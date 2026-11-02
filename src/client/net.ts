@@ -10,8 +10,16 @@
 //   reconnects at once instead of waiting out a backoff.
 // - Commands are kept until the server acknowledges them and are resent after
 //   a reconnect; the server ignores repeats (shared/protocol.ts).
+// - A tab whose view hasn't changed for SLEEP_AFTER_MS goes to sleep: the
+//   line closes, the screen may turn off, and a tap wakes it. A tablet left
+//   on after the lesson doesn't keep its line, or its polling, all day.
+// - When the site's daily allowance is spent, the page says so and asks
+//   again once a minute (decisions.md, "Hardening").
 
 import type { Auth, ClientMessage, Command, ServerMessage } from "../shared/protocol.ts";
+import { SLEEP_AFTER_MS, quotaMessage } from "../shared/limits.ts";
+import { hideNotice, showNotice } from "./notice.ts";
+import { pauseAwake } from "./dom.ts";
 
 export type LineStatus = "connecting" | "live" | "offline";
 
@@ -35,6 +43,11 @@ const PONG_WITHIN = 8_000;
 const FIRST_MESSAGE_WITHIN = 8_000;
 /** Polls never follow each other faster than this, whatever the server answers. */
 const MIN_POLL_GAP = 300;
+/** Out of the daily allowance: ask again this often, not every few seconds. */
+const QUOTA_RETRY = 60_000;
+
+/** The site answered that its daily allowance is spent. */
+class QuotaError extends Error {}
 
 export class Line {
   private ws: WebSocket | null = null;
@@ -51,6 +64,12 @@ export class Line {
   private polling = false;
   private flushing = false;
   private seq = 0;
+  private asleep = false;
+  /** When the view last changed, or someone touched the page. */
+  private lastChange = Date.now();
+  private lastKey = "";
+  /** Out of the allowance: "http" when the site turned requests away, "write" when the quiz couldn't store. */
+  private quota: "http" | "write" | null = null;
 
   private opts: LineOptions;
 
@@ -58,11 +77,59 @@ export class Line {
     this.opts = opts;
     const kick = () => {
       if (this.stopped) return;
-      if (document.visibilityState === "visible") this.reconnectNow();
+      if (document.visibilityState !== "visible") return;
+      // A tablet switched back on: the student is back.
+      if (this.asleep) this.wake();
+      else this.reconnectNow();
     };
     document.addEventListener("visibilitychange", kick);
-    window.addEventListener("online", kick);
+    window.addEventListener("online", () => {
+      if (!this.asleep) kick();
+    });
     window.addEventListener("pageshow", kick);
+    const touched = () => {
+      this.lastChange = Date.now();
+    };
+    document.addEventListener("pointerdown", touched, { passive: true });
+    document.addEventListener("keydown", touched);
+    window.setInterval(() => {
+      if (!this.stopped && !this.asleep && Date.now() - this.lastChange > SLEEP_AFTER_MS) this.sleep();
+    }, 60_000);
+  }
+
+  /** Closes the line until a tap; the page underneath stays as it was. */
+  private sleep(): void {
+    this.asleep = true;
+    clearTimeout(this.retryTimer);
+    this.clearPing();
+    const ws = this.ws;
+    this.ws = null;
+    try {
+      ws?.close(1000, "asleep");
+    } catch {
+      /* already closed */
+    }
+    pauseAwake(true);
+    this.setStatus("offline");
+    showNotice("sleep", "Tap to continue", () => this.wake());
+  }
+
+  private wake(): void {
+    if (!this.asleep) return;
+    this.asleep = false;
+    this.lastChange = Date.now();
+    hideNotice("sleep");
+    pauseAwake(false);
+    this.backoff = 500;
+    this.connect();
+    this.flush();
+  }
+
+  private setQuota(q: "http" | "write" | null): void {
+    if (q === this.quota) return;
+    this.quota = q;
+    if (q) showNotice("quota", quotaMessage());
+    else hideNotice("quota");
   }
 
   start(): void {
@@ -79,6 +146,12 @@ export class Line {
 
 
   send(cmd: Command): Promise<Extract<ServerMessage, { t: "ack" }>> {
+    if (this.asleep) {
+      // A page's timer asking how things are doesn't wake the line; anything else is someone at the device.
+      if (cmd.op === "tick") return Promise.resolve({ t: "ack", id: "", ok: false, error: "asleep" });
+      this.wake();
+    }
+    if (cmd.op !== "tick") this.lastChange = Date.now();
     return new Promise((resolve) => {
       const p: Pending = { id: `${Date.now().toString(36)}-${(++this.seq).toString(36)}-${Math.random().toString(36).slice(2, 7)}`, cmd, resolve, sent: false };
       this.pending.push(p);
@@ -108,7 +181,7 @@ export class Line {
   }
 
   private connect(): void {
-    if (this.stopped) return;
+    if (this.stopped || this.asleep) return;
     if (this.mode === "poll") {
       this.pollLoop();
       return;
@@ -181,7 +254,7 @@ export class Line {
   }
 
   private onWsFail(worked: boolean): void {
-    if (this.stopped) return;
+    if (this.stopped || this.asleep) return;
     this.setStatus("offline");
     if (!worked) this.wsFailures++;
     if (this.wsFailures >= 3) {
@@ -244,7 +317,21 @@ export class Line {
       const i = this.pending.findIndex((p) => p.id === m.id);
       if (i >= 0) {
         const [p] = this.pending.splice(i, 1);
+        // Something was stored again: the allowance is back.
+        if (m.ok && p.cmd.op !== "tick" && this.quota === "write") this.setQuota(null);
         p.resolve(m);
+      }
+    }
+    if (m.t === "quota") {
+      this.setQuota(this.quota ?? "write");
+      return;
+    }
+    if (m.t === "state" || m.t === "choose") {
+      // What the page shows, without the version: a change keeps the line awake.
+      const key = JSON.stringify(m.t === "state" ? { ...m.view, v: 0 } : m);
+      if (key !== this.lastKey) {
+        this.lastKey = key;
+        this.lastChange = Date.now();
       }
     }
     if (m.t === "state") {
@@ -277,11 +364,12 @@ export class Line {
     if (this.flushing) return;
     this.flushing = true;
     let delay = 500;
-    while (this.pending.length > 0 && !this.stopped) {
+    while (this.pending.length > 0 && !this.stopped && !this.asleep) {
       const p = this.pending[0];
       try {
         const res = await post(`/api/i/${this.opts.instance}/cmd`, { auth: this.opts.auth(), cmd: { id: p.id, cmd: p.cmd } });
         this.setStatus("live");
+        if (this.quota === "http") this.setQuota(null);
         delay = 500;
         for (const m of res.messages ?? []) this.handle(m);
         // An HTTP reply always carries the ack; make sure it's settled.
@@ -290,8 +378,13 @@ export class Line {
           this.pending.splice(still, 1);
           p.resolve({ t: "ack", id: p.id, ok: false, error: "no answer" });
         }
-      } catch {
+      } catch (e) {
         this.setStatus("offline");
+        if (e instanceof QuotaError) {
+          this.setQuota("http");
+          await sleep(QUOTA_RETRY);
+          continue;
+        }
         await sleep(delay);
         delay = Math.min(delay * 2, 5000);
       }
@@ -304,13 +397,15 @@ export class Line {
     this.polling = true;
     let delay = 500;
     let first = true;
-    while (!this.stopped) {
+    while (!this.stopped && !this.asleep) {
       try {
         const t0 = Date.now();
         const res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v });
+        if (this.asleep) break;
         first = false;
         delay = 500;
         this.setStatus("live");
+        if (this.quota === "http") this.setQuota(null);
         let gone = false;
         const msgs = res.messages ?? [];
         for (const m of msgs) {
@@ -323,8 +418,13 @@ export class Line {
         const took = Date.now() - t0;
         if (msgs.length === 0 && took < 1000) await sleep(1500);
         else if (took < MIN_POLL_GAP) await sleep(MIN_POLL_GAP - took);
-      } catch {
+      } catch (e) {
         this.setStatus("offline");
+        if (e instanceof QuotaError) {
+          this.setQuota("http");
+          await sleep(QUOTA_RETRY);
+          continue;
+        }
         await sleep(delay);
         delay = Math.min(delay * 2, 5000);
       }
@@ -338,22 +438,43 @@ async function post(path: string, body: unknown): Promise<{ messages?: ServerMes
   const t = setTimeout(() => ctl.abort(), 35_000);
   try {
     const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: ctl.signal });
+    const r = await readApi<{ messages?: ServerMessage[] }>(res);
+    if (r.quota) throw new QuotaError();
     if (!res.ok && res.status >= 500) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    if (r.json === false) throw new Error("not JSON");
+    return r;
   } finally {
     clearTimeout(t);
   }
 }
 
-export async function api<T>(path: string, body: unknown): Promise<{ status: number; body: T }> {
+export type ApiBody<T> = T & { quota?: boolean; error?: string; json?: false };
+
+export async function api<T>(path: string, body: unknown): Promise<{ status: number; body: ApiBody<T> }> {
   const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-  let parsed: T;
+  return { status: res.status, body: await readApi<T>(res) };
+}
+
+/**
+ * An API answer's body (`json: false` when it wasn't JSON, e.g. a school
+ * filter's page). When the site's daily allowance is spent it comes back with
+ * `quota` and the words to show in `error`: our functions say
+ * `{error: "quota"}`; past the request allowance Cloudflare answers itself,
+ * with its error 1027 (a best reading of its docs, unverified; a 429 counts
+ * too).
+ */
+export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
+  const text = await res.text().catch(() => "");
+  let parsed: ApiBody<T> | null = null;
   try {
-    parsed = await res.json();
+    const v = JSON.parse(text);
+    parsed = v && typeof v === "object" ? v : null;
   } catch {
-    parsed = {} as T;
+    parsed = null;
   }
-  return { status: res.status, body: parsed };
+  const quota = parsed ? parsed.error === "quota" : res.status === 429 || /\b1027\b/.test(text);
+  if (quota) return { ...(parsed ?? ({} as T)), quota: true, error: quotaMessage() } as ApiBody<T>;
+  return parsed ?? ({ json: false } as ApiBody<T>);
 }
 
 function sleep(ms: number): Promise<void> {

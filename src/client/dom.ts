@@ -123,11 +123,20 @@ export function rolePage(instance: string, role: "screen" | "remote"): string {
 // waiting for the next question)
 
 let lock: WakeLockSentinel | null = null;
+/** Asleep (net.ts): the screen may turn off; a device left on doesn't keep its line open all day. */
+let paused = false;
+let requestLock: (() => Promise<void>) | null = null;
+
+export function pauseAwake(pause: boolean): void {
+  paused = pause;
+  if (paused && lock) void lock.release().catch(() => {});
+  if (!paused) void requestLock?.();
+}
 
 export function keepAwake(): void {
   if (!("wakeLock" in navigator)) return;
   const request = async () => {
-    if (document.visibilityState !== "visible" || lock) return;
+    if (document.visibilityState !== "visible" || lock || paused) return;
     try {
       lock = await navigator.wakeLock.request("screen");
       lock.addEventListener("release", () => (lock = null));
@@ -135,6 +144,7 @@ export function keepAwake(): void {
       /* not allowed yet (needs a user gesture on some browsers) */
     }
   };
+  requestLock = request;
   void request();
   document.addEventListener("visibilitychange", () => void request());
   document.addEventListener("pointerdown", () => void request(), { passive: true });
