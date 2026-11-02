@@ -108,6 +108,34 @@ so there is something to click early; authoring closes the loop.
     disappointed, and the fun is dented for the whole class. What the device
     shows as accepted and what is counted must agree, however the teacher's
     reveal and the tap race each other over school Wi-Fi.
+16. **The landing page lands the teacher** — the teacher arrives first and may
+    be non-technical; if they don't see within seconds how to get a quiz and
+    how to start one, the AI reading the same page doesn't matter. They need
+    the sentence to give their AI (e.g. "Please help me build a
+    classyQuiz.pages.dev quiz from the attached exercises") and an expectation
+    of how that conversation goes; then two things to do: start a quiz, join a
+    quiz. Students need less, the teacher instructs them. What's there now is
+    five action elements and a number field with no minimal how-to.
+17. **Coming back to a quiz, from the teacher's side** — a quiz already
+    uploaded is worth resuming, but "your quizzes on this device" reads as if
+    the server held a shared list. The teacher's view is: resume, how long
+    until it closes, delete now — with delete placed where a misclick can't
+    reach it. Students coming back by re-entering the code is probably enough.
+    These are design decisions; the purpose is low-friction use.
+18. **One code, roles picked in the lobby** — owner's direction after seeing
+    v1: most teachers start from the projector laptop, not by "connecting a
+    projector". Anyone who has the code can pick any role still free, with
+    one screen role and one control role in total; so a teacher whose battery
+    runs out picks up the freed control role from any device, with the same
+    code the class used, which the screen shows in a corner throughout.
+19. **The view after upload** — owner's direction: it must be easy to tell
+    it's the right quiz. Lobby management on top, few words, simple clean
+    design: how to join, who joined, and the start button ("Start quiz", not
+    "Start with a class"). Below it the question set; expanding the answers,
+    with an "all" toggle, shows them with the marked ones. A "show the key
+    check" button fails because the teacher doesn't know what a key check is,
+    and a "the class would see them" warning is only needed when the user
+    doesn't know what the button does.
 
 ## v2 — Figures, tempo, and a hardened instance
 
