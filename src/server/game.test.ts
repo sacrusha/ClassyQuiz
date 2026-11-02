@@ -149,3 +149,14 @@ test("avatars: the first dozen players all get different animals", () => {
   const combos = new Set(Object.values(big.run!.players).map((p) => `${p.avatar.a}/${p.avatar.c}`));
   assert.equal(combos.size, G.ANIMAL_COUNT * G.COLOUR_COUNT);
 });
+
+test("a question the class has moved past can't be un-skipped; ids from devices don't reach the prototype", () => {
+  const { g, ids } = setup(1);
+  G.begin(g, 0);
+  G.skipCurrent(g, 1);
+  assert.throws(() => G.setSkip(g, 0, false), /moved past/);
+  G.removePlayer(g, "__proto__");
+  assert.equal(({} as Record<string, unknown>).removed, undefined);
+  assert.equal(G.answer(g, "__proto__", 1, 0, 1, 2), false);
+  assert.equal(G.activePlayers(g.run!).length, ids.length);
+});

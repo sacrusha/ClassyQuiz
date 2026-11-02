@@ -4,7 +4,7 @@
 // and deletes everything when the instance ends.
 
 import { DurableObject } from "cloudflare:workers";
-import type { Quiz, Problem } from "../quiz/format.ts";
+import { parseQuiz, type Quiz, type Problem } from "../quiz/format.ts";
 import * as G from "./game.ts";
 import type {
   Auth,
@@ -28,11 +28,24 @@ export const RUN_KEEP_MS = 3600_000;
 /** A long-poll is answered after this long even when nothing changed. */
 const POLL_HOLD_MS = 25_000;
 /** A player seen polling within this window counts as connected. */
-const POLL_FRESH_MS = 40_000;
+const POLL_FRESH_MS = 35_000;
+/**
+ * A WebSocket whose device hasn't pinged for this long counts as away: the
+ * device died or slept without the socket closing (clients ping every 20 s;
+ * the runtime answers without waking the object and notes the time).
+ */
+const WS_FRESH_MS = 45_000;
+/** Join command ids remembered per run, to answer a resent join with the same player. */
+const JOINS_KEPT = 300;
 
-interface Meta {
+/** Written once at upload. */
+interface QuizRecord {
   quiz: Quiz;
   warnings: Problem[];
+}
+
+/** Small; written with every change. */
+interface Meta {
   secret: string;
   screens: string[];
   created: number;
@@ -40,18 +53,35 @@ interface Meta {
   v: number;
 }
 
-type Session = { role: "teacher" } | { role: "screen" } | { role: "player"; player: string } | { role: "chooser" } | { role: null };
+type Session =
+  | { role: "teacher" }
+  | { role: "screen" }
+  /** since: when this socket said hello (a device that never pings is away after WS_FRESH_MS). */
+  | { role: "player"; player: string; since?: number }
+  | { role: "chooser" }
+  | { role: null };
 
 interface Waiter {
   session: Session;
   resolve: (msgs: ServerMessage[]) => void;
+  /** For a student device without a player: the choice it was last given. */
+  chooseKey?: string;
 }
 
 export class Instance extends DurableObject<Env> {
   private meta: Meta | null = null;
+  private quizRecord: QuizRecord | null = null;
   private game: G.Game | null = null;
   private waiters = new Set<Waiter>();
   private lastPoll = new Map<string, number>();
+  /**
+   * What each student device was last sent. A student's view only changes
+   * with their own answer or the teacher's steps, not with classmates'
+   * answers; sending only changes keeps a polling class from waking 25
+   * devices per answer (the Free plan's request budget).
+   */
+  private sentToSocket = new WeakMap<WebSocket, string>();
+  private sentToPoller = new Map<string, { key: string; v: number }>();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -59,14 +89,16 @@ export class Instance extends DurableObject<Env> {
     // NAT tables from dropping an idle socket.
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
     ctx.blockConcurrencyWhile(async () => {
-      const [meta, fixes, run] = await Promise.all([
+      const [meta, record, fixes, run] = await Promise.all([
         ctx.storage.get<Meta>("meta"),
+        ctx.storage.get<QuizRecord>("quiz"),
         ctx.storage.get<G.Fix[]>("fixes"),
         ctx.storage.get<G.Run | null>("run"),
       ]);
-      if (meta && fixes) {
+      if (meta && record && fixes) {
         this.meta = meta;
-        this.game = { quiz: meta.quiz, fixes, run: run ?? null };
+        this.quizRecord = record;
+        this.game = { quiz: record.quiz, fixes, run: run ?? null };
       }
     });
   }
@@ -74,15 +106,23 @@ export class Instance extends DurableObject<Env> {
   // -------------------------------------------------------------------------
   // RPC from the API functions
 
-  async create(quiz: Quiz, warnings: Problem[]): Promise<{ secret: string }> {
+  /**
+   * Parses the uploaded text here rather than in the API function: a Durable
+   * Object has far more CPU time per request than a Function on the Free
+   * plan. Nothing is stored when the quiz has errors.
+   */
+  async create(text: string): Promise<{ ok: true; secret: string } | { ok: false; errors: Problem[]; warnings: Problem[] }> {
     if (this.meta) throw new Error("instance exists");
+    const r = parseQuiz(text);
+    if (!r.ok) return { ok: false, errors: r.errors, warnings: r.warnings };
     const now = Date.now();
     const secret = randomToken();
-    this.meta = { quiz, warnings, secret, screens: [], created: now, lastActivity: now, v: 1 };
-    this.game = G.newGame(quiz);
-    await this.ctx.storage.put({ meta: this.meta, fixes: this.game.fixes, run: null });
+    this.quizRecord = { quiz: r.quiz, warnings: r.warnings };
+    this.meta = { secret, screens: [], created: now, lastActivity: now, v: 1 };
+    this.game = G.newGame(r.quiz);
+    await this.ctx.storage.put({ quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: null });
     await this.scheduleAlarm();
-    return { secret };
+    return { ok: true, secret };
   }
 
   /** For the join code directory: is this code the instance's running class? */
@@ -120,22 +160,48 @@ export class Instance extends DurableObject<Env> {
       return json({ messages: [...out, ...replies.direct] });
     }
     if (action === "poll") {
-      if (session.role === null || session.role === "chooser") return json({ messages: out });
-      if (session.role === "player") this.lastPoll.set(session.player, Date.now());
-      if (out.some((m) => m.t === "welcome" || m.t === "choose")) return json({ messages: [...out, this.stateFor(session)] });
+      if (session.role === null) return json({ messages: out });
       const known = typeof body.v === "number" ? body.v : -1;
+      if (session.role === "chooser") {
+        // The first poll gets the choice at once (it's in `out`); later ones
+        // are held until the choice changes, instead of being answered at
+        // once over and over (the device would spin and redraw its buttons).
+        if (known === -1) return json({ messages: out });
+        const chooseKey = JSON.stringify(this.chooseMessage());
+        const msgs = await this.hold({ session, resolve: () => {}, chooseKey });
+        const fresh = this.chooseMessage();
+        return json({ messages: msgs.length > 0 ? msgs : JSON.stringify(fresh) !== chooseKey ? [fresh] : [] });
+      }
+      if (session.role === "player") {
+        const pid = session.player;
+        this.lastPoll.set(pid, Date.now());
+        const view = this.viewFor(session) as PlayerView;
+        const sent = this.sentToPoller.get(pid);
+        // Answer at once when the device's view changed, or when it didn't
+        // get the last one (its version is older than what was sent).
+        if (!sent || known < sent.v || sent.key !== viewKey(view)) {
+          this.sentToPoller.set(pid, { key: viewKey(view), v: view.v });
+          return json({ messages: [...out, { t: "state", view }] });
+        }
+        const msgs = await this.hold({ session, resolve: () => {} });
+        this.lastPoll.set(pid, Date.now());
+        return json({ messages: msgs });
+      }
       if (this.meta && this.meta.v > known) return json({ messages: [...out, this.stateFor(session)] });
-      const msgs = await new Promise<ServerMessage[]>((resolve) => {
-        const w: Waiter = { session, resolve };
-        this.waiters.add(w);
-        setTimeout(() => {
-          if (this.waiters.delete(w)) resolve([]);
-        }, POLL_HOLD_MS);
-      });
-      if (session.role === "player") this.lastPoll.set(session.player, Date.now());
-      return json({ messages: msgs });
+      return json({ messages: await this.hold({ session, resolve: () => {} }) });
     }
     return json({ error: "not found" }, 404);
+  }
+
+  /** Holds a long-poll until the device's view changes, or POLL_HOLD_MS. */
+  private hold(w: Waiter): Promise<ServerMessage[]> {
+    return new Promise<ServerMessage[]>((resolve) => {
+      w.resolve = resolve;
+      this.waiters.add(w);
+      setTimeout(() => {
+        if (this.waiters.delete(w)) resolve([]);
+      }, POLL_HOLD_MS);
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -151,14 +217,15 @@ export class Instance extends DurableObject<Env> {
     }
     if (msg.t === "hello") {
       const out: ServerMessage[] = [];
-      const session = this.authenticate(msg.auth, out);
+      let session = this.authenticate(msg.auth, out);
+      if (session.role === "player") session = { ...session, since: Date.now() };
       ws.serializeAttachment(session);
       for (const m of out) send(ws, m);
       if (session.role === null) {
         ws.close(4000, "gone");
         return;
       }
-      if (session.role !== "chooser") send(ws, this.stateFor(session));
+      if (session.role !== "chooser") this.sendView(ws, session);
       if (session.role === "player" || session.role === "screen") this.broadcastTeacher();
       return;
     }
@@ -166,10 +233,12 @@ export class Instance extends DurableObject<Env> {
       const session = ws.deserializeAttachment() as Session;
       if (!session || session.role === null) return;
       const replies = await this.command(session, msg.id, msg.cmd);
-      if (replies.session) ws.serializeAttachment(replies.session);
+      let next = replies.session;
+      if (next && next.role === "player") next = { ...next, since: Date.now() };
+      if (next) ws.serializeAttachment(next);
       for (const m of replies.direct) send(ws, m);
-      if (replies.session && replies.session.role === "player") {
-        send(ws, this.stateFor(replies.session));
+      if (next && next.role === "player") {
+        this.sendView(ws, next);
         this.broadcastTeacher();
       }
     }
@@ -245,18 +314,28 @@ export class Instance extends DurableObject<Env> {
     try {
       // --- a student device without a player yet
       if (session.role === "chooser") {
+        if (cmd.op === "choose") return { direct: [ack(true), this.chooseMessage()] };
         if (cmd.op !== "newPlayer" && cmd.op !== "claim") return { direct: [ack(false, "not joined")] };
         const run = game.run;
         if (!run || run.phase === "final") return { direct: [ack(false), { t: "gone", reason: "This quiz has finished." }] };
         // Joining after the start may be a student whose device lost its
         // player; they can pick their avatar back (decisions.md).
         if (cmd.op === "newPlayer") {
+          // A join resent after its answer was lost gets the same player.
+          const earlier = typeof id === "string" && run.joins && Object.hasOwn(run.joins, id) ? G.playerById(run, run.joins[id]) : null;
+          if (earlier && !earlier.removed) {
+            return { direct: [ack(true), { t: "welcome", player: earlier.id, token: earlier.token }], session: { role: "player", player: earlier.id } };
+          }
           const p = G.addPlayer(game, randomToken(12), randomToken(), now, Math.random);
+          const joins = (run.joins ??= {});
+          joins[id] = p.id;
+          const keys = Object.keys(joins);
+          if (keys.length > JOINS_KEPT) delete joins[keys[0]];
           await this.persist(["run"]);
           this.broadcast();
           return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token }], session: { role: "player", player: p.id } };
         }
-        const p = run.players[cmd.player];
+        const p = G.playerById(run, cmd.player);
         if (!p || p.removed || !this.awayPlayers().includes(p)) return { direct: [ack(false, "That avatar is taken.")] };
         p.token = randomToken();
         await this.persist(["run"]);
@@ -274,8 +353,15 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(recorded)] };
       }
 
-      // --- the projector: only the clicker key
+      // --- the projector: the clicker key, and connecting a device (the
+      // teacher's phone died and a new one shows a code: typed in at the
+      // projector computer, in the room).
       if (session.role === "screen") {
+        if (cmd.op === "pair") {
+          const role = await this.pair(cmd.code);
+          await this.afterTeacherChange(["meta"]);
+          return { direct: [ack(true, undefined, role)] };
+        }
         if (cmd.op !== "advance") return { direct: [ack(false, "not allowed")] };
         if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
         G.advance(game, now);
@@ -289,7 +375,10 @@ export class Instance extends DurableObject<Env> {
       switch (cmd.op) {
         case "startRun": {
           // A new class with this quiz. The previous run's data goes now:
-          // its ranking has been shown.
+          // its ranking has been shown. Only from "no run" or the final
+          // ranking, and only once: a resend must not wipe a class that
+          // has started joining.
+          if (!at(cmd) || (game.run && game.run.phase !== "final")) return { direct: [ack(true, undefined, "stale")] };
           await this.releaseCode();
           const code = await this.claimCode();
           G.startRun(game, code, now);
@@ -331,7 +420,6 @@ export class Instance extends DurableObject<Env> {
         case "remove":
           G.removePlayer(game, cmd.player);
           changed = ["run"];
-          this.closePlayerSockets(cmd.player);
           break;
         case "pair":
           result = await this.pair(cmd.code);
@@ -359,6 +447,7 @@ export class Instance extends DurableObject<Env> {
     this.broadcast();
   }
 
+  /** Writes what changed; the quiz text itself was written once at upload. */
   private async persist(keys: ("run" | "fixes" | "meta")[]): Promise<void> {
     const meta = this.meta!;
     const game = this.game!;
@@ -468,14 +557,17 @@ export class Instance extends DurableObject<Env> {
   // -------------------------------------------------------------------------
   // Views
 
+  /** Players whose device was heard from recently: an open socket that still pings, or a recent poll. */
   private connectedPlayers(exclude?: WebSocket): Set<string> {
     const ids = new Set<string>();
+    const now = Date.now();
     for (const ws of this.ctx.getWebSockets()) {
       if (ws === exclude || ws.readyState !== WebSocket.OPEN) continue;
       const s = ws.deserializeAttachment() as Session | null;
-      if (s && s.role === "player") ids.add(s.player);
+      if (!s || s.role !== "player") continue;
+      const pinged = this.ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? 0;
+      if (now - Math.max(pinged, s.since ?? 0) < WS_FRESH_MS) ids.add(s.player);
     }
-    const now = Date.now();
     for (const [pid, t] of this.lastPoll) if (now - t < POLL_FRESH_MS) ids.add(pid);
     return ids;
   }
@@ -560,7 +652,7 @@ export class Instance extends DurableObject<Env> {
       id: this.ctx.id.toString(),
       title: game.quiz.title,
       quizNote: game.quiz.note,
-      warnings: meta.warnings,
+      warnings: this.quizRecord?.warnings ?? [],
       questions: game.quiz.questions.map((q, i) => {
         const fix = game.fixes[i];
         let status: "upcoming" | "current" | "revealed" | "skipped" = "upcoming";
@@ -624,7 +716,7 @@ export class Instance extends DurableObject<Env> {
     return { t: "state", view: this.viewFor(session)! };
   }
 
-  private viewFor(session: Session, cache?: { screen?: ScreenView; teacher?: TeacherView; player?: (id: string) => PlayerView }, exclude?: WebSocket): View | null {
+  private viewFor(session: Session, cache?: ViewCache, exclude?: WebSocket): View | null {
     if (!this.meta || !this.game) return null;
     if (session.role === "teacher") return cache ? (cache.teacher ??= this.teacherView(exclude)) : this.teacherView(exclude);
     if (session.role === "screen") return cache ? (cache.screen ??= this.screenView()) : this.screenView();
@@ -635,22 +727,47 @@ export class Instance extends DurableObject<Env> {
     return null;
   }
 
-  /** Sends every connected device its newest view. */
+  /** Sends a socket its view; a student's only when it changed. */
+  private sendView(ws: WebSocket, session: Session, cache?: ViewCache): void {
+    const view = this.viewFor(session, cache);
+    if (!view) return;
+    if (view.role === "player") {
+      const key = viewKey(view);
+      if (this.sentToSocket.get(ws) === key) return;
+      this.sentToSocket.set(ws, key);
+    }
+    send(ws, { t: "state", view });
+  }
+
+  /** Sends every connected device its newest view, where it changed. */
   private broadcast(exclude?: WebSocket): void {
     if (!this.meta || !this.game) return;
-    const cache: { screen?: ScreenView; teacher?: TeacherView; player?: (id: string) => PlayerView } = {};
+    const cache: ViewCache = {};
     for (const ws of this.ctx.getWebSockets()) {
       if (ws === exclude) continue;
       const s = ws.deserializeAttachment() as Session | null;
-      if (!s) continue;
-      const view = this.viewFor(s, cache, exclude);
-      if (view) send(ws, { t: "state", view });
+      if (!s || s.role === null || s.role === "chooser") continue;
+      this.sendView(ws, s, cache);
     }
-    for (const w of this.waiters) {
+    let choose: ServerMessage | null = null;
+    for (const w of [...this.waiters]) {
+      if (w.session.role === "chooser") {
+        choose ??= this.chooseMessage();
+        if (JSON.stringify(choose) === w.chooseKey) continue;
+        this.waiters.delete(w);
+        w.resolve([choose]);
+        continue;
+      }
       const view = this.viewFor(w.session, cache, exclude);
+      if (view && view.role === "player" && w.session.role === "player") {
+        const key = viewKey(view);
+        const sent = this.sentToPoller.get(w.session.player);
+        if (sent && sent.key === key) continue;
+        this.sentToPoller.set(w.session.player, { key, v: view.v });
+      }
+      this.waiters.delete(w);
       w.resolve(view ? [{ t: "state", view }] : []);
     }
-    this.waiters.clear();
   }
 
   /** Only the teacher's view changed (someone connected or left). */
@@ -670,12 +787,13 @@ export class Instance extends DurableObject<Env> {
     }
   }
 
-  private closePlayerSockets(player: string): void {
-    for (const ws of this.ctx.getWebSockets()) {
-      const s = ws.deserializeAttachment() as Session | null;
-      if (s && s.role === "player" && s.player === player) send(ws, { t: "state", view: this.playerViews()(player) });
-    }
-  }
+}
+
+type ViewCache = { screen?: ScreenView; teacher?: TeacherView; player?: (id: string) => PlayerView };
+
+/** A student's view without its version: what the device actually shows. */
+function viewKey(view: PlayerView): string {
+  return JSON.stringify({ ...view, v: 0 });
 }
 
 class PairError extends Error {}

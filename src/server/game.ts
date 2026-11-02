@@ -54,6 +54,8 @@ export interface Run {
   /** Questions whose answer was revealed, in order; only these score. */
   revealed: number[];
   players: Record<string, Player>;
+  /** Join command id → player it created, so a resent join doesn't make a second avatar. */
+  joins?: Record<string, string>;
   /** Question index → player id → answer. */
   answers: Record<string, Record<string, AnswerRecord>>;
   started: number;
@@ -137,8 +139,13 @@ export function addPlayer(g: Game, id: string, token: string, now: number, rando
   return p;
 }
 
+/** The player with this id, if any (ids come from devices: no prototype lookups). */
+export function playerById(run: Run, id: string): Player | null {
+  return typeof id === "string" && Object.hasOwn(run.players, id) ? run.players[id] : null;
+}
+
 export function removePlayer(g: Game, id: string): void {
-  const p = needRun(g).players[id];
+  const p = playerById(needRun(g), id);
   if (p) p.removed = true;
 }
 
@@ -214,7 +221,7 @@ export function finish(g: Game, now: number): void {
 export function answer(g: Game, playerId: string, q: number, choice: number, seq: number, now: number): boolean {
   const run = g.run;
   if (!run) return false;
-  const p = run.players[playerId];
+  const p = playerById(run, playerId);
   if (!p || p.removed) return false;
   // A resend of an answer already recorded (its acknowledgement was lost
   // with the connection) is confirmed, also after the reveal: it counts.
@@ -254,6 +261,10 @@ export function setSkip(g: Game, q: number, skip: boolean): void {
   const run = g.run;
   if (run && (run.revealed.includes(q) || (run.current === q && run.phase === "question")) && skip)
     throw new GameError("The class has already seen this question; void it instead.");
+  // The run only moves forward: a question behind the current one would
+  // count in "n / total" but never come up.
+  if (run && run.phase !== "lobby" && q <= run.current && !skip)
+    throw new GameError("The class has moved past this question; it can't come back in this run.");
   fix.skip = skip;
 }
 

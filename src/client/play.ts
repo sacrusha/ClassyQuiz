@@ -26,6 +26,8 @@ let joining = false;
 let offlineTimer: number | undefined;
 let instanceId = "";
 let lastKey = "";
+let chooseKey = "";
+let chooseTimer: number | undefined;
 
 async function start(): Promise<void> {
   if (!JOIN_CODE.test(code)) {
@@ -79,7 +81,7 @@ function onMessage(m: ServerMessage): void {
     joining = false;
   } else if (m.t === "choose") {
     if (joining) return;
-    if (m.avatars.length === 0) newPlayer();
+    if (m.avatars.length === 0 && !main.querySelector(".choose")) newPlayer();
     else showChoose(m.avatars);
   } else if (m.t === "state" && m.view.role === "player") {
     // Every answer in the class bumps the version; only redraw when this
@@ -98,6 +100,8 @@ function onMessage(m: ServerMessage): void {
 }
 
 function newPlayer(): void {
+  clearInterval(chooseTimer);
+  chooseKey = "";
   joining = true;
   showWaiting();
   void line!.send({ op: "newPlayer" }).then((a) => {
@@ -116,6 +120,16 @@ function showMessage(html: string, home: boolean): void {
 }
 
 function showChoose(avatars: { id: string; avatar: Avatar }[]): void {
+  // Unchanged choice: leave the buttons alone, a tap may be under way.
+  const k = JSON.stringify(avatars);
+  if (k === chooseKey && main.querySelector(".choose")) return;
+  chooseKey = k;
+  // A classmate whose tablet died shows up here once it counts as away
+  // (up to a minute); ask again now and then.
+  clearInterval(chooseTimer);
+  chooseTimer = window.setInterval(() => {
+    if (!joining && line) void line.send({ op: "choose" });
+  }, 10_000);
   main.innerHTML = `<div class="center">
     <div class="choose">
       ${avatars.map((a) => `<button data-id="${esc(a.id)}">${avatarSvg(a.avatar)}</button>`).join("")}
@@ -129,6 +143,8 @@ function showChoose(avatars: { id: string; avatar: Avatar }[]): void {
         newPlayer();
         return;
       }
+      clearInterval(chooseTimer);
+      chooseKey = "";
       joining = true;
       showWaiting();
       void line!.send({ op: "claim", player: id }).then((a) => {

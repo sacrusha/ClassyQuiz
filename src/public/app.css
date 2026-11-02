@@ -93,8 +93,8 @@ a { color: var(--accent); }
 /* -------------------------------------------------------------------------
    Projector */
 
-body.screen { overflow: hidden; height: 100vh; font-size: clamp(16px, 1.6vw, 40px); }
-.screen main { height: 100vh; display: flex; flex-direction: column; padding: 2.2vh 2.5vw; gap: 2vh; }
+body.screen { overflow: hidden; height: 100vh; height: 100dvh; font-size: clamp(16px, 1.6vw, 40px); }
+.screen main { height: 100vh; height: 100dvh; display: flex; flex-direction: column; padding: 2.2vh 2.5vw; gap: 2vh; }
 .screen .bar { display: flex; align-items: center; gap: 1.2em; font-weight: 700; color: var(--muted); font-size: 1.2em; }
 .screen .bar .grow { flex: 1; }
 .screen .corner { position: fixed; right: 10px; bottom: 10px; display: flex; gap: 8px; align-items: center; opacity: .6; font-size: 14px; }
@@ -140,13 +140,15 @@ body.screen { overflow: hidden; height: 100vh; font-size: clamp(16px, 1.6vw, 40p
 .classres .bars { display: flex; align-items: flex-end; gap: 4px; height: 16vh; justify-content: center; margin-top: 2vh; }
 .classres .bars span { width: 2.2vh; background: var(--good); border-radius: 4px 4px 0 0; min-height: 3px; }
 .pair { text-align: center; }
+.connect-box { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--card); border: 2px solid var(--rule); border-radius: 16px; padding: 20px; width: min(90vw, 460px); z-index: 30; font-size: 18px; display: grid; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.2); }
 .pair .bigcode { font-size: 7em; font-weight: 800; letter-spacing: .1em; font-variant-numeric: tabular-nums; }
 
 /* -------------------------------------------------------------------------
    Student */
 
-body.play { min-height: 100vh; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-.play main { min-height: 100vh; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
+/* dvh: on a tablet the browser's toolbar is not part of the screen. */
+body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.play main { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
 .play .top { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.2rem; }
 .play .top .me { width: 48px; height: 48px; }
 .play .top .grow { flex: 1; }

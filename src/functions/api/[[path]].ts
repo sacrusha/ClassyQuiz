@@ -1,7 +1,7 @@
 // The site's API, as a Pages Function in front of the Durable Objects of the
-// state Worker. Only /api/* runs code (functions/_routes.json); every page and
-// script is a static file, which keeps the Free plan's request budget for the
-// quiz itself.
+// state Worker. Only /api/* runs code: Pages generates the routes from this
+// folder, so every page and script is a static file, which keeps the Free
+// plan's request budget for the quiz itself.
 //
 //   POST /api/quiz          {text}            upload: parse, create an instance
 //   POST /api/join          {code}            join code → instance id
@@ -13,7 +13,6 @@
 //   GET  /api/ping                            network check
 //   GET  /api/echo                            network check: WebSocket echo
 
-import { parseQuiz } from "../../quiz/format.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, PAIR_CODE } from "../../shared/protocol.ts";
 import type { Env } from "../../server/env.ts";
 import { randomCode, randomToken } from "../../server/random.ts";
@@ -47,11 +46,12 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
 
 async function upload(env: Env, body: Record<string, unknown>): Promise<Response> {
   if (typeof body.text !== "string" || body.text.trim() === "") return json({ ok: false, errors: [{ line: null, question: null, message: "The quiz text is empty." }], warnings: [] });
-  const r = parseQuiz(body.text);
-  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings });
+  // Parsed in the Durable Object, which has the CPU time for a long quiz;
+  // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  const { secret } = await env.INSTANCE.get(id).create(r.quiz, r.warnings);
-  return json({ ok: true, id: id.toString(), secret });
+  const r = await env.INSTANCE.get(id).create(body.text);
+  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings });
+  return json({ ok: true, id: id.toString(), secret: r.secret });
 }
 
 async function join(env: Env, body: Record<string, unknown>): Promise<Response> {
