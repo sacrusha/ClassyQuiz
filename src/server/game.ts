@@ -53,6 +53,13 @@ export interface Run {
   openedAt: number;
   /** Questions whose answer was revealed, in order; only these score. */
   revealed: number[];
+  /**
+   * Question index → the view version that first showed its reveal. An answer
+   * tapped on an older view was in time as far as the device showed, and
+   * counts whenever it arrives (backlog v1 item 15). Missing in runs stored
+   * before this was added.
+   */
+  revealView?: Record<string, number>;
   players: Record<string, Player>;
   /** Join command id → player it created, so a resent join doesn't make a second avatar. */
   joins?: Record<string, string>;
@@ -173,10 +180,12 @@ export function begin(g: Game, now: number): void {
   open(g, run, nextShown(g, -1), now);
 }
 
-export function reveal(g: Game): void {
+/** `view`: the version of the first view that will show the reveal. */
+export function reveal(g: Game, view: number): void {
   const run = needRun(g);
   if (run.phase !== "question") throw new GameError("There is no open question to reveal.");
   if (!run.revealed.includes(run.current)) run.revealed.push(run.current);
+  (run.revealView ??= {})[run.current] ??= view;
   run.phase = "reveal";
 }
 
@@ -195,10 +204,10 @@ export function showRanking(g: Game): void {
 }
 
 /** The one key a clicker or keyboard has: whatever comes next in the usual flow. */
-export function advance(g: Game, now: number): void {
+export function advance(g: Game, now: number, view: number): void {
   const run = needRun(g);
   if (run.phase === "lobby") begin(g, now);
-  else if (run.phase === "question") reveal(g);
+  else if (run.phase === "question") reveal(g, view);
   else if (run.phase === "reveal" || run.phase === "ranking") next(g, now);
 }
 
@@ -212,8 +221,12 @@ export function finish(g: Game, now: number): void {
 // ---------------------------------------------------------------------------
 // Answers
 
-/** Returns true when the answer was recorded (or was already the recorded one). */
-export function answer(g: Game, playerId: string, q: number, choice: number, seq: number, now: number): boolean {
+/**
+ * Records a tap. `view` is the version of the view the device showed when it
+ * was tapped. Returns true when the answer was recorded (or was already the
+ * recorded one).
+ */
+export function answer(g: Game, playerId: string, q: number, choice: number, seq: number, view: number, now: number): boolean {
   const run = g.run;
   if (!run) return false;
   const p = playerById(run, playerId);
@@ -222,11 +235,16 @@ export function answer(g: Game, playerId: string, q: number, choice: number, seq
   // with the connection) is confirmed, also after the reveal: it counts.
   const prev = run.answers[q]?.[playerId];
   if (prev && prev.seq >= seq) return true;
-  if (run.phase !== "question" || run.current !== q) return false;
+  const open = run.phase === "question" && run.current === q;
+  // Tapped before the device showed the reveal, delivered after it: the
+  // device showed the question as open, so the answer counts.
+  const revealedAt = run.revealView?.[q];
+  const inTime = open || (run.revealed.includes(q) && revealedAt !== undefined && view < revealedAt);
+  if (!inTime) return false;
   const question = g.quiz.questions[q];
   if (!question || !Number.isInteger(choice) || choice < 0 || choice >= question.answers.length) return false;
   const byPlayer = (run.answers[q] ??= {});
-  // Changing one's mind is allowed until the reveal; the time is the last tap's.
+  // Changing one's mind is allowed until the reveal; the last tap counts.
   byPlayer[playerId] = { choice, ms: Math.max(0, now - run.openedAt), seq };
   return true;
 }

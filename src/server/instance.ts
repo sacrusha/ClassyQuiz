@@ -346,7 +346,8 @@ export class Instance extends DurableObject<Env> {
       // --- a student
       if (session.role === "player") {
         if (cmd.op !== "answer") return { direct: [ack(false, "not allowed")] };
-        const recorded = G.answer(game, session.player, cmd.q, cmd.choice, cmd.seq, now);
+        const view = typeof cmd.v === "number" ? cmd.v : Infinity;
+        const recorded = G.answer(game, session.player, cmd.q, cmd.choice, cmd.seq, view, now);
         if (recorded) {
           await this.persist(["run"]);
           this.broadcast();
@@ -365,7 +366,7 @@ export class Instance extends DurableObject<Env> {
         }
         if (cmd.op !== "advance") return { direct: [ack(false, "not allowed")] };
         if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
-        G.advance(game, now);
+        G.advance(game, now, this.nextView());
         await this.afterTeacherChange(["run"]);
         return { direct: [ack(true)] };
       }
@@ -393,7 +394,7 @@ export class Instance extends DurableObject<Env> {
         case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           if (cmd.op === "begin") G.begin(game, now);
-          else if (cmd.op === "reveal") G.reveal(game);
+          else if (cmd.op === "reveal") G.reveal(game, this.nextView());
           else if (cmd.op === "next") G.next(game, now);
           else if (cmd.op === "ranking") G.showRanking(game);
           else if (cmd.op === "finish") G.finish(game, now);
@@ -444,6 +445,11 @@ export class Instance extends DurableObject<Env> {
     await this.persist([...new Set([...changed, "meta" as const])]);
     await this.scheduleAlarm();
     this.broadcast();
+  }
+
+  /** The version the views get with the next persist(): the first to show what just changed. */
+  private nextView(): number {
+    return this.meta!.v + 1;
   }
 
   /** Writes what changed; the quiz text itself was written once at upload. */

@@ -484,7 +484,8 @@ Serves: v1 items 6, 7, 8, 9.
   question 9); a question that wasn't revealed doesn't count.
 - **A question scores once it's revealed.** Students can change their
   answer until the reveal, and the last tap counts. On a tablet a mis-tap is
-  likelier than a tactic.
+  likelier than a tactic. "Until the reveal" means until the device showed
+  it; see "A tap that looked in time counts".
 - **Fixes, at any time while the instance lives:**
   - which answers count;
   - void: shown, but counts for nobody;
@@ -724,6 +725,43 @@ ordinary ones, so an AI that wrote the number with them didn't help.
 Checked in headless Edge: three spellings of the number, plus long, two-answer
 and short quizzes, at 1280×720, 1024×768 and 800×600. Question and reveal
 have identical text geometry in all of them.
+
+## 2026-11-02 — A tap that looked in time counts
+
+Serves: v1 item 15.
+
+Before: a tap that reached the server after the reveal was refused. The
+tablet had already shown it as chosen, and then showed "no answer" at the
+reveal.
+
+- **The rule is the device's view, not the arrival time.** Every view
+  carries a version, and the server notes the version of the first view that
+  shows each reveal. An answer names the version of the view it was tapped
+  on. If that is older than the reveal's, the device was still showing the
+  question as open, so the answer counts whenever it arrives, even after the
+  class has moved on. It doesn't count if the question was skipped, or not
+  revealed before an early final ranking.
+- **Why not time:** device clocks aren't synchronised, and on school Wi-Fi a
+  delivery can take longer than any window that would still be fair. The
+  version answers exactly the backlog's question: what the tablet showed.
+- **Accepted risk:** a tablet that is offline still shows the question, so
+  a child could copy the key from the projector and tap. The backlog designs
+  against the normal user; the teacher deals with that one in the room. A
+  device that sends no version (an old cached page) gets the old rule.
+- **On the device:** a tap shows as chosen at once, as before. If the reveal
+  comes before the server confirmed the tap, the device shows the tap as on
+  its way (its shape, a pulsing dot), not "no answer". It shows right or
+  wrong once the server has the tap. So the device never shows an answer
+  counted that isn't, or the other way round.
+- **Evidence:**
+  - game tests for a late tap, a change of mind, after Next, after an
+    early final ranking, and after a skip;
+  - an HTTP probe: the same tap counts on the question view and doesn't on
+    the reveal view;
+  - the simulation now has a tablet that taps offline, the reveal going out
+    before the tap arrives, and the check that it counts. Both modes pass;
+  - headless Edge on the HTTP fallback, with the tap's request held back
+    past the reveal: "on its way", then the right-answer verdict.
 
 ## Open
 

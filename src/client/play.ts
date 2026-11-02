@@ -28,6 +28,8 @@ let instanceId = "";
 let lastKey = "";
 let chooseKey = "";
 let chooseTimer: number | undefined;
+/** The last tap, until the server confirms it. It counts when it arrives, even after the reveal. */
+let waiting: { q: number; choice: number } | null = null;
 
 async function start(): Promise<void> {
   if (!JOIN_CODE.test(code)) {
@@ -200,9 +202,22 @@ function render(): void {
         q.mine = choice;
         lastKey = JSON.stringify({ ...view!, v: 0 });
         render();
-        void line!.send({ op: "answer", q: q.q, choice, seq: Date.now() });
+        const tap = { q: q.q, choice };
+        waiting = tap;
+        void line!.send({ op: "answer", q: q.q, choice, seq: Date.now(), v: v.v }).then((a) => {
+          if (waiting !== tap) return;
+          waiting = null;
+          // During the question the buttons stay as they are: a redraw could swallow a tap.
+          if (!a.ok || view?.phase === "reveal") render();
+        });
       }),
     );
+    return;
+  }
+  if (v.phase === "reveal" && v.reveal && waiting && waiting.q === v.question?.q) {
+    // Tapped before the reveal but not yet delivered: it will count.
+    main.innerHTML = `${top}<div class="center"><div class="verdict none"><span class="dot" data-status="offline" style="width:30%;height:30%"></span></div>
+      <div class="row verdict-shape" style="justify-content:center"><span class="a${waiting.choice}" style="color:var(--ans)">${shapeSvg(waiting.choice)}</span></div></div>`;
     return;
   }
   if (v.phase === "reveal" && v.reveal) {
