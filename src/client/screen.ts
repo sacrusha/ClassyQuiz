@@ -26,7 +26,7 @@ interface Paired {
   instance: string;
   token: string;
   /** When it was paired: a shared school laptop shouldn't open yesterday's teacher's quiz. */
-  at?: number;
+  at: number;
 }
 
 /** A pairing is resumed after a reload within a school day, not the next morning. */
@@ -41,7 +41,7 @@ function start(): void {
     return;
   }
   const paired = store.get<Paired>("cq.screen");
-  if (paired && Date.now() - (paired.at ?? 0) < RESUME_WITHIN_MS) {
+  if (paired && Date.now() - paired.at < RESUME_WITHIN_MS) {
     connect(paired.instance, { role: "screen", token: paired.token });
     return;
   }

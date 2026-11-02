@@ -8,10 +8,10 @@
 // were given in and are ignored when it has moved on; answers carry a sequence
 // number; fixes set a value rather than toggle one.
 
-import type { Avatar, Phase, Standing } from "../server/game.ts";
+import type { Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
 
-export type { Avatar, Phase, Standing, Problem };
+export type { Avatar, Phase, Problem };
 
 export type Auth =
   | { role: "teacher"; secret: string }
@@ -44,7 +44,7 @@ export type Command =
   /** Teacher, or the projector (a new phone for a teacher whose device died). */
   | { op: "pair"; code: string }
   | { op: "endInstance" }
-  // teacher or projector (keyboard, presentation clicker)
+  // projector (keyboard, presentation clicker): the next usual step
   | { op: "advance"; at: At }
   // student
   | { op: "answer"; q: number; choice: number; seq: number }

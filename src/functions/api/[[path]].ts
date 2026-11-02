@@ -45,7 +45,7 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
 };
 
 async function upload(env: Env, body: Record<string, unknown>): Promise<Response> {
-  if (typeof body.text !== "string" || body.text.trim() === "") return json({ ok: false, errors: [{ line: null, question: null, message: "The quiz text is empty." }], warnings: [] });
+  if (typeof body.text !== "string" || body.text.trim() === "") return json({ ok: false, errors: [{ message: "The quiz text is empty." }], warnings: [] });
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();

@@ -11,7 +11,7 @@
 // - Commands are kept until the server acknowledges them and are resent after
 //   a reconnect; the server ignores repeats (shared/protocol.ts).
 
-import type { Auth, ClientMessage, Command, ServerMessage, View } from "../shared/protocol.ts";
+import type { Auth, ClientMessage, Command, ServerMessage } from "../shared/protocol.ts";
 
 export type LineStatus = "connecting" | "live" | "offline";
 
@@ -19,7 +19,7 @@ export interface LineOptions {
   instance: string;
   auth: () => Auth;
   onMessage: (m: ServerMessage) => void;
-  onStatus?: (s: LineStatus, mode: "ws" | "poll") => void;
+  onStatus?: (s: LineStatus) => void;
 }
 
 interface Pending {
@@ -77,14 +77,6 @@ export class Line {
     this.ws = null;
   }
 
-  /** The newest view's version, for long-polling. */
-  get version(): number {
-    return this.v;
-  }
-
-  get transport(): "ws" | "poll" {
-    return this.mode;
-  }
 
   send(cmd: Command): Promise<Extract<ServerMessage, { t: "ack" }>> {
     return new Promise((resolve) => {
@@ -97,7 +89,7 @@ export class Line {
   private setStatus(s: LineStatus): void {
     if (s === this.status) return;
     this.status = s;
-    this.opts.onStatus?.(s, this.mode);
+    this.opts.onStatus?.(s);
   }
 
   private reconnectNow(): void {
@@ -363,5 +355,3 @@ export async function api<T>(path: string, body: unknown): Promise<{ status: num
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
-
-export type { View };

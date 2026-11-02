@@ -2,6 +2,8 @@
 // be missing (private windows, managed school browsers), and keeping the
 // screen awake.
 
+import type { LineStatus } from "./net.ts";
+
 export function $(sel: string, root: ParentNode = document): HTMLElement {
   const el = root.querySelector(sel);
   if (!el) throw new Error(`missing ${sel}`);
@@ -72,19 +74,15 @@ export function findQuiz(id: string): SavedQuiz | null {
 // --- keeping the screen on (projector during a long explanation, a tablet
 // waiting for the next question)
 
-let lock: { release(): Promise<void> } | null = null;
+let lock: WakeLockSentinel | null = null;
 
 export function keepAwake(): void {
+  if (!("wakeLock" in navigator)) return;
   const request = async () => {
     if (document.visibilityState !== "visible" || lock) return;
     try {
-      const wl = (navigator as unknown as { wakeLock?: { request(t: "screen"): Promise<{ release(): Promise<void>; addEventListener(e: string, f: () => void): void }> } }).wakeLock;
-      if (!wl) return;
-      const l = await wl.request("screen");
-      lock = l;
-      l.addEventListener("release", () => {
-        lock = null;
-      });
+      lock = await navigator.wakeLock.request("screen");
+      lock.addEventListener("release", () => (lock = null));
     } catch {
       /* not allowed yet (needs a user gesture on some browsers) */
     }
@@ -100,7 +98,7 @@ export function siteAddress(): string {
   return location.host;
 }
 
-export function statusDot(el: HTMLElement, s: "connecting" | "live" | "offline"): void {
+export function statusDot(el: HTMLElement, s: LineStatus): void {
   el.dataset.status = s;
   el.title = s === "live" ? "Connected" : s === "offline" ? "Connection lost — reconnecting" : "Connecting";
 }
