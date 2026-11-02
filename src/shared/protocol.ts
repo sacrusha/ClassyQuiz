@@ -47,7 +47,8 @@ export type Command =
   // projector (keyboard, presentation clicker): the next usual step
   | { op: "advance"; at: At }
   // student
-  | { op: "answer"; q: number; choice: number; seq: number }
+  /** v: the version of the view the tap was made on; a tap made before the device showed the reveal counts. */
+  | { op: "answer"; q: number; choice: number; seq: number; v: number }
   | { op: "claim"; player: string }
   | { op: "newPlayer" }
   /** A device without a player asks again whom it might be (avatars become "away" over time). */

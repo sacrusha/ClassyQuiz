@@ -282,11 +282,15 @@ function maybeAnswer(p) {
     const n = v.question.answers.length;
     const tries = Math.random() < 0.25 ? 2 : 1; // some change their mind
     for (let i = 0; i < tries; i++) {
+      // Like client/play.ts: a tap only while the device shows this question,
+      // naming the view it was made on. A device that is offline still shows it.
+      const shown = p.view;
+      if (shown.phase !== "question" || shown.question?.q !== q) break;
       const choice = Math.floor(Math.random() * n);
       const seq = Date.now() * 10 + i;
       // Some answers are sent just before the device drops: the line must resend them.
       const dropAfter = p.d.mode === "ws" && Math.random() < 0.15;
-      const sent = p.d.send({ op: "answer", q, choice, seq });
+      const sent = p.d.send({ op: "answer", q, choice, seq, v: shown.v });
       if (dropAfter) void p.d.drop(rnd(300, 2500));
       sent.then((a) => {
         if (a.ok) {
@@ -325,6 +329,7 @@ let qi = 0;
 await teacher.send({ op: "begin", at: at() });
 let deadPlayer = null;
 let revival = null;
+let lateTap = null;
 for (;;) {
   await until(() => tv.phase === "question", 5000, "question");
   const current = tv.current;
@@ -332,6 +337,19 @@ for (;;) {
   const t = Date.now();
   while (tv.run.answered < active() && Date.now() - t < 12000) await sleep(100);
   await sleep(800); // stragglers changing their mind
+  if (current === 2) {
+    // Item 15: a tablet taps while offline, the teacher reveals, then the tap
+    // arrives. The tablet showed the question as open, so the tap counts.
+    const p = players.find((x) => x.d.mode === "ws" && !x.dead && x.d.online && x.view?.phase === "question");
+    void p.d.drop(3000);
+    const choice = 0;
+    const seq = Date.now() * 10 + 9;
+    lateTap = p.d.send({ op: "answer", q: current, choice, seq, v: p.view.v }).then((a) => {
+      check(a.ok, `${p.name}: a tap made before the reveal and delivered after it counts`);
+      if (a.ok && (!p.acked[current] || p.acked[current].seq < seq)) p.acked[current] = { choice, seq };
+    });
+    log(`${p.name} taps while offline; the reveal goes out before the tap arrives`);
+  }
   log(`question ${current + 1}: ${tv.run.answered}/${tv.run.players.length} answered, revealing`);
   // A double tap on Reveal (or a retry) must not skip anything.
   const a1 = teacher.send({ op: "reveal", at: at() });
@@ -377,6 +395,7 @@ for (;;) {
   if (tv.phase === "final") break;
 }
 chaos = false;
+await lateTap;
 await sleep(500);
 
 // Expected scores from acknowledged answers and the final fixes.
