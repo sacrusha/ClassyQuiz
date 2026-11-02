@@ -13,10 +13,11 @@
 // Projector ("screen") or the Remote. Each role is held by one tab at a time,
 // named by a token the tab keeps for its lifetime (sessionStorage).
 
-import type { Avatar, Phase } from "../server/game.ts";
+import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
+import type { Tempo } from "./tempo.ts";
 
-export type { Avatar, Phase, Problem };
+export type { Answering, Avatar, Phase, Problem, Tempo };
 
 export type RoleName = "screen" | "remote";
 
@@ -31,6 +32,12 @@ export type Auth =
 export interface At {
   phase: Phase | "idle";
   current: number;
+  /**
+   * The class was reading the question, its answers not yet shown (countdown
+   * tempos). Go and Reveal share a phase, so a doubled Go must not land as a
+   * Reveal. Absent: not compared (the picture's zoom; older pages).
+   */
+  reading?: boolean;
 }
 
 export type Command =
@@ -41,6 +48,12 @@ export type Command =
   | { op: "ranking"; at: At }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
+  /** Countdown tempos: the answers appear and the clock starts. */
+  | { op: "go"; at: At }
+  /** The answers stay open, or open again after time's up, without a clock. */
+  | { op: "stopClock"; at: At }
+  /** The class's tempo (in the lobby) and the countdown's length (any time; for the questions to come). */
+  | { op: "tempo"; tempo?: Tempo; seconds?: number }
   /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
   | { op: "again"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
@@ -67,8 +80,12 @@ export type Command =
   | { op: "newPlayer" }
   | { op: "claim"; player: string }
   // a player
-  /** v: the version of the view the tap was made on; a tap made before the device showed the reveal counts. */
-  | { op: "answer"; q: number; choice: number; seq: number; v: number };
+  /**
+   * v: the version of the view the tap was made on; a tap made before the
+   * device showed answering closed counts. ms: how long after the answers
+   * appeared on this device it was tapped (points for speed).
+   */
+  | { op: "answer"; q: number; choice: number; seq: number; v: number; ms?: number };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
 
@@ -137,6 +154,20 @@ export interface QuestionView {
   image: ImageRef | null;
   /** Behind the question: its own background, else the quiz's. */
   background: ImageRef | null;
+  /** Reading: the tiles keep their place, their text hidden until Go. */
+  answering: Answering;
+  clock: ClockView | null;
+}
+
+/**
+ * A running countdown, or one whose time is up (leftMs 0). Device clocks
+ * aren't synchronised: a device runs it from when the view arrived, so it
+ * ends a moment after the server's, never before.
+ */
+export interface ClockView {
+  ms: number;
+  /** What was left when the view was made. */
+  leftMs: number;
 }
 
 export interface RevealView {
@@ -155,6 +186,8 @@ export interface RankingView {
   /** Questions that scored so far. */
   of: number;
   players: number;
+  /** Points for speed: scores aren't "right out of so many". */
+  speed: boolean;
 }
 
 export interface ScreenView {
@@ -168,6 +201,7 @@ export interface ScreenView {
   pictures: string[];
   /** The question's picture fills the screen. */
   zoom: boolean;
+  tempo: Tempo;
   phase: Phase | "idle";
   current: number;
   players: { id: string; avatar: Avatar }[];
@@ -209,6 +243,12 @@ export interface TeacherView {
   remote: Presence;
   /** The question's picture fills the projector. */
   zoom: boolean;
+  tempo: Tempo;
+  /** The countdown's length for the questions to come, in seconds. */
+  seconds: number;
+  /** The open question: being read, open, or closed until the reveal; null between questions. */
+  answering: Answering | null;
+  clock: ClockView | null;
   run: null | {
     n: number;
     total: number;
@@ -226,11 +266,35 @@ export interface PlayerView {
   current: number;
   removed: boolean;
   me: { avatar: Avatar; score: number; place: number; of: number } | null;
-  question: { q: number; n: number; total: number; answers: string[]; mine: number | null } | null;
-  reveal: { counts: boolean[]; mine: number | null; void: boolean } | null;
+  /**
+   * answers: empty while the class reads the question (countdown tempos).
+   * sinceMs: how long the answers had been showing when the view was made;
+   * the device adds its own time to it for the points for speed.
+   */
+  question: {
+    q: number;
+    n: number;
+    total: number;
+    answers: string[];
+    mine: number | null;
+    answering: Answering;
+    clock: ClockView | null;
+    sinceMs: number | null;
+  } | null;
+  /** points: what the answer scored, with points for speed; null otherwise. */
+  reveal: { counts: boolean[]; mine: number | null; void: boolean; points: number | null } | null;
 }
 
 export type View = ScreenView | TeacherView | PlayerView;
+
+/**
+ * What a view shows, as a string to compare: without its version and the
+ * fields that only say how much time passed (a student's view is sent again
+ * only when what it shows changes).
+ */
+export function viewKey(view: View): string {
+  return JSON.stringify(view, (k, val) => (k === "v" || k === "leftMs" || k === "sinceMs" ? undefined : val));
+}
 
 export const JOIN_CODE = /^\d{5}$/;
 export const MAX_QUIZ_BYTES = 200_000;

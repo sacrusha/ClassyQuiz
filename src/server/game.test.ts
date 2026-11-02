@@ -258,11 +258,7 @@ Image: c.png
   assert.equal(G.zoomed(g), true);
 });
 
-test("answers are shuffled for each class, the same on every screen; Order: fixed and letters A, B, C keep theirs", () => {
-  assert.equal(G.keepsOrder(["A", "B", "C", "Auf keinem"]), true, "letters with a 'none' last");
-  assert.equal(G.keepsOrder(["A", "B", "C"]), true);
-  assert.equal(G.keepsOrder(["C", "A", "B"]), false);
-  assert.equal(G.keepsOrder(["10", "20", "30", "40"]), false, "numbers need Order: fixed");
+test("answers are shuffled for each class, the same on every screen; only Order: fixed keeps them", () => {
   const random = (() => {
     let r = 7;
     return () => ((r = (r * 9301 + 49297) % 233280) / 233280);
@@ -277,10 +273,133 @@ test("answers are shuffled for each class, the same on every screen; Order: fixe
   assert.ok(new Set(keyPlaces).size >= 3 && keyPlaces.filter((p) => p === 0).length < 12, `the key, first in the text, lands at ${keyPlaces}`);
   for (let q = 0; q < 20; q++) assert.deepEqual([...G.orderOf(g, q)].sort(), [0, 1, 2, 3], "a permutation");
   assert.deepEqual(G.orderOf(g, 20), [0, 1, 2, 3], "Order: fixed");
-  assert.deepEqual(G.orderOf(g, 21), [0, 1, 2, 3], "A, B, C, none");
+  assert.notDeepEqual(
+    [21, 21, 21].map(() => (G.startRun(g, "12345", "rx", random), G.orderOf(g, 21).join())),
+    ["0,1,2,3", "0,1,2,3", "0,1,2,3"],
+    "letters A, B, C without the line are shuffled like any answers",
+  );
+  G.startRun(g, "12345", "r1", random);
   const before = quiz.questions.map((_, q) => G.orderOf(g, q).join());
   G.startRun(g, "12345", "r2", random);
   assert.notDeepEqual(quiz.questions.map((_, q) => G.orderOf(g, q).join()), before, "another class, another order");
   G.startRun(g, "12345", "r3");
   assert.deepEqual(G.orderOf(g, 0), [0, 1, 2, 3], "without randomness (tests, runs stored before): the text's order");
+});
+
+// ---------------------------------------------------------------------------
+// Tempo: the countdown and points for speed (backlog v2 items 2, 3)
+
+test("countdown: the question first, Go opens the answers, time's up closes them, the reveal stays the teacher's", () => {
+  const { g, ids } = setup(2);
+  G.setTempo(g, "countdown");
+  G.setSeconds(g, 10);
+  G.begin(g, 0);
+  assert.equal(G.answering(g), "reading");
+  assert.equal(G.answer(g, ids[0], 0, 0, 1, 0, 5), false, "no answers while the class reads");
+  assert.equal(G.deadline(g), null);
+  G.advance(g, 100, 1);
+  assert.equal(G.answering(g), "open", "the clicker's step from reading is Go, not the reveal");
+  assert.equal(G.deadline(g), 10_100);
+  assert.equal(G.answer(g, ids[0], 0, 0, 1, 2, 3000, 2800), true);
+  assert.equal(g.run!.answers[0][ids[0]].ms, 2800, "the device's own time");
+  G.closeAnswers(g, 5);
+  assert.equal(G.answering(g), "closed");
+  assert.equal(g.run!.phase, "question", "time's up doesn't reveal");
+  assert.equal(G.deadline(g), null);
+  assert.equal(G.answer(g, ids[1], 0, 0, 1, 4, 10_300, 9_900), true, "tapped on a view that still showed the answers open: counts");
+  assert.equal(G.answer(g, ids[1], 0, 1, 2, 5, 10_400), false, "tapped once the device showed time's up: doesn't");
+  G.advance(g, 11_000, 6);
+  assert.equal(g.run!.phase, "reveal");
+  assert.equal(g.run!.closedView![0], 5, "the reveal keeps the close's view");
+  assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [1, 1], "without points for speed a right answer is 1, as before");
+});
+
+test("countdown: a doubled Go is told apart from the Reveal by the reading flag (advance from reading only goes)", () => {
+  const { g } = setup(1);
+  G.setTempo(g, "countdown");
+  G.begin(g, 0);
+  G.go(g, 10);
+  assert.throws(() => G.go(g, 20), G.GameError);
+  assert.equal(G.answering(g), "open");
+});
+
+test("countdown: the teacher can stop it, or open the answers again after time's up", () => {
+  const { g, ids } = setup(1);
+  G.setTempo(g, "speed");
+  G.setSeconds(g, 10);
+  G.begin(g, 0);
+  G.go(g, 0);
+  G.closeAnswers(g, 7);
+  assert.equal(G.answer(g, ids[0], 0, 0, 1, 7, 12_000), false);
+  G.stopClock(g);
+  assert.equal(G.answering(g), "open");
+  assert.equal(G.deadline(g), null, "no clock runs after a stop");
+  assert.equal(G.answer(g, ids[0], 0, 0, 2, 8, 15_000, 14_000), true, "open again");
+  G.reveal(g, 9);
+  assert.equal(score(g, ids[0]), 10, "right but after the countdown's length: no bonus");
+  assert.throws(() => G.stopClock(g), G.GameError, "nothing to stop after the reveal");
+});
+
+test("points for speed: 10 for a right answer, up to 5 more by the share of the clock left; fixes move them", () => {
+  const { g, ids } = setup(3);
+  G.setTempo(g, "speed");
+  G.setSeconds(g, 20);
+  G.begin(g, 0);
+  G.go(g, 1000);
+  G.answer(g, ids[0], 0, 0, 1, 0, 2000, 900); // fast, right
+  G.answer(g, ids[1], 0, 0, 1, 0, 16_000, 14_500); // slow, right
+  G.answer(g, ids[2], 0, 1, 1, 0, 3000, 1500); // fast, wrong
+  G.reveal(g, 5);
+  assert.deepEqual(ids.map((id) => score(g, id)), [15, 11, 0]);
+  assert.equal(G.pointsFor(g, 0, ids[0]), 15);
+  G.setCounts(g, 0, [true, true, false]);
+  assert.deepEqual(ids.map((id) => score(g, id)), [15, 11, 15], "another answer counts too: its speed counts with it");
+  G.setVoid(g, 0, true);
+  assert.deepEqual(ids.map((id) => score(g, id)), [0, 0, 0]);
+  assert.equal(G.pointsFor(g, 0, ids[0]), null);
+  assert.equal(G.standings(g)[0].place, 1);
+});
+
+test("points for speed: the device's time can't exceed the server's, and an old page without one gets the server's", () => {
+  const { g, ids } = setup(2);
+  G.setTempo(g, "speed");
+  G.begin(g, 0);
+  G.go(g, 1000);
+  G.answer(g, ids[0], 0, 0, 1, 0, 3000, 99_999);
+  G.answer(g, ids[1], 0, 0, 1, 0, 4000);
+  assert.equal(g.run!.answers[0][ids[0]].ms, 2000);
+  assert.equal(g.run!.answers[0][ids[1]].ms, 3000);
+  G.answer(g, ids[0], 0, 1, 2, 0, 5000, -50);
+  assert.equal(g.run!.answers[0][ids[0]].ms, 0, "a change of mind keeps its own time; never below zero");
+});
+
+test("tempo: chosen in the lobby, its length changeable between questions, carried to the next class", () => {
+  const { g } = setup(1);
+  assert.equal(G.tempoOf(g.run), "pace");
+  assert.throws(() => G.setSeconds(g, 15), G.GameError, "only the lengths on offer");
+  G.setTempo(g, "speed");
+  G.setSeconds(g, 30);
+  G.begin(g, 0);
+  assert.throws(() => G.setTempo(g, "pace"), G.GameError, "not once the quiz has started");
+  G.go(g, 0);
+  G.setSeconds(g, 10);
+  assert.equal(G.deadline(g), 30_000, "the running countdown keeps its length");
+  G.reveal(g, 1);
+  G.next(g, 40_000);
+  G.go(g, 40_000);
+  assert.equal(G.deadline(g), 50_000, "the next one takes the new length");
+  G.finish(g, 60_000);
+  G.startRun(g, "12345", "r2");
+  assert.deepEqual([G.tempoOf(g.run), G.secondsOf(g.run)], ["speed", 10], "Again with another class keeps the tempo");
+});
+
+test("at the teacher's pace nothing changes: no reading step, no clock", () => {
+  const { g, ids } = setup(1);
+  G.begin(g, 0);
+  assert.equal(G.answering(g), "open");
+  assert.equal(G.deadline(g), null);
+  assert.throws(() => G.go(g, 0), G.GameError);
+  G.closeAnswers(g, 3);
+  assert.equal(G.answering(g), "open", "no clock to close");
+  assert.equal(G.answer(g, ids[0], 0, 0, 1, 4, 10), true);
 });

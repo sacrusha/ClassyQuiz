@@ -10,11 +10,12 @@
 //                    projector window").
 
 import type { Auth, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
-import { JOIN_CODE } from "../shared/protocol.ts";
+import { JOIN_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import { Line, api } from "./net.ts";
+import { clockBar, localEnd } from "./clock.ts";
 
 interface Saved {
   instance: string;
@@ -47,6 +48,14 @@ let offlineTimer: number | undefined;
 let waiting: { q: number; choice: number } | null = null;
 /** The class turned this device away (full, or started), in the phase it was then; asked again when that changes. */
 let refused: { reason: string; phase: string } | null = null;
+/**
+ * When the open question's answers appeared on this device (performance.now()),
+ * per question: a tap's time for the points for speed is counted from here,
+ * on this device, so a slow line costs no speed.
+ */
+let shown: { q: number; at: number } | null = null;
+/** The countdown ran out on this device: the buttons stop taking taps until the server says otherwise. */
+let outTimer: number | undefined;
 
 async function start(): Promise<void> {
   if (!JOIN_CODE.test(code)) {
@@ -151,8 +160,10 @@ function onMessage(m: ServerMessage): void {
     // Every answer in the class bumps the version; only redraw when this
     // device's own view changed, or a tap could land on a button being
     // replaced and get lost.
-    const k = JSON.stringify({ ...m.view, v: 0 });
+    const k = viewKey(m.view);
     view = m.view;
+    const q = view.question;
+    if (q && q.answering !== "reading" && q.sinceMs !== null && shown?.q !== q.q) shown = { q: q.q, at: performance.now() - q.sinceMs };
     if (k === lastKey) return;
     lastKey = k;
     render();
@@ -332,16 +343,41 @@ function render(): void {
     main.innerHTML = `<div class="center">${me ? `<div class="hero">${avatarSvg(me.avatar)}</div>` : ""}<div class="big">${ICON.eye}</div></div>`;
     return;
   }
+  clearTimeout(outTimer);
+  if (v.phase === "question" && v.question && v.question.answering === "reading") {
+    // The class reads the question on the board; the answers come with Go.
+    main.innerHTML = `${top}<div class="center"><div class="big reading">${ICON.eye}</div></div>`;
+    return;
+  }
   if (v.phase === "question" && v.question) {
     const q = v.question;
     const n = q.answers.length;
-    main.innerHTML = `${top}<div class="buttons n${n}${q.mine !== null ? " chosen" : ""}">
+    // Time's up, here or on the server: the buttons stay, the chosen one
+    // marked, and take no more taps. A tap still on its way shows as chosen.
+    const end = q.clock ? localEnd(`${v.current}`, q.clock) : null;
+    const out = q.answering === "closed" || (end !== null && end <= performance.now());
+    const pending = waiting && waiting.q === q.q ? waiting.choice : null;
+    const mine = out && pending !== null ? pending : q.mine;
+    main.innerHTML = `${top}${q.clock && end !== null ? clockBar(q.clock.ms, end) : ""}<div class="buttons n${n}${mine !== null ? " chosen" : ""}${out ? " closed" : ""}">
       ${q.answers
-        .map((a, i) => `<button class="ansbtn a${i}${q.mine === i ? " mine" : ""}" data-i="${i}">${shapeSvg(i)}<span>${lines(a)}</span></button>`)
+        .map((a, i) => `<button class="ansbtn a${i}${mine === i ? " mine" : ""}" data-i="${i}">${shapeSvg(i)}<span>${lines(a)}</span></button>`)
         .join("")}
     </div>`;
+    if (out) {
+      main.querySelector(".top")?.insertAdjacentHTML("beforeend", `<span class="timeup">${ICON.timer}</span>`);
+      return;
+    }
+    if (end !== null) {
+      // Run out here: closed without a redraw, so no tap is swallowed by one.
+      outTimer = window.setTimeout(() => {
+        main.querySelector(".buttons")?.classList.add("closed");
+        main.querySelector(".clockbar")?.classList.add("out");
+        main.querySelector(".top")?.insertAdjacentHTML("beforeend", `<span class="timeup">${ICON.timer}</span>`);
+      }, Math.max(0, end - performance.now()));
+    }
     main.querySelectorAll<HTMLButtonElement>(".ansbtn").forEach((b) =>
       b.addEventListener("click", () => {
+        if (main.querySelector(".buttons.closed")) return;
         const choice = Number(b.dataset.i);
         // The same button again changes nothing; it isn't sent (children
         // hammer buttons, and each stored tap is spent from the site's day).
@@ -349,21 +385,23 @@ function render(): void {
         const before = q.mine;
         // Shown at once; the line delivers it, resending until the server confirms.
         q.mine = choice;
-        lastKey = JSON.stringify({ ...view!, v: 0 });
+        lastKey = viewKey(view!);
+        const ms = shown && shown.q === q.q ? Math.round(performance.now() - shown.at) : undefined;
         render();
         const tap = { q: q.q, choice };
         waiting = tap;
-        void line!.send({ op: "answer", q: q.q, choice, seq: Date.now(), v: v.v }).then((a) => {
+        void line!.send({ op: "answer", q: q.q, choice, seq: Date.now(), v: v.v, ms }).then((a) => {
           if (waiting !== tap) return;
           waiting = null;
           // Not taken (e.g. too many changes of mind): the device shows what counts.
-          const shown = view?.question;
-          if (!a.ok && shown && shown.q === tap.q && shown.mine === choice) {
-            shown.mine = before;
-            lastKey = JSON.stringify({ ...view!, v: 0 });
+          const current = view?.question;
+          if (!a.ok && current && current.q === tap.q && current.mine === choice) {
+            current.mine = before;
+            lastKey = viewKey(view!);
           }
-          // During the question the buttons stay as they are: a redraw could swallow a tap.
-          if (!a.ok || view?.phase === "reveal") render();
+          // During the question the buttons stay as they are: a redraw could
+          // swallow a tap. Once answering has closed there is none to swallow.
+          if (!a.ok || view?.phase === "reveal" || view?.question?.answering === "closed") render();
         });
       }),
     );
@@ -380,7 +418,9 @@ function render(): void {
     const cls = r.void ? "void" : r.mine === null ? "none" : r.counts[r.mine] ? "right" : "wrong";
     const icon = r.void ? ICON.void : r.mine === null ? "–" : r.counts[r.mine] ? ICON.check : ICON.cross;
     const mine = r.mine !== null ? `<div class="row verdict-shape" style="justify-content:center"><span class="a${r.mine}" style="color:var(--ans)">${shapeSvg(r.mine)}</span></div>` : "";
-    main.innerHTML = `${top}<div class="center"><div class="verdict ${cls}">${icon}</div>${mine}</div>`;
+    // Points for speed: what this answer brought, the quicker the more.
+    const gained = r.points ? `<div class="big gained">+${r.points}</div>` : "";
+    main.innerHTML = `${top}<div class="center"><div class="verdict ${cls}">${icon}</div>${gained}${mine}</div>`;
     return;
   }
   if (v.phase === "ranking" || v.phase === "final") {

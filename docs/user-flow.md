@@ -203,6 +203,9 @@ A question opened (or all of them, with Show all answers / Hide answers):
 - **The site's warnings** (the same answer twice, the right answer always in
   one place) sit above the list, one muted line each.
 - **Avatars** can be tapped to remove a double.
+- **Tempo**, one muted line under Start: "Tempo: Teacher's pace ›". It opens
+  a sheet with Teacher's pace, Countdown, and Countdown and points for
+  speed, plus the length (10/20/30/60 s); see §3.7.
 - **The device lines** become "Remote connected ✓" once a Remote is there.
 - **⋯:** Players · Leave · Delete the quiz…
 
@@ -266,6 +269,24 @@ The student screens are unchanged from v1: avatar and 👁 in the lobby, colour
 buttons, ✓ or ✗ at the reveal, place and stars at the ranking. A tablet of
 the previous class is told "This quiz has finished"; it doesn't slip into
 the next class's lobby.
+
+### 3.7 Tempo: countdown and points for speed (v2 items 2, 3)
+
+Off by default. With a countdown, each question has one more step:
+
+| Step | Wall | Tablets | Steering tab |
+|---|---|---|---|
+| Next | the question and picture; tiles coloured, without text | the eye | **Go ▶** ("The class reads the question…") |
+| Go | the answers; a bar drains along the top edge | buttons, the same bar | the bar; **Reveal** |
+| Time's up, or all present answered | the bar empty, a timer by the count | buttons locked, the chosen one marked | "Time's up: answering is closed"; **Reveal** |
+| Reveal | as at the teacher's pace | ✓ or ✗, and "+13" with speed points | as at the teacher's pace |
+
+- The clicker's next step from reading is Go; it ignores a second press
+  within 0.7 s.
+- ⋯ while the clock runs: "Stop the countdown: answers stay open"; after
+  time's up: "Open the answers again, without a countdown"; between and
+  during questions: "Countdown length: 20 s…".
+- With speed points the ranking shows points, not "right out of n".
 
 ## 4. Variants
 

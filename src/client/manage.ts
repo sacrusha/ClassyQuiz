@@ -3,7 +3,8 @@
 // lobby (backlog item 19), the next step, fixes, players, the ⋯ menu.
 // docs/user-flow.md §3.3–3.5.
 
-import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
+import type { ImageRef, TeacherQuestion, TeacherView, Tempo } from "../shared/protocol.ts";
+import { COUNTDOWN_CHOICES, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import type { Line } from "./net.ts";
@@ -163,6 +164,8 @@ export function nextStep(v: TeacherView): Step | null {
     case "lobby":
       return { act: "begin", label: "Start quiz &#9654;" };
     case "question":
+      // Countdown tempos: the class has read the question; Go shows the answers and starts the clock.
+      if (v.answering === "reading") return { act: "go", label: "Go &#9654;" };
       return { act: "reveal", label: `${ICON.eye} Reveal` };
     case "reveal":
     case "ranking":
@@ -183,7 +186,7 @@ export function sideStep(v: TeacherView): Step | null {
 // ---------------------------------------------------------------------------
 // Acting
 
-const STEPS = new Set(["begin", "reveal", "next", "ranking", "finish", "skip-current", "again"]);
+const STEPS = new Set(["begin", "go", "reveal", "next", "ranking", "finish", "skip-current", "again"]);
 /** After each step the buttons stay inert for a moment, so a double tap on Reveal doesn't land on the Next that replaces it. */
 export const STEP_LOCK_MS = 700;
 
@@ -204,7 +207,8 @@ export class Steer {
 
   /** Call on every view: a new step locks the step buttons for a moment. */
   noteStep(v: TeacherView, buttons: ParentNode): void {
-    const step = `${v.phase}|${v.current}`;
+    // Go and Reveal share a phase: a double tap on Go mustn't land on the Reveal that replaces it.
+    const step = `${v.phase}|${v.current}|${v.answering === "reading"}`;
     if (step === this.lastStep) return;
     this.lastStep = step;
     this.lockUntil = Math.max(this.lockUntil, Date.now() + STEP_LOCK_MS);
@@ -237,7 +241,7 @@ export class Steer {
       if (this.locked()) return true;
       this.lockUntil = Date.now() + STEP_LOCK_MS;
     }
-    const at = { phase: v.phase, current: v.current };
+    const at = { phase: v.phase, current: v.current, reading: v.answering === "reading" };
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
       if (!r.ok && r.error) toast(r.error);
@@ -245,12 +249,19 @@ export class Steer {
     };
     switch (a) {
       case "begin":
+      case "go":
       case "reveal":
       case "next":
       case "ranking":
       case "again":
         if (a === "next" || a === "again") this.ui.fixing = null;
         await send({ op: a, at });
+        return true;
+      case "stop-clock":
+        await send({ op: "stopClock", at });
+        return true;
+      case "tempo-sheet":
+        tempoSheet(v, (cmd) => send(cmd));
         return true;
       case "finish":
         if (confirm("Show the final ranking now? Questions not yet shown are left out.")) await send({ op: "finish", at });
@@ -351,6 +362,11 @@ export function openMenu(items: MenuItem[]): void {
 export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuItem[] {
   const open = (act: string, data: Record<string, string> = {}) => void steer.run(act, data);
   const items: MenuItem[] = [];
+  // The clock presses the class, never the teacher: it can be stopped, and
+  // after time's up the answers can open again.
+  if (v.phase === "question" && v.clock && v.answering === "open") items.push({ label: "Stop the countdown: answers stay open", run: () => open("stop-clock") });
+  if (v.phase === "question" && v.answering === "closed") items.push({ label: "Open the answers again, without a countdown", run: () => open("stop-clock") });
+  if (v.tempo !== "pace" && v.phase !== "lobby" && v.phase !== "final") items.push({ label: `Countdown length: ${v.seconds} s…`, run: () => open("tempo-sheet") });
   if (v.phase === "question") {
     items.push({ label: "Skip this question", run: () => open("skip-current") });
     items.push({ label: onWall ? "Change the right answer – the class sees it" : "Change the right answer", run: () => open("fix-q", { q: String(v.current) }) });
@@ -377,4 +393,75 @@ export function toast(msg: string, ms = 4000): void {
 /** "classyquiz.pages.dev · 63953" */
 export function addressAndCode(code: string): string {
   return `${esc(siteAddress())} · <strong>${esc(code)}</strong>`;
+}
+
+// ---------------------------------------------------------------------------
+// Tempo (backlog v2 items 2, 3; shared/tempo.ts)
+
+const TEMPO_NAMES: Record<Tempo, string> = {
+  pace: "Teacher's pace",
+  countdown: "Countdown",
+  speed: "Countdown and points for speed",
+};
+
+/** The tempo in a few words, for the lobby's line: "Countdown, 20 s". */
+export function tempoName(v: TeacherView): string {
+  return v.tempo === "pace" ? TEMPO_NAMES.pace : `${TEMPO_NAMES[v.tempo]}, ${v.seconds} s`;
+}
+
+/** The lobby's line under Start: the tempo, tapped to change it. Off (the teacher's pace) unless a class turns it on. */
+export function tempoLine(v: TeacherView): string {
+  return `<button class="link tempo-line" data-act="tempo-sheet">Tempo: ${esc(tempoName(v))} ›</button>`;
+}
+
+/** The tempo's sheet goes when the step it was opened in has passed, or this tab no longer steers. */
+export function closeTempoSheet(): void {
+  document.querySelector(".tempo-sheet")?.parentElement?.remove();
+}
+
+/**
+ * The tempo's choices in a sheet: in the lobby the three tempos and the
+ * countdown's length; during the quiz only the length, for the questions to
+ * come. Changes are sent at once; the sheet marks them as they're made.
+ */
+function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; seconds?: number }) => Promise<{ ok: boolean }>): void {
+  document.querySelector(".sheet-back")?.remove();
+  const lobby = v.phase === "lobby";
+  const what: Record<Tempo, string> = {
+    pace: "You reveal when the class is ready. No clock.",
+    countdown: "The question comes first. Go shows the answers and starts the clock; when it runs out, answering closes and you reveal.",
+    speed: `As Countdown. A right answer scores ${POINTS_RIGHT}, and up to ${SPEED_BONUS} more the quicker it came.`,
+  };
+  const tempos = lobby
+    ? (["pace", "countdown", "speed"] as Tempo[])
+        .map((t) => `<button class="tempo-choice${v.tempo === t ? " on" : ""}" data-tempo="${t}"><strong>${TEMPO_NAMES[t]}</strong><small>${esc(what[t])}</small></button>`)
+        .join("")
+    : `<p><strong>${esc(TEMPO_NAMES[v.tempo])}</strong><br><span class="hint">For the questions still to come.</span></p>`;
+  const seconds = `<div class="seconds"${lobby && v.tempo === "pace" ? " hidden" : ""}><span>Countdown</span>${COUNTDOWN_CHOICES.map(
+    (n) => `<button class="btn${v.seconds === n ? " on" : ""}" data-seconds="${n}">${n} s</button>`,
+  ).join("")}</div>`;
+  const back = document.createElement("div");
+  back.className = "sheet-back";
+  back.innerHTML = `<div class="sheet tempo-sheet">${tempos}${seconds}<button class="cancel" data-close>Done</button></div>`;
+  back.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target === back || target.closest("[data-close]")) {
+      back.remove();
+      return;
+    }
+    const t = target.closest<HTMLElement>("[data-tempo]");
+    if (t) {
+      const tempo = t.dataset.tempo as Tempo;
+      back.querySelectorAll("[data-tempo]").forEach((b) => b.classList.toggle("on", b === t));
+      back.querySelector<HTMLElement>(".seconds")!.hidden = tempo === "pace";
+      void send({ op: "tempo", tempo });
+      return;
+    }
+    const n = target.closest<HTMLElement>("[data-seconds]");
+    if (n) {
+      back.querySelectorAll("[data-seconds]").forEach((b) => b.classList.toggle("on", b === n));
+      void send({ op: "tempo", seconds: Number(n.dataset.seconds) });
+    }
+  });
+  document.body.appendChild(back);
 }

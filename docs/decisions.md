@@ -1318,6 +1318,18 @@ the measure, teacher time. Reverses "The order in the text is the order on
 screen" in "The quiz text format". Settled with the owner through the
 product owner.
 
+Amended by the owner (2026-11-02, "Countdown and points for speed" work):
+**the letters exemption is reversed.** Only `Order: fixed` keeps an order.
+The exemption existed so the owner's own test zip, made before the line
+existed, would still read well; that compatibility is worth nothing now,
+and a rule hidden in the site is one neither the AI nor the teacher can
+see or rely on. The guidance names the cases where the line belongs:
+letters that label a picture, a sequence, rising numbers, "none of these"
+last. `keepsOrder` and its test are gone; a test now checks that "A, B, C,
+none" without the line is shuffled like any answers. The owner's
+number-line zip shuffles its "A, B, C, Auf keinem" questions until it is
+remade with the line.
+
 **The problem.** The owner's number-line quiz from his own AI had the
 right answer first in 14 of 19 questions. The other five were "A, B, C,
 Auf keinem", where the key follows the figure. A class learns "tap red" in
@@ -1375,11 +1387,9 @@ same. Nobody needs the text beside the wall any more.
     it keeps all of them. Right after the answers it is also taken for the
     question above: unlike a picture line it can't be meant for the next
     question. `Order: shuffle` (or random, mixed) states the default.
-  - **Letters in order**, such as "A, B, C", optionally followed by one
+  - ~~**Letters in order**, such as "A, B, C", optionally followed by one
     longer answer ("A, B, C, Auf keinem"), keep their order without the
-    line. The key follows the figure there, and "C, Auf keinem, A, B"
-    reads badly. Quizzes made before `Order:` existed rely on it,
-    including the owner's.
+    line.~~ Reversed, see the amendment above.
   - Not numbers in order: an AI that writes the key first and the rest
     rising would keep its bias by chance (one in three for three answers).
     `Order: fixed` covers numbers.
@@ -1597,6 +1607,217 @@ needs.
 Revisit: the numbers, once the deploy log or the dashboard shows real
 use; the door, if teachers are seen with more than five latecomers; the
 quota wording, the first time the allowance runs out.
+
+## 2026-11-02 — Countdown and points for speed
+
+Serves: v2 items 2 (optional countdown) and 3 (speed scoring); v1 item 6
+("no clock pressures the teacher"), item 8 (closure, slow readers
+included), item 15 (a tap that looked in time counts). The design was
+mine; the product owner settled the open points within the owner's words
+(below). The owner's thoughts were a smooth bar or circle rather than a
+count, perhaps a "start the countdown" button, and possibly the question
+first with the answers only during the countdown.
+
+**One choice, three tempos, off by default.** In the lobby, under Start,
+one line: "Tempo: Teacher's pace ›". It opens a sheet with three choices,
+each with one sentence:
+- *Teacher's pace* (the default, v1 unchanged);
+- *Countdown*;
+- *Countdown and points for speed*, plus the length (10, 20, 30 or 60 s).
+
+Speed points without a countdown aren't offered. With the teacher reading
+aloud, a clock started with the question measures reading speed, and with
+no end there is no scale for "slow". The choice is per class, carries over
+to "Again with another class", and can't change once the quiz has started.
+The length can change at any time, from ⋯ on whichever tab steers. It
+applies from the next Go.
+
+**The question first, the answers on Go.** With a countdown, a question
+opens for reading:
+- the wall shows the question and its picture, with the tiles in their
+  final places, coloured and shaped but without text (nothing moves at
+  Go);
+- the tablets show the eye they show in the lobby, and get no answers;
+- the steering tab's main button is **Go**, and the clicker's next step is
+  Go too.
+
+Go shows the answers everywhere and starts the clock. This is the owner's
+"start the countdown" button. It is also what makes speed fair: time zero
+comes after the reading, so a slow reader who heard the teacher read the
+question starts level. The cost is one more press per question, only for a
+class that chose the countdown.
+
+**Time's up closes answering; it doesn't reveal.** The reveal stays the
+teacher's step. This goes against Kahoot's convention, and the product
+owner confirmed it. When time runs out:
+- the wall's bar is empty and a timer shows next to the answered count;
+- the tablets keep their buttons, the chosen one marked, but take no more
+  taps;
+- the Remote says "Time's up: answering is closed".
+
+This is the state that v2 item 6 (spread, then key) needs, between
+answering and the key. Answering also closes early when everyone present
+has answered. Away devices don't hold it open, the same rule as "n of
+25".
+
+**The clock never presses the teacher.** Reveal ends it early. From ⋯:
+- "Stop the countdown: answers stay open" turns the question into
+  teacher's pace;
+- after time's up, "Open the answers again, without a countdown" does the
+  same.
+
+Nothing moves on by itself.
+
+**The bar.** A bar that drains smoothly, with no digits, as the owner
+leaned. Its last fifth turns orange.
+- On the wall it runs along the top edge, over everything, including an
+  enlarged picture. It takes no room from the question, its picture or
+  the tiles, so no layout changes.
+- On the tablet it sits above the buttons; on the Remote, in the current
+  question's card.
+- It is one CSS animation with a negative delay (`client/clock.ts`). A
+  redraw, or a device that arrives mid-countdown, picks up where it is
+  without a timer in the page.
+
+A circle was rejected: it needs a place of its own and competes with the
+picture layout.
+
+**Time on unsynchronised devices.** Device clocks aren't synchronised.
+Views carry what was left when the server made them (`leftMs`). A device
+runs its bar from when the view arrived, so its countdown ends at or after
+the server's, never before. The server closes answering at the deadline
+with the Durable Object's alarm, the same alarm the lifetime uses:
+`scheduleAlarm` takes the earliest. The close is a view change like the
+reveal. `Run.closedView` records the version of the first view that showed
+answering closed, whether by time's up or the reveal. A tap made on an
+older view counts whenever it arrives, by item 15's rule. `closedView`
+replaces `revealView`, which is still read for runs stored before.
+
+**What a tablet shows when time runs out.** A tablet whose own bar has run
+out closes its buttons without a redraw, so no tap is swallowed by one. A
+tap still on its way shows as chosen.
+
+**The time a tap took is measured on the device.** It runs from the
+answers appearing on that device to the tap. Before, `ms` was the server's
+arrival time after the question opened. That includes the network both
+ways, and for a late tap counted by item 15, the whole time offline. On
+school Wi-Fi the podium would have gone to the best line.
+- Each view carries `sinceMs`, how long the answers had been showing when
+  it was made. The device adds its own time, so a reloaded tablet still
+  measures from Go.
+- The server caps the device's figure at its own count, which includes
+  both trips, and never goes below zero. A page that sends no figure (an
+  older cached page) gets the server's count.
+- This trusts the client, which fits "a normal user, not a malicious one".
+- The last tap counts, with its own time: a change of mind costs speed.
+
+**Scoring is a mode.** Scores are still computed from the stored answers
+under the current fixes (`points` in `game.ts`):
+- without speed points, a right answer scores 1, as in v1;
+- with them, `POINTS_RIGHT` (10) plus `speedBonus`: up to `SPEED_BONUS`
+  (5), whole points, by the share of the countdown left.
+
+That is the Kahoot ratio, chosen by the product owner: two fast right
+answers weigh as much as three slow ones. Whole points keep ties possible,
+and ties share a place.
+- A key changed afterwards moves the points with their speed.
+- A tap after the countdown's length (possible once the clock was
+  stopped) scores 10 with no bonus.
+- The numbers are in `shared/tempo.ts`, one place for a self-hoster (or
+  us) to tilt.
+- The tablet shows "+13" under the check at the reveal.
+- The ranking shows the score without "/ questions" when speed counts.
+
+**The clicker is inert for a moment after a press,** like the buttons
+(`STEP_LOCK_MS`). Go and Reveal share a phase. A clicker pressed twice
+took two steps once the first step's view was back (found in headless
+Edge, about 150 ms apart): Go, then straight to the reveal before anyone
+could answer. This was already possible before the countdown (Reveal,
+then Next). Commands also carry `at.reading`, so a doubled Go sent from
+the same view is stale rather than a reveal.
+
+**Protocol and state** (all additive; stored runs without them read as
+teacher's pace):
+- `Run`: `tempo`, `seconds`, `clocks[q]` (`at`, `ms`, `stopped`,
+  `closed`), `closedView`;
+- commands: `go`, `stopClock`, `tempo`;
+- `answer.ms`, `At.reading`;
+- views: `answering` (reading/open/closed) and `clock` on the question,
+  `sinceMs` and `reveal.points` for the tablet, `tempo`/`seconds` for the
+  teacher, `ranking.speed`.
+
+`viewKey` (in `shared/protocol.ts`) leaves out the fields that only say
+how much time has passed. A student's view is still sent only when what it
+shows changes.
+
+**Pages.**
+- The guidance's account of a lesson gains a paragraph on the tempo, so
+  an AI can tell the teacher it exists. The quiz format is unchanged.
+- `/layout.html` describes the reading state and the bar.
+- The README points self-hosters to `shared/tempo.ts`.
+
+**Free plan.** A countdown question costs one alarm and one or two stored
+rows (Go and the close). With all 25 devices polling, the simulation made
+891 HTTP requests with the countdown, against 747 for the same branch
+without it (758 to 768 on main earlier): the extra step per question, and
+a run that lasts longer, cost about a fifth more.
+
+**Checked:**
+- Unit tests (75):
+  - reading refuses taps, and the clicker's step from reading is Go;
+  - time's up doesn't reveal;
+  - a tap on the open view counts after the close, and one on the closed
+    view doesn't;
+  - the clock can be stopped, and the answers opened again after time's
+    up;
+  - speed points of 15, 11 and 0, which follow a key change and a void;
+  - the device's time is capped by the server's, with the server's used
+    when there is none;
+  - the tempo is chosen in the lobby only, its length changes for the
+    next question, and it carries over to the next class;
+  - the teacher's pace is unchanged.
+- `simulate.mjs --tempo` (new): the countdown with speed points, a doubled
+  Go on every question, answering closing before the reveal, and every
+  score checked against the device times the tablets sent. It passes over
+  WebSockets and with `--all-poll`. In both runs answering closed every
+  time because everyone present had answered.
+- An HTTP probe of the alarm path:
+  - one of two students stays silent;
+  - answering closes about 10 s after Go without a reveal;
+  - the silent tablet's tap made on the open view still counts, and its
+    tap on the closed view is refused;
+  - stopping the clock reopens the answers;
+  - the tempo can't change after Start, but the length can.
+- Headless Edge through the real pages (wall 1280×720, phone, two
+  tablets), with no page errors:
+  - the default line in the lobby, and the sheet chosen on the phone;
+  - reading: tiles veiled, the eye on the tablet, Go on the Remote;
+  - a doubled Space on the wall leaves the question open;
+  - the bar on the wall, the tablet and the Remote;
+  - time's up on all three, and a tap after it not taken;
+  - "+13" at the reveal, and the ranking without "/";
+  - ⋯ offering the length, then "Stop the countdown", after which the bar
+    is gone everywhere;
+  - the wall's tempo sheet closing once the phone steers.
+- The plain simulation's "final view reached" check failed intermittently
+  on this branch and on main's code alike. The cause was devices still
+  inside a 5 s chaos drop at the check. It now waits for the drops to end.
+  The simulated tablets also no longer send the answer they already show
+  as chosen, like `client/play.ts`. The server keeps the first tap's time
+  for a repeat, which the tempo check had counted from the second.
+
+**Not established:**
+- Whether a class finds the empty tiles while reading odd. They could
+  instead show nothing at all, but the layout would then jump at Go.
+- Whether orange reads as "nearly over" on a washed-out projector.
+- The alarm's precision on Cloudflare under load. Locally it fired well
+  within a second. A late alarm only means the bar sits empty a moment
+  before the tablets lock, since each tablet locks at its own end anyway.
+
+Revisit: if classes leave the countdown on and slow readers drop out of
+the ranking anyway (then a smaller `SPEED_BONUS`); if teachers want a
+length per question (a format line was rejected: every addition is
+something an AI must write reliably, and the teacher is in the room).
 
 ## Open
 
