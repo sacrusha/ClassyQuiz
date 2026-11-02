@@ -70,6 +70,18 @@ export type ServerMessage =
   /** The credentials don't open anything (wrong link, quiz ended or expired). */
   | { t: "gone"; reason: string };
 
+/**
+ * A picture that came with the quiz. `src` is fetched with GET; it holds a
+ * secret that only views carry, and the response is never cached, so a
+ * shared school laptop keeps nothing once the page is closed. `w`/`h` are
+ * the file's pixel size, for the layout before it has loaded.
+ */
+export interface ImageRef {
+  src: string;
+  w: number;
+  h: number;
+}
+
 export interface QuestionView {
   /** Index in the quiz. */
   q: number;
@@ -78,6 +90,9 @@ export interface QuestionView {
   total: number;
   text: string;
   answers: string[];
+  image: ImageRef | null;
+  /** Behind the question: its own background, else the quiz's. */
+  background: ImageRef | null;
 }
 
 export interface RevealView {
@@ -102,6 +117,8 @@ export interface ScreenView {
   role: "screen";
   v: number;
   title: string;
+  /** The quiz's background (a question's own is in `question`). */
+  background: ImageRef | null;
   phase: Phase | "idle";
   current: number;
   code: string | null;
@@ -114,6 +131,9 @@ export interface ScreenView {
 
 export interface TeacherQuestion {
   text: string;
+  image: ImageRef | null;
+  /** What the class sees behind it: its own background, else the quiz's. */
+  background: ImageRef | null;
   answers: { text: string; counts: boolean; marked: boolean }[];
   note: string;
   void: boolean;
@@ -126,6 +146,7 @@ export interface TeacherView {
   v: number;
   id: string;
   title: string;
+  background: ImageRef | null;
   quizNote: string;
   warnings: Problem[];
   questions: TeacherQuestion[];
@@ -163,3 +184,19 @@ export type Grant = { instance: string; role: "screen"; token: string } | { inst
 export const JOIN_CODE = /^\d{5}$/;
 export const PAIR_CODE = /^\d{6}$/;
 export const MAX_QUIZ_BYTES = 200_000;
+
+// Pictures (decisions.md, "Pictures in the archive"). The browser redraws each
+// one at upload to at most IMAGE_LONG_SIDE (BACKGROUND_LONG_SIDE) pixels; the server checks the rest.
+// A Durable Object value holds at most 2 MB.
+export const IMAGE_LONG_SIDE = 1600;
+/** A background fills the projector, 1920 pixels wide at most. */
+export const BACKGROUND_LONG_SIDE = 1920;
+export const MAX_IMAGE_BYTES = 1_500_000;
+export const MAX_IMAGES = 60;
+/** The whole upload with its pictures, as multipart/form-data. */
+export const MAX_UPLOAD_BYTES = 16_000_000;
+
+/** Answer to POST /api/quiz. `missingImages`: pictures the quiz names that didn't come with it. */
+export type UploadResult =
+  | { ok: true; id: string; secret: string }
+  | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[] };

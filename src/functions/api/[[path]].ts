@@ -3,8 +3,10 @@
 // folder, so every page and script is a static file, which keeps the Free
 // plan's request budget for the quiz itself.
 //
-//   POST /api/quiz          {text}            upload: parse, create an instance
+//   POST /api/quiz          {text, leaveOut?} upload: parse, create an instance
+//   POST /api/quiz          multipart         … with pictures: text, leaveOut?, image files
 //   POST /api/join          {code}            join code → instance id
+//   GET  /api/i/:id/img/:secret/:n            a picture of the quiz
 //   GET  /api/i/:id/ws                        WebSocket to the instance
 //   POST /api/i/:id/poll    {auth, v}         long-poll fallback
 //   POST /api/i/:id/cmd     {auth, cmd}       command over HTTP (fallback)
@@ -15,7 +17,7 @@
 //   POST /api/attempt       {format}          count an upload attempt by format
 //   GET  /api/stats                           upload attempts by format
 
-import { JOIN_CODE, MAX_QUIZ_BYTES, PAIR_CODE } from "../../shared/protocol.ts";
+import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, PAIR_CODE, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
 import type { Env } from "../../server/env.ts";
 import { randomCode, randomToken } from "../../server/random.ts";
@@ -33,7 +35,9 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (parts[0] === "echo") return echo(request);
     if (parts[0] === "stats" && request.method === "GET") return json(await stats(env).read());
     if (parts[0] === "i" && parts.length === 3) return await toInstance(request, env, parts[1], parts[2]);
+    if (parts[0] === "i" && parts.length === 5 && parts[2] === "img" && request.method === "GET") return await toInstance(request, env, parts[1], "img");
     if (request.method !== "POST") return json({ error: "not found" }, 404);
+    if (parts[0] === "quiz" && parts.length === 1 && /^multipart\/form-data/i.test(request.headers.get("content-type") ?? "")) return await uploadWithImages(request, env);
     const body = await readJson(request);
     if (body === null) return json({ error: "The request was too large or not readable." }, 400);
     if (parts[0] === "quiz" && parts.length === 1) return await upload(env, body);
@@ -57,9 +61,20 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  const r = await env.INSTANCE.get(id).create(body.text);
-  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings });
-  return json({ ok: true, id: id.toString(), secret: r.secret });
+  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing");
+  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages } satisfies UploadResult);
+  return json({ ok: true, id: id.toString(), secret: r.secret } satisfies UploadResult);
+}
+
+/**
+ * The upload with pictures goes to the new instance unread: a Function on
+ * the Free plan has 10 ms of CPU, too little to take apart a few megabytes
+ * of multipart; the Durable Object has the time, and answers the same JSON.
+ */
+async function uploadWithImages(request: Request, env: Env): Promise<Response> {
+  const len = Number(request.headers.get("content-length") ?? "NaN");
+  if (!(len <= MAX_UPLOAD_BYTES)) return json({ ok: false, errors: [{ message: "The quiz with its pictures is too large for the site." }], warnings: [] }, 413);
+  return env.INSTANCE.get(env.INSTANCE.newUniqueId()).fetch(request);
 }
 
 async function join(env: Env, body: Record<string, unknown>): Promise<Response> {
@@ -73,7 +88,7 @@ async function join(env: Env, body: Record<string, unknown>): Promise<Response> 
 }
 
 async function toInstance(request: Request, env: Env, id: string, action: string): Promise<Response> {
-  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd"].includes(action)) return json({ error: "not found" }, 404);
+  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img"].includes(action)) return json({ error: "not found" }, 404);
   let doId: DurableObjectId;
   try {
     doId = env.INSTANCE.idFromString(id);
