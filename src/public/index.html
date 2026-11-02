@@ -32,6 +32,8 @@
   .start h2 { border: 0; padding: 0; margin: 2rem 0 .6rem; font-size: 1.35rem; }
   .start ol { padding-left: 1.4em; }
   .start li { margin: .45rem 0; }
+  .start ol ul { list-style: "\2013  "; padding-left: 1.1em; margin: .3rem 0 0; color: var(--muted); font-size: .95rem; }
+  .start ol ul li { margin: .2rem 0; }
   .addr { display: inline-flex; align-items: center; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 2px 4px 2px 10px; font-weight: 600; white-space: nowrap; }
   .addr button, .resume .del { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
   .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; position: relative; }
@@ -67,9 +69,14 @@
 <section class="start" aria-label="Build or run a quiz">
   <h2>Build a quiz</h2>
   <ol>
-    <li>Open a chat with an AI such as Claude. The free version works.</li>
-    <li>Give it photos of the exercises and ask, in your own words, for a quiz for <span class="addr">classyquiz.pages.dev<button type="button" id="copy" hidden>Copy</button></span>. Write in the language the quiz should be in.</li>
-    <li>It asks what it needs, then hands you the quiz as one block to copy, or as a .zip when it has pictures. Paste it below. Ask the AI anything about how the lesson runs.</li>
+    <li>Use a good AI. Claude's free version works with Sonnet on high effort; Opus works better.</li>
+    <li>Ask it, in your own words, to build you a quiz for <span class="addr">classyquiz.pages.dev<button type="button" id="copy" hidden>Copy</button></span>
+      <ul>
+        <li>Fastest: give it photos or PDFs of the exercises, write in the language the quiz should be in, and say what kind of questions you need.</li>
+        <li>Or leave it open and steer turn by turn.</li>
+        <li>You can also ask it how the quizzes on this site work and what it needs to build one.</li>
+      </ul>
+    </li>
   </ol>
 
   <h2>Run a quiz</h2>
@@ -91,7 +98,7 @@
 
 <div class="guide">
 <h1>About classyQuiz</h1>
-<p class="lede">Live classroom quizzes, made from a teacher's exercise sheet by the teacher's own AI assistant. What follows describes the site for teachers and for the assistants that make quizzes with them: what the site is for, what the quizzes are for, how a quiz is written, and what making one with a teacher is like.</p>
+<p class="lede">Live classroom quizzes, made from a teacher's exercise sheet by the teacher's own AI assistant. What follows describes the site for the assistants that make quizzes with teachers: what the site is for, what the quizzes are for, how a quiz is written, and what making one with a teacher is like.</p>
 
 <h2 id="site">What this site is for</h2>
 
@@ -99,7 +106,7 @@
 
 <p>During a quiz there are up to three screens. The <strong>projector</strong> shows the question and the answers to the class. Each <strong>student</strong> answers on their own phone or tablet by tapping a colour. The teacher steers: next question, reveal, ranking, and fixing a question that turns out to be wrong.</p>
 
-<p>How a lesson runs, for an assistant explaining it to a teacher. The teacher pastes the quiz into the box on this page, or drops the file there, usually on the laptop connected to the projector. That screen then shows the quiz's five-digit code and a QR code, the students who joined, and the teacher's Start button; the questions are listed below it for a last check, with their answers folded away. Students open the site on their tablets and type the code, or scan the QR code. Started, the projector shows each question, and a slim bar on it carries the teacher's next step: reveal, next, ranking; a presentation clicker or the space bar does the same. A teacher who wants to steer from their phone opens the site's <code>/teacher</code> page on it, types the code and chooses <strong>Remote</strong>; the projector then shows only what the class should see. A laptop with a second screen can open the projector in a window of its own and keep the steering on the laptop. A teacher who pasted the quiz on the phone opens <code>/teacher</code> on the projector computer and chooses <strong>Projector</strong>. Both are set up before the students get the code: once students have joined, no other device can take over the steering, so a student can't either. If the phone's battery dies, the projector takes the steering back by itself.</p>
+<p>How a lesson runs. The teacher pastes the quiz into the box on this page, or drops the file there, usually on the laptop connected to the projector. That screen then shows the quiz's five-digit code and a QR code, the students who joined, and the teacher's Start button; the questions are listed below it for a last check, with their answers folded away. Students open the site on their tablets and type the code, or scan the QR code. Started, the projector shows each question, and a slim bar on it carries the teacher's next step: reveal, next, ranking; a presentation clicker or the space bar does the same. A teacher who wants to steer from their phone opens the site's <code>/teacher</code> page on it, types the code and chooses <strong>Remote</strong>; the projector then shows only what the class should see. A laptop with a second screen can open the projector in a window of its own and keep the steering on the laptop. A teacher who pasted the quiz on the phone opens <code>/teacher</code> on the projector computer and chooses <strong>Projector</strong>. Both are set up before the students get the code: once students have joined, no other device can take over the steering, so a student can't either. If the phone's battery dies, the projector takes the steering back by itself.</p>
 
 <p>Nobody has an account. Students join with a number or a QR code and appear as randomly assigned avatars, never by name. Nothing is public and nothing is kept beyond its use: a quiz can only be reached with its code, which the teacher gives the class. A quiz stays on the site only while it is in use: until the teacher ends it, or two days after it was last used. The teacher's lasting copy is the text or file the assistant produced. A run's answers and scores are deleted an hour after the run ends. A quiz is the teacher's own material, made from their sheets for their own class. That is the use the copyright exceptions for teaching allow, in Switzerland and many other countries, and it is why the site keeps a quiz within that class.</p>
 
@@ -151,13 +158,15 @@
   <li><strong>Title.</strong> The first line, <code>Title:</code> followed by the title. It is shown to the class at the start.</li>
   <li><strong>Questions</strong> are numbered <code>1.</code>, <code>2.</code>, … The text may run over several lines. A question line never starts with <code>+ </code> or <code>- </code>, because those mark answers.</li>
   <li><strong>Answers</strong> follow their question, one per line, between two and four of them. The correct answer's line starts with <code>+ </code>, each wrong answer's line with <code>- </code>. Usually exactly one answer is correct. A question may have more than one right answer, up to all of them; each is marked <code>+</code>, and a student who picks any one of them scores. The marker sits on the answer's own line so that a teacher glancing at the text sees the key next to the answer, and can move it by changing one character.</li>
-  <li><strong>Pictures.</strong> A question can show one picture: the figure, diagram, chart or drawing its exercise depends on. The line <code>Image: q3.png</code> after the question text, before the answers, names the picture's file. It is shown on the projector with the question; the students' devices show only the answer buttons.</li>
+  <li><strong>Pictures.</strong> A question can show one picture: the figure, diagram, chart or drawing its exercise depends on. The line <code>Image: q3.png</code> after the question text, before the answers, names the picture's file. It belongs on the projector with the question; the students' devices show only the answer buttons.</li>
   <li><strong>Backgrounds.</strong> A picture behind the question, for atmosphere or context rather than content, is a separate line: <code>Background: forest.jpg</code>. Before the first question it lies behind every question; after a question's text it lies behind that question only, in place of the quiz's. The question and its answers stay readable over it.</li>
 </ul>
 
 <p>Pictures and backgrounds are files that travel with the quiz text in a <code>.zip</code>; pasted text can't carry them. The same file can serve several questions, as a picture or as a background. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. At upload, the teacher's browser scales every picture down to what a projector shows and drops everything it carries besides the image, such as a photo's location. A figure cropped out of a photographed sheet is what reads from the back of the room; the whole page would be too small, and anything else on it, such as a solution written in or a student's name, would be on the wall too.</p>
 
 <p>Nothing else belongs to the quiz: no answer letters, explanations, solutions sections or messages to the teacher. The quiz is the finished piece the class sees; what the assistant has to tell the teacher belongs in the conversation, before the quiz is handed over. Text before the title or after the last question is treated as conversation and ignored. Text between questions that isn't a question, an answer or a picture line is reported as an error. The site shows text as written, without Markdown formatting. Mathematical notation is written in plain text with ordinary characters: <code>x²</code>, <code>½</code>, <code>√2</code>, <code>3 × 4</code>, <code>12 ÷ 3</code>, <code>a ≤ b</code>. A formula that plain text can't show, such as a fraction of fractions, can be the question's picture.</p>
+
+<p>The projector's layout for a question, as HTML and CSS, is at <a href="/layout.html">classyquiz.pages.dev/layout.html</a>.</p>
 
 <h3>Getting the quiz to the site</h3>
 <p>In a chat, the quiz arrives as one code block. Two quizzes, e.g. one for each of two classes, are two blocks, pasted one at a time. The chat then shows a copy button, and the <code>+</code> and <code>-</code> markers survive the copy. Outside a code block, chat apps turn those lines into bullet points and the key is lost. The site takes no single text file; a file is a <code>.zip</code>. A quiz with pictures is always one: the quiz text as one <code>.txt</code> or <code>.md</code> file, and the picture files beside it. An assistant that can run code can crop figures out of the photographed or scanned sheets for it. The teacher pastes the text, or drops the <code>.zip</code>, on this site's start page.</p>

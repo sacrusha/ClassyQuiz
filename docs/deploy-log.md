@@ -20,3 +20,7 @@ Still open after this deploy: school web filters on `*.pages.dev` (check with `/
 ## 2026-11-02 — second deploy, 7a0fd6d
 
 Pages deployment b3d103da, state Worker version b05cbebe (migration v2 adds the UploadStats Durable Object). Carries the review fixes, the pruning, the projector tile fix, in-time taps and the upload-attempt counter. Run by the owner from a clean worktree at 7a0fd6d, since the session's permission mode blocks deploys from the assistant.
+
+## 2026-11-02 — third deploy, 984806a
+
+Pages deployment 6dfdcde0, state Worker version 6eb4679a (migration v3 deletes the Pairing class). The redesigned teacher flow. Run by the owner from the clean worktree. Lesson: `npm run deploy` deploys the Worker first, which fails when a migration deletes a class the live Pages project still binds to — deploy Pages first in that case, then the Worker. A fresh self-hoster is unaffected.
