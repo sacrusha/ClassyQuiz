@@ -41,7 +41,7 @@ second design:
    Roles belong to tabs, not devices: a laptop with two screens holds both in
    two windows. Each tab keeps its role token in sessionStorage. A reload,
    sleep or dropped connection resumes the same role with nothing to do.
-4. **The tab you paste in becomes the Projector, and it steers itself.**
+4. **The tab you open the quiz in becomes the Projector, and it steers itself.**
    In the lobby it shows the teacher's lobby (§3.3). During the quiz a slim
    bar carries the next step. One mirrored laptop needs nothing else. A
    clicker or the keyboard works on any Projector.
@@ -50,7 +50,7 @@ second design:
      The Projector stops showing its bar.
    - *Second screen:* "Open the projector window" in the lobby. The new window
      takes the Projector, and the first tab turns into the Remote.
-   - *Pasted on the phone:* on the projector computer, `/teacher`, the code,
+   - *Opened on the phone:* on the projector computer, `/teacher`, the code,
      then Projector. The phone's tab turns into the Remote.
 
    A Projector that steers itself can be taken over by another tab. That tab
@@ -70,8 +70,8 @@ tablets, and a quiz made in the break.
 
 | When | Teacher | Class |
 |---|---|---|
-| Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as one block (or a .zip with pictures). | — |
-| Break | **Laptop:** opens `classyquiz.pages.dev` and presses Paste the quiz (or Ctrl+V, or drops the .zip). The lobby is on the wall (§3.3). | — |
+| Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
+| Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The lobby is on the wall (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "Open the projector window", drag it across, F. | — |
 | Lesson starts | "Type classyquiz.pages.dev and the number." | Tablets: address, code, ▶. Avatars pop up on the wall. |
 | Quiz | Start quiz → Reveal → Next … on whichever tab steers, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
@@ -83,61 +83,65 @@ tablets, and a quiz made in the break.
 
 ### 3.1 Root page (item 16)
 
+Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
+(item 2); decisions.md, "The landing page by attention budget".
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ classyQuiz                            Code [_ _ _ _ _]  ▶  │
 ├────────────────────────────────────────────────────────────┤
 │  Build a quiz                                              │
-│  1  Use a capable AI. Free Claude works.                   │
-│  2  Attach photos of the exercises and ask it to build a   │
-│     quiz for  classyquiz.pages.dev [Copy] , best in the    │
-│     language the quiz should be in.                        │
-│  3  It asks what it needs, tells you how the quiz gets to  │
-│     your class, and hands you the quiz.                    │
+│  1  Use a good AI. Claude's free version works …           │
+│  2  Ask it, in your own words, to build you a quiz for     │
+│     classyquiz.pages.dev [Copy]                            │
+│       – Fastest: photos or PDFs, your quiz's language …    │
+│       – Or leave it open and steer turn by turn.           │
+│       – You can also ask it how the quizzes work …         │
+│  3  It hands you the quiz as a .zip file. Download it.     │
 │                                                            │
 │  Run a quiz                                                │
 │  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐  │
-│  │ Prozente · code 63953                                │  │  only on a device that
-│  │ [Resume ▶]   closes Wed 16:20              Delete…   │  │  pasted it, while open
-│  │ ──────────────────────────────────────────────────── │  │
-│  │               [ Paste the quiz ]                     │  │
-│  │     the block your AI made, or its .zip: drop it here│  │
+│  │               [ Open the quiz's .zip ]               │  │
+│  │                    or drop it here                   │  │
 │  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  │
-│  Before the first lesson: check the school network ·       │
-│  run your own copy · about this site                       │
+│  Resume Prozente ▶   closes 16:20                Delete…   │  only on a device that
+│  › 1 more quiz                                             │  opened it, while open
+│                                                            │
+│  Some school networks block live quizzes. Check this       │
+│  network: one click tells you it works, or what to ask IT. │
+│  This site is free, and shared by everyone who uses it: a  │
+│  few dozen classes a day in all. If that's too tight, your │
+│  AI can set up your own copy.                              │
 ├────────────────────────────────────────────────────────────┤
 │  About classyQuiz (the guidance for AIs, static HTML)      │
 ```
 
-- **The Build copy** is still open with the owner: "points 1–3 need work, the
-  direction is right". The draft above has no English sentence to copy;
-  only the address is copied. Step 3 leaves the explaining to the AI. The
-  guidance's "What this site is for" now holds a paragraph on how a lesson
-  runs, so the AI can explain it.
-- **Run a quiz is not a text box.**
-  - Ctrl+V anywhere on the page pastes.
-  - "Paste the quiz" reads the clipboard.
-  - A .zip can be dropped on the box or chosen.
-  - A typing box ("Long-press here and choose Paste", with Continue) appears
-    only when the browser won't let the page read the clipboard.
-- **Text that isn't a quiz.** A paste with no line marked `+`/`-`/`[x]` and no
-  `Title:` gets: "That doesn't look like a quiz yet. This box takes the quiz
-  your AI made. Ask your AI in its own chat; it answers with the quiz as a
-  block with a copy button. Copy that and paste it here." It is not sent.
-- **Files:** a .zip only. Any other file gets: "The site takes the quiz
-  pasted, or as a .zip from your AI, not a .docx file." Attempts are still
-  counted by format.
+- **Run a quiz takes a .zip and nothing else.** The button opens the file
+  chooser; a .zip can also be dropped on the box. Nothing invites pasting.
+  - A file pasted with Ctrl+V (copied in the file manager) opens like a
+    chosen one.
+  - Text pasted or dropped anyway gets "The site takes the quiz as a .zip
+    file, not as text. Ask your AI for the quiz as one .zip file, download
+    it, and open it here." It is counted as "paste".
+  - Any other file gets "The site takes the quiz as a .zip file, not a
+    .docx file." and the same sentence. Attempts are counted by format.
 - **Problems with the quiz:** listed in place, with "Copy the message for your
-  AI", plus "Continue without these pictures" when it's pictures.
+  AI" (which asks for a corrected .zip), plus "Continue without these
+  pictures" when it's pictures.
 - **On success:** straight to the lobby, in this tab as the Projector.
-- **Coming back (item 17):** an entry per quiz this device pasted that is
-  still open, inside the Run box.
+- **Coming back (item 17):** the latest quiz this device opened that is still
+  open, as one line under the box; any others fold under "n more quizzes".
   - Resume goes to `/teacher#<code>`.
-  - "closes Wed 16:20" is the only place the product mentions the closing
-    time.
-  - Delete… sits apart from Resume and asks inline: "Delete *Prozente*? The
-    class can't join it any more. [Delete] [Keep]".
+  - "closes 16:20" is the only place the product mentions the closing time.
+  - Delete… sits at the far end of the line and asks inline: "Delete
+    *Prozente*? The class can't join it any more. [Delete] [Keep]".
   - Closed quizzes drop off the list.
+- **The two lines at the foot** say what their links are for:
+  - `/check` ends in one of three verdicts; the two that aren't "all good"
+    carry a message to forward to IT, with the site's address in it.
+  - `/own-copy` is the self-hosting guide for a teacher (item 14).
+- "About this site" is gone: the guidance below is for the AI, and a teacher
+  who scrolls finds it anyway.
 
 ### 3.2 The two entrances after a code
 
@@ -301,9 +305,9 @@ countdown, each question has one more step:
   is untried.
 - **Phone only, no projector.** The phone is a Projector that steers itself.
   The teacher reads aloud, and the tablets show the answers' text.
-- **Evening before.** Paste at home, then Resume on the same device next day.
-  On another device, use `/teacher` and the code, or paste again.
-- **Two quizzes** (6a, 6b): two pastes, two codes, two entries in the Run box.
+- **Evening before.** Open the .zip at home, then Resume on the same device
+  next day. On another device, use `/teacher` and the code, or open it again.
+- **Two quizzes** (6a, 6b): two .zip files, two codes, two Resume lines.
 
 ## 5. When something goes wrong
 
@@ -315,7 +319,7 @@ countdown, each question has one more step:
 | Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …" and shows the bar | Steer at the laptop. The phone is the Remote again when it's back |
 | Projector dies | — | Read off the Remote. Optionally another computer: `/teacher`, code, Projector (offered after 45 s) |
 | Wrong code | "No quiz with the code …" | Type it again |
-| Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Paste it again from the AI chat |
+| Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Open the .zip again |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |
 
 ## 6. Decisions to record in decisions.md once built

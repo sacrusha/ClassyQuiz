@@ -36,26 +36,25 @@
   .start ol ul li { margin: .2rem 0; }
   .addr { display: inline-flex; align-items: center; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 2px 4px 2px 10px; font-weight: 600; white-space: nowrap; }
   .addr button, .resume .del { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
-  .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; position: relative; }
+  .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 22px 16px; text-align: center; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
-  .drop { padding: 22px 16px; text-align: center; }
-  .drop .paste { border: 0; background: var(--accent); color: var(--bg); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
-  .drop p { color: var(--muted); margin: .7rem 0 0; }
-  .drop .file { color: var(--accent); text-decoration: underline; cursor: pointer; }
-  #manual { margin-top: 12px; }
-  #manual textarea { display: block; width: 100%; box-sizing: border-box; min-height: 110px; border: 2px solid var(--rule); border-radius: 12px; background: var(--bg); color: var(--fg); padding: 12px; font: 15px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; }
-  #manual .go { margin-top: 8px; border: 0; background: var(--accent); color: var(--bg); border-radius: 10px; padding: 8px 18px; font: inherit; font-weight: 600; cursor: pointer; }
-  .resume { border-bottom: 1px solid var(--rule); padding: 12px 16px; }
-  .resume .l2 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
-  .resume .go { border: 0; background: var(--accent); color: var(--bg); border-radius: 10px; padding: 8px 16px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; }
-  .resume .t { color: var(--muted); flex: 1; }
-  .resume .confirm { margin-top: 8px; }
+  .runbox .open { border: 0; background: var(--accent); color: var(--bg); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
+  .runbox p { color: var(--muted); margin: .6rem 0 0; }
+  .resume { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; margin: 14px 0 0; }
+  .resume .go { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .resume .go:hover { text-decoration: underline; }
+  .resume .t { color: var(--muted); font-size: .95rem; flex: 1; }
+  .resume .confirm { flex-basis: 100%; }
+  #mine details { margin-top: 6px; }
+  #mine summary { cursor: pointer; color: var(--muted); font-size: .95rem; }
+  #mine details .resume { margin-top: 8px; }
   #out:empty { display: none; }
   .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0; }
   .problem .err { color: #c62828; font-weight: 600; }
   .problem button { border: 2px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; margin: 4px 6px 0 0; }
   .problem button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-  .foot { margin-top: 2rem; color: var(--muted); font-size: .95rem; }
+  .foot { margin-top: 2.2rem; color: var(--muted); font-size: .95rem; }
+  .foot p { margin: .4rem 0; }
   .guide { margin-top: 3rem; }
 </style>
 </head>
@@ -77,23 +76,22 @@
         <li>You can also ask it how the quizzes on this site work and what it needs to build one.</li>
       </ul>
     </li>
+    <li>It hands you the quiz as a <strong>.zip</strong> file. Download it.</li>
   </ol>
 
   <h2>Run a quiz</h2>
   <div class="runbox" id="runbox">
-    <div id="mine"></div>
-    <div class="drop">
-      <button type="button" class="paste" id="paste">Paste the quiz</button>
-      <p>the block your AI made, or its <label class="file">.zip<input id="file" type="file" accept=".zip,application/zip" hidden></label>: drop it here</p>
-      <div id="manual" hidden>
-        <textarea id="text" spellcheck="false" aria-label="The quiz from your AI" placeholder="Long-press here and choose Paste"></textarea>
-        <button type="button" class="go" id="go">Continue</button>
-      </div>
-    </div>
+    <button type="button" class="open" id="open">Open the quiz's .zip</button>
+    <p>or drop it here</p>
+    <input id="file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
   </div>
   <div id="out" role="status"></div>
+  <div id="mine"></div>
 
-  <p class="foot">Before the first lesson: <a href="/check">check the school network</a> · <a href="https://github.com/sacrusha/ClassyQuiz">run your own copy</a> · <a href="#site">about this site</a></p>
+  <div class="foot">
+    <p>Some school networks block live quizzes. <a href="/check">Check this network</a>: one click tells you it works, or what to ask IT.</p>
+    <p>This site is free, and shared by everyone who uses it: a few dozen classes a day in all. If that's too tight, your AI can set up <a href="/own-copy">your own copy</a>.</p>
+  </div>
 </section>
 
 <div class="guide">
@@ -102,19 +100,19 @@
 
 <h2 id="site">What this site is for</h2>
 
-<p>A teacher has an exercise sheet and wants fifteen minutes of practice on exactly that content, in a form the class enjoys. Ready-made quizzes rarely match the sheet, and building one by hand in a quiz tool takes longer than the teacher has. Here the teacher's AI assistant reads the material and writes the quiz as plain text. The teacher pastes the text into this site, or drops the <code>.zip</code> there, and the class plays it.</p>
+<p>A teacher has an exercise sheet and wants fifteen minutes of practice on exactly that content, in a form the class enjoys. Ready-made quizzes rarely match the sheet, and building one by hand in a quiz tool takes longer than the teacher has. Here the teacher's AI assistant reads the material and writes the quiz as plain text, in a <code>.zip</code> file. The teacher opens the file on this site, and the class plays it.</p>
 
 <p>During a quiz there are up to three screens. The <strong>projector</strong> shows the question and the answers to the class. Each <strong>student</strong> answers on their own phone or tablet by tapping a colour. The teacher steers: next question, reveal, ranking, and fixing a question that turns out to be wrong.</p>
 
-<p>How a lesson runs. The teacher pastes the quiz into the box on this page, or drops the file there, usually on the laptop connected to the projector. That screen then shows the quiz's five-digit code and a QR code, the students who joined, and the teacher's Start button; the questions are listed below it for a last check, with their answers folded away. Students open the site on their tablets and type the code, or scan the QR code. Started, the projector shows each question, and a slim bar on it carries the teacher's next step: reveal, next, ranking; a presentation clicker or the space bar does the same. A teacher who wants to steer from their phone opens the site's <code>/teacher</code> page on it, types the code and chooses <strong>Remote</strong>; the projector then shows only what the class should see. A laptop with a second screen can open the projector in a window of its own and keep the steering on the laptop. A teacher who pasted the quiz on the phone opens <code>/teacher</code> on the projector computer and chooses <strong>Projector</strong>. Both are set up before the students get the code: once students have joined, no other device can take over the steering, so a student can't either. If the phone's battery dies, the projector takes the steering back by itself.</p>
+<p>How a lesson runs. The teacher opens the quiz's <code>.zip</code> on this page, or drops it there, usually on the laptop connected to the projector. That screen then shows the quiz's five-digit code and a QR code, the students who joined, and the teacher's Start button; the questions are listed below it for a last check, with their answers folded away. Students open the site on their tablets and type the code, or scan the QR code. Started, the projector shows each question, and a slim bar on it carries the teacher's next step: reveal, next, ranking; a presentation clicker or the space bar does the same. A teacher who wants to steer from their phone opens the site's <code>/teacher</code> page on it, types the code and chooses <strong>Remote</strong>; the projector then shows only what the class should see. A laptop with a second screen can open the projector in a window of its own and keep the steering on the laptop. A teacher who opened the quiz on the phone opens <code>/teacher</code> on the projector computer and chooses <strong>Projector</strong>. Both are set up before the students get the code: once students have joined, no other device can take over the steering, so a student can't either. If the phone's battery dies, the projector takes the steering back by itself.</p>
 
 <p>The tempo is the teacher's by default: no clock. A quiz can be written for a countdown instead (see Tempo under the parts of a quiz). Each question then comes up on its own first; the teacher reads it, and Go shows the answers and starts a bar that drains. When it runs out, answering closes and the teacher still reveals. Points for speed are an option on top: a right answer scores more the quicker it came. The lobby shows the tempo the quiz was written for, and the teacher can change it there, or during the quiz from the next question on.</p>
 
-<p>Nobody has an account. Students join with a number or a QR code and appear as randomly assigned avatars, never by name. Nothing is public and nothing is kept beyond its use: a quiz can only be reached with its code, which the teacher gives the class. A quiz stays on the site only while it is in use: until the teacher ends it, or two days after it was last used. The teacher's lasting copy is the text or file the assistant produced. A run's answers and scores are deleted an hour after the run ends. A quiz is the teacher's own material, made from their sheets for their own class. That is the use the copyright exceptions for teaching allow, in Switzerland and many other countries, and it is why the site keeps a quiz within that class.</p>
+<p>Nobody has an account. Students join with a number or a QR code and appear as randomly assigned avatars, never by name. Nothing is public and nothing is kept beyond its use: a quiz can only be reached with its code, which the teacher gives the class. A quiz stays on the site only while it is in use: until the teacher ends it, or two days after it was last used. The teacher's lasting copy is the <code>.zip</code> the assistant produced. A run's answers and scores are deleted an hour after the run ends. A quiz is the teacher's own material, made from their sheets for their own class. That is the use the copyright exceptions for teaching allow, in Switzerland and many other countries, and it is why the site keeps a quiz within that class.</p>
 
-<p>This site runs on a free hosting plan meant for a few teachers. Anyone can run their own copy for their school or for themselves: the code is public at <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a>, and setting it up on a free Cloudflare account takes five to ten minutes, with an AI assistant's help or by following the guide there.</p>
+<p>This site runs on a free hosting plan meant for a few teachers. Anyone can run their own copy for their school or for themselves: the code is public at <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a>, and an AI assistant that can run programs on the teacher's computer can set it up on a free Cloudflare account. <a href="/own-copy">classyquiz.pages.dev/own-copy</a> describes it for a teacher.</p>
 
-<p>An assistant reading this page has usually been given just the site's address, by a teacher who has material in hand and a lesson coming up. Assistants can't upload to the site. The teacher pastes what the assistant wrote, or drops its <code>.zip</code> on the site.</p>
+<p>An assistant reading this page has usually been given just the site's address, by a teacher who has material in hand and a lesson coming up. Assistants can't upload to the site. The teacher opens the assistant's <code>.zip</code> on the site.</p>
 
 <h2 id="quizzes">What the quizzes are for</h2>
 
@@ -166,7 +164,7 @@
   <li><strong>Backgrounds.</strong> A picture behind the question, for atmosphere or context rather than content, is a separate line: <code>Background: forest.jpg</code>. Before the first question it lies behind every question; after a question's text it lies behind that question only, in place of the quiz's. The question and its answers stay readable over it.</li>
 </ul>
 
-<p>Pictures and backgrounds are files that travel with the quiz text in a <code>.zip</code>; pasted text can't carry them. The same file can serve several questions, as a picture or as a background. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. At upload, the teacher's browser scales every picture down to what a projector shows and drops everything it carries besides the image, such as a photo's location.</p>
+<p>Pictures and backgrounds are files that travel with the quiz text in its <code>.zip</code>. The same file can serve several questions, as a picture or as a background. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. At upload, the teacher's browser scales every picture down to what a projector shows and drops everything it carries besides the image, such as a photo's location.</p>
 
 <p>Nothing else belongs to the quiz: no answer letters, explanations, solutions sections or messages to the teacher. The quiz is the finished piece the class sees; what the assistant has to tell the teacher belongs in the conversation, before the quiz is handed over. Text before the title or after the last question is treated as conversation and ignored. Text between questions that isn't a question, an answer or a picture line is reported as an error. The site shows text as written, without Markdown formatting. Mathematical notation is written in plain text with ordinary characters: <code>x²</code>, <code>½</code>, <code>√2</code>, <code>3 × 4</code>, <code>12 ÷ 3</code>, <code>a ≤ b</code>. A formula that plain text can't show, such as a fraction of fractions, can be the question's picture.</p>
 
@@ -177,7 +175,7 @@
 <p>Limits, all checked at upload: up to 60 pictures and 16 MB for the whole <code>.zip</code>. Each picture is scaled to at most 1600 pixels on its longer side, a background to 1920, so larger files gain nothing; a small picture is enlarged on the wall, a little blurry, since blurry reads better than small. The projector's layout for a question, as HTML and CSS, is at <a href="/layout.html">classyquiz.pages.dev/layout.html</a>.</p>
 
 <h3>Getting the quiz to the site</h3>
-<p>In a chat, the quiz arrives as one code block. Two quizzes, e.g. one for each of two classes, are two blocks, pasted one at a time. The chat then shows a copy button, and the <code>+</code> and <code>-</code> markers survive the copy. Outside a code block, chat apps turn those lines into bullet points and the key is lost. The site takes no single text file; a file is a <code>.zip</code>. A quiz with pictures is always one: the quiz text as one <code>.txt</code> or <code>.md</code> file, and the picture files beside it. An assistant that can run code can crop figures out of the photographed or scanned sheets for it. The teacher pastes the text, or drops the <code>.zip</code>, on this site's start page.</p>
+<p>The site takes a quiz as one <code>.zip</code> file and nothing else: no pasted text, no single text file. In the <code>.zip</code> is the quiz text as one <code>.txt</code> or <code>.md</code> file, and the picture files beside it, if the quiz has pictures. Two quizzes, e.g. one for each of two classes, are two <code>.zip</code> files, opened one at a time. An assistant that can create files makes the <code>.zip</code> for the teacher to download; one that can run code can also crop figures out of the photographed or scanned sheets for it. The teacher opens the <code>.zip</code> on this site's start page, or drops it there. An assistant that can't create files has no way to hand a quiz to this site.</p>
 
 <p>The site then shows the teacher the quiz's questions, with their right answers a tap away, so a wrong key can be spotted and fixed before the lesson. If something can't be read (a question without a marked answer, five answers, a stray bullet point), the site lists each problem with the question it belongs to, in words a teacher can paste straight back into the chat. Some things only get a warning: no title, the same answer twice, a very long answer. The quiz runs anyway. A picture the quiz names that isn't in the <code>.zip</code>, or that the browser can't open, is listed the same way, and the teacher can also choose to run the quiz without it.</p>
 

@@ -6,9 +6,11 @@ For creating quizzes, ask AI to "Help me create a Quiz for https://classyquiz.pa
 
 ## Your own instance
 
-The demo runs on a free plan meant for a few teachers. Your own copy runs on a free Cloudflare account and takes five to ten minutes to set up.
+The demo runs on a free plan shared by everyone who uses it. Your own copy runs on a free Cloudflare account. For teachers, https://classyquiz.pages.dev/own-copy describes it without the technical part.
 
 With an AI assistant that can run commands on your computer, e.g. Claude Code: *"Set up my own classyQuiz from https://github.com/sacrusha/ClassyQuiz, following its README."*
+
+For an AI doing this for a teacher: the teacher creates the Cloudflare account and the token (step 3) and chooses the name (step 5); everything else is yours. Tell them where to click, and have them put the token into `secrets/cloudflare.env` themselves rather than into the chat.
 
 By hand:
 

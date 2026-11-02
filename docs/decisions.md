@@ -54,7 +54,8 @@ this falls out of the parser at little cost.
 
 ## 2026-11-02 — Upload accepts paste, a single text file, or an archive
 
-Serves: v1 item 2.
+Serves: v1 item 2. **Superseded 2026-11-03: zip only** ("The landing page by
+attention budget; zip only").
 
 Paste is the main path, since many free AI tiers can't produce files. A single
 .md/.txt file is accepted as-is. A zip archive holding the quiz text is
@@ -723,7 +724,8 @@ the first lesson.
 
 ## 2026-11-02 — Self-hosting nudge
 
-Serves: v1 item 14.
+Serves: v1 item 14. **Revised 2026-11-03:** a guide page of its own,
+`/own-copy` ("The landing page by attention budget; zip only").
 
 The guidance page says the site runs on a free plan meant for a few
 teachers and points to the public repository. Its README has the setup
@@ -2020,6 +2022,115 @@ design is yours.
     `mock-root.mjs`, `upload-count.mjs`, `smoke.mjs`.
   - A local stack: see "A second local stack" in "Pictures in the
     archive".
+
+## 2026-11-03 — The landing page by attention budget; zip only
+
+Serves: v1 item 16's last paragraph (the live page overspends attention),
+item 2's last paragraph (a drop target and file opener for a .zip, nothing
+else), item 14 (self-hosting nudge), item 17 (coming back). Supersedes the
+paste path of "Upload accepts paste, a single text file, or an archive" and
+the GitHub link of "Self-hosting nudge". The owner's examples were taken as
+examples; where the result differs, the reason is below.
+
+**Run a quiz is one element.** A dashed box with one button, "Open the
+quiz's .zip", and "or drop it here". Gone: the Paste button, the textarea
+fallback, "the block your AI made", "That doesn't look like a quiz yet".
+- Nothing on the page invites pasting, but the page still listens for
+  Ctrl+V. A file copied in the file manager and pasted opens like a
+  chosen one. Text pasted or dropped gets "The site takes the quiz as a
+  .zip file, not as text. Ask your AI for the quiz as one .zip file,
+  download it, and open it here." It is counted as `paste`, so whether
+  teachers still try (an AI that read the old guidance, say) stays a fact
+  to look up. Silently ignoring it would leave a teacher with nothing.
+- Any other file gets the same sentence after "not a .docx file", and is
+  counted by format as before.
+- "Copy the message for your AI" now asks for a corrected .zip.
+- `accept` also names `application/x-zip-compressed` (what Windows reports
+  for a .zip), so a picker that filters by type doesn't grey it out.
+- The server's JSON upload of plain text is unchanged: the simulator and
+  probes use it, and nothing on the page reaches it any more.
+
+**Build gains a third step:** "It hands you the quiz as a .zip file.
+Download it." With zip only, the Build list has to end where Run begins.
+
+**The resume list: one line, under the box.** "Resume Prozente ▶ ·
+closes 16:20 · Delete…", for the latest open quiz on this device. Any
+others fold under "1 more quiz". The code is gone from the line, since
+Resume carries it. The box no longer moves down when a quiz is open: it is
+the page's main action and stays in one place. Delete… sits at the far
+end and still asks inline.
+
+**"About this site" is gone.** The guidance below the start section is for
+the AI. A teacher who scrolls finds it, and the Build steps already say the
+AI can explain how the site works.
+
+**Two foot lines that say what their links are for:**
+- "Some school networks block live quizzes. *Check this network*: one
+  click tells you it works, or what to ask IT." The check page already
+  ended in one of three verdicts. The two that aren't "all good" now carry
+  a message to forward to IT, with the site's own address: allow it, it is
+  a quiz site, it needs HTTPS and WebSocket connections, and what is
+  blocked now.
+- "This site is free, and shared by everyone who uses it: a few dozen
+  classes a day in all. If that's too tight, your AI can set up *your own
+  copy*." The owner's example said "a few hundred quizzes a month". I gave
+  a daily figure, since the limits reset daily and "full for today" is what
+  a teacher would meet. It comes from "Hardening": about 30 classes a day
+  when every device polls, about 75 on stored rows, under the 300 uploads
+  a day. A comment at `OWN_COPY` in `shared/limits.ts` says the sentence
+  rests on those numbers.
+
+**`/own-copy`** (`public/own-copy.html`, static, no script) is the short
+guide the owner described:
+- why: the shared site's daily allowance, and that an own copy's is yours
+  alone;
+- who does what: GitHub (where the code is, no account needed),
+  Cloudflare (whose free plan runs it, your own account), your AI (the
+  setup);
+- what you need: an AI that runs programs on your computer, such as Claude
+  Code (a browser chat can explain but not carry out), a computer where you
+  may install programs (a school laptop often isn't one), an email address;
+- a sample prompt; what you do yourself (account, token, a name for the
+  site), and that the AI asks before it installs anything;
+- afterwards: name your own address to the AI; ask it to update from
+  GitHub; the GitHub link.
+
+The token goes where the AI says, not into the chat. The README's "Your own
+instance" now tells an AI that: what the teacher does (account, token,
+name), and that the teacher pastes the token into `secrets/cloudflare.env`
+themselves. `OWN_COPY` points to `/own-copy` instead of GitHub. The page
+makes no time promise: "five to ten minutes" was never measured, and a
+first setup with Node.js to install is likely longer.
+
+**The guidance (`#site`, `#format`) assumes a .zip throughout.** "Getting
+the quiz to the site" now says the site takes one .zip and nothing else,
+what is in it, that two quizzes are two files, and that an assistant that
+can't create files has no way to hand a quiz to the site. The paragraphs on
+the code block, the copy button and bullet points that eat the markers are
+gone. The self-hosting paragraph links `/own-copy`.
+
+**Checked:**
+- Typecheck.
+- Headless Edge, local stack (`shots-tool/landing-walk.mjs`), no page
+  errors:
+  - the page at 1366×768 and 390×844, with no sideways scroll on the phone;
+  - the button opens the file chooser;
+  - two .zip files opened lead to the lobby;
+  - back on `/`, the resume line, "1 more quiz" and its fold, and Delete…
+    asking inline;
+  - pasted text and a .docx show their messages;
+  - the stats counted `paste` 1, `docx` 1, `zip` 2;
+  - `/check` all good, and with WebSocket blocked the HTTP-only verdict
+    with the IT message;
+  - `/own-copy` at phone width.
+
+**Not established:**
+- Whether free Claude, and other free tiers, hand over a .zip. An AI that
+  can't make files can no longer deliver at all. The owner chose that, to
+  find out.
+- Whether an Android tablet's file picker shows a .zip downloaded from a
+  chat app as selectable under this `accept`.
+- How long a teacher's first own copy takes with Claude Code. Not tried.
 
 ## Open
 
