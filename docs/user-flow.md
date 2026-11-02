@@ -272,7 +272,11 @@ the next class's lobby.
 
 ### 3.7 Tempo: countdown and points for speed (v2 items 2, 3)
 
-Off by default. With a countdown, each question has one more step:
+Off by default, unless the quiz says otherwise: `Tempo: countdown` or
+`Tempo: speed` before the first question, `Time: 30` for one question or
+all. The lobby shows what the quiz says, and the teacher can change it.
+In ⋯ during the quiz it changes from the next question on. With a
+countdown, each question has one more step:
 
 | Step | Wall | Tablets | Steering tab |
 |---|---|---|---|
@@ -284,8 +288,8 @@ Off by default. With a countdown, each question has one more step:
 - The clicker's next step from reading is Go; it ignores a second press
   within 0.7 s.
 - ⋯ while the clock runs: "Stop the countdown: answers stay open"; after
-  time's up: "Open the answers again, without a countdown"; between and
-  during questions: "Countdown length: 20 s…".
+  time's up: "Open the answers again, without a countdown"; at any time:
+  "Tempo: …" (from the next question on).
 - With speed points the ranking shows points, not "right out of n".
 
 ## 4. Variants

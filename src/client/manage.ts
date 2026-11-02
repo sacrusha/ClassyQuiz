@@ -4,7 +4,7 @@
 // docs/user-flow.md §3.3–3.5.
 
 import type { ImageRef, TeacherQuestion, TeacherView, Tempo } from "../shared/protocol.ts";
-import { COUNTDOWN_CHOICES, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
+import { COUNTDOWN_CHOICES, COUNTDOWN_DEFAULT, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import type { Line } from "./net.ts";
@@ -48,9 +48,11 @@ export function patch(el: HTMLElement, html: string): void {
 // ---------------------------------------------------------------------------
 // The questions (lobby, and "All questions" during the run)
 
-function tags(q: TeacherQuestion): string {
+function tags(q: TeacherQuestion, v: TeacherView): string {
   const right = q.answers.filter((a) => a.counts).length;
   return [
+    // With a countdown: each question's length, as the quiz gives it (or the teacher's one length).
+    v.tempo !== "pace" && q.status === "upcoming" ? `<span class="tag">${q.seconds} s</span>` : "",
     q.status === "current" ? `<span class="tag now">now</span>` : "",
     q.status === "revealed" ? `<span class="tag">done</span>` : "",
     q.skip ? `<span class="tag">skipped</span>` : "",
@@ -108,7 +110,7 @@ export function questionList(v: TeacherView, ui: ManageUI): string {
       const open = ui.all || ui.open.has(i) || ui.fixing === i;
       return `<li class="q${open ? " open" : ""}">
         <button class="qhead" data-act="toggle-q" data-q="${i}" aria-expanded="${open}">
-          <span class="num">${i + 1}</span><span class="qt">${lines(q.text)}</span>${tags(q)}<span class="chev">›</span>
+          <span class="num">${i + 1}</span><span class="qt">${lines(q.text)}</span>${tags(q, v)}<span class="chev">›</span>
         </button>
         ${questionPictures(q, v.background)}
         ${open ? answersBlock(q, i, ui) : ""}
@@ -366,7 +368,8 @@ export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuIt
   // after time's up the answers can open again.
   if (v.phase === "question" && v.clock && v.answering === "open") items.push({ label: "Stop the countdown: answers stay open", run: () => open("stop-clock") });
   if (v.phase === "question" && v.answering === "closed") items.push({ label: "Open the answers again, without a countdown", run: () => open("stop-clock") });
-  if (v.tempo !== "pace" && v.phase !== "lobby" && v.phase !== "final") items.push({ label: `Countdown length: ${v.seconds} s…`, run: () => open("tempo-sheet") });
+  // An unfun tempo is changed here, from the next question on.
+  if (v.phase !== "lobby" && v.phase !== "final") items.push({ label: `Tempo: ${esc(tempoName(v))}…`, run: () => open("tempo-sheet") });
   if (v.phase === "question") {
     items.push({ label: "Skip this question", run: () => open("skip-current") });
     items.push({ label: onWall ? "Change the right answer – the class sees it" : "Change the right answer", run: () => open("fix-q", { q: String(v.current) }) });
@@ -404,9 +407,10 @@ const TEMPO_NAMES: Record<Tempo, string> = {
   speed: "Countdown and points for speed",
 };
 
-/** The tempo in a few words, for the lobby's line: "Countdown, 20 s". */
+/** The tempo in a few words: "Countdown, 20 s", or "Countdown, lengths as written" when the quiz gives them. */
 export function tempoName(v: TeacherView): string {
-  return v.tempo === "pace" ? TEMPO_NAMES.pace : `${TEMPO_NAMES[v.tempo]}, ${v.seconds} s`;
+  if (v.tempo === "pace") return TEMPO_NAMES.pace;
+  return `${TEMPO_NAMES[v.tempo]}, ${v.seconds !== null ? `${v.seconds} s` : v.timed ? "lengths as written" : `${COUNTDOWN_DEFAULT} s`}`;
 }
 
 /** The lobby's line under Start: the tempo, tapped to change it. Off (the teacher's pace) unless a class turns it on. */
@@ -420,11 +424,13 @@ export function closeTempoSheet(): void {
 }
 
 /**
- * The tempo's choices in a sheet: in the lobby the three tempos and the
- * countdown's length; during the quiz only the length, for the questions to
- * come. Changes are sent at once; the sheet marks them as they're made.
+ * The tempo's choices in a sheet: the three tempos and the countdown's
+ * length. The quiz's own "Tempo:" and "Time:" lines are what it shows first;
+ * the teacher's choice overrides them. During the quiz a change applies from
+ * the next question. Changes are sent at once; the sheet marks them as
+ * they're made.
  */
-function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; seconds?: number }) => Promise<{ ok: boolean }>): void {
+function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; seconds?: number | null }) => Promise<{ ok: boolean }>): void {
   document.querySelector(".sheet-back")?.remove();
   const lobby = v.phase === "lobby";
   const what: Record<Tempo, string> = {
@@ -432,13 +438,16 @@ function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; se
     countdown: "The question comes first. Go shows the answers and starts the clock; when it runs out, answering closes and you reveal.",
     speed: `As Countdown. A right answer scores ${POINTS_RIGHT}, and up to ${SPEED_BONUS} more the quicker it came.`,
   };
-  const tempos = lobby
-    ? (["pace", "countdown", "speed"] as Tempo[])
-        .map((t) => `<button class="tempo-choice${v.tempo === t ? " on" : ""}" data-tempo="${t}"><strong>${TEMPO_NAMES[t]}</strong><small>${esc(what[t])}</small></button>`)
-        .join("")
-    : `<p><strong>${esc(TEMPO_NAMES[v.tempo])}</strong><br><span class="hint">For the questions still to come.</span></p>`;
-  const seconds = `<div class="seconds"${lobby && v.tempo === "pace" ? " hidden" : ""}><span>Countdown</span>${COUNTDOWN_CHOICES.map(
-    (n) => `<button class="btn${v.seconds === n ? " on" : ""}" data-seconds="${n}">${n} s</button>`,
+  const tempos =
+    (lobby ? "" : `<p class="hint">From the next question on.</p>`) +
+    (["pace", "countdown", "speed"] as Tempo[])
+      .map((t) => `<button class="tempo-choice${v.tempo === t ? " on" : ""}" data-tempo="${t}"><strong>${TEMPO_NAMES[t]}</strong><small>${esc(what[t])}</small></button>`)
+      .join("");
+  // The quiz's own lengths ("Time:" lines) are a choice of their own; without them the default is marked.
+  const shownSeconds = v.seconds ?? (v.timed ? null : COUNTDOWN_DEFAULT);
+  const asWritten = v.timed ? `<button class="btn${v.seconds === null ? " on" : ""}" data-seconds="">As written</button>` : "";
+  const seconds = `<div class="seconds"${v.tempo === "pace" ? " hidden" : ""}><span>Countdown</span>${asWritten}${COUNTDOWN_CHOICES.map(
+    (n) => `<button class="btn${shownSeconds === n ? " on" : ""}" data-seconds="${n}">${n} s</button>`,
   ).join("")}</div>`;
   const back = document.createElement("div");
   back.className = "sheet-back";
@@ -460,7 +469,7 @@ function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; se
     const n = target.closest<HTMLElement>("[data-seconds]");
     if (n) {
       back.querySelectorAll("[data-seconds]").forEach((b) => b.classList.toggle("on", b === n));
-      void send({ op: "tempo", seconds: Number(n.dataset.seconds) });
+      void send({ op: "tempo", seconds: n.dataset.seconds ? Number(n.dataset.seconds) : null });
     }
   });
   document.body.appendChild(back);

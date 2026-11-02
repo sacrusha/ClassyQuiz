@@ -373,14 +373,13 @@ test("points for speed: the device's time can't exceed the server's, and an old 
   assert.equal(g.run!.answers[0][ids[0]].ms, 0, "a change of mind keeps its own time; never below zero");
 });
 
-test("tempo: chosen in the lobby, its length changeable between questions, carried to the next class", () => {
+test("tempo: its length changeable between questions, carried to the next class", () => {
   const { g } = setup(1);
-  assert.equal(G.tempoOf(g.run), "pace");
+  assert.equal(G.tempoOf(g), "pace");
   assert.throws(() => G.setSeconds(g, 15), G.GameError, "only the lengths on offer");
   G.setTempo(g, "speed");
   G.setSeconds(g, 30);
   G.begin(g, 0);
-  assert.throws(() => G.setTempo(g, "pace"), G.GameError, "not once the quiz has started");
   G.go(g, 0);
   G.setSeconds(g, 10);
   assert.equal(G.deadline(g), 30_000, "the running countdown keeps its length");
@@ -390,7 +389,32 @@ test("tempo: chosen in the lobby, its length changeable between questions, carri
   assert.equal(G.deadline(g), 50_000, "the next one takes the new length");
   G.finish(g, 60_000);
   G.startRun(g, "12345", "r2");
-  assert.deepEqual([G.tempoOf(g.run), G.secondsOf(g.run)], ["speed", 10], "Again with another class keeps the tempo");
+  assert.deepEqual([G.tempoOf(g), G.secondsFor(g, 0)], ["speed", 10], "Again with another class keeps the tempo");
+});
+
+test("tempo changed mid-quiz: from the next question on; each question is played and scored as it came up", () => {
+  const { g, ids } = setup(2);
+  G.setTempo(g, "speed");
+  G.setSeconds(g, 10);
+  G.begin(g, 0);
+  G.setTempo(g, "pace");
+  assert.equal(G.answering(g), "reading", "the question on screen keeps how it came up");
+  G.go(g, 0);
+  G.answer(g, ids[0], 0, 0, 1, 0, 1000, 1000);
+  G.reveal(g, 1);
+  assert.deepEqual([score(g, ids[0]), G.speedScale(g)], [15, true]);
+  G.next(g, 20_000);
+  assert.equal(G.answering(g), "open", "the next one at the teacher's pace: no reading, no clock");
+  assert.equal(G.deadline(g), null);
+  G.answer(g, ids[0], 1, 1, 2, 0, 21_000);
+  G.answer(g, ids[1], 1, 1, 1, 0, 21_000);
+  G.reveal(g, 2);
+  assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [25, 10], "on the speed scale a right answer is 10; no bonus without a countdown");
+  G.setCounts(g, 1, [true, false]);
+  assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [15, 0]);
+  G.setVoid(g, 0, true);
+  assert.equal(G.speedScale(g), false, "no scoring question was played for speed: right out of so many again");
+  assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [0, 0]);
 });
 
 test("at the teacher's pace nothing changes: no reading step, no clock", () => {

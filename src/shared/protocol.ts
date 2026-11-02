@@ -53,7 +53,8 @@ export type Command =
   /** The answers stay open, or open again after time's up, without a clock. */
   | { op: "stopClock"; at: At }
   /** The class's tempo (in the lobby) and the countdown's length (any time; for the questions to come). */
-  | { op: "tempo"; tempo?: Tempo; seconds?: number }
+  /** seconds: null goes back to the quiz's own lengths ("Time:" lines). */
+  | { op: "tempo"; tempo?: Tempo; seconds?: number | null }
   /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
   | { op: "again"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
@@ -226,6 +227,8 @@ export interface TeacherQuestion {
   void: boolean;
   skip: boolean;
   status: "upcoming" | "current" | "revealed" | "skipped";
+  /** Its countdown in seconds, should the class play with one: the teacher's length, else the quiz's. */
+  seconds: number;
 }
 
 export interface TeacherView {
@@ -243,9 +246,14 @@ export interface TeacherView {
   remote: Presence;
   /** The question's picture fills the projector. */
   zoom: boolean;
+  /** The teacher's choice in the lobby, else the quiz's "Tempo:", else the teacher's pace. */
   tempo: Tempo;
-  /** The countdown's length for the questions to come, in seconds. */
-  seconds: number;
+  /** One length the teacher chose for the questions to come, in seconds; null: as the quiz says. */
+  seconds: number | null;
+  /** The quiz gives its own lengths ("Time:" lines). */
+  timed: boolean;
+  /** The tempo the open question came up under (a change applies from the next one); null between questions. */
+  playing: Tempo | null;
   /** The open question: being read, open, or closed until the reveal; null between questions. */
   answering: Answering | null;
   clock: ClockView | null;

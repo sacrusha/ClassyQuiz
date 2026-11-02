@@ -415,3 +415,40 @@ test("Order: fixed keeps a question's answers as written; before the first quest
   const all = parseQuiz(`Title: T\nOrder: fixed\n\n1. A?\n+ a\n- b\n\n2. B?\n- a\n+ b\n`);
   assert.deepEqual(all.quiz.questions.map((q) => q.keepOrder), [true, true]);
 });
+
+test("tempo: Tempo: before the first question, Time: for the quiz or a question; missing means the teacher's pace", () => {
+  const r = parseQuiz(`Title: T
+Tempo: countdown with points for speed
+Time: 20 s
+
+1. Quick?
++ a
+- b
+
+2. A sum that takes a while?
+Time: 1:30
++ a
+- b
+
+3. After the answers?
++ a
+- b
+Time: 45
+`);
+  assert.equal(r.ok, true);
+  assert.equal(r.quiz.tempo, "speed");
+  assert.equal(r.quiz.seconds, 20);
+  assert.deepEqual(r.quiz.questions.map((q) => q.seconds), [undefined, 90, 45]);
+  assert.equal(r.warnings.length, 0, JSON.stringify(r.warnings));
+
+  const plain = parseQuiz("Title: T\n\n1. Q?\n+ a\n- b\n");
+  assert.equal(plain.quiz.tempo, undefined, "no line: the teacher's pace, as before");
+  assert.equal(plain.quiz.seconds, undefined);
+
+  const odd = parseQuiz("Title: T\nTempo: whenever\n\n1. Q?\nTime: soon\n+ a\n- b\n\n2. R?\nTime: 2 s\nTempo: countdown\n+ a\n- b\n");
+  assert.equal(odd.ok, true, "a tempo line the site can't read is a warning, not an error");
+  assert.equal(odd.quiz.tempo, undefined);
+  assert.equal(odd.quiz.questions[0].seconds, undefined);
+  assert.equal(odd.quiz.questions[1].seconds, 5, "clamped to the shortest countdown");
+  assert.equal(odd.warnings.length, 4, JSON.stringify(odd.warnings));
+});

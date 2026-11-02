@@ -158,8 +158,8 @@ function current(v: TeacherView): string {
  * running (its bar goes in the slot, see renderClock), or time's up.
  */
 function tempoState(v: TeacherView): string {
-  if (v.phase !== "question" || v.tempo === "pace") return "";
-  if (v.answering === "reading") return `<p class="hint">The class reads the question. <strong>Go</strong> shows the answers and starts the ${v.seconds} s countdown.</p>`;
+  if (v.phase !== "question" || v.playing === "pace") return "";
+  if (v.answering === "reading") return `<p class="hint">The class reads the question. <strong>Go</strong> shows the answers and starts the ${v.questions[v.current].seconds} s countdown.</p>`;
   if (v.answering === "closed") return `<p class="timeup-line">${ICON.timer} Time's up: answering is closed.</p>`;
   return v.clock ? `<div class="clockslot"></div>` : `<p class="hint">Countdown stopped: the answers stay open.</p>`;
 }
