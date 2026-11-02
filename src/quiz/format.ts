@@ -9,7 +9,7 @@
 // cannot read unambiguously; error messages name the question and are written
 // so a teacher can paste them back to the AI.
 
-import type { Tempo } from "../shared/tempo.ts";
+import { COUNTDOWN_MAX, COUNTDOWN_MIN, type Tempo } from "../shared/tempo.ts";
 
 export interface Answer {
   text: string;
@@ -41,9 +41,9 @@ export interface Quiz {
   seconds?: number;
 }
 
-/** A countdown the format takes, in seconds: long enough to read four answers, short of a lesson's patience. */
-export const MIN_SECONDS = 5;
-export const MAX_SECONDS = 300;
+/** A countdown the format takes, in seconds: the range the teacher's −5/+5 moves in (shared/tempo.ts). */
+export const MIN_SECONDS = COUNTDOWN_MIN;
+export const MAX_SECONDS = COUNTDOWN_MAX;
 
 /** A picture the quiz names, with the words that name it in messages. */
 export interface PictureRef {

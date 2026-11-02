@@ -353,7 +353,7 @@ body.teach { padding-bottom: 96px; }
   body.screen .lobby .bigcode { font-size: 4.2em; }
   body.screen .lobby .qr, .mfold .lobby .qr { width: 38vw; height: 38vw; }
   .crowdcol .avatars > *, .lobby .crowd .av { width: 7vh; height: 7vh; }
-  .mstart .twoscreens { display: none; }
+  .mstart .twoscreens { display: none; } /* no second monitor on a phone */
 }
 
 /* -------------------------------------------------------------------------
@@ -374,6 +374,23 @@ body.teach { padding-bottom: 96px; }
 .timeup { display: inline-flex; color: #d9480f; }
 .timeup-line { color: #d9480f; font-weight: 700; margin: .4em 0; }
 .clockslot { margin: 6px 0 10px; }
+/* The teacher's −5/+5 on the countdown: the Remote's card, and the wall's steering bar. */
+.nudge { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.nudge .btn { min-height: 40px; padding: .2em .7em; font-variant-numeric: tabular-nums; }
+.nudge .len { display: inline-flex; align-items: center; gap: 4px; min-width: 4.2em; justify-content: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nudge .len svg { width: 1.1em; height: 1.1em; }
+.nudgeline { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); margin: .4em 0; }
+.steerbar .nudge .btn { min-height: 46px; padding: .2em .8em; }
+/* A phone as the steering Projector: the bar's five controls only fit tight. */
+@media (max-width: 600px) {
+  .steerbar { gap: 5px; padding: 0 6px; font-size: 16px; }
+  .steerbar .btn { padding: .3em .6em; }
+  .steerbar .btn.more { width: 40px; }
+  .steerbar .nudge { gap: 3px; }
+  .steerbar .nudge .btn { padding: .2em .4em; }
+  .steerbar .nudge .len { min-width: 2.6em; }
+  .steerbar .nudge .len svg { display: none; }
+}
 /* The class reads the question first: the tiles keep their place, colours and shapes, without text. */
 .tiles.veiled .txt { visibility: hidden; }
 .tiles.veiled .tile { opacity: .55; }

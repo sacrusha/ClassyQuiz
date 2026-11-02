@@ -354,7 +354,8 @@ function render(): void {
     const n = q.answers.length;
     // Time's up, here or on the server: the buttons stay, the chosen one
     // marked, and take no more taps. A tap still on its way shows as chosen.
-    const end = q.clock ? localEnd(`${v.current}`, q.clock) : null;
+    // Keyed by the length too: the teacher's −5/+5 can change a running countdown.
+    const end = q.clock ? localEnd(`${v.current}|${q.clock.ms}`, q.clock) : null;
     const out = q.answering === "closed" || (end !== null && end <= performance.now());
     const pending = waiting && waiting.q === q.q ? waiting.choice : null;
     const mine = out && pending !== null ? pending : q.mine;

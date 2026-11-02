@@ -52,9 +52,10 @@ export type Command =
   | { op: "go"; at: At }
   /** The answers stay open, or open again after time's up, without a clock. */
   | { op: "stopClock"; at: At }
-  /** The class's tempo (in the lobby) and the countdown's length (any time; for the questions to come). */
-  /** seconds: null goes back to the quiz's own lengths ("Time:" lines). */
-  | { op: "tempo"; tempo?: Tempo; seconds?: number | null }
+  /** The class's tempo, in the lobby or for the questions to come. */
+  | { op: "tempo"; tempo: Tempo }
+  /** The teacher's −5/+5 (by: −5 or 5): the countdown on now, or the next one, and every one after. */
+  | { op: "nudge"; by: number }
   /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
   | { op: "again"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
@@ -227,7 +228,7 @@ export interface TeacherQuestion {
   void: boolean;
   skip: boolean;
   status: "upcoming" | "current" | "revealed" | "skipped";
-  /** Its countdown in seconds, should the class play with one: the teacher's length, else the quiz's. */
+  /** Its countdown in seconds, should the class play with one: as written, moved by the teacher's −5/+5. */
   seconds: number;
 }
 
@@ -248,10 +249,12 @@ export interface TeacherView {
   zoom: boolean;
   /** The teacher's choice in the lobby, else the quiz's "Tempo:", else the teacher's pace. */
   tempo: Tempo;
-  /** One length the teacher chose for the questions to come, in seconds; null: as the quiz says. */
-  seconds: number | null;
   /** The quiz gives its own lengths ("Time:" lines). */
   timed: boolean;
+  /** Seconds the teacher's −5/+5 moved the lengths by; 0: as written. */
+  adjust: number;
+  /** The length the −5/+5 pair shows and acts on: the countdown running, or the next to start; null: no pair. */
+  countdown: number | null;
   /** The tempo the open question came up under (a change applies from the next one); null between questions. */
   playing: Tempo | null;
   /** The open question: being read, open, or closed until the reveal; null between questions. */

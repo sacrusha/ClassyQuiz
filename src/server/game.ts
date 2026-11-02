@@ -11,7 +11,7 @@
 
 import type { Quiz } from "../quiz/format.ts";
 import { CLASS_FULL, CLASS_STARTED, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
-import { COUNTDOWN_CHOICES, COUNTDOWN_DEFAULT, POINTS_RIGHT, TEMPOS, speedBonus, type Tempo } from "../shared/tempo.ts";
+import { COUNTDOWN_DEFAULT, NUDGE_SECONDS, POINTS_RIGHT, TEMPOS, clampCountdown, speedBonus, type Tempo } from "../shared/tempo.ts";
 
 export type Phase = "lobby" | "question" | "reveal" | "ranking" | "final";
 
@@ -99,8 +99,12 @@ export interface Run {
   revealView?: Record<string, number>;
   /** The tempo the teacher chose in the lobby (shared/tempo.ts); missing: the quiz's ("Tempo:"), else the teacher's pace. */
   tempo?: Tempo;
-  /** A countdown length the teacher chose, in seconds, for every question still to come; missing: as the quiz says ("Time:"). */
-  seconds?: number;
+  /**
+   * Seconds the teacher's −5/+5 added to (or took from) the quiz's lengths,
+   * for every countdown from the one it was pressed on; missing: 0, the
+   * lengths as written. Each length stays within 10..60 s.
+   */
+  adjust?: number;
   /** Question index → its countdown, once its answers appeared under one. */
   clocks?: Record<string, Clock>;
   /**
@@ -160,7 +164,7 @@ export function startRun(g: Game, code: string, id: string, random?: () => numbe
   const before = g.run;
   g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
   if (before?.tempo) g.run.tempo = before.tempo;
-  if (before?.seconds) g.run.seconds = before.seconds;
+  if (before?.adjust) g.run.adjust = before.adjust;
   if (random) g.run.order = g.quiz.questions.map((q) => (q.keepOrder ? q.answers.map((_, i) => i) : shownOrder(q.answers.map((a) => a.text), random)));
 }
 
@@ -295,9 +299,14 @@ export function tempoOf(g: Game): Tempo {
   return g.run?.tempo ?? g.quiz.tempo ?? "pace";
 }
 
-/** Question q's countdown in seconds: the teacher's length, else the question's "Time:", else the quiz's, else the default. */
+/** Question q's countdown as written: its "Time:", else the quiz's, else the safe default. */
+function writtenSeconds(g: Game, q: number): number {
+  return g.quiz.questions[q]?.seconds ?? g.quiz.seconds ?? COUNTDOWN_DEFAULT;
+}
+
+/** Question q's countdown in seconds: as written, moved by the teacher's −5/+5, within 10..60. */
 export function secondsFor(g: Game, q: number): number {
-  return g.run?.seconds ?? g.quiz.questions[q]?.seconds ?? g.quiz.seconds ?? COUNTDOWN_DEFAULT;
+  return clampCountdown(writtenSeconds(g, q) + (g.run?.adjust ?? 0));
 }
 
 /** Whether the quiz gives its own countdown lengths ("Time:" lines). */
@@ -331,17 +340,49 @@ export function speedScale(g: Game): boolean {
 }
 
 /**
- * One countdown length for every question still to come, or null for the
- * quiz's own lengths again; a running countdown keeps its own.
+ * The countdown the teacher's −5/+5 acts on, during the quiz: the one
+ * running now; else the open question's, while the class reads it; else the
+ * next question's, when the class plays with a countdown. Null: no pair to
+ * show (the lobby, the teacher's pace, the last question done).
  */
-export function setSeconds(g: Game, seconds: number | null): void {
+export function nudgeTarget(g: Game): { q: number; clock: Clock | null } | null {
+  const run = g.run;
+  if (!run || (run.phase !== "question" && run.phase !== "reveal" && run.phase !== "ranking")) return null;
+  const clock = runningClock(g);
+  if (clock) return { q: run.current, clock };
+  if (answering(g) === "reading") return { q: run.current, clock: null };
+  if (tempoOf(g) === "pace") return null;
+  const q = nextShown(g, run.current);
+  return q === -1 ? null : { q, clock: null };
+}
+
+/** The length the −5/+5 pair shows, in seconds; null when there is none. */
+export function nudgeSeconds(g: Game): number | null {
+  const t = nudgeTarget(g);
+  return t ? (t.clock ? Math.round(t.clock.ms / 1000) : secondsFor(g, t.q)) : null;
+}
+
+/**
+ * The teacher's −5 or +5: the countdown it acts on (nudgeTarget) gets that
+ * much shorter or longer, within 10..60 s, and so does every one after it,
+ * each against its own length as written. A running countdown changes at
+ * once; cut below the time already gone, answering closes (`view`: as in
+ * closeAnswers). At a bound the press changes nothing.
+ */
+export function nudge(g: Game, by: number, now: number, view: number): void {
   const run = needRun(g);
-  if (seconds === null) {
-    delete run.seconds;
-    return;
+  if (by !== NUDGE_SECONDS && by !== -NUDGE_SECONDS) throw new GameError("The countdown changes by 5 seconds.");
+  const t = nudgeTarget(g);
+  const from = nudgeSeconds(g);
+  if (!t || from === null) throw new GameError("No countdown to change.");
+  const to = clampCountdown(from + by);
+  if (to === from) return;
+  run.adjust = to - writtenSeconds(g, t.q);
+  if (run.adjust === 0) delete run.adjust;
+  if (t.clock) {
+    t.clock.ms = to * 1000;
+    if (now >= t.clock.at + t.clock.ms) closeAnswers(g, view);
   }
-  if (!COUNTDOWN_CHOICES.includes(seconds)) throw new GameError("That countdown length isn't on offer.");
-  run.seconds = seconds;
 }
 
 /** Where the open question is: being read, open for answers, or closed until the reveal. */

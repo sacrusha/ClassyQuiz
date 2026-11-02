@@ -11,7 +11,7 @@
 
 import type { ClockView } from "../shared/protocol.ts";
 
-/** Per question, when its countdown ends on this device (performance.now()). */
+/** Per question and length, when its countdown ends on this device (performance.now()). */
 const ends = new Map<string, number>();
 
 /** When the countdown of this question ends here; the first view that showed it sets it. */

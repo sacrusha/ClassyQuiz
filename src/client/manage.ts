@@ -4,7 +4,7 @@
 // docs/user-flow.md §3.3–3.5.
 
 import type { ImageRef, TeacherQuestion, TeacherView, Tempo } from "../shared/protocol.ts";
-import { COUNTDOWN_CHOICES, COUNTDOWN_DEFAULT, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
+import { COUNTDOWN_MAX, COUNTDOWN_MIN, NUDGE_SECONDS, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import type { Line } from "./net.ts";
@@ -262,6 +262,9 @@ export class Steer {
       case "stop-clock":
         await send({ op: "stopClock", at });
         return true;
+      case "nudge":
+        await send({ op: "nudge", by: Number(el.dataset.by) });
+        return true;
       case "tempo-sheet":
         tempoSheet(v, (cmd) => send(cmd));
         return true;
@@ -407,10 +410,35 @@ const TEMPO_NAMES: Record<Tempo, string> = {
   speed: "Countdown and points for speed",
 };
 
-/** The tempo in a few words: "Countdown, 20 s", or "Countdown, lengths as written" when the quiz gives them. */
+/** The countdown lengths still to come, in a few words: "60 s", "15–40 s". */
+function lengths(v: TeacherView): string {
+  const s = v.questions.filter((q, i) => !q.skip && (v.phase === "lobby" || i >= v.current)).map((q) => q.seconds);
+  if (s.length === 0) return "";
+  const lo = Math.min(...s);
+  const hi = Math.max(...s);
+  return lo === hi ? `${lo} s` : `${lo}–${hi} s`;
+}
+
+/** The tempo in a few words: "Countdown, 60 s", or "Countdown, 15–40 s" when the quiz gives its own lengths. */
 export function tempoName(v: TeacherView): string {
   if (v.tempo === "pace") return TEMPO_NAMES.pace;
-  return `${TEMPO_NAMES[v.tempo]}, ${v.seconds !== null ? `${v.seconds} s` : v.timed ? "lengths as written" : `${COUNTDOWN_DEFAULT} s`}`;
+  const l = lengths(v);
+  return l ? `${TEMPO_NAMES[v.tempo]}, ${l}` : TEMPO_NAMES[v.tempo];
+}
+
+/**
+ * The teacher's −5/+5 during the quiz (owner's decomposition, v2 item 2): the
+ * countdown running, or the next to start, and every one after it, within
+ * 10..60 s. Shown only when there is a countdown to change.
+ */
+export function nudgePair(v: TeacherView): string {
+  const s = v.countdown;
+  if (s === null) return "";
+  return `<span class="nudge" aria-label="countdown length">
+    <button class="btn" data-act="nudge" data-by="-${NUDGE_SECONDS}"${s <= COUNTDOWN_MIN ? " disabled" : ""} aria-label="shorter">&minus;${NUDGE_SECONDS}</button>
+    <span class="len">${ICON.timer}${s} s</span>
+    <button class="btn" data-act="nudge" data-by="${NUDGE_SECONDS}"${s >= COUNTDOWN_MAX ? " disabled" : ""} aria-label="longer">+${NUDGE_SECONDS}</button>
+  </span>`;
 }
 
 /** The lobby's line under Start: the tempo, tapped to change it. Off (the teacher's pace) unless a class turns it on. */
@@ -424,13 +452,13 @@ export function closeTempoSheet(): void {
 }
 
 /**
- * The tempo's choices in a sheet: the three tempos and the countdown's
- * length. The quiz's own "Tempo:" and "Time:" lines are what it shows first;
- * the teacher's choice overrides them. During the quiz a change applies from
- * the next question. Changes are sent at once; the sheet marks them as
- * they're made.
+ * The tempo's choices in a sheet: the three tempos, the quiz's own choice
+ * marked first. No lengths: the quiz's are as written (60 s without), and
+ * during the quiz −5/+5 changes them (owner, v2 item 2: less clutter than a
+ * length picker). During the quiz a change applies from the next question.
+ * Changes are sent at once; the sheet marks them as they're made.
  */
-function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; seconds?: number | null }) => Promise<{ ok: boolean }>): void {
+function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo: Tempo }) => Promise<{ ok: boolean }>): void {
   document.querySelector(".sheet-back")?.remove();
   const lobby = v.phase === "lobby";
   const what: Record<Tempo, string> = {
@@ -443,15 +471,13 @@ function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; se
     (["pace", "countdown", "speed"] as Tempo[])
       .map((t) => `<button class="tempo-choice${v.tempo === t ? " on" : ""}" data-tempo="${t}"><strong>${TEMPO_NAMES[t]}</strong><small>${esc(what[t])}</small></button>`)
       .join("");
-  // The quiz's own lengths ("Time:" lines) are a choice of their own; without them the default is marked.
-  const shownSeconds = v.seconds ?? (v.timed ? null : COUNTDOWN_DEFAULT);
-  const asWritten = v.timed ? `<button class="btn${v.seconds === null ? " on" : ""}" data-seconds="">As written</button>` : "";
-  const seconds = `<div class="seconds"${v.tempo === "pace" ? " hidden" : ""}><span>Countdown</span>${asWritten}${COUNTDOWN_CHOICES.map(
-    (n) => `<button class="btn${shownSeconds === n ? " on" : ""}" data-seconds="${n}">${n} s</button>`,
-  ).join("")}</div>`;
+  const l = lengths(v);
+  const how = `<p class="hint seconds"${v.tempo === "pace" ? " hidden" : ""}>${
+    v.timed && v.adjust === 0 ? `The countdown: ${l}, as the quiz says.` : `The countdown: ${l}.`
+  } During the quiz, &minus;${NUDGE_SECONDS} and +${NUDGE_SECONDS} make it shorter or longer, from ${COUNTDOWN_MIN} to ${COUNTDOWN_MAX} s.</p>`;
   const back = document.createElement("div");
   back.className = "sheet-back";
-  back.innerHTML = `<div class="sheet tempo-sheet">${tempos}${seconds}<button class="cancel" data-close>Done</button></div>`;
+  back.innerHTML = `<div class="sheet tempo-sheet">${tempos}${how}<button class="cancel" data-close>Done</button></div>`;
   back.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
     if (target === back || target.closest("[data-close]")) {
@@ -464,12 +490,6 @@ function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo?: Tempo; se
       back.querySelectorAll("[data-tempo]").forEach((b) => b.classList.toggle("on", b === t));
       back.querySelector<HTMLElement>(".seconds")!.hidden = tempo === "pace";
       void send({ op: "tempo", tempo });
-      return;
-    }
-    const n = target.closest<HTMLElement>("[data-seconds]");
-    if (n) {
-      back.querySelectorAll("[data-seconds]").forEach((b) => b.classList.toggle("on", b === n));
-      void send({ op: "tempo", seconds: n.dataset.seconds ? Number(n.dataset.seconds) : null });
     }
   });
   document.body.appendChild(back);

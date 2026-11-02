@@ -8,7 +8,7 @@ import qrcode from "qrcode-generator";
 import type { ScreenView, ServerMessage } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
-import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
+import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
@@ -170,10 +170,14 @@ function deviceHelp(): string {
 /**
  * The lobby while this screen steers: the class's part on top and large,
  * laid out like the class lobby; the Start button and the teacher's
- * questions below it (item 19). On a mirrored laptop all of it is on the
- * wall, so the line on how to steer from a phone shows only until the first
- * student is in: after that it would invite the class to the teacher's page
- * (backlog item 18, "children accidentally taking the remote"). It stays in ⋯.
+ * questions below it (item 19). Start says the mode: this screen is the
+ * Projector and the Remote at once. One sentence says how to split them,
+ * with "a new window here" as the shortcut for a second monitor (owner, item
+ * 19: the window button and the device line did the same job). On a mirrored
+ * laptop all of it is on the wall, so the sentence shows only until the
+ * first student is in: after that it would invite the class to the teacher's
+ * page (backlog item 18, "children accidentally taking the remote"). It
+ * stays in ⋯.
  */
 function renderManagedLobby(v: ScreenView): void {
   lobbyKey = "";
@@ -183,8 +187,7 @@ function renderManagedLobby(v: ScreenView): void {
     t.remote === "present"
       ? `<p class="device ok">Remote connected ✓</p>`
       : n === 0
-        ? `<p class="device twoscreens"><button class="btn" data-act="projector-window">Two screens? Open the projector window</button></p>
-           <p class="device">${deviceHelp()}</p>`
+        ? `<p class="device">For a separate projector and remote, open <strong>${esc(siteAddress())}/teacher</strong> on the other screen (a phone, another computer<span class="twoscreens">, or <button class="link" data-act="projector-window">a new window here</button></span>), type <strong>${esc(v.code)}</strong> and choose.</p>`
         : "";
   const html = `<div class="mlobby">
     <div class="mfold">
@@ -200,7 +203,7 @@ function renderManagedLobby(v: ScreenView): void {
           ${playersRow(t, true)}
         </div>
       </div>
-      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>
+      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start as Projector + Remote &#9654;</button>
         <p class="device">${tempoLine(t)}</p>${devices}</div>
     </div>
     <div class="mbelow">
@@ -314,7 +317,7 @@ function renderClock(v: ScreenView): void {
     el.id = "clock";
     document.body.appendChild(el);
   }
-  el.innerHTML = clockBar(c.ms, localEnd(`${v.current}`, c), "wall");
+  el.innerHTML = clockBar(c.ms, localEnd(`${v.current}|${c.ms}`, c), "wall");
 }
 
 /**
@@ -549,6 +552,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = `<div class="steerbar">
       <button class="btn more" data-menu aria-label="more">⋯</button>
       <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
+      ${nudgePair(v.steer)}
       ${side ? `<button class="btn" data-step data-act="${side.act}">${side.label}</button>` : ""}
       ${next ? `<button class="btn primary" data-step data-act="${next.act}">${next.label}</button>` : ""}
     </div>`;

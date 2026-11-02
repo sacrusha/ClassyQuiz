@@ -6,7 +6,7 @@
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
-import { Steer, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
+import { Steer, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures } from "./pictures.ts";
@@ -87,6 +87,8 @@ function render(): void {
   if (v.phase === "lobby") body = lobby(v);
   else if (v.phase === "question" || v.phase === "reveal") body = current(v);
   else if (v.phase === "ranking" || v.phase === "final") body = ranking(v);
+  // Between questions the pair acts on the next countdown (during one, it sits in the card).
+  if ((v.phase === "reveal" || v.phase === "ranking") && v.countdown !== null) body += `<p class="nudgeline">Next countdown ${nudgePair(v)}</p>`;
   if (v.phase !== "lobby") {
     if (showPlayers) body += playersPanel(v);
     if (showAll) body += questionList(v, steer.ui);
@@ -159,9 +161,11 @@ function current(v: TeacherView): string {
  */
 function tempoState(v: TeacherView): string {
   if (v.phase !== "question" || v.playing === "pace") return "";
-  if (v.answering === "reading") return `<p class="hint">The class reads the question. <strong>Go</strong> shows the answers and starts the ${v.questions[v.current].seconds} s countdown.</p>`;
-  if (v.answering === "closed") return `<p class="timeup-line">${ICON.timer} Time's up: answering is closed.</p>`;
-  return v.clock ? `<div class="clockslot"></div>` : `<p class="hint">Countdown stopped: the answers stay open.</p>`;
+  // The pair acts on the countdown being read or running; after it, on the next one.
+  const pair = v.countdown !== null ? `<p class="nudgeline">${v.answering === "reading" || (v.answering === "open" && v.clock) ? "Countdown" : "Next countdown"} ${nudgePair(v)}</p>` : "";
+  if (v.answering === "reading") return `<p class="hint">The class reads the question. <strong>Go</strong> shows the answers and starts the countdown.</p>${pair}`;
+  if (v.answering === "closed") return `<p class="timeup-line">${ICON.timer} Time's up: answering is closed.</p>${pair}`;
+  return v.clock ? `<div class="clockslot"></div>${pair}` : `<p class="hint">Countdown stopped: the answers stay open.</p>${pair}`;
 }
 
 /** The running countdown in its slot, drawn again only when it starts or stops: CSS drains it. */
@@ -171,7 +175,7 @@ function renderClock(v: TeacherView): void {
   const key = `${v.current}|${v.clock.ms}|${v.clock.leftMs === 0}`;
   if (slot.dataset.key === key) return;
   slot.dataset.key = key;
-  slot.innerHTML = clockBar(v.clock.ms, localEnd(`${v.current}`, v.clock));
+  slot.innerHTML = clockBar(v.clock.ms, localEnd(`${v.current}|${v.clock.ms}`, v.clock));
 }
 
 function ranking(v: TeacherView): string {

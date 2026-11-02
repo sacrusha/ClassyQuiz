@@ -21,8 +21,9 @@ const quiz = parseQuiz(`Title: T
 - b
 `).quiz;
 
-function setup(players = 3) {
-  const g = G.newGame(quiz);
+/** seconds: the quiz's "Time:" for every question (none: the safe 60 s). */
+function setup(players = 3, seconds?: number) {
+  const g = G.newGame(seconds ? { ...quiz, seconds } : quiz);
   G.startRun(g, "12345", "r1");
   let r = 0;
   const random = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
@@ -290,9 +291,8 @@ test("answers are shuffled for each class, the same on every screen; only Order:
 // Tempo: the countdown and points for speed (backlog v2 items 2, 3)
 
 test("countdown: the question first, Go opens the answers, time's up closes them, the reveal stays the teacher's", () => {
-  const { g, ids } = setup(2);
+  const { g, ids } = setup(2, 10);
   G.setTempo(g, "countdown");
-  G.setSeconds(g, 10);
   G.begin(g, 0);
   assert.equal(G.answering(g), "reading");
   assert.equal(G.answer(g, ids[0], 0, 0, 1, 0, 5), false, "no answers while the class reads");
@@ -324,9 +324,8 @@ test("countdown: a doubled Go is told apart from the Reveal by the reading flag 
 });
 
 test("countdown: the teacher can stop it, or open the answers again after time's up", () => {
-  const { g, ids } = setup(1);
+  const { g, ids } = setup(1, 10);
   G.setTempo(g, "speed");
-  G.setSeconds(g, 10);
   G.begin(g, 0);
   G.go(g, 0);
   G.closeAnswers(g, 7);
@@ -341,9 +340,8 @@ test("countdown: the teacher can stop it, or open the answers again after time's
 });
 
 test("points for speed: 10 for a right answer, up to 5 more by the share of the clock left; fixes move them", () => {
-  const { g, ids } = setup(3);
+  const { g, ids } = setup(3, 20);
   G.setTempo(g, "speed");
-  G.setSeconds(g, 20);
   G.begin(g, 0);
   G.go(g, 1000);
   G.answer(g, ids[0], 0, 0, 1, 0, 2000, 900); // fast, right
@@ -373,29 +371,86 @@ test("points for speed: the device's time can't exceed the server's, and an old 
   assert.equal(g.run!.answers[0][ids[0]].ms, 0, "a change of mind keeps its own time; never below zero");
 });
 
-test("tempo: its length changeable between questions, carried to the next class", () => {
-  const { g } = setup(1);
-  assert.equal(G.tempoOf(g), "pace");
-  assert.throws(() => G.setSeconds(g, 15), G.GameError, "only the lengths on offer");
-  G.setTempo(g, "speed");
-  G.setSeconds(g, 30);
+test("tempo: 60 s without a Time: line; the -5/+5 pair acts on the countdown read, running or next, and every one after", () => {
+  const { g, ids } = setup(1);
+  G.setTempo(g, "countdown");
+  assert.equal(G.secondsFor(g, 0), 60, "the safe countdown");
+  assert.equal(G.nudgeSeconds(g), null, "no pair in the lobby");
+  assert.throws(() => G.nudge(g, 5, 0, 1), G.GameError);
   G.begin(g, 0);
-  G.go(g, 0);
-  G.setSeconds(g, 10);
-  assert.equal(G.deadline(g), 30_000, "the running countdown keeps its length");
-  G.reveal(g, 1);
-  G.next(g, 40_000);
-  G.go(g, 40_000);
-  assert.equal(G.deadline(g), 50_000, "the next one takes the new length");
-  G.finish(g, 60_000);
+  assert.equal(G.nudgeSeconds(g), 60, "while the class reads: this question's");
+  G.nudge(g, 5, 0, 1);
+  assert.equal(G.nudgeSeconds(g), 60, "at 60 a +5 changes nothing");
+  assert.throws(() => G.nudge(g, 10, 0, 1), G.GameError, "only 5 either way");
+  for (let i = 0; i < 4; i++) G.nudge(g, -5, 0, 1);
+  assert.equal(G.secondsFor(g, 0), 40);
+  G.go(g, 1000);
+  assert.equal(G.deadline(g), 41_000);
+  G.nudge(g, 5, 5000, 2);
+  assert.deepEqual([G.deadline(g), G.nudgeSeconds(g)], [46_000, 45], "a running countdown changes at once");
+  G.answer(g, ids[0], 0, 0, 1, 0, 6000, 4000);
+  G.reveal(g, 3);
+  assert.equal(G.nudgeSeconds(g), 45, "after the reveal: the next question's, the change kept");
+  G.nudge(g, -5, 7000, 4);
+  G.next(g, 8000);
+  assert.equal(G.secondsFor(g, 1), 40);
+  G.go(g, 8000);
+  G.nudge(g, -5, 50_000, 5);
+  assert.equal(G.answering(g), "closed", "cut below the time already gone: answering closes");
+  assert.equal(g.run!.closedView![1], 5);
+  assert.equal(g.run!.phase, "question", "and the reveal is still the teacher's");
+  for (let i = 0; i < 9; i++) G.nudge(g, -5, 60_000, 6);
+  assert.equal(G.nudgeSeconds(g), 10, "never under 10 s");
+  G.reveal(g, 7);
+  G.next(g, 70_000);
+  G.go(g, 70_000);
+  G.reveal(g, 8);
+  assert.equal(G.nudgeSeconds(g), null, "nothing after the last question");
+  G.finish(g, 80_000);
   G.startRun(g, "12345", "r2");
-  assert.deepEqual([G.tempoOf(g), G.secondsFor(g, 0)], ["speed", 10], "Again with another class keeps the tempo");
+  assert.deepEqual([G.tempoOf(g), G.secondsFor(g, 0)], ["countdown", 10], "Again with another class keeps the tempo and the change");
+});
+
+test("tempo: the -5/+5 moves lengths written per question together, each held within 10..60", () => {
+  const timed = parseQuiz(`Title: T
+Tempo: countdown
+Time: 20
+
+1. A?
++ a
+- b
+
+2. B?
+Time: 50
++ a
+- b
+
+3. C?
+Time: 10
++ a
+- b
+`).quiz;
+  const g = G.newGame(timed);
+  G.startRun(g, "12345", "r1");
+  assert.deepEqual([0, 1, 2].map((q) => G.secondsFor(g, q)), [20, 50, 10], "as written");
+  G.begin(g, 0);
+  G.nudge(g, 5, 0, 1);
+  G.nudge(g, 5, 0, 1);
+  assert.deepEqual([0, 1, 2].map((q) => G.secondsFor(g, q)), [30, 60, 20], "+10 on each, 50 held at 60");
+  G.nudge(g, -5, 0, 1);
+  G.nudge(g, -5, 0, 1);
+  G.nudge(g, -5, 0, 1);
+  assert.deepEqual([0, 1, 2].map((q) => G.secondsFor(g, q)), [15, 45, 10], "-5 on each, 5 held at 10");
+  G.go(g, 0);
+  G.stopClock(g);
+  assert.equal(G.nudgeSeconds(g), 45, "a stopped countdown: the pair acts on the next one");
+  G.setTempo(g, "pace");
+  assert.equal(G.nudgeSeconds(g), null, "and none when the next question comes at the teacher's pace");
 });
 
 test("tempo changed mid-quiz: from the next question on; each question is played and scored as it came up", () => {
-  const { g, ids } = setup(2);
+  const { g, ids } = setup(2, 10);
   G.setTempo(g, "speed");
-  G.setSeconds(g, 10);
   G.begin(g, 0);
   G.setTempo(g, "pace");
   assert.equal(G.answering(g), "reading", "the question on screen keeps how it came up");

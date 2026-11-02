@@ -1,7 +1,10 @@
 // The class's tempo (backlog v2 items 2 and 3; docs/decisions.md, "Countdown
-// and points for speed"). Off by default: the teacher sets the pace, and no
-// clock presses anyone. A class that wants game-show energy turns on the
-// countdown, with or without points for speed, in the lobby.
+// and points for speed" and "The tempo by the owner's decomposition"). Off
+// by default: the teacher sets the pace, and no clock presses anyone. A quiz
+// can be written for a countdown ("Tempo:", "Time:"), and the teacher can
+// turn one on or off in the lobby. Without designed lengths a countdown is
+// the safe 60 s; during the quiz the teacher's −5/+5 shortens or lengthens
+// it, from the countdown on now through every one after.
 //
 // The numbers live here, in one place, for a self-hoster (or us) to tilt.
 
@@ -15,9 +18,18 @@ export type Tempo = "pace" | "countdown" | "speed";
 
 export const TEMPOS: readonly Tempo[] = ["pace", "countdown", "speed"];
 
-/** The countdown lengths a teacher picks from, in seconds. */
-export const COUNTDOWN_CHOICES: readonly number[] = [10, 20, 30, 60];
-export const COUNTDOWN_DEFAULT = 20;
+/** Every countdown is this long or shorter, in seconds, and this long without a "Time:" line: safe, if slow. */
+export const COUNTDOWN_MAX = 60;
+export const COUNTDOWN_DEFAULT = COUNTDOWN_MAX;
+/** The shortest countdown, in seconds: time to read four short answers and tap one. */
+export const COUNTDOWN_MIN = 10;
+/** One press of the teacher's −5 or +5, in seconds. */
+export const NUDGE_SECONDS = 5;
+
+/** A length in seconds, held within COUNTDOWN_MIN..COUNTDOWN_MAX. */
+export function clampCountdown(seconds: number): number {
+  return Math.max(COUNTDOWN_MIN, Math.min(COUNTDOWN_MAX, seconds));
+}
 
 /**
  * Points for speed: a right answer scores POINTS_RIGHT plus up to

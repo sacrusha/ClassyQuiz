@@ -48,7 +48,7 @@ second design:
 5. **Splitting the roles:**
    - *Phone as Remote:* on the phone, `/teacher` and the code, then Remote.
      The Projector stops showing its bar.
-   - *Second screen:* "Open the projector window" in the lobby. The new window
+   - *Second screen:* "a new window here" in the lobby's sentence. The new window
      takes the Projector, and the first tab turns into the Remote.
    - *Opened on the phone:* on the projector computer, `/teacher`, the code,
      then Projector. The phone's tab turns into the Remote.
@@ -72,9 +72,9 @@ tablets, and a quiz made in the break.
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
 | Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The lobby is on the wall (§3.3). | — |
-| Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "Open the projector window", drag it across, F. | — |
+| Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "a new window here", drag it across, F. | — |
 | Lesson starts | "Type classyquiz.pages.dev and the number." | Tablets: address, code, ▶. Avatars pop up on the wall. |
-| Quiz | Start quiz → Reveal → Next … on whichever tab steers, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
+| Quiz | Start → Reveal → Next … on whichever tab steers, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
 ## 3. Screens
@@ -180,10 +180,12 @@ the fold.
 │   classyquiz.pages.dev   ┌─────┐   👤 6                     │
 │   6 3 9 5 3              │ QR  │   🐱 🐻 🐷 🐧 🐭 🐼          │
 │                          └─────┘                           │
-│   [ Start quiz ▶ ]                                         │
-│   Two screens? [Open the projector window]                 │
-│   Another screen or your phone: open                       │
-│   classyquiz.pages.dev/teacher, type the code.             │
+│          [ Start as Projector + Remote ▶ ]                 │
+│               Tempo: Countdown, 20–40 s ›                  │
+│   For a separate projector and remote, open                │
+│   classyquiz.pages.dev/teacher on the other screen (a      │
+│   phone, another computer, or a new window here), type     │
+│   63953 and choose.                                        │
 ├──────────────────────── below the fold ────────────────────┤
 │   12 questions                         [Show all answers]  │
 │    1  Was sind 10% von 250?                             ›  │
@@ -207,10 +209,15 @@ A question opened (or all of them, with Show all answers / Hide answers):
 - **The site's warnings** (the same answer twice, the right answer always in
   one place) sit above the list, one muted line each.
 - **Avatars** can be tapped to remove a double.
-- **Tempo**, one muted line under Start: "Tempo: Teacher's pace ›". It opens
-  a sheet with Teacher's pace, Countdown, and Countdown and points for
-  speed, plus the length (10/20/30/60 s); see §3.7.
-- **The device lines** become "Remote connected ✓" once a Remote is there.
+- **Start says the mode** (item 19): this screen is the Projector and the
+  Remote at once. "Projector + Remote" uses the two names `/teacher` offers.
+- **Tempo**, one muted line under Start: "Tempo: Teacher's pace ›", or what
+  the quiz says, e.g. "Countdown, 20–40 s". It opens a sheet with Teacher's
+  pace, Countdown, and Countdown and points for speed. There are no lengths
+  in the sheet; see §3.7.
+- **One sentence** says how to split the roles. "a new window here" opens
+  the projector window (hidden on a phone). It shows until the first student
+  is in, and becomes "Remote connected ✓" once a Remote is there.
 - **⋯:** Players · Leave · Delete the quiz…
 
 The Remote's lobby is the same in one column, with Start quiz pinned at the
@@ -225,10 +232,12 @@ The v1 screens (question, reveal, ranking, final), with the code in a corner
 throughout. While it steers, the bottom line is the bar:
 
 ```
-│ ⋯   classyquiz.pages.dev · 63953          [Ranking] [Next ▶] │
+│ ⋯   classyquiz.pages.dev · 63953   [−5] ⏱25 s [+5]  [Ranking] [Next ▶] │
 ```
 
-- **The bar's main button** is the next step: Start quiz, Reveal, Next or
+- **With a countdown in play** the bar also carries the −5/+5 pair (§3.7).
+  On a phone the code gives way to it.
+- **The bar's main button** is the next step: Go, Reveal, Next or
   Final ranking. Space, Enter, →, ↓, PageDown, N and a clicker do the same;
   F toggles full screen.
 - **⋯ while steering:** Skip this question · Change the right answer · Final
@@ -236,7 +245,7 @@ throughout. While it steers, the bottom line is the bar:
 - **⋯ while a Remote steers:** Steer from here · Leave.
 - **Notices on the wall:** "Remote connected", and "Remote gone – steer here,
   or enter the code on another device".
-- **A window opened by "Open the projector window"** says "Drag this window
+- **A window opened by "a new window here"** says "Drag this window
   to the projector screen, then press F for full screen" until it is full
   screen.
 
@@ -277,10 +286,11 @@ the next class's lobby.
 ### 3.7 Tempo: countdown and points for speed (v2 items 2, 3)
 
 Off by default, unless the quiz says otherwise: `Tempo: countdown` or
-`Tempo: speed` before the first question, `Time: 30` for one question or
-all. The lobby shows what the quiz says, and the teacher can change it.
-In ⋯ during the quiz it changes from the next question on. With a
-countdown, each question has one more step:
+`Tempo: speed` before the first question, `Time: 30` (10 to 60 s) for one
+question or all; without `Time:`, 60 s. The lobby shows what the quiz says,
+and the teacher can switch the tempo there. In ⋯ during the quiz it changes
+from the next question on. With a countdown, each question has one more
+step:
 
 | Step | Wall | Tablets | Steering tab |
 |---|---|---|---|
@@ -295,12 +305,19 @@ countdown, each question has one more step:
   time's up: "Open the answers again, without a countdown"; at any time:
   "Tempo: …" (from the next question on).
 - With speed points the ranking shows points, not "right out of n".
+- **−5 / +5** (owner's decomposition, v2 item 2), on whichever tab steers:
+  the Remote's card ("Countdown [−5] ⏱ 25 s [+5]"; "Next countdown" once
+  this one is over or at the reveal), and the wall's steering bar. It acts
+  on the countdown being read or running, else the next one, and every one
+  after, each against its own `Time:`, within 10 to 60 s. A running bar
+  changes at once on every screen; cut below the time gone, answering
+  closes. Not in the lobby. It carries over to "Again with another class".
 
 ## 4. Variants
 
 - **One laptop, mirrored.** The Projector steers itself all lesson. Changing
   a key before the reveal shows it on the wall; the button says what it does.
-- **Laptop with two screens.** "Open the projector window", drag it, F. Placing
+- **Laptop with two screens.** "a new window here", drag it, F. Placing
   the window on the second screen automatically (the Window Management API)
   is untried.
 - **Phone only, no projector.** The phone is a Projector that steers itself.
