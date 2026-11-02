@@ -19,6 +19,22 @@ let view: TeacherView | null = null;
 let keyShown = !window.matchMedia("(min-width: 900px) and (pointer: fine)").matches;
 let fixMode = false;
 let pairMessage = "";
+// Redraws: the page is rebuilt only when more than live numbers changed, and
+// the action bar only when its buttons changed. Answers arrive fastest just
+// when the teacher reaches for Reveal; a button replaced under the finger
+// loses the tap.
+let lastSkeleton = "";
+let lastButtons = "";
+// After each step the buttons stay inert for a moment, so a double tap on
+// "Reveal" doesn't land on the "Next" that replaces it.
+const STEP_LOCK_MS = 700;
+let lockUntil = 0;
+let lastStep = "";
+const STEPS = new Set(["start-run", "another", "begin", "reveal", "next", "ranking", "skip-current", "finish"]);
+
+/** A number that changes while answers come in, patched in place. */
+const live = (key: string, value: string | number) => `<span data-live="${key}">${value}</span>`;
+const LIVE = /<span data-live="([^"]+)">[^<]*<\/span>/g;
 
 function start(): void {
   // Arrives as /teach#<id>.<secret> from the upload or pairing; the secret
@@ -77,6 +93,10 @@ async function act(el: HTMLElement): Promise<void> {
   if (!v || !line) return;
   const a = el.dataset.act;
   const q = Number(el.dataset.q);
+  if (a && STEPS.has(a)) {
+    if (Date.now() < lockUntil) return;
+    lockUntil = Date.now() + STEP_LOCK_MS;
+  }
   const send = async (cmd: Parameters<Line["send"]>[0]) => {
     const r = await line!.send(cmd);
     if (!r.ok && r.error) toast(r.error);
@@ -86,7 +106,7 @@ async function act(el: HTMLElement): Promise<void> {
     case "start-run":
     case "another":
       fixMode = false;
-      await send({ op: "startRun" });
+      await send({ op: "startRun", at: at() });
       break;
     case "begin":
       await send({ op: "begin", at: at() });
@@ -131,6 +151,16 @@ async function act(el: HTMLElement): Promise<void> {
       keyShown = true;
       render();
       break;
+    case "copy-link": {
+      const link = `${location.origin}/teach#${quiz!.id}.${quiz!.secret}`;
+      try {
+        await navigator.clipboard.writeText(link);
+        toast("Teacher link copied. Keep it private: whoever has it steers the quiz.");
+      } catch {
+        prompt("The teacher link (keep it private):", link);
+      }
+      break;
+    }
     case "remove":
       if (confirm("Remove this avatar? Its answers stop counting. Use it for a double or a stranger.")) await send({ op: "remove", player: el.dataset.player! });
       break;
@@ -204,7 +234,31 @@ function render(): void {
     body = rankingCard(v) + allQuestions(v) + connectCard(v) + endCard(v);
     buttons = `<button class="btn" data-act="another">Another class</button><button class="btn danger" data-act="end">End and delete</button>`;
   }
-  // Sections the teacher opened or closed stay that way while answers come in.
+  const step = `${v.phase}|${v.current}`;
+  if (step !== lastStep) {
+    lastStep = step;
+    lockUntil = Math.max(lockUntil, Date.now() + STEP_LOCK_MS);
+    window.setTimeout(() => actions.querySelectorAll("button").forEach((b) => (b.disabled = false)), lockUntil - Date.now());
+  }
+  if (buttons !== lastButtons) {
+    lastButtons = buttons;
+    actions.innerHTML = `<div class="wrap">${buttons}</div>`;
+    if (Date.now() < lockUntil) actions.querySelectorAll("button").forEach((b) => (b.disabled = true));
+  }
+
+  const skeleton = body.replace(LIVE, '<span data-live="$1"></span>');
+  if (skeleton === lastSkeleton) {
+    // Only live numbers changed: patch them, touch nothing else.
+    const values = new Map<string, string>();
+    for (const m of body.matchAll(/<span data-live="([^"]+)">([^<]*)<\/span>/g)) values.set(m[1], m[2]);
+    main.querySelectorAll<HTMLElement>("[data-live]").forEach((el) => {
+      const val = values.get(el.dataset.live!);
+      if (val !== undefined && el.textContent !== val) el.textContent = val;
+    });
+    return;
+  }
+  lastSkeleton = skeleton;
+  // Sections the teacher opened or closed stay that way across redraws.
   const before = new Map<string, boolean>();
   main.querySelectorAll<HTMLDetailsElement>("details[data-k]").forEach((d) => before.set(d.dataset.k!, d.open));
   main.innerHTML = body;
@@ -212,7 +266,6 @@ function render(): void {
     const was = before.get(d.dataset.k!);
     if (was !== undefined) d.open = was;
   });
-  actions.innerHTML = `<div class="wrap">${buttons}</div>`;
   if (typing !== null) {
     const input = $("#paircode") as HTMLInputElement;
     input.value = typing;
@@ -272,7 +325,7 @@ function questionBlock(q: TeacherQuestion, i: number, o: { note?: boolean; fix?:
       const fixable = o.fix ? ` fixable" data-act="toggle-count" data-q="${i}" data-i="${j}` : "";
       return `<div class="ans a${j}${a.counts ? " right" : ""}${fixable}">
         <span class="key">${a.counts ? ICON.check : ""}</span>${shapeSvg(j)}<span class="t">${lines(a.text)}</span>
-        ${o.dist ? `<span class="cnt">${o.dist[j]}</span>` : ""}
+        ${o.dist ? `<span class="cnt">${live(`d${i}-${j}`, o.dist[j])}</span>` : ""}
       </div>`;
     })
     .join("");
@@ -294,7 +347,7 @@ function lobbyCard(v: TeacherView): string {
   return `<div class="card">
     <div class="muted">${esc(siteAddress())}</div>
     <div class="codebig">${esc(run.code)}</div>
-    <div class="row"><span class="stat">${run.players.length}</span><span class="muted">joined</span></div>
+    <div class="row"><span class="stat">${live("joined", run.players.length)}</span><span class="muted">joined</span></div>
     ${playersList(v)}
     <p class="muted" style="margin-bottom:0">The projector shows the code and a QR code. Students who join later get in too.</p>
   </div>`;
@@ -324,7 +377,7 @@ function currentCard(v: TeacherView): string {
   return `<div class="card">
     <div class="row" style="justify-content:space-between">
       <strong>${run.n} / ${run.total}</strong>
-      <span><span class="stat" style="font-size:1.6rem">${run.answered}</span><span class="muted"> / ${run.players.length} answered</span></span>
+      <span><span class="stat" style="font-size:1.6rem">${live("answered", run.answered)}</span><span class="muted"> / ${live("players", run.players.length)} answered</span></span>
     </div>
     ${q.note ? `<div class="note"><strong>Note from your AI</strong>${esc(q.note)}</div>` : ""}
     <div class="qt" style="font-weight:600;font-size:1.1rem;margin:8px 0;white-space:pre-wrap">${lines(q.text)}</div>
@@ -363,6 +416,7 @@ function connectCard(v: TeacherView): string {
     </form>
     ${pairMessage ? `<p>${esc(pairMessage)}</p>` : ""}
     <p class="muted">Is the projector this computer's second screen? <a href="/screen?q=${esc(v.id)}" target="_blank" rel="noopener">Open the projector window here</a> and move it there (F for full screen).</p>
+    <p class="muted">If this device's battery dies: open <strong>${esc(siteAddress())}/remote</strong> on another device and type its code at the projector computer (press C there). Or keep the teacher link somewhere private: <button class="btn" data-act="copy-link" type="button">Copy the teacher link</button></p>
   </details>`;
 }
 

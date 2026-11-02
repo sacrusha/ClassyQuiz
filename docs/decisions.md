@@ -58,6 +58,12 @@ Paste is the main path, since many free AI tiers can't produce files. A single
 accepted from v1. What has to be future-proof is that the text can refer to
 images in the archive by file name (v2), so the format reserves that now.
 
+Any other file (.docx, .pdf, .tar.gz, …) gets a message naming what the site
+takes, instead of being read as text and failing with "No questions were
+found" (review B). The backlog's newer "zip only" and "count upload attempts
+by format" (3e17927) were not built yet; they wait on the owner (see
+the review hand-back).
+
 ## 2026-11-02 — Lifetime of a quiz instance
 
 Serves: "nothing kept beyond its use"; v1 item 10.
@@ -385,9 +391,23 @@ v1 items 4, 10, 14.
   - one storage write per answer.
 
   That is a few hundred requests out of 100,000 a day, plus about 150 GB-s
-  of Durable Object time out of 13,000 a day. A whole class on the
-  long-poll fallback stays around 2,500 requests. Short polling was
-  rejected: about 11,000 requests per run.
+  of Durable Object time out of 13,000 a day.
+
+  On the long-poll fallback, a student's device is woken only when its own
+  view changes: its answer, or the teacher's next step. A classmate's answer
+  doesn't wake it. Measured with `simulate.mjs --all-poll`: 25 students,
+  drops, five questions, about 1,100 HTTP requests in two minutes. Each one
+  is a Function request plus a Durable Object request. Idle polls add one
+  per device every 25 s. A 15-minute lesson with the whole class on the
+  fallback comes to roughly 3,000 of each.
+
+  Short polling was rejected: about 11,000 requests per run. Before review A
+  found it, every answer woke every poller, which cost about the same as
+  short polling.
+- **Parsing at upload** happens in the Durable Object, not the Function. A
+  Function on Free has 10 ms of CPU, and a long pasted text could exceed
+  it. Nothing is stored when the quiz has errors. The quiz text is stored
+  once, apart from the small record rewritten with every answer.
 - **Storage:** SQLite-backed Durable Objects, the only kind on Free. There
   are no request logs (`observability` off), so no IP addresses are kept.
   Error logs carry the message only, never quiz content.
@@ -411,9 +431,14 @@ Serves: constraint "survives school Wi-Fi"; v1 items 3, 6, 7, 9.
   - A missing pong means the line is dead, and the device reconnects.
   - Waking up, coming back online, or the tab becoming visible reconnects
     at once.
-  - If a WebSocket can't open three times in a row, the page switches to
-    HTTP long-polling (25 s holds) for the rest of its life. Some school
-    filters break WebSockets; the quiz then runs a moment slower.
+  - If WebSockets fail three times in a row, the page switches to HTTP
+    long-polling (25 s holds) for the rest of its life. A socket counts as
+    failed when no message arrives through it within 8 s, whether or not
+    it opened. Some school filters block the upgrade; others accept it and
+    then drop every frame. The quiz then runs a moment slower.
+  - Polls never follow each other closer than 300 ms. A device without a
+    player is held like any other poller, until the avatars on offer
+    change.
   - Rejected: Server-Sent Events. Proxies buffer them too, commands would
     still need POST, and they don't hibernate.
 - **Everything a device sends is safe to repeat:**
@@ -421,6 +446,11 @@ Serves: constraint "survives school Wi-Fi"; v1 items 3, 6, 7, 9.
     given in; the server ignores them once the quiz has moved on.
   - Answers carry a sequence number; a late older one changes nothing.
   - Fixes set a value rather than toggle one.
+  - "Start with a class" names the state it was given in, like flow
+    commands. It only acts from "no run" or the final ranking, so a resend
+    can't wipe a class that has started joining.
+  - A join remembers its command id, so a resent join gets the same player,
+    not a second avatar.
 
   Commands are resent until acknowledged. So a double tap, or a retry after
   a dropped connection, never skips a question or counts twice.
@@ -434,7 +464,15 @@ Serves: constraint "survives school Wi-Fi"; v1 items 3, 6, 7, 9.
   - doubled Reveal and Next.
 
   It checks that every score equals the acknowledged answers under the
-  final fixes.
+  final fixes. Since the review, the dead tablet dies silently: its socket
+  stays open and just goes quiet, as when a battery dies. The student gets
+  their avatar back once the old device counts as away. A browser check
+  covers the real client:
+  - behind a proxy that drops frames, the device falls back to HTTP and
+    plays;
+  - a double tap on a teacher step;
+  - Reveal tapped while 45 answers arrive;
+  - a new phone taking over at the projector.
 
 ## 2026-11-02 — Runner: the flow of a run
 
@@ -461,6 +499,12 @@ Serves: v1 items 6, 7, 8, 9.
 - **Keyboard and presentation clicker on the projector:** Space, Enter, →,
   ↓ or PageDown takes the next usual step (start, reveal, next). F toggles
   full screen.
+- **On the teacher's device, a step can't be tapped twice.** After each step
+  (start, reveal, next, …) the buttons stay inert for 0.7 s. Otherwise a
+  double tap on "Reveal" lands on the "Next" that replaces it, and the class
+  never sees the reveal. The page also leaves the buttons alone while
+  answers come in: only the numbers are patched. A button replaced under
+  the finger would lose the tap. Found by both reviews.
 - **Late joiners** get in at any point before the final ranking.
 - **The teacher can remove an avatar**, e.g. a double tab or a stranger
   with the code. Its answers stop counting.
@@ -489,6 +533,16 @@ child's tablet.
 - **Same device, extended screen:** a teacher on one laptop opens the
   projector window from the teacher page (`/screen?q=…`) and moves it to
   the second screen. No pairing needed.
+- **The teacher's only device dies** (review A). A new device opens
+  `/remote` and shows a code. The code is typed in at the projector
+  computer: press C, or the "Connect a phone" button. The projector may
+  hand over control because it is the device in the room. Anyone at its
+  keyboard could do the same, and the teacher is there. Also, the
+  "Connect" section offers "Copy the teacher link" for a teacher who wants
+  a private copy.
+- **A projector resumes its pairing after a reload only within 8 hours.** A
+  shared school laptop shouldn't open yesterday's teacher's quiz. "Other
+  quiz" lets go of a pairing at any time.
 - **The secret leaves the address bar.** The teacher link arrives as
   `/teach#id.secret`, is stored in the browser, and the address becomes
   `/teach?q=id`. A projected address bar shows nothing usable.
@@ -530,6 +584,15 @@ with nothing set up or installed.
   Continuity entry's "joins again as a new player".
 - **A known player can reconnect after the end,** so a reloaded tablet
   still shows its final place.
+- **"Away" means not heard from recently:**
+  - a WebSocket whose device hasn't pinged for 45 s (clients ping every
+    20 s);
+  - a poller silent for 35 s.
+
+  A tablet whose battery dies doesn't close its socket. Counting only open
+  sockets kept its avatar "connected", so its student couldn't pick it back
+  (review A). A device without a player asks again every 10 s, so the
+  avatar shows up within about a minute of the death.
 
 ## 2026-11-02 — Runner: what each screen shows
 

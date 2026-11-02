@@ -103,6 +103,11 @@ so there is something to click early; authoring closes the loop.
 14. **Self-hosting nudge** — the free plan serves a few users; the site tells
     people how to get their own instance, e.g. "ask your AI to set one up,
     takes 5–10 minutes", or the guide on GitHub.
+15. **An answer that looked in time counts** — a student who tapped before the
+    reveal, as far as their tablet showed, and then finds it didn't count is
+    disappointed, and the fun is dented for the whole class. What the device
+    shows as accepted and what is counted must agree, however the teacher's
+    reveal and the tap race each other over school Wi-Fi.
 
 ## v2 — Figures, tempo, and a hardened instance
 

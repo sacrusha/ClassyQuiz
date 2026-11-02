@@ -1,11 +1,16 @@
 // A class on bad Wi-Fi, against a running site (local dev or deployed):
 //
-//   node scripts/simulate.mjs [base-url] [players]
+//   node scripts/simulate.mjs [base-url] [players] [--all-poll]
+//
+// --all-poll: every student over long-polling, and the number of HTTP
+// requests reported (the Free plan's budget on a network without
+// WebSockets).
 //
 // 25 students join; a fifth of them only get through over HTTP long-polling
 // (as on a network that blocks WebSockets). During the quiz, devices drop
 // their connection and come back (sleep, Wi-Fi), answers sent just before a
-// drop are resent, one tablet dies and its student picks their avatar back on
+// drop are resent, one tablet dies silently (its socket just goes quiet) and
+// its student picks their avatar back on
 // another device, a stray avatar is removed, and the teacher changes a key
 // after the reveal, voids one question and skips another.
 //
@@ -13,8 +18,11 @@
 // answers and the teacher's fixes say. That is the constraint "survives
 // school Wi-Fi" made checkable: nothing lost, nothing counted twice.
 
-const BASE = (process.argv[2] ?? "http://127.0.0.1:8788").replace(/\/$/, "");
-const N = Number(process.argv[3] ?? 25);
+const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const ALL_POLL = process.argv.includes("--all-poll");
+const BASE = (args[0] ?? "http://127.0.0.1:8788").replace(/\/$/, "");
+const N = Number(args[1] ?? 25);
+let requests = 0;
 const WS_BASE = BASE.replace(/^http/, "ws");
 
 const QUIZ = `Title: Simulation
@@ -56,6 +64,7 @@ let log = (...a) => console.log(`[${((Date.now() - T0) / 1000).toFixed(1)}s]`, .
 const T0 = Date.now();
 
 async function post(path, body) {
+  requests++;
   const res = await fetch(BASE + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   return { status: res.status, body: await res.json() };
 }
@@ -82,14 +91,23 @@ class Device {
     if (this.stopped || !this.online) return;
     const ws = new WebSocket(`${WS_BASE}/api/i/${this.instance}/ws`);
     this.ws = ws;
+    let pinger;
     ws.onopen = () => {
       ws.send(JSON.stringify({ t: "hello", auth: this.auth }));
       for (const [id, p] of this.pending) ws.send(JSON.stringify({ t: "cmd", id, cmd: p.cmd }));
+      // Like client/net.ts: a ping every 20 s, answered by the runtime.
+      pinger = setInterval(() => {
+        if (!this.frozen && ws.readyState === 1) ws.send("ping");
+      }, 20_000);
     };
-    ws.onmessage = (e) => this.handle(JSON.parse(e.data));
+    ws.onmessage = (e) => {
+      if (this.frozen || e.data === "pong") return;
+      this.handle(JSON.parse(e.data));
+    };
     ws.onclose = () => {
+      clearInterval(pinger);
       if (this.ws === ws) this.ws = null;
-      if (!this.stopped && this.online) setTimeout(() => this.connect(), 500);
+      if (!this.stopped && this.online && !this.frozen) setTimeout(() => this.connect(), 500);
     };
   }
   /** The device sleeps or loses Wi-Fi: no messages either way for a while. */
@@ -106,6 +124,11 @@ class Device {
     this.stopped = true;
     this.online = false;
     if (this.ws) this.ws.close();
+  }
+  /** The battery dies: no goodbye. The socket stays open on the server's side and simply goes quiet. */
+  freeze() {
+    this.frozen = true;
+    this.stopped = true;
   }
   handle(m) {
     if (m.t === "ack" && this.pending.has(m.id)) {
@@ -201,7 +224,7 @@ const until = async (cond, ms, what) => {
 };
 await until(() => tv, 5000, "teacher view");
 await teacher.send({ op: "setSkip", q: 4, value: true });
-const started = await teacher.send({ op: "startRun" });
+const started = await teacher.send({ op: "startRun", at: { phase: "idle", current: -1 } });
 check(started.ok, "startRun ok");
 await until(() => tv.run && tv.run.code, 5000, "join code");
 const code = tv.run.code;
@@ -209,16 +232,28 @@ log("join code", code);
 
 // Students
 const players = [];
-async function joinPlayer(name, mode, claimId = null) {
+async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 15000) {
   const r = await post("/api/join", { code });
   if (!r.body.instance) throw new Error("join failed " + JSON.stringify(r.body));
   const d = new Device(name, r.body.instance, { role: "player", join: true }, mode);
-  const p = { name, d, id: null, acked: {}, view: null, joining: false };
+  const p = { name, d, id: null, acked, view: null, joining: false };
+  let refresh = null;
   d.on((m) => {
     if (m.t === "choose" && !p.joining) {
+      if (claimId) {
+        // Coming back: wait until the old avatar is offered (its device
+        // counts as away), asking again now and then like client/play.ts.
+        if (!m.avatars.some((a) => a.id === claimId)) {
+          refresh ??= setInterval(() => !p.joining && void d.send({ op: "choose" }), 5000);
+          return;
+        }
+        clearInterval(refresh);
+        p.joining = true;
+        void d.send({ op: "claim", player: claimId });
+        return;
+      }
       p.joining = true;
-      if (claimId && m.avatars.some((a) => a.id === claimId)) void d.send({ op: "claim", player: claimId });
-      else void d.send({ op: "newPlayer" });
+      void d.send({ op: "newPlayer" });
     }
     if (m.t === "welcome") {
       p.id = m.player;
@@ -230,7 +265,7 @@ async function joinPlayer(name, mode, claimId = null) {
     }
   });
   d.start();
-  await until(() => p.id, 15000, `${name} welcome`);
+  await until(() => p.id, timeout, `${name} welcome`);
   return p;
 }
 
@@ -265,7 +300,7 @@ function maybeAnswer(p) {
 }
 
 for (let i = 0; i < N; i++) {
-  players.push(await joinPlayer(`s${i}`, i % 5 === 4 ? "poll" : "ws"));
+  players.push(await joinPlayer(`s${i}`, ALL_POLL || i % 5 === 4 ? "poll" : "ws"));
 }
 // A stray avatar (a double tab), removed by the teacher.
 const ghost = await joinPlayer("ghost", "ws");
@@ -289,6 +324,7 @@ const active = () => players.filter((p) => !p.dead).length;
 let qi = 0;
 await teacher.send({ op: "begin", at: at() });
 let deadPlayer = null;
+let revival = null;
 for (;;) {
   await until(() => tv.phase === "question", 5000, "question");
   const current = tv.current;
@@ -307,11 +343,21 @@ for (;;) {
     await teacher.send({ op: "setCounts", q: 0, counts: [false, false, true, false] });
   }
   if (current === 1) {
-    // A tablet dies; its student comes back on another device and picks their avatar.
-    deadPlayer = players.find((p) => p.d.mode === "ws" && !p.dead);
+    // A tablet dies without a goodbye; its student comes back on another
+    // device and picks their avatar once the old device counts as away.
+    // A device that is connected right now: one mid-drop would just be away.
+    deadPlayer = players.find((p) => p.d.mode === (ALL_POLL ? "poll" : "ws") && !p.dead && p.d.online && (ALL_POLL || p.d.ws?.readyState === 1));
     deadPlayer.dead = true;
-    deadPlayer.d.kill();
-    log(`device of ${deadPlayer.name} dies`);
+    deadPlayer.d.freeze();
+    log(`device of ${deadPlayer.name} dies silently`);
+    const dead = deadPlayer;
+    revival = (async () => {
+      await sleep(1500);
+      const back = await joinPlayer(`${dead.name}-again`, "ws", dead.id, dead.acked, 120_000);
+      check(back.id === dead.id, `the dead device's student got their avatar back (${back.id} vs ${dead.id})`);
+      players[players.indexOf(dead)] = back;
+      log(`${dead.name} is back on another device as the same avatar`);
+    })();
   }
   if (current === 3) await teacher.send({ op: "setVoid", q: 3, value: true });
   if (qi === 1) {
@@ -323,14 +369,10 @@ for (;;) {
   await teacher.send({ op: "next", at: before });
   await teacher.send({ op: "next", at: before }); // a retried Next is ignored
   await until(() => tv.phase !== "reveal" && tv.phase !== "ranking", 5000, "next");
-  if (deadPlayer && !deadPlayer.revived) {
-    deadPlayer.revived = true;
-    await sleep(1500);
-    const back = await joinPlayer(`${deadPlayer.name}-again`, "ws", deadPlayer.id);
-    check(back.id === deadPlayer.id, `the dead device's student got their avatar back (${back.id} vs ${deadPlayer.id})`);
-    back.acked = deadPlayer.acked;
-    players[players.indexOf(deadPlayer)] = back;
-    log(`${deadPlayer.name} is back on another device as the same avatar`);
+  if (revival && tv.phase === "question" && tv.current === 2) {
+    // The teacher waits for the student to be back before going on.
+    await revival;
+    revival = null;
   }
   if (tv.phase === "final") break;
 }
@@ -364,6 +406,7 @@ check((after.body.messages ?? []).some((m) => m.t === "gone"), "after the end, t
 for (const p of players) p.d.kill();
 teacher.kill();
 
+if (ALL_POLL) log(`HTTP requests by all devices: ${requests}`);
 if (failures.length) {
   console.log(`\nFAILED (${failures.length}):\n- ` + failures.join("\n- "));
   process.exit(1);

@@ -19,7 +19,14 @@ file.addEventListener("change", async () => {
   if (!f) return;
   try {
     if (/\.zip$/i.test(f.name) || f.type === "application/zip") text.value = await quizTextFromZip(await f.arrayBuffer());
-    else text.value = await f.text();
+    else if (/\.(txt|md|markdown)$/i.test(f.name) || f.type.startsWith("text/")) text.value = await f.text();
+    else {
+      // Read as text, a .docx or .pdf would end in "No questions were found".
+      const ext = (f.name.match(/\.([A-Za-z0-9]{1,8})$/)?.[1] ?? "").toLowerCase();
+      out.innerHTML = `<div class="card"><p class="err">The site takes the quiz as pasted text, a .txt or .md file, or a .zip containing one${ext ? `, not a .${esc(ext)} file` : ""}.</p>
+        <p class="muted">Ask your AI for the quiz as one code block and paste it here, or as a .zip.</p></div>`;
+      return;
+    }
     out.innerHTML = "";
     await submit();
   } catch (e) {

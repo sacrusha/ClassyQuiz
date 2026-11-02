@@ -29,7 +29,8 @@ export interface At {
 
 export type Command =
   // teacher
-  | { op: "startRun" }
+  /** Only from no run or the final ranking; `at` makes a resend harmless. */
+  | { op: "startRun"; at: At }
   | { op: "begin"; at: At }
   | { op: "reveal"; at: At }
   | { op: "next"; at: At }
@@ -40,6 +41,7 @@ export type Command =
   | { op: "setVoid"; q: number; value: boolean }
   | { op: "setSkip"; q: number; value: boolean }
   | { op: "remove"; player: string }
+  /** Teacher, or the projector (a new phone for a teacher whose device died). */
   | { op: "pair"; code: string }
   | { op: "endInstance" }
   // teacher or projector (keyboard, presentation clicker)
@@ -47,7 +49,9 @@ export type Command =
   // student
   | { op: "answer"; q: number; choice: number; seq: number }
   | { op: "claim"; player: string }
-  | { op: "newPlayer" };
+  | { op: "newPlayer" }
+  /** A device without a player asks again whom it might be (avatars become "away" over time). */
+  | { op: "choose" };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
 

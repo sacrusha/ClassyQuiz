@@ -204,7 +204,10 @@ export function parseQuiz(input: string): ParseResult {
   const blocks: Block[] = [];
   let current: Block | null = null;
 
-  const answeredCount = () => blocks.filter((b) => b.answers.length > 0).length;
+  // Blocks that have answers so far, kept as a count: recounting on every
+  // line made parsing quadratic in the number of questions.
+  let answered = 0;
+  const answeredCount = () => answered;
 
   const startBlock = (text: string, n: number) => {
     const m = text.match(NUMBERING);
@@ -226,14 +229,14 @@ export function parseQuiz(input: string): ParseResult {
         break;
       case "keyword":
         if (c.key === "title") {
-          if (title === null && blocks.every((b) => b.answers.length === 0)) {
+          if (title === null && answered === 0) {
             title = c.value;
             // Whatever came before the title was the AI talking to the teacher:
             // dropped without a warning (notes in it are kept for the teacher).
             for (const b of blocks) quizNotes.push(...b.notes);
             blocks.length = 0;
             current = null;
-          } else if (blocks.some((b) => b.answers.length > 0)) {
+          } else if (answered > 0) {
             // A title after questions starts a second quiz (an AI may write
             // one per class); merging them would be silently wrong.
             err(
@@ -256,6 +259,7 @@ export function parseQuiz(input: string): ParseResult {
           err(n, null, `The answer line "${excerpt(raw.trim())}" comes before any question.`);
           break;
         }
+        if (block.answers.length === 0) answered++;
         block.answers.push({ text: c.text, correct: c.correct, line: n });
         block.answerIndent = c.indent;
         break;

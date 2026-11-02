@@ -22,7 +22,7 @@ async function run(): Promise<void> {
       continue;
     }
     box.innerHTML = `<div class="codebig" style="font-size:3rem;font-weight:800;letter-spacing:.1em">${code}</div>
-      <p>On the device that has the quiz, open <strong>Connect the projector · other devices</strong> and type this code.</p>
+      <p>On the device that has the quiz, open <strong>Connect the projector · other devices</strong> and type this code. If that device is gone (battery), type it at the projector computer instead: press <strong>C</strong> there.</p>
       <p class="muted">The code is good for 10 minutes.</p>`;
     for (;;) {
       let r: { grant?: Grant; waiting?: true; expired?: true };
@@ -38,6 +38,8 @@ async function run(): Promise<void> {
         return;
       }
       if (r.expired) break;
+      // Neither a grant nor "still waiting": an error page; don't hammer the site.
+      if (!r.waiting) await new Promise((res) => setTimeout(res, 3000));
     }
   }
 }

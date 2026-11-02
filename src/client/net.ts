@@ -2,9 +2,10 @@
 //
 // - WebSocket first. A ping every 20 s keeps proxies from dropping an idle
 //   socket; a missing pong means the line is dead and we reconnect.
-// - If WebSockets never open on this network (some school filters break
-//   them), long-polling over plain HTTP takes over for the rest of the page's
-//   life. Same messages, same views.
+// - If WebSockets don't carry messages on this network (some school filters
+//   block the upgrade, others accept it and then drop the frames), long-
+//   polling over plain HTTP takes over for the rest of the page's life. Same
+//   messages, same views.
 // - Waking from sleep, coming back online, or the tab becoming visible
 //   reconnects at once instead of waiting out a backoff.
 // - Commands are kept until the server acknowledges them and are resent after
@@ -30,6 +31,10 @@ interface Pending {
 
 const PING_EVERY = 20_000;
 const PONG_WITHIN = 8_000;
+/** The server answers a hello at once; an open socket that stays silent this long doesn't work. */
+const FIRST_MESSAGE_WITHIN = 8_000;
+/** Polls never follow each other faster than this, whatever the server answers. */
+const MIN_POLL_GAP = 300;
 
 export class Line {
   private ws: WebSocket | null = null;
@@ -127,17 +132,35 @@ export class Line {
       return;
     }
     this.ws = ws;
-    let opened = false;
+    // A socket counts as working once a message arrived through it, not when
+    // it opened: some proxies accept the upgrade and then drop every frame.
+    let heard = false;
+    let silence: number | undefined;
     ws.onopen = () => {
-      opened = true;
-      this.wsFailures = 0;
-      this.backoff = 500;
       this.raw({ t: "hello", auth: this.opts.auth() });
       for (const p of this.pending) p.sent = false;
       this.flush();
       this.schedulePing();
+      silence = window.setTimeout(() => {
+        if (this.ws === ws && !heard) {
+          this.ws = null;
+          this.clearPing();
+          try {
+            ws.close();
+          } catch {
+            /* already closed */
+          }
+          this.onWsFail(false);
+        }
+      }, FIRST_MESSAGE_WITHIN);
     };
     ws.onmessage = (e) => {
+      if (!heard) {
+        heard = true;
+        clearTimeout(silence);
+        this.wsFailures = 0;
+        this.backoff = 500;
+      }
       if (e.data === "pong") {
         clearTimeout(this.pongTimer);
         return;
@@ -152,6 +175,7 @@ export class Line {
       this.handle(m);
     };
     ws.onclose = (e) => {
+      clearTimeout(silence);
       if (this.ws !== ws) return;
       this.ws = null;
       this.clearPing();
@@ -160,14 +184,14 @@ export class Line {
         this.setStatus("offline");
         return;
       }
-      this.onWsFail(opened);
+      this.onWsFail(heard);
     };
   }
 
-  private onWsFail(hadOpened: boolean): void {
+  private onWsFail(worked: boolean): void {
     if (this.stopped) return;
     this.setStatus("offline");
-    if (!hadOpened) this.wsFailures++;
+    if (!worked) this.wsFailures++;
     if (this.wsFailures >= 3) {
       // WebSockets don't get through on this network; plain HTTP it is.
       this.mode = "poll";
@@ -298,9 +322,11 @@ export class Line {
           if (m.t === "gone") gone = true;
         }
         if (gone) break;
-        // A quick empty answer (e.g. before a student has a player) is not
-        // a reason to ask again at once.
-        if (msgs.length === 0 && Date.now() - t0 < 1000) await sleep(1500);
+        // A quick empty answer is not a reason to ask again at once, and no
+        // answer at all makes this loop spin.
+        const took = Date.now() - t0;
+        if (msgs.length === 0 && took < 1000) await sleep(1500);
+        else if (took < MIN_POLL_GAP) await sleep(MIN_POLL_GAP - took);
       } catch {
         this.setStatus("offline");
         await sleep(delay);

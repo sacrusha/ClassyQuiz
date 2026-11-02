@@ -12,7 +12,7 @@ With an AI assistant that can run commands on your computer, e.g. Claude Code: *
 
 By hand:
 
-1. Install [Node.js](https://nodejs.org) 22 or newer and git, and create a free [Cloudflare account](https://dash.cloudflare.com/sign-up).
+1. Install [Node.js](https://nodejs.org) 22.18 or newer (24 recommended) and git, and create a free [Cloudflare account](https://dash.cloudflare.com/sign-up).
 2. Get the code and its tools:
    ```
    git clone https://github.com/sacrusha/ClassyQuiz.git

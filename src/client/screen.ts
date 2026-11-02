@@ -18,13 +18,19 @@ const main = $("main");
 const dot = $("#dot");
 const fsBtn = $("#fullscreen") as HTMLButtonElement;
 const otherBtn = $("#other") as HTMLButtonElement;
+const connectBtn = $("#connect-phone") as HTMLButtonElement;
 let line: Line | null = null;
 let view: ScreenView | null = null;
 
 interface Paired {
   instance: string;
   token: string;
+  /** When it was paired: a shared school laptop shouldn't open yesterday's teacher's quiz. */
+  at?: number;
 }
+
+/** A pairing is resumed after a reload within a school day, not the next morning. */
+const RESUME_WITHIN_MS = 8 * 3600_000;
 
 function start(): void {
   keepAwake();
@@ -35,7 +41,7 @@ function start(): void {
     return;
   }
   const paired = store.get<Paired>("cq.screen");
-  if (paired) {
+  if (paired && Date.now() - (paired.at ?? 0) < RESUME_WITHIN_MS) {
     connect(paired.instance, { role: "screen", token: paired.token });
     return;
   }
@@ -44,6 +50,7 @@ function start(): void {
 
 function connect(instance: string, auth: Auth): void {
   otherBtn.hidden = false;
+  connectBtn.hidden = false;
   line?.stop();
   line = new Line({
     instance,
@@ -75,7 +82,7 @@ async function pair(): Promise<void> {
     let code: string, nonce: string;
     try {
       const r = await api<{ code: string; nonce: string }>("/api/pair/new", { role: "screen" });
-      if (!r.body.code) throw new Error("no code");
+      if (!r.body.code) throw new Error("no code"); // the catch waits before trying again
       ({ code, nonce } = r.body);
     } catch {
       main.innerHTML = `<div class="center"><p class="muted">${ICON.wifi} No connection to ${esc(siteAddress())} yet. Retrying…</p></div>`;
@@ -99,11 +106,14 @@ async function pair(): Promise<void> {
       }
       statusDot(dot, "live");
       if (r.grant && r.grant.role === "screen") {
-        store.set("cq.screen", { instance: r.grant.instance, token: r.grant.token } satisfies Paired);
+        store.set("cq.screen", { instance: r.grant.instance, token: r.grant.token, at: Date.now() } satisfies Paired);
         connect(r.grant.instance, { role: "screen", token: r.grant.token });
         return;
       }
       if (r.expired) break;
+      // Neither a grant nor "still waiting": an error page from a filter or
+      // the host. Don't hammer the site.
+      if (!r.waiting) await new Promise((res) => setTimeout(res, 3000));
     }
   }
 }
@@ -245,14 +255,52 @@ function renderRanking(v: ScreenView): void {
 
 const ADVANCE = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
 document.addEventListener("keydown", (e) => {
+  if ((e.target as HTMLElement).tagName === "INPUT") return;
   if (e.key === "f" || e.key === "F") {
     toggleFullscreen();
+    return;
+  }
+  if ((e.key === "c" || e.key === "C") && line) {
+    e.preventDefault();
+    openConnect();
     return;
   }
   if (!ADVANCE.has(e.key) || e.repeat || !line || !view) return;
   e.preventDefault();
   void line.send({ op: "advance", at: { phase: view.phase, current: view.current } });
 });
+
+// The teacher's phone died: a new device opens /remote and shows a code,
+// which is typed in here, at the projector computer in the room.
+function openConnect(): void {
+  if (document.getElementById("connect")) return;
+  const box = document.createElement("form");
+  box.id = "connect";
+  box.className = "connect-box";
+  box.innerHTML = `<label for="connect-code">Code shown on the other device (${esc(siteAddress())}/remote)</label>
+    <input id="connect-code" class="code-input" inputmode="numeric" maxlength="7" autocomplete="off">
+    <div class="row"><button class="btn primary" type="submit">Connect</button><button class="btn" type="button" id="connect-cancel">Cancel</button></div>
+    <p id="connect-msg" class="muted"></p>`;
+  document.body.appendChild(box);
+  const input = box.querySelector("input")!;
+  input.focus();
+  box.querySelector("#connect-cancel")!.addEventListener("click", () => box.remove());
+  box.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") box.remove();
+  });
+  box.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const code = input.value.replace(/\D/g, "");
+    const msg = box.querySelector("#connect-msg")!;
+    msg.textContent = "…";
+    const r = await line!.send({ op: "pair", code });
+    if (r.ok) {
+      msg.textContent = r.result === "teacher" ? "Connected: that device steers the quiz now." : "Connected.";
+      window.setTimeout(() => box.remove(), 2500);
+    } else msg.textContent = r.error ?? "That didn't work.";
+  });
+}
+connectBtn.addEventListener("click", openConnect);
 
 function toggleFullscreen(): void {
   if (document.fullscreenElement) void document.exitFullscreen();
@@ -267,11 +315,13 @@ otherBtn.addEventListener("click", () => {
   store.remove("cq.screen");
   history.replaceState(null, "", "/screen");
   otherBtn.hidden = true;
+  connectBtn.hidden = true;
   void pair();
 });
 document.addEventListener("fullscreenchange", () => {
   fsBtn.hidden = !!document.fullscreenElement;
   otherBtn.hidden = !!document.fullscreenElement || !line;
+  connectBtn.hidden = !!document.fullscreenElement || !line;
 });
 
 start();
