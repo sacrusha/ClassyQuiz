@@ -16,3 +16,7 @@ From commit 356d2ae, Pages deployment 718effa0. Implementer's report, verbatim w
 - Left behind: one test quiz that expires on its own; roughly 2,000–3,000 of the day's 100,000 requests used.
 
 Still open after this deploy: school web filters on `*.pages.dev` (check with `/check` on the school network); claude.ai's free tier and the other AIs reading the page; real Android tablets.
+
+## 2026-11-02 — second deploy, 7a0fd6d
+
+Pages deployment b3d103da, state Worker version b05cbebe (migration v2 adds the UploadStats Durable Object). Carries the review fixes, the pruning, the projector tile fix, in-time taps and the upload-attempt counter. Run by the owner from a clean worktree at 7a0fd6d, since the session's permission mode blocks deploys from the assistant.

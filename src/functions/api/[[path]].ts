@@ -5,22 +5,21 @@
 //
 //   POST /api/quiz          {text, leaveOut?} upload: parse, create an instance
 //   POST /api/quiz          multipart         … with pictures: text, leaveOut?, image files
-//   POST /api/join          {code}            join code → instance id
+//   POST /api/join          {code}            the quiz's code → instance id
 //   GET  /api/i/:id/img/:secret/:n            a picture of the quiz
 //   GET  /api/i/:id/ws                        WebSocket to the instance
 //   POST /api/i/:id/poll    {auth, v}         long-poll fallback
 //   POST /api/i/:id/cmd     {auth, cmd}       command over HTTP (fallback)
-//   POST /api/pair/new      {role}            a device asks for a pairing code
-//   POST /api/pair/wait     {code, nonce}     … and waits for its grant
+//   POST /api/i/:id/info    {secret}          the pasting device: title, code, when it closes
+//   POST /api/i/:id/end     {secret}          the pasting device: delete the quiz now
 //   GET  /api/ping                            network check
 //   GET  /api/echo                            network check: WebSocket echo
 //   POST /api/attempt       {format}          count an upload attempt by format
 //   GET  /api/stats                           upload attempts by format
 
-import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, PAIR_CODE, type UploadResult } from "../../shared/protocol.ts";
+import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
 import type { Env } from "../../server/env.ts";
-import { randomCode, randomToken } from "../../server/random.ts";
 
 interface Ctx {
   request: Request;
@@ -42,8 +41,6 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (body === null) return json({ error: "The request was too large or not readable." }, 400);
     if (parts[0] === "quiz" && parts.length === 1) return await upload(env, body);
     if (parts[0] === "join" && parts.length === 1) return await join(env, body);
-    if (parts[0] === "pair" && parts[1] === "new") return await pairNew(env, body);
-    if (parts[0] === "pair" && parts[1] === "wait") return await pairWait(env, body);
     if (parts[0] === "attempt" && parts.length === 1) {
       await stats(env).count(isUploadFormat(body.format) ? body.format : "other");
       return json({ ok: true });
@@ -63,7 +60,7 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   const id = env.INSTANCE.newUniqueId();
   const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing");
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages } satisfies UploadResult);
-  return json({ ok: true, id: id.toString(), secret: r.secret } satisfies UploadResult);
+  return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, token: r.token } satisfies UploadResult);
 }
 
 /**
@@ -82,13 +79,13 @@ async function join(env: Env, body: Record<string, unknown>): Promise<Response> 
   if (!JOIN_CODE.test(code)) return json({ error: "code" }, 404);
   const instance = await env.JOIN.get(env.JOIN.idFromName(code)).resolve();
   if (!instance) return json({ error: "code" }, 404);
-  const running = await env.INSTANCE.get(env.INSTANCE.idFromString(instance)).hasRun(code);
-  if (!running) return json({ error: "code" }, 404);
+  const opens = await env.INSTANCE.get(env.INSTANCE.idFromString(instance)).opens(code);
+  if (!opens) return json({ error: "code" }, 404);
   return json({ instance });
 }
 
 async function toInstance(request: Request, env: Env, id: string, action: string): Promise<Response> {
-  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img"].includes(action)) return json({ error: "not found" }, 404);
+  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info", "end"].includes(action)) return json({ error: "not found" }, 404);
   let doId: DurableObjectId;
   try {
     doId = env.INSTANCE.idFromString(id);
@@ -100,24 +97,6 @@ async function toInstance(request: Request, env: Env, id: string, action: string
     if (len > 20_000) return json({ error: "too large" }, 413);
   }
   return env.INSTANCE.get(doId).fetch(request);
-}
-
-async function pairNew(env: Env, body: Record<string, unknown>): Promise<Response> {
-  const role = body.role === "screen" || body.role === "teacher" ? body.role : null;
-  if (!role) return json({ error: "role" }, 400);
-  const nonce = randomToken();
-  for (let i = 0; i < 20; i++) {
-    const code = randomCode(6);
-    if (await env.PAIR.get(env.PAIR.idFromName(code)).open(role, nonce)) return json({ code, nonce });
-  }
-  return json({ error: "No free code; try again." }, 503);
-}
-
-async function pairWait(env: Env, body: Record<string, unknown>): Promise<Response> {
-  const code = typeof body.code === "string" ? body.code : "";
-  const nonce = typeof body.nonce === "string" ? body.nonce : "";
-  if (!PAIR_CODE.test(code) || !nonce) return json({ expired: true });
-  return json(await env.PAIR.get(env.PAIR.idFromName(code)).wait(nonce));
 }
 
 function stats(env: Env) {

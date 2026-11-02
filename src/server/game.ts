@@ -46,6 +46,8 @@ export interface AnswerRecord {
 }
 
 export interface Run {
+  /** Tells this class from the next one playing the same quiz: a tablet left on the last final screen does not slip into the new lobby. */
+  id: string;
   code: string;
   phase: Phase;
   /** Index of the question that is up (or was last up); -1 before the first. */
@@ -87,8 +89,8 @@ export function newGame(quiz: Quiz): Game {
   };
 }
 
-export function startRun(g: Game, code: string): void {
-  g.run = { code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
+export function startRun(g: Game, code: string, id: string): void {
+  g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
 }
 
 function needRun(g: Game): Run {

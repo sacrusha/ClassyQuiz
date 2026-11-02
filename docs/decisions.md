@@ -28,6 +28,9 @@ only whether the output parses.
 
 Serves: v1 item 1 (a wrong key visible in seconds), item 12.
 
+Amended: the notes are gone ("The quiz carries no notes"); the key check
+becomes the lobby's question list (docs/user-flow.md §3.3).
+
 - In the format, the correct answer is marked on the answer line itself, not
   given as an index ("answer: 3"). An AI can get an index wrong without anyone
   noticing; an inline mark sits next to the text a human reads.
@@ -111,6 +114,9 @@ Revisit: if teachers are seen re-uploading for patterns the 48 hours miss.
 
 Serves: "survives school Wi-Fi"; v1 items 4, 7.
 
+Superseded for teacher devices by "One code per quiz, two teacher roles per
+tab": no teacher link; roles per tab.
+
 - A student device holds a player token for the run. A device coming back
   after sleep or a dropped connection resumes the same avatar, score and the
   current screen without the student doing anything.
@@ -133,6 +139,9 @@ avatar back ("Runner: joining and rejoining").
 ## 2026-11-02 — Single mirrored laptop: not designed for in v1
 
 Serves: v1 item 3.
+
+Superseded by "One code per quiz, two teacher roles per tab": the single
+mirrored laptop is now the starting point; the Projector steers itself.
 
 The expected setup is the big screen on one device and the remote on
 another. A lone mirrored laptop is not a v1 target. The projector view does
@@ -187,6 +196,9 @@ Serves: v1 items 1, 2, 13. Implemented in src/quiz/format.ts. The
 specification is the "How quizzes are built" section of the guidance page
 (src/public/index.html), because that is where AIs and teachers read it. A
 test parses the page's example, so the two can't drift apart.
+
+Amended: `Note:` is no longer part of the format; the parser drops such
+lines ("The quiz carries no notes").
 
 ```
 Title: Adding fractions
@@ -269,6 +281,8 @@ number, paste or upload a quiz) will sit at the top of the same page. Part 4
 over.
 
 ## 2026-11-02 — Notes are for doubts, and rare
+
+Superseded by "The quiz carries no notes" below.
 
 Serves: v1 item 1 ("an authoring note per question for the AI's doubts, which
 must reach the teacher while the question is up").
@@ -478,6 +492,9 @@ Serves: constraint "survives school Wi-Fi"; v1 items 3, 6, 7, 9.
 
 Serves: v1 items 6, 7, 8, 9.
 
+Amended by "One code per quiz, two teacher roles per tab": "Another class"
+keeps the quiz's code; a class opens at upload.
+
 - **Phases:** lobby → question → reveal → (ranking) → next question … →
   final. The final ranking can be called from any point (the bell rings at
   question 9); a question that wasn't revealed doesn't count.
@@ -514,6 +531,9 @@ Serves: v1 items 6, 7, 8, 9.
 
 Serves: v1 items 3, 10. Replaces the Continuity entry's handover through a
 code on the projector.
+
+Superseded by "One code per quiz, two teacher roles per tab": no pairing
+codes; `/teacher` and the quiz's code.
 
 **The device that wants a role shows a code; a device that already holds
 the quiz types it in.**
@@ -556,6 +576,10 @@ child's tablet.
 Serves: v1 item 3. The owner's frame: setup happens with the projector off
 or on an extended screen, and both devices must work for setup.
 
+Superseded by the lobby's question list, answers folded until a button that
+says it shows them (user flow §3.3, "One code per quiz, two teacher roles
+per tab").
+
 On a laptop, detected as min-width 900 px with a fine pointer, the key
 check opens collapsed: a summary and a "Show the key check" button. On a
 phone it opens directly. That costs the laptop one tap, against the case
@@ -565,6 +589,10 @@ where the situation doesn't hold and the class sees every key.
 
 Serves: v1 items 4, 5. The owner's baseline: shared, school-managed tablets
 with nothing set up or installed.
+
+Amended by "One code per quiz, two teacher roles per tab": the code is per
+quiz, not per run; no "8 hours" projector resume (a tab keeps its role,
+`sessionStorage`).
 
 - **Getting to the quiz:**
   - The projector shows the address, the join code, and a QR code for
@@ -975,6 +1003,10 @@ them after the flow redesign (docs/user-flow.md) has landed on main and
   read "[connected]". Restarting the site fixes it.
 - Stop a stack by killing the wrangler node processes with their children
   (`taskkill /T`). Stopping only the shell leaves workerd holding the ports.
+- Don't give the site and the state Worker the same `--persist-to`
+  directory: every Durable Object call from the site then fails with
+  "Network connection lost". A start script that waits for "Ready on" in a
+  log must delete the old log first.
 
 **Checked:**
 - Unit tests: parser forms and errors, `imageKey`, PNG/JPEG reading,
@@ -998,6 +1030,152 @@ them after the flow redesign (docs/user-flow.md) has landed on main and
 
 Revisit: if teachers' AIs put picture lines after the answers often enough
 that the error costs more round trips than a guess would cost wrong figures.
+
+## 2026-11-02 — The quiz carries no notes
+
+Serves: v1 item 1 as the owner rewrote it: "The quiz is the finished
+deliverable: the AI talks to the teacher while authoring, when the teacher is
+there to react, not through the quiz during the lesson." Supersedes "Notes
+are for doubts, and rare". The per-question note was the product owner's
+proposal, rejected once the owner saw it on the screens of the flow design.
+
+- **Format:** no `Note:` line, neither on a question nor on the quiz. Nothing
+  in the quiz is addressed to the teacher.
+- **Parser:** a `Note:` line is dropped without an error or a warning. An AI
+  that read the old guidance, or a cached copy of it, still produces a quiz
+  that runs. An indented line after a `Note:` line doesn't continue the
+  answer above it, as before.
+- **Guidance page:** the notes section and the notes in the example are gone.
+  "Nothing else belongs to the quiz" now names messages to the teacher.
+  "Making a quiz with a teacher" says where a doubt goes instead: into the
+  conversation, before the quiz is handed over, best as a reading the teacher
+  can confirm. Part 4 stays the owner's to take over.
+- **Screens:** no note anywhere. This covers the key check's count and "Check
+  these first", and the note above the current question. The protocol lost
+  `quizNote` and the question's `note`.
+- **What the notes did that is now unprotected:** a doubt the AI raised in a
+  chat the teacher only skimmed no longer reappears during the run. The
+  remedy is the lobby's question list with the answers a tap away (user flow
+  §3.3) and fixing during the run (item 9). The harness evidence under the old
+  entry, that models put a planted wrong sheet key in a note, says nothing
+  about whether they mention it in the chat. That is worth one harness round
+  when the guidance is next tested.
+
+## 2026-11-02 — One code per quiz, two teacher roles per tab
+
+Serves: v1 items 3, 4, 17, 18, 19; constraint "survives school Wi-Fi".
+Built from docs/user-flow.md revision 3 (§1, §3); this entry records what
+was built and where it differs from the design.
+
+- **One code per quiz** (`server/instance.ts`). Claimed in its `JoinCode`
+  object at upload, for the instance's lifetime plus `CODE_SLACK_MS` (12 h),
+  and claimed again whenever the instance's end moves to within half that
+  slack of the claim's end. `/api/join` also asks the instance whether the
+  code still opens it, so a code whose claim outlived a deleted quiz opens
+  nothing. "Again with another class" keeps the code and the fixes; the old
+  class's tablets are told "This quiz has finished" (their token carries
+  the class's id), live or when they come back.
+- **Roles per tab.** The Projector (`screen`) and the Remote, each held by
+  one token, kept in `sessionStorage`: a reload, sleep or dropped line
+  resumes the role; two windows of one browser can hold both. The tab that
+  pasted the quiz holds the Projector.
+- **Two entrances.** `/play#<code>` (students; the root page's code box and
+  the QR code lead there) offers no teacher role. `/teacher#<code>` offers
+  Projector and Remote while free.
+- **Presence.** A role's tab is "quiet" after 25 s without a sign and "away"
+  after 45 s (`QUIET_MS`, `FRESH_MS`; the tablets' away detection). A sign
+  is a WebSocket ping, a poll, or a hello. A teacher tab whose socket
+  closes (reload, a phone locking) counts from the close and fades the same
+  way, so a reload doesn't flip the steering to the wall and back. Presence
+  changes with time, not events: the teacher pages send `tick` (Projector
+  every 15 s while a Remote is there, Remote every 20 s, the role choice
+  every 10 s).
+- **The Projector steers itself while no Remote is there** (none, or away):
+  its view carries `steer`, the Remote's view. In the lobby it shows the
+  teacher's lobby; during the quiz a bar at the bottom. The clicker and
+  keyboard (`advance`) work on any Projector, also while a Remote steers.
+  "Steer from here" (⋯) takes the steering at once and sends the Remote back
+  to the role choice; a Remote that was only away resumes when it comes
+  back.
+- **"Movable".** A Projector that steers itself is offered to another tab;
+  taking it turns the old tab into the Remote (pasted on the phone, the
+  laptop takes the wall; "Open the projector window" on a laptop with two
+  screens). The new tokens count as present from the handover, and a tab
+  that was between polls or reconnecting when its role moved is told so on
+  its next contact (an in-memory map of moved tokens), rather than "lost".
+- **Legacy instances** (made before codes per quiz) are refused with "This
+  quiz was made with an earlier version of the site. Paste it again." and
+  expire on their own.
+- **Upload:** paste or .zip, nothing else; a paste with no answer line and
+  no `Title:` gets the not-a-quiz message and isn't sent. Attempts are
+  still counted by format.
+- **Deploy:** the state Worker's migration `v3` deletes the `Pairing` class
+  (and its stored pairing codes). `npm run deploy` deploys the state Worker
+  before the site, which is the order it needs.
+
+**Where it differs from the design:**
+- **The phone line on the wall.** On the self-steering Projector's lobby
+  the line "Your phone or another screen: open …/teacher, type the code"
+  and the projector-window button show only until the first student has
+  joined, as does ⋯ "Steer from your phone…" (after that the gate below
+  closes the way anyway). On a mirrored laptop that lobby is the wall, and
+  the line would invite the class to the teacher's entrance (the owner: "be
+  careful of children accidentally taking the remote"). For the same reason
+  the wall's notice
+  is "Remote gone – steering here", without "enter the code on another
+  device".
+- **"Change the right answer" on the steering Projector** during the quiz
+  opens the answers in a sheet over the wall; during a question the menu
+  item says "– the class sees it" (user flow §4). Any open fix closes when
+  the quiz moves on, so the clicker never brings a key onto the wall.
+- **A phone as the Projector** (pasted on the phone, or no projector) gets
+  a one-column lobby.
+
+**No new steering once students are in** (decided by the product owner
+within the owner's three cases). Once the current class has a student, a
+guest at `/teacher` can't take the Remote, can't take over a Projector that
+steers itself, and can't take a free Projector that would steer itself; the
+role choice shows such a role as "not once students are in". The owner's
+cases all still hold: a tab that holds a role comes back to it; a dead phone
+means the wall steers; a dead projector means reading off the Remote, and
+another computer can still take the free Projector while a Remote steers.
+"Again with another class" opens a lobby without students, so the roles are
+open again. Accepted loss: a phone whose tab was closed, or that left the
+Remote, can't steer again during that class; "Stop being the remote" and
+"Steer from here" say so in their confirmation once students are in. Why:
+the owner's "be careful of children accidentally taking the remote"; without
+the gate a child who knew `/teacher` got the steering, all lesson long on a
+single mirrored laptop. The guidance's paragraph on how a lesson runs says
+both screens are set up before the students get the code.
+
+**Evidence:**
+- `scripts/simulate.mjs`, rewritten for the roles: 25 students (a fifth
+  polling, or all with `--all-poll`), drops, a silent dead tablet picked
+  back, a stray avatar, fixes, doubled steps, a late tap; the phone takes
+  the Remote and steers, dies silently, and the wall steers again after
+  ~45 s since its last ping; it comes back as the Remote; "again" (same
+  code, fixes kept, old tablets told, an old token refused); the Remote
+  leaves; a tab on HTTP takes the self-steering Projector and the old one
+  becomes the Remote; that Remote shows the projector itself and the HTTP
+  Projector, waiting in a poll, hears it lost the role; delete, and the
+  code opens nothing; once the next class has a student, a new tab is
+  offered no steering and is refused both roles. Both modes pass on the
+  local stack (763 HTTP requests with all polling).
+- Headless Edge through the real pages: paste and not-a-quiz on the root
+  page; the managed lobby, answers and fixing; a phone at `/teacher` taking
+  the Remote; a full run with reveal, ranking, the bar after the Remote
+  left, final, again; the projector window (drag hint, opener becomes the
+  Remote); a Remote reloading mid-question without the wall taking over;
+  Space revealing on the wall; delete reaching the wall; pasted on the
+  phone with the laptop taking the wall; the fix sheet on the wall; a
+  student and a Remote with WebSockets broken (the role choice polls twice
+  in 8 s, not three times a second); a .docx; Delete on the root page; a
+  tablet closed mid-question and its avatar picked back with its answer;
+  `/teacher` after the Remote left mid-quiz, showing the Remote as "not
+  once students are in". No page errors.
+
+Revisit: 45 s once a phone in a pocket has been seen in a lesson; the gate,
+if teachers are seen wanting a phone in mid-lesson.
 
 ## Open
 

@@ -3,7 +3,7 @@
 // name. It has no public address of its own (workers_dev = false).
 
 export { Instance } from "./instance.ts";
-export { JoinCode, Pairing } from "./directory.ts";
+export { JoinCode } from "./directory.ts";
 export { UploadStats } from "./stats.ts";
 
 export default {

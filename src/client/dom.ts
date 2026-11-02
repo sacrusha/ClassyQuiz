@@ -49,17 +49,20 @@ export const store = {
   },
 };
 
-// --- the teacher's quizzes on this device
+// --- the quizzes pasted on this device (root page: resume, delete)
 
 export interface SavedQuiz {
   id: string;
+  /** Lets this device delete the quiz and ask when it closes. */
   secret: string;
+  code: string;
   title: string;
   at: number;
 }
 
 export function savedQuizzes(): SavedQuiz[] {
-  return store.get<SavedQuiz[]>("cq.quizzes") ?? [];
+  // Entries from before codes were per quiz have no code; they can't be resumed.
+  return (store.get<SavedQuiz[]>("cq.quizzes") ?? []).filter((q) => typeof q.code === "string");
 }
 
 export function saveQuiz(q: SavedQuiz): void {
@@ -74,6 +77,46 @@ export function forgetQuiz(id: string): void {
 
 export function findQuiz(id: string): SavedQuiz | null {
   return savedQuizzes().find((x) => x.id === id) ?? null;
+}
+
+// --- the role this tab holds (user flow §1). Per tab, not per device: two
+// windows of one browser may hold the Projector and the Remote. sessionStorage
+// survives a reload of the tab and goes with it when it's closed.
+
+export interface HeldRole {
+  role: "screen" | "remote";
+  token: string;
+  code: string;
+}
+
+export const tabRole = {
+  get(instance: string): HeldRole | null {
+    try {
+      const v = sessionStorage.getItem(`cq.role.${instance}`);
+      return v ? (JSON.parse(v) as HeldRole) : null;
+    } catch {
+      return null;
+    }
+  },
+  set(instance: string, r: HeldRole): void {
+    try {
+      sessionStorage.setItem(`cq.role.${instance}`, JSON.stringify(r));
+    } catch {
+      /* without storage a reload returns to the choice; the role frees up after a minute */
+    }
+  },
+  remove(instance: string): void {
+    try {
+      sessionStorage.removeItem(`cq.role.${instance}`);
+    } catch {
+      /* ignore */
+    }
+  },
+};
+
+/** Where a tab holding a role shows it. */
+export function rolePage(instance: string, role: "screen" | "remote"): string {
+  return `/${role === "screen" ? "screen" : "teach"}?q=${instance}`;
 }
 
 // --- keeping the screen on (projector during a long explanation, a tablet

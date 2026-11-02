@@ -64,6 +64,9 @@ so there is something to click early; authoring closes the loop.
    and several loose files are too error-prone. Upload attempts are counted by
    format, with content and identity excluded, so whether anyone tries another
    format is a fact to look up rather than a guess.
+   Owner, after seeing v1: .txt/.md invite users to type their AI questions
+   into the textbox — people tend to be like that. So no text files, and the
+   paste box must not read as a place to talk to an AI.
 3. **Three audiences in one session** — the class looking at the projector, the
    teacher steering from a small screen — possibly a different device than the
    one driving the projector — and students answering on their own. The teacher
@@ -127,7 +130,10 @@ so there is something to click early; authoring closes the loop.
     capable AI, free Claude works; give it photos of the exercises and ask it
     to build a quiz for classyquiz.pages.dev — "Help me build a quiz for
     classyquiz.pages.dev" works — best in the language the quiz should be in,
-    and ask it to explain how this works.
+    and ask it to explain how this works. On the second design: looks clean;
+    the copy has a problem for multilingual users, the specific sentence
+    contradicts the language instruction; the three Build steps need work,
+    the direction is right.
 17. **Coming back to a quiz, from the teacher's side** — a quiz already
     uploaded is worth resuming, but "your quizzes on this device" reads as if
     the server held a shared list. The teacher's view is: resume, how long
@@ -145,7 +151,16 @@ so there is something to click early; authoring closes the loop.
     code the class used, which the screen shows in a corner throughout. Roles
     aren't necessarily different devices: different tabs or windows do; a
     dual-screen laptop should be a common case, and the projector as
-    single-screen controller is useful.
+    single-screen controller is useful. Redefined after the second design, in
+    the owner's words: be careful of children accidentally taking the remote;
+    we may be over-committed to a solution. Losing connection is presumably
+    rare; losing both projector and remote is an "oh well, quiz is over"
+    moment; typically both are set up before any student gets the code.
+    Realistically: a device loses connection and reconnects with the same
+    role; the phone battery dies and the teacher switches to a
+    projector-plus-control hybrid role; the projector dies — tough luck, the
+    teacher reads the questions off the remote and improvises. Code per quiz,
+    confirmed.
 19. **The view after upload** — owner's direction: it must be easy to tell
     it's the right quiz. Lobby management on top, few words, simple clean
     design: how to join, who joined, and the start button ("Start quiz", not
@@ -197,3 +212,8 @@ The quiz is already made; it can be more than one activity.
 - **Pictures for a teacher whose AI can't make a zip** — free tiers and some
   AIs may not crop figures and bundle them; e.g. attach and crop the photo in
   the lobby, or an AI-drawn figure inline in the pasted text.
+- **"Add remote" among the wall's admin options** — once the class has
+  players, nobody can take a free Remote, so a teacher whose phone tab was
+  closed mid-lesson is left steering from the wall; the wall deliberately
+  admitting a new Remote reopens the role on purpose, where a child couldn't
+  take it by accident.

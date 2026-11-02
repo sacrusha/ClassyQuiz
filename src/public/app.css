@@ -1,5 +1,5 @@
-/* classyQuiz app pages: projector, student, teacher, upload, pairing, check.
-   The guidance page (index.html) has its own small inline style. */
+/* classyQuiz app pages: projector, student, remote, the teacher's entrance,
+   network check. The root page (index.html) has its own small inline style. */
 
 :root {
   --bg: #fbf8f2;
@@ -9,9 +9,6 @@
   --rule: #e2ddd2;
   --accent: #2a5db0;
   --accent-ink: #fff;
-  --note-bg: #fff1b8;
-  --note-edge: #d9a400;
-  --note-ink: #3d2f00;
   --bad: #c62828;
   --good: #1f8a4c;
   --radius: 14px;
@@ -28,9 +25,6 @@
     --rule: #3a3935;
     --accent: #8fb3f0;
     --accent-ink: #10213f;
-    --note-bg: #3b3210;
-    --note-edge: #d9a400;
-    --note-ink: #ffe9a3;
     color-scheme: dark;
   }
 }
@@ -71,14 +65,7 @@ a { color: var(--accent); }
 .dot[data-status="offline"] { background: #e0a100; animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: .3; } }
 
-.note {
-  background: var(--note-bg); color: var(--note-ink);
-  border-left: 6px solid var(--note-edge); border-radius: 8px;
-  padding: .6em .8em; margin: .5em 0; white-space: pre-wrap;
-}
-.note strong { display: block; font-size: .8em; letter-spacing: .04em; text-transform: uppercase; }
 .card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; margin: 12px 0; }
-.problems li { margin: .35em 0; }
 .code-input {
   font-size: 2rem; letter-spacing: .25em; text-align: center; width: 100%;
   padding: .3em; border-radius: 12px; border: 2px solid var(--rule); background: var(--card);
@@ -97,9 +84,15 @@ body.screen { overflow: hidden; height: 100vh; height: 100dvh; font-size: clamp(
 .screen main { height: 100vh; height: 100dvh; display: flex; flex-direction: column; padding: 2.2vh 2.5vw; gap: 2vh; }
 .screen .bar { display: flex; align-items: center; gap: 1.2em; font-weight: 700; color: var(--muted); font-size: 1.2em; }
 .screen .bar .grow { flex: 1; }
-.screen .corner { position: fixed; right: 10px; bottom: 10px; display: flex; gap: 8px; align-items: center; opacity: .6; font-size: 14px; }
+/* Not steering: the code in a corner throughout (latecomers, a teacher on
+   another device), with full screen and ⋯ beside it, faint. Room is kept
+   for it below the content. */
+body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px); }
+.screen .corner { position: fixed; right: 10px; bottom: 8px; display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.screen .corner .codeline { font-size: 20px; color: var(--muted); margin-right: 6px; }
+.screen .corner button, .screen .corner .dot { opacity: .6; }
 .screen .corner button { font-size: 14px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--rule); background: var(--card); }
-.screen h1.title { font-size: 3.2em; margin: 0; line-height: 1.1; text-align: center; }
+.codeline strong { color: var(--fg); letter-spacing: .05em; }
 .screen .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
 
 .lobby { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 3vw; min-height: 0; }
@@ -142,9 +135,6 @@ body.screen { overflow: hidden; height: 100vh; height: 100dvh; font-size: clamp(
 .classres .pct { font-size: 6em; font-weight: 800; line-height: 1; }
 .classres .bars { display: flex; align-items: flex-end; gap: 4px; height: 16vh; justify-content: center; margin-top: 2vh; }
 .classres .bars span { width: 2.2vh; background: var(--good); border-radius: 4px 4px 0 0; min-height: 3px; }
-.pair { text-align: center; }
-.connect-box { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--card); border: 2px solid var(--rule); border-radius: 16px; padding: 20px; width: min(90vw, 460px); z-index: 30; font-size: 18px; display: grid; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.2); }
-.pair .bigcode { font-size: 7em; font-weight: 800; letter-spacing: .1em; font-variant-numeric: tabular-nums; }
 
 /* -------------------------------------------------------------------------
    Student */
@@ -181,42 +171,146 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .choose button.new { background: var(--card); border: 3px dashed var(--rule); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
 .offline-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); background: #2b2b2b; color: #fff; border-radius: 999px; padding: 6px 14px; display: flex; gap: 8px; align-items: center; z-index: 10; }
 
+/* Steering: the slim bar at the bottom carries the teacher's next step
+   (docs/user-flow.md §3.4). Fixed px: the page's font scales with the
+   projector's width, the bar is for the teacher at the laptop. */
+body.screen.steering main { height: calc(100vh - 64px); height: calc(100dvh - 64px); }
+.steerbar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 64px; z-index: 6;
+  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  background: var(--card); border-top: 1px solid var(--rule); font-size: 18px;
+}
+.steerbar .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.steerbar .codeline { color: var(--muted); }
+.steerbar .btn { min-height: 46px; padding: .3em 1.2em; }
+.steerbar .btn.more { width: 52px; padding: 0; font-size: 1.3em; }
+.drag-hint {
+  position: fixed; left: 0; right: 0; top: 0; z-index: 25; padding: 14px 20px;
+  background: var(--accent); color: var(--accent-ink); font-size: 22px; font-weight: 700; text-align: center;
+}
+
+/* The lobby while the Projector steers itself (§3.3): the class's part fills
+   the first screen like the class lobby; Start and the teacher's questions
+   below. The page scrolls. */
+body.screen.manage { overflow: auto; height: auto; }
+body.screen.manage main { height: auto; display: block; padding: 0; }
+.mfold { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; gap: 2vh; padding: 2.2vh 2.5vw; }
+.mfold .lobby .qr { width: min(28vh, 24vw); height: min(28vh, 24vw); }
+.crowdcol { display: flex; flex-direction: column; gap: 1vh; min-height: 0; }
+.crowdcol .avatars { gap: 1.2vh; overflow: hidden; padding-top: 1vh; }
+.crowdcol .avatars > * { width: 9vh; height: 9vh; }
+.mstart { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-bottom: 1vh; }
+.mstart .btn.big { width: auto; min-width: 12em; font-size: 1.4em; }
+.mstart .device { font-size: 16px; }
+.mbelow { max-width: 50rem; margin: 0 auto; padding: 16px 16px 64px; font-size: 18px; border-top: 1px solid var(--rule); }
+.mfoot { text-align: right; }
+.device { margin: 0; color: var(--muted); text-align: center; }
+.device.ok { color: var(--good); font-weight: 700; }
+
 /* -------------------------------------------------------------------------
-   Teacher */
+   What the steering tab shows, on the Remote and on the steering Projector
+   (client/manage.ts): questions with their answers, fixes, players, ⋯ */
+
+button.link { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; font: inherit; cursor: pointer; }
+.hint { color: var(--muted); font-size: .9em; margin: .4em 0; }
+.qlist-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; }
+.qlist .warning { color: var(--muted); font-size: .9em; margin: .3em 0; }
+.qlist .warning::before { content: "⚠ "; }
+.qlist ol { list-style: none; margin: 8px 0 0; padding: 0; }
+.qlist li.q { border-top: 1px solid var(--rule); }
+.qhead { display: flex; align-items: baseline; gap: .5em; width: 100%; padding: 12px 2px; background: none; border: 0; text-align: left; color: inherit; font: inherit; }
+.qhead .num, .fixq .num { color: var(--muted); font-weight: 700; min-width: 1.4em; }
+.qhead .qt { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.qhead .chev { color: var(--muted); font-weight: 700; width: 1em; text-align: center; }
+.tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; border-radius: 6px; padding: 1px 6px; background: var(--rule); color: var(--fg); white-space: nowrap; align-self: center; }
+.tag.now { background: var(--accent); color: var(--accent-ink); }
+.answers { padding: 0 0 12px 1.9em; }
+.answers .row { margin-top: 6px; }
+.ans { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.ans .shape { color: var(--ans); width: 18px; height: 18px; }
+.ans .t { overflow-wrap: anywhere; }
+.ans .key { width: 24px; height: 24px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+.ans.right .key { background: var(--good); color: #fff; }
+.ans.right .t { font-weight: 700; }
+.ans .cnt { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 700; }
+.ans.fixable { cursor: pointer; border-radius: 8px; padding: 8px 6px; margin: 0 -6px; }
+.ans.fixable:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.ans.fixable .key { border: 2px solid var(--rule); }
+.ans.fixable.right .key { border-color: var(--good); }
+.avatars { display: flex; flex-wrap: wrap; gap: 6px; }
+.avatars > button, .avatars > span { width: 44px; height: 44px; border: 0; padding: 0; background: none; border-radius: 50%; display: block; }
+.avatars .away { opacity: .35; }
+
+/* ⋯: a sheet of choices from the bottom; a tap outside closes it */
+.sheet-back { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .35); display: flex; align-items: flex-end; justify-content: center; font-size: 17px; }
+.sheet {
+  background: var(--card); color: var(--fg); width: min(100%, 30rem); max-height: 85vh; overflow: auto;
+  border-radius: 16px 16px 0 0; padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 2px; box-shadow: 0 -8px 30px rgba(0, 0, 0, .2);
+}
+.sheet > button { text-align: left; background: none; border: 0; border-radius: 10px; padding: 12px 14px; min-height: 48px; font-weight: 600; }
+.sheet > button:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.sheet > button.danger { color: var(--bad); }
+.sheet > button.cancel { text-align: center; color: var(--muted); border-top: 1px solid var(--rule); border-radius: 0; margin-top: 4px; }
+.sheet > p { margin: 0; padding: 10px 14px; }
+.sheet > .avatars { padding: 8px 14px; }
+.sheet.fixsheet { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); width: min(100%, 36rem); }
+.fixq { font-weight: 700; margin: 4px 0 8px; display: flex; gap: .3em; }
+.fixsheet .answers { padding-left: 0; }
+.toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); background: #2b2b2b; color: #fff; padding: 8px 14px; border-radius: 10px; z-index: 40; max-width: 90vw; font-size: 17px; }
+.err { color: var(--bad); font-weight: 600; }
+
+/* -------------------------------------------------------------------------
+   Remote (docs/user-flow.md §3.5): one card and one button */
 
 body.teach { padding-bottom: 96px; }
 .teach header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--rule); }
-.teach header .wrap { display: flex; align-items: center; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
-.teach header h1 { font-size: 1.05rem; margin: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.teach header .wrap { display: flex; align-items: center; gap: 12px; padding-top: 10px; padding-bottom: 10px; }
+.teach header h1 { font-size: 1.05rem; margin: 0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar #pos { color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.topbar .code { font-weight: 800; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 .teach .actions { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); border-top: 1px solid var(--rule); z-index: 5; }
 .teach .actions .wrap { display: flex; gap: 10px; padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
 .teach .actions .btn { flex: 1; }
 .teach .actions .btn.primary { flex: 2; }
-.teach .q { border-top: 1px solid var(--rule); padding: 10px 0; }
-.teach .q:first-child { border-top: 0; }
-.teach .q .qt { font-weight: 600; white-space: pre-wrap; }
-.teach .q .num { color: var(--muted); font-weight: 700; margin-right: .3em; }
-.teach .ans { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
-.teach .ans .shape { color: var(--ans); width: 18px; height: 18px; }
-.teach .ans .key { width: 24px; height: 24px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
-.teach .ans.right .key { background: var(--good); color: #fff; }
-.teach .ans.right .t { font-weight: 700; }
-.teach .ans .cnt { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 700; }
-.teach .ans.fixable { cursor: pointer; border-radius: 8px; padding: 6px; margin: 0 -6px; }
-.teach .ans.fixable:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
-.teach .ans.fixable .key { border: 2px solid var(--rule); }
-.teach .ans.fixable.right .key { border-color: var(--good); }
-.teach .tag { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; border-radius: 6px; padding: 1px 6px; background: var(--rule); color: var(--fg); }
-.teach .tag.warn { background: var(--note-bg); color: var(--note-ink); }
+.teach .actions .btn.more { flex: 0 0 56px; padding: 0; font-size: 1.3rem; }
+.joinbox { text-align: center; padding: 8px 0 4px; }
+.joinbox .addr { color: var(--muted); font-weight: 600; }
+.joinbox .codebig { font-size: 2.8rem; font-weight: 800; letter-spacing: .1em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.joinbox .joined { color: var(--muted); margin-bottom: 8px; }
+.joinbox .avatars { justify-content: center; }
+.teach .device { margin: 10px 0; font-size: .95rem; }
+.current .qt { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; overflow-wrap: anywhere; }
+.current .answers { padding-left: 0; }
+.current .answered { color: var(--muted); margin: 10px 0 0; }
+.current .answered strong { color: var(--fg); }
 .teach .stat { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-.teach .codebig { font-size: 2.6rem; font-weight: 800; letter-spacing: .08em; }
-.teach .players { display: flex; flex-wrap: wrap; gap: 6px; }
-.teach .players button { width: 44px; height: 44px; border: 0; padding: 0; background: none; border-radius: 50%; position: relative; }
-.teach .players button.away { opacity: .35; }
-.teach .cover { text-align: center; padding: 28px 16px; }
-.teach details > summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
-.teach .summary { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.err { color: var(--bad); font-weight: 600; }
-.toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); background: #2b2b2b; color: #fff; padding: 8px 14px; border-radius: 10px; z-index: 20; max-width: 90vw; }
+.avatars > .ranked { width: auto; height: auto; border-radius: 0; display: flex; flex-direction: column; align-items: center; }
+.ranked .avatar { width: 44px; height: 44px; }
+.ranked small { font-weight: 700; }
+.row.spread { justify-content: space-between; }
 
-textarea.paste { width: 100%; min-height: 40vh; border-radius: 12px; border: 2px solid var(--rule); background: var(--card); padding: 12px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 15px; }
+/* -------------------------------------------------------------------------
+   The teacher's entrance (/teacher): the code, then Projector or Remote */
+
+.teacher-entry h1, .choice h1 { font-size: 1.5rem; margin: 0; line-height: 1.2; }
+.codeform { display: flex; gap: 8px; width: min(100%, 340px); }
+.codeform .code-input { flex: 1; min-width: 0; }
+.codeform .btn { width: 64px; font-size: 1.3rem; }
+.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: min(100%, 520px); }
+.btn.role { flex-direction: column; gap: 4px; min-height: 120px; font-size: 1.35rem; }
+.btn.role:not(:disabled) { border-color: var(--accent); }
+.btn.role small { font-size: .8rem; font-weight: 500; color: var(--muted); }
+.qhead .chev { transition: transform .15s; }
+.q.open .chev { transform: rotate(90deg); }
+
+/* A phone as the Projector (pasted on the phone, or no projector at all):
+   one column, the code still the largest thing. */
+@media (max-width: 700px) {
+  body.screen .lobby { grid-template-columns: minmax(0, 1fr); gap: 2vh; }
+  body.screen .lobby .addr { font-size: 1.3em; }
+  body.screen .lobby .bigcode { font-size: 4.2em; }
+  body.screen .lobby .qr, .mfold .lobby .qr { width: 38vw; height: 38vw; }
+  .crowdcol .avatars > *, .lobby .crowd .av { width: 7vh; height: 7vh; }
+  .mstart .twoscreens { display: none; }
+}
