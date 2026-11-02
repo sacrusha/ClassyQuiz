@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseQuiz } from "./format.ts";
+import { imageKey, parseQuiz, pictureRefs } from "./format.ts";
 
 const canonical = `Title: Brüche addieren
 Note: Aufgabe 4 war auf dem Foto abgeschnitten und fehlt.
@@ -270,15 +270,76 @@ test("empty input", () => {
 
 // --- warnings, shown in the key check
 
-test("missing title, duplicate answers, long answers, image lines are warnings", () => {
+test("missing title, duplicate answers, long answers are warnings", () => {
   const long = "x".repeat(90);
-  const r = parseQuiz(`1. Q?\n+ a\n- a\n- ${long}\nImage: fig1.png\n`);
+  const r = parseQuiz(`1. Q?\n+ a\n- a\n- ${long}\n`);
   assert.equal(r.ok, true);
   const text = r.warnings.map((w) => w.message).join("\n");
   assert.match(text, /no title/);
   assert.match(text, /twice/);
   assert.match(text, /90 characters long/);
-  assert.match(text, /Images are not supported yet/);
+});
+
+// --- pictures
+
+const withImage = (line: string) => `Title: T\n\n1. Wie gross ist der Winkel?\n${line}\n- 30°\n+ 45°\n\n2. Q2?\n+ a\n- b\n`;
+
+test("an Image: line after the question text gives the question its picture", () => {
+  const r = parseQuiz(withImage("Image: q1.png"));
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.quiz.questions[0].image, "q1.png");
+  assert.equal(r.quiz.questions[0].text, "Wie gross ist der Winkel?");
+  assert.equal(r.quiz.questions[1].image, "");
+});
+
+test("the picture's file name is read out of what AIs wrap around it", () => {
+  const cases: [string, string][] = [
+    ["**Image:** q1.png", "q1.png"],
+    ["Image: `q1.png`", "q1.png"],
+    ['Image: "Bild 1ä.png"', "Bild 1ä.png"],
+    ["image: bilder/q1.JPG", "bilder/q1.JPG"],
+    ["Image: q1.png (the triangle from exercise 4)", "q1.png"],
+    ["Image: q1.png – the triangle", "q1.png"],
+    ["Image: ![Dreieck](q1.png)", "q1.png"],
+    ["![Dreieck](q1.png)", "q1.png"],
+    ['![Dreieck](<fig 1.svg> "Figure")', "fig 1.svg"],
+  ];
+  for (const [line, name] of cases) {
+    const r = parseQuiz(withImage(line));
+    assert.deepEqual(r.errors, [], line);
+    assert.equal(r.quiz.questions[0].image, name, line);
+  }
+});
+
+test("an Image: line among the answers belongs to that question", () => {
+  const r = parseQuiz(`1. Q?\n- a\nImage: q1.png\n+ b\n`);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.quiz.questions[0].image, "q1.png");
+});
+
+test("an Image: line after the answers is an error: it might be meant for the next question", () => {
+  const r = parseQuiz(`Title: T\n1. Q1?\n+ a\n- b\nImage: q2.png\n2. Q2?\n+ a\n- b\n`);
+  assert.equal(r.ok, false);
+  assert.match(r.errors[0].message, /^Question 1 .*comes after the answers.*before the answers/);
+  assert.equal(r.quiz.questions[0].image, "");
+  assert.equal(r.quiz.questions[1].image, "");
+});
+
+test("pictures: two on one question, none named, from the web, before any question", () => {
+  const two = parseQuiz(withImage("Image: a.png\nImage: b.png"));
+  assert.match(two.errors.map((e) => e.message).join("\n"), /Question 1 .*more than one picture/);
+  const none = parseQuiz(withImage("Image: the triangle"));
+  assert.match(none.errors[0].message, /names no picture file/);
+  const web = parseQuiz(withImage("Image: https://example.org/q1.png"));
+  assert.match(web.errors[0].message, /from the web/);
+  const before = parseQuiz(`Title: T\nImage: cover.png\n1. Q?\n+ a\n- b\n`);
+  assert.match(before.errors[0].message, /comes before any question/);
+});
+
+test("imageKey ignores folders, case and Unicode composition", () => {
+  assert.equal(imageKey("Bilder/Q1.PNG"), "q1.png");
+  assert.equal(imageKey("a\\b\\Q1.png"), "q1.png");
+  assert.equal(imageKey("Bild 1a\u0308.png"), imageKey("bild 1ä.png"));
 });
 
 test("correct answer always in the same position is a warning", () => {
@@ -308,4 +369,35 @@ test("two quizzes in one pasted answer (e.g. one per class) are an error, not me
   const r = parseQuiz(src);
   assert.equal(r.ok, false);
   assert.match(r.errors[0].message, /more than one quiz.*Title: B \(6b\)/);
+});
+
+test("Background: before the first question is the quiz's; after a question's text, that question's own", () => {
+  const r = parseQuiz(`Title: Wald\nBackground: wald.jpg\n\n1. Welcher Baum?\nImage: blatt.png\nBackground: herbst.jpg\n+ Eiche\n- Buche\n\n2. Und hier?\n+ a\n- b\n`);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.quiz.background, "wald.jpg");
+  assert.deepEqual([r.quiz.questions[0].image, r.quiz.questions[0].background], ["blatt.png", "herbst.jpg"]);
+  assert.deepEqual([r.quiz.questions[1].image, r.quiz.questions[1].background], ["", ""]);
+  assert.deepEqual(
+    pictureRefs(r.quiz).map((p) => p.label),
+    ['The quiz has the background "wald.jpg"', 'Question 1 shows the picture "blatt.png"', 'Question 1 has the background "herbst.jpg"'],
+  );
+});
+
+test("Background: under an unmarked title still belongs to the quiz", () => {
+  const r = parseQuiz(`Wald\nBackground: wald.jpg\n1. Q?\n+ a\n- b\n`);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.quiz.title, "Wald");
+  assert.equal(r.quiz.background, "wald.jpg");
+});
+
+test("backgrounds: two for the quiz, two for a question, or after the answers are errors", () => {
+  const twoQuiz = parseQuiz(`Title: T\nBackground: a.jpg\nBackground: b.jpg\n1. Q?\n+ a\n- b\n`);
+  assert.match(twoQuiz.errors[0].message, /more than one "Background:" line/);
+  const twoQ = parseQuiz(`Title: T\n1. Q?\nBackground: a.jpg\nBackground: b.jpg\n+ a\n- b\n`);
+  assert.match(twoQ.errors[0].message, /^Question 1 .*more than one background/);
+  const after = parseQuiz(`Title: T\n1. Q?\n+ a\n- b\nBackground: a.jpg\n`);
+  assert.match(after.errors[0].message, /^Question 1 .*comes after the answers, so it's unclear which question the background belongs to/);
+  assert.equal(after.quiz.questions[0].background, "");
+  const image = parseQuiz(`Title: T\nImage: a.png\n1. Q?\n+ a\n- b\n`);
+  assert.match(image.errors[0].message, /comes before any question.*"Background:" line before the first question/);
 });
