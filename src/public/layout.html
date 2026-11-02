@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>classyQuiz — a question on screen</title>
+<meta name="description" content="How the classyQuiz projector lays out a question and how a student's device shows the answers: the markup and the stylesheet rules, with the sizes the script sets as comments.">
+<style>
+  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 60rem; margin: 0 auto; padding: 2rem 16px 4rem; }
+  h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
+  p { margin: .5rem 0; }
+  .lede { color: var(--muted); }
+  pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .85rem; line-height: 1.45; }
+  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<h1>A question on screen</h1>
+<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, and how a student's device shows its answers: the markup, and the rules from the site's stylesheet. Two things the stylesheet doesn't carry are in comments: the type sizes, which a script sets from the length of the text, and what the reveal adds.</p>
+
+<h2>Markup</h2>
+<pre><code>&lt;!-- The projector, one question. Always the light theme: projectors wash out dark backgrounds. --&gt;
+&lt;body class=&quot;screen&quot;&gt;&lt;main&gt;
+  &lt;div class=&quot;bar&quot;&gt;&lt;span&gt;2 / 12&lt;/span&gt;&lt;span class=&quot;grow&quot;&gt;&lt;/span&gt;&lt;span&gt;👤 &lt;span&gt;17 / 24&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;
+  &lt;h2 class=&quot;qtext&quot;&gt;A jacket costs 80 francs and is reduced by 25%. What does it cost now?&lt;/h2&gt;
+  &lt;div class=&quot;tiles&quot;&gt;
+    &lt;div class=&quot;tile a0&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 12 L90 84 H10Z&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;55 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;tile a1&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 8 L92 50 L50 92 L8 50Z&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;20 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;tile a2&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;75 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;tile a3&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;74&quot; height=&quot;74&quot; rx=&quot;4&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;60 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/main&gt;&lt;/body&gt;
+&lt;!-- At the reveal: a tile that doesn&#x27;t count gets the class &quot;dim&quot;; every tile&#x27;s .side becomes
+     &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; (only on a tile that counts) &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it),
+     and each tile gets &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;. --&gt;
+
+&lt;!-- A student&#x27;s phone or tablet: the answers as buttons, the question is on the projector. --&gt;
+&lt;body class=&quot;play&quot;&gt;&lt;main&gt;
+  &lt;div class=&quot;buttons n4&quot;&gt;
+    &lt;button class=&quot;ansbtn a0&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 12 L90 84 H10Z&quot;/&gt;&lt;/svg&gt;&lt;span&gt;55 francs&lt;/span&gt;&lt;/button&gt;
+    &lt;button class=&quot;ansbtn a1&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 8 L92 50 L50 92 L8 50Z&quot;/&gt;&lt;/svg&gt;&lt;span&gt;20 francs&lt;/span&gt;&lt;/button&gt;
+    &lt;button class=&quot;ansbtn a2&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/&gt;&lt;/svg&gt;&lt;span&gt;75 francs&lt;/span&gt;&lt;/button&gt;
+    &lt;button class=&quot;ansbtn a3&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;74&quot; height=&quot;74&quot; rx=&quot;4&quot;/&gt;&lt;/svg&gt;&lt;span&gt;60 francs&lt;/span&gt;&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/main&gt;&lt;/body&gt;</code></pre>
+
+<h2>Stylesheet</h2>
+<pre><code>:root { --bg: #fbf8f2; --fg: #1d1d1b; --muted: #5d5c57; --good: #1f8a4c; --bad: #c62828; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.45 system-ui, -apple-system, &quot;Segoe UI&quot;, Roboto, sans-serif; }
+.a0 { --ans: #d93b3b; --ans-ink: #fff; }      /* 1st answer: red triangle   */
+.a1 { --ans: #2f6fd6; --ans-ink: #fff; }      /* 2nd: blue diamond          */
+.a2 { --ans: #e8b100; --ans-ink: #1b1b1f; }   /* 3rd: yellow circle         */
+.a3 { --ans: #1f9d55; --ans-ink: #fff; }      /* 4th: green square          */
+.shape { width: 1em; height: 1em; display: inline-block; flex: none; fill: currentColor; }
+
+/* Projector */
+body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40px); }
+.screen main { height: 100dvh; display: flex; flex-direction: column; padding: 2.2vh 2.5vw; gap: 2vh; }
+.screen .bar { display: flex; align-items: center; gap: 1.2em; font-weight: 700; color: var(--muted); font-size: 1.2em; }
+.screen .bar .grow { flex: 1; }
+.qtext { font-weight: 700; text-align: center; line-height: 1.2; margin: 0; overflow-wrap: anywhere; display: flex; align-items: center; justify-content: center; flex: 0 1 auto; min-height: 18vh; }
+/* .qtext font-size is set by script from the question&#x27;s length: up to 40 characters 3.6em, up to 90 3em,
+   up to 160 2.4em, longer 1.9em; then reduced in 0.15em steps until the question fits in 34vh, down to 1.1em. */
+.tiles { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vh; min-height: 0; }
+/* .tiles font-size is set by script from the longest answer: up to 12 characters 2.6em, up to 30 2em,
+   up to 60 1.55em, longer 1.25em; then reduced in 0.1em steps until no tile overflows, down to 1em;
+   if it still overflows, words are broken. */
+.tile { background: var(--ans); color: var(--ans-ink); border-radius: 18px; display: flex; align-items: center; gap: .6em; padding: 1.2vh 1.6vw; font-weight: 700; position: relative; overflow: hidden; min-height: 0; }
+.tile .shape { width: 1.6em; height: 1.6em; }
+.tile .txt { flex: 1; min-width: 0; line-height: 1.15; }
+.tile .side { flex: none; width: 3.4em; display: flex; align-items: center; justify-content: flex-end; gap: .2em; }
+.tile .n { font-size: 1.3em; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tile .fill { position: absolute; left: 0; bottom: 0; height: 1.6vh; background: currentColor; opacity: .7; }
+.tile.dim { opacity: .5; }
+
+/* Student */
+.play main { min-height: 100dvh; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
+.play .buttons { flex: 1; display: grid; gap: 12px; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
+.play .buttons.n2 { grid-template-columns: 1fr; }
+.ansbtn { background: var(--ans); color: var(--ans-ink); border: 0; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px; font-size: clamp(1.3rem, 4.5vmin, 2.6rem); font-weight: 700; min-height: 90px; overflow-wrap: anywhere; }
+.ansbtn .shape { width: clamp(52px, 12vmin, 140px); height: clamp(52px, 12vmin, 140px); }</code></pre>
+</main>
+</body>
+</html>
