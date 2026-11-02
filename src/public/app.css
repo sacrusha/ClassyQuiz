@@ -118,15 +118,18 @@ body.screen { overflow: hidden; height: 100vh; height: 100dvh; font-size: clamp(
 .tile {
   background: var(--ans); color: var(--ans-ink); border-radius: 18px;
   display: flex; align-items: center; gap: .6em; padding: 1.2vh 1.6vw;
-  font-weight: 700; position: relative; overflow: hidden; min-height: 0; overflow-wrap: anywhere;
+  font-weight: 700; position: relative; overflow: hidden; min-height: 0;
 }
 .tile .shape { width: 1.6em; height: 1.6em; }
-.tile .txt { flex: 1; line-height: 1.15; }
-.tile .n { font-size: 1.4em; font-weight: 800; min-width: 1.6em; text-align: right; }
+.tile .txt { flex: 1; min-width: 0; line-height: 1.15; }
+.tiles.squeezed .txt { overflow-wrap: anywhere; }
+/* Room for the reveal's mark and count, there during the question too. */
+.tile .side { flex: none; width: 3.4em; display: flex; align-items: center; justify-content: flex-end; gap: .2em; }
+.tile .n { font-size: 1.3em; font-weight: 800; font-variant-numeric: tabular-nums; }
 .tile .fill { position: absolute; left: 0; bottom: 0; height: 1.6vh; background: currentColor; opacity: .7; transition: width .6s; }
 /* Wrong answers stay readable: how many picked them is the teaching moment. */
 .tile.dim { opacity: .5; }
-.tile .mark { width: 1.4em; height: 1.4em; }
+.tile .mark .icon { width: 1.3em; height: 1.3em; display: block; }
 .voided { display: inline-flex; gap: .3em; align-items: center; color: var(--bad); }
 
 .ranking { flex: 1; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 3vw; min-height: 0; align-items: center; }

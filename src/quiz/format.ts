@@ -72,7 +72,7 @@ function stripWrappingEmphasis(s: string): string {
 }
 
 function indentWidth(raw: string): number {
-  const m = raw.match(/^[ \t]*/);
+  const m = raw.match(/^\s*/);
   return m ? m[0].replace(/\t/g, "    ").length : 0;
 }
 
@@ -82,8 +82,8 @@ function classify(raw: string): Classified {
   if (s === "") return { kind: "blank" };
 
   // Checkbox lists, a common AI habit: "- [x] right", "- [ ] wrong", "[x] right".
-  let m = s.match(/^(?:[-*+]\s+)?\[([ xX✓✔])\]\s+(.*)$/);
-  if (m) return { kind: "answer", correct: m[1] !== " ", text: m[2].trim(), indent };
+  let m = s.match(/^(?:[-*+]\s+)?\[([\sxX✓✔])\]\s+(.*)$/);
+  if (m) return { kind: "answer", correct: /\S/.test(m[1]), text: m[2].trim(), indent };
 
   // "+" (also fullwidth) marks the correct answer.
   m = s.match(/^[+＋]\s+(.*)$/);
@@ -179,10 +179,9 @@ export function parseQuiz(input: string): ParseResult {
   const err = (message: string) => errors.push({ message });
   const warn = (message: string) => warnings.push({ message });
 
-  const normalised = input
-    .replace(/\r\n?/g, "\n")
-    .replace(INVISIBLES, "")
-    .replace(/[  ]/g, " ");
+  // Non-breaking spaces stay: an author who wrote "1 000 000" with them wants
+  // it kept on one line. Every pattern here reads them as spaces anyway.
+  const normalised = input.replace(/\r\n?/g, "\n").replace(INVISIBLES, "");
   const lines = selectBody(normalised.split("\n"));
 
   let title: string | null = null;

@@ -187,6 +187,16 @@ test("CRLF, BOM, non-breaking spaces and zero-width characters are normalised", 
   assert.equal(r.quiz.questions[0].answers[0].text, "a");
 });
 
+test("non-breaking spaces in the text are kept, and read as spaces around markers", () => {
+  const r = parseQuiz("Title: T\n1.\u00A0How much is 1000 × 1000?\n+\u00A01\u202F000\u202F000\n-\u00A0100\u00A0000\n- [\u00A0] 1 000\n");
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.quiz.questions[0].answers.map((a) => [a.text, a.correct]), [
+    ["1\u202F000\u202F000", true],
+    ["100\u00A0000", false],
+    ["1 000", false],
+  ]);
+});
+
 test("right-to-left text with a leading bidi mark keeps its markers", () => {
   const src = "Title: اختبار\n1. كم يساوي ٢ + ٢؟\n‏+ ٤\n‏- ٥\n";
   const r = parseQuiz(src);
