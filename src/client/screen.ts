@@ -1,136 +1,204 @@
-// The projector: what the class sees. Shows no teacher controls, no notes and
-// no key before the reveal. A presentation clicker or the keyboard can move
-// the quiz on (next / reveal); everything else is on the teacher's device.
-//
-// It gets its right to show a quiz in one of two ways:
-// - the device holds the teacher link (a second window on an extended
-//   screen): /screen?q=<id>;
-// - pairing: it shows a code, the teacher's device types it in. The code is
-//   harmless on the projector: it grants nothing to whoever reads it.
+// The Projector: what the class sees (docs/user-flow.md §3.3, §3.4). No key
+// before the reveal. While no Remote is there it steers itself: in the lobby
+// it is the teacher's lobby (join box on top, questions below the fold), and
+// during the quiz a slim bar carries the next step. A clicker or the keyboard
+// moves the quiz on at any time; the quiz's code stays in a corner throughout.
 
 import qrcode from "qrcode-generator";
-import type { Auth, Grant, ScreenView, ServerMessage } from "../shared/protocol.ts";
-import { $, esc, findQuiz, keepAwake, lines, siteAddress, statusDot, store } from "./dom.ts";
+import type { ScreenView, ServerMessage } from "../shared/protocol.ts";
+import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
-import { Line, api } from "./net.ts";
+import { Steer, addressAndCode, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, toast, type MenuItem } from "./manage.ts";
+import { Line } from "./net.ts";
 
 const main = $("main");
-const dot = $("#dot");
-const fsBtn = $("#fullscreen") as HTMLButtonElement;
-const otherBtn = $("#other") as HTMLButtonElement;
-const connectBtn = $("#connect-phone") as HTMLButtonElement;
+const sbar = $("#sbar");
+
+const params = new URLSearchParams(location.search);
+const instance = params.get("q") ?? "";
+const held: HeldRole | null = instance ? tabRole.get(instance) : null;
+/** Opened from the lobby's "Open the projector window": say where it goes. */
+const dragHint = params.get("drag") === "1";
+
 let line: Line | null = null;
 let view: ScreenView | null = null;
-
-interface Paired {
-  instance: string;
-  token: string;
-  /** When it was paired: a shared school laptop shouldn't open yesterday's teacher's quiz. */
-  at: number;
-}
-
-/** A pairing is resumed after a reload within a school day, not the next morning. */
-const RESUME_WITHIN_MS = 8 * 3600_000;
+let lastBar = "";
+let wasFull = false;
+let tickTimer: number | undefined;
+const steer = new Steer(() => line, () => view?.steer ?? null, newUI(), () => render());
 
 function start(): void {
+  if (!held || held.role !== "screen") {
+    location.replace(held ? rolePage(instance, held.role) : "/");
+    return;
+  }
+  if (dragHint) history.replaceState(null, "", rolePage(instance, "screen"));
   keepAwake();
-  const q = new URLSearchParams(location.search).get("q");
-  const own = q ? findQuiz(q) : null;
-  if (own) {
-    connect(own.id, { role: "screen", secret: own.secret });
-    return;
-  }
-  const paired = store.get<Paired>("cq.screen");
-  if (paired && Date.now() - paired.at < RESUME_WITHIN_MS) {
-    connect(paired.instance, { role: "screen", token: paired.token });
-    return;
-  }
-  void pair();
-}
-
-function connect(instance: string, auth: Auth): void {
-  otherBtn.hidden = false;
-  connectBtn.hidden = false;
-  line?.stop();
   line = new Line({
     instance,
-    auth: () => auth,
-    onMessage: (m) => onMessage(m, auth),
-    onStatus: (s) => statusDot(dot, s),
+    auth: () => ({ role: "screen", token: held.token }),
+    onMessage,
+    onStatus: (s) => {
+      const d = document.getElementById("dot");
+      if (d) statusDot(d, s);
+    },
   });
   line.start();
 }
 
-function onMessage(m: ServerMessage, auth: Auth): void {
+function onMessage(m: ServerMessage): void {
   if (m.t === "state" && m.view.role === "screen") {
+    const before = view;
     view = m.view;
+    if (before && before.remote !== view.remote) {
+      if (view.remote === "present") toast("Remote connected");
+      // On the wall: nothing here invites the class to the teacher's page.
+      else if (before.remote === "present") toast("Remote gone – steering here", 8000);
+    }
+    // Whether the Remote's tab is still there changes with time, not with an event: ask now and then.
+    clearInterval(tickTimer);
+    if (view.remote === "present") {
+      tickTimer = window.setInterval(() => {
+        if (line) void line.send({ op: "tick" });
+      }, 15_000);
+    }
     render();
+  } else if (m.t === "role") {
+    // Another tab took the Projector: this one steers from now on.
+    line?.stop();
+    tabRole.set(instance, { role: m.role, token: m.token, code: held!.code });
+    location.replace(rolePage(instance, m.role));
+  } else if (m.t === "lost") {
+    line?.stop();
+    tabRole.remove(instance);
+    location.replace(`/teacher#${held!.code}`);
   } else if (m.t === "gone") {
     line?.stop();
-    line = null;
-    if ("token" in auth) store.remove("cq.screen");
-    view = null;
-    void pair();
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Pairing
-
-async function pair(): Promise<void> {
-  for (;;) {
-    let code: string, nonce: string;
-    try {
-      const r = await api<{ code: string; nonce: string }>("/api/pair/new", { role: "screen" });
-      if (!r.body.code) throw new Error("no code"); // the catch waits before trying again
-      ({ code, nonce } = r.body);
-    } catch {
-      main.innerHTML = `<div class="center"><p class="muted">${ICON.wifi} No connection to ${esc(siteAddress())} yet. Retrying…</p></div>`;
-      await new Promise((r) => setTimeout(r, 3000));
-      continue;
-    }
-    main.innerHTML = `<div class="center pair">
-      <p style="font-size:1.6em;margin:0">Projector</p>
-      <div class="bigcode">${code}</div>
-      <p class="muted" style="max-width:36em">On the teacher's phone or computer, open the quiz, choose <strong>Connect the projector</strong> and type this code.</p>
-    </div>`;
-    statusDot(dot, "live");
-    for (;;) {
-      let r: { grant?: Grant; waiting?: true; expired?: true };
-      try {
-        r = (await api<typeof r>("/api/pair/wait", { code, nonce })).body;
-      } catch {
-        statusDot(dot, "offline");
-        await new Promise((res) => setTimeout(res, 2000));
-        continue;
-      }
-      statusDot(dot, "live");
-      if (r.grant && r.grant.role === "screen") {
-        store.set("cq.screen", { instance: r.grant.instance, token: r.grant.token, at: Date.now() } satisfies Paired);
-        connect(r.grant.instance, { role: "screen", token: r.grant.token });
-        return;
-      }
-      if (r.expired) break;
-      // Neither a grant nor "still waiting": an error page from a filter or
-      // the host. Don't hammer the site.
-      if (!r.waiting) await new Promise((res) => setTimeout(res, 3000));
-    }
+    tabRole.remove(instance);
+    document.body.className = "screen";
+    sbar.innerHTML = "";
+    main.innerHTML = `<div class="center"><p style="font-size:1.6em">${esc(m.reason)}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
   }
 }
 
 // ---------------------------------------------------------------------------
 // Drawing
 
+let lastStepKey = "";
 function render(): void {
   const v = view;
   if (!v) return;
   document.title = v.title ? `${v.title} · classyQuiz` : "classyQuiz";
+  // A fix opened in the lobby, or for the last question, must not pop up on
+  // the wall with the next one (the clicker moves on without the menu).
+  const stepKey = `${v.phase}|${v.current}`;
+  if (stepKey !== lastStepKey) {
+    lastStepKey = stepKey;
+    steer.ui.fixing = null;
+  }
+  const managing = !!v.steer && v.phase === "lobby";
+  document.body.classList.toggle("manage", managing);
+  document.body.classList.toggle("steering", !!v.steer && !managing);
   if (v.phase !== "question" && v.phase !== "reveal") questionKey = "";
-  if (v.phase === "idle") {
-    main.innerHTML = `<div class="center"><h1 class="title">${esc(v.title || "classyQuiz")}</h1></div>`;
-  } else if (v.phase === "lobby") renderLobby(v);
+  if (managing) renderManagedLobby(v);
+  else if (v.phase === "lobby") renderLobby(v);
   else if ((v.phase === "question" || v.phase === "reveal") && v.question) renderQuestion(v);
   else if (v.phase === "ranking" || v.phase === "final") renderRanking(v);
+  renderBar(v, managing);
+  renderFix(v);
+}
+
+/**
+ * "Change the right answer" from ⋯ during the quiz: the question's answers in
+ * a sheet over the wall, tappable. On a mirrored laptop the class sees it;
+ * the menu item says so.
+ */
+function renderFix(v: ScreenView): void {
+  const t = v.steer;
+  const i = steer.ui.fixing;
+  let el = document.getElementById("fix");
+  if (!t || i === null || v.phase === "lobby" || !t.questions[i]) {
+    if (el) {
+      el.remove();
+      if (t && v.phase !== "lobby") steer.ui.fixing = null;
+    }
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "fix";
+    el.className = "sheet-back";
+    el.innerHTML = `<div class="sheet fixsheet"></div>`;
+    el.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target === el) {
+        steer.ui.fixing = null;
+        render();
+        return;
+      }
+      const a = target.closest<HTMLElement>("[data-act]");
+      if (a) void steer.act(a);
+    });
+    document.body.appendChild(el);
+  }
+  const q = t.questions[i];
+  patch(el.firstElementChild as HTMLElement, `<p class="fixq"><span class="num">${i + 1}</span> ${lines(q.text)}</p>${answersBlock(q, i, steer.ui)}`);
+}
+
+function qrSvg(code: string): string {
+  const qr = qrcode(0, "M");
+  qr.addData(`${location.origin}/#${code}`);
+  qr.make();
+  return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+}
+
+/** How a phone or another screen joins the teacher's side. */
+function deviceHelp(): string {
+  return `Your phone or another screen: open <strong>${esc(siteAddress())}/teacher</strong>, type the code, choose <strong>Remote</strong> or <strong>Projector</strong>.`;
+}
+
+/**
+ * The lobby while this screen steers: the class's part on top and large,
+ * laid out like the class lobby; the Start button and the teacher's
+ * questions below it (item 19). On a mirrored laptop all of it is on the
+ * wall, so the line on how to steer from a phone shows only until the first
+ * student is in: after that it would invite the class to the teacher's page
+ * (backlog item 18, "children accidentally taking the remote"). It stays in ⋯.
+ */
+function renderManagedLobby(v: ScreenView): void {
+  lobbyKey = "";
+  const t = v.steer!;
+  const n = v.players.length;
+  const devices =
+    t.remote === "present"
+      ? `<p class="device ok">Remote connected ✓</p>`
+      : n === 0
+        ? `<p class="device twoscreens"><button class="btn" data-act="projector-window">Two screens? Open the projector window</button></p>
+           <p class="device">${deviceHelp()}</p>`
+        : "";
+  const html = `<div class="mlobby">
+    <div class="mfold">
+      <div class="bar"><span class="grow">${esc(v.title || "Quiz")}</span></div>
+      <div class="lobby">
+        <div class="join">
+          <div class="qr">${qrSvg(v.code)}</div>
+          <div class="addr">${esc(siteAddress())}</div>
+          <div class="bigcode">${esc(v.code)}</div>
+        </div>
+        <div class="crowdcol">
+          <div class="count">${ICON.person}${live("joined", n)}</div>
+          ${playersRow(t, true)}
+        </div>
+      </div>
+      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>${devices}</div>
+    </div>
+    <div class="mbelow">
+      ${questionList(t, steer.ui)}
+      <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
+    </div>
+  </div>`;
+  patch(main, html);
+  steer.noteStep(t, main);
 }
 
 let lobbyKey = "";
@@ -138,17 +206,14 @@ function renderLobby(v: ScreenView): void {
   const key = `${v.code}`;
   if (lobbyKey !== key || !main.querySelector(".lobby")) {
     lobbyKey = key;
-    const url = `${location.origin}/#${v.code}`;
-    const qr = qrcode(0, "M");
-    qr.addData(url);
-    qr.make();
+    delete main.dataset.skeleton;
     main.innerHTML = `
       <div class="bar"><span class="grow">${esc(v.title)}</span></div>
       <div class="lobby">
         <div class="join">
-          <div class="qr">${qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true })}</div>
+          <div class="qr">${qrSvg(v.code)}</div>
           <div class="addr">${esc(siteAddress())}</div>
-          <div class="bigcode">${esc(v.code ?? "")}</div>
+          <div class="bigcode">${esc(v.code)}</div>
         </div>
         <div style="display:flex;flex-direction:column;min-height:0">
           <div class="count">${ICON.person}<span id="count">0</span></div>
@@ -178,14 +243,16 @@ function renderQuestion(v: ScreenView): void {
   const q = v.question!;
   const r = v.reveal;
   // While answers come in only the count changes; redrawing the question
-  // each time would make it flicker on a slow laptop.
-  const key = JSON.stringify([v.phase, q, r]);
+  // each time would make it flicker on a slow laptop. The fit depends on the
+  // room the bar leaves, so it is part of the key.
+  const key = JSON.stringify([v.phase, q, r, !!v.steer]);
   const counter = main.querySelector("#answered");
   if (key === questionKey && counter) {
     counter.textContent = `${v.answered} / ${v.players.length}`;
     return;
   }
   questionKey = key;
+  delete main.dataset.skeleton;
   const max = r ? Math.max(1, ...r.dist) : 1;
   const longest = Math.max(...q.answers.map((a) => a.length));
   const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
@@ -247,7 +314,7 @@ function renderRanking(v: ScreenView): void {
   if (!r) return;
   const pct = r.given > 0 ? Math.round((100 * r.right) / r.given) : 0;
   const final = v.phase === "final";
-  main.innerHTML = `
+  const html = `
     <div class="bar"><span class="grow">${esc(v.title)}</span>${final ? `<span>${ICON.trophy}</span>` : ""}</div>
     <div class="ranking">
       <div class="podium">
@@ -267,80 +334,166 @@ function renderRanking(v: ScreenView): void {
         <div class="bars">${r.perQuestion.map((p) => `<span style="height:${p.given ? (100 * p.right) / p.given : 0}%"></span>`).join("")}</div>
       </div>
     </div>`;
+  patch(main, html);
+}
+
+/**
+ * The bottom line. Steering: ⋯, the code, and the next step. Not steering:
+ * the code in a corner, full screen, and ⋯ (steer from here, leave).
+ */
+function renderBar(v: ScreenView, managing: boolean): void {
+  const full = !!document.fullscreenElement;
+  let html: string;
+  if (managing) {
+    html = "";
+  } else if (v.steer) {
+    const next = nextStep(v.steer);
+    const side = sideStep(v.steer);
+    html = `<div class="steerbar">
+      <button class="btn more" data-menu aria-label="more">⋯</button>
+      <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
+      ${side ? `<button class="btn" data-step data-act="${side.act}">${side.label}</button>` : ""}
+      ${next ? `<button class="btn primary" data-step data-act="${next.act}">${next.label}</button>` : ""}
+    </div>`;
+  } else {
+    html = `<div class="corner">
+      ${v.phase === "lobby" ? "" : `<span class="codeline">${addressAndCode(v.code)}</span>`}
+      <span class="grow"></span><span class="dot" id="dot"></span>
+      ${full ? "" : `<button data-full type="button">Full screen (F)</button>`}
+      <button data-menu type="button" aria-label="more">⋯</button>
+    </div>`;
+  }
+  // Until the window has been full screen once (it is on the projector then).
+  if (full) wasFull = true;
+  if (dragHint && !full && !wasFull && !v.steer) {
+    html += `<div class="drag-hint">Drag this window to the projector screen, then press F for full screen.</div>`;
+  }
+  if (html !== lastBar) {
+    lastBar = html;
+    sbar.innerHTML = html;
+  }
+  if (v.steer) {
+    steer.noteStep(v.steer, sbar);
+    if (steer.locked()) sbar.querySelectorAll<HTMLButtonElement>("button[data-step]").forEach((b) => (b.disabled = true));
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Clicker and keyboard: the one key moves the quiz on.
+// Acting
 
+function menu(v: ScreenView): void {
+  const items: MenuItem[] = v.steer ? steerItems(v.steer, steer, true) : [];
+  if (v.steer) items.push({ label: "Players", run: () => showPlayers() });
+  if (!v.steer) items.push({ label: "Steer from here", run: () => void steerHere() });
+  else {
+    // Once students are in, no new tab gets the steering (decisions.md).
+    if (v.players.length === 0) items.push({ label: "Steer from your phone…", run: () => showNote(deviceHelp()) });
+    if (v.phase === "lobby") items.push({ label: "Two screens: open the projector window", run: () => projectorWindow() });
+  }
+  items.push({ label: "Leave: stop showing the quiz here", run: () => void leave() });
+  if (v.steer) items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
+  openMenu(items);
+}
+
+function showPlayers(): void {
+  const t = view?.steer;
+  if (!t) return;
+  document.querySelector(".sheet-back")?.remove();
+  const back = document.createElement("div");
+  back.className = "sheet-back";
+  back.innerHTML = `<div class="sheet players-sheet"><p class="hint">Faded ones are away; they come back by themselves. Tap one to remove it, e.g. a double.</p>
+    ${playersRow(t, true)}<button class="cancel" data-close>Close</button></div>`;
+  back.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
+    if (el) void steer.act(el);
+    if (el || (e.target as HTMLElement).closest("[data-close]") || e.target === back) back.remove();
+  });
+  document.body.appendChild(back);
+}
+
+/** A short text in a sheet, for the teacher to read and close. */
+function showNote(html: string): void {
+  document.querySelector(".sheet-back")?.remove();
+  const back = document.createElement("div");
+  back.className = "sheet-back";
+  back.innerHTML = `<div class="sheet"><p>${html}</p><button class="cancel" data-close>Close</button></div>`;
+  back.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("[data-close]") || e.target === back) back.remove();
+  });
+  document.body.appendChild(back);
+}
+
+async function steerHere(): Promise<void> {
+  if ((view?.players.length ?? 0) > 0 && !confirm("Steer from here? The remote stops steering, and while students are in it can't take the steering back.")) return;
+  const r = await line?.send({ op: "steerHere" });
+  if (r && !r.ok && r.error) toast(r.error);
+}
+
+async function leave(): Promise<void> {
+  if (!confirm("Stop showing the quiz on this screen?")) return;
+  await line?.send({ op: "leave" });
+  line?.stop();
+  tabRole.remove(instance);
+  location.replace("/");
+}
+
+/** Two screens: a new window takes the Projector, and this tab becomes the Remote. */
+function projectorWindow(): void {
+  const w = window.open(`/teacher?role=screen#${held!.code}`, "_blank", "popup,width=1280,height=720");
+  if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open the code in another window and choose Projector.", 8000);
+}
+
+for (const area of [main, sbar]) {
+  area.addEventListener("click", (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest("[data-menu]")) {
+      if (view) menu(view);
+      return;
+    }
+    if (t.closest("[data-full]")) {
+      toggleFullscreen();
+      return;
+    }
+    const el = t.closest<HTMLElement>("[data-act]");
+    if (!el) return;
+    if (el.dataset.act === "projector-window") {
+      projectorWindow();
+      return;
+    }
+    void steer.act(el);
+  });
+}
+
+// Clicker and keyboard: the one key moves the quiz on.
 const ADVANCE = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
 document.addEventListener("keydown", (e) => {
-  if ((e.target as HTMLElement).tagName === "INPUT") return;
+  const tag = (e.target as HTMLElement).tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
   if (e.key === "f" || e.key === "F") {
     toggleFullscreen();
     return;
   }
-  if ((e.key === "c" || e.key === "C") && line) {
-    e.preventDefault();
-    openConnect();
-    return;
-  }
+  // Space or Enter on a focused button is that button's click.
+  if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
   if (!ADVANCE.has(e.key) || e.repeat || !line || !view) return;
   e.preventDefault();
   void line.send({ op: "advance", at: { phase: view.phase, current: view.current } });
 });
 
-// The teacher's phone died: a new device opens /remote and shows a code,
-// which is typed in here, at the projector computer in the room.
-function openConnect(): void {
-  if (document.getElementById("connect")) return;
-  const box = document.createElement("form");
-  box.id = "connect";
-  box.className = "connect-box";
-  box.innerHTML = `<label for="connect-code">Code shown on the other device (${esc(siteAddress())}/remote)</label>
-    <input id="connect-code" class="code-input" inputmode="numeric" maxlength="7" autocomplete="off">
-    <div class="row"><button class="btn primary" type="submit">Connect</button><button class="btn" type="button" id="connect-cancel">Cancel</button></div>
-    <p id="connect-msg" class="muted"></p>`;
-  document.body.appendChild(box);
-  const input = box.querySelector("input")!;
-  input.focus();
-  box.querySelector("#connect-cancel")!.addEventListener("click", () => box.remove());
-  box.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") box.remove();
-  });
-  box.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const code = input.value.replace(/\D/g, "");
-    const msg = box.querySelector("#connect-msg")!;
-    msg.textContent = "…";
-    const r = await line!.send({ op: "pair", code });
-    if (r.ok) {
-      msg.textContent = r.result === "teacher" ? "Connected: that device steers the quiz now." : "Connected.";
-      window.setTimeout(() => box.remove(), 2500);
-    } else msg.textContent = r.error ?? "That didn't work.";
-  });
-}
-connectBtn.addEventListener("click", openConnect);
-
 function toggleFullscreen(): void {
   if (document.fullscreenElement) void document.exitFullscreen();
   else void document.documentElement.requestFullscreen?.().catch(() => {});
 }
-fsBtn.addEventListener("click", toggleFullscreen);
-// A projector paired yesterday still shows yesterday's quiz: let go of it.
-otherBtn.addEventListener("click", () => {
-  line?.stop();
-  line = null;
-  view = null;
-  store.remove("cq.screen");
-  history.replaceState(null, "", "/screen");
-  otherBtn.hidden = true;
-  connectBtn.hidden = true;
-  void pair();
-});
 document.addEventListener("fullscreenchange", () => {
-  fsBtn.hidden = !!document.fullscreenElement;
-  otherBtn.hidden = !!document.fullscreenElement || !line;
-  connectBtn.hidden = !!document.fullscreenElement || !line;
+  lastBar = "";
+  if (view) renderBar(view, !!view.steer && view.phase === "lobby");
+});
+window.addEventListener("resize", () => {
+  // A window dragged to the projector screen: fit the question to its size.
+  if (view && (view.phase === "question" || view.phase === "reveal")) {
+    questionKey = "";
+    render();
+  }
 });
 
 start();

@@ -14,10 +14,6 @@ name = "JOIN"
 class_name = "JoinCode"
 
 [[durable_objects.bindings]]
-name = "PAIR"
-class_name = "Pairing"
-
-[[durable_objects.bindings]]
 name = "STATS"
 class_name = "UploadStats"
 
@@ -29,6 +25,11 @@ new_sqlite_classes = ["Instance", "JoinCode", "Pairing"]
 [[migrations]]
 tag = "v2"
 new_sqlite_classes = ["UploadStats"]
+
+# Pairing codes went with one code per quiz (docs/user-flow.md).
+[[migrations]]
+tag = "v3"
+deleted_classes = ["Pairing"]
 
 # No request logs: they would hold IP addresses (decisions.md, lifetime).
 [observability]

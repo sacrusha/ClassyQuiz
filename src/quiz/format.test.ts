@@ -3,14 +3,12 @@ import assert from "node:assert/strict";
 import { imageKey, parseQuiz, pictureRefs } from "./format.ts";
 
 const canonical = `Title: Brüche addieren
-Note: Aufgabe 4 war auf dem Foto abgeschnitten und fehlt.
 
 1. Was ist 1/2 + 1/4?
 - 2/6
 + 3/4
 - 1/8
 - 2/4
-Note: Das Lösungsblatt sagt 3/4.
 
 2. Was ist 1/3 + 1/3?
 + 2/3
@@ -31,7 +29,6 @@ test("canonical quiz parses completely", () => {
   assert.deepEqual(r.warnings, []);
   assert.equal(r.ok, true);
   assert.equal(r.quiz.title, "Brüche addieren");
-  assert.equal(r.quiz.note, "Aufgabe 4 war auf dem Foto abgeschnitten und fehlt.");
   assert.equal(r.quiz.questions.length, 3);
   const q1 = r.quiz.questions[0];
   assert.equal(q1.text, "Was ist 1/2 + 1/4?");
@@ -39,8 +36,6 @@ test("canonical quiz parses completely", () => {
     q1.answers.map((a) => [a.text, a.correct]),
     [["2/6", false], ["3/4", true], ["1/8", false], ["2/4", false]],
   );
-  assert.equal(q1.note, "Das Lösungsblatt sagt 3/4.");
-  assert.equal(r.quiz.questions[1].note, "");
   assert.deepEqual(keys(canonical), [1, 0, 1]);
 });
 
@@ -91,25 +86,42 @@ test("unmarked single title line before the first question is taken as the title
 
 test("markdown dressing on keywords and questions is tolerated", () => {
   const src = `**Title:** Fractions
-**Note**: two answers on the sheet were smudged
 
 ## 1. What is 1/2 of 10?
 + 5
 - 2
-**Note:** sheet key agrees
 `;
   const r = parseQuiz(src);
   assert.equal(r.ok, true);
   assert.equal(r.quiz.title, "Fractions");
-  assert.equal(r.quiz.note, "two answers on the sheet were smudged");
   assert.equal(r.quiz.questions[0].text, "What is 1/2 of 10?");
-  assert.equal(r.quiz.questions[0].note, "sheet key agrees");
 });
 
 test("keywords are case-insensitive and spacing-tolerant", () => {
   const r = parseQuiz(`TITLE :  X\n1. Q?\n+ a\n- b\nnote: n`);
   assert.equal(r.quiz.title, "X");
-  assert.equal(r.quiz.questions[0].note, "n");
+  assert.equal(r.ok, true);
+});
+
+test("Note: lines, from guidance an AI read before notes left the format, are dropped silently", () => {
+  const src = `Title: T
+**Note**: two answers on the sheet were smudged
+
+1. Q?
++ a
+- b
+Note: sheet key agrees
+
+2. R?
+- c
++ d
+`;
+  const r = parseQuiz(src);
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.warnings, []);
+  assert.equal(r.quiz.questions.length, 2);
+  assert.deepEqual(r.quiz.questions[0].answers.map((a) => a.text), ["a", "b"]);
+  assert.ok(!JSON.stringify(r.quiz).includes("smudged"));
 });
 
 test("checkbox answers are understood", () => {

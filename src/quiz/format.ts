@@ -18,8 +18,6 @@ export interface Answer {
 export interface Question {
   text: string;
   answers: Answer[];
-  /** Authoring note: shown to the teacher while the question is up, never to students. */
-  note: string;
   /** The picture shown with the question: a file name as written in the quiz, matched by `imageKey`; "" for none. */
   image: string;
   /** The picture behind this question, in place of the quiz's background; "" for none of its own. */
@@ -28,8 +26,6 @@ export interface Question {
 
 export interface Quiz {
   title: string;
-  /** Note on the quiz as a whole, for the teacher only. */
-  note: string;
   /** The picture behind every question that has no background of its own; "" for none. */
   background: string;
   questions: Question[];
@@ -233,7 +229,8 @@ function selectBody(all: string[]): string[] {
 interface Block {
   textLines: string[];
   answers: Answer[];
-  notes: string[];
+  /** A "Note:" line came after the answers: an indented line after it doesn't continue the last answer. */
+  noted: boolean;
   /** The question number written in front of the text, when there was one. */
   number: number | null;
   /** Indentation of the last answer line, to recognise its continuation. */
@@ -267,7 +264,6 @@ export function parseQuiz(input: string): ParseResult {
   const lines = selectBody(normalised.split("\n"));
 
   let title: string | null = null;
-  const quizNotes: string[] = [];
   let quizBackground = "";
   const blocks: Block[] = [];
   let current: Block | null = null;
@@ -284,7 +280,7 @@ export function parseQuiz(input: string): ParseResult {
       text = text.slice(m[0].length);
       number = expected;
     }
-    current = { textLines: [text], answers: [], notes: [], number, answerIndent: 0, image: "", background: "", pictureProblems: [], afterAnswers: [] };
+    current = { textLines: [text], answers: [], noted: false, number, answerIndent: 0, image: "", background: "", pictureProblems: [], afterAnswers: [] };
     blocks.push(current);
   };
 
@@ -299,8 +295,7 @@ export function parseQuiz(input: string): ParseResult {
           if (title === null && answered === 0) {
             title = c.value;
             // Whatever came before the title was the AI talking to the teacher:
-            // dropped without a warning (notes in it are kept for the teacher).
-            for (const b of blocks) quizNotes.push(...b.notes);
+            // dropped without a warning.
             blocks.length = 0;
             current = null;
           } else if (answered > 0) {
@@ -312,9 +307,9 @@ export function parseQuiz(input: string): ParseResult {
             );
           } else warn(`A second title line was ignored: "${excerpt(c.value)}".`);
         } else if (c.key === "note") {
-          if (c.value === "") break;
-          if (block === null) quizNotes.push(c.value);
-          else block.notes.push(c.value);
+          // The quiz carries no messages from the AI to the teacher (backlog
+          // item 1); one an AI still writes is dropped, not a failed paste.
+          if (block !== null) block.noted = true;
         } else {
           // Image: (the question's picture) or Background: (behind it).
           const kind = c.key;
@@ -372,7 +367,7 @@ export function parseQuiz(input: string): ParseResult {
         if (block === null) {
           startBlock(c.text);
         } else if (block.answers.length > 0) {
-          if (c.indent > block.answerIndent && block.notes.length === 0) {
+          if (c.indent > block.answerIndent && !block.noted) {
             // A line indented deeper than the answer before it continues that answer.
             const last = block.answers[block.answers.length - 1];
             last.text = `${last.text} ${c.text}`;
@@ -404,14 +399,13 @@ export function parseQuiz(input: string): ParseResult {
   blocks.forEach((b, i) => {
     const text = b.textLines.join("\n").trim();
     if (b.answers.length > 0) {
-      questions.push({ text, answers: b.answers, note: b.notes.join("\n"), image: b.image, background: b.background });
+      questions.push({ text, answers: b.answers, image: b.image, background: b.background });
       questionBlocks.push(b);
       return;
     }
     const leading = firstAnswered === -1 || i < firstAnswered;
     const trailing = i > lastAnswered;
     if (leading && !trailing) {
-      quizNotes.push(...b.notes);
       // Picture lines under an unmarked title, before the first question.
       for (const problem of b.pictureProblems) err(problem("Before the first question"));
       if (b.background && quizBackground) err(`The quiz has more than one "Background:" line before the first question.`);
@@ -491,7 +485,7 @@ export function parseQuiz(input: string): ParseResult {
 
   return {
     ok: errors.length === 0,
-    quiz: { title: title ?? "", note: quizNotes.join("\n"), background: quizBackground, questions },
+    quiz: { title: title ?? "", background: quizBackground, questions },
     errors,
     warnings,
   };

@@ -1,363 +1,348 @@
-# classyQuiz — User flow (draft for the owner's reaction)
+# classyQuiz — User flow
 
-2026-11-02. The redesign of how teacher and class get through a lesson:
-backlog v1 items 16–19, with the parts of items 3, 4 and 10 they touch. Not
-code yet. Not covered here: item 15, the upload counter, images (the second
-implementer's), and the quiz format.
+The teacher's and the class's path through a lesson: backlog v1 items 16–19,
+and the parts of items 1, 2, 3, 4 and 10 they touch. This document is the
+handover for implementing them. §8 says what is already in the working tree.
 
-What v1 got wrong, in one line each, as the owner saw it: the root page is
-five links and a number box; the teacher must know the words *projector*,
-*remote*, *pairing*, *key check*; a second device needs a second code; the
-teacher's view is a stack of folded cards; coming back reads like an account.
+**Revision 3, 2026-11-02.** This revision folds in the owner's answers to the
+second design:
+- **Roles redefined (item 18).** Children must not take the Remote by
+  accident. Both teacher screens are set up before the class gets the code.
+  Only three cases need handling:
+  - a tab that loses its connection comes back in the same role;
+  - when the phone is gone, the projector takes over the steering;
+  - when the projector is gone, the teacher reads the questions off the phone.
 
-## 1. The model, in five rules
+  The first draft's "any tab with the code picks a free role" is dropped.
+- **Code per quiz,** confirmed.
+- **Build a quiz:** the first draft's English sentence to copy contradicted
+  "write in your quiz's language". Now only the address is copied.
+- **Paste or .zip, no single text files (item 2).** The Run box must not read
+  as a place to talk to an AI.
+- **The quiz carries no notes (item 1).** The AI talks to the teacher in its
+  chat, before the quiz is handed over.
 
-1. **One code per quiz.** Made at upload, it lives as long as the quiz (until
-   deleted, or 48 h after last use). The class joins with it, the teacher's
-   other devices open the quiz with it, and a second class later uses it again.
-2. **Two teacher roles: Projector and Remote,** one device each. Every other
-   device with the code is a player. A device that enters the code chooses:
-   **▶** (play), **Projector** or **Remote**; a role is offered while free.
-3. **The device you uploaded on takes one role:** Projector on a laptop-sized
-   screen, Remote on a phone. It can switch (⋯ → "Use this device as the
-   remote instead").
-4. **While no device holds the Remote, the Projector steers:** it shows a
-   slim bar with the next step. A clicker or the keyboard works on it always.
-5. **A role is freed when its device has been gone for about a minute**
-   (asleep, offline, battery). A device that comes back to a role still free
-   gets it back without noticing; if someone took it meanwhile, it shows the
-   choice again. The Projector can always take the steering back ("Steer from
-   here"), because it is the device in the room; the device that had the
-   Remote then shows the choice again.
+## 1. The model
 
-Everything below follows from these. Pairing codes, `/screen`, `/remote`, the
-teacher link and the key-check cover go away.
+1. **One code per quiz.** It is made at upload and lives as long as the quiz:
+   until it is deleted, or 48 h after the last teacher action. The class
+   joins with it. "Again with another class" keeps it.
+2. **Two entrances.**
+   - **Students:** the code box in the root page's header, or the QR code on
+     the wall, leads to `/play#<code>`. There they go straight to an avatar,
+     or to "Which one are you?" when the quiz is running and absent players
+     exist. A student device offers no teacher choice.
+   - **Teacher:** `/teacher#<code>` (typed, or Resume on the root page) offers
+     **Projector** and **Remote**. A role is offered while free.
+3. **Two teacher roles, one tab each.**
+   - The **Projector** is what the class sees.
+   - The **Remote** is the teacher's own steering view.
 
-## 2. The usual lesson, minute by minute
+   Roles belong to tabs, not devices: a laptop with two screens holds both in
+   two windows. Each tab keeps its role token in sessionStorage. A reload,
+   sleep or dropped connection resumes the same role with nothing to do.
+4. **The tab you paste in becomes the Projector, and it steers itself.**
+   In the lobby it shows the teacher's lobby (§3.3). During the quiz a slim
+   bar carries the next step. One mirrored laptop needs nothing else. A
+   clicker or the keyboard works on any Projector.
+5. **Splitting the roles:**
+   - *Phone as Remote:* on the phone, `/teacher` and the code, then Remote.
+     The Projector stops showing its bar.
+   - *Second screen:* "Open the projector window" in the lobby. The new window
+     takes the Projector, and the first tab turns into the Remote.
+   - *Pasted on the phone:* on the projector computer, `/teacher`, the code,
+     then Projector. The phone's tab turns into the Remote.
 
-Design target: school laptop on the projector (often mirrored), teacher's
-phone, Android tablets, the quiz made in the break.
+   A Projector that steers itself can be taken over by another tab. That tab
+   becomes the Projector, and the old one the Remote.
+6. **Phone gone.** The Remote's tab counts as gone after 45 s without a
+   sign. From then on the Projector steers again with its bar. On the
+   Projector, ⋯ → "Steer from here" does the same at once. When the phone
+   comes back, it is the Remote again.
+7. **Projector gone.** The teacher reads the questions off the Remote. A role
+   whose tab is gone is offered again at `/teacher`, so another computer can
+   take the Projector. Nothing on the screens advertises this.
+
+## 2. The usual lesson
+
+Design target: a school laptop on the projector, the teacher's phone, Android
+tablets, and a quiz made in the break.
 
 | When | Teacher | Class |
 |---|---|---|
-| Break | Phone or laptop: AI chat with the sheet photos and the sentence from the site. Copies the quiz block. | — |
-| Break | **Laptop** at the projector: opens `classyquiz.pages.dev`, pastes. The laptop now shows the lobby (§3.3): big address, code and QR on the wall, Start quiz, the questions below. Scrolls down, opens a question or two, sees it's the right quiz. | — |
-| Lesson starts | Says: "Type classyquiz.pages.dev, the number, press the big button." | Tablets: address, code, **▶**. Avatars pop up on the wall. |
-| Optional | Phone: same address, same code, **Remote**. The wall says "Remote connected", the laptop's buttons go away, the phone shows the lobby. | — |
-| Quiz | Start quiz → Reveal → Next … on the phone (or the laptop, or the clicker). The AI's note on a question shows on the phone while it's up. | Tap a colour; see ✓ or ✗ at the reveal. |
-| End | Final ranking. "Again with another class" for the parallel class, or nothing: the quiz deletes itself. | Their place on their tablet. |
-
-Phone-first is the mirror image: the teacher pastes on the phone, the phone
-is the Remote, and its lobby says how to put the quiz on the projector (same
-address and code on the laptop, **Projector**).
+| Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as one block (or a .zip with pictures). | — |
+| Break | **Laptop:** opens `classyquiz.pages.dev` and presses Paste the quiz (or Ctrl+V, or drops the .zip). The lobby is on the wall (§3.3). | — |
+| Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "Open the projector window", drag it across, F. | — |
+| Lesson starts | "Type classyquiz.pages.dev and the number." | Tablets: address, code, ▶. Avatars pop up on the wall. |
+| Quiz | Start quiz → Reveal → Next … on whichever tab steers, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
+| End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
 ## 3. Screens
 
-Exact words. `[ ]` button, `[_]` input, `›` expands, `⋯` menu. Sizes are
-indicative; laptop frames are 1366×768, phone frames 390 wide.
+`[ ]` is a button, `[_]` an input, `›` expands, `⋯` a menu.
 
 ### 3.1 Root page (item 16)
 
-The top is for people; the guidance for AIs stays below it as static HTML.
-The code box sits in the header so a teacher can say "the box at the top"
-and a child finds it on any device. `/new` merges into this page.
-
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ classyQuiz                       Quiz code [_ _ _ _ _]  ▶  │
+│ classyQuiz                            Code [_ _ _ _ _]  ▶  │
 ├────────────────────────────────────────────────────────────┤
-│  A live quiz for your class, made from your exercise       │
-│  sheets by your own AI.                                     │
+│  Build a quiz                                              │
+│  1  Use a capable AI. Free Claude works.                   │
+│  2  Attach photos of the exercises and ask it to build a   │
+│     quiz for  classyquiz.pages.dev [Copy] , best in the    │
+│     language the quiz should be in.                        │
+│  3  It asks what it needs, tells you how the quiz gets to  │
+│     your class, and hands you the quiz.                    │
 │                                                            │
-│  1  Give your AI the sheets – photos or a PDF – and this:  │
-│     ┌────────────────────────────────────────────┐         │
-│     │ Please help me build a classyquiz.pages.dev │ [Copy] │
-│     │ quiz from the attached exercises.           │         │
-│     └────────────────────────────────────────────┘         │
-│     It reads this site, may ask you a question or two –    │
-│     which exercises, how many questions – and answers with │
-│     the quiz as one block of text. Copy the block.         │
-│                                                            │
-│  2  Paste it here                                          │
-│     ┌────────────────────────────────────────────┐         │
-│     │                                            │         │
-│     └────────────────────────────────────────────┘         │
-│     [Continue ▶]   or upload the file                      │
-│                                                            │
+│  Run a quiz                                                │
+│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐  │
+│  │ Prozente · code 63953                                │  │  only on a device that
+│  │ [Resume ▶]   closes Wed 16:20              Delete…   │  │  pasted it, while open
+│  │ ──────────────────────────────────────────────────── │  │
+│  │               [ Paste the quiz ]                     │  │
+│  │     the block your AI made, or its .zip: drop it here│  │
+│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  │
 │  Before the first lesson: check the school network ·       │
-│  Run your own copy                                         │
+│  run your own copy · about this site                       │
 ├────────────────────────────────────────────────────────────┤
-│  About this site – for teachers and their AI               │
-│  (the guidance, unchanged)                                 │
+│  About classyQuiz (the guidance for AIs, static HTML)      │
 ```
 
-- Pasting starts the check at once; Continue is for typed text. Problems
-  appear under the box as in v1, with "Copy the message for your AI".
-- Success goes straight to the lobby. There is no "Start with a class" step.
+- **The Build copy** is still open with the owner: "points 1–3 need work, the
+  direction is right". The draft above has no English sentence to copy;
+  only the address is copied. Step 3 leaves the explaining to the AI. The
+  guidance's "What this site is for" now holds a paragraph on how a lesson
+  runs, so the AI can explain it.
+- **Run a quiz is not a text box.**
+  - Ctrl+V anywhere on the page pastes.
+  - "Paste the quiz" reads the clipboard.
+  - A .zip can be dropped on the box or chosen.
+  - A typing box ("Long-press here and choose Paste", with Continue) appears
+    only when the browser won't let the page read the clipboard.
+- **Text that isn't a quiz.** A paste with no line marked `+`/`-`/`[x]` and no
+  `Title:` gets: "That doesn't look like a quiz yet. This box takes the quiz
+  your AI made. Ask your AI in its own chat; it answers with the quiz as a
+  block with a copy button. Copy that and paste it here." It is not sent.
+- **Files:** a .zip only. Any other file gets: "The site takes the quiz
+  pasted, or as a .zip from your AI, not a .docx file." Attempts are still
+  counted by format.
+- **Problems with the quiz:** listed in place, with "Copy the message for your
+  AI", plus "Continue without these pictures" when it's pictures.
+- **On success:** straight to the lobby, in this tab as the Projector.
+- **Coming back (item 17):** an entry per quiz this device pasted that is
+  still open, inside the Run box.
+  - Resume goes to `/teacher#<code>`.
+  - "closes Wed 16:20" is the only place the product mentions the closing
+    time.
+  - Delete… sits apart from Resume and asks inline: "Delete *Prozente*? The
+    class can't join it any more. [Delete] [Keep]".
+  - Closed quizzes drop off the list.
 
-**Coming back (item 17).** On a device that uploaded quizzes still on the
-site, a block above step 1. "On this device" answers "is this a shared
-list?"; the code says how to open it anywhere else.
+### 3.2 The two entrances after a code
 
-```
-│  On this device                                            │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ Prozente · 12 questions · code 63953                 │  │
-│  │ [Continue ▶]          on the site until Wed 16:20    │  │
-│  │                                            Delete…   │  │
-│  └──────────────────────────────────────────────────────┘  │
-```
+Students (`/play#63953`) get no screen of their own:
+- in the lobby, straight to their avatar;
+- once running, "Which one are you?" with the absent players' avatars and
+  **+**, when there are any;
+- after the final ranking, a trophy and ←;
+- with a wrong code, the code, ✗, and the code box again.
 
-Delete… sits apart from Continue and opens: "Delete *Prozente* from the site
-now? The class can't join it any more. [Delete] [Keep]". Expired quizzes drop
-off the list. The same "until … · Delete…" line is at the foot of the lobby.
-
-### 3.2 Choosing what this device is
-
-After a code, on any device. The title tells a teacher it's the right quiz;
-▶ is what children are told to press.
+Teacher (`/teacher#63953`; `/teacher` alone asks "The quiz's code:"):
 
 ```
 ┌──────────────────────────────┐
 │ Prozente                     │
-│ ┌──────────────────────────┐ │
-│ │            ▶             │ │  big, green
-│ └──────────────────────────┘ │
-│ Teacher                      │
+│ This screen is the…          │
 │ [ Projector    ] [ Remote  ] │
-│  what the class    steer     │
-│  sees              from here │
+│  shows the quiz   steers the │
+│  to the class     quiz       │
 └──────────────────────────────┘
 ```
 
-- A role held by a live device shows "in use", greyed. Held by a device
-  that's gone: "in use – free in under a minute", and it becomes a button by
-  itself.
-- Wrong code: "No quiz with the code 12345." and the box again.
-- After ▶ once the quiz is running, and avatars of absent players exist:
-  "Which one are you?" with those avatars and **+** (v1's reclaim).
-- The QR on the wall leads here too, so a teacher's phone can scan it. It
-  costs each child one tap on ▶.
+A role held by a live tab is greyed and says "in use". If its tab has gone
+quiet, it says "in use – free in under a minute" and becomes a button by
+itself.
 
-### 3.3 Lobby, on the device that steers (item 19)
+### 3.3 Lobby, on the tab that steers (item 19)
 
-On the laptop this is the projector and the steering in one screen; what the
-class needs is on top and large, what the teacher checks is below the fold.
+On a single laptop this screen is the wall and the teacher's view at once.
+What the class needs is on top and large; what the teacher checks is below
+the fold.
 
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ Prozente                                                   │
-│                                                            │
-│   classyquiz.pages.dev    ┌─────┐   🐱 🐻 🐷 🐧 🐭 🐼        │
-│   6 3 9 5 3               │ QR  │   6 joined              │
-│                           └─────┘                          │
-│                                                            │
+│   classyquiz.pages.dev   ┌─────┐   👤 6                     │
+│   6 3 9 5 3              │ QR  │   🐱 🐻 🐷 🐧 🐭 🐼          │
+│                          └─────┘                           │
 │   [ Start quiz ▶ ]                                         │
-│   Steer from your phone: same address and code, Remote.    │
+│   Two screens? [Open the projector window]                 │
+│   Another screen or your phone: open                       │
+│   classyquiz.pages.dev/teacher, type the code.             │
 ├──────────────────────── below the fold ────────────────────┤
-│   12 questions · 1 with a note from your AI                │
-│                                          [Show all answers]│
-│   Note: Exercise 5 was cut off in the photo, left out.     │
+│   12 questions                         [Show all answers]  │
 │    1  Was sind 10% von 250?                             ›  │
-│    2  Eine Jacke kostet 80 Franken …               ⚑ note ›│
-│    3  Welche dieser Zahlen sind gerade?                 ›  │
-│   …                                                        │
-│   On the site until Wed 16:20 · Delete…              ⋯     │
+│    2  Eine Jacke kostet 80 Franken …                    ›  │
+│   …                                               ⋯ More   │
 └────────────────────────────────────────────────────────────┘
 ```
 
-A question opened (or all, with Show all answers / Hide answers):
+A question opened (or all of them, with Show all answers / Hide answers):
 
 ```
-│    2  Eine Jacke kostet 80 Franken und wird um 25 %     ⌄  │
-│       reduziert. Wie viel kostet sie jetzt?                │
-│       ▲ 55 Franken  ◆ 20 Franken  ● 75 Franken  ■ 60 Fr. ✓ │
-│       ⚑ Die Lösung auf dem Blatt sagt 65 Franken; ich      │
-│         habe 60 gerechnet.                                 │
+│    2  Eine Jacke kostet 80 Franken …                    ⌄  │
+│       ▲ 55 Franken  ◆ 20 Franken  ● 75 Franken  ✓■ 60 Fr.  │
 │       Change the right answer                              │
 ```
 
-- Answers start folded on every device: a mirrored laptop shows no key until
-  the teacher presses a button that says it shows the answers.
-- The question's note is inside the fold (it may give the key away); the
-  question line carries "⚑ note" so a skimming teacher sees which to open.
-  The note on the whole quiz is shown openly. Parser warnings sit on their
-  question ("same answer twice"), quiz-wide ones beside the quiz note.
-- "Change the right answer": the answers become tappable, "Tap the answers
-  that count. [Done]". Void and skip are in the same place.
-- The device line names only what is missing and turns into a tick when it
-  arrives: on a laptop "Steer from your phone: …", on a phone "On the
-  projector computer: open classyquiz.pages.dev, type 63953, choose
-  Projector." Both connected: "Projector ✓ Remote ✓".
-- ⋯: Use this device as the remote / as the projector instead · Players.
+- **Answers start folded,** so a mirrored laptop shows no key until the
+  teacher presses a button that says it shows the answers.
+- **"Change the right answer"** makes the answers tappable ("Tap the answers
+  that count."), with Void, Skip it and Done.
+- **The site's warnings** (the same answer twice, the right answer always in
+  one place) sit above the list, one muted line each.
+- **Avatars** can be tapped to remove a double.
+- **The device lines** become "Remote connected ✓" once a Remote is there.
+- **⋯:** Players · Leave · Delete the quiz…
 
-On the phone (Remote) the same content in one column, Start quiz pinned at
-the bottom. The laptop, once a phone holds the Remote, shows only the top
-half: address, code, QR, avatars.
+The Remote's lobby is the same in one column, with Start quiz pinned at the
+bottom. It names the projector line until a Projector is there: "On the
+projector computer: open classyquiz.pages.dev/teacher, type 63953, choose
+Projector." A Projector that doesn't steer shows only the class's part:
+address, code, QR and avatars.
 
 ### 3.4 Projector during the quiz
 
-v1's screens (question, reveal, ranking, final), plus the code in a corner
-throughout, so a late child or a teacher on a new device can always read it.
+The v1 screens (question, reveal, ranking, final), with the code in a corner
+throughout. While it steers, the bottom line is the bar:
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│ 2 / 12                                           👤 18 / 22 │
-│        Eine Jacke kostet 80 Franken und wird um            │
-│        25 % reduziert. Wie viel kostet sie jetzt?          │
-│  ┌──────────────────────┐ ┌──────────────────────┐         │
-│  │ ▲ 55 Franken         │ │ ◆ 20 Franken         │         │
-│  └──────────────────────┘ └──────────────────────┘         │
-│  ┌──────────────────────┐ ┌──────────────────────┐         │
-│  │ ● 75 Franken         │ │ ■ 60 Franken         │         │
-│  └──────────────────────┘ └──────────────────────┘         │
-│ classyquiz.pages.dev · 63953                             ⛶ │
-└────────────────────────────────────────────────────────────┘
+│ ⋯   classyquiz.pages.dev · 63953          [Ranking] [Next ▶] │
 ```
 
-While no Remote is connected, a slim bar replaces the bottom line:
-
-```
-│ ⋯   classyquiz.pages.dev · 63953     ⚑ Note     [Reveal ▶] │
-```
-
-- The bar's button is the next step: Start quiz / Reveal / Next / Final
-  ranking. Space, Enter, → and a clicker do the same.
-- ⚑ Note appears only when the question has one; it opens the note on the
-  wall. On one mirrored laptop there is nowhere private to show it; the chip
-  is how the note reaches the teacher at all.
-- ⋯: Skip this question · Change the right answer · Ranking now · Final
-  ranking now · Players · Steer from here (only while a Remote is
-  connected) · Leave (the screen goes back to the root page).
-- "Remote connected" and "Remote gone – steer here or open the code on
-  another device" appear as short notices on the wall, so the teacher sees
-  that the phone worked, or that a child took the Remote.
+- **The bar's main button** is the next step: Start quiz, Reveal, Next or
+  Final ranking. Space, Enter, →, ↓, PageDown, N and a clicker do the same;
+  F toggles full screen.
+- **⋯ while steering:** Skip this question · Change the right answer · Final
+  ranking now · Players · Leave · Delete the quiz…
+- **⋯ while a Remote steers:** Steer from here · Leave.
+- **Notices on the wall:** "Remote connected", and "Remote gone – steer here,
+  or enter the code on another device".
+- **A window opened by "Open the projector window"** says "Drag this window
+  to the projector screen, then press F for full screen" until it is full
+  screen.
 
 ### 3.5 Remote during the quiz
 
-One card and one button. Everything else is in ⋯.
-
 ```
 ┌──────────────────────────────┐
-│ Prozente     2/12   63953  ● │
+│ Prozente   2/12   63953    ● │
 ├──────────────────────────────┤
-│ ⚑ Note from your AI          │
-│ Die Lösung auf dem Blatt     │
-│ sagt 65 Franken; ich habe    │
-│ 60 gerechnet.                │
-│                              │
 │ Eine Jacke kostet 80 Franken │
 │ … Wie viel kostet sie jetzt? │
 │   ▲ 55 Franken            3  │
 │   ◆ 20 Franken            1  │
 │   ● 75 Franken            2  │
 │ ✓ ■ 60 Franken           12  │
-│                              │
+│ Change the right answer      │
 │ 18 of 22 answered · 1 away   │
 ├──────────────────────────────┤
 │ [⋯]            [ Reveal ▶ ]  │
 └──────────────────────────────┘
 ```
 
-- "of 22" counts the devices present; absent ones are named separately
-  (landscape requirement 3, at no extra cost).
-- After the reveal: `[Ranking]  [Next ▶]`; after the last question
-  `[Final ranking]`.
-- ⋯: Skip this question · Change the right answer · Final ranking now · All
-  questions · Players (tap one to remove a double) · Stop using this phone as
-  remote · On the site until Wed 16:20 · Delete…
-- Final: the class result and top three, then `[Again with another class]`
-  and, apart, "On the site until … · Delete…". Another class gets a new lobby
-  with the same code; the corrections carry over (v1).
+- **The buttons:** Reveal during a question; Ranking and Next after the
+  reveal; Final ranking after the last question; "Again with another class"
+  at the end, which opens a new lobby with the same code and keeps the
+  corrections.
+- **⋯:** Skip this question · Change the right answer · Final ranking now ·
+  All questions · Players · Show the projector here · Stop being the remote ·
+  Delete the quiz…
 
 ### 3.6 Student
 
-Unchanged from v1 apart from the way in: avatar and 👁 in the lobby, colour
-buttons, ✓/✗ at the reveal, place and stars at the ranking. A tablet from the
-previous class still showing the final screen doesn't slip into the next
-class's lobby; it stays on its final place.
+The student screens are unchanged from v1: avatar and 👁 in the lobby, colour
+buttons, ✓ or ✗ at the reveal, place and stars at the ranking. A tablet of
+the previous class is told "This quiz has finished"; it doesn't slip into
+the next class's lobby.
 
 ## 4. Variants
 
-- **Laptop only, no phone.** The projector steers through its bar the whole
-  lesson. The AI's notes hide behind ⚑ Note. Changing a key before the reveal
-  shows it on the wall: the button says what it does.
-- **Phone only, no projector.** The phone is the Remote; the teacher reads the
-  questions aloud, the tablets show the answers' text (v1).
-- **Evening before.** Uploaded at home: next day the school laptop and the
-  phone open it with the code (the home laptop's role is long free). On the
-  phone it is also under "On this device". The code is the thing to remember;
-  the lobby says "Code 63953 opens this quiz on any device until Wed 16:20".
-- **Two quizzes** (6a, 6b): two uploads, two codes, two entries under "On this
-  device".
-- **Extended screen.** The laptop window is the Remote (⋯ → use as remote);
-  a second window with the code becomes the Projector and is dragged to the
-  wall. Possible, not advertised.
+- **One laptop, mirrored.** The Projector steers itself all lesson. Changing
+  a key before the reveal shows it on the wall; the button says what it does.
+- **Laptop with two screens.** "Open the projector window", drag it, F. Placing
+  the window on the second screen automatically (the Window Management API)
+  is untried.
+- **Phone only, no projector.** The phone is a Projector that steers itself.
+  The teacher reads aloud, and the tablets show the answers' text.
+- **Evening before.** Paste at home, then Resume on the same device next day.
+  On another device, use `/teacher` and the code, or paste again.
+- **Two quizzes** (6a, 6b): two pastes, two codes, two entries in the Run box.
 
-## 5. When something goes wrong, or someone comes back
+## 5. When something goes wrong
 
 | What happens | What they see | What they do |
 |---|---|---|
-| Tablet sleeps, Wi-Fi drops | Same avatar and screen on waking; "offline" banner meanwhile | Nothing |
-| Tablet dies or the page is closed | — | Another tablet: address, code, ▶, own avatar among "Which one are you?" (shows up within a minute). Score kept |
-| Child types a wrong code | "No quiz with the code …", or another quiz's title | Types again |
-| Teacher's phone sleeps or goes to the AI app | Back on the Remote when it returns | Nothing. After a minute away the wall shows the steering bar until the phone is back |
-| Teacher's phone dies | Wall: "Remote gone – …"; steering bar | Steer at the laptop, or any device: code → Remote |
-| Projector laptop reloads | The quiz again (within 8 h, v1) | Nothing |
-| Projector laptop dies | — | Another computer: code → Projector (free after a minute) |
-| A child picks Remote | Wall: "Remote connected"; the bar goes | Projector ⋯ → Steer from here, or walk over and take the tablet |
-| Teacher back next day, same device | "On this device" block | Continue |
-| … on another device | — | Code → Projector or Remote |
-| Quiz expired or deleted | Gone from "On this device"; code: "No quiz with the code …"; open screens: "This quiz has ended" | Paste it again from the AI chat |
+| Tablet sleeps, Wi-Fi drops | Same avatar and screen on waking | Nothing |
+| Tablet dies | — | Another tablet: code, own avatar under "Which one are you?" (it appears within a minute). Score kept |
+| Any teacher tab reloads, sleeps or loses Wi-Fi | The same role again | Nothing |
+| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …" and shows the bar | Steer at the laptop. The phone is the Remote again when it's back |
+| Projector dies | — | Read off the Remote. Optionally another computer: `/teacher`, code, Projector (offered after 45 s) |
+| Wrong code | "No quiz with the code …" | Type it again |
+| Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Paste it again from the AI chat |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |
 
-## 6. What this changes in v1
+## 6. Decisions to record in decisions.md once built
 
-For the code phase; listed so the scope is visible.
+These entries are superseded, in part or whole:
+- Continuity (the teacher link);
+- Pairing devices;
+- Key check on a screen that may be projected;
+- Flow of a run (a new code per class);
+- Joining and rejoining (a code per run, "8 hours" projector resume);
+- Single mirrored laptop (now the starting point).
 
-- Root page: new top, `/new` folded in; the guidance text stays.
-- Code per quiz, made at upload (was per run, made at "Start with a class");
-  the run's lobby opens at upload; "Another class" keeps the code.
-- Roles held by device tokens with the existing "gone" detection (45 s);
-  upload device's role by screen width; a lookup by code returns title,
-  phase and which roles are free.
-- Removed: Pairing objects and codes, `/screen` pairing, `/remote`, teacher
-  link and its copy button, the key-check cover, the "Connect" and
-  "Finish · end" cards.
-- Projector: corner code, steering bar, notices, ⋯. Teacher page rebuilt
-  as the lobby of §3.3 and the Remote of §3.5. Student page: the choice
-  screen in front.
-- decisions.md entries superseded in part: Continuity (teacher link),
-  Pairing devices, Key check on a screen that may be projected, Flow of a run
-  (new code per class), Joining and rejoining (code per run), Single mirrored
-  laptop (now supported, with the note behind a chip).
-- Overlap with the second implementer: `instance.ts`, `protocol.ts`,
-  `play.ts`, `screen.ts` are theirs for item 15 now; the role work goes in
-  after theirs lands.
+New entries:
+- one code per quiz and its renewal (`CODE_SLACK_MS`);
+- roles per tab with sessionStorage tokens;
+- the two entrances;
+- presence: 25 s "quiet", 45 s "away";
+- a Projector that steers itself while no Remote is there;
+- "movable", the self-steering Projector taken over by another tab;
+- legacy instances refused with "paste it again";
+- the zip-only upload and the not-a-quiz message;
+- deploy note: state Worker migration `v3` deletes the `Pairing` class.
 
-## 7. Calls I made that you may want to overrule
-
-1. **Code per quiz, not per class.** One number for the teacher to know,
-   and coming back from any device works. Consequence of item 18 either way,
-   larger with this: while nobody holds the Remote, anyone with the code can
-   open the quiz as Remote at home and see the answers, or delete it. Fits
-   "normal users, not malicious"; per-class codes would shrink the window.
-2. **Upload device's role by screen width**, with a switch in ⋯, instead of
-   asking "Is this the projector?" after upload.
-3. **The choice screen for everyone**, one tap on ▶ for each child, rather
-   than children landing straight on an avatar with teacher links underneath.
-4. **The code box in the header** rather than as a second card beside "paste".
-5. **Laptop alone: the AI's note behind a chip** on the wall, not shown
-   unasked.
-
-## 8. Not established
+## 7. Not established
 
 - Whether "Projector" and "Remote" are the words a teacher reaches for.
-  A lesson will tell.
-- Whether a minute is right for freeing a role. It is the v1 away detection,
-  measured for tablets, not phones in pockets.
-- Whether the new top of the root page, which addresses the teacher
-  ("Give your AI…"), changes how AIs read the page. The guidance decision
-  notes that imperative text trips injection guards. Needs a fetch test
-  after the change.
-- Whether children press ▶ without help. The teacher is in the room.
+- Whether 45 s is right for a phone in a pocket. It is the tablets' away
+  detection.
+- Whether AIs explain the run well enough for Build step 3. This needs a
+  fetch test of the new guidance. The test should also check that the
+  page's new top doesn't trip injection guards.
+- "Free Claude works" is the owner's statement; it is untested here.
+- `navigator.clipboard.readText()` behaviour on the school's Android tablets
+  and Edge. The long-press box is the fallback.
+- Whether children find the code box in the header. The first lesson will
+  show.
+
+## 8. State of the working tree (2026-11-02, uncommitted)
+
+On top of main at 8959cc4 (the pictures merge). Built and run: both
+typechecks, 64 tests, the simulator in both modes, and headless Edge
+through the real pages. What was built, the differences from this design,
+and the evidence are in decisions.md, "One code per quiz, two teacher roles
+per tab", including the product owner's gate: once the class has a
+student, no new tab gets the steering, which narrows §1 rules 5–7.
+
+| Area | State |
+|---|---|
+| Notes removal (item 1) | Done: format, tests, guidance, protocol, views; decisions.md "The quiz carries no notes" |
+| Server (`instance.ts`, `directory.ts`, API, migration `v3`) | Done and run. Fixed while running it: a role handed over counts as present at once; a tab whose role moved while it was between polls is told so; a closed teacher socket fades over 45 s instead of at once; an HTTP command from a tab whose role moved gets the message, not a 404 |
+| `client/net.ts` | A tab without a view (role or avatar choice) on HTTP no longer polls three times a second |
+| Root page | Run in the browser. The Build copy is a draft for the owner to judge on the live site: only the address is copied; "in your own words" and "write in the language the quiz should be in" replace the English sentence |
+| Projector, Remote, `/teacher`, students | Styled in `public/app.css` and run; the obsolete pairing, notes and key-check rules removed. Changes to §3.3/§3.4 listed in decisions.md |
+| `scripts/simulate.mjs` | Rewritten for the roles (see decisions.md) |
+| Pictures on the screens | Not started: decisions.md, "Pictures in the archive" |

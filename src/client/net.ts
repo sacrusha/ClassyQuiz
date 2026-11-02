@@ -171,8 +171,8 @@ export class Line {
       if (this.ws !== ws) return;
       this.ws = null;
       this.clearPing();
-      if (e.code === 4000) {
-        // The server said "gone"; the page has been told and decides.
+      if (e.code === 4000 || e.code === 4001) {
+        // The server said "gone", or that this tab's role moved; the page has been told and decides.
         this.setStatus("offline");
         return;
       }
@@ -251,6 +251,10 @@ export class Line {
       if (m.view.v < this.v && this.mode === "poll") return;
       this.v = m.view.v;
     }
+    // A tab that hasn't a view yet (choosing a role or an avatar) has been
+    // told its choice: its next poll waits for a change instead of being
+    // answered at once, which would spin and redraw the buttons under a finger.
+    if (m.t === "choose" && this.v < 0) this.v = 0;
     if (m.t === "gone") {
       for (const p of this.pending) p.resolve({ t: "ack", id: p.id, ok: false, error: m.reason });
       this.pending = [];

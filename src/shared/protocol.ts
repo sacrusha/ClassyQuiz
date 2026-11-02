@@ -2,24 +2,30 @@
 // over a WebSocket or, when a school network breaks WebSockets, over plain
 // HTTP long-polling (docs/decisions.md, "Transport").
 //
-// The server sends each device a complete view of what it should show, never
-// a diff, so a device that slept or lost its connection just draws the newest
+// The server sends each tab a complete view of what it should show, never a
+// diff, so a tab that slept or lost its connection just draws the newest
 // view. Commands are safe to send twice: flow commands name the state they
 // were given in and are ignored when it has moved on; answers carry a sequence
 // number; fixes set a value rather than toggle one.
+//
+// Roles (docs/user-flow.md §1): one code per quiz. A tab with the code is a
+// guest until it plays (a player) or takes one of the two teacher roles, the
+// Projector ("screen") or the Remote. Each role is held by one tab at a time,
+// named by a token the tab keeps for its lifetime (sessionStorage).
 
 import type { Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
 
 export type { Avatar, Phase, Problem };
 
+export type RoleName = "screen" | "remote";
+
 export type Auth =
-  | { role: "teacher"; secret: string }
   | { role: "screen"; token: string }
-  /** A projector window on the device that holds the teacher link. */
-  | { role: "screen"; secret: string }
-  | { role: "player"; token: string }
-  | { role: "player"; join: true };
+  | { role: "remote"; token: string }
+  /** run: the class the token belongs to; a tablet of an earlier class is told it has finished. */
+  | { role: "player"; token: string; run?: string }
+  | { role: "guest" };
 
 /** The state a flow command was given in. */
 export interface At {
@@ -28,46 +34,78 @@ export interface At {
 }
 
 export type Command =
-  // teacher
-  /** Only from no run or the final ranking; `at` makes a resend harmless. */
-  | { op: "startRun"; at: At }
+  // steering: the Remote, or the Projector while no Remote is there
   | { op: "begin"; at: At }
   | { op: "reveal"; at: At }
   | { op: "next"; at: At }
   | { op: "ranking"; at: At }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
+  /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
+  | { op: "again"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
   | { op: "setVoid"; q: number; value: boolean }
   | { op: "setSkip"; q: number; value: boolean }
   | { op: "remove"; player: string }
-  /** Teacher, or the projector (a new phone for a teacher whose device died). */
-  | { op: "pair"; code: string }
   | { op: "endInstance" }
-  // projector (keyboard, presentation clicker): the next usual step
+  // the Projector: the clicker or keyboard's next usual step, at any time
   | { op: "advance"; at: At }
-  // student
-  /** v: the version of the view the tap was made on; a tap made before the device showed the reveal counts. */
-  | { op: "answer"; q: number; choice: number; seq: number; v: number }
-  | { op: "claim"; player: string }
+  /** Projector: take the steering back from the Remote (the screen in the room). */
+  | { op: "steerHere" }
+  /** Remote: this tab becomes the Projector that steers itself. */
+  | { op: "projectorHere" }
+  /** Projector or Remote: give the role up. */
+  | { op: "leave" }
+  /** Any tab: send me my current view (presence changes with time, not with events). */
+  | { op: "tick" }
+  // a guest
+  | { op: "takeRole"; role: RoleName }
   | { op: "newPlayer" }
-  /** A device without a player asks again whom it might be (avatars become "away" over time). */
-  | { op: "choose" };
+  | { op: "claim"; player: string }
+  // a player
+  /** v: the version of the view the tap was made on; a tap made before the device showed the reveal counts. */
+  | { op: "answer"; q: number; choice: number; seq: number; v: number };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
+
+/**
+ * How a role looks to a guest choosing what its tab is:
+ * - free: nobody holds it, or its tab has been gone about a minute;
+ * - taken: a tab holds it;
+ * - quiet: a tab holds it but hasn't been heard from for a while; free soon;
+ * - movable (Projector only): held by a Projector that steers itself; taking
+ *   it turns that tab into the Remote;
+ * - closed: free, but the class has students, and taking it would steer the
+ *   quiz (decisions.md: no new tab gets the steering once students are in).
+ */
+export type ChoiceState = "free" | "taken" | "quiet" | "movable" | "closed";
+
+/** Whether a role is held, and by a tab that is there. */
+export type Presence = "none" | "present" | "away";
 
 export type ServerMessage =
   | { t: "state"; view: View }
   | { t: "ack"; id: string; ok: boolean; error?: string; result?: unknown }
-  /** A student device got its player; it keeps the token to come back. */
-  | { t: "welcome"; player: string; token: string }
+  /** A guest became a player; it keeps the token to come back. */
+  | { t: "welcome"; player: string; token: string; run: string }
+  /** This tab holds a role now (taken, or handed to it when its Projector moved to another tab). */
+  | { t: "role"; role: RoleName; token: string }
+  /** The role this tab held went to another tab. */
+  | { t: "lost"; role: RoleName }
   /**
-   * To a student device without a player: the avatars of players whose
-   * devices are away (empty in the lobby). It picks one back or asks for a
-   * new player.
+   * To a guest: the quiz's title, and what it can be. `avatars`: players whose
+   * devices are away, once the quiz is under way; a student whose tablet died
+   * picks theirs back.
    */
-  | { t: "choose"; avatars: { id: string; avatar: Avatar }[] }
-  /** The credentials don't open anything (wrong link, quiz ended or expired). */
+  | {
+      t: "choose";
+      title: string;
+      phase: Phase | "idle";
+      avatars: { id: string; avatar: Avatar }[];
+      screen: ChoiceState;
+      remote: ChoiceState;
+    }
+  /** The quiz is gone (ended, expired), or this tablet's class has finished. */
   | { t: "gone"; reason: string };
 
 /**
@@ -117,16 +155,19 @@ export interface ScreenView {
   role: "screen";
   v: number;
   title: string;
+  code: string;
   /** The quiz's background (a question's own is in `question`). */
   background: ImageRef | null;
   phase: Phase | "idle";
   current: number;
-  code: string | null;
   players: { id: string; avatar: Avatar }[];
   answered: number;
   question: QuestionView | null;
   reveal: RevealView | null;
   ranking: RankingView | null;
+  remote: Presence;
+  /** While no Remote is there, the Projector steers: what the Remote would see. */
+  steer: TeacherView | null;
 }
 
 export interface TeacherQuestion {
@@ -135,7 +176,6 @@ export interface TeacherQuestion {
   /** What the class sees behind it: its own background, else the quiz's. */
   background: ImageRef | null;
   answers: { text: string; counts: boolean; marked: boolean }[];
-  note: string;
   void: boolean;
   skip: boolean;
   status: "upcoming" | "current" | "revealed" | "skipped";
@@ -146,16 +186,15 @@ export interface TeacherView {
   v: number;
   id: string;
   title: string;
+  code: string;
   background: ImageRef | null;
-  quizNote: string;
   warnings: Problem[];
   questions: TeacherQuestion[];
-  expires: number;
-  screens: number;
   phase: Phase | "idle";
   current: number;
+  screen: Presence;
+  remote: Presence;
   run: null | {
-    code: string;
     n: number;
     total: number;
     players: { id: string; avatar: Avatar; connected: boolean; score: number }[];
@@ -178,11 +217,7 @@ export interface PlayerView {
 
 export type View = ScreenView | TeacherView | PlayerView;
 
-/** Grant handed to a device that showed a pairing code. */
-export type Grant = { instance: string; role: "screen"; token: string } | { instance: string; role: "teacher"; secret: string };
-
 export const JOIN_CODE = /^\d{5}$/;
-export const PAIR_CODE = /^\d{6}$/;
 export const MAX_QUIZ_BYTES = 200_000;
 
 // Pictures (decisions.md, "Pictures in the archive"). The browser redraws each
@@ -196,7 +231,19 @@ export const MAX_IMAGES = 60;
 /** The whole upload with its pictures, as multipart/form-data. */
 export const MAX_UPLOAD_BYTES = 16_000_000;
 
-/** Answer to POST /api/quiz. `missingImages`: pictures the quiz names that didn't come with it. */
+/**
+ * Answer to POST /api/quiz. On success: the quiz's code, the secret this
+ * device keeps to delete it, and the Projector token for the tab that pasted
+ * it. `missingImages`: pictures the quiz names that didn't come with it.
+ */
 export type UploadResult =
-  | { ok: true; id: string; secret: string }
+  | { ok: true; id: string; secret: string; code: string; token: string }
   | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[] };
+
+/** Answer to POST /api/i/:id/info, for the device that pasted the quiz. */
+export interface QuizInfo {
+  title: string;
+  code: string;
+  /** When the quiz closes unless used before. */
+  closes: number;
+}

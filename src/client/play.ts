@@ -1,67 +1,97 @@
-// A student's device: join with the code, get an avatar, tap a colour.
-// Built for young readers on shared, school-managed tablets: pictures,
-// colours, shapes and numbers; the teacher in the room does the explaining.
+// A tab that came with the quiz's code. Two entrances (docs/user-flow.md §1):
+//
+//   /play#63953      a student's device: straight to an avatar, then colours.
+//                    No teacher choices here, so a child can't take the remote
+//                    by accident. Built for young readers on shared tablets:
+//                    pictures, colours, shapes and numbers.
+//   /teacher#63953   the teacher's other screen or phone: Projector or Remote.
+//   /teacher?role=screen#63953
+//                    takes the Projector at once (the lobby's "Open the
+//                    projector window").
 
-import type { Auth, Avatar, PlayerView, ServerMessage } from "../shared/protocol.ts";
+import type { Auth, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE } from "../shared/protocol.ts";
-import { $, esc, keepAwake, lines, statusDot, store } from "./dom.ts";
+import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import { Line, api } from "./net.ts";
 
 interface Saved {
   instance: string;
   token: string;
+  /** The class the token belongs to. */
+  run?: string;
 }
+
+type Choice = Extract<ServerMessage, { t: "choose" }>;
 
 const main = $("main");
 const dot = $("#dot");
 const banner = $("#offline");
-const code = (location.hash.slice(1) || new URLSearchParams(location.search).get("c") || "").replace(/\D/g, "");
+const teacher = location.pathname.startsWith("/teacher");
+const params = new URLSearchParams(location.search);
+const code = (location.hash.slice(1) || params.get("c") || "").replace(/\D/g, "");
+const wantScreen = teacher && params.get("role") === "screen";
 const key = `cq.player.${code}`;
 
 let line: Line | null = null;
-let auth: Auth = { role: "player", join: true };
+let auth: Auth = { role: "guest" };
 let view: PlayerView | null = null;
-let joining = false;
-let offlineTimer: number | undefined;
 let instanceId = "";
 let lastKey = "";
-let chooseKey = "";
-let chooseTimer: number | undefined;
+let choice: Choice | null = null;
+let busy = false;
+let tickTimer: number | undefined;
+let offlineTimer: number | undefined;
 /** The last tap, until the server confirms it. It counts when it arrives, even after the reveal. */
 let waiting: { q: number; choice: number } | null = null;
 
 async function start(): Promise<void> {
   if (!JOIN_CODE.test(code)) {
-    location.replace("/");
+    if (teacher) showCodeForm(false);
+    else location.replace("/");
     return;
   }
   keepAwake();
-  const saved = store.get<Saved>(key);
-  let instance: string;
-  if (saved) {
-    instance = saved.instance;
-    auth = { role: "player", token: saved.token };
-  } else {
-    showWaiting();
-    for (;;) {
-      try {
-        const r = await api<{ instance?: string }>("/api/join", { code });
-        if (r.body.instance) {
-          instance = r.body.instance;
-          break;
-        }
-        if (r.status === 404) {
-          showMessage(`<div class="big">${esc(code)}</div><div class="verdict wrong" style="width:22vmin;height:22vmin">${ICON.cross}</div>`, true);
-          return;
-        }
-      } catch {
-        /* offline: try again */
+  showWaiting();
+  let instance = "";
+  for (;;) {
+    try {
+      const r = await api<{ instance?: string }>("/api/join", { code });
+      if (r.body.instance) {
+        instance = r.body.instance;
+        break;
       }
-      await new Promise((res) => setTimeout(res, 2000));
+      if (r.status === 404) {
+        store.remove(key);
+        if (teacher) showCodeForm(true);
+        else showNoQuiz();
+        return;
+      }
+    } catch {
+      /* offline: try again */
     }
+    await new Promise((res) => setTimeout(res, 2000));
   }
   instanceId = instance;
+  if (teacher) {
+    if (wantScreen) {
+      // A window opened from the lobby: it may carry a copy of its opener's
+      // role, which stays with the opener.
+      tabRole.remove(instance);
+    } else {
+      const held = tabRole.get(instance);
+      if (held) {
+        // This tab holds a role in this quiz: back to it.
+        location.replace(rolePage(instance, held.role));
+        return;
+      }
+    }
+    auth = { role: "guest" };
+  } else {
+    const saved = store.get<Saved>(key);
+    auth = saved && saved.instance === instance ? { role: "player", token: saved.token, run: saved.run } : { role: "guest" };
+    if (saved && saved.instance !== instance) store.remove(key);
+  }
   line = new Line({
     instance,
     auth: () => auth,
@@ -78,13 +108,34 @@ async function start(): Promise<void> {
 
 function onMessage(m: ServerMessage): void {
   if (m.t === "welcome") {
-    auth = { role: "player", token: m.token };
-    store.set(key, { instance: instanceId, token: m.token } satisfies Saved);
-    joining = false;
+    auth = { role: "player", token: m.token, run: m.run };
+    store.set(key, { instance: instanceId, token: m.token, run: m.run } satisfies Saved);
+    busy = false;
+    clearInterval(tickTimer);
   } else if (m.t === "choose") {
-    if (joining) return;
-    if (m.avatars.length === 0 && !main.querySelector(".choose")) newPlayer();
-    else showChoose(m.avatars);
+    choice = m;
+    if (view || busy) return;
+    if (teacher) {
+      if (wantScreen && (m.screen === "free" || m.screen === "movable")) void takeRole("screen");
+      else showRoles();
+    } else if (m.phase === "final") {
+      showFinished();
+    } else if (m.avatars.length > 0) {
+      // A student whose tablet died picks their avatar back.
+      showAvatars();
+    } else {
+      newPlayer();
+    }
+    // Which roles are free, and which avatars are away, change with time.
+    clearInterval(tickTimer);
+    tickTimer = window.setInterval(() => {
+      if (!busy && line && !view) void line.send({ op: "tick" });
+    }, 10_000);
+  } else if (m.t === "role") {
+    clearInterval(tickTimer);
+    line?.stop();
+    tabRole.set(instanceId, { role: m.role, token: m.token, code });
+    location.replace(rolePage(instanceId, m.role) + (wantScreen ? "&drag=1" : ""));
   } else if (m.t === "state" && m.view.role === "player") {
     // Every answer in the class bumps the version; only redraw when this
     // device's own view changed, or a tap could land on a button being
@@ -97,70 +148,147 @@ function onMessage(m: ServerMessage): void {
   } else if (m.t === "gone") {
     store.remove(key);
     line?.stop();
-    showMessage(`<div class="verdict void" style="width:22vmin;height:22vmin">${ICON.trophy}</div>`, true);
+    clearInterval(tickTimer);
+    main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.trophy}</div>
+      <p class="muted">${esc(m.reason)}</p><a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a></div>`;
   }
 }
 
-function newPlayer(): void {
-  clearInterval(chooseTimer);
-  chooseKey = "";
-  joining = true;
-  showWaiting();
-  void line!.send({ op: "newPlayer" }).then((a) => {
-    if (!a.ok) joining = false;
-  });
-}
-
 // ---------------------------------------------------------------------------
+// Before a player or a role
 
 function showWaiting(): void {
   main.innerHTML = `<div class="center"><div class="dot" data-status="connecting" style="width:28px;height:28px"></div></div>`;
 }
 
-function showMessage(html: string, home: boolean): void {
-  main.innerHTML = `<div class="center">${html}${home ? `<a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a>` : ""}</div>`;
+function codeForm(): string {
+  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="12345" aria-label="Quiz code"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
 }
 
-function showChoose(avatars: { id: string; avatar: Avatar }[]): void {
-  // Unchanged choice: leave the buttons alone, a tap may be under way.
-  const k = JSON.stringify(avatars);
-  if (k === chooseKey && main.querySelector(".choose")) return;
-  chooseKey = k;
-  // A classmate whose tablet died shows up here once it counts as away
-  // (up to a minute); ask again now and then.
-  clearInterval(chooseTimer);
-  chooseTimer = window.setInterval(() => {
-    if (!joining && line) void line.send({ op: "choose" });
-  }, 10_000);
+function wireCodeForm(): void {
+  const input = $("#c") as HTMLInputElement;
+  input.focus();
+  $("#codeform").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const c = input.value.replace(/\D/g, "");
+    if (!JOIN_CODE.test(c)) return;
+    location.hash = c;
+    location.reload();
+  });
+}
+
+function showNoQuiz(): void {
+  main.innerHTML = `<div class="center">
+    <p class="big">${esc(code)}</p><div class="verdict wrong" style="width:22vmin;height:22vmin">${ICON.cross}</div>
+    ${codeForm()}
+  </div>`;
+  wireCodeForm();
+}
+
+/** The teacher's entrance without a code, or with one that opens nothing. */
+function showCodeForm(wrong: boolean): void {
+  document.title = "classyQuiz · teacher";
+  main.innerHTML = `<div class="center teacher-entry">
+    <h1>Show or steer a quiz from here</h1>
+    <p class="muted">${wrong ? `No quiz with the code ${esc(code)}.` : "The quiz's code:"}</p>
+    ${codeForm()}
+    <p class="muted">Students go to <a href="/">${esc(siteAddress())}</a>.</p>
+  </div>`;
+  wireCodeForm();
+}
+
+function showFinished(): void {
+  main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.trophy}</div>
+    <a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a></div>`;
+}
+
+function showAvatars(): void {
+  const c = choice!;
   main.innerHTML = `<div class="center">
     <div class="choose">
-      ${avatars.map((a) => `<button data-id="${esc(a.id)}">${avatarSvg(a.avatar)}</button>`).join("")}
+      ${c.avatars.map((a) => `<button data-id="${esc(a.id)}">${avatarSvg(a.avatar)}</button>`).join("")}
       <button class="new" aria-label="new">${ICON.plus}</button>
     </div>
   </div>`;
   main.querySelectorAll<HTMLButtonElement>(".choose button").forEach((b) =>
     b.addEventListener("click", () => {
       const id = b.dataset.id;
-      if (!id) {
-        newPlayer();
-        return;
-      }
-      clearInterval(chooseTimer);
-      chooseKey = "";
-      joining = true;
-      showWaiting();
-      void line!.send({ op: "claim", player: id }).then((a) => {
-        if (!a.ok) {
-          // Someone else took that avatar in the meantime: ask again.
-          joining = false;
-          auth = { role: "player", join: true };
-          line!.stop();
-          void start();
-        }
-      });
+      if (id) claim(id);
+      else newPlayer();
     }),
   );
 }
+
+function roleButton(role: "screen" | "remote", state: ChoiceState): string {
+  const free = state === "free" || state === "movable";
+  const label = role === "screen" ? "Projector" : "Remote";
+  const what = role === "screen" ? "shows the quiz to the class" : "steers the quiz";
+  const note =
+    state === "quiet"
+      ? "in use – free in under a minute"
+      : state === "closed"
+        ? role === "remote"
+          ? "not once students are in: the projector steers"
+          : "not once students are in"
+        : free
+          ? what
+          : "in use";
+  return `<button class="btn role" data-role="${role}"${free ? "" : " disabled"}>${label}<small>${note}</small></button>`;
+}
+
+/** The teacher's entrance: what this tab is for. */
+function showRoles(): void {
+  const c = choice!;
+  document.title = `${c.title || "Quiz"} · teacher`;
+  main.innerHTML = `<div class="center choice">
+    <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
+    <p class="muted">This screen is the…</p>
+    <div class="row roles">${roleButton("screen", c.screen)}${roleButton("remote", c.remote)}</div>
+  </div>`;
+  main.querySelectorAll<HTMLButtonElement>("button[data-role]").forEach((b) =>
+    b.addEventListener("click", () => void takeRole(b.dataset.role as "screen" | "remote")),
+  );
+}
+
+async function takeRole(role: "screen" | "remote"): Promise<void> {
+  if (!line) return;
+  busy = true;
+  showWaiting();
+  const a = await line.send({ op: "takeRole", role });
+  if (!a.ok) {
+    // Taken in the meantime: the new choice has come with the answer.
+    busy = false;
+    showRoles();
+  }
+}
+
+function newPlayer(): void {
+  if (!line) return;
+  busy = true;
+  showWaiting();
+  void line.send({ op: "newPlayer" }).then((a) => {
+    if (!a.ok) {
+      busy = false;
+      if (choice?.phase === "final") showFinished();
+    }
+  });
+}
+
+function claim(id: string): void {
+  if (!line) return;
+  busy = true;
+  showWaiting();
+  void line.send({ op: "claim", player: id }).then((a) => {
+    if (!a.ok) {
+      // Someone else took that avatar in the meantime: ask again.
+      busy = false;
+      void line!.send({ op: "tick" });
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// The student's device
 
 function render(): void {
   const v = view;
@@ -170,7 +298,9 @@ function render(): void {
     main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>
       <button class="btn big" style="max-width:320px" id="again">${ICON.plus}</button></div>`;
     $("#again").addEventListener("click", () => {
-      auth = { role: "player", join: true };
+      auth = { role: "guest" };
+      view = null;
+      lastKey = "";
       line?.stop();
       void start();
     });
