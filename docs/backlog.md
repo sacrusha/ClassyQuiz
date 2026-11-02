@@ -53,9 +53,11 @@ so there is something to click early; authoring closes the loop.
 
 1. **Quiz format** — a wrong key must be visible in seconds and fixable in the
    text or by telling the AI; an AI must write it reliably. Title, questions, up
-   to four answers, one correct, and an authoring note per question for the
-   AI's doubts, which must reach the teacher while the question is up, not the
-   students.
+   to four answers, any number of them right. The quiz is the finished
+   deliverable: the AI talks to the teacher while authoring, when the teacher
+   is there to react, not through the quiz during the lesson. (A per-question
+   authoring note for the AI's doubts was the product owner's proposal,
+   unobjected until the owner saw it in the design and rejected it.)
 2. **Upload as pasted text or as an archive** — not every AI emits files; those
    that do hand over one bundle. The archive is the container from the start;
    v2 puts images in it. Zip only: every tool that makes tar.gz can make zip,
@@ -118,19 +120,32 @@ so there is something to click early; authoring closes the loop.
     classyQuiz.pages.dev quiz from the attached exercises") and an expectation
     of how that conversation goes; then two things to do: start a quiz, join a
     quiz. Students need less, the teacher instructs them. What's there now is
-    five action elements and a number field with no minimal how-to.
+    five action elements and a number field with no minimal how-to. On the
+    first design: right direction, too noisy. Two things, "Build a Quiz" and
+    "Run a Quiz"; Run a Quiz is one element, not three plus a label; no need
+    to keep the screen busy. Build, perhaps, a step-by-step list: pick a
+    capable AI, free Claude works; give it photos of the exercises and ask it
+    to build a quiz for classyquiz.pages.dev — "Help me build a quiz for
+    classyquiz.pages.dev" works — best in the language the quiz should be in,
+    and ask it to explain how this works.
 17. **Coming back to a quiz, from the teacher's side** — a quiz already
     uploaded is worth resuming, but "your quizzes on this device" reads as if
     the server held a shared list. The teacher's view is: resume, how long
     until it closes, delete now — with delete placed where a misclick can't
     reach it. Students coming back by re-entering the code is probably enough.
-    These are design decisions; the purpose is low-friction use.
+    These are design decisions; the purpose is low-friction use. On the first
+    design: "On the site until Wed 16:20" reads as publicly shared, which it
+    must not; what it is for is unclear to the owner, and its insistence points
+    to a rule that snuck in as a requirement.
 18. **One code, roles picked in the lobby** — owner's direction after seeing
     v1: most teachers start from the projector laptop, not by "connecting a
     projector". Anyone who has the code can pick any role still free, with
     one screen role and one control role in total; so a teacher whose battery
     runs out picks up the freed control role from any device, with the same
-    code the class used, which the screen shows in a corner throughout.
+    code the class used, which the screen shows in a corner throughout. Roles
+    aren't necessarily different devices: different tabs or windows do; a
+    dual-screen laptop should be a common case, and the projector as
+    single-screen controller is useful.
 19. **The view after upload** — owner's direction: it must be easy to tell
     it's the right quiz. Lobby management on top, few words, simple clean
     design: how to join, who joined, and the start button ("Start quiz", not
@@ -145,8 +160,13 @@ so there is something to click early; authoring closes the loop.
 Most sheets have pictures; some classes want energy; an open instance gets fed
 garbage.
 
-1. **Image per question** — figures are the exercise; e.g. between question and
-   answers, or as background.
+1. **Image per question** — figures are the exercise; the question on the big
+   screen is what makes the quiz feel interactive, so the voting devices don't
+   need it. Owner's direction: beside the question is a good improvement but
+   may depend on question length; a background image is a separate thing from
+   the question's image, and different questions can share images. The
+   initial target is a teacher whose AI can make a zip — working and good
+   first, flexible later.
 2. **Optional countdown** — game-show tempo for classes that want it.
 3. **Speed scoring** — energy for classes that want it.
 4. **Hardening** — an open public instance: e.g. size limits, malformed
@@ -174,3 +194,6 @@ The quiz is already made; it can be more than one activity.
   English, classes that should see the few labels there are in their own.
 - **Formula rendering** — fractions, powers, equations on maths sheets; until
   then an image carries them.
+- **Pictures for a teacher whose AI can't make a zip** — free tiers and some
+  AIs may not crop figures and bundle them; e.g. attach and crop the photo in
+  the lobby, or an AI-drawn figure inline in the pasted text.
