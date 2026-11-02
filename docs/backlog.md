@@ -187,6 +187,13 @@ so there is something to click early; authoring closes the loop.
     check" button fails because the teacher doesn't know what a key check is,
     and a "the class would see them" warning is only needed when the user
     doesn't know what the button does.
+    On the live lobby: Start, "Open projector" and the "open classyquiz on
+    another device" line — the last duplicates the second's job. "Start quiz"
+    doesn't say the mode: as projector, remote, or the one screen that does
+    both, which needs a better public-facing name. Owner's example: the button
+    says "Start as [that]", and the text below says if you want separate
+    remote and projector screens, connect a second screen and choose remote
+    or projector.
 
 ## v2 — Figures, tempo, and a hardened instance
 

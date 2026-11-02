@@ -23,8 +23,14 @@ export const CLASS_IDLE_MS = 3 * 3600_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
 export const SLEEP_AFTER_MS = 45 * 60_000;
 
-const OWN_COPY =
-  "Your own copy takes five to ten minutes: ask your AI to help set up your own, or follow the guide on GitHub (github.com/sacrusha/ClassyQuiz).";
+/**
+ * The self-hosting nudge (backlog items 14, 16). The start page and
+ * public/own-copy.html say the site serves "a few dozen classes a day in
+ * all": the account's daily allowance covers about 30 classes when every
+ * device polls and about 75 on stored rows (decisions.md, "Hardening"),
+ * below MAX_UPLOADS_PER_DAY. Raise these and that sentence no longer holds.
+ */
+const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages.dev/own-copy says how.";
 
 /** Why a device can't join a class (server/game.ts); shown on it, in words its teacher can act on. */
 export const CLASS_FULL = "This class is full. Ask your teacher.";

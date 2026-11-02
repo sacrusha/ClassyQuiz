@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your own classyQuiz</title>
+<meta name="description" content="How a teacher gets their own copy of classyQuiz on a free Cloudflare account, with an AI assistant doing the setup.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 12 L90 84 H10Z' fill='%23d93b3b'/%3E%3C/svg%3E">
+<style>
+  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; }
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 42rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+  h1 { font-size: 1.8rem; margin: .5rem 0 .5rem; }
+  h2 { font-size: 1.2rem; margin: 2rem 0 .4rem; }
+  p, ul, ol { margin: .5rem 0; }
+  li { margin: .3rem 0; }
+  .lede { color: var(--muted); }
+  .prompt { background: var(--code-bg); border-radius: 8px; padding: .75rem 1rem; }
+  a { color: var(--accent); }
+  .back { font-size: .95rem; }
+</style>
+</head>
+<body>
+<main>
+<p class="back"><a href="/">&#8592; classyQuiz</a></p>
+<h1>Your own classyQuiz</h1>
+<p class="lede">This site is free, and shared by everyone who uses it: a few dozen classes a day in all. When that is used up, it says so and works again the next day. Your own copy is the same site at an address of your own, on a free account of your own, and what it allows a day is yours alone.</p>
+
+<h2>Who does what</h2>
+<ul>
+  <li><strong>GitHub</strong> is where the site's code is published. Your AI fetches it from there. You don't need a GitHub account.</li>
+  <li><strong>Cloudflare</strong> is the company whose free plan runs the site. Your copy runs on your own free Cloudflare account, at an address like <strong>yourname.pages.dev</strong>.</li>
+  <li><strong>Your AI</strong> does the setup: it downloads the code, installs what it needs and puts the site online.</li>
+</ul>
+
+<h2>What you need</h2>
+<ul>
+  <li>An AI that can run programs on your computer, such as Claude Code. A chat in the browser can explain the steps but can't carry them out.</li>
+  <li>A computer where you may install programs. A school-managed laptop often isn't one.</li>
+  <li>An email address for the Cloudflare account.</li>
+</ul>
+
+<h2>What to ask your AI</h2>
+<p class="prompt">Please set up my own copy of classyQuiz from https://github.com/sacrusha/ClassyQuiz on a free Cloudflare account, following its README. Tell me each step I have to do myself.</p>
+
+<h2>What you do yourself</h2>
+<ol>
+  <li>Create a free account at <a href="https://dash.cloudflare.com/sign-up">dash.cloudflare.com</a>, if you don't have one.</li>
+  <li>Create a token when the AI asks for one: a key that lets it put sites on your account. The AI tells you where in Cloudflare to create it, what to tick, and where to put it.</li>
+  <li>Choose a name for your site. It becomes the address: <strong>name.pages.dev</strong>.</li>
+  <li>The AI asks before it installs programs on your computer (Node.js, git) and runs the setup; those are the steps it needs.</li>
+</ol>
+<p>At the end the AI tells you your site's address.</p>
+
+<h2>Afterwards</h2>
+<p>When you ask your AI for a quiz, name your own address instead of classyquiz.pages.dev. To bring your copy up to date later, ask your AI to update it from GitHub.</p>
+
+<p>The code, and the setup steps the AI follows: <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a></p>
+</main>
+</body>
+</html>

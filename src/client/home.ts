@@ -1,12 +1,10 @@
 // The root page's top (docs/user-flow.md §3.1): the code box for students in
-// the header, Build a quiz, and Run a quiz: paste the AI's block or drop its
-// .zip, and the quizzes this device pasted that are still open. The guidance
+// the header, Build a quiz, and Run a quiz: open or drop the .zip the AI
+// made, and the quizzes this device opened that are still open. The guidance
 // for AIs below reads without this script.
 //
-// Run a quiz is not a text box: a box to type in reads as a place to talk to
-// an AI (backlog item 2). Ctrl+V anywhere on the page, the Paste button, or a
-// dropped .zip; a box to long-press only where the browser won't let the page
-// read the clipboard.
+// Run a quiz takes a .zip and nothing else (backlog item 2): a box to type
+// in read as a place to talk to an AI, and pasting text distracted.
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES } from "../shared/protocol.ts";
@@ -58,9 +56,6 @@ if (copy && navigator.clipboard?.writeText) {
 
 const runbox = $("#runbox");
 const out = $("#out");
-const pasteBtn = $("#paste") as HTMLButtonElement;
-const manual = $("#manual");
-const text = $("#text") as HTMLTextAreaElement;
 const file = $("#file") as HTMLInputElement;
 let sending = false;
 
@@ -69,32 +64,10 @@ function countAttempt(format: UploadFormat): void {
   void fetch("/api/attempt", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ format }), keepalive: true }).catch(() => {});
 }
 
-document.addEventListener("paste", (e) => {
-  if (e.target === codeInput) return;
-  const t = e.clipboardData?.getData("text/plain") ?? "";
-  const files = [...(e.clipboardData?.files ?? [])];
-  if (!t.trim() && files.length === 0) return;
-  e.preventDefault();
-  if (t.trim()) void fromPaste(t);
-  else void fromFiles(files);
-});
+/** What the box takes, said when something else arrives. */
+const ZIP_ONLY = `<p>Ask your AI for the quiz as one .zip file, download it, and open it here.</p>`;
 
-pasteBtn.addEventListener("click", async () => {
-  let t = "";
-  try {
-    t = await navigator.clipboard.readText();
-  } catch {
-    /* not allowed or not offered: the long-press box below */
-  }
-  if (t.trim()) {
-    void fromPaste(t);
-    return;
-  }
-  manual.hidden = false;
-  text.focus();
-});
-$("#go").addEventListener("click", () => void fromPaste(text.value));
-
+$("#open").addEventListener("click", () => file.click());
 file.addEventListener("change", () => {
   const files = [...(file.files ?? [])];
   file.value = "";
@@ -110,24 +83,27 @@ runbox.addEventListener("drop", (e) => {
   runbox.classList.remove("drag");
   const files = [...(e.dataTransfer?.files ?? [])];
   if (files.length) void fromFiles(files);
-  else {
-    const t = e.dataTransfer?.getData("text/plain") ?? "";
-    if (t.trim()) void fromPaste(t);
+  else if ((e.dataTransfer?.getData("text/plain") ?? "").trim()) notText();
+});
+
+// Nothing on the page invites pasting (item 2: pasting distracted). A file
+// copied in the file manager and pasted still opens; pasted text is told
+// where the quiz goes, and counted, so whether people still try is a fact.
+document.addEventListener("paste", (e) => {
+  if (e.target === codeInput) return;
+  const files = [...(e.clipboardData?.files ?? [])];
+  if (files.length) {
+    e.preventDefault();
+    void fromFiles(files);
+  } else if ((e.clipboardData?.getData("text/plain") ?? "").trim()) {
+    e.preventDefault();
+    notText();
   }
 });
 
-/** Lines a quiz has and a question to an AI doesn't: answers marked + or -, or a title. */
-const QUIZ_LIKE = /^\s*(?:[-+–—−＋]\s+\S|[-*]?\s*\[[ xX✓✔]\]\s|#*\s*\**title\**\s*:)/im;
-
-async function fromPaste(t: string): Promise<void> {
+function notText(): void {
   countAttempt("paste");
-  if (!QUIZ_LIKE.test(t)) {
-    // Someone typed or pasted a question for the AI: tell them where it goes.
-    out.innerHTML = `<div class="problem"><p class="err">That doesn't look like a quiz yet.</p>
-      <p>This box takes the quiz your AI made. Ask your AI in its own chat; it answers with the quiz as a block with a copy button. Copy that and paste it here.</p></div>`;
-    return;
-  }
-  await submit(t, null);
+  out.innerHTML = `<div class="problem"><p class="err">The site takes the quiz as a .zip file, not as text.</p>${ZIP_ONLY}</div>`;
 }
 
 async function fromFiles(files: File[]): Promise<void> {
@@ -135,8 +111,7 @@ async function fromFiles(files: File[]): Promise<void> {
   countAttempt(format);
   if (format !== "zip") {
     const what = format === "several files" ? "several files at once" : format === "no extension" || format === "other" ? "this file" : `a .${format} file`;
-    out.innerHTML = `<div class="problem"><p class="err">The site takes the quiz pasted, or as a .zip from your AI, not ${esc(what)}.</p>
-      <p>Ask your AI for the quiz as one code block and paste it here, or as a .zip.</p></div>`;
+    out.innerHTML = `<div class="problem"><p class="err">The site takes the quiz as a .zip file, not ${esc(what)}.</p>${ZIP_ONLY}</div>`;
     return;
   }
   try {
@@ -151,7 +126,7 @@ async function fromFiles(files: File[]): Promise<void> {
 async function submit(value: string, archive: ZipEntry[] | null, leaveOut = false): Promise<void> {
   if (sending) return;
   if (new Blob([value]).size > MAX_QUIZ_BYTES) {
-    out.innerHTML = `<div class="problem"><p class="err">This text is longer than a quiz can be (${Math.round(MAX_QUIZ_BYTES / 1000)} KB).</p></div>`;
+    out.innerHTML = `<div class="problem"><p class="err">The quiz text is longer than the site takes (${Math.round(MAX_QUIZ_BYTES / 1000)} KB).</p></div>`;
     return;
   }
   sending = true;
@@ -185,13 +160,13 @@ async function submit(value: string, archive: ZipEntry[] | null, leaveOut = fals
 /** pictures: the problems are pictures that can't go up; the teacher may run the quiz without them. */
 function showProblems(errors: Problem[], pictures: boolean, without: () => void): void {
   const ask = pictures
-    ? "Please send the quiz with its pictures as one .zip file, or the quiz without pictures as one code block."
-    : "Please send the corrected quiz as one code block.";
+    ? "Please send the quiz again as one .zip file, with these pictures fixed."
+    : "Please send the corrected quiz as one .zip file.";
   const forAi = `The quiz site couldn't read the quiz:\n${errors.map((e) => `- ${e.message}`).join("\n")}\n${ask}`;
   out.innerHTML = `<div class="problem">
     <p class="err">${pictures ? "Some pictures can't go up with the quiz:" : "The site can't run this quiz yet:"}</p>
     <ul>${errors.map((e) => `<li>${esc(e.message)}</li>`).join("")}</ul>
-    <p>Your AI can fix this. Copy the message, paste it into the chat, then paste the new quiz here.</p>
+    <p>Your AI can fix this. Copy the message, paste it into the chat, then open the new .zip here.</p>
     <p><button class="primary" id="copymsg" type="button">Copy the message for your AI</button>
     ${pictures ? `<button id="without" type="button">Continue without these pictures</button>` : ""}</p>
   </div>`;
@@ -207,7 +182,7 @@ function showProblems(errors: Problem[], pictures: boolean, without: () => void)
   if (pictures) $("#without").addEventListener("click", without);
 }
 
-// --- coming back (item 17): the quizzes this device pasted that are still open
+// --- coming back (item 17): the quizzes this device opened that are still open
 
 const mine = $("#mine");
 
@@ -218,6 +193,12 @@ function closes(t: number): string {
   return sameDay ? time : `${d.toLocaleDateString([], { weekday: "short" })} ${time}`;
 }
 
+/**
+ * One line per open quiz: Resume, when it closes, and Delete… apart at the
+ * end, asking inline. The latest shows; the rest fold under "n more" (item
+ * 16: the list overspent the page's attention; one open quiz is the usual
+ * case, and a teacher with several already knows the page).
+ */
 async function showMine(): Promise<void> {
   const list = savedQuizzes().slice(0, 5);
   const open: { q: SavedQuiz; info: QuizInfo }[] = [];
@@ -233,14 +214,13 @@ async function showMine(): Promise<void> {
     }),
   );
   open.sort((a, b) => b.q.at - a.q.at);
-  mine.innerHTML = open
-    .map(
-      ({ q, info }) => `<div class="resume" data-id="${esc(q.id)}">
-        <div><strong>${esc(info.title || "Quiz")}</strong> · code ${esc(info.code)}</div>
-        <div class="l2"><a class="go" href="/teacher#${esc(info.code)}">Resume &#9654;</a><span class="t">closes ${esc(closes(info.closes))}</span><button class="del" type="button" data-del>Delete…</button></div>
-      </div>`,
-    )
-    .join("");
+  const row = ({ q, info }: { q: SavedQuiz; info: QuizInfo }) => `<div class="resume" data-id="${esc(q.id)}">
+      <a class="go" href="/teacher#${esc(info.code)}">Resume ${esc(info.title || "the quiz")} &#9654;</a>
+      <span class="t">closes ${esc(closes(info.closes))}</span>
+      <button class="del" type="button" data-del>Delete…</button>
+    </div>`;
+  const [first, ...rest] = open;
+  mine.innerHTML = first ? row(first) + (rest.length ? `<details><summary>${rest.length} more ${rest.length === 1 ? "quiz" : "quizzes"}</summary>${rest.map(row).join("")}</details>` : "") : "";
   mine.querySelectorAll<HTMLElement>("[data-del]").forEach((b) =>
     b.addEventListener("click", () => {
       const box = b.closest<HTMLElement>(".resume")!;
