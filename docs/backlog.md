@@ -183,6 +183,10 @@ garbage.
    the question's image, and different questions can share images. The
    initial target is a teacher whose AI can make a zip — working and good
    first, flexible later.
+   Open: the guidance tells the AI the mechanics of a picture and points to
+   the wall's layout, but not what makes one work there — a tight crop, how
+   wide and square figures land, what the back row can read, nothing from the
+   sheet's solutions or a pupil's name in the crop, the size caps.
 2. **Optional countdown** — game-show tempo for classes that want it. Owner's
    thoughts, undecided: a smooth bar or circle might be better than a discrete
    count; what the teacher needs to control it is unclear, a minimal solution

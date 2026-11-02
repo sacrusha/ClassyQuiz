@@ -24,3 +24,7 @@ Pages deployment b3d103da, state Worker version b05cbebe (migration v2 adds the 
 ## 2026-11-02 — third deploy, 984806a
 
 Pages deployment 6dfdcde0, state Worker version 6eb4679a (migration v3 deletes the Pairing class). The redesigned teacher flow. Run by the owner from the clean worktree. Lesson: `npm run deploy` deploys the Worker first, which fails when a migration deletes a class the live Pages project still binds to — deploy Pages first in that case, then the Worker. A fresh self-hoster is unaffected.
+
+## 2026-11-02 — fourth deploy, b244980
+
+Pages deployment fc1f647f, state Worker version 28ec17c1, no migration. Pictures on the screens, answers shuffled at upload, Order: fixed, the as-built /layout.html, and the owner's landing-page copy. Run by the owner from the clean worktree.

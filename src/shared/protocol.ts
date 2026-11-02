@@ -110,7 +110,9 @@ export type ServerMessage =
       remote: ChoiceState;
     }
   /** The quiz is gone (ended, expired), or this tablet's class has finished. */
-  | { t: "gone"; reason: string };
+  | { t: "gone"; reason: string }
+  /** The account's daily allowance is spent: nothing can be stored until it comes back (shared/limits.ts). */
+  | { t: "quota" };
 
 /**
  * A picture that came with the quiz. `src` is fetched with GET; it holds a
@@ -248,10 +250,12 @@ export const MAX_UPLOAD_BYTES = 16_000_000;
  * Answer to POST /api/quiz. On success: the quiz's code, the secret this
  * device keeps to delete it, and the Projector token for the tab that pasted
  * it. `missingImages`: pictures the quiz names that didn't come with it.
+ * `error`: the site couldn't take it (full, or out of its daily allowance),
+ * for the teacher, not a problem with the quiz to hand back to the AI.
  */
 export type UploadResult =
   | { ok: true; id: string; secret: string; code: string; token: string }
-  | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[] };
+  | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string };
 
 /** Answer to POST /api/i/:id/info, for the device that pasted the quiz. */
 export interface QuizInfo {

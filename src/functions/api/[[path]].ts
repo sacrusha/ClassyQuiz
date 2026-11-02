@@ -19,6 +19,7 @@
 
 import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
+import { isQuotaError } from "../../shared/limits.ts";
 import type { Env } from "../../server/env.ts";
 
 interface Ctx {
@@ -47,6 +48,10 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     }
     return json({ error: "not found" }, 404);
   } catch (e) {
+    // The account's daily allowance is spent (a best reading of an
+    // undocumented error, decisions.md): the page says so and when it comes
+    // back, instead of looking like a network problem.
+    if (isQuotaError(e)) return json(parts[0] === "quiz" ? { ok: false, errors: [], warnings: [], error: "quota" } : { error: "quota" }, 503);
     // No request content in logs (decisions.md); the message only.
     console.error("api error", parts[0], e instanceof Error ? e.message : "unknown");
     return json({ error: "Something went wrong on the server. Try again." }, 500);
@@ -59,7 +64,7 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
   const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing");
-  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages } satisfies UploadResult);
+  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error } satisfies UploadResult);
   return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, token: r.token } satisfies UploadResult);
 }
 
@@ -92,11 +97,45 @@ async function toInstance(request: Request, env: Env, id: string, action: string
   } catch {
     return json({ error: "not found" }, 404);
   }
-  if (action !== "ws") {
-    const len = Number(request.headers.get("content-length") ?? "0");
-    if (len > 20_000) return json({ error: "too large" }, 413);
+  if (request.method === "POST") {
+    // Read here, capped: a body sent without a length (chunked) would
+    // otherwise reach the instance whole, and a big one could take down a
+    // class's instance mid-lesson.
+    const body = await readCapped(request, MAX_COMMAND_BYTES);
+    if (body === null) return json({ error: "too large" }, 413);
+    return env.INSTANCE.get(doId).fetch(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body }));
   }
   return env.INSTANCE.get(doId).fetch(request);
+}
+
+/** A command, a poll, or the pasting device's info/end call. */
+const MAX_COMMAND_BYTES = 20_000;
+
+/** The body as text, or null past `max` bytes, whatever the request says its length is. */
+async function readCapped(request: Request, max: number): Promise<string | null> {
+  const len = Number(request.headers.get("content-length") ?? "0");
+  if (len > max) return null;
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+    chunks.push(value);
+  }
+  const all = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) {
+    all.set(c, at);
+    at += c.byteLength;
+  }
+  return new TextDecoder().decode(all);
 }
 
 function stats(env: Env) {
@@ -117,11 +156,9 @@ function echo(request: Request): Response {
 }
 
 async function readJson(request: Request): Promise<Record<string, unknown> | null> {
-  const len = Number(request.headers.get("content-length") ?? "0");
-  if (len > MAX_QUIZ_BYTES * 2) return null;
+  const text = await readCapped(request, MAX_QUIZ_BYTES * 2);
+  if (text === null) return null;
   try {
-    const text = await request.text();
-    if (text.length > MAX_QUIZ_BYTES * 2) return null;
     const v = JSON.parse(text);
     return v && typeof v === "object" ? v : null;
   } catch {
