@@ -735,8 +735,13 @@ export class Instance extends DurableObject<Env> {
           break;
         }
         case "tempo":
-          if (cmd.tempo !== undefined) G.setTempo(game, cmd.tempo);
-          if (cmd.seconds !== undefined) G.setSeconds(game, cmd.seconds);
+          G.setTempo(game, cmd.tempo);
+          changed = ["run"];
+          break;
+        case "nudge":
+          // No `at`: two presses are meant as two, and one sent at the reveal
+          // that lands after Next acts on the same question, now being read.
+          G.nudge(game, cmd.by, now, this.nextView());
           changed = ["run"];
           break;
         case "setCounts":
@@ -1135,8 +1140,9 @@ export class Instance extends DurableObject<Env> {
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
       tempo: G.tempoOf(game),
-      seconds: run?.seconds ?? null,
       timed: G.timed(game),
+      adjust: run?.adjust ?? 0,
+      countdown: G.nudgeSeconds(game),
       playing: run && run.phase === "question" && run.current >= 0 ? G.playedAt(game, run.current) : null,
       answering: G.answering(game),
       clock: this.clockView(),

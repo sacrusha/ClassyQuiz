@@ -1621,7 +1621,9 @@ count, perhaps a "start the countdown" button, and possibly the question
 first with the answers only during the countdown.
 
 **Amended 2026-11-03 by the owner. Two changes; the rest of this entry
-stands.**
+stands.** Lengths since replaced by "The tempo by the owner's
+decomposition": no length picker or single length; 60 s without `Time:`;
+`Time:` 10..60; −5/+5 during the run.
 
 *1. The quiz carries its tempo.* The owner: "tempo is a bit of a problem if
 it's done in the lobby and the quiz not designed for a specified tempo."
@@ -2131,6 +2133,155 @@ gone. The self-hosting paragraph links `/own-copy`.
 - Whether an Android tablet's file picker shows a .zip downloaded from a
   chat app as selectable under this `accept`.
 - How long a teacher's first own copy takes with Claude Code. Not tried.
+
+## 2026-11-03 — The tempo by the owner's decomposition: 60 s safe, −5/+5 during the run
+
+Serves: v2 item 2's last paragraph. The owner splits the tempo three ways:
+- the teacher's pace, with full control;
+- a safe countdown of 60 s, which may be boring;
+- a fast countdown, which needs designed questions and a way for the
+  teacher to adjust: a −5/+5 pair during the run, persisting across
+  questions, 10 to 60 s. That keeps the lobby less cluttered than a length
+  picker.
+
+Replaces the lobby's length picker (10/20/30/60) and the teacher's single
+length over every question ("Countdown and points for speed", amendment
+1). The quiz's `Tempo:` and `Time:` lines stay: they are the "designed
+questions". Approved by the product owner as proposed.
+
+**The model: an offset over the quiz's lengths.**
+- `Run.adjust` replaces `Run.seconds`: the seconds the pair added or took
+  away.
+- A question's countdown is its length as written (`Time:` for the
+  question, else the quiz's, else 60) plus `adjust`, held within 10..60
+  (`secondsFor`).
+- An offset, not one length, because per-question lengths are the design:
+  +5 on a 15 s vocabulary question shouldn't turn the next 45 s sum into
+  20 s.
+- Each length is clamped on its own. From 50 and 20, +10 gives 60 and 30.
+  Cutting a written 60 to 10 carries −50, so a later written 15 runs 10.
+- `adjust` carries over to "Again with another class", like the tempo.
+- Production never had the countdown, so no stored run carries `seconds`.
+
+**What the pair acts on** (`nudgeTarget`):
+- the countdown running now;
+- else the question being read;
+- else, when the class plays with a countdown, the next question.
+
+It is not shown in the lobby, at the teacher's pace (unless a clock still
+runs from before a switch) or after the last question.
+- On a running countdown it acts at once (approved; "persisting across
+  questions" read as including the one on screen). The clock's `ms`
+  changes, the alarm is rescheduled through `afterTeacherChange`, and
+  every screen redraws its bar.
+- Cut below the time already gone, answering closes, with the same
+  `closedView` rule as time's up: a tap made on an older view still counts.
+- At 10 or 60 the button is disabled, and a press that arrives anyway
+  changes nothing.
+- The command `{op: "nudge", by: ±5}` carries no `at`. Two presses are
+  meant as two. One pressed at the reveal that lands after Next acts on the
+  same question, now being read.
+- Points for speed use the clock's final length.
+- Devices key their local end by question and length (`localEnd`), so a
+  changed length restarts the bar from the new view's `leftMs`. A tablet
+  that had locked its buttons at its own end opens again when +5 extends a
+  clock the server hadn't closed.
+
+**Where it shows:**
+- On the Remote: a line in the question's card, "Countdown [−5] ⏱ 25 s
+  [+5]". It reads "Next countdown" once this one is over (time's up,
+  stopped) and at the reveal or the ranking.
+- On the wall while it steers itself: in the steering bar, before the step
+  buttons. On a phone-sized wall the bar tightens and the code gives way,
+  so five controls fit in 360 px.
+- The lobby keeps one line, "Tempo: Countdown, 20–40 s ›", showing the
+  range of the lengths to come. Its sheet has the three tempos and one
+  sentence: the lengths as the quiz says (or 60 s), and that −5 and +5
+  change them during the quiz, from 10 to 60 s.
+
+**The format's `Time:` range is now 10..60, the pair's range** (approved).
+A line outside it is taken at the bound with a warning ("was taken as 60
+seconds: a countdown is 10 to 60 seconds"). Before it was 5..300. The
+guidance says a task needing more than a minute suits the teacher's pace;
+⋯ "Stop the countdown" is still there. Without `Time:` a countdown is 60 s
+(before: 20). The guidance says so, and that 60 is slow for most
+questions, so an AI writing `Tempo: countdown` has reason to write lengths.
+
+Constants in `shared/tempo.ts`: `COUNTDOWN_MIN` 10, `COUNTDOWN_MAX` and
+`COUNTDOWN_DEFAULT` 60, `NUDGE_SECONDS` 5, `clampCountdown`.
+`COUNTDOWN_CHOICES` is gone. `setSeconds` is replaced by `nudge`. The view
+drops `seconds` and gains `adjust` and `countdown` (the pair's length, null
+for no pair).
+
+**Checked:**
+- Unit tests (78). Two new ones:
+  - 60 s without `Time:`; no pair in the lobby; the bounds; only ±5;
+    reading, running (the deadline moves), after the reveal (the next
+    question), a cut below the time gone closing answering without a
+    reveal; nothing after the last question; carried to the next class;
+  - lengths written per question moving together, each held at 10 and 60;
+    a stopped clock pointing the pair at the next question; none when the
+    next comes at the teacher's pace.
+  - The format test's clamp is now 10..60 with its warning.
+- HTTP probe against the real alarm (`scratchpad/lp/nudge.mjs`, nobody
+  answering, so only the clock closes):
+  - `Time: 90` taken as 60 with the warning; a nudge in the lobby refused;
+  - +5 three seconds into a 15 s countdown: the tablet's view says 20 s,
+    and answering closed 20.2 s after Go;
+  - at the reveal the pair shows the next question;
+  - ten −5 on a written 60: 10 s, closed at 10.2 s;
+  - on the third question, +10 while reading, then −10 twelve seconds in:
+    closed at once, on the tablet too.
+- `simulate.mjs --tempo` (now a `Time: 10` line, plus +5 and −5 while the
+  first question is read, the pair's length checked) and the plain mode:
+  both pass on a restarted stack.
+- Headless Edge (`shots-tool/pair-walk.mjs`), no page errors: the Remote's
+  pair while reading and running; the wall's bar and the tablet's bar both
+  going from 25 to 30 s after +5 while running; "Next countdown 50 s" at
+  the reveal (written 40, +10); the wall's own steering bar −5 to 15 s.
+  `pair-narrow.mjs`: the steering bar fits at 360 px at the reveal.
+
+**Not established:** whether teachers find −5/+5 during a running
+countdown, and whether a class reads a bar that suddenly lengthens as
+"more time".
+
+## 2026-11-03 — The lobby's Start says the mode
+
+Serves: v1 item 19's last paragraph. The owner, on the live lobby:
+- Start, "Open projector" and the "open classyquiz on another device" line:
+  the last duplicates the second's job.
+- "Start quiz" doesn't say the mode: as projector, as remote, or the one
+  screen that does both, which needs a better public-facing name.
+- His example: "Start as [that]", and a text below saying that for
+  separate remote and projector screens, connect a second screen and
+  choose remote or projector.
+
+**The name is "Projector + Remote".** The button on the tab that steers
+itself reads **Start as Projector + Remote ▶**. It uses the two names the
+teacher meets at `/teacher`. The Remote's own button stays "Start quiz":
+its mode is already the screen it is on.
+
+**One sentence instead of a button and a line:** "For a separate projector
+and remote, open classyquiz.pages.dev/teacher on the other screen (a phone,
+another computer, or *a new window here*), type 63953 and choose."
+- "a new window here" is a link that does what the button did: a popup at
+  `/teacher?role=screen` takes the Projector, and this tab becomes the
+  Remote.
+- On a phone-sized screen the link part is hidden, since there's no second
+  monitor; the button was hidden there before too.
+- As before, the sentence shows only until the first student is in, and
+  becomes "Remote connected ✓". ⋯ still has "Steer from your phone…" and
+  "Two screens: open the projector window".
+
+The guidance's account of a lesson names the button and the link.
+
+**Checked** (`shots-tool/pair-walk.mjs`):
+- the label;
+- one sentence with the link and no second button;
+- the link hidden at 390 px;
+- the link opening a window that took the Projector, while the first tab
+  went to `/teach`;
+- a lobby screenshot at 1366×768.
 
 ## Open
 

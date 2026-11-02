@@ -246,6 +246,17 @@ garbage.
 7. **Who has answered, on the wall** — a child wonders whether the tap
    counted; a mark on each avatar as its answer lands answers that from the
    projector, and the "n of 25" should not count devices that are away.
+8. **The wall admits a second teacher device** — once the class has
+   players nobody can take a free role, so a teacher whose phone died or who
+   forgot to connect it before giving out the code steers from the wall for
+   the rest of the lesson; review C expects this to be missed on day one.
+   Owner's direction: dropping projector or remote already falls back to the
+   one screen doing both, and that screen having a button to allow a second
+   teacher device to join solves most reconnect issues; the edge cases need
+   working through first — a second device rejoining might be "drop the
+   missing projector or remote, allow a new one to join", or plainly "allow a
+   remote or projector to join" if none was connected from the start. The
+   usability problem: drops are rare and users aren't trained on it.
 
 ## v3 — Answers as images
 
@@ -279,8 +290,3 @@ The quiz is already made; it can be more than one activity.
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
   own.
-- **"Add remote" among the wall's admin options** — once the class has
-  players, nobody can take a free Remote, so a teacher whose phone tab was
-  closed mid-lesson is left steering from the wall; the wall deliberately
-  admitting a new Remote reopens the role on purpose, where a child couldn't
-  take it by accident.

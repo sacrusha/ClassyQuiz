@@ -6,7 +6,9 @@
 // --all-poll: every student over long-polling, and the number of HTTP
 // requests reported (the Free plan's budget on a network without
 // WebSockets).
-// --tempo: the class plays with a 10 s countdown and points for speed. Each
+// --tempo: the class plays with a 10 s countdown ("Time: 10") and points for
+// speed; on the first question the teacher presses +5 and -5 while the class
+// reads, and the length must come back to 10 s. Each
 // question is read first; the teacher presses Go (twice: a doubled Go must
 // not reveal); answering closes when everyone present has answered or time
 // is up, and only then does the teacher reveal. Taps carry the device's own
@@ -261,7 +263,7 @@ const until = async (cond, ms, what) => {
   }
 };
 
-const up = await post("/api/quiz", { text: QUIZ });
+const up = await post("/api/quiz", { text: TEMPO ? QUIZ.replace("\n\n", `\nTime: ${SECONDS}\n\n`) : QUIZ });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
 const { id: instance, code, token: screenToken } = up.body;
 check(/^\d{5}$/.test(code), `the upload returns the quiz's code (${code})`);
@@ -417,9 +419,11 @@ const at = () => ({ phase: tv().phase, current: tv().current, reading: tv().answ
 const active = () => players.filter((p) => !p.dead).length;
 let qi = 0;
 if (TEMPO) {
-  const t = await steerer().send({ op: "tempo", tempo: "speed", seconds: SECONDS });
+  const t = await steerer().send({ op: "tempo", tempo: "speed" });
   check(t.ok, "the tempo is set in the lobby");
-  await until(() => tv().tempo === "speed" && tv().seconds === SECONDS, 5000, "the tempo in the teacher's view");
+  await until(() => tv().tempo === "speed", 5000, "the tempo in the teacher's view");
+  check(tv().questions.every((q) => q.seconds === SECONDS), "the quiz's Time: line gives every question its length");
+  check(tv().countdown === null, "no -5/+5 in the lobby");
 }
 await steerer().send({ op: "begin", at: at() });
 let closedByAll = 0;
@@ -433,6 +437,13 @@ for (;;) {
   if (TEMPO) {
     check(tv().answering === "reading", `question ${current + 1} opens for reading (${tv().answering})`);
     await sleep(rnd(300, 1200)); // the teacher reads it out
+    if (current === 0) {
+      check(tv().countdown === SECONDS, `the pair shows this question's ${SECONDS} s (${tv().countdown})`);
+      await steerer().send({ op: "nudge", by: 5 });
+      await until(() => tv().countdown === SECONDS + 5, 5000, "+5 while reading");
+      await steerer().send({ op: "nudge", by: -5 });
+      await until(() => tv().countdown === SECONDS, 5000, "-5 back again");
+    }
     const readAt = { ...at() };
     // A double tap on Go (or a retry) must not reveal.
     await Promise.all([steerer().send({ op: "go", at: readAt }), steerer().send({ op: "go", at: readAt })]);
