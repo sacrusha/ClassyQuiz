@@ -58,7 +58,6 @@ export interface Run {
   joins?: Record<string, string>;
   /** Question index → player id → answer. */
   answers: Record<string, Record<string, AnswerRecord>>;
-  started: number;
   ended: number | null;
 }
 
@@ -81,19 +80,8 @@ export function newGame(quiz: Quiz): Game {
   };
 }
 
-export function startRun(g: Game, code: string, now: number): Run {
-  g.run = {
-    code,
-    phase: "lobby",
-    current: -1,
-    openedAt: 0,
-    revealed: [],
-    players: {},
-    answers: {},
-    started: now,
-    ended: null,
-  };
-  return g.run;
+export function startRun(g: Game, code: string): void {
+  g.run = { code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
 }
 
 function needRun(g: Game): Run {
@@ -151,6 +139,13 @@ export function removePlayer(g: Game, id: string): void {
 
 export function activePlayers(run: Run): Player[] {
   return Object.values(run.players).filter((p) => !p.removed);
+}
+
+/** The answers to question q that count in the run: a removed avatar's don't. */
+export function activeAnswers(run: Run, q: number): AnswerRecord[] {
+  return Object.entries(run.answers[q] ?? {})
+    .filter(([pid]) => playerById(run, pid)?.removed === false)
+    .map(([, a]) => a);
 }
 
 // ---------------------------------------------------------------------------
@@ -280,7 +275,6 @@ export function skipCurrent(g: Game, now: number): void {
 // ---------------------------------------------------------------------------
 // Scores
 
-/** Questions that score: revealed and not void. */
 export function scoringQuestions(g: Game): number[] {
   const run = g.run;
   if (!run) return [];
@@ -316,46 +310,33 @@ export function standings(g: Game): Standing[] {
   const run = g.run;
   if (!run) return [];
   const s = scores(g);
+  const score = (p: Player) => s.get(p.id) ?? 0;
   const list = activePlayers(run)
-    .map((p) => ({ id: p.id, avatar: p.avatar, score: s.get(p.id) ?? 0, place: 0, joined: p.joined }))
-    .sort((a, b) => b.score - a.score || a.joined - b.joined);
+    .sort((a, b) => score(b) - score(a) || a.joined - b.joined)
+    .map((p): Standing => ({ id: p.id, avatar: p.avatar, score: score(p), place: 0 }));
   list.forEach((e, i) => (e.place = i > 0 && list[i - 1].score === e.score ? list[i - 1].place : i + 1));
-  return list.map(({ joined: _j, ...e }) => e);
+  return list;
 }
 
 /** How many players picked each answer of question q. */
 export function distribution(g: Game, q: number): number[] {
-  const run = g.run;
   const counts = new Array(g.quiz.questions[q]?.answers.length ?? 0).fill(0);
-  if (!run) return counts;
-  for (const [pid, a] of Object.entries(run.answers[q] ?? {})) {
-    const p = run.players[pid];
-    if (p && !p.removed) counts[a.choice]++;
-  }
+  if (g.run) for (const a of activeAnswers(g.run, q)) counts[a.choice]++;
   return counts;
 }
 
 /** Share of given answers that were right, per scoring question: the class's result as a picture. */
-export function classResult(g: Game): { perQuestion: { q: number; right: number; given: number }[]; right: number; given: number } {
+export function classResult(g: Game): { perQuestion: { right: number; given: number }[]; right: number; given: number } {
   const run = g.run;
-  const perQuestion: { q: number; right: number; given: number }[] = [];
-  let right = 0;
-  let given = 0;
-  if (!run) return { perQuestion, right, given };
-  for (const q of scoringQuestions(g)) {
-    let r = 0;
-    let n = 0;
-    for (const [pid, a] of Object.entries(run.answers[q] ?? {})) {
-      const p = run.players[pid];
-      if (!p || p.removed) continue;
-      n++;
-      if (isRight(g, q, a.choice)) r++;
-    }
-    perQuestion.push({ q, right: r, given: n });
-    right += r;
-    given += n;
-  }
-  return { perQuestion, right, given };
+  const perQuestion = scoringQuestions(g).map((q) => {
+    const given = run ? activeAnswers(run, q) : [];
+    return { right: given.filter((a) => isRight(g, q, a.choice)).length, given: given.length };
+  });
+  return {
+    perQuestion,
+    right: perQuestion.reduce((n, p) => n + p.right, 0),
+    given: perQuestion.reduce((n, p) => n + p.given, 0),
+  };
 }
 
 /** Position of the current question among the shown ones, and how many will be shown. */

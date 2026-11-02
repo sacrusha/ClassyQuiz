@@ -23,7 +23,7 @@ const quiz = parseQuiz(`Title: T
 
 function setup(players = 3) {
   const g = G.newGame(quiz);
-  G.startRun(g, "12345", 0);
+  G.startRun(g, "12345");
   let r = 0;
   const random = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
   const ids = Array.from({ length: players }, (_, i) => G.addPlayer(g, `p${i}`, `t${i}`, i, random).id);

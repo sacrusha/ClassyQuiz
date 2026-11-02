@@ -18,6 +18,7 @@ import type {
   TeacherView,
   View,
 } from "../shared/protocol.ts";
+import { PAIR_CODE } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomToken } from "./random.ts";
 
@@ -48,7 +49,6 @@ interface QuizRecord {
 interface Meta {
   secret: string;
   screens: string[];
-  created: number;
   lastActivity: number;
   v: number;
 }
@@ -118,7 +118,7 @@ export class Instance extends DurableObject<Env> {
     const now = Date.now();
     const secret = randomToken();
     this.quizRecord = { quiz: r.quiz, warnings: r.warnings };
-    this.meta = { secret, screens: [], created: now, lastActivity: now, v: 1 };
+    this.meta = { secret, screens: [], lastActivity: now, v: 1 };
     this.game = G.newGame(r.quiz);
     await this.ctx.storage.put({ quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: null });
     await this.scheduleAlarm();
@@ -168,7 +168,7 @@ export class Instance extends DurableObject<Env> {
         // once over and over (the device would spin and redraw its buttons).
         if (known === -1) return json({ messages: out });
         const chooseKey = JSON.stringify(this.chooseMessage());
-        const msgs = await this.hold({ session, resolve: () => {}, chooseKey });
+        const msgs = await this.hold(session, chooseKey);
         const fresh = this.chooseMessage();
         return json({ messages: msgs.length > 0 ? msgs : JSON.stringify(fresh) !== chooseKey ? [fresh] : [] });
       }
@@ -183,20 +183,21 @@ export class Instance extends DurableObject<Env> {
           this.sentToPoller.set(pid, { key: viewKey(view), v: view.v });
           return json({ messages: [...out, { t: "state", view }] });
         }
-        const msgs = await this.hold({ session, resolve: () => {} });
+        const msgs = await this.hold(session);
         this.lastPoll.set(pid, Date.now());
         return json({ messages: msgs });
       }
-      if (this.meta && this.meta.v > known) return json({ messages: [...out, this.stateFor(session)] });
-      return json({ messages: await this.hold({ session, resolve: () => {} }) });
+      const view = this.viewFor(session);
+      if (view && view.v > known) return json({ messages: [...out, { t: "state", view }] });
+      return json({ messages: await this.hold(session) });
     }
     return json({ error: "not found" }, 404);
   }
 
   /** Holds a long-poll until the device's view changes, or POLL_HOLD_MS. */
-  private hold(w: Waiter): Promise<ServerMessage[]> {
+  private hold(session: Session, chooseKey?: string): Promise<ServerMessage[]> {
     return new Promise<ServerMessage[]>((resolve) => {
-      w.resolve = resolve;
+      const w: Waiter = { session, resolve, chooseKey };
       this.waiters.add(w);
       setTimeout(() => {
         if (this.waiters.delete(w)) resolve([]);
@@ -380,8 +381,7 @@ export class Instance extends DurableObject<Env> {
           // has started joining.
           if (!at(cmd) || (game.run && game.run.phase !== "final")) return { direct: [ack(true, undefined, "stale")] };
           await this.releaseCode();
-          const code = await this.claimCode();
-          G.startRun(game, code, now);
+          G.startRun(game, await this.claimCode());
           changed = ["run"];
           break;
         }
@@ -390,18 +390,17 @@ export class Instance extends DurableObject<Env> {
         case "next":
         case "ranking":
         case "finish":
-        case "skipCurrent":
-        case "advance": {
+        case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           if (cmd.op === "begin") G.begin(game, now);
           else if (cmd.op === "reveal") G.reveal(game);
           else if (cmd.op === "next") G.next(game, now);
           else if (cmd.op === "ranking") G.showRanking(game);
           else if (cmd.op === "finish") G.finish(game, now);
-          else if (cmd.op === "skipCurrent") {
+          else {
             G.skipCurrent(game, now);
             changed.push("fixes");
-          } else G.advance(game, now);
+          }
           changed.push("run");
           break;
         }
@@ -479,7 +478,7 @@ export class Instance extends DurableObject<Env> {
   }
 
   private async pair(code: string): Promise<string> {
-    if (typeof code !== "string" || !/^\d{6}$/.test(code)) throw new PairError("A device code has 6 digits.");
+    if (typeof code !== "string" || !PAIR_CODE.test(code)) throw new PairError("A device code has 6 digits.");
     const stub = this.env.PAIR.get(this.env.PAIR.idFromName(code));
     const role = await stub.wanted();
     if (role === null) throw new PairError("No device is showing this code. Check the digits, or open the page on the other device again.");
@@ -597,18 +596,19 @@ export class Instance extends DurableObject<Env> {
 
   private ranking(): RankingView | null {
     const game = this.game!;
-    const run = game.run;
-    if (!run) return null;
+    if (!game.run) return null;
     const st = G.standings(game);
-    const cr = G.classResult(game);
     return {
       top: st.filter((s) => s.place <= 3).slice(0, 10).map(({ avatar, score, place }) => ({ avatar, score, place })),
-      perQuestion: cr.perQuestion.map(({ right, given }) => ({ right, given })),
-      right: cr.right,
-      given: cr.given,
+      ...G.classResult(game),
       of: G.scoringQuestions(game).length,
       players: st.length,
     };
+  }
+
+  private answeredNow(): number {
+    const run = this.game?.run;
+    return run && run.current >= 0 ? G.activeAnswers(run, run.current).length : 0;
   }
 
   private screenView(): ScreenView {
@@ -628,7 +628,7 @@ export class Instance extends DurableObject<Env> {
       current: run ? run.current : -1,
       code: run ? run.code : null,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
-      answered: run && run.current >= 0 ? Object.keys(run.answers[run.current] ?? {}).filter((id) => run.players[id] && !run.players[id].removed).length : 0,
+      answered: this.answeredNow(),
       question: showQ ? { q: run!.current, n: prog.n, total: prog.total, text: q!.text, answers: q!.answers.map((a) => a.text) } : null,
       reveal:
         run && phase === "reveal"
@@ -645,7 +645,6 @@ export class Instance extends DurableObject<Env> {
     const connected = this.connectedPlayers(exclude);
     const scores = G.scores(game);
     const prog = G.progress(game);
-    const screen = this.screenView();
     return {
       role: "teacher",
       v: meta.v,
@@ -670,15 +669,15 @@ export class Instance extends DurableObject<Env> {
       }),
       expires: meta.lastActivity + INSTANCE_IDLE_MS,
       screens: this.screenCount(exclude),
-      phase: screen.phase,
-      current: screen.current,
+      phase: run ? run.phase : "idle",
+      current: run ? run.current : -1,
       run: run
         ? {
             code: run.code,
             n: prog.n,
             total: prog.total,
             players: G.activePlayers(run).map((p) => ({ id: p.id, avatar: p.avatar, connected: connected.has(p.id), score: scores.get(p.id) ?? 0 })),
-            answered: screen.answered,
+            answered: this.answeredNow(),
             dist: run.current >= 0 && (run.phase === "question" || run.phase === "reveal") ? G.distribution(game, run.current) : null,
             ranking: this.ranking(),
           }
@@ -712,9 +711,6 @@ export class Instance extends DurableObject<Env> {
     };
   }
 
-  private stateFor(session: Session): ServerMessage {
-    return { t: "state", view: this.viewFor(session)! };
-  }
 
   private viewFor(session: Session, cache?: ViewCache, exclude?: WebSocket): View | null {
     if (!this.meta || !this.game) return null;

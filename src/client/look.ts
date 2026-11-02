@@ -5,8 +5,8 @@
 import type { Avatar } from "../shared/protocol.ts";
 
 /** Disc colours of avatars, told apart by the class: "the frog on purple". */
-export const AVATAR_COLOURS = ["#e5484d", "#3e7bfa", "#f5c518", "#8e4ec6", "#12a594", "#e93d82", "#7cb518", "#1f3a8a"];
-export const ANIMAL_NAMES = ["cat", "dog", "fox", "bear", "rabbit", "owl", "frog", "pig", "mouse", "lion", "panda", "penguin"];
+const AVATAR_COLOURS = ["#e5484d", "#3e7bfa", "#f5c518", "#8e4ec6", "#12a594", "#e93d82", "#7cb518", "#1f3a8a"];
+const ANIMAL_NAMES = ["cat", "dog", "fox", "bear", "rabbit", "owl", "frog", "pig", "mouse", "lion", "panda", "penguin"];
 
 const EYE = (x: number, y: number, r = 4.2) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#1b1b1f"/><circle cx="${x + r * 0.35}" cy="${y - r * 0.4}" r="${r * 0.33}" fill="#fff"/>`;
 const EYES = (y = 52, dx = 11, r?: number) => EYE(50 - dx, y, r) + EYE(50 + dx, y, r);
@@ -78,16 +78,15 @@ export function avatarSvg(av: Avatar, label = true): string {
 
 // ---------------------------------------------------------------------------
 // Answers: colour plus shape, so colour-blind students can tell them apart.
+// The colours are in app.css (.a0 to .a3).
 
-export const ANSWER_COLOURS = ["#d93b3b", "#2f6fd6", "#e8b100", "#1f9d55"];
-export const ANSWER_INK = ["#fff", "#fff", "#1b1b1f", "#fff"];
 const SHAPES = [
   `<path d="M50 12 L90 84 H10Z"/>`,
   `<path d="M50 8 L92 50 L50 92 L8 50Z"/>`,
   `<circle cx="50" cy="50" r="40"/>`,
   `<rect x="13" y="13" width="74" height="74" rx="4"/>`,
 ];
-export const SHAPE_NAMES = ["triangle", "diamond", "circle", "square"];
+const SHAPE_NAMES = ["triangle", "diamond", "circle", "square"];
 
 export function shapeSvg(i: number, fill = "currentColor"): string {
   return `<svg class="shape" viewBox="0 0 100 100" aria-label="${SHAPE_NAMES[i]}" role="img" fill="${fill}">${SHAPES[i]}</svg>`;

@@ -185,14 +185,12 @@ async function act(el: HTMLElement): Promise<void> {
   }
 }
 
-main.addEventListener("click", (e) => {
-  const el = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
-  if (el) void act(el);
-});
-actions.addEventListener("click", (e) => {
-  const el = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
-  if (el) void act(el);
-});
+for (const area of [main, actions]) {
+  area.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
+    if (el) void act(el);
+  });
+}
 main.addEventListener("submit", (e) => {
   e.preventDefault();
   const btn = (e.target as HTMLElement).querySelector<HTMLElement>("[data-act]");

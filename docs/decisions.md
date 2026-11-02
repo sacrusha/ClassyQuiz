@@ -93,7 +93,8 @@ Patterns to fit:
   the instance's quiz, so a parallel class in the same instance gets them.
   When the instance ends they are lost, and the teacher's copy still has the
   wrong key. That is the problem the later "corrected quiz downloadable" item
-  solves. formatQuiz already writes the corrected text, so that item is cheap.
+  solves. (A serializer for it was written early and removed unused in the
+  2026-11-02 pruning; the item writes its own against the fixes.)
 - **Storage during the lifetime** is whatever lets the instance survive
   devices dying and the server going idle overnight, e.g. Durable Object
   storage. That is not "persisting" in the owner's sense, which means keeping
