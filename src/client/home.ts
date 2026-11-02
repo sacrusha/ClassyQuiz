@@ -173,7 +173,7 @@ async function submit(value: string, archive: ZipEntry[] | null, leaveOut = fals
       location.href = `/screen?q=${r.id}`;
       return;
     }
-    if (r.errors.length > 0) showProblems(r.errors, (r.missingImages?.length ?? 0) > 0, () => void submit(value, archive, true));
+    if ((r.errors?.length ?? 0) > 0) showProblems(r.errors, (r.missingImages?.length ?? 0) > 0, () => void submit(value, archive, true));
     else out.innerHTML = `<div class="problem"><p class="err">${esc(r.error ?? "The site couldn't take the quiz. Try again.")}</p></div>`;
   } catch {
     out.innerHTML = `<div class="problem"><p class="err">No connection to the site. Check the network and try again.</p></div>`;

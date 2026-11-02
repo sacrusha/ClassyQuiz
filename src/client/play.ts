@@ -11,6 +11,7 @@
 
 import type { Auth, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE } from "../shared/protocol.ts";
+import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import { Line, api } from "./net.ts";
@@ -44,6 +45,8 @@ let tickTimer: number | undefined;
 let offlineTimer: number | undefined;
 /** The last tap, until the server confirms it. It counts when it arrives, even after the reveal. */
 let waiting: { q: number; choice: number } | null = null;
+/** The class turned this device away (full, or started), in the phase it was then; asked again when that changes. */
+let refused: { reason: string; phase: string } | null = null;
 
 async function start(): Promise<void> {
   if (!JOIN_CODE.test(code)) {
@@ -66,6 +69,12 @@ async function start(): Promise<void> {
         if (teacher) showCodeForm(true);
         else showNoQuiz();
         return;
+      }
+      if (r.body.quota) {
+        // The site's daily allowance is spent: say so, and ask again rarely.
+        main.innerHTML = `<div class="center"><p class="muted" style="max-width:36rem">${esc(r.body.error ?? "")}</p></div>`;
+        await new Promise((res) => setTimeout(res, 60_000));
+        continue;
       }
     } catch {
       /* offline: try again */
@@ -120,6 +129,8 @@ function onMessage(m: ServerMessage): void {
       else showRoles();
     } else if (m.phase === "final") {
       showFinished();
+    } else if (refused && refused.phase === m.phase && m.avatars.length === 0) {
+      showRefused(refused.reason);
     } else if (m.avatars.length > 0) {
       // A student whose tablet died picks their avatar back.
       showAvatars();
@@ -270,8 +281,18 @@ function newPlayer(): void {
     if (!a.ok) {
       busy = false;
       if (choice?.phase === "final") showFinished();
-    }
+      else if (a.error === CLASS_FULL || a.error === CLASS_STARTED) {
+        refused = { reason: a.error, phase: choice?.phase ?? "" };
+        showRefused(a.error);
+      }
+    } else refused = null;
   });
+}
+
+/** Turned away by the class (MAX_PLAYERS, MAX_LATE_JOINERS): the teacher is in the room. */
+function showRefused(reason: string): void {
+  main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>
+    <p class="muted">${esc(reason)}</p></div>`;
 }
 
 function claim(id: string): void {
@@ -294,16 +315,10 @@ function render(): void {
   const v = view;
   if (!v) return;
   if (v.removed) {
-    store.remove(key);
-    main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>
-      <button class="btn big" style="max-width:320px" id="again">${ICON.plus}</button></div>`;
-    $("#again").addEventListener("click", () => {
-      auth = { role: "guest" };
-      view = null;
-      lastKey = "";
-      line?.stop();
-      void start();
-    });
+    // The teacher removed this avatar: the device keeps its token, so it
+    // comes back as removed rather than as a new player in the same class
+    // (decisions.md, "Hardening": Remove means something).
+    main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div></div>`;
     return;
   }
   const me = v.me;
@@ -328,6 +343,10 @@ function render(): void {
     main.querySelectorAll<HTMLButtonElement>(".ansbtn").forEach((b) =>
       b.addEventListener("click", () => {
         const choice = Number(b.dataset.i);
+        // The same button again changes nothing; it isn't sent (children
+        // hammer buttons, and each stored tap is spent from the site's day).
+        if (q.mine === choice) return;
+        const before = q.mine;
         // Shown at once; the line delivers it, resending until the server confirms.
         q.mine = choice;
         lastKey = JSON.stringify({ ...view!, v: 0 });
@@ -337,6 +356,12 @@ function render(): void {
         void line!.send({ op: "answer", q: q.q, choice, seq: Date.now(), v: v.v }).then((a) => {
           if (waiting !== tap) return;
           waiting = null;
+          // Not taken (e.g. too many changes of mind): the device shows what counts.
+          const shown = view?.question;
+          if (!a.ok && shown && shown.q === tap.q && shown.mine === choice) {
+            shown.mine = before;
+            lastKey = JSON.stringify({ ...view!, v: 0 });
+          }
           // During the question the buttons stay as they are: a redraw could swallow a tap.
           if (!a.ok || view?.phase === "reveal") render();
         });

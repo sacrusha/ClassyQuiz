@@ -14,7 +14,7 @@
 
 import { imageKey, parseQuiz, pictureRefs, type PictureRef, type Problem } from "../quiz/format.ts";
 import { BACKGROUND_LONG_SIDE, IMAGE_LONG_SIDE, MAX_IMAGE_BYTES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../shared/protocol.ts";
-import { api } from "./net.ts";
+import { api, readApi } from "./net.ts";
 import type { ZipEntry } from "./unzip.ts";
 
 export interface PreparedImage {
@@ -191,9 +191,8 @@ export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut
     return { ok: false, errors: [{ message: `The quiz with its pictures is larger than the site takes (${Math.round(MAX_UPLOAD_BYTES / 1e6)} MB).` }], warnings: [] };
   }
   const res = await fetch("/api/quiz", { method: "POST", body: form });
-  try {
-    return await res.json();
-  } catch {
-    return { ok: false, errors: [], warnings: [], error: "The site couldn't take the quiz. Try again." };
-  }
+  // Out of the site's daily allowance, `error` says so and when it comes back.
+  const r = await readApi<UploadResult>(res);
+  if (r.json === false) return { ok: false, errors: [], warnings: [], error: "The site couldn't take the quiz. Try again." };
+  return r;
 }
