@@ -60,9 +60,8 @@ images in the archive by file name (v2), so the format reserves that now.
 
 Any other file (.docx, .pdf, .tar.gz, …) gets a message naming what the site
 takes, instead of being read as text and failing with "No questions were
-found" (review B). The backlog's newer "zip only" and "count upload attempts
-by format" (3e17927) were not built yet; they wait on the owner (see
-the review hand-back).
+found" (review B). Counting upload attempts by format is built; see "Upload
+attempts counted by format" below.
 
 ## 2026-11-02 — Lifetime of a quiz instance
 
@@ -762,6 +761,114 @@ reveal.
     before the tap arrives, and the check that it counts. Both modes pass;
   - headless Edge on the HTTP fallback, with the tap's request held back
     past the reveal: "on its way", then the right-answer verdict.
+
+## 2026-11-02 — Upload attempts counted by format
+
+Serves: v1 item 2 ("upload attempts are counted by format, with content and
+identity excluded").
+
+- **What is counted:** each attempt on the upload page, as one word from a
+  closed list in `src/shared/upload.ts`:
+  - paste, txt, md, zip;
+  - several files;
+  - docx, pdf, tar.gz and the other formats a teacher might try;
+  - "no extension", "other".
+
+  The word comes from the file name only. The server takes only words from
+  the list, and anything else is counted as "other", so no file name or text
+  can end up stored.
+- **What is kept:** per format, the count and the first and last day it was
+  seen. No content, no identity, no time of day. One Durable Object for the
+  site (`UploadStats`). This is kept for good: it describes the site, not a
+  quiz or a person.
+- **Where to look:** `GET /api/stats` on the site, e.g.
+  https://classyquiz.pages.dev/api/stats. It is public. The numbers say how
+  much the site is used, nothing about anyone. If the owner wants them
+  private, a key in `secrets/` read by an `npm run stats` script is the next
+  step.
+- **How:** the page sends the word to `POST /api/attempt` and doesn't wait
+  for an answer. A failed count never touches the upload. A pasted quiz
+  resent after the AI fixed it counts again: these are attempts, not
+  quizzes.
+- **The file picker no longer filters** to .txt/.md/.zip and accepts several
+  files. On a phone a filter can make other files unpickable, and then no
+  one could be seen trying a .docx. Any other file, or several at once, gets
+  the message naming what the site takes. That message existed already.
+- **Not settled:** the backlog says "zip only", and a single .txt or .md
+  file is still accepted. It costs no code beyond reading text, and the
+  counter will show whether anyone uses it. Dropping it is the owner's call.
+- **Deploy:** a new Durable Object class needs the state Worker migration
+  `v2` (server/wrangler.toml). `npm run deploy` deploys the state Worker
+  before the site, which is the order it needs.
+- **Checked:** unit tests for the format words; the endpoints on the local
+  stack; headless Edge counting a paste, a zip, a .docx and two files at
+  once, with the paste and zip still reaching the teacher page.
+
+## 2026-11-02 — Notes for v2 item 1, images in the archive (not started)
+
+For whoever takes it. Nothing here is decided. These are the facts in the
+code, and what I would have looked at first.
+
+**What is already there**
+- **The format reserves the keyword.** An `Image: <file name>` line is
+  recognised by the parser, warned about ("Images are not supported yet")
+  and ignored. It is not attached to any question yet. It is recognised
+  anywhere, in any case, Markdown-dressed like `Title:`/`Note:`. The guidance
+  page says only "The site doesn't handle images yet". Where the line goes
+  (after the question text, before the answers?) and what a missing file
+  means (error or warning) are still open.
+- **The zip reader** (`src/client/unzip.ts`):
+  - It runs in the teacher's browser, with no library.
+  - `listZip()` reads the central directory and returns entries with a lazy
+    `read()`. So images can be read one by one, without decompressing the
+    whole archive.
+  - Only stored (0) and deflate (8) entries; deflate goes through
+    `DecompressionStream("deflate-raw")`.
+  - No zip64, so not for archives over 4 GB or with 65,535 entries.
+  - Names are decoded as UTF-8 whatever the archive's flag says. An old
+    Windows zip with a non-ASCII name in code page 437 would come out
+    garbled, which matters if an `Image:` line names a file "Bild 1ä.png".
+  - Sizes come from the central directory, so archives written with data
+    descriptors work.
+  - There is no size cap; the backlog puts that under v2 item 4.
+  - `quizTextFromZip()` takes the one .md/.txt file, preferring the top
+    level and skipping `__MACOSX` and dot files.
+- **The upload is text only today:** `POST /api/quiz {text}` as JSON, capped
+  at `MAX_QUIZ_BYTES` (200 KB). Parsing happens in the instance's Durable
+  Object, which stores the quiz once at upload.
+
+**What I would have checked first**
+- **Photos carry location and camera data.** A figure cropped from a phone
+  photo may come with EXIF GPS. Redrawing each image on a canvas in the
+  browser before upload drops all metadata ("nothing identified"). It also
+  shrinks a 4 MB photo to something a class of 25 tablets can load over
+  school Wi-Fi: 15 images × 25 devices adds up quickly.
+- **Who needs the image.** The projector certainly does, and the teacher
+  probably. Do the students' tablets? They look at the projector, and image
+  answers are v3. Leaving images off the tablets saves most of the
+  bandwidth and the request budget.
+- **Where the images live.** Durable Object storage keeps the "lives as long
+  as the instance, deleted with it" rule for free. Check its per-value size
+  limit (I believe 2 MB on the SQLite backend) and the Free plan's storage
+  quota before relying on it. I don't know whether R2 is usable on the
+  owner's Free account without a payment method; check before designing
+  around it.
+- **Serving them.** Images must not be public, so they come through the
+  instance with the same credentials as views: `/api/i/:id/...` plus auth.
+  The browser should fetch them before the question comes up (in the lobby,
+  or during the previous question), so the reveal and the next question
+  don't wait on them. The Free-plan request budget is in "Runner: hosting
+  shape".
+- **The projector layout.** The question text is fitted (`fitText` in
+  `screen.ts`), and so are the answer tiles (`fitTiles`). An image between
+  question and answers takes height from both. "Projector tiles: the reveal
+  doesn't move the text" says what must not move.
+- **The AI side is the real unknown.** Can the teacher's AI crop figures out
+  of the sheet photos and hand back a zip? Claude and ChatGPT can with code
+  execution; free tiers may not. The guidance page has to explain it, as
+  information rather than instruction (first entry in this file). Testing
+  that needs model calls, which count against the owner's plan, so ask
+  first.
 
 ## Open
 

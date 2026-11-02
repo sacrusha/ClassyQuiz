@@ -12,8 +12,11 @@
 //   POST /api/pair/wait     {code, nonce}     … and waits for its grant
 //   GET  /api/ping                            network check
 //   GET  /api/echo                            network check: WebSocket echo
+//   POST /api/attempt       {format}          count an upload attempt by format
+//   GET  /api/stats                           upload attempts by format
 
 import { JOIN_CODE, MAX_QUIZ_BYTES, PAIR_CODE } from "../../shared/protocol.ts";
+import { isUploadFormat } from "../../shared/upload.ts";
 import type { Env } from "../../server/env.ts";
 import { randomCode, randomToken } from "../../server/random.ts";
 
@@ -28,6 +31,7 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
   try {
     if (parts[0] === "ping") return json({ ok: true, t: Date.now() });
     if (parts[0] === "echo") return echo(request);
+    if (parts[0] === "stats" && request.method === "GET") return json(await stats(env).read());
     if (parts[0] === "i" && parts.length === 3) return await toInstance(request, env, parts[1], parts[2]);
     if (request.method !== "POST") return json({ error: "not found" }, 404);
     const body = await readJson(request);
@@ -36,6 +40,10 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (parts[0] === "join" && parts.length === 1) return await join(env, body);
     if (parts[0] === "pair" && parts[1] === "new") return await pairNew(env, body);
     if (parts[0] === "pair" && parts[1] === "wait") return await pairWait(env, body);
+    if (parts[0] === "attempt" && parts.length === 1) {
+      await stats(env).count(isUploadFormat(body.format) ? body.format : "other");
+      return json({ ok: true });
+    }
     return json({ error: "not found" }, 404);
   } catch (e) {
     // No request content in logs (decisions.md); the message only.
@@ -95,6 +103,10 @@ async function pairWait(env: Env, body: Record<string, unknown>): Promise<Respon
   const nonce = typeof body.nonce === "string" ? body.nonce : "";
   if (!PAIR_CODE.test(code) || !nonce) return json({ expired: true });
   return json(await env.PAIR.get(env.PAIR.idFromName(code)).wait(nonce));
+}
+
+function stats(env: Env) {
+  return env.STATS.get(env.STATS.idFromName("uploads"));
 }
 
 function echo(request: Request): Response {

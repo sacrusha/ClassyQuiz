@@ -17,10 +17,18 @@ class_name = "JoinCode"
 name = "PAIR"
 class_name = "Pairing"
 
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "UploadStats"
+
 # The Free plan only offers SQLite-backed Durable Objects.
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Instance", "JoinCode", "Pairing"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["UploadStats"]
 
 # No request logs: they would hold IP addresses (decisions.md, lifetime).
 [observability]

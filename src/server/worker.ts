@@ -4,6 +4,7 @@
 
 export { Instance } from "./instance.ts";
 export { JoinCode, Pairing } from "./directory.ts";
+export { UploadStats } from "./stats.ts";
 
 export default {
   async fetch(): Promise<Response> {

@@ -19,3 +19,8 @@ script_name = "classyquiz-state"
 name = "PAIR"
 class_name = "Pairing"
 script_name = "classyquiz-state"
+
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "UploadStats"
+script_name = "classyquiz-state"
