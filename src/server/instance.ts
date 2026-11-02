@@ -4,13 +4,15 @@
 // and deletes everything when the instance ends.
 
 import { DurableObject } from "cloudflare:workers";
-import { parseQuiz, type Quiz, type Problem } from "../quiz/format.ts";
+import { imageKey, parseQuiz, type Quiz, type Problem } from "../quiz/format.ts";
 import * as G from "./game.ts";
+import { matchImages, type StoredImage, type UploadedImage } from "./images.ts";
 import type {
   Auth,
   ClientMessage,
   Command,
   Grant,
+  ImageRef,
   PlayerView,
   RankingView,
   ScreenView,
@@ -18,7 +20,7 @@ import type {
   TeacherView,
   View,
 } from "../shared/protocol.ts";
-import { PAIR_CODE } from "../shared/protocol.ts";
+import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, PAIR_CODE, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomToken } from "./random.ts";
 
@@ -43,6 +45,13 @@ const JOINS_KEPT = 300;
 interface QuizRecord {
   quiz: Quiz;
   warnings: Problem[];
+  /**
+   * The quiz's pictures by `imageKey`; each file is stored under `img:<n>`.
+   * Absent on quizzes uploaded before pictures existed.
+   */
+  images?: Record<string, StoredImage>;
+  /** Part of every picture's address, so the instance id alone doesn't open them. */
+  imageSecret?: string;
 }
 
 /** Small; written with every change. */
@@ -111,18 +120,84 @@ export class Instance extends DurableObject<Env> {
    * Object has far more CPU time per request than a Function on the Free
    * plan. Nothing is stored when the quiz has errors.
    */
-  async create(text: string): Promise<{ ok: true; secret: string } | { ok: false; errors: Problem[]; warnings: Problem[] }> {
+  async create(
+    text: string,
+    images: UploadedImage[] = [],
+    /** The teacher chose to run the quiz without the pictures that didn't come with it. */
+    leaveOutMissing = false,
+  ): Promise<{ ok: true; secret: string } | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[] }> {
     if (this.meta) throw new Error("instance exists");
     const r = parseQuiz(text);
     if (!r.ok) return { ok: false, errors: r.errors, warnings: r.warnings };
+    const pictures = matchImages(r.quiz, images, leaveOutMissing);
+    if (!pictures.ok) return { ok: false, errors: pictures.errors, warnings: r.warnings, missingImages: pictures.missing };
     const now = Date.now();
     const secret = randomToken();
-    this.quizRecord = { quiz: r.quiz, warnings: r.warnings };
+    this.quizRecord = { quiz: r.quiz, warnings: [...r.warnings, ...pictures.warnings], images: pictures.index, imageSecret: randomToken() };
     this.meta = { secret, screens: [], lastActivity: now, v: 1 };
     this.game = G.newGame(r.quiz);
-    await this.ctx.storage.put({ quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: null });
+    // The alarm goes first: should the write below fail halfway, the alarm
+    // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
+    await this.ctx.storage.put({ ...pictures.files, quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: null });
     return { ok: true, secret };
+  }
+
+  /**
+   * The upload with pictures, as multipart/form-data: "text", "leaveOut",
+   * and per picture an "image" file with its "imageName" (a text field: a
+   * non-ASCII file name in a multipart header isn't decoded reliably).
+   */
+  private async createFromForm(req: Request): Promise<Response> {
+    const fail = (message: string) => json({ ok: false, errors: [{ message }], warnings: [] } satisfies UploadResult);
+    const len = Number(req.headers.get("content-length") ?? "NaN");
+    if (!(len <= MAX_UPLOAD_BYTES)) return json({ error: "The quiz with its pictures is too large." }, 413);
+    if (this.meta) return json({ error: "instance exists" }, 409);
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      return json({ error: "The upload couldn't be read." }, 400);
+    }
+    const text = form.get("text");
+    if (typeof text !== "string" || text.trim() === "") return fail("The quiz text is empty.");
+    if (new TextEncoder().encode(text).byteLength > MAX_QUIZ_BYTES) return fail(`This text is longer than a quiz can be (${Math.round(MAX_QUIZ_BYTES / 1000)} KB).`);
+    const files = form.getAll("image");
+    const names = form.getAll("imageName");
+    if (files.length > MAX_IMAGES) return fail(`The quiz has more than ${MAX_IMAGES} pictures.`);
+    if (names.length !== files.length || files.some((f) => typeof f === "string") || names.some((n) => typeof n !== "string")) {
+      return json({ error: "The upload couldn't be read." }, 400);
+    }
+    const images = await Promise.all(files.map(async (f, i) => ({ name: names[i] as string, bytes: new Uint8Array(await (f as File).arrayBuffer()) })));
+    const r = await this.create(text, images, form.get("leaveOut") === "missing");
+    const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret } : r;
+    return json(body);
+  }
+
+  /** GET …/img/<secret>/<n>: a picture, for a device that was sent a view naming it. */
+  private async image(secret: string, n: string): Promise<Response> {
+    const record = this.quizRecord;
+    const info = record?.images && Object.values(record.images).find((i) => String(i.n) === n);
+    if (!record?.imageSecret || secret !== record.imageSecret || !info) return new Response("not found", { status: 404 });
+    const bytes = await this.ctx.storage.get<Uint8Array>(`img:${info.n}`);
+    if (!bytes) return new Response("not found", { status: 404 });
+    return new Response(bytes, {
+      headers: {
+        "content-type": info.type,
+        // Not even the browser keeps it: a shared school laptop holds nothing once the page is gone.
+        "cache-control": "no-store",
+        "x-content-type-options": "nosniff",
+        "content-security-policy": "default-src 'none'; sandbox",
+      },
+    });
+  }
+
+  /** Where a question's picture is fetched, and its size, for the views. */
+  private imageRef(name: string): ImageRef | null {
+    const record = this.quizRecord;
+    const info = name ? record?.images?.[imageKey(name)] : undefined;
+    if (!info || !record?.imageSecret) return null;
+    return { src: `/api/i/${this.ctx.id.toString()}/img/${record.imageSecret}/${info.n}`, w: info.w, h: info.h };
   }
 
   /** For the join code directory: is this code the instance's running class? */
@@ -135,7 +210,10 @@ export class Instance extends DurableObject<Env> {
 
   async fetch(req: Request): Promise<Response> {
     const url = new URL(req.url);
-    const action = url.pathname.split("/").pop();
+    const parts = url.pathname.split("/");
+    const action = parts[parts.length - 1];
+    if (action === "quiz" && req.method === "POST") return this.createFromForm(req);
+    if (parts[parts.length - 3] === "img" && req.method === "GET") return this.image(parts[parts.length - 2], action);
     if (action === "ws") {
       if (req.headers.get("Upgrade") !== "websocket") return new Response("expected a WebSocket", { status: 426 });
       const pair = new WebSocketPair();
@@ -555,6 +633,7 @@ export class Instance extends DurableObject<Env> {
     this.waiters.clear();
     this.meta = null;
     this.game = null;
+    this.quizRecord = null;
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
   }
@@ -630,12 +709,23 @@ export class Instance extends DurableObject<Env> {
       role: "screen",
       v: meta.v,
       title: game.quiz.title,
+      background: this.imageRef(game.quiz.background),
       phase,
       current: run ? run.current : -1,
       code: run ? run.code : null,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
       answered: this.answeredNow(),
-      question: showQ ? { q: run!.current, n: prog.n, total: prog.total, text: q!.text, answers: q!.answers.map((a) => a.text) } : null,
+      question: showQ
+        ? {
+            q: run!.current,
+            n: prog.n,
+            total: prog.total,
+            text: q!.text,
+            answers: q!.answers.map((a) => a.text),
+            image: this.imageRef(q!.image),
+            background: this.imageRef(q!.background || game.quiz.background),
+          }
+        : null,
       reveal:
         run && phase === "reveal"
           ? { counts: game.fixes[run.current].counts, dist: G.distribution(game, run.current), void: game.fixes[run.current].void }
@@ -656,6 +746,7 @@ export class Instance extends DurableObject<Env> {
       v: meta.v,
       id: this.ctx.id.toString(),
       title: game.quiz.title,
+      background: this.imageRef(game.quiz.background),
       quizNote: game.quiz.note,
       warnings: this.quizRecord?.warnings ?? [],
       questions: game.quiz.questions.map((q, i) => {
@@ -666,6 +757,8 @@ export class Instance extends DurableObject<Env> {
         else if (run && run.current === i && run.phase === "question") status = "current";
         return {
           text: q.text,
+          image: this.imageRef(q.image),
+          background: this.imageRef(q.background || game.quiz.background),
           answers: q.answers.map((a, j) => ({ text: a.text, counts: fix.counts[j], marked: a.correct })),
           note: q.note,
           void: fix.void,

@@ -1,10 +1,10 @@
-// Reads the quiz text out of a .zip, using the browser's own decompression
-// (DecompressionStream "deflate-raw"); no library. v1 only needs the text
-// file; v2 will take the images from the same archive (decisions.md, upload).
+// Reads the quiz text and its pictures out of a .zip, using the browser's own
+// decompression (DecompressionStream "deflate-raw"); no library. Entries are
+// read one at a time, when asked for (images.ts).
 
 export interface ZipEntry {
   name: string;
-  read(): Promise<Uint8Array>;
+  read(): Promise<Uint8Array<ArrayBuffer>>;
 }
 
 export function listZip(buf: ArrayBuffer): ZipEntry[] {
@@ -53,7 +53,12 @@ export function listZip(buf: ArrayBuffer): ZipEntry[] {
 
 /** The quiz text in an archive: its one .md/.txt file (ignoring system clutter). */
 export async function quizTextFromZip(buf: ArrayBuffer): Promise<string> {
-  const texts = listZip(buf).filter((e) => /\.(md|txt|markdown)$/i.test(e.name) && !/(^|\/)(__MACOSX|\.)/.test(e.name));
+  return quizTextFromEntries(listZip(buf));
+}
+
+/** The quiz text among an archive's entries: its one .md/.txt file (ignoring system clutter). */
+export async function quizTextFromEntries(entries: ZipEntry[]): Promise<string> {
+  const texts = entries.filter((e) => /\.(md|txt|markdown)$/i.test(e.name) && !/(^|\/)(__MACOSX|\.)/.test(e.name));
   if (texts.length === 0) throw new Error("The archive contains no .txt or .md file with the quiz.");
   // Prefer a file at the top level, then the shortest path.
   texts.sort((a, b) => a.name.split("/").length - b.name.split("/").length || a.name.length - b.name.length);

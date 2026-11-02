@@ -236,7 +236,7 @@ Note: (teacher only, shown while this question is up)
   - no title;
   - the same answer twice;
   - long answers or questions;
-  - an "Image:" line (reserved for v2);
+  - an "Image:" line (until v2 made it the question's picture: "Pictures in the archive");
   - the correct answer in the same position in every question.
 - **Rejected alternatives:**
   - Aiken (lettered answers plus "ANSWER: B"): an index key, which hides
@@ -804,71 +804,200 @@ identity excluded").
   stack; headless Edge counting a paste, a zip, a .docx and two files at
   once, with the paste and zip still reaching the teacher page.
 
-## 2026-11-02 — Notes for v2 item 1, images in the archive (not started)
+## 2026-11-02 — Pictures in the archive
 
-For whoever takes it. Nothing here is decided. These are the facts in the
-code, and what I would have looked at first.
+Serves: v2 item 1; v1 item 2 (the archive is the container); constraints
+"nothing kept beyond its use, nothing identified" and the Free plan. Keeps
+v3 item 1 (answers as images) open. Replaces the handover notes that stood
+here; what they flagged is answered below.
 
-**What is already there**
-- **The format reserves the keyword.** An `Image: <file name>` line is
-  recognised by the parser, warned about ("Images are not supported yet")
-  and ignored. It is not attached to any question yet. It is recognised
-  anywhere, in any case, Markdown-dressed like `Title:`/`Note:`. The guidance
-  page says only "The site doesn't handle images yet". Where the line goes
-  (after the question text, before the answers?) and what a missing file
-  means (error or warning) are still open.
-- **The zip reader** (`src/client/unzip.ts`):
-  - It runs in the teacher's browser, with no library.
-  - `listZip()` reads the central directory and returns entries with a lazy
-    `read()`. So images can be read one by one, without decompressing the
-    whole archive.
-  - Only stored (0) and deflate (8) entries; deflate goes through
-    `DecompressionStream("deflate-raw")`.
-  - No zip64, so not for archives over 4 GB or with 65,535 entries.
-  - Names are decoded as UTF-8 whatever the archive's flag says. An old
-    Windows zip with a non-ASCII name in code page 437 would come out
-    garbled, which matters if an `Image:` line names a file "Bild 1ä.png".
-  - Sizes come from the central directory, so archives written with data
-    descriptors work.
-  - There is no size cap; the backlog puts that under v2 item 4.
-  - `quizTextFromZip()` takes the one .md/.txt file, preferring the top
-    level and skipping `__MACOSX` and dot files.
-- **The upload is text only today:** `POST /api/quiz {text}` as JSON, capped
-  at `MAX_QUIZ_BYTES` (200 KB). Parsing happens in the instance's Durable
-  Object, which stores the quiz once at upload.
+Owner's direction (backlog v2 item 1): the picture is for the big screen,
+not the voting devices; a background is separate from the question's
+picture, and questions can share files; the first target is a teacher whose
+AI can make a zip ("working and good first, flexible later"). Sonnet can
+crop and zip (owner's test), so no model calls were spent on it. Pictures
+without a zip are a Later item.
 
-**What I would have checked first**
-- **Photos carry location and camera data.** A figure cropped from a phone
-  photo may come with EXIF GPS. Redrawing each image on a canvas in the
-  browser before upload drops all metadata ("nothing identified"). It also
-  shrinks a 4 MB photo to something a class of 25 tablets can load over
-  school Wi-Fi: 15 images × 25 devices adds up quickly.
-- **Who needs the image.** The projector certainly does, and the teacher
-  probably. Do the students' tablets? They look at the projector, and image
-  answers are v3. Leaving images off the tablets saves most of the
-  bandwidth and the request budget.
-- **Where the images live.** Durable Object storage keeps the "lives as long
-  as the instance, deleted with it" rule for free. Check its per-value size
-  limit (I believe 2 MB on the SQLite backend) and the Free plan's storage
-  quota before relying on it. I don't know whether R2 is usable on the
-  owner's Free account without a payment method; check before designing
-  around it.
-- **Serving them.** Images must not be public, so they come through the
-  instance with the same credentials as views: `/api/i/:id/...` plus auth.
-  The browser should fetch them before the question comes up (in the lobby,
-  or during the previous question), so the reveal and the next question
-  don't wait on them. The Free-plan request budget is in "Runner: hosting
-  shape".
-- **The projector layout.** The question text is fitted (`fitText` in
-  `screen.ts`), and so are the answer tiles (`fitTiles`). An image between
-  question and answers takes height from both. "Projector tiles: the reveal
-  doesn't move the text" says what must not move.
-- **The AI side is the real unknown.** Can the teacher's AI crop figures out
-  of the sheet photos and hand back a zip? Claude and ChatGPT can with code
-  execution; free tiers may not. The guidance page has to explain it, as
-  information rather than instruction (first entry in this file). Testing
-  that needs model calls, which count against the owner's plan, so ask
-  first.
+**Format** (guidance page, "How quizzes are built"):
+- `Image: q3.png` after the question text, before the answers: the
+  question's picture, one per question.
+- `Background: forest.jpg`: before the first question, behind every
+  question; after a question's text, behind that one instead.
+- One file can serve several questions, as picture or background.
+- Names match by `imageKey`: base name, case-insensitive, Unicode NFC. So
+  `Bilder/Q3.PNG` in the archive is the quiz's `q3.png`, and a decomposed
+  "ä" from a Mac zip matches.
+- Forgiven: Markdown dress (`**Image:**`, `![alt](q3.png)` on its own
+  line), quotes, backticks, a description after the file name.
+- Errors:
+  - a picture line after the answers, because it may be meant for the next
+    question and a wrong guess shows a figure with the wrong question;
+  - two pictures or two backgrounds on one question;
+  - `Image:` before the first question;
+  - a line that names no picture file, or a web address.
+- A picture the quiz names that didn't come with it is an error that names
+  it. When it's a zip, the message lists the pictures the zip does have, so
+  the AI sees its own naming mistake. The teacher can instead press
+  "Continue without these pictures", and the quiz runs with a warning per
+  question.
+
+**Upload** (`client/images.ts`, called by the upload page; whichever page
+takes the quiz after the flow redesign calls `prepareImages()` and
+`uploadQuiz()`):
+- The browser parses the text (the parser is pure) and reads only the named
+  files out of the zip, one at a time.
+- It redraws each one on a canvas:
+  - long side at most 1600 px, 1920 for backgrounds;
+  - flattened onto white, so a transparent line drawing doesn't vanish on a
+    dark screen;
+  - EXIF orientation applied;
+  - PNG kept for line art up to 500 KB, else JPEG.
+- That drops everything a photo carries besides the image: camera, time,
+  GPS. It shrinks a 4 MB phone photo to a few hundred KB. And the server
+  only ever takes PNG or JPEG, so no SVG (with whatever scripts it holds)
+  is served. An SVG with only a viewBox is drawn at full size.
+- HEIC can't be decoded by most browsers. The teacher gets a message saying
+  so.
+- The zip reader's limits stand (`client/unzip.ts`): stored and deflate
+  only, no zip64, and names read as UTF-8 whatever the archive's flag. An
+  old Windows zip with a non-ASCII name in code page 437 would not match its
+  `Image:` line; Python's zipfile, which AIs use, writes UTF-8.
+- Without pictures, the upload is the old JSON `{text}`. With them it is
+  multipart: `text`, `leaveOut`, and per picture an `image` file plus its
+  `imageName` as a text field. Non-ASCII names in multipart headers aren't
+  decoded alike everywhere.
+- The Function forwards the multipart body unread to the new instance. A
+  Free Function has 10 ms CPU; the Durable Object parses it.
+
+**Storage and serving** (`server/images.ts`, `instance.ts`):
+- The server checks every file: PNG or JPEG by its signature, size read
+  from the file, at most 1.5 MB per file (a Durable Object value holds 2 MB),
+  at most 60 pictures, 16 MB per upload. Files the quiz doesn't name are
+  dropped.
+- Each picture is stored once as `img:<n>` in the instance's own storage, in
+  the same write as the quiz. The alarm is set before that write, so a
+  failed write is still cleaned up. Pictures go with `deleteAll` when the
+  instance ends, like everything else.
+- `GET /api/i/:id/img/:secret/:n`:
+  - The secret is per quiz and travels only in views, so the instance id
+    that every student device knows doesn't open the pictures.
+  - `cache-control: no-store`: a shared school laptop keeps nothing on disk
+    once the page is closed.
+  - `nosniff`, plus a sandbox CSP.
+- Views: the projector and teacher views carry `image` and `background` as
+  `{src, w, h}` per question, and the quiz's background. The player view
+  carries none (owner: not on the voting devices). The size is there for
+  the layout before the file has loaded.
+- Budget: on Cloudflare's published Free limits (5 GB of Durable Object
+  storage per account, 100,000 rows written a day), a quiz with 15 pictures
+  is a few MB and a handful of rows. Fetching them costs one Function and
+  one Durable Object request per picture per screen.
+
+**Not yet: the screens.** Until they're built, the projector doesn't show
+pictures, so this isn't for deploying alone. They're left for whoever builds
+them after the flow redesign (docs/user-flow.md) has landed on main and
+`images` is merged. A plan, not decided:
+- **Projector, question and reveal:**
+  - The figure goes beside the question and tiles (figure left at full
+    height, question and tiles right) or between question and tiles. The
+    page picks one from the figure's aspect (`w`/`h` in the view) and the
+    question's length. Owner: "beside is a good improvement, but might
+    depend on question length". On 16:9 at 1366×768, between leaves a
+    square-ish figure about 300 px of height.
+  - Wide figures (number lines, strips) and long questions suit between;
+    square or portrait figures with short questions suit beside. No keyword:
+    neither the AI nor the teacher chooses.
+  - The figure is fitted like the text (`fitText`/`fitTiles` in
+    `screen.ts`). "Projector tiles: the reveal doesn't move the text" holds
+    for the figure too: the reveal moves neither figure nor text.
+- **Background:** behind the whole projector screen, under a scrim dark or
+  light enough that question and tiles read from the back row. A question's
+  own background replaces the quiz's (the view already resolves this).
+  - My call, pending the owner: the quiz's background also shows in the
+    lobby and on the ranking screens (`ScreenView.background`).
+- **Full screen for a figure:** a key on the projector and a button on the
+  Remote, for the moment the teacher points at it. Toggled back the same
+  way.
+- **Loading:** the projector fetches every picture of the quiz in the
+  lobby, as blobs into object URLs, so a question or reveal never waits on
+  one. The responses are `no-store`, so a reload fetches them again. That
+  costs one Function and one Durable Object request per picture.
+- **Teacher's lobby (§3.3) and Remote (§3.5):**
+  - A thumbnail per question that has a picture or a background; tapped, it
+    opens full size. A wrong crop is the picture's wrong key, so it has to
+    be visible to a skimming teacher.
+  - The picture is not behind the answers' fold: the class sees it anyway.
+    One that shows the solution is exactly what the teacher needs to spot.
+- **Fix: hide the picture**, beside void and skip. It covers a wrong or
+  revealing crop during the run: a per-question fix like the others, which
+  views then leave out.
+- **Student devices:** no picture (owner). v3 image answers will be the
+  first thing tablets fetch; the route and `ImageRef` already allow it.
+
+**Merging with the flow redesign:**
+- `client/new.ts` is the upload page. The redesign folds it into the root
+  page. What the new page needs:
+  - keep the zip's entries (`listZip`) in a variable, set when a zip is
+    picked and cleared when the teacher types or pastes into the box;
+  - take the text with `quizTextFromEntries`;
+  - call `prepareImages(text, entries)`;
+  - show its problems with "Continue without these pictures", which
+    resubmits with `leaveOut`;
+  - call `uploadQuiz(text, images, leaveOut)`. It returns
+    `UploadResult`; an error with `missingImages` offers the same button.
+- The copy-for-AI text for picture problems asks for a .zip, not a code
+  block.
+- `quizTextFromZip` still exists for callers that only want the text.
+- Server changes are additive:
+  - `Instance.create(text, images?, leaveOutMissing?)`;
+  - the multipart branch in the instance's `fetch` (action `quiz`) and the
+    `img` GET;
+  - `QuizRecord.images`/`imageSecret`;
+  - `image`/`background` fields on `QuestionView`, `TeacherQuestion`,
+    `ScreenView` and `TeacherView`.
+
+  When the redesign rebuilds the views around roles, these fields move with
+  the question data. The picture's secret stays out of anything a student
+  device is sent.
+
+**A second local stack** (for an agent beside the main one on 8787/8788):
+- Wrangler's dev registry is global (`%APPDATA%\xdg.config\.wrangler\registry`).
+  Its entries are keyed by Worker name, so a second stack that keeps the name
+  `classyquiz-state` would overwrite the entry the main stack's site binds
+  to. This is inferred from the registry's layout, not tried.
+- So copy the deployables (functions, server, shared, quiz, dist, both
+  wrangler.toml) to a scratch folder, and rename the state Worker in both
+  tomls, e.g. `classyquiz-state-images`. The site name `classyquiz` is
+  shared, harmlessly, since nothing binds to it. Use ports 8817/8818.
+- Start the site only after the state Worker is registered. If the site
+  starts against a stale registry entry (left by a killed process), every
+  API call fails with "Network connection lost" even though the bindings
+  read "[connected]". Restarting the site fixes it.
+- Stop a stack by killing the wrangler node processes with their children
+  (`taskkill /T`). Stopping only the shell leaves workerd holding the ports.
+
+**Checked:**
+- Unit tests: parser forms and errors, `imageKey`, PNG/JPEG reading,
+  matching, sharing, leaving out.
+- HTTP against the local stack:
+  - a non-ASCII name;
+  - wrong secret and unknown picture: 404;
+  - pasted text naming pictures, and "continue without";
+  - SVG bytes under a .png name: refused;
+  - 15 pictures, 5.9 MB: stored and served in about 0.3 s;
+  - 17 MB: 413;
+  - ending the instance: the picture is gone.
+- Headless Edge, through the real upload page, with a zip holding:
+  - a 3000×2000 JPEG with EXIF orientation 6 and a GPS-like marker: came
+    out 1067×1600, upright, without EXIF or the marker;
+  - a viewBox-only SVG: 1600×800 PNG;
+  - a transparent PNG: white corners;
+  - a fake HEIC: listed, then left out on request;
+  - a background: 1920×1280, behind every question;
+  - a `__MACOSX` entry: ignored.
+
+Revisit: if teachers' AIs put picture lines after the answers often enough
+that the error costs more round trips than a guess would cost wrong figures.
 
 ## Open
 

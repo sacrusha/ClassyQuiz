@@ -20,13 +20,56 @@ export interface Question {
   answers: Answer[];
   /** Authoring note: shown to the teacher while the question is up, never to students. */
   note: string;
+  /** The picture shown with the question: a file name as written in the quiz, matched by `imageKey`; "" for none. */
+  image: string;
+  /** The picture behind this question, in place of the quiz's background; "" for none of its own. */
+  background: string;
 }
 
 export interface Quiz {
   title: string;
   /** Note on the quiz as a whole, for the teacher only. */
   note: string;
+  /** The picture behind every question that has no background of its own; "" for none. */
+  background: string;
   questions: Question[];
+}
+
+/** A picture the quiz names, with the words that name it in messages. */
+export interface PictureRef {
+  name: string;
+  kind: "image" | "background";
+  /** The question's index, or null for the quiz's background. */
+  question: number | null;
+  /** "Question 3 shows the picture "q3.png"", "The quiz has the background "x.jpg"". */
+  label: string;
+  /** "Question 3 runs without its picture "q3.png"". */
+  leftOut: string;
+}
+
+/** Every picture the quiz names, in order: the quiz's background, then each question's picture and background. */
+export function pictureRefs(quiz: Quiz): PictureRef[] {
+  const refs: PictureRef[] = [];
+  if (quiz.background) {
+    const b = quiz.background;
+    refs.push({ name: b, kind: "background", question: null, label: `The quiz has the background "${b}"`, leftOut: `The quiz runs without its background "${b}".` });
+  }
+  quiz.questions.forEach((q, i) => {
+    if (q.image) {
+      refs.push({ name: q.image, kind: "image", question: i, label: `Question ${i + 1} shows the picture "${q.image}"`, leftOut: `Question ${i + 1} runs without its picture "${q.image}".` });
+    }
+    if (q.background) {
+      const b = q.background;
+      refs.push({ name: b, kind: "background", question: i, label: `Question ${i + 1} has the background "${b}"`, leftOut: `Question ${i + 1} runs without its background "${b}".` });
+    }
+  });
+  return refs;
+}
+
+/** Takes a picture off the quiz, for a quiz that runs without it. */
+export function dropPicture(quiz: Quiz, ref: PictureRef): void {
+  if (ref.question === null) quiz.background = "";
+  else quiz.questions[ref.question][ref.kind] = "";
 }
 
 /** Worded so the teacher can paste it back to the AI; it names the question it belongs to. */
@@ -61,7 +104,7 @@ const LEADING_BIDI = /^[‎‏؜‪-‮⁦-⁩]+/;
 
 type Classified =
   | { kind: "blank" }
-  | { kind: "keyword"; key: "title" | "note" | "image"; value: string }
+  | { kind: "keyword"; key: "title" | "note" | "image" | "background"; value: string }
   | { kind: "answer"; correct: boolean; text: string; indent: number }
   | { kind: "ambiguous"; marker: string; text: string }
   | { kind: "text"; text: string; indent: number };
@@ -98,16 +141,49 @@ function classify(raw: string): Classified {
   m = s.match(/^([*•])\s+(.*)$/);
   if (m) return { kind: "ambiguous", marker: m[1], text: m[2].trim() };
 
+  // A Markdown image on a line of its own, "![figure](q3.png)", is an AI's
+  // way of writing an Image: line.
+  if (/^!\[[^\]]*\]\([^)]*\)$/.test(s)) return { kind: "keyword", key: "image", value: s };
+
   // Keywords, possibly dressed up as Markdown: "## Title: x", "**Title:** x", "**Note**: x".
   const unheaded = s.replace(/^#{1,6}\s+/, "");
-  m = unheaded.match(/^([*_]{0,2})(title|note|image)[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
+  m = unheaded.match(/^([*_]{0,2})(title|note|image|background)[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
   if (m) {
     let value = m[3].trim();
     if (m[1]) value = value.replace(/(\*\*|__)$/, "").trim();
-    return { kind: "keyword", key: m[2].toLowerCase() as "title" | "note" | "image", value };
+    return { kind: "keyword", key: m[2].toLowerCase() as "title" | "note" | "image" | "background", value };
   }
 
   return { kind: "text", text: stripWrappingEmphasis(unheaded), indent };
+}
+
+// ---------------------------------------------------------------------------
+// Pictures
+
+/** File types a picture can come as; whether the browser can read it is the upload's concern. */
+const PICTURE_FILE = /^(.*?\.(?:png|jpe?g|gif|webp|svg|bmp|avif|heic|heif))(?=$|[\s`"'”’>»),;:])/i;
+
+/**
+ * The file name on an Image: line, without what an AI may wrap around it:
+ * Markdown image or link syntax, quotes, backticks, a description after it.
+ * Null when the line names no picture file.
+ */
+function pictureName(value: string): string | null {
+  let v = value.trim();
+  const md = v.match(/^!?\[[^\]]*\]\(\s*<?([^)>]+?)>?(?:\s+["'“][^)]*)?\s*\)/);
+  if (md) v = md[1];
+  v = v.replace(/^[`"'“‘<«]+/, "");
+  const m = v.match(PICTURE_FILE);
+  return m ? m[1].trim() : null;
+}
+
+/**
+ * How a picture's name is matched against the files that came with the quiz:
+ * folders, case and Unicode composition don't matter, so "Bilder/Q3.PNG" in
+ * the archive is the "q3.png" the quiz names.
+ */
+export function imageKey(name: string): string {
+  return name.replace(/^.*[/\\]/, "").normalize("NFC").toLowerCase();
 }
 
 // ---------------------------------------------------------------------------
@@ -162,6 +238,12 @@ interface Block {
   number: number | null;
   /** Indentation of the last answer line, to recognise its continuation. */
   answerIndent: number;
+  image: string;
+  background: string;
+  /** Problems with the block's Image:/Background: lines, worded once the question's number is known. */
+  pictureProblems: ((label: string) => string)[];
+  /** Image:/Background: lines after the answers so far; errors unless more answers follow. */
+  afterAnswers: { kind: "image" | "background"; line: string }[];
 }
 
 // "1. ", "1) ", "Q1: ", "Question 1: ". Stripped only when the number is the
@@ -186,6 +268,7 @@ export function parseQuiz(input: string): ParseResult {
 
   let title: string | null = null;
   const quizNotes: string[] = [];
+  let quizBackground = "";
   const blocks: Block[] = [];
   let current: Block | null = null;
 
@@ -201,7 +284,7 @@ export function parseQuiz(input: string): ParseResult {
       text = text.slice(m[0].length);
       number = expected;
     }
-    current = { textLines: [text], answers: [], notes: [], number, answerIndent: 0 };
+    current = { textLines: [text], answers: [], notes: [], number, answerIndent: 0, image: "", background: "", pictureProblems: [], afterAnswers: [] };
     blocks.push(current);
   };
 
@@ -233,7 +316,38 @@ export function parseQuiz(input: string): ParseResult {
           if (block === null) quizNotes.push(c.value);
           else block.notes.push(c.value);
         } else {
-          warn(`Images are not supported yet; the line "${excerpt(raw.trim())}" was ignored.`);
+          // Image: (the question's picture) or Background: (behind it).
+          const kind = c.key;
+          const line = excerpt(raw.trim());
+          const name = pictureName(c.value);
+          let problem: ((label: string) => string) | null = null;
+          if (/[a-z]:\/\//i.test(c.value)) {
+            problem = (label) =>
+              `${label}: the line "${line}" points to the web. The site doesn't load pictures from the web; a picture comes as a file in the .zip, together with the quiz text.`;
+          } else if (name === null) {
+            problem = (label) => `${label}: the line "${line}" names no picture file. It names the file in the .zip, e.g. "${kind === "image" ? "Image" : "Background"}: q3.png".`;
+          }
+          if (block === null) {
+            // Before the first question: a background for the whole quiz.
+            if (kind === "image") {
+              err(
+                `The line "${line}" comes before any question. A question's picture goes after the question text, before the answers; ` +
+                  `a picture behind every question is a "Background:" line before the first question.`,
+              );
+            } else if (problem) err(problem("The quiz's background"));
+            else if (quizBackground !== "") err(`The quiz has more than one "Background:" line before the first question.`);
+            else quizBackground = name!;
+            break;
+          }
+          if (problem) block.pictureProblems.push(problem);
+          else if (block[kind] !== "") {
+            block.pictureProblems.push((label) =>
+              kind === "image" ? `${label} has more than one picture. A question shows one; combine them into one picture file.` : `${label} has more than one background.`,
+            );
+          } else {
+            block[kind] = name!;
+            if (block.answers.length > 0) block.afterAnswers.push({ kind, line });
+          }
         }
         break;
       case "answer":
@@ -243,6 +357,7 @@ export function parseQuiz(input: string): ParseResult {
         }
         if (block.answers.length === 0) answered++;
         block.answers.push({ text: c.text, correct: c.correct });
+        block.afterAnswers = [];
         block.answerIndent = c.indent;
         break;
       case "ambiguous":
@@ -285,16 +400,28 @@ export function parseQuiz(input: string): ParseResult {
     if (b.answers.length > 0) lastAnswered = i;
   });
   const questions: Question[] = [];
+  const questionBlocks: Block[] = [];
   blocks.forEach((b, i) => {
     const text = b.textLines.join("\n").trim();
     if (b.answers.length > 0) {
-      questions.push({ text, answers: b.answers, note: b.notes.join("\n") });
+      questions.push({ text, answers: b.answers, note: b.notes.join("\n"), image: b.image, background: b.background });
+      questionBlocks.push(b);
       return;
     }
     const leading = firstAnswered === -1 || i < firstAnswered;
     const trailing = i > lastAnswered;
     if (leading && !trailing) {
       quizNotes.push(...b.notes);
+      // Picture lines under an unmarked title, before the first question.
+      for (const problem of b.pictureProblems) err(problem("Before the first question"));
+      if (b.background && quizBackground) err(`The quiz has more than one "Background:" line before the first question.`);
+      else if (b.background) quizBackground = b.background;
+      if (b.image) {
+        err(
+          `The picture "${b.image}" comes before any question. A question's picture goes after the question text, before the answers; ` +
+            `a picture behind every question is a "Background:" line before the first question.`,
+        );
+      }
       const single = b.textLines.length === 1 ? b.textLines[0].trim() : "";
       const looksLikeTitle =
         i === firstAnswered - 1 && single !== "" && single.length <= LONG_ANSWER && !/[:?]$/.test(single);
@@ -335,6 +462,18 @@ export function parseQuiz(input: string): ParseResult {
     }
     if (q.text.length > LONG_QUESTION)
       warn(`${label} is ${q.text.length} characters long, which is a lot to read on a projector.`);
+    const b = questionBlocks[i];
+    for (const problem of b.pictureProblems) err(problem(label));
+    // After the answers, the line could as well be meant for the next
+    // question, whose figure an AI may put above it; guessing would show a
+    // figure with the wrong question.
+    for (const { kind, line } of b.afterAnswers) {
+      err(
+        `${label}: the line "${line}" comes after the answers, so it's unclear which question the ${kind === "image" ? "picture" : "background"} belongs to. ` +
+          `Its line goes after the question text, before the answers.`,
+      );
+      q[kind] = "";
+    }
   });
 
   // Answer order is display order (each position has its colour). If the key
@@ -352,7 +491,7 @@ export function parseQuiz(input: string): ParseResult {
 
   return {
     ok: errors.length === 0,
-    quiz: { title: title ?? "", note: quizNotes.join("\n"), questions },
+    quiz: { title: title ?? "", note: quizNotes.join("\n"), background: quizBackground, questions },
     errors,
     warnings,
   };
