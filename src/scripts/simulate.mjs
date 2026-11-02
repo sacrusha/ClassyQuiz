@@ -1,11 +1,16 @@
 // A class on bad Wi-Fi, with the teacher's two roles, against a running site
 // (local dev or deployed):
 //
-//   node scripts/simulate.mjs [base-url] [players] [--all-poll]
+//   node scripts/simulate.mjs [base-url] [players] [--all-poll] [--tempo]
 //
 // --all-poll: every student over long-polling, and the number of HTTP
 // requests reported (the Free plan's budget on a network without
 // WebSockets).
+// --tempo: the class plays with a 10 s countdown and points for speed. Each
+// question is read first; the teacher presses Go (twice: a doubled Go must
+// not reveal); answering closes when everyone present has answered or time
+// is up, and only then does the teacher reveal. Taps carry the device's own
+// time, and the scores are checked against it.
 //
 // The upload's tab is the Projector and steers itself; a phone takes the
 // Remote and steers from then on (docs/user-flow.md §1). 25 students join; a
@@ -30,6 +35,12 @@
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
+const TEMPO = process.argv.includes("--tempo");
+const SECONDS = 10;
+// shared/tempo.ts
+const POINTS_RIGHT = 10;
+const SPEED_BONUS = 5;
+const speedBonus = (ms, clockMs) => Math.round(SPEED_BONUS * Math.max(0, Math.min(1, 1 - ms / clockMs)));
 const BASE = (args[0] ?? "http://127.0.0.1:8788").replace(/\/$/, "");
 const N = Number(args[1] ?? 25);
 let requests = 0;
@@ -301,7 +312,7 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
   const r = await post("/api/join", { code });
   if (!r.body.instance) throw new Error("join failed " + JSON.stringify(r.body));
   const d = new Device(name, r.body.instance, { role: "guest" }, mode);
-  const p = { name, d, id: null, acked, view: null, joining: false };
+  const p = { name, d, id: null, acked, view: null, joining: false, shown: {} };
   let refresh = null;
   d.on((m) => {
     if (m.t === "choose" && !p.joining) {
@@ -328,6 +339,9 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
     }
     if (m.t === "state" && m.view.role === "player") {
       p.view = m.view;
+      // Like client/play.ts: when the answers appeared on this device, per question.
+      const q = m.view.question;
+      if (q && q.answering !== "reading" && q.sinceMs !== null && p.shown[q.q] === undefined) p.shown[q.q] = Date.now() - q.sinceMs;
       maybeAnswer(p);
     }
   });
@@ -340,6 +354,8 @@ const answering = new Set();
 function maybeAnswer(p) {
   const v = p.view;
   if (!v || v.phase !== "question" || !v.question || p.dead) return;
+  // Countdown: nothing to tap while the class reads; the open view comes with Go.
+  if (v.question.answering !== "open") return;
   const key = `${p.name}:${v.question.q}`;
   if (answering.has(key)) return;
   answering.add(key);
@@ -348,21 +364,28 @@ function maybeAnswer(p) {
     await sleep(rnd(100, 1500));
     const n = v.question.answers.length;
     const tries = Math.random() < 0.25 ? 2 : 1; // some change their mind
+    let last = -1;
     for (let i = 0; i < tries; i++) {
       // Like client/play.ts: a tap only while the device shows this question,
       // naming the view it was made on. A device that is offline still shows it.
       const shown = p.view;
-      if (shown.phase !== "question" || shown.question?.q !== q) break;
+      if (shown.phase !== "question" || shown.question?.q !== q || shown.question.answering !== "open") break;
       const choice = Math.floor(Math.random() * n);
+      // Like client/play.ts: the answer already chosen isn't sent again (the
+      // server would keep the first tap, and its time, anyway).
+      if (choice === last) continue;
+      last = choice;
       const seq = Date.now() * 10 + i;
+      const ms = p.shown[q] !== undefined ? Date.now() - p.shown[q] : undefined;
       // Some answers are sent just before the device drops: the line must resend them.
       const dropAfter = p.d.mode === "ws" && Math.random() < 0.15;
-      const sent = p.d.send({ op: "answer", q, choice, seq, v: shown.v });
+      const sent = p.d.send({ op: "answer", q, choice, seq, v: shown.v, ms });
       if (dropAfter) void p.d.drop(rnd(300, 2500));
       sent.then((a) => {
         if (a.ok) {
           const prev = p.acked[q];
-          if (!prev || prev.seq < seq) p.acked[q] = { choice, seq };
+          // The same answer again keeps its first tap's time, as on the server.
+          if (!prev || prev.seq < seq) p.acked[q] = prev?.choice === choice ? { ...prev, seq } : { choice, seq, ms };
         }
       });
       await sleep(rnd(200, 600));
@@ -390,32 +413,65 @@ void (async () => {
   }
 })();
 
-const at = () => ({ phase: tv().phase, current: tv().current });
+const at = () => ({ phase: tv().phase, current: tv().current, reading: tv().answering === "reading" });
 const active = () => players.filter((p) => !p.dead).length;
 let qi = 0;
+if (TEMPO) {
+  const t = await steerer().send({ op: "tempo", tempo: "speed", seconds: SECONDS });
+  check(t.ok, "the tempo is set in the lobby");
+  await until(() => tv().tempo === "speed" && tv().seconds === SECONDS, 5000, "the tempo in the teacher's view");
+}
 await steerer().send({ op: "begin", at: at() });
+let closedByAll = 0;
+let closedByTime = 0;
 let deadPlayer = null;
 let revival = null;
 let lateTap = null;
 for (;;) {
   await until(() => tv().phase === "question", 5000, "question");
   const current = tv().current;
+  if (TEMPO) {
+    check(tv().answering === "reading", `question ${current + 1} opens for reading (${tv().answering})`);
+    await sleep(rnd(300, 1200)); // the teacher reads it out
+    const readAt = { ...at() };
+    // A double tap on Go (or a retry) must not reveal.
+    await Promise.all([steerer().send({ op: "go", at: readAt }), steerer().send({ op: "go", at: readAt })]);
+    await until(() => tv().answering !== "reading", 5000, "Go");
+    await sleep(300);
+    check(tv().phase === "question", `a doubled Go doesn't reveal question ${current + 1} (${tv().phase})`);
+  }
   // Wait until the class has answered (or 12 s: some devices are asleep).
+  // With the countdown: until answering closes, by everyone present having
+  // answered or by time's up.
   const t = Date.now();
-  while (tv().run.answered < active() && Date.now() - t < 12000) await sleep(100);
-  await sleep(800); // stragglers changing their mind
+  if (TEMPO && current === 2) {
+    // The late tap below needs the answers open: the teacher reveals early, with the clock still running.
+    await sleep(400);
+    check(tv().answering === "open", `question 3 still open 0.4 s after Go (${tv().answering})`);
+  } else if (TEMPO) {
+    await until(() => tv().answering === "closed", (SECONDS + 5) * 1000, `answering to close on question ${current + 1}`);
+    const took = Date.now() - t;
+    if (took < SECONDS * 1000 - 300) closedByAll++;
+    else closedByTime++;
+    check(took < SECONDS * 1000 + 3000, `time's up comes on time (${took} ms after Go for a ${SECONDS} s countdown)`);
+  } else {
+    while (tv().run.answered < active() && Date.now() - t < 12000) await sleep(100);
+    await sleep(800); // stragglers changing their mind
+  }
   if (current === 2) {
     // Item 15: a tablet taps while offline, the teacher reveals, then the tap
     // arrives. The tablet showed the question as open, so the tap counts.
     // A tablet on WebSockets if there is one (with --all-poll only a revived one may be).
-    const ready = (x) => !x.dead && x.d.online && x.view?.phase === "question";
+    const ready = (x) => !x.dead && x.d.online && x.view?.phase === "question" && (!TEMPO || x.view.question?.answering === "open");
     const p = players.find((x) => x.d.mode === "ws" && ready(x)) ?? players.find(ready);
     void p.d.drop(3000);
     const choice = 0;
     const seq = Date.now() * 10 + 9;
-    lateTap = p.d.send({ op: "answer", q: current, choice, seq, v: p.view.v }).then((a) => {
+    const ms = p.shown[current] !== undefined ? Date.now() - p.shown[current] : undefined;
+    lateTap = p.d.send({ op: "answer", q: current, choice, seq, v: p.view.v, ms }).then((a) => {
       check(a.ok, `${p.name}: a tap made before the reveal and delivered after it counts`);
-      if (a.ok && (!p.acked[current] || p.acked[current].seq < seq)) p.acked[current] = { choice, seq };
+      const prev = p.acked[current];
+      if (a.ok && (!prev || prev.seq < seq)) p.acked[current] = prev?.choice === choice ? { ...prev, seq } : { choice, seq, ms };
     });
     log(`${p.name} taps while offline; the reveal goes out before the tap arrives`);
   }
@@ -486,15 +542,23 @@ check(JSON.stringify(scored) === JSON.stringify([0, 1, 2, 5]), `scored questions
 const byId = new Map(fin.run.players.map((p) => [p.id, p]));
 check(fin.run.players.length === N, `players in the final view: ${fin.run.players.length}, expected ${N}`);
 let total = 0;
+const pts = (a) => (TEMPO ? POINTS_RIGHT + speedBonus(a.ms, SECONDS * 1000) : 1);
 for (const p of players) {
-  const expected = scored.filter((q) => p.acked[q] && fixes[q].counts[p.acked[q].choice]).length;
+  const expected = scored.filter((q) => p.acked[q] && fixes[q].counts[p.acked[q].choice]).reduce((sum, q) => sum + pts(p.acked[q]), 0);
   const got = byId.get(p.id)?.score;
   total += expected;
   check(got === expected, `${p.name}: score ${got}, expected ${expected}`);
 }
 log(`final: ${players.length} students, ${total} points in total, ranking top: ${fin.run.ranking.top.map((e) => `${e.place}.${e.score}`).join(" ")}`);
+if (TEMPO) {
+  log(`answering closed: ${closedByAll} times by everyone present having answered, ${closedByTime} times by time's up`);
+  check(fin.run.ranking.speed === true, "the ranking knows the scores include speed");
+}
 
-// Students still connected see their own result.
+// Students still connected see their own result. A drop the chaos started
+// just before the end lasts up to 5 s; wait it out rather than count a
+// device that is still asleep as one that missed the view.
+await until(() => players.every((p) => p.dead || p.d.online), 6000, "the last drops to end").catch(() => {});
 await sleep(1500);
 const withView = players.filter((p) => !p.dead && p.view && p.view.phase === "final");
 check(withView.length >= players.length - 3, `final view reached ${withView.length}/${players.length} devices`);

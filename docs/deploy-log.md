@@ -28,3 +28,7 @@ Pages deployment 6dfdcde0, state Worker version 6eb4679a (migration v3 deletes t
 ## 2026-11-02 — fourth deploy, b244980
 
 Pages deployment fc1f647f, state Worker version 28ec17c1, no migration. Pictures on the screens, answers shuffled at upload, Order: fixed, the as-built /layout.html, and the owner's landing-page copy. Run by the owner from the clean worktree.
+
+## 2026-11-02 — fifth deploy, 5c536d6
+
+Pages deployment 659be631, state Worker version 5ef3adb4 (migration v4 adds the SiteBudget Durable Object). Hardening merged with the picture screens. Run by the owner from the clean worktree. Unverified until the platform refuses: the wording of the allowance-spent state.

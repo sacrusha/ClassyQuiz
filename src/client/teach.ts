@@ -5,8 +5,9 @@
 
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
-import { avatarSvg } from "./look.ts";
-import { Steer, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
+import { ICON, avatarSvg } from "./look.ts";
+import { Steer, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
+import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures } from "./pictures.ts";
 
@@ -23,6 +24,7 @@ let view: TeacherView | null = null;
 let showAll = false;
 let showPlayers = false;
 let lastButtons = "";
+let lastStep = "";
 const steer = new Steer(() => line, () => view, newUI(), () => render());
 
 function start(): void {
@@ -76,6 +78,11 @@ function render(): void {
   $("#code").textContent = v.code;
   $("#pos").textContent = v.run && (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") ? `${v.run.n}/${v.run.total}` : "";
 
+  const step = `${v.phase}|${v.current}`;
+  if (step !== lastStep) {
+    lastStep = step;
+    closeTempoSheet();
+  }
   let body = "";
   if (v.phase === "lobby") body = lobby(v);
   else if (v.phase === "question" || v.phase === "reveal") body = current(v);
@@ -86,6 +93,7 @@ function render(): void {
   }
   patch(main, body);
   fillPictures(main);
+  renderClock(v);
 
   const next = nextStep(v);
   const side = sideStep(v);
@@ -113,6 +121,7 @@ function lobby(v: TeacherView): string {
       <div class="codebig">${esc(v.code)}</div>
       <div class="joined">${live("joined", n)} joined</div>
       ${playersRow(v, true)}
+      <p class="device">${tempoLine(v)}</p>
     </section>
     ${projector}
     ${questionList(v, steer.ui)}`;
@@ -137,9 +146,32 @@ function current(v: TeacherView): string {
     <div class="qt">${lines(q.text)}</div>
     ${pic}
     ${q.void ? `<p class="hint">Void: counts for nobody.</p>` : ""}
+    ${tempoState(v)}
     ${answersBlock(q, v.current, steer.ui, run.dist)}
     <p class="answered"><strong>${live("answered", run.answered)}</strong> of ${live("present", present)} answered${away ? ` · ${live("away", away)} away` : ""}</p>
   </section>`;
+}
+
+/**
+ * Where the countdown is, above the answers: the class reading (the wall
+ * shows the question, Go brings the answers and the clock), the clock
+ * running (its bar goes in the slot, see renderClock), or time's up.
+ */
+function tempoState(v: TeacherView): string {
+  if (v.phase !== "question" || v.tempo === "pace") return "";
+  if (v.answering === "reading") return `<p class="hint">The class reads the question. <strong>Go</strong> shows the answers and starts the ${v.seconds} s countdown.</p>`;
+  if (v.answering === "closed") return `<p class="timeup-line">${ICON.timer} Time's up: answering is closed.</p>`;
+  return v.clock ? `<div class="clockslot"></div>` : `<p class="hint">Countdown stopped: the answers stay open.</p>`;
+}
+
+/** The running countdown in its slot, drawn again only when it starts or stops: CSS drains it. */
+function renderClock(v: TeacherView): void {
+  const slot = main.querySelector<HTMLElement>(".clockslot");
+  if (!slot || !v.clock) return;
+  const key = `${v.current}|${v.clock.ms}|${v.clock.leftMs === 0}`;
+  if (slot.dataset.key === key) return;
+  slot.dataset.key = key;
+  slot.innerHTML = clockBar(v.clock.ms, localEnd(`${v.current}`, v.clock));
 }
 
 function ranking(v: TeacherView): string {

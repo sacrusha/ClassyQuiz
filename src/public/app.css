@@ -355,3 +355,42 @@ body.teach { padding-bottom: 96px; }
   .crowdcol .avatars > *, .lobby .crowd .av { width: 7vh; height: 7vh; }
   .mstart .twoscreens { display: none; }
 }
+
+/* -------------------------------------------------------------------------
+   Tempo (backlog v2 items 2, 3): the countdown as a bar that drains, no
+   digits (client/clock.ts); the last fifth turns warm. */
+
+.clockbar { flex: none; height: 12px; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, var(--fg) 12%, transparent); }
+.clockbar > span { display: block; height: 100%; background: var(--accent); transform-origin: left center; animation-name: drain; animation-timing-function: linear; animation-fill-mode: forwards; }
+.clockbar.out > span { animation: none; transform: scaleX(0); }
+@keyframes drain {
+  0% { transform: scaleX(1); background: var(--accent); }
+  80% { background: var(--accent); }
+  100% { transform: scaleX(0); background: #d9480f; }
+}
+/* On the wall: along the top edge, over everything (an enlarged picture too). */
+#clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
+.clockbar.wall { height: max(10px, 1.7vh); border-radius: 0; }
+.timeup { display: inline-flex; color: #d9480f; }
+.timeup-line { color: #d9480f; font-weight: 700; margin: .4em 0; }
+.clockslot { margin: 6px 0 10px; }
+/* The class reads the question first: the tiles keep their place, colours and shapes, without text. */
+.tiles.veiled .txt { visibility: hidden; }
+.tiles.veiled .tile { opacity: .55; }
+/* A student's tablet: reading, time's up, and what a right answer brought. */
+.play .big.reading .icon { width: 30vmin; height: 30vmin; }
+.play .clockbar { height: 16px; }
+.play .top .timeup .icon { width: 32px; height: 32px; }
+.buttons.closed .ansbtn { pointer-events: none; opacity: .35; }
+.buttons.closed .ansbtn.mine { opacity: 1; }
+.play .gained { color: var(--good); font-variant-numeric: tabular-nums; }
+/* The tempo's line in the lobby and its sheet. */
+button.link.tempo-line { color: var(--muted); }
+.tempo-sheet > .tempo-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.tempo-sheet > .tempo-choice small { font-weight: 400; color: var(--muted); }
+.tempo-sheet > .tempo-choice.on { background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 4px 0 0 var(--accent); }
+.tempo-sheet .seconds { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; }
+.tempo-sheet .seconds[hidden] { display: none; }
+.tempo-sheet .seconds > span { font-weight: 600; flex-basis: 100%; }
+.tempo-sheet .seconds .btn { min-height: 44px; padding: .3em .9em; }
+.tempo-sheet .seconds .btn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

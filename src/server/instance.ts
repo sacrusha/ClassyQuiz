@@ -24,7 +24,7 @@ import type {
   TeacherView,
   View,
 } from "../shared/protocol.ts";
-import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../shared/protocol.ts";
+import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomToken } from "./random.ts";
 import { CLASS_IDLE_MS, SITE_FULL, isQuotaError } from "../shared/limits.ts";
@@ -574,11 +574,13 @@ export class Instance extends DurableObject<Env> {
     const roles = meta.roles!;
     const ack = (ok: boolean, error?: string, result?: unknown): ServerMessage => ({ t: "ack", id, ok, error, result });
     const now = Date.now();
-    const at = (c: { at: { phase: string; current: number } }) => {
+    const at = (c: { at: { phase: string; current: number; reading?: boolean } }) => {
       const run = game.run;
       const phase = run ? run.phase : "idle";
       const current = run ? run.current : -1;
-      return c.at && c.at.phase === phase && c.at.current === current;
+      if (!c.at || c.at.phase !== phase || c.at.current !== current) return false;
+      // Go and Reveal are steps within one phase: a doubled Go mustn't reveal.
+      return typeof c.at.reading !== "boolean" || c.at.reading === (G.answering(game) === "reading");
     };
 
     try {
@@ -636,9 +638,15 @@ export class Instance extends DurableObject<Env> {
         // Only a tap that changed the recorded answer is stored: a resend or
         // the same button again isn't (children hammer buttons; each write
         // comes out of the account's daily allowance).
-        const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now);
+        const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now, typeof cmd.ms === "number" ? cmd.ms : undefined);
         if (outcome === "recorded") {
-          await this.persist(["run"]);
+          // Everyone present has answered: the countdown ends now rather
+          // than leaving the class to watch it run out.
+          if (G.runningClock(game) && this.allAnswered()) {
+            G.closeAnswers(game, this.nextView());
+            await this.persist(["run"]);
+            await this.scheduleAlarm();
+          } else await this.persist(["run"]);
           this.broadcast();
         }
         return { direct: [ack(outcome !== "refused")] };
@@ -704,6 +712,8 @@ export class Instance extends DurableObject<Env> {
           break;
         }
         case "begin":
+        case "go":
+        case "stopClock":
         case "reveal":
         case "next":
         case "ranking":
@@ -711,6 +721,8 @@ export class Instance extends DurableObject<Env> {
         case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           if (cmd.op === "begin") G.begin(game, now);
+          else if (cmd.op === "go") G.go(game, now);
+          else if (cmd.op === "stopClock") G.stopClock(game);
           else if (cmd.op === "reveal") G.reveal(game, this.nextView());
           else if (cmd.op === "next") G.next(game, now);
           else if (cmd.op === "ranking") G.showRanking(game);
@@ -722,6 +734,11 @@ export class Instance extends DurableObject<Env> {
           changed.push("run");
           break;
         }
+        case "tempo":
+          if (cmd.tempo !== undefined) G.setTempo(game, cmd.tempo);
+          if (cmd.seconds !== undefined) G.setSeconds(game, cmd.seconds);
+          changed = ["run"];
+          break;
         case "setCounts":
           // In screen order, like everything the teacher's views show.
           G.setCounts(game, cmd.q, this.fromScreen(cmd.q, cmd.counts));
@@ -858,6 +875,9 @@ export class Instance extends DurableObject<Env> {
     if (ended != null) at = Math.min(at, ended + RUN_KEEP_MS);
     const idle = this.classIdleFrom();
     if (idle != null) at = Math.min(at, idle + CLASS_IDLE_MS);
+    // A running countdown: time's up is the server's step, as the reveal is the teacher's.
+    const deadline = this.game ? G.deadline(this.game) : null;
+    if (deadline != null) at = Math.min(at, deadline);
     await this.ctx.storage.setAlarm(at);
   }
 
@@ -887,6 +907,13 @@ export class Instance extends DurableObject<Env> {
     if (now >= meta.lastActivity + INSTANCE_IDLE_MS || !this.live()) {
       await this.endInstance();
       return;
+    }
+    const deadline = G.deadline(this.game!);
+    if (deadline != null && now >= deadline) {
+      // Time's up: answering closes; the reveal waits for the teacher.
+      G.closeAnswers(this.game!, this.nextView());
+      await this.persist(["run"]);
+      this.broadcast();
     }
     const idle = this.classIdleFrom();
     if (idle != null && now >= idle + CLASS_IDLE_MS) {
@@ -975,7 +1002,26 @@ export class Instance extends DurableObject<Env> {
       ...G.classResult(game),
       of: G.scoringQuestions(game).length,
       players: st.length,
+      speed: G.tempoOf(game.run) === "speed",
     };
+  }
+
+  /** Every player whose device is there has answered the open question (and someone has). */
+  private allAnswered(): boolean {
+    const run = this.game?.run;
+    if (!run || run.current < 0) return false;
+    const given = run.answers[run.current] ?? {};
+    const connected = this.connectedPlayers();
+    const active = G.activePlayers(run);
+    return active.some((p) => Object.hasOwn(given, p.id)) && active.every((p) => Object.hasOwn(given, p.id) || !connected.has(p.id));
+  }
+
+  /** The open question's countdown as the screens draw it: running, or run out; null without one (or stopped). */
+  private clockView(): ClockView | null {
+    const run = this.game?.run;
+    const clock = run && run.phase === "question" ? run.clocks?.[run.current] : undefined;
+    if (!clock || clock.stopped) return null;
+    return { ms: clock.ms, leftMs: clock.closed ? 0 : Math.max(0, clock.at + clock.ms - Date.now()) };
   }
 
   private answeredNow(): number {
@@ -1021,6 +1067,7 @@ export class Instance extends DurableObject<Env> {
       background: this.imageRef(game.quiz.background),
       pictures: [...pictures],
       zoom: !!image && G.zoomed(game),
+      tempo: G.tempoOf(run),
       phase,
       current: run ? run.current : -1,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
@@ -1034,6 +1081,9 @@ export class Instance extends DurableObject<Env> {
             answers: this.onScreen(run!.current, q!.answers.map((a) => a.text)),
             image,
             background: this.imageRef(q!.background || game.quiz.background),
+            // After the reveal the answers are open as far as the wall goes.
+            answering: G.answering(game) ?? "open",
+            clock: this.clockView(),
           }
         : null,
       reveal:
@@ -1083,6 +1133,10 @@ export class Instance extends DurableObject<Env> {
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
+      tempo: G.tempoOf(run),
+      seconds: G.secondsOf(run),
+      answering: G.answering(game),
+      clock: this.clockView(),
       run: run
         ? {
             n: prog.n,
@@ -1103,6 +1157,11 @@ export class Instance extends DurableObject<Env> {
     const st = run ? G.standings(game) : [];
     const byId = new Map(st.map((s) => [s.id, s]));
     const prog = G.progress(game);
+    const now = Date.now();
+    const clock = this.clockView();
+    const clockRec = run && run.phase === "question" ? run.clocks?.[run.current] : undefined;
+    const speed = G.tempoOf(run) === "speed";
+    const ans = G.answering(game) ?? "open";
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
       const phase = run ? run.phase : "idle";
@@ -1117,8 +1176,29 @@ export class Instance extends DurableObject<Env> {
         current: run ? run.current : -1,
         removed: !p || p.removed,
         me: p && s ? { avatar: p.avatar, score: s.score, place: s.place, of: st.length } : p ? { avatar: p.avatar, score: 0, place: 0, of: st.length } : null,
-        question: q && (phase === "question" || phase === "reveal") ? { q: run!.current, n: prog.n, total: prog.total, answers: this.onScreen(run!.current, q.answers.map((a) => a.text)), mine } : null,
-        reveal: run && phase === "reveal" ? { counts: this.onScreen(run.current, game.fixes[run.current].counts), mine, void: game.fixes[run.current].void } : null,
+        question:
+          q && (phase === "question" || phase === "reveal")
+            ? {
+                q: run!.current,
+                n: prog.n,
+                total: prog.total,
+                // Not while the class reads the question: the tablet points at the board instead.
+                answers: ans === "reading" ? [] : this.onScreen(run!.current, q.answers.map((a) => a.text)),
+                mine,
+                answering: ans,
+                clock,
+                sinceMs: clockRec ? Math.max(0, now - clockRec.at) : null,
+              }
+            : null,
+        reveal:
+          run && phase === "reveal"
+            ? {
+                counts: this.onScreen(run.current, game.fixes[run.current].counts),
+                mine,
+                void: game.fixes[run.current].void,
+                points: speed ? G.pointsFor(game, run.current, player) : null,
+              }
+            : null,
       };
     };
   }
@@ -1194,11 +1274,6 @@ export class Instance extends DurableObject<Env> {
 }
 
 type ViewCache = { screen?: ScreenView; teacher?: TeacherView; player?: (id: string) => PlayerView };
-
-/** A student's view without its version: what the device actually shows. */
-function viewKey(view: PlayerView): string {
-  return JSON.stringify({ ...view, v: 0 });
-}
 
 function send(ws: WebSocket, msg: ServerMessage): void {
   try {

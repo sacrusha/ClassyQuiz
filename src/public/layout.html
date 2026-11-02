@@ -45,6 +45,12 @@
      and each tile gets &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;,
      growing from 0. The tiles are marked in place: nothing else is redrawn, so neither text nor picture moves. --&gt;
 
+&lt;!-- With a countdown (the class&#x27;s tempo, chosen in the lobby), a question first comes up for reading: the same
+     layout, the tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their
+     answers so nothing moves when the teacher presses Go. Then the text shows and a bar drains along the top edge
+     of the screen, over everything and outside the layout:
+     &lt;div id=&quot;clock&quot;&gt;&lt;div class=&quot;clockbar wall&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;. --&gt;
+
 &lt;!-- A question with a picture (its Image: line). Between the question and the tiles: --&gt;
   &lt;div class=&quot;stage fig between&quot;&gt;
     &lt;h2 class=&quot;qtext&quot;&gt;Welche Zahl ist mit dem Pfeil markiert?&lt;/h2&gt;
@@ -83,7 +89,7 @@
 &lt;/main&gt;&lt;/body&gt;
 &lt;!-- .a0 to .a3 are places on screen, not places in the quiz text: the site shuffles each question&#x27;s answers at
      upload (and again for another class), the same on the projector, every tablet and the teacher&#x27;s screens.
-     A question with the line &quot;Order: fixed&quot;, and answers that are letters in order (A, B, C), keep the text&#x27;s order. --&gt;</code></pre>
+     A question with the line &quot;Order: fixed&quot; keeps the text&#x27;s order. --&gt;</code></pre>
 
 <h2>Stylesheet</h2>
 <pre><code>:root { --bg: #fbf8f2; --fg: #1d1d1b; --muted: #5d5c57; --good: #1f8a4c; --bad: #c62828; }
@@ -115,6 +121,11 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
 .tile .n { font-size: 1.3em; font-weight: 800; font-variant-numeric: tabular-nums; }
 .tile .fill { position: absolute; left: 0; bottom: 0; height: 1.6vh; background: currentColor; opacity: .7; transition: width .6s; }
 .tile.dim { opacity: .5; }
+.tiles.veiled .txt { visibility: hidden; }
+.tiles.veiled .tile { opacity: .55; }
+#clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
+.clockbar.wall { height: max(10px, 1.7vh); overflow: hidden; background: rgba(29, 29, 27, .12); }
+.clockbar > span { display: block; height: 100%; background: #2a5db0; transform-origin: left center; } /* drains to scaleX(0) over the countdown, turning orange in its last fifth */
 
 /* A question&#x27;s picture: always on white, so a transparent drawing reads on any background. */
 .stage.fig .qtext { min-height: 0; flex: none; }

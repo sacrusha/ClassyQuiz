@@ -101,5 +101,7 @@ export const ICON = {
   plus: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
   void: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M5.6 18.4L18.4 5.6" stroke="currentColor" stroke-width="2.5"/></svg>`,
   trophy: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 01-10 0zM5 4H2v2a4 4 0 004 4M19 4h3v2a4 4 0 01-4 4M10 14h4v3h3v3H7v-3h3z" fill="currentColor"/></svg>`,
+  /** Time's up (the countdown tempos). */
+  timer: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 13.5V9M9.5 2.5h5M19 6l-1.6 1.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
   wifi: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0120 0M5.5 12.5a10 10 0 0113 0M9 16a5 5 0 016 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="19.5" r="1.6" fill="currentColor"/></svg>`,
 };

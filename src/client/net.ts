@@ -17,6 +17,7 @@
 //   again once a minute (decisions.md, "Hardening").
 
 import type { Auth, ClientMessage, Command, ServerMessage } from "../shared/protocol.ts";
+import { viewKey } from "../shared/protocol.ts";
 import { SLEEP_AFTER_MS, quotaMessage } from "../shared/limits.ts";
 import { hideNotice, showNotice } from "./notice.ts";
 import { pauseAwake } from "./dom.ts";
@@ -328,7 +329,7 @@ export class Line {
     }
     if (m.t === "state" || m.t === "choose") {
       // What the page shows, without the version: a change keeps the line awake.
-      const key = JSON.stringify(m.t === "state" ? { ...m.view, v: 0 } : m);
+      const key = m.t === "state" ? viewKey(m.view) : JSON.stringify(m);
       if (key !== this.lastKey) {
         this.lastKey = key;
         this.lastChange = Date.now();

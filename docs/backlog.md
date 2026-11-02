@@ -68,6 +68,10 @@ so there is something to click early; authoring closes the loop.
    Owner, after seeing v1: .txt/.md invite users to type their AI questions
    into the textbox — people tend to be like that. So no text files, and the
    paste box must not read as a place to talk to an AI.
+   Later the same day, on the live page: pasting the text quiz is itself a
+   distractor; a simpler drop target and file opener is enough, "the block
+   your AI made" and the clipboard button distract; zip is more useful —
+   "let's see if we can get away with zip only."
 3. **Three audiences in one session** — the class looking at the projector, the
    teacher steering from a small screen — possibly a different device than the
    one driving the projector — and students answering on their own. The teacher
@@ -135,6 +139,19 @@ so there is something to click early; authoring closes the loop.
     the copy has a problem for multilingual users, the specific sentence
     contradicts the language instruction; the three Build steps need work,
     the direction is right.
+    On the live page, by attention budget: it overspends. The resume list
+    needs no more than one active quiz, though a list is fine since that user
+    already knows how to create one. "About this site" is a wasted link.
+    "Check the school network" and "run your own copy" don't say what they
+    are for, to an average teacher. Owner's examples, problems more relevant
+    than the wording: "Some networks block … — one click compatibility
+    check", leading to all good or to what to tell IT; and "This is a free
+    server that can run a few hundred quizzes per month, total. If you don't
+    worry about its limits, ask AI to set up your own, here's a quick guide",
+    the guide being short: what Cloudflare and GitHub are for the user, a
+    sample prompt for the AI, what work they'll have to do (create a free
+    account, have the AI tell them where to find a token and how to give it
+    to the AI), the GitHub link. Better solutions welcome.
 17. **Coming back to a quiz, from the teacher's side** — a quiz already
     uploaded is worth resuming, but "your quizzes on this device" reads as if
     the server held a shared list. The teacher's view is: resume, how long

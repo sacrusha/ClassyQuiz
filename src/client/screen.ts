@@ -8,7 +8,8 @@ import qrcode from "qrcode-generator";
 import type { ScreenView, ServerMessage } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
-import { Steer, addressAndCode, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, toast, type MenuItem } from "./manage.ts";
+import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
+import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
 
@@ -99,7 +100,9 @@ function render(): void {
   if (stepKey !== lastStepKey) {
     lastStepKey = stepKey;
     steer.ui.fixing = null;
+    closeTempoSheet();
   }
+  if (!v.steer) closeTempoSheet();
   const managing = !!v.steer && v.phase === "lobby";
   document.body.classList.toggle("manage", managing);
   document.body.classList.toggle("steering", !!v.steer && !managing);
@@ -109,6 +112,7 @@ function render(): void {
   else if ((v.phase === "question" || v.phase === "reveal") && v.question) renderQuestion(v);
   else if (v.phase === "ranking" || v.phase === "final") renderRanking(v);
   renderBar(v, managing);
+  renderClock(v);
   renderFix(v);
   renderBackdrop(v);
   renderZoom(v);
@@ -196,7 +200,8 @@ function renderManagedLobby(v: ScreenView): void {
           ${playersRow(t, true)}
         </div>
       </div>
-      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>${devices}</div>
+      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>
+        <p class="device">${tempoLine(t)}</p>${devices}</div>
     </div>
     <div class="mbelow">
       ${questionList(t, steer.ui)}
@@ -263,20 +268,53 @@ function renderQuestion(v: ScreenView): void {
     main.innerHTML = `<div class="bar" id="qbar"></div><div class="stage" id="stage"></div>`;
   }
   // The bar first: the layout measures the room it leaves.
-  const bk = JSON.stringify([q.n, q.total, !!r?.void]);
+  const reading = q.answering === "reading";
+  const timeUp = !r && q.answering === "closed";
+  const bk = JSON.stringify([q.n, q.total, !!r?.void, reading, timeUp]);
   if (bk !== barKey) {
     barKey = bk;
     $("#qbar").innerHTML = `<span>${q.n} / ${q.total}</span><span class="grow"></span>
       ${r && r.void ? `<span class="voided">${ICON.void}</span>` : ""}
-      <span>${ICON.person} <span id="answered"></span></span>`;
+      ${timeUp ? `<span class="timeup">${ICON.timer}</span>` : ""}
+      ${reading ? "" : `<span>${ICON.person} <span id="answered"></span></span>`}`;
   }
-  $("#answered").textContent = `${v.answered} / ${v.players.length}`;
+  const answered = document.getElementById("answered");
+  if (answered) answered.textContent = `${v.answered} / ${v.players.length}`;
   const stage = $("#stage");
   if (!stage.dataset.laid) {
     stage.dataset.laid = "1";
     layQuestion(stage, q);
   }
+  // Countdown tempos: the tiles are laid out with their answers from the
+  // start, so nothing moves at Go; until then only their colours and shapes show.
+  document.getElementById("tiles")?.classList.toggle("veiled", reading);
   markTiles(r);
+}
+
+/**
+ * The countdown along the top edge of the wall, over everything: it takes
+ * no room from the question, its picture or the tiles. Drawn again only when
+ * it starts, stops or runs out; in between, CSS drains it.
+ */
+let clockKey = "";
+function renderClock(v: ScreenView): void {
+  const q = v.phase === "question" ? v.question : null;
+  const c = q?.clock ?? null;
+  let el = document.getElementById("clock");
+  if (!q || !c) {
+    clockKey = "";
+    el?.remove();
+    return;
+  }
+  const key = JSON.stringify([q.q, c.ms, c.leftMs === 0]);
+  if (key === clockKey && el) return;
+  clockKey = key;
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "clock";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = clockBar(c.ms, localEnd(`${v.current}`, c), "wall");
 }
 
 /**
@@ -482,7 +520,7 @@ function renderRanking(v: ScreenView): void {
             (e) => `<div class="entry p${e.place}">
               <div class="av">${avatarSvg(e.avatar)}</div>
               <div class="place">${e.place}.</div>
-              <div>${ICON.star} ${e.score} / ${r.of}</div>
+              <div>${ICON.star} ${e.score}${r.speed ? "" : ` / ${r.of}`}</div>
             </div>`,
           )
           .join("")}
@@ -626,8 +664,12 @@ for (const area of [main, sbar]) {
   });
 }
 
-// Clicker and keyboard: the one key moves the quiz on.
+// Clicker and keyboard: the one key moves the quiz on. Like the buttons,
+// it stays inert for a moment after a press: a clicker pressed twice (or a
+// bouncing key) would otherwise take two steps once the first one's view is
+// back, e.g. Go and straight on to the reveal before anyone could answer.
 const ADVANCE = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
+let lastAdvance = 0;
 document.addEventListener("keydown", (e) => {
   const tag = (e.target as HTMLElement).tagName;
   if (tag === "INPUT" || tag === "TEXTAREA") return;
@@ -643,7 +685,9 @@ document.addEventListener("keydown", (e) => {
   if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
   if (!ADVANCE.has(e.key) || e.repeat || !line || !view) return;
   e.preventDefault();
-  void line.send({ op: "advance", at: { phase: view.phase, current: view.current } });
+  if (Date.now() - lastAdvance < STEP_LOCK_MS) return;
+  lastAdvance = Date.now();
+  void line.send({ op: "advance", at: { phase: view.phase, current: view.current, reading: view.phase === "question" && view.question?.answering === "reading" } });
 });
 
 /** The question's picture over the whole screen, or back. */

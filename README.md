@@ -26,6 +26,6 @@ By hand:
 
 To try it on your own computer first: `npm run dev` in `src/`, then open http://127.0.0.1:8788.
 
-The demo's limits for a few teachers (players per class, uploads a day, storage) are constants in `src/shared/limits.ts`; raise them for your own copy.
+The demo's limits for a few teachers (players per class, uploads a day, storage) are constants in `src/shared/limits.ts`; raise them for your own copy. The countdown's lengths and the points for speed are in `src/shared/tempo.ts`.
 
 How it is built and why: `docs/`.
