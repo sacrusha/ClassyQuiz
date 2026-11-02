@@ -4,6 +4,7 @@
 
 import type { Problem } from "../shared/protocol.ts";
 import { MAX_QUIZ_BYTES } from "../shared/protocol.ts";
+import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
 import { $, esc, saveQuiz } from "./dom.ts";
 import { api } from "./net.ts";
 import { quizTextFromZip } from "./unzip.ts";
@@ -14,16 +15,24 @@ const file = $("#file") as HTMLInputElement;
 const out = $("#out");
 const go = $("#go") as HTMLButtonElement;
 
+/** Counted by format only; a failure here never touches the upload. */
+function countAttempt(format: UploadFormat): void {
+  void fetch("/api/attempt", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ format }), keepalive: true }).catch(() => {});
+}
+
 file.addEventListener("change", async () => {
-  const f = file.files?.[0];
-  if (!f) return;
+  const files = [...(file.files ?? [])];
+  if (files.length === 0) return;
+  const format = uploadFormat(files.map((f) => f.name));
+  countAttempt(format);
+  const f = files[0];
   try {
-    if (/\.zip$/i.test(f.name) || f.type === "application/zip") text.value = await quizTextFromZip(await f.arrayBuffer());
-    else if (/\.(txt|md|markdown)$/i.test(f.name) || f.type.startsWith("text/")) text.value = await f.text();
+    if (format === "zip") text.value = await quizTextFromZip(await f.arrayBuffer());
+    else if (format === "txt" || format === "md") text.value = await f.text();
     else {
       // Read as text, a .docx or .pdf would end in "No questions were found".
-      const ext = (f.name.match(/\.([A-Za-z0-9]{1,8})$/)?.[1] ?? "").toLowerCase();
-      out.innerHTML = `<div class="card"><p class="err">The site takes the quiz as pasted text, a .txt or .md file, or a .zip containing one${ext ? `, not a .${esc(ext)} file` : ""}.</p>
+      const what = format === "several files" ? "several files at once" : format === "no extension" || format === "other" ? "this file" : `a .${format} file`;
+      out.innerHTML = `<div class="card"><p class="err">The site takes the quiz as pasted text, a .txt or .md file, or a .zip containing one, not ${esc(what)}.</p>
         <p class="muted">Ask your AI for the quiz as one code block and paste it here, or as a .zip.</p></div>`;
       return;
     }
@@ -38,6 +47,7 @@ file.addEventListener("change", async () => {
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+  if (text.value.trim()) countAttempt("paste");
   void submit();
 });
 
