@@ -1618,6 +1618,78 @@ mine; the product owner settled the open points within the owner's words
 count, perhaps a "start the countdown" button, and possibly the question
 first with the answers only during the countdown.
 
+**Amended 2026-11-03 by the owner. Two changes; the rest of this entry
+stands.**
+
+*1. The quiz carries its tempo.* The owner: "tempo is a bit of a problem if
+it's done in the lobby and the quiz not designed for a specified tempo."
+The AI that wrote the questions knows which take a minute of arithmetic
+and which ten seconds, and the quiz is the finished deliverable.
+- **Format:** `Tempo: countdown` or `Tempo: speed` before the first
+  question (also `pace`; forgiving wording such as "countdown with points
+  for speed").
+- **`Time: 30`** (also "30 s", "1 min", "1:30"): before the first question
+  for every question, after a question's text for that question, and after
+  the answers for the question above (like `Order:`). It is clamped to
+  5–300 s.
+- **A missing line means what it meant before:** the teacher's pace, and
+  20 s once a countdown runs.
+- **What can't be read** is a warning, not an error: an unknown tempo, a
+  `Tempo:` line after the first question, or a `Time:` that isn't a
+  length.
+- **The lobby shows what the quiz says.** The tempo line reads e.g.
+  "Countdown, lengths as written". Each upcoming question shows its
+  length as a tag in the list.
+- **The teacher's choice overrides:** a tempo, or one length for every
+  question. "As written" goes back to the quiz's lengths.
+- **Precedence** (`secondsFor`): the teacher's length, then the
+  question's `Time:`, then the quiz's, then 20 s.
+- **Guidance:** a "Tempo" item among the parts of a quiz, in the page's
+  register. It says what a countdown does, how long typical tasks take, and
+  that the reading isn't part of the time. It also says which material
+  suits which tempo.
+- This reverses the product owner's "no `Time:` line" (length point 3,
+  above).
+
+*2. The tempo can change mid-quiz.* The owner asked how a teacher changes
+an unfun tempo mid-quiz. ⋯ now has "Tempo: …" during the quiz, the same
+sheet as in the lobby, marked "From the next question on". It covers
+countdown on or off, points on or off, and the length.
+- **Each question keeps the tempo it came up under** (`Run.played[q]`, set
+  when it opens). The question on screen is read, timed and scored as it
+  came up. That removes the ambiguity that had locked the tempo.
+- **The scale:** if any question that scores was played for speed, every
+  right answer is worth 10. Questions played for speed with a countdown
+  add their bonus. Otherwise a right answer is 1 ("right out of so many").
+- So switching on points mid-quiz rescales the earlier questions from 1
+  to 10 each. The order between players is kept, since earlier right
+  answers each move to 10 together, and the ranking changes its display.
+- Voiding the only speed question goes back to the 1-point scale.
+
+Checked:
+- Unit tests (77):
+  - the parser's `Tempo:`/`Time:` forms, the clamp, warnings, and that no
+    line means teacher's pace;
+  - a mid-quiz switch: the open question keeps its reading step, the next
+    one opens at the teacher's pace, scores 15/25/10 on the speed scale,
+    and the 1-point scale comes back after a void.
+- An HTTP probe of a quiz with `Tempo: countdown` and two `Time:` lines:
+  - the lobby view says countdown, lengths as written, 15 and 40 s;
+  - the first question reads and its clock is 15 s;
+  - switching to pace mid-question leaves it reading;
+  - the next question opens without a clock.
+- On a restarted stack:
+  - `simulate.mjs --tempo` and the plain mode both pass;
+  - the browser walk passes with no page errors;
+  - a Remote on a quiz with `Tempo: speed`, `Time: 20` and one `Time: 60`
+    shows "Countdown and points for speed, lengths as written", the tags
+    20 s and 60 s, "As written" marked in the sheet, and the sheet from ⋯
+    mid-quiz.
+- Lesson for the next local stack: wrangler dev didn't reload the state
+  Worker after its folders were replaced by a fresh copy. Restart the stack
+  after copying server code. The shuffle change of 2026-11-02 was therefore
+  checked by unit tests only, not on the stack.
+
 **One choice, three tempos, off by default.** In the lobby, under Start,
 one line: "Tempo: Teacher's pace ›". It opens a sheet with three choices,
 each with one sentence:
@@ -1818,6 +1890,136 @@ Revisit: if classes leave the countdown on and slow readers drop out of
 the ranking anyway (then a smaller `SPEED_BONUS`); if teachers want a
 length per question (a format line was rejected: every addition is
 something an AI must write reliably, and the teacher is in the room).
+
+## 2026-11-03 — Guidance: what makes a picture work on the wall
+
+Serves: v2 item 1, its "Open" paragraph. Before this, the guidance told
+the AI how to attach a picture and pointed at the layout. It didn't say
+what makes a picture work on the wall: a tight crop, how wide and square
+figures land, what the back row can read, nothing from the solutions or a
+pupil's name in the crop, the size caps.
+
+**What changed.** `public/index.html`, under "How quizzes are built", has a
+new subsection "Pictures on the wall". It replaces the one sentence about
+crops and moves the link to `/layout.html` into it. It is written as
+situation, in the page's register: what the AI needs to judge a crop, not
+rules. Its four paragraphs:
+- **Where a picture lands.** About eight to ten metres to the back row. At
+  most about three fifths of the height. Wide figures go between the
+  question and the tiles, at full width; a 6:1 strip takes under a third
+  of the height. Square, upright and landscape up to about 3:2 go beside a
+  short question, at about half the width. The site chooses. The teacher
+  can enlarge a picture, with the question out of sight while it is.
+- **So what reaches the back row is the crop.** Margins and neighbouring
+  exercises take room from the figure. Labels read at about a tenth of the
+  figure's height. Text to be read belongs in the question. A photographed
+  sheet projects as taken (a grey page, a shadow, a slant), and a
+  transparent picture shows on white.
+- **What must not be in the crop.** A pupil's filled-in answer, a printed
+  solution or worked example, the key, a name, a stamp. A redrawn figure
+  (SVG) can replace one with the answer in it. A figure can also give the
+  answer away by itself.
+- **The caps.** 60 pictures and 16 MB per zip; 1600 px on the long side,
+  1920 for a background. A small picture is enlarged.
+
+**Where the numbers come from:** "Pictures on the screens" (62% of the
+height, 50 to 58% of the width beside, the 1.3× rule) and
+`shared/protocol.ts` (the caps). The 3:2 boundary is worked out from
+`layQuestion` for a short question on a 1366×768 screen. Beside wins up
+to about 3:2; at 2:1 the picture goes between.
+
+**Not established:**
+- "A tenth of the figure's height" is my estimate. On a 768-px-high
+  projector, a figure shown about 300 px high gives labels of about 30 px,
+  roughly two thirds of the answer tiles' letter height. No room has been
+  measured.
+- Whether AIs crop tighter with this text, and leave pupils' writing out,
+  is untested. The product owner ruled out a fetch test for this change:
+  the fetcher that matters isn't the one we can run, and the page's
+  structure is unchanged.
+
+Rendered in headless Edge: the section reads in place, and the page has
+no errors.
+
+## 2026-11-03 — For whoever picks up the landing page (backlog items 16 and 2, the owner's latest words)
+
+A handover from the countdown worker, who stopped at the picture guidance.
+These are facts about the code that aren't obvious from the backlog; the
+design is yours.
+
+- **One file, two readers.** `src/public/index.html` is both the landing
+  page and the guidance an AI reads.
+  - The landing part is `<section class="start">`: Build a quiz, Run a
+    quiz, and the `.foot` line with the three links.
+  - The guidance is `<div class="guide">`, from the `<h1>` "About
+    classyQuiz" on. Its anchors are `#site`, `#quizzes`, `#format` and
+    `#with-a-teacher`.
+  - An AI told the site's name fetches this whole page, so whatever the
+    landing part says is also read as guidance. "Guidance page is
+    information, not instruction" applies to both: imperative text trips
+    AI injection guards.
+  - Styles are inline in the page's `<style>`, not `app.css`.
+- **The Run box's code** is `src/client/home.ts`:
+  - Ctrl+V anywhere on the page;
+  - the "Paste the quiz" button, which reads the clipboard;
+  - the `#manual` textarea fallback, for when the clipboard can't be read;
+  - the file input and drop;
+  - "That doesn't look like a quiz yet", for a paste without markers;
+  - the resume list in `#mine`. It holds one entry per quiz this device
+    pasted that is still open, from localStorage. It calls `/api/i/:id/info`
+    with the device's secret, and Delete asks inline.
+
+  **Zip only** (owner, item 2) means removing the paste paths, the
+  clipboard button, the textarea and that message. Keep
+  `countAttempt(uploadFormat(...))` on drop and choose, so what people try
+  is still counted. The "paste" format in the counter then stops occurring.
+  `uploadFormat` and the counter are in `shared/upload.ts` and
+  `server/stats.ts`.
+- **The guidance assumes pasting in several places. Under zip only, each
+  needs to change:**
+  - "How a lesson runs" in `#site`: "pastes the quiz into the box … or
+    drops the file";
+  - all of "Getting the quiz to the site" in `#format`: the code block and
+    copy button, "The site takes no single text file";
+  - the `.foot` line;
+  - the messages for the teacher in `home.ts`: "That doesn't look like a
+    quiz yet", and the one for a wrong file type. Both send the teacher
+    back for "a block with a copy button" or "one code block".
+
+  The quiz text inside the zip keeps its format. An AI that can't make
+  files can no longer deliver at all. The owner chose that, to find out.
+- **The link targets today:**
+  - "check the school network" goes to `/check` (`public/check.html`,
+    `client/check.ts`). Its verdict is already one of three: all good; the
+    quiz runs over HTTP; blocked, ask IT ("Runner: network check"). So the
+    owner's "one click → all good, or what to tell IT" is mostly the
+    landing line's wording, plus the IT text on the check page.
+  - "run your own copy" goes to the GitHub repo. Its README "Your own
+    instance" has the setup steps, the token's three permissions and
+    `npm run deploy`.
+  - "about this site" goes to `#site`.
+
+  A new static page (like `public/layout.html`) is copied to `dist/` by
+  `scripts/build.mjs` with no further wiring. The CSP allows only the
+  site's own scripts, so a page with no script, or one bundled per page,
+  works.
+- **"A few hundred quizzes a month"**: the numbers behind it, from
+  "Hardening" and `shared/limits.ts`:
+  - uploads are capped at 300 a day, site-wide;
+  - the day's request allowance covers about 30 classes when every device
+    polls, about 75 on stored rows;
+  - "a few hundred a month" is therefore conservative, not a cap.
+
+  The same self-hosting words appear in `OWN_COPY` in `shared/limits.ts`,
+  shown when the site is full or out of allowance ("…or follow the guide
+  on GitHub"). If a guide page replaces the GitHub link, that string
+  should point to it too.
+- **Testing:**
+  - The shots tool under the session scratchpad (`shots-tool/`,
+    puppeteer-core driving Edge) has walks of the root page:
+    `mock-root.mjs`, `upload-count.mjs`, `smoke.mjs`.
+  - A local stack: see "A second local stack" in "Pictures in the
+    archive".
 
 ## Open
 

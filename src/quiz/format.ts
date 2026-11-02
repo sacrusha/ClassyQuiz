@@ -9,6 +9,8 @@
 // cannot read unambiguously; error messages name the question and are written
 // so a teacher can paste them back to the AI.
 
+import type { Tempo } from "../shared/tempo.ts";
+
 export interface Answer {
   text: string;
   /** Picking this answer counts as right. Any number of a question's answers may count, at least one. */
@@ -24,6 +26,8 @@ export interface Question {
   background: string;
   /** "Order: fixed": the answers keep the text's order on screen; otherwise the site shuffles them. */
   keepOrder: boolean;
+  /** "Time: 40": this question's countdown in seconds, when the quiz has one; absent: the quiz's. */
+  seconds?: number;
 }
 
 export interface Quiz {
@@ -31,7 +35,15 @@ export interface Quiz {
   /** The picture behind every question that has no background of its own; "" for none. */
   background: string;
   questions: Question[];
+  /** "Tempo: countdown" or "Tempo: speed" before the first question: the tempo the quiz was written for; absent: the teacher's pace. */
+  tempo?: Tempo;
+  /** "Time: 20" before the first question: the countdown of every question without its own. */
+  seconds?: number;
 }
+
+/** A countdown the format takes, in seconds: long enough to read four answers, short of a lesson's patience. */
+export const MIN_SECONDS = 5;
+export const MAX_SECONDS = 300;
 
 /** A picture the quiz names, with the words that name it in messages. */
 export interface PictureRef {
@@ -100,9 +112,11 @@ const INVISIBLES = /[​⁠﻿]/g;
 // in right-to-left text is still recognised.
 const LEADING_BIDI = /^[‎‏؜‪-‮⁦-⁩]+/;
 
+type Keyword = "title" | "note" | "image" | "background" | "order" | "tempo" | "time";
+
 type Classified =
   | { kind: "blank" }
-  | { kind: "keyword"; key: "title" | "note" | "image" | "background" | "order"; value: string }
+  | { kind: "keyword"; key: Keyword; value: string }
   | { kind: "answer"; correct: boolean; text: string; indent: number }
   | { kind: "ambiguous"; marker: string; text: string }
   | { kind: "text"; text: string; indent: number };
@@ -145,11 +159,11 @@ function classify(raw: string): Classified {
 
   // Keywords, possibly dressed up as Markdown: "## Title: x", "**Title:** x", "**Note**: x".
   const unheaded = s.replace(/^#{1,6}\s+/, "");
-  m = unheaded.match(/^([*_]{0,2})(title|note|image|background|order)[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
+  m = unheaded.match(/^([*_]{0,2})(title|note|image|background|order|tempo|time)[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
   if (m) {
     let value = m[3].trim();
     if (m[1]) value = value.replace(/(\*\*|__)$/, "").trim();
-    return { kind: "keyword", key: m[2].toLowerCase() as "title" | "note" | "image" | "background" | "order", value };
+    return { kind: "keyword", key: m[2].toLowerCase() as Keyword, value };
   }
 
   return { kind: "text", text: stripWrappingEmphasis(unheaded), indent };
@@ -241,6 +255,10 @@ interface Block {
   background: string;
   /** An "Order:" line asked for the text's order. */
   keepOrder: boolean;
+  /** A "Time:" line's seconds. */
+  seconds?: number;
+  /** A "Tempo:" line in a block before the first question (under an unmarked title). */
+  tempo?: Tempo;
   /** Problems with the block's Image:/Background: lines, worded once the question's number is known. */
   pictureProblems: ((label: string) => string)[];
   /** Image:/Background: lines after the answers so far; errors unless more answers follow. */
@@ -270,6 +288,8 @@ export function parseQuiz(input: string): ParseResult {
   let title: string | null = null;
   let quizBackground = "";
   let quizKeepOrder = false;
+  let quizTempo: Tempo | undefined;
+  let quizSeconds: number | undefined;
   const blocks: Block[] = [];
   let current: Block | null = null;
 
@@ -315,6 +335,29 @@ export function parseQuiz(input: string): ParseResult {
           // The quiz carries no messages from the AI to the teacher (backlog
           // item 1); one an AI still writes is dropped, not a failed paste.
           if (block !== null) block.noted = true;
+        } else if (c.key === "tempo") {
+          // The tempo the quiz was written for (backlog v2 items 2, 3): one
+          // line before the first question. The teacher can still change it
+          // in the lobby.
+          const tempo = readTempo(c.value);
+          if (tempo === null) warn(`The line "Tempo: ${excerpt(c.value)}" was ignored. The site reads "Tempo: countdown", "Tempo: speed" or "Tempo: pace".`);
+          else if (answered > 0) warn(`The line "Tempo: ${excerpt(c.value)}" was ignored: the tempo is one line before the first question, for the whole quiz.`);
+          else if (block === null) quizTempo = tempo;
+          else block.tempo = tempo;
+        } else if (c.key === "time") {
+          // A countdown's length: before the first question for every
+          // question, after a question's text for that one. After the
+          // answers it still means the question above, like "Order:".
+          const seconds = readSeconds(c.value);
+          if (seconds === null) warn(`The line "Time: ${excerpt(c.value)}" was ignored. It gives the countdown in seconds, e.g. "Time: 30".`);
+          else {
+            if (seconds !== clampSeconds(seconds)) warn(`The line "Time: ${excerpt(c.value)}" was taken as ${clampSeconds(seconds)} seconds: a countdown is ${MIN_SECONDS} to ${MAX_SECONDS} seconds.`);
+            if (block === null) quizSeconds = clampSeconds(seconds);
+            else {
+              block.seconds = clampSeconds(seconds);
+              if (block.answers.length > 0) block.noted = true;
+            }
+          }
         } else if (c.key === "order") {
           // "Order: fixed" keeps the answers as written; the site shuffles
           // them otherwise. Before the first question it holds for all. After
@@ -415,7 +458,7 @@ export function parseQuiz(input: string): ParseResult {
   blocks.forEach((b, i) => {
     const text = b.textLines.join("\n").trim();
     if (b.answers.length > 0) {
-      questions.push({ text, answers: b.answers, image: b.image, background: b.background, keepOrder: b.keepOrder });
+      questions.push({ text, answers: b.answers, image: b.image, background: b.background, keepOrder: b.keepOrder, ...(b.seconds ? { seconds: b.seconds } : {}) });
       questionBlocks.push(b);
       return;
     }
@@ -427,6 +470,8 @@ export function parseQuiz(input: string): ParseResult {
       if (b.background && quizBackground) err(`The quiz has more than one "Background:" line before the first question.`);
       else if (b.background) quizBackground = b.background;
       if (b.keepOrder) quizKeepOrder = true;
+      if (b.tempo) quizTempo = b.tempo;
+      if (b.seconds) quizSeconds = b.seconds;
       if (b.image) {
         err(
           `The picture "${b.image}" comes before any question. A question's picture goes after the question text, before the answers; ` +
@@ -495,8 +540,36 @@ export function parseQuiz(input: string): ParseResult {
 
   return {
     ok: errors.length === 0,
-    quiz: { title: title ?? "", background: quizBackground, questions },
+    quiz: { title: title ?? "", background: quizBackground, questions, ...(quizTempo && quizTempo !== "pace" ? { tempo: quizTempo } : {}), ...(quizSeconds ? { seconds: quizSeconds } : {}) },
     errors,
     warnings,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Tempo
+
+/** "countdown", "speed" (a countdown with points for speed), "pace"; null for anything else. */
+function readTempo(value: string): Tempo | null {
+  const v = value.toLowerCase();
+  if (/speed|fast|points/.test(v)) return "speed";
+  if (/count\s*-?down|clock|timer|timed/.test(v)) return "countdown";
+  if (/pace|teacher|none|off|no\b/.test(v)) return "pace";
+  return null;
+}
+
+/** "30", "30 s", "30 seconds", "1 min", "1:30"; null when it isn't a length. */
+function readSeconds(value: string): number | null {
+  const v = value.trim().toLowerCase();
+  let m = v.match(/^(\d+):(\d{2})$/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  m = v.match(/^(\d+(?:[.,]\d+)?)\s*(s|sec|secs|second|seconds|sek|sekunden|min|mins|minute|minutes|minuten)?\.?$/);
+  if (!m) return null;
+  const n = Number(m[1].replace(",", "."));
+  const minutes = m[2] !== undefined && m[2].startsWith("min");
+  return Math.round(minutes ? n * 60 : n);
+}
+
+function clampSeconds(n: number): number {
+  return Math.max(MIN_SECONDS, Math.min(MAX_SECONDS, n));
 }

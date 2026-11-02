@@ -97,12 +97,18 @@ export interface Run {
   closedView?: Record<string, number>;
   /** The same, as runs stored before the countdown named it (reveals only); read when closedView has no entry. */
   revealView?: Record<string, number>;
-  /** The class's tempo (shared/tempo.ts); missing: the teacher's pace. Chosen in the lobby. */
+  /** The tempo the teacher chose in the lobby (shared/tempo.ts); missing: the quiz's ("Tempo:"), else the teacher's pace. */
   tempo?: Tempo;
-  /** The countdown's length in seconds, for the questions still to come; missing: COUNTDOWN_DEFAULT. */
+  /** A countdown length the teacher chose, in seconds, for every question still to come; missing: as the quiz says ("Time:"). */
   seconds?: number;
   /** Question index → its countdown, once its answers appeared under one. */
   clocks?: Record<string, Clock>;
+  /**
+   * Question index → the tempo it came up under. The tempo can change mid-quiz
+   * and applies from the next question; each question is read, timed and
+   * scored as it was played. Missing in runs stored before: the current tempo.
+   */
+  played?: Record<string, Tempo>;
   players: Record<string, Player>;
   /** Join command id → player it created, so a resent join doesn't make a second avatar. */
   joins?: Record<string, string>;
@@ -153,7 +159,7 @@ export function newGame(quiz: Quiz): Game {
 export function startRun(g: Game, code: string, id: string, random?: () => number): void {
   const before = g.run;
   g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
-  if (before?.tempo && before.tempo !== "pace") g.run.tempo = before.tempo;
+  if (before?.tempo) g.run.tempo = before.tempo;
   if (before?.seconds) g.run.seconds = before.seconds;
   if (random) g.run.order = g.quiz.questions.map((q) => (q.keepOrder ? q.answers.map((_, i) => i) : shownOrder(q.answers.map((a) => a.text), random)));
 }
@@ -261,6 +267,7 @@ function open(g: Game, run: Run, q: number, now: number): void {
   run.current = q;
   run.phase = "question";
   run.openedAt = now;
+  (run.played ??= {})[q] = tempoOf(g);
 }
 
 /** Lobby → first question. */
@@ -283,26 +290,56 @@ export function reveal(g: Game, view: number): void {
 // ---------------------------------------------------------------------------
 // Tempo (backlog v2 items 2, 3; shared/tempo.ts)
 
-export function tempoOf(run: Run | null): Tempo {
-  return run?.tempo ?? "pace";
+/** The class's tempo: the teacher's choice in the lobby, else what the quiz was written for, else the teacher's pace. */
+export function tempoOf(g: Game): Tempo {
+  return g.run?.tempo ?? g.quiz.tempo ?? "pace";
 }
 
-export function secondsOf(run: Run | null): number {
-  return run?.seconds ?? COUNTDOWN_DEFAULT;
+/** Question q's countdown in seconds: the teacher's length, else the question's "Time:", else the quiz's, else the default. */
+export function secondsFor(g: Game, q: number): number {
+  return g.run?.seconds ?? g.quiz.questions[q]?.seconds ?? g.quiz.seconds ?? COUNTDOWN_DEFAULT;
 }
 
-/** The class's tempo: chosen in the lobby, before the class has seen a question. */
+/** Whether the quiz gives its own countdown lengths ("Time:" lines). */
+export function timed(g: Game): boolean {
+  return g.quiz.seconds !== undefined || g.quiz.questions.some((q) => q.seconds !== undefined);
+}
+
+/**
+ * The class's tempo, in the lobby or mid-quiz (an unfun tempo is changed from
+ * ⋯). It applies from the next question: the one on screen keeps how it came up.
+ */
 export function setTempo(g: Game, tempo: Tempo): void {
   const run = needRun(g);
   if (!TEMPOS.includes(tempo)) throw new GameError("Unknown tempo.");
-  if (run.phase !== "lobby") throw new GameError("The tempo is chosen in the lobby, before the quiz starts.");
-  if (tempo === "pace") delete run.tempo;
-  else run.tempo = tempo;
+  run.tempo = tempo;
 }
 
-/** The countdown's length for the questions still to come; a running one keeps its own. */
-export function setSeconds(g: Game, seconds: number): void {
+/** The tempo question q came up under. */
+export function playedAt(g: Game, q: number): Tempo {
+  return g.run?.played?.[q] ?? tempoOf(g);
+}
+
+/**
+ * Whether scores are on the speed scale: some question that scores was
+ * played with points for speed. Then every right answer is worth
+ * POINTS_RIGHT, plus its bonus where it was played for speed; otherwise a
+ * right answer is 1, "right out of so many", as in v1.
+ */
+export function speedScale(g: Game): boolean {
+  return scoringQuestions(g).some((q) => playedAt(g, q) === "speed");
+}
+
+/**
+ * One countdown length for every question still to come, or null for the
+ * quiz's own lengths again; a running countdown keeps its own.
+ */
+export function setSeconds(g: Game, seconds: number | null): void {
   const run = needRun(g);
+  if (seconds === null) {
+    delete run.seconds;
+    return;
+  }
   if (!COUNTDOWN_CHOICES.includes(seconds)) throw new GameError("That countdown length isn't on offer.");
   run.seconds = seconds;
 }
@@ -313,7 +350,7 @@ export function answering(g: Game): Answering | null {
   if (!run || run.phase !== "question" || run.current < 0) return null;
   const clock = run.clocks?.[run.current];
   if (clock) return clock.closed ? "closed" : "open";
-  return tempoOf(run) === "pace" ? "open" : "reading";
+  return playedAt(g, run.current) === "pace" ? "open" : "reading";
 }
 
 /** The open question's countdown while it runs: neither stopped nor closed. */
@@ -328,7 +365,7 @@ export function runningClock(g: Game): Clock | null {
 export function go(g: Game, now: number): void {
   const run = needRun(g);
   if (answering(g) !== "reading") throw new GameError("The answers are already shown.");
-  (run.clocks ??= {})[run.current] = { at: now, ms: secondsOf(run) * 1000 };
+  (run.clocks ??= {})[run.current] = { at: now, ms: secondsFor(g, run.current) * 1000 };
 }
 
 /**
@@ -545,12 +582,11 @@ export function isRight(g: Game, q: number, choice: number): boolean {
  * current fixes: 0 when wrong; 1 when right; with points for speed
  * POINTS_RIGHT plus the speed bonus, when the question had a countdown.
  */
-export function points(g: Game, q: number, a: AnswerRecord): number {
+export function points(g: Game, q: number, a: AnswerRecord, scale = speedScale(g)): number {
   if (!isRight(g, q, a.choice)) return 0;
-  const run = g.run;
-  if (tempoOf(run) !== "speed") return 1;
-  const clock = run?.clocks?.[q];
-  return POINTS_RIGHT + (clock ? speedBonus(a.ms, clock.ms) : 0);
+  if (!scale) return 1;
+  const clock = g.run?.clocks?.[q];
+  return POINTS_RIGHT + (clock && playedAt(g, q) === "speed" ? speedBonus(a.ms, clock.ms) : 0);
 }
 
 export function scores(g: Game): Map<string, number> {
@@ -558,9 +594,10 @@ export function scores(g: Game): Map<string, number> {
   const run = g.run;
   if (!run) return out;
   for (const p of activePlayers(run)) out.set(p.id, 0);
+  const scale = speedScale(g);
   for (const q of scoringQuestions(g)) {
     for (const [pid, a] of Object.entries(run.answers[q] ?? {})) {
-      if (out.has(pid)) out.set(pid, out.get(pid)! + points(g, q, a));
+      if (out.has(pid)) out.set(pid, out.get(pid)! + points(g, q, a, scale));
     }
   }
   return out;

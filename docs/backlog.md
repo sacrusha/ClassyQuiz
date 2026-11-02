@@ -209,6 +209,16 @@ garbage.
    count; what the teacher needs to control it is unclear, a minimal solution
    might be a "start the countdown" button; unclear whether the question
    should appear first and the answers only during the countdown.
+   After the build: a tempo chosen in the lobby is a problem when the quiz
+   wasn't designed for one — the AI that wrote the questions knows which need
+   a minute of arithmetic and which ten seconds; so the quiz carries its
+   tempo, and the lobby shows it with the teacher able to change it.
+   Owner's decomposition after the build: teacher's pace — they do their own
+   countdown, narrated or none, full control; a safe countdown of 60 s, which
+   might be boring; a fast countdown needs designed questions and a way for
+   the teacher to adjust — a −5/+5 s pair during the run, persisting across
+   questions, minimum 10 s, maximum 60 s — which keeps the lobby less
+   cluttered than a length picker.
 3. **Speed scoring** — energy for classes that want it.
 4. **Hardening** — an open public instance: e.g. size limits, malformed
    archives, abuse of upload and sessions. Includes closing the door, which

@@ -1002,7 +1002,7 @@ export class Instance extends DurableObject<Env> {
       ...G.classResult(game),
       of: G.scoringQuestions(game).length,
       players: st.length,
-      speed: G.tempoOf(game.run) === "speed",
+      speed: G.speedScale(game),
     };
   }
 
@@ -1067,7 +1067,7 @@ export class Instance extends DurableObject<Env> {
       background: this.imageRef(game.quiz.background),
       pictures: [...pictures],
       zoom: !!image && G.zoomed(game),
-      tempo: G.tempoOf(run),
+      tempo: G.tempoOf(game),
       phase,
       current: run ? run.current : -1,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
@@ -1126,6 +1126,7 @@ export class Instance extends DurableObject<Env> {
           void: fix.void,
           skip: fix.skip,
           status,
+          seconds: G.secondsFor(game, i),
         };
       }),
       phase: run ? run.phase : "idle",
@@ -1133,8 +1134,10 @@ export class Instance extends DurableObject<Env> {
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
-      tempo: G.tempoOf(run),
-      seconds: G.secondsOf(run),
+      tempo: G.tempoOf(game),
+      seconds: run?.seconds ?? null,
+      timed: G.timed(game),
+      playing: run && run.phase === "question" && run.current >= 0 ? G.playedAt(game, run.current) : null,
       answering: G.answering(game),
       clock: this.clockView(),
       run: run
@@ -1160,7 +1163,8 @@ export class Instance extends DurableObject<Env> {
     const now = Date.now();
     const clock = this.clockView();
     const clockRec = run && run.phase === "question" ? run.clocks?.[run.current] : undefined;
-    const speed = G.tempoOf(run) === "speed";
+    // The bonus is shown for a question played with points for speed.
+    const speed = !!run && run.current >= 0 && G.playedAt(game, run.current) === "speed";
     const ans = G.answering(game) ?? "open";
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
