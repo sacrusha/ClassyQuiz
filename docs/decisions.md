@@ -425,6 +425,7 @@ v1 items 4, 10, 14.
   once, apart from the small record rewritten with every answer.
 - **Storage:** SQLite-backed Durable Objects, the only kind on Free. There
   are no request logs (`observability` off), so no IP addresses are kept.
+  The Pages side has no such setting and stores no logs ("Hardening").
   Error logs carry the message only, never quiz content.
 
 ## 2026-11-02 — Runner: state, transport and repeats
@@ -525,8 +526,10 @@ keeps the quiz's code; a class opens at upload.
   answers come in: only the numbers are patched. A button replaced under
   the finger would lose the tap. Found by both reviews.
 - **Late joiners** get in at any point before the final ranking.
+  Amended by "Hardening": five once the quiz has started, 60 players in all.
 - **The teacher can remove an avatar**, e.g. a double tab or a stranger
-  with the code. Its answers stop counting.
+  with the code. Its answers stop counting. Since "Hardening" the removed
+  device can't join the same class again.
 
 ## 2026-11-02 — Runner: pairing devices
 
@@ -603,7 +606,7 @@ quiz, not per run; no "8 hours" projector resume (a tab keeps its role,
 - **Join codes have 5 digits** and never start with 0. With four digits, a
   mistyped code is likelier to land in another class's quiz. Six or more
   are slower for young children, who use the QR code or type. There is no
-  rate limiting until v2's hardening item.
+  rate limiting; "Hardening" says why, and what bounds a guess instead.
 - **No name, no choice:** the avatar is assigned (decision "Ranking and
   closure"). The device keeps a player token, so a reload, sleep or dropped
   Wi-Fi resumes the same avatar and score.
@@ -969,7 +972,13 @@ the plan that stood here became, and where it differs.
   API call fails with "Network connection lost" even though the bindings
   read "[connected]". Restarting the site fixes it.
 - Stop a stack by killing the wrangler node processes with their children
-  (`taskkill /T`). Stopping only the shell leaves workerd holding the ports.
+  (`taskkill /T`). Stopping only the shell leaves workerd holding the ports;
+  killing only workerd makes wrangler start a new one. The wrangler process
+  is the parent of the workerd that listens on the port (`netstat -ano`,
+  then `wmic process where ProcessId=<pid> get ParentProcessId`).
+- Right after a start, the site's calls to the Durable Objects can fail
+  with "Network connection lost" for up to about 40 s (hardening, three
+  starts); a probe should wait until `/api/join` stops answering 500.
 - Don't give the site and the state Worker the same `--persist-to`
   directory: every Durable Object call from the site then fails with
   "Network connection lost". A start script that waits for "Ready on" in a
@@ -1408,6 +1417,186 @@ same. Nobody needs the text beside the wall any more.
 
 Revisit: if teachers are confused that the class sees another order than
 the AI's text; whether AIs use `Order: fixed` where it matters.
+
+## 2026-11-02 — Hardening
+
+Serves: v2 item 4; constraints "nothing public, nothing kept beyond its
+use, nothing identified" and the Free plan "for a few users, usage limits
+nudging heavy use toward self-hosting"; the Project's "a normal user who
+can't use it, not a malicious one". Answers what reviews A and B left open.
+Decided by the product owner within the owner's words; the numbers are
+constants in `src/shared/limits.ts`, which the README points self-hosters
+to.
+
+**What it can and can't do.** Cloudflare's Free limits are account-wide
+and reset at 00:00 UTC: 100,000 Function requests, 100,000 Durable Object
+requests, 100,000 rows written, 5 GB stored in all (published limits,
+2026-11-02; past any of them "further operations of that type will fail
+with an error"). A pages.dev address has no zone, so no WAF: every request
+reaches the Function and counts, rejected or not. A determined script can
+spend the day's requests, and nothing on this plan prevents it. Accepted:
+the remedy is self-hosting (or a domain with a WAF rule). The goal is that
+accidents, careless clients and casual pranks don't, and that no quiz grows
+without bound. A class of 25 over 15 questions costs about 1,300 rows
+(answers 2 rows each, teacher steps about 4) and a few hundred requests on
+WebSockets, about 3,000 on the HTTP fallback: some 75 classes a day on
+rows, 30 on requests with every device polling.
+
+- **Hammered buttons.** Children hammer a button; every tap was stored
+  (2 rows), so one class making a game of it could spend the account's
+  day. Now:
+  - the device doesn't send an answer it already shows as chosen;
+  - the server doesn't store a tap that changes nothing (a resend, or the
+    same answer again; the newer sequence number is kept in memory, so a
+    late older tap still loses);
+  - changes of mind are capped at 10 per student and question. Past that
+    the tap is refused, and the device shows the answer that counts, not
+    the refused one (v1 item 15 holds).
+- **Players per class: 60**, removed avatars included. The run is one
+  stored value rewritten with every answer, and it has to stay under the
+  2 MB a value holds; the projector draws every avatar. The owner's design
+  target is about 25.
+- **The door, automatic, no new control** (owner's "few elements"). Once
+  the quiz has started, 5 more players get in, then "This quiz has started
+  and takes no more players. Ask your teacher." A student whose tablet
+  died picks their avatar back as before; that isn't a new player.
+  **Remove now sticks:** the removed device keeps its token and shows the
+  cross, with no "+" to join again, also after a reload. A determined child
+  in a private window gets back in; the teacher walks over. The removed
+  avatar still counts towards both caps, so removing and rejoining isn't a
+  way in.
+- **The site's share, booked** (`server/budget.ts`, `SiteBudget`, one
+  Durable Object): every quiz that parses is booked against 300 uploads a
+  day and 1 GB stored at once (text plus pictures). Storage is the limit
+  that doesn't reset at midnight: filled, every write on the account fails,
+  answers in running classes included, until quizzes expire. A quiz with
+  errors books nothing. Ending a quiz releases its booking; a booking also
+  lapses at the end of its code's claim, renewed alongside it, so a lost
+  release can't fill the ledger for good. The refusal is the owner's
+  self-hosting nudge: "The free site is full for today. Your own copy takes
+  five to ten minutes: ask your AI to help set up your own, or follow the
+  guide on GitHub (github.com/sacrusha/ClassyQuiz)." It shows as a message
+  to the teacher, not as a problem to copy for the AI. Holds per quiz: its
+  id, size, and until when; per day a count. Quizzes uploaded before this
+  have no booking and aren't counted.
+- **Left-behind classes.** A class nobody steers for 3 hours ends: under
+  way, with its final ranking, whose data goes an hour later as before; a
+  lobby with students opens empty again (the tablets are told the quiz has
+  finished). The clock runs from the teacher's last step or the last
+  student joining, so a lobby filling for a lesson hours after the upload
+  isn't cleared. An empty lobby isn't touched: an upload the evening before
+  waits. Before this, an unfinished class kept its tablets connected for the
+  quiz's 48 hours; on the HTTP fallback each one costs about 144 Function
+  and 144 Durable Object requests an hour.
+- **Devices left on.** A tab whose view hasn't changed for 45 minutes
+  sleeps: the line closes, the wake lock is released, and "Tap to continue"
+  covers the page. The waking tap or key doesn't reach the page, so it
+  presses nothing and doesn't advance the quiz on a clicker. Coming back to
+  the tab (a tablet switched on) wakes it too. A lesson is 45 minutes, and
+  in a running quiz the view changes with every step. Pages' own timers
+  (`tick`) don't wake it. In `client/net.ts`, so it covers every page with
+  a line, the picture screens included.
+- **The allowance spent.** Devices say so instead of showing the offline
+  dot: "The free site has used up today's allowance. It works again at
+  01:00 Swiss time. Your own copy …", the hour computed (02:00 in
+  summer). The Function maps
+  a platform error that reads like a spent limit to `{error: "quota"}`
+  (503); an instance whose write fails that way answers `{t: "quota"}`
+  and reloads its state from storage, so nothing shows that isn't stored;
+  the client also takes a 429, or a page mentioning error 1027, as spent.
+  Then it asks again once a minute rather than every few seconds. Joining,
+  and uploading on the root page, show the same words. **Unverified:** the
+  error's wording (matched on "free tier", "daily limit", "quota"), and
+  what Cloudflare returns once Pages Functions pass their requests (the
+  Workers docs say error 1027; status and Pages behaviour aren't
+  documented). To check in the dashboard and with a look at the responses
+  the first time it happens, or never.
+- **Bodies without a length** (review A): every POST to an instance is
+  read in the Function, capped at 20 KB, whatever its Content-Length says,
+  and forwarded as text; JSON uploads likewise at twice the quiz limit.
+  Before, a chunked body reached the instance whole, and a large one could
+  have reset a class's instance mid-lesson. Uploads with pictures already
+  needed a length.
+- **Content-Security-Policy** on every page (`scripts/build.mjs`,
+  `_headers`): scripts only from the site's own files, no plugins, no
+  `<base>`, forms to the site, no framing; pictures also as `data:` (the
+  favicons) and `blob:` (the projector fetches pictures into object URLs).
+  Styles stay open: the pages set many inline. WebSocket addresses stay
+  open (`ws: wss:`): matching them by `'self'` is uneven on older browsers.
+  It's the second layer behind escaping: quiz text is the teacher's AI's,
+  and a slip in any page that builds HTML from it must not run.
+
+**Not done, and why:**
+- **Rate-limiting code guesses, uploads or roles.** A refused request still
+  costs the Function request it was meant to save. Counting in a Durable
+  Object costs a DO request per guess, as much as the lookup it protects.
+  Cloudflare's Rate Limiting binding is per location and approximate, its
+  docs advise against keying by IP, and Free/Pages support isn't
+  documented. Keying by IP misfires on school NAT, where a class shares
+  one, and the owner ruled out IP-based limiting altogether ("nothing
+  identified"). What a guess wins is an avatar in someone's class, which
+  the cap, the door and Remove now handle. Taking a role is already closed
+  once students are in.
+- **Stripping bidi characters** (review A). The only text anyone sees is
+  the teacher's own quiz, on their own class's screens: avatars are
+  assigned, nobody types a name. Stripping could damage legitimate
+  right-to-left text. Isolating quiz text (`unicode-bidi: isolate`) is
+  display hygiene for whoever next touches the screens.
+- **Logs.** The state Worker has `observability` off. Pages has no such
+  key: its documented config keys don't include it, and its Functions logs
+  "are not stored", only streamed while someone tails them
+  (developers.cloudflare.com/pages/functions/debugging-and-logging,
+  2026-11-02). So nothing to set; error logs carry the message only, as
+  before.
+
+**Checked:**
+- Unit tests: the door (60, removed included; 5 late; a removed late
+  joiner still counts), answers (same tap and resend unchanged, a late
+  older tap loses, 10 changes then refused, the counted answer tapped
+  again is fine, the score follows).
+- `simulate.mjs` against a local stack, both modes pass (758 and 768 HTTP
+  requests with all polling, against 763 before).
+- HTTP probes: 30 more taps on the same answer stored nothing (the view
+  version didn't move); the 11th change refused; 60 join and the 61st is
+  told the class is full; after Start 5 join and the 6th is turned away; a
+  removed device sees itself removed; a 1 MB chunked poll body gets 413
+  and a 500 KB chunked upload 400.
+- A stack with small limits (4 uploads a day, 2,000 bytes, a class idle
+  after 15 s): the second large quiz refused with the owner's words, taken
+  again once the first was deleted; a quiz with errors books nothing; the
+  fifth upload of the day refused; a lobby with a student cleared and its
+  tablet told; a class under way ended with its ranking; the quiz, its
+  empty lobby and its code still there.
+- Headless Edge through the real pages: the CSP header on `/`, `/check`
+  (which still passes), `/layout.html`, `/teacher`, the Projector with its
+  QR code and the student page, with no violation or page error; eight
+  taps on one button send one answer; after 45 minutes (clock moved on) the
+  student page sleeps, doesn't hear the reveal, and a tap wakes it onto
+  the reveal it missed; the allowance spent, as our `{error: "quota"}` and
+  as a 429 page with 1027, shows the notice, which goes once the polls
+  succeed again (up to a poll's 25 s hold); joining with it spent shows
+  the words, not a spinner; the 61st device reads "This class is full";
+  the root page shows "The free site is full for today" without the
+  copy-for-AI button; a sleeping Projector woken by Space stays in the
+  lobby, and the next Space starts the quiz.
+- After merging with the picture screens and the shuffled answers (taps
+  name a place on screen, translated to the text's order before the
+  answer rules above apply): tests, typecheck, `simulate.mjs` in both
+  modes (760 requests all polling) and the probes and pages above again,
+  plus a Projector over HTTP showing a question's picture from a `blob:`
+  URL with no CSP violation, the allowance notice over it and gone again,
+  and asleep, woken by Space without a step, the picture still there. A
+  step pressed while the allowance was out (HTTP) is resent once a minute
+  and happens when it comes back; the `at` guard drops it once the class
+  has moved on.
+
+**Deploy:** the state Worker's migration `v4` adds `SiteBudget`. `npm run
+deploy` deploys the state Worker before the site, which is the order it
+needs.
+
+Revisit: the numbers, once the deploy log or the dashboard shows real
+use; the door, if teachers are seen with more than five latecomers; the
+quota wording, the first time the allowance runs out.
 
 ## Open
 

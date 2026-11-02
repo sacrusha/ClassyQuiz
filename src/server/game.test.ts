@@ -166,9 +166,45 @@ test("avatars: the first dozen players all get different animals", () => {
   const { g } = setup(12);
   const animals = new Set(Object.values(g.run!.players).map((p) => p.avatar.a));
   assert.equal(animals.size, 12);
-  const { g: big } = setup(G.ANIMAL_COUNT * G.COLOUR_COUNT);
+  // A full class (MAX_PLAYERS, below the 96 combinations) gets no two alike.
+  const { g: big } = setup(G.MAX_PLAYERS);
   const combos = new Set(Object.values(big.run!.players).map((p) => `${p.avatar.a}/${p.avatar.c}`));
-  assert.equal(combos.size, G.ANIMAL_COUNT * G.COLOUR_COUNT);
+  assert.equal(combos.size, G.MAX_PLAYERS);
+});
+
+test("the door: a class takes MAX_PLAYERS, removed ones included, and a few late joiners once started", () => {
+  const { g, ids } = setup(G.MAX_PLAYERS - 1);
+  G.removePlayer(g, ids[0]);
+  G.addPlayer(g, "last", "tl", 1, Math.random);
+  assert.throws(() => G.addPlayer(g, "one-more", "t", 1, Math.random), /full/);
+
+  const { g: small } = setup(3);
+  G.begin(small, 10);
+  for (let i = 0; i < G.MAX_LATE_JOINERS; i++) G.addPlayer(small, `late${i}`, `tl${i}`, 11, Math.random);
+  assert.throws(() => G.addPlayer(small, "late-too", "t", 12, Math.random), /started/);
+  // A removed late joiner still took a place: removing and rejoining isn't a way in.
+  G.removePlayer(small, "late0");
+  assert.throws(() => G.addPlayer(small, "late-again", "t", 13, Math.random), /started/);
+});
+
+test("taps that change nothing aren't stored; changes of mind are capped; the last accepted tap counts", () => {
+  const { g, ids } = setup(1);
+  G.begin(g, 0);
+  const p = ids[0];
+  assert.equal(G.answerOutcome(g, p, 0, 1, 1, 0, 1), "recorded");
+  assert.equal(G.answerOutcome(g, p, 0, 1, 2, 0, 2), "unchanged", "the same button again");
+  assert.equal(G.answerOutcome(g, p, 0, 1, 2, 0, 3), "unchanged", "a resend");
+  // A late, older tap on another answer doesn't overwrite the newer same-answer tap.
+  assert.equal(G.answerOutcome(g, p, 0, 0, 1, 0, 4), "unchanged");
+  assert.equal(g.run!.answers[0][p].choice, 1);
+  let seq = 10;
+  for (let i = 0; i < G.MAX_ANSWER_CHANGES; i++) assert.equal(G.answerOutcome(g, p, 0, i % 2 === 0 ? 0 : 1, seq++, 0, 5), "recorded");
+  const last = g.run!.answers[0][p].choice;
+  assert.equal(G.answerOutcome(g, p, 0, 1 - last, seq++, 0, 6), "refused", "one change too many");
+  assert.equal(G.answerOutcome(g, p, 0, last, seq++, 0, 6), "unchanged", "the counted answer tapped again is fine");
+  assert.equal(g.run!.answers[0][p].choice, last);
+  G.reveal(g, 1);
+  assert.equal(score(g, p), last === 0 ? 1 : 0);
 });
 
 test("a question the class has moved past can't be un-skipped; ids from devices don't reach the prototype", () => {

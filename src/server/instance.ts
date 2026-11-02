@@ -27,6 +27,7 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomToken } from "./random.ts";
+import { CLASS_IDLE_MS, SITE_FULL, isQuotaError } from "../shared/limits.ts";
 
 /** An instance ends this long after its last activity (upload, a teacher's step, a role taken). */
 export const INSTANCE_IDLE_MS = 48 * 3600_000;
@@ -118,19 +119,23 @@ export class Instance extends DurableObject<Env> {
     // Answered by the runtime without waking the object: keeps proxies and
     // NAT tables from dropping an idle socket.
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
-    ctx.blockConcurrencyWhile(async () => {
-      const [meta, record, fixes, run] = await Promise.all([
-        ctx.storage.get<Meta>("meta"),
-        ctx.storage.get<QuizRecord>("quiz"),
-        ctx.storage.get<G.Fix[]>("fixes"),
-        ctx.storage.get<G.Run | null>("run"),
-      ]);
-      if (meta && record && fixes) {
-        this.meta = meta;
-        this.quizRecord = record;
-        this.game = { quiz: record.quiz, fixes, run: run ?? null };
-      }
-    });
+    ctx.blockConcurrencyWhile(() => this.load());
+  }
+
+  /** The instance as stored; also after a write failed, so nothing shows that isn't stored. */
+  private async load(): Promise<void> {
+    const storage = this.ctx.storage;
+    const [meta, record, fixes, run] = await Promise.all([
+      storage.get<Meta>("meta"),
+      storage.get<QuizRecord>("quiz"),
+      storage.get<G.Fix[]>("fixes"),
+      storage.get<G.Run | null>("run"),
+    ]);
+    if (meta && record && fixes) {
+      this.meta = meta;
+      this.quizRecord = record;
+      this.game = { quiz: record.quiz, fixes, run: run ?? null };
+    }
   }
 
   /** The instance holds a quiz made with per-quiz codes and roles; older ones are left to expire. */
@@ -154,7 +159,8 @@ export class Instance extends DurableObject<Env> {
     /** The teacher chose to run the quiz without the pictures that didn't come with it. */
     leaveOutMissing = false,
   ): Promise<
-    { ok: true; secret: string; code: string; token: string } | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[] }
+    | { ok: true; secret: string; code: string; token: string }
+    | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string }
   > {
     if (this.meta) throw new Error("instance exists");
     const r = parseQuiz(text);
@@ -165,6 +171,9 @@ export class Instance extends DurableObject<Env> {
     const secret = randomToken();
     const token = randomToken();
     const codeUntil = now + INSTANCE_IDLE_MS + CODE_SLACK_MS;
+    // The site's share of the free plan: uploads today, bytes stored at once.
+    const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
+    if (!(await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil))) return { ok: false, errors: [], warnings: [], error: SITE_FULL };
     const code = await this.claimCode(codeUntil);
     this.quizRecord = { quiz: r.quiz, warnings: [...r.warnings, ...pictures.warnings], images: pictures.index, imageSecret: randomToken() };
     this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, lastActivity: now, v: 1 };
@@ -175,7 +184,12 @@ export class Instance extends DurableObject<Env> {
     // The alarm goes first: should the write below fail halfway, the alarm
     // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
-    await this.ctx.storage.put({ ...pictures.files, quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: this.game.run });
+    try {
+      await this.ctx.storage.put({ ...pictures.files, quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: this.game.run });
+    } catch (e) {
+      await this.budget().release(this.ctx.id.toString()).catch(() => {});
+      throw e;
+    }
     return { ok: true, secret, code, token };
   }
 
@@ -208,6 +222,10 @@ export class Instance extends DurableObject<Env> {
     const r = await this.create(text, images, form.get("leaveOut") === "missing");
     const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, token: r.token } : r;
     return json(body);
+  }
+
+  private budget() {
+    return this.env.BUDGET.get(this.env.BUDGET.idFromName("site"));
   }
 
   /** GET …/img/<secret>/<n>: a picture, for a device that was sent a view naming it. */
@@ -594,6 +612,10 @@ export class Instance extends DurableObject<Env> {
           const keys = Object.keys(joins);
           if (keys.length > JOINS_KEPT) delete joins[keys[0]];
           await this.persist(["run"]);
+          // The first student in: from now on this class can be left behind
+          // (CLASS_IDLE_MS); later joins only move that time, which the alarm
+          // reads when it fires.
+          if (Object.keys(run.players).length === 1) await this.scheduleAlarm();
           this.broadcast();
           return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token, run: run.id }], session: { role: "player", player: p.id } };
         }
@@ -611,12 +633,15 @@ export class Instance extends DurableObject<Env> {
         const view = typeof cmd.v === "number" ? cmd.v : Infinity;
         // The tablet names the answer by its place on screen; it is stored by its place in the text.
         const choice = Number.isInteger(cmd.choice) ? (G.orderOf(game, cmd.q)[cmd.choice] ?? -1) : -1;
-        const recorded = G.answer(game, session.player, cmd.q, choice, cmd.seq, view, now);
-        if (recorded) {
+        // Only a tap that changed the recorded answer is stored: a resend or
+        // the same button again isn't (children hammer buttons; each write
+        // comes out of the account's daily allowance).
+        const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now);
+        if (outcome === "recorded") {
           await this.persist(["run"]);
           this.broadcast();
         }
-        return { direct: [ack(recorded)] };
+        return { direct: [ack(outcome !== "refused")] };
       }
 
       // --- a teacher role: still the tab holding it?
@@ -734,6 +759,13 @@ export class Instance extends DurableObject<Env> {
       return { direct: [ack(true)] };
     } catch (e) {
       if (e instanceof G.GameError) return { direct: [ack(false, e.message)] };
+      // The account's daily allowance is spent: the tab says so rather than
+      // looking offline (decisions.md, hardening). What's in memory may be
+      // ahead of storage now; reload it, so nothing shows that isn't stored.
+      if (isQuotaError(e)) {
+        await this.load().catch(() => {});
+        return { direct: [ack(false, "quota"), { t: "quota" }] };
+      }
       throw e;
     }
   }
@@ -804,6 +836,8 @@ export class Instance extends DurableObject<Env> {
     const until = end + CODE_SLACK_MS;
     const stub = this.env.JOIN.get(this.env.JOIN.idFromName(meta.code));
     if (await stub.claim(this.ctx.id.toString(), until)) meta.codeUntil = until;
+    // The site's booking of this quiz's storage lives as long.
+    await this.budget().renew(this.ctx.id.toString(), until).catch(() => {});
   }
 
   private async releaseCode(): Promise<void> {
@@ -822,7 +856,25 @@ export class Instance extends DurableObject<Env> {
     let at = meta.lastActivity + INSTANCE_IDLE_MS;
     const ended = this.game?.run?.ended;
     if (ended != null) at = Math.min(at, ended + RUN_KEEP_MS);
+    const idle = this.classIdleFrom();
+    if (idle != null) at = Math.min(at, idle + CLASS_IDLE_MS);
     await this.ctx.storage.setAlarm(at);
+  }
+
+  /**
+   * A class nobody steers any more: since when, or null when there is none
+   * to end (no class, already over, or an empty lobby, which may wait from
+   * the evening before). The clock runs from the teacher's last step or the
+   * last student joining, whichever is later, so a lobby filling for a
+   * lesson hours after the upload isn't cleared under the students.
+   */
+  private classIdleFrom(): number | null {
+    const run = this.game?.run;
+    const meta = this.meta;
+    if (!run || !meta || run.ended != null) return null;
+    const players = Object.values(run.players);
+    if (run.phase === "lobby" && players.length === 0) return null;
+    return Math.max(meta.lastActivity, ...players.map((p) => p.joined));
   }
 
   async alarm(): Promise<void> {
@@ -835,6 +887,17 @@ export class Instance extends DurableObject<Env> {
     if (now >= meta.lastActivity + INSTANCE_IDLE_MS || !this.live()) {
       await this.endInstance();
       return;
+    }
+    const idle = this.classIdleFrom();
+    if (idle != null && now >= idle + CLASS_IDLE_MS) {
+      // Left behind: the lesson is over, but its tablets would keep their
+      // line open (and, on the HTTP fallback, keep polling) for the quiz's 48
+      // hours. A class under way ends with its final ranking, whose data goes
+      // an hour later; a lobby with students opens empty again.
+      if (this.game!.run!.phase === "lobby") this.newClass();
+      else G.finish(this.game!, now);
+      await this.persist(["run"]);
+      this.broadcast();
     }
     const run = this.game?.run;
     if (run && run.ended != null && now >= run.ended + RUN_KEEP_MS) {
@@ -849,6 +912,7 @@ export class Instance extends DurableObject<Env> {
   /** Everything goes: quiz, classes, players, answers, pictures (decisions.md). */
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
+    await this.budget().release(this.ctx.id.toString()).catch(() => {});
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;
       if (ackId && (s?.role === "screen" || s?.role === "remote")) send(ws, { t: "ack", id: ackId, ok: true });

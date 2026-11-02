@@ -17,6 +17,10 @@ class_name = "JoinCode"
 name = "STATS"
 class_name = "UploadStats"
 
+[[durable_objects.bindings]]
+name = "BUDGET"
+class_name = "SiteBudget"
+
 # The Free plan only offers SQLite-backed Durable Objects.
 [[migrations]]
 tag = "v1"
@@ -30,6 +34,11 @@ new_sqlite_classes = ["UploadStats"]
 [[migrations]]
 tag = "v3"
 deleted_classes = ["Pairing"]
+
+# The site's share of the free plan: uploads a day, bytes stored (decisions.md, hardening).
+[[migrations]]
+tag = "v4"
+new_sqlite_classes = ["SiteBudget"]
 
 # No request logs: they would hold IP addresses (decisions.md, lifetime).
 [observability]

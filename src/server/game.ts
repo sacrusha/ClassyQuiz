@@ -9,6 +9,7 @@
 // are already recorded.
 
 import type { Quiz } from "../quiz/format.ts";
+import { CLASS_FULL, CLASS_STARTED, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 
 export type Phase = "lobby" | "question" | "reveal" | "ranking" | "final";
 
@@ -37,6 +38,8 @@ export interface Player {
   avatar: Avatar;
   joined: number;
   removed: boolean;
+  /** Joined after the quiz started (MAX_LATE_JOINERS). */
+  late?: boolean;
 }
 
 export interface AnswerRecord {
@@ -45,6 +48,8 @@ export interface AnswerRecord {
   ms: number;
   /** The client's sequence number; a lower one arriving late is ignored. */
   seq: number;
+  /** Times the student changed their mind on this question (MAX_ANSWER_CHANGES); absent until the first change. */
+  changes?: number;
 }
 
 export interface Run {
@@ -183,10 +188,16 @@ export function pickAvatar(run: Run, random: () => number): Avatar {
   return pool[Math.floor(random() * pool.length)];
 }
 
+export { MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
+
 export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number): Player {
   const run = needRun(g);
   if (run.phase === "final") throw new GameError("This quiz has finished.");
-  const p: Player = { id, token, avatar: pickAvatar(run, random), joined: now, removed: false };
+  const all = Object.values(run.players);
+  if (all.length >= MAX_PLAYERS) throw new GameError(CLASS_FULL);
+  const late = run.phase !== "lobby";
+  if (late && all.filter((p) => p.late).length >= MAX_LATE_JOINERS) throw new GameError(CLASS_STARTED);
+  const p: Player = { id, token, avatar: pickAvatar(run, random), joined: now, removed: false, ...(late ? { late: true } : {}) };
   run.players[id] = p;
   return p;
 }
@@ -280,30 +291,56 @@ export function finish(g: Game, now: number): void {
 
 /**
  * Records a tap. `view` is the version of the view the device showed when it
- * was tapped. Returns true when the answer was recorded (or was already the
- * recorded one).
+ * was tapped. Returns true when the answer was accepted (recorded, or already
+ * the recorded one).
  */
 export function answer(g: Game, playerId: string, q: number, choice: number, seq: number, view: number, now: number): boolean {
+  return answerOutcome(g, playerId, q, choice, seq, view, now) !== "refused";
+}
+
+/**
+ * As `answer`, telling apart a tap that changed what is recorded (to be
+ * stored) from one that didn't: a resend, or the same answer tapped again.
+ * Children hammer a button; storing each tap would spend the account's daily
+ * storage writes, which every class on the site shares.
+ */
+export function answerOutcome(
+  g: Game,
+  playerId: string,
+  q: number,
+  choice: number,
+  seq: number,
+  view: number,
+  now: number,
+): "recorded" | "unchanged" | "refused" {
   const run = g.run;
-  if (!run) return false;
+  if (!run) return "refused";
   const p = playerById(run, playerId);
-  if (!p || p.removed) return false;
+  if (!p || p.removed) return "refused";
   // A resend of an answer already recorded (its acknowledgement was lost
   // with the connection) is confirmed, also after the reveal: it counts.
   const prev = run.answers[q]?.[playerId];
-  if (prev && prev.seq >= seq) return true;
+  if (prev && prev.seq >= seq) return "unchanged";
   const open = run.phase === "question" && run.current === q;
   // Tapped before the device showed the reveal, delivered after it: the
   // device showed the question as open, so the answer counts.
   const revealedAt = run.revealView?.[q];
   const inTime = open || (run.revealed.includes(q) && revealedAt !== undefined && view < revealedAt);
-  if (!inTime) return false;
+  if (!inTime) return "refused";
   const question = g.quiz.questions[q];
-  if (!question || !Number.isInteger(choice) || choice < 0 || choice >= question.answers.length) return false;
+  if (!question || !Number.isInteger(choice) || choice < 0 || choice >= question.answers.length) return "refused";
+  if (prev && prev.choice === choice) {
+    // The same answer again: nothing to store. The newer sequence number is
+    // kept in memory, so an older different tap arriving late still loses.
+    prev.seq = seq;
+    return "unchanged";
+  }
+  const changes = prev ? (prev.changes ?? 0) + 1 : 0;
+  if (changes > MAX_ANSWER_CHANGES) return "refused";
   const byPlayer = (run.answers[q] ??= {});
   // Changing one's mind is allowed until the reveal; the last tap counts.
-  byPlayer[playerId] = { choice, ms: Math.max(0, now - run.openedAt), seq };
-  return true;
+  byPlayer[playerId] = { choice, ms: Math.max(0, now - run.openedAt), seq, ...(changes > 0 ? { changes } : {}) };
+  return "recorded";
 }
 
 // ---------------------------------------------------------------------------
