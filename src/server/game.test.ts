@@ -181,3 +181,70 @@ test("a question the class has moved past can't be un-skipped; ids from devices 
   assert.equal(G.answer(g, "__proto__", 1, 0, 1, 0, 2), false);
   assert.equal(G.activePlayers(g.run!).length, ids.length);
 });
+
+test("a picture enlarged on the projector goes back by itself with the next step; a hidden one can't be enlarged", () => {
+  const pictured = parseQuiz(`Title: P
+1. One?
+Image: a.png
++ a
+- b
+
+2. Two?
++ a
+- b
+
+3. Three?
+Image: c.png
++ a
+- b
+`).quiz;
+  const g = G.newGame(pictured);
+  G.startRun(g, "12345", "r1");
+  assert.throws(() => G.setZoom(g, true), G.GameError, "nothing on screen in the lobby");
+  G.begin(g, 0);
+  G.setZoom(g, true);
+  assert.equal(G.zoomed(g), true);
+  G.reveal(g, 1);
+  assert.equal(G.zoomed(g), false, "the reveal shows the tiles again");
+  G.setZoom(g, true);
+  G.setZoom(g, false);
+  assert.equal(G.zoomed(g), false);
+  G.setZoom(g, true);
+  G.next(g, 10);
+  assert.equal(G.zoomed(g), false, "the next question starts unenlarged");
+  assert.throws(() => G.setZoom(g, true), G.GameError, "question 2 has no picture");
+  G.setHidePicture(g, 2, true);
+  G.reveal(g, 2);
+  G.next(g, 20);
+  assert.throws(() => G.setZoom(g, true), G.GameError, "a hidden picture isn't on screen");
+  G.setHidePicture(g, 2, false);
+  G.setZoom(g, true);
+  assert.equal(G.zoomed(g), true);
+});
+
+test("answers are shuffled for each class, the same on every screen; Order: fixed and letters A, B, C keep theirs", () => {
+  assert.equal(G.keepsOrder(["A", "B", "C", "Auf keinem"]), true, "letters with a 'none' last");
+  assert.equal(G.keepsOrder(["A", "B", "C"]), true);
+  assert.equal(G.keepsOrder(["C", "A", "B"]), false);
+  assert.equal(G.keepsOrder(["10", "20", "30", "40"]), false, "numbers need Order: fixed");
+  const random = (() => {
+    let r = 7;
+    return () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+  })();
+  const quiz = parseQuiz(
+    Array.from({ length: 20 }, (_, i) => `${i + 1}. Q?\n+ right\n- w1\n- w2\n- w3\n`).join("\n") +
+      "\n21. Kept?\nOrder: fixed\n+ 10\n- 20\n- 30\n- 40\n\n22. Parts?\n- A\n+ B\n- C\n- none\n",
+  ).quiz;
+  const g = G.newGame(quiz);
+  G.startRun(g, "12345", "r1", random);
+  const keyPlaces = quiz.questions.slice(0, 20).map((_, q) => G.orderOf(g, q).indexOf(0));
+  assert.ok(new Set(keyPlaces).size >= 3 && keyPlaces.filter((p) => p === 0).length < 12, `the key, first in the text, lands at ${keyPlaces}`);
+  for (let q = 0; q < 20; q++) assert.deepEqual([...G.orderOf(g, q)].sort(), [0, 1, 2, 3], "a permutation");
+  assert.deepEqual(G.orderOf(g, 20), [0, 1, 2, 3], "Order: fixed");
+  assert.deepEqual(G.orderOf(g, 21), [0, 1, 2, 3], "A, B, C, none");
+  const before = quiz.questions.map((_, q) => G.orderOf(g, q).join());
+  G.startRun(g, "12345", "r2", random);
+  assert.notDeepEqual(quiz.questions.map((_, q) => G.orderOf(g, q).join()), before, "another class, another order");
+  G.startRun(g, "12345", "r3");
+  assert.deepEqual(G.orderOf(g, 0), [0, 1, 2, 3], "without randomness (tests, runs stored before): the text's order");
+});

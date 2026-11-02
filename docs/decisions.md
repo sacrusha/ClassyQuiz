@@ -213,7 +213,8 @@ Note: (teacher only, shown while this question is up)
 
 - **"+" marks the correct answer, "-" a wrong one,** on the answer's own
   line. It sits in a fixed column, so it is visible at a glance, and a phone
-  keyboard can move it. The order in the text is the order on screen.
+  keyboard can move it. The order in the text is the order on screen
+  (reversed: "Answers shuffled at upload").
 - **Loss of the markers fails loudly.** If the text was copied from a
   rendered chat bubble, "+"/"-" become bullet points and disappear. The
   parser then reports "no answer marked correct" instead of guessing a key.
@@ -876,8 +877,12 @@ takes the quiz after the flow redesign calls `prepareImages()` and
   files out of the zip, one at a time.
 - It redraws each one on a canvas:
   - long side at most 1600 px, 1920 for backgrounds;
-  - flattened onto white, so a transparent line drawing doesn't vanish on a
-    dark screen;
+  - a question's picture with transparency stays a PNG with its alpha
+    channel, up to 1.5 MB (changed in "Pictures on the screens": v3's
+    answers as pictures need alpha); every screen shows pictures on white,
+    so a transparent line drawing doesn't vanish on a dark page;
+  - anything else is flattened onto white: backgrounds, opaque pictures,
+    and a transparent one too large as PNG;
   - EXIF orientation applied;
   - PNG kept for line art up to 500 KB, else JPEG.
 - That drops everything a photo carries besides the image: camera, time,
@@ -921,46 +926,8 @@ takes the quiz after the flow redesign calls `prepareImages()` and
   is a few MB and a handful of rows. Fetching them costs one Function and
   one Durable Object request per picture per screen.
 
-**Not yet: the screens.** Until they're built, the projector doesn't show
-pictures, so this isn't for deploying alone. They're left for whoever builds
-them after the flow redesign (docs/user-flow.md) has landed on main and
-`images` is merged. A plan, not decided:
-- **Projector, question and reveal:**
-  - The figure goes beside the question and tiles (figure left at full
-    height, question and tiles right) or between question and tiles. The
-    page picks one from the figure's aspect (`w`/`h` in the view) and the
-    question's length. Owner: "beside is a good improvement, but might
-    depend on question length". On 16:9 at 1366×768, between leaves a
-    square-ish figure about 300 px of height.
-  - Wide figures (number lines, strips) and long questions suit between;
-    square or portrait figures with short questions suit beside. No keyword:
-    neither the AI nor the teacher chooses.
-  - The figure is fitted like the text (`fitText`/`fitTiles` in
-    `screen.ts`). "Projector tiles: the reveal doesn't move the text" holds
-    for the figure too: the reveal moves neither figure nor text.
-- **Background:** behind the whole projector screen, under a scrim dark or
-  light enough that question and tiles read from the back row. A question's
-  own background replaces the quiz's (the view already resolves this).
-  - My call, pending the owner: the quiz's background also shows in the
-    lobby and on the ranking screens (`ScreenView.background`).
-- **Full screen for a figure:** a key on the projector and a button on the
-  Remote, for the moment the teacher points at it. Toggled back the same
-  way.
-- **Loading:** the projector fetches every picture of the quiz in the
-  lobby, as blobs into object URLs, so a question or reveal never waits on
-  one. The responses are `no-store`, so a reload fetches them again. That
-  costs one Function and one Durable Object request per picture.
-- **Teacher's lobby (§3.3) and Remote (§3.5):**
-  - A thumbnail per question that has a picture or a background; tapped, it
-    opens full size. A wrong crop is the picture's wrong key, so it has to
-    be visible to a skimming teacher.
-  - The picture is not behind the answers' fold: the class sees it anyway.
-    One that shows the solution is exactly what the teacher needs to spot.
-- **Fix: hide the picture**, beside void and skip. It covers a wrong or
-  revealing crop during the run: a per-question fix like the others, which
-  views then leave out.
-- **Student devices:** no picture (owner). v3 image answers will be the
-  first thing tablets fetch; the route and `ImageRef` already allow it.
+**The screens** are built: "Pictures on the screens" below records what
+the plan that stood here became, and where it differs.
 
 **Merging with the flow redesign:**
 - `client/new.ts` is the upload page. The redesign folds it into the root
@@ -1007,6 +974,11 @@ them after the flow redesign (docs/user-flow.md) has landed on main and
   directory: every Durable Object call from the site then fails with
   "Network connection lost". A start script that waits for "Ready on" in a
   log must delete the old log first.
+- The first start after stopping a stack failed that way three times out of
+  three ("Pictures on the screens", ports 8827/8828), even with the site
+  started 10 s after the state Worker was ready; restarting only the site
+  didn't help. Stopping both and starting both again worked each time.
+  Probe with one upload before running a walk.
 
 **Checked:**
 - Unit tests: parser forms and errors, `imageKey`, PNG/JPEG reading,
@@ -1177,6 +1149,266 @@ both screens are set up before the students get the code.
 Revisit: 45 s once a phone in a pocket has been seen in a lesson; the gate,
 if teachers are seen wanting a phone in mid-lesson.
 
+## 2026-11-02 — Pictures on the screens
+
+Serves: v2 item 1, with the owner's direction (beside the question, "might
+depend on question length"; a background is a separate thing; nothing on
+the voting devices); v1 items 9 (fixing during the run) and 19 (the right
+quiz at a glance); v3 item 1 kept open (alpha). Built on the plan in
+"Pictures in the archive". The trigger: the owner's own AI made a German
+number-line quiz from a real sheet (19 questions, nine pictures and one
+shared by five questions, all wide strips of 6:1 to 2.6:1); uploaded to
+the live site, it showed no picture.
+
+**Projector, question and reveal** (`client/screen.ts`, `layQuestion`):
+- The picture goes **between** the question and the tiles, or **beside**
+  both (picture left, question and tiles in one column on the right). The
+  page lays out *between* first, then computes how large *beside* would
+  show the picture. *Beside* is taken when the picture comes out at least
+  1.3 times larger, with the picture at 58% of the width, else 50%, and
+  only if the text stays readable in the narrower column: the question at
+  1.5em or more, and no answer squeezed or below 1.3em. Otherwise it's
+  *between*. Neither the AI nor the teacher chooses.
+- What that gives: number lines and other wide strips go *between* at the
+  full width; square and upright figures, and photos with short answers,
+  go *beside*. A long question beside a square figure stays *beside* on a
+  1366×768 laptop (question at 1.5em) and goes *between* on 1920×1080 and
+  1280×800, where *between* already shows it large enough. A phone as the
+  projector is always *between*.
+- With a picture, the question starts smaller (3em instead of 3.6em up to
+  40 characters, and so on down) and may take at most 30% of the height.
+  The tiles keep a minimum height per row (13.5% of the height for answers
+  up to 12 characters, 16% up to 30, 20% beyond). The picture takes the
+  rest, at most 62% of the height.
+- The figure's size is set in px from `w`/`h` in the view, so nothing
+  moves when the file arrives. It sits on a white card. A picture smaller
+  than its box is enlarged: blurry beats small from the back row.
+- **The reveal moves nothing.** The question is laid out once per question
+  (and window size). The reveal and incoming answers only change the
+  tiles' marks, counts and bars in place; the figure isn't redrawn. The
+  bars now grow from zero at the reveal.
+
+**Enlarging the picture** (the plan's "full screen for a figure"): `Z` or
+a click on the picture on the projector, "Enlarge the picture (Z)" in its
+⋯ menu, or "Enlarge on the projector" on the Remote's current question.
+- The picture fills the screen, above everything but the steering bar.
+  The same key, click or button brings the question back.
+- The state is on the server (`run.zoom`, command `zoom`), so the Remote
+  and the projector agree. It is keyed to the step it was set in, so the
+  reveal and the next question end it by themselves; the class always
+  sees the tiles at the reveal.
+- The projector may enlarge also while a Remote steers, like the clicker:
+  it's the teacher at the laptop pointing at the figure.
+- No clicker button is mapped to it. Clickers' "black screen" key sends
+  `B` or `.`, and a figure appearing there would surprise.
+
+**Background:** behind the whole projector, `object-fit: cover`, under a
+light veil (55% of the page colour). The question, the lobby's join box,
+the counter, the ranking's podium and class result, and the top bar sit
+on white cards. A question's own background replaces the quiz's. My call,
+as the plan proposed and still pending the owner: the quiz's background
+also shows in the lobby and at the rankings. In the steering lobby the
+question list below the fold has the plain page colour.
+
+**Loading** (`client/pictures.ts`): the server sends pictures `no-store`,
+so an `<img>` drawn again would fetch again.
+- Each page fetches each picture once, into a blob URL, at most two at a
+  time; the one on screen goes first and skips the queue. Every
+  `<img data-pic>` is filled from that.
+- The projector view carries `pictures`, every picture the projector may
+  show, and the projector fetches them all as soon as it has a view: in
+  the lobby, or on a reload mid-quiz.
+- The teacher's pages fetch what they show.
+- If a fetch fails, the `<img>` asks the server itself.
+- Measured on the sample: 10 picture requests for a whole run, none at a
+  reveal.
+
+**Teacher's side** (`client/manage.ts`, `teach.ts`):
+- **Question list** (lobby, and "All questions" during the run): a
+  thumbnail under each question that has a picture, 72 px high, outside
+  the answers' fold. A question's own background gets a smaller one
+  labelled "background". The quiz's background is shown once above the
+  list ("behind every question"). A tap shows the picture full size on
+  that device (a dark overlay; a tap closes it).
+- Nine of the sample's questions read "Welche Zahl ist mit dem Pfeil
+  markiert?". Without the thumbnails the list can't tell them apart.
+- **Remote, current question:** the picture across the card, above the
+  answers, with "Enlarge on the projector". It's also what the teacher
+  shows around when the projector has died.
+
+**Fix: hide the picture.** In "Change the right answer", beside Void and
+Skip: "Hide the picture" / "Show the picture again". It's for a wrong or
+revealing crop.
+- It's a per-question fix like the others (`Fix.hidePicture`, command
+  `setHidePicture`). The projector's view then has no picture for that
+  question, the projector doesn't fetch it, and it can't be enlarged.
+- The teacher's view keeps the picture, faded and struck through, with a
+  "picture hidden" tag, so it can be shown again.
+- Allowed at any time, also on the open question. On the wall the
+  picture disappears; the class saw it anyway.
+
+**Alpha** (owner, via backlog v3 item 1: answers as images "will require
+an alpha channel"):
+- The upload no longer flattens a question's picture when it has
+  transparency. It stays a PNG with alpha, up to 1.5 MB; larger, it's
+  flattened to JPEG as before. Backgrounds are always flattened.
+- The dark-screen case the flattening guarded against is now handled
+  where pictures are shown: the projector's figure, the enlarged view,
+  the thumbnails and the full-size view all put the picture on white.
+- The server accepted any PNG already. v3 will need its own answer to
+  where an answer picture sits; a white tile is the obvious start.
+
+**Student devices:** unchanged, no picture (owner).
+
+**Not done:**
+- The upload page doesn't preview pictures; the lobby list is the
+  preview.
+- No picture in the "Change the right answer" sheet on the wall.
+
+**Evidence** (headless Edge, local stack, through the real pages):
+- **The owner's sample zip**, uploaded on the root page, with the
+  projector at 1366×768, a phone as Remote and a tablet:
+  - 10 pictures fetched ahead, each once;
+  - 14 thumbnails in the lobby;
+  - Q1 *between* at full width;
+  - the figure, question and answer text at the same pixel positions
+    before and after the reveal, and no fetch at the reveal;
+  - Q10 (three number lines) *between*;
+  - enlarged from the Remote, back with `Z`, enlarged by a click, ended by
+    the reveal;
+  - Q11's picture hidden from the Remote's list before it came up, and
+    absent on the projector;
+  - Q15 without a picture as before;
+  - the full-size view on the phone.
+- **A drawn quiz**, with the projector steering itself by keyboard:
+  - a square figure, an upright one, a 3:2 photo with a 21-character
+    answer, a long question with a square figure, two answers, a
+    transparent line drawing, the quiz's background and a question's own;
+  - each question at 1366×768, 1920×1080, 1024×768, 1280×800 and 390×844:
+    nothing overflows, and the figure stays inside its area;
+  - the transparent PNG served back with alpha 0 in the corner and 255 on
+    the line;
+  - the background in the lobby, behind the questions and at the final
+    ranking.
+- **First run, a bug found and fixed:** the layout measured the room
+  before the top bar had its text. Square figures *beside* then ran past
+  the bottom by the bar's height.
+- `scripts/simulate.mjs` on the same stack: OK. Unit tests: 65,
+  including zoom and hide.
+
+Revisit:
+- the 1.3× and 1.5em/1.3em thresholds, once real sheets with photos have
+  been on a real projector;
+- whether teachers find `Z` and the click, or only the Remote's button;
+- the background in the lobby and rankings, once the owner has seen it.
+
+## 2026-11-02 — Answers shuffled at upload
+
+Serves: v1 items 1 (quiz format), 6 and 7 (a teaching moment, quick taps);
+the measure, teacher time. Reverses "The order in the text is the order on
+screen" in "The quiz text format". Settled with the owner through the
+product owner.
+
+**The problem.** The owner's number-line quiz from his own AI had the
+right answer first in 14 of 19 questions. The other five were "A, B, C,
+Auf keinem", where the key follows the figure. A class learns "tap red" in
+a few questions.
+- The site's warning ("the correct answer is in position N in every
+  question") didn't fire: it needed every question.
+- A warning costs the teacher a round trip in the break anyway.
+- The guidance had a sentence on it. Whether the AI read it is unknown:
+  the guidance may not have reached it.
+
+**What was considered:**
+- *A guidance-only fix*, the owner's first suggestion: write the right
+  answer first, then the wrong ones, then permute with a script. It makes
+  the text right when the AI does all of it. But an AI that skips the last
+  step, or can't run code, now leaves every key first: worse than today.
+- *Shuffling on screen only when the text shows the bias* (built briefly,
+  then replaced): keeps the AI's order when it did its job. But the rule
+  is harder to state, and the teacher can't predict what the class sees.
+- *Settled:* the site always shuffles. The guidance states it as a fact,
+  in the owner's words: answers will be shuffled; right answer first might
+  be convenient. A question keeps its order where the order carries
+  meaning.
+
+**Why text order is no longer screen order.** It was there so a teacher
+could match the text to the wall. The teacher now checks the key in the
+lobby's question list and fixes it on the Remote. Both show the answers in
+the order on screen, with the right ones marked, and the class sees the
+same. Nobody needs the text beside the wall any more.
+
+**How:**
+- **Per class.** `Run.order[q]` maps position on screen to the answer's
+  index in the text. It is made when the quiz is uploaded (the first
+  class's lobby), stored with the run in the instance's storage, and made
+  again for "Again with another class". A parallel class then can't be told
+  "number 3 is red" in the break.
+  - Reshuffling for another class is my call (the product owner left it
+    open).
+  - The cost: the second class's order differs from what the teacher
+    checked before the first lesson. The key and the corrections are by
+    answer, not by place, so nothing about them changes.
+- **One order everywhere.** Every view shows the answers in the order on
+  screen: the projector's tiles, the tablets' buttons, the Remote's
+  current question and the question list, and the reveal's marks and
+  counts. Commands that name an answer use that order too:
+  - a tablet's `answer.choice`;
+  - the teacher's `setCounts`.
+
+  The instance maps them to the text's order (`orderOf`, `onScreen`,
+  `fromScreen` in `instance.ts`). Everything stored stays by the text's
+  order: answers, `Fix.counts`. So scores, fixes and "again" are
+  unaffected. The clients needed no change.
+- **Kept in order:**
+  - **`Order: fixed`** (new in the format). After the question text, like
+    `Image:`, it keeps that question as written. Before the first question
+    it keeps all of them. Right after the answers it is also taken for the
+    question above: unlike a picture line it can't be meant for the next
+    question. `Order: shuffle` (or random, mixed) states the default.
+  - **Letters in order**, such as "A, B, C", optionally followed by one
+    longer answer ("A, B, C, Auf keinem"), keep their order without the
+    line. The key follows the figure there, and "C, Auf keinem, A, B"
+    reads badly. Quizzes made before `Order:` existed rely on it,
+    including the owner's.
+  - Not numbers in order: an AI that writes the key first and the rest
+    rising would keep its bias by chance (one in three for three answers).
+    `Order: fixed` covers numbers.
+- **Old data.** Runs stored before this have no `order`, and tests start
+  runs without randomness: both show the text's order.
+- **Parser:** the position warning is gone; it would describe an order
+  nobody sees.
+- **Guidance:** "Up to four answers" now says the site shuffles and that
+  writing the right answer first might be convenient. The parts list has
+  "Answer order" with `Order: fixed`. The keyword list names it. The
+  warnings list lost the position warning.
+- **`/layout.html`:** `.a0`–`.a3` are places on screen, not in the text.
+
+**Evidence:**
+- Unit tests:
+  - a key written first in 20 questions lands in at least three places;
+  - every order is a permutation;
+  - `Order: fixed` and letters keep their order;
+  - another class gets another order;
+  - the `Order:` forms, including before the first question and after
+    the answers.
+- Headless Edge on the owner's zip:
+  - the lobby list showed Q1 in the order the class then saw;
+  - the projector, a tablet and the Remote showed one order;
+  - the tablet tapped "73 000" by its text, and the reveal ticked
+    "73 000" with 1 vote; the tablet said right;
+  - "77 200" was made to count on the Remote by its text, and the reveal
+    ticked "77 200" and "77 400";
+  - across Q1–9, keys written first landed in several places;
+  - Q10 stayed "A, B, C, Auf keinem";
+  - after "Again with another class", the order differed.
+- `scripts/simulate.mjs`: its answers are now words (letters keep their
+  order) and its two index-based checks go by text. It passes with
+  shuffled answers.
+
+Revisit: if teachers are confused that the class sees another order than
+the AI's text; whether AIs use `Order: fixed` where it matters.
+
 ## Open
 
 - Whether the default Cloudflare address passes the AIs' fetchers and school
@@ -1184,6 +1416,8 @@ if teachers are seen wanting a phone in mid-lesson.
   the day.
 - Whether AIs overuse several "+" lines now that the guidance allows them.
 - A real sheet. The local harness ran on an invented German fractions sheet.
+  The owner's own AI has since made a number-line quiz from a real sheet
+  (pictures, see "Pictures on the screens"); the harness hasn't run on it.
 - Free-tier verification: the harness runs the claude CLI under the owner's
   login, not claude.ai's free tier. Testing the free tier, and ChatGPT,
   Gemini and Copilot, needs a person or those accounts.

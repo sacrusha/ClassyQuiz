@@ -38,33 +38,33 @@ const WS_BASE = BASE.replace(/^http/, "ws");
 const QUIZ = `Title: Simulation
 
 1. Q one?
-- a
-+ b
-- c
-- d
+- ant
++ bee
+- cat
+- dog
 
 2. Q two, two right?
-+ a
-+ b
-- c
++ ant
++ bee
+- cat
 
 3. Q three?
-+ a
-- b
-- c
++ ant
+- bee
+- cat
 
 4. Q four (to be voided)?
-- a
-+ b
+- ant
++ bee
 
 5. Q five (to be skipped)?
-+ a
-- b
++ ant
+- bee
 
 6. Q six?
-- a
-- b
-+ c
+- ant
+- bee
++ cat
 `;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -426,8 +426,10 @@ for (;;) {
   await Promise.all([a1, a2]);
   await until(() => tv().phase === "reveal", 5000, "reveal");
   if (current === 0) {
-    // The key was wrong: answer "c" counts instead of "b".
-    await steerer().send({ op: "setCounts", q: 0, counts: [false, false, true, false] });
+    // The key was wrong: "cat" counts instead of "bee". The teacher's view
+    // lists the answers in the order on screen, which the command follows.
+    const shown = tv().questions[0].answers.map((x) => x.text);
+    await steerer().send({ op: "setCounts", q: 0, counts: shown.map((t) => t === "cat") });
   }
   if (current === 1) {
     // A tablet dies without a goodbye; its student comes back on another
@@ -515,7 +517,8 @@ const again = await phone2.send({ op: "again", at: { phase: "final", current: ph
 check(again.ok, "again is acknowledged");
 await until(() => phone2.view.phase === "lobby" && phone2.view.run.players.length === 0, 5000, "the new class's lobby");
 check(phone2.view.code === code, "the new class keeps the code");
-check(phone2.view.questions[0].answers[2].counts && !phone2.view.questions[0].answers[1].counts, "the new class keeps the corrections");
+const q0 = Object.fromEntries(phone2.view.questions[0].answers.map((x) => [x.text, x.counts]));
+check(q0.cat && !q0.bee, "the new class keeps the corrections");
 const reason = await Promise.race([oldGone, sleep(5000).then(() => "nothing")]);
 check(reason === "This quiz has finished.", `an old class's tablet is told the quiz has finished (${reason})`);
 // A tablet of the old class that was asleep, coming back with its token.

@@ -125,6 +125,33 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 .tile .mark .icon { width: 1.3em; height: 1.3em; display: block; }
 .voided { display: inline-flex; gap: .3em; align-items: center; color: var(--bad); }
 
+/* A question's picture (client/screen.ts, layQuestion): between the question
+   and the tiles, or beside both. The script sets the figure's size in px from
+   the picture's shape, so nothing moves when the file arrives. */
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2vh; overflow: hidden; }
+.stage.fig .qtext { min-height: 0; flex: none; }
+.figure { flex: none; align-self: center; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0, 0, 0, .14); cursor: zoom-in; }
+.figure img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.stage.beside { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 2.5vw; }
+.stage.beside .col { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 2vh; }
+.stage.beside .tiles { grid-template-columns: minmax(0, 1fr); }
+/* Enlarged (Z, a click on it, or the Remote): over everything but the steering bar. */
+#zoom { position: fixed; inset: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+#zoom.over-bar { bottom: 64px; }
+#zoom .figure { cursor: zoom-out; }
+/* A background: behind the whole screen, under a light veil; text sits on cards. */
+#backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+#backdrop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#backdrop::after { content: ""; position: absolute; inset: 0; background: rgba(251, 248, 242, .55); }
+.has-backdrop .qtext, .has-backdrop .lobby .join, .has-backdrop .classres, .has-backdrop .podium, .has-backdrop .crowdcol .count, .has-backdrop .lobby .count {
+  background: rgba(255, 255, 255, .9); border-radius: 18px; box-shadow: 0 1px 6px rgba(0, 0, 0, .12);
+}
+.has-backdrop .qtext { align-self: center; max-width: 100%; padding: .25em .7em; }
+.has-backdrop .lobby .join, .has-backdrop .classres, .has-backdrop .podium { padding: 2vh 2vw; }
+.has-backdrop .lobby .count { align-self: flex-start; padding: .1em .5em; }
+body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-radius: 12px; padding: .2em .6em; }
+.has-backdrop .mbelow { background: var(--bg); }
+
 .ranking { flex: 1; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 3vw; min-height: 0; align-items: center; }
 .podium { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 2vw; }
 .podium .entry { display: flex; flex-direction: column; align-items: center; gap: .6vh; font-weight: 800; }
@@ -237,6 +264,20 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); tex
 .ans.fixable:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
 .ans.fixable .key { border: 2px solid var(--rule); }
 .ans.fixable.right .key { border-color: var(--good); }
+/* Pictures on the teacher's side: small in the list, full size when tapped. */
+.qpics { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 12px 1.9em; margin-top: -4px; }
+.thumb { position: relative; display: block; max-width: 100%; padding: 0; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; cursor: zoom-in; }
+.thumb img { display: block; height: 72px; width: auto; max-width: 100%; object-fit: contain; }
+.thumb.hidden img { opacity: .3; }
+.thumb.hidden::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1.5px), var(--bad) calc(50% - 1.5px), var(--bad) calc(50% + 1.5px), transparent calc(50% + 1.5px)); }
+.thumb > span { position: absolute; left: 4px; bottom: 4px; font-size: .7rem; font-weight: 700; background: rgba(0, 0, 0, .65); color: #fff; border-radius: 4px; padding: 0 5px; }
+.thumb.bg img { height: 48px; }
+.qbg { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.curpic { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0 0 12px; }
+.curpic .thumb { width: 100%; }
+.curpic .thumb img { width: 100%; height: auto; max-height: 34vh; }
+.lightbox { position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, .85); display: flex; align-items: center; justify-content: center; padding: 12px; cursor: zoom-out; }
+.lightbox img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; background: #fff; border-radius: 6px; }
 .avatars { display: flex; flex-wrap: wrap; gap: 6px; }
 .avatars > button, .avatars > span { width: 44px; height: 44px; border: 0; padding: 0; background: none; border-radius: 50%; display: block; }
 .avatars .away { opacity: .35; }

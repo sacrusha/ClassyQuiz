@@ -240,12 +240,6 @@ test("more than one answer may count, up to all of them", () => {
   );
 });
 
-test("several right answers don't trigger the same-position warning", () => {
-  const q = (i: number) => `${i}. Q${i}?\n+ a\n+ b\n- c\n`;
-  const r = parseQuiz(`Title: T\n${[1, 2, 3, 4].map(q).join("\n")}`);
-  assert.deepEqual(r.warnings, []);
-});
-
 test("too many and too few answers are errors", () => {
   assert.match(parseQuiz(`Title: T\n1. Q?\n+ a\n- b\n- c\n- d\n- e\n`).errors[0].message, /5 answers; a question has at most 4/);
   assert.match(parseQuiz(`Title: T\n1. Q?\n+ a\n`).errors[0].message, /only 1 answer/);
@@ -354,11 +348,11 @@ test("imageKey ignores folders, case and Unicode composition", () => {
   assert.equal(imageKey("Bild 1a\u0308.png"), imageKey("bild 1ä.png"));
 });
 
-test("correct answer always in the same position is a warning", () => {
+test("the key in the same place in every question is no warning: the screens shuffle the answers", () => {
   const q = (i: number) => `${i}. Q${i}?\n- a\n+ b\n- c\n`;
   const r = parseQuiz(`Title: T\n${[1, 2, 3, 4].map(q).join("\n")}`);
   assert.equal(r.ok, true);
-  assert.ok(r.warnings.some((w) => /position 2 in every question/.test(w.message)));
+  assert.deepEqual(r.warnings, []);
 });
 
 // --- the specification on the guidance page and this parser stay in step
@@ -412,4 +406,12 @@ test("backgrounds: two for the quiz, two for a question, or after the answers ar
   assert.equal(after.quiz.questions[0].background, "");
   const image = parseQuiz(`Title: T\nImage: a.png\n1. Q?\n+ a\n- b\n`);
   assert.match(image.errors[0].message, /comes before any question.*"Background:" line before the first question/);
+});
+
+test("Order: fixed keeps a question's answers as written; before the first question, all of them", () => {
+  const r = parseQuiz(`Title: T\n\n1. Smallest first?\nOrder: fixed\n+ 1\n- 2\n\n2. Free?\n+ a\n- b\n\n3. After the answers?\n+ x\n- y\n**Order:** keep\n\n4. Shuffle stated?\nOrder: shuffle\n+ p\n- q\n`);
+  assert.equal(r.ok, true, JSON.stringify(r.errors));
+  assert.deepEqual(r.quiz.questions.map((q) => q.keepOrder), [true, false, true, false]);
+  const all = parseQuiz(`Title: T\nOrder: fixed\n\n1. A?\n+ a\n- b\n\n2. B?\n- a\n+ b\n`);
+  assert.deepEqual(all.quiz.questions.map((q) => q.keepOrder), [true, true]);
 });

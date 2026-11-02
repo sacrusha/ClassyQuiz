@@ -3,10 +3,11 @@
 // lobby (backlog item 19), the next step, fixes, players, the ⋯ menu.
 // docs/user-flow.md §3.3–3.5.
 
-import type { TeacherQuestion, TeacherView } from "../shared/protocol.ts";
+import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import type { Line } from "./net.ts";
+import { fillPictures, picImg } from "./pictures.ts";
 
 /** What the teacher opened or is fixing; kept across redraws. */
 export interface ManageUI {
@@ -53,6 +54,7 @@ function tags(q: TeacherQuestion): string {
     q.status === "revealed" ? `<span class="tag">done</span>` : "",
     q.skip ? `<span class="tag">skipped</span>` : "",
     q.void ? `<span class="tag">void</span>` : "",
+    q.image && q.pictureHidden ? `<span class="tag">picture hidden</span>` : "",
     right > 1 ? `<span class="tag">${right} right</span>` : "",
     q.answers.some((a) => a.counts !== a.marked) ? `<span class="tag">changed</span>` : "",
   ].join("");
@@ -75,10 +77,28 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
        <div class="row">
          <button class="btn" data-act="void" data-q="${i}">${ICON.void} ${q.void ? "Count it again" : "Void: counts for nobody"}</button>
          ${q.status === "upcoming" || q.status === "skipped" ? `<button class="btn" data-act="skip" data-q="${i}">${q.skip ? "Show it after all" : "Skip it"}</button>` : ""}
+         ${q.image ? `<button class="btn" data-act="hide-pic" data-q="${i}">${q.pictureHidden ? "Show the picture again" : "Hide the picture"}</button>` : ""}
          <button class="btn primary" data-act="fix-done">Done</button>
        </div>`
     : `<button class="link" data-act="fix-q" data-q="${i}">Change the right answer</button>`;
   return `<div class="answers">${rows}${fix}</div>`;
+}
+
+/** A picture small, tapped to see it full size on this device. */
+export function thumb(img: ImageRef, cls = "", label = ""): string {
+  return `<button class="thumb${cls ? ` ${cls}` : ""}" data-act="lightbox" data-src="${esc(img.src)}" data-w="${img.w}" data-h="${img.h}" aria-label="${label || "picture"}">${picImg(img.src, img.w, img.h)}${label ? `<span>${label}</span>` : ""}</button>`;
+}
+
+/**
+ * A question's picture, and its own background if it has one, outside the
+ * answers' fold: the class sees them anyway, and a wrong or revealing crop
+ * is what a skimming teacher has to spot.
+ */
+function questionPictures(q: TeacherQuestion, quizBackground: ImageRef | null): string {
+  const parts: string[] = [];
+  if (q.image) parts.push(thumb(q.image, q.pictureHidden ? "hidden" : ""));
+  if (q.background && q.background.src !== quizBackground?.src) parts.push(thumb(q.background, "bg", "background"));
+  return parts.length ? `<div class="qpics">${parts.join("")}</div>` : "";
 }
 
 export function questionList(v: TeacherView, ui: ManageUI): string {
@@ -89,6 +109,7 @@ export function questionList(v: TeacherView, ui: ManageUI): string {
         <button class="qhead" data-act="toggle-q" data-q="${i}" aria-expanded="${open}">
           <span class="num">${i + 1}</span><span class="qt">${lines(q.text)}</span>${tags(q)}<span class="chev">›</span>
         </button>
+        ${questionPictures(q, v.background)}
         ${open ? answersBlock(q, i, ui) : ""}
       </li>`;
     })
@@ -96,9 +117,21 @@ export function questionList(v: TeacherView, ui: ManageUI): string {
   return `<section class="qlist">
     <div class="qlist-head"><strong>${v.questions.length} questions</strong>
       <button class="btn" data-act="toggle-all">${ui.all ? "Hide answers" : "Show all answers"}</button></div>
+    ${v.background ? `<div class="qbg">${thumb(v.background, "bg", "background")}<span class="hint">behind every question</span></div>` : ""}
     ${v.warnings.map((w) => `<p class="warning">${esc(w.message)}</p>`).join("")}
     <ol>${items}</ol>
   </section>`;
+}
+
+/** A picture over the whole page of this device; a tap closes it. */
+export function lightbox(src: string, w: number, h: number): void {
+  document.querySelector(".lightbox")?.remove();
+  const back = document.createElement("div");
+  back.className = "lightbox";
+  back.innerHTML = picImg(src, w, h);
+  back.addEventListener("click", () => back.remove());
+  document.body.appendChild(back);
+  fillPictures(back);
 }
 
 export function playersRow(v: TeacherView, removable: boolean): string {
@@ -259,6 +292,15 @@ export class Steer {
         return true;
       case "skip":
         await send({ op: "setSkip", q, value: !v.questions[q].skip });
+        return true;
+      case "hide-pic":
+        await send({ op: "setHidePicture", q, value: !v.questions[q].pictureHidden });
+        return true;
+      case "lightbox":
+        lightbox(el.dataset.src!, Number(el.dataset.w), Number(el.dataset.h));
+        return true;
+      case "zoom":
+        await send({ op: "zoom", value: !v.zoom, at });
         return true;
       case "remove":
         if (confirm("Remove this avatar? Its answers stop counting. For a double, or a device that isn't from this class.")) {

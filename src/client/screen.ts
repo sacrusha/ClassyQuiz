@@ -10,6 +10,7 @@ import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, ty
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import { Steer, addressAndCode, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, toast, type MenuItem } from "./manage.ts";
 import { Line } from "./net.ts";
+import { fillPictures, load, picImg, preload } from "./pictures.ts";
 
 const main = $("main");
 const sbar = $("#sbar");
@@ -50,6 +51,9 @@ function onMessage(m: ServerMessage): void {
   if (m.t === "state" && m.view.role === "screen") {
     const before = view;
     view = m.view;
+    // Every picture of the quiz, fetched ahead: the one on screen first.
+    if (view.question?.image) void load(view.question.image.src, true);
+    preload(view.pictures);
     if (before && before.remote !== view.remote) {
       if (view.remote === "present") toast("Remote connected");
       // On the wall: nothing here invites the class to the teacher's page.
@@ -106,6 +110,8 @@ function render(): void {
   else if (v.phase === "ranking" || v.phase === "final") renderRanking(v);
   renderBar(v, managing);
   renderFix(v);
+  renderBackdrop(v);
+  renderZoom(v);
 }
 
 /**
@@ -198,6 +204,7 @@ function renderManagedLobby(v: ScreenView): void {
     </div>
   </div>`;
   patch(main, html);
+  fillPictures(main);
   steer.noteStep(t, main);
 }
 
@@ -238,52 +245,147 @@ function renderLobby(v: ScreenView): void {
 }
 
 let questionKey = "";
+let barKey = "";
 function renderQuestion(v: ScreenView): void {
   lobbyKey = "";
   const q = v.question!;
   const r = v.reveal;
-  // While answers come in only the count changes; redrawing the question
-  // each time would make it flicker on a slow laptop. The fit depends on the
-  // room the bar leaves, so it is part of the key.
-  const key = JSON.stringify([v.phase, q, r, !!v.steer]);
-  const counter = main.querySelector("#answered");
-  if (key === questionKey && counter) {
-    counter.textContent = `${v.answered} / ${v.players.length}`;
-    return;
+  // The question is laid out once: while answers come in only the count
+  // changes, and the reveal only marks the tiles, so neither text nor
+  // picture moves or flickers (decisions.md, "Projector tiles: the reveal
+  // doesn't move the text"). The fit depends on the room the bar leaves and
+  // on the window's size, so both are part of the key.
+  const key = JSON.stringify([q.q, q.text, q.answers, q.image, !!v.steer, innerWidth, innerHeight]);
+  if (key !== questionKey || !main.querySelector("#stage")) {
+    questionKey = key;
+    barKey = "";
+    delete main.dataset.skeleton;
+    main.innerHTML = `<div class="bar" id="qbar"></div><div class="stage" id="stage"></div>`;
   }
-  questionKey = key;
-  delete main.dataset.skeleton;
+  // The bar first: the layout measures the room it leaves.
+  const bk = JSON.stringify([q.n, q.total, !!r?.void]);
+  if (bk !== barKey) {
+    barKey = bk;
+    $("#qbar").innerHTML = `<span>${q.n} / ${q.total}</span><span class="grow"></span>
+      ${r && r.void ? `<span class="voided">${ICON.void}</span>` : ""}
+      <span>${ICON.person} <span id="answered"></span></span>`;
+  }
+  $("#answered").textContent = `${v.answered} / ${v.players.length}`;
+  const stage = $("#stage");
+  if (!stage.dataset.laid) {
+    stage.dataset.laid = "1";
+    layQuestion(stage, q);
+  }
+  markTiles(r);
+}
+
+/**
+ * The reveal on the tiles: a tick on the ones that count, the others faded,
+ * and how many picked each. The mark and count have their place at the
+ * right of every tile from the start, so this moves no answer text.
+ */
+function markTiles(r: ScreenView["reveal"]): void {
   const max = r ? Math.max(1, ...r.dist) : 1;
+  main.querySelectorAll<HTMLElement>("#tiles .tile").forEach((tile, i) => {
+    const right = r ? r.counts[i] : false;
+    tile.classList.toggle("dim", !!r && !right);
+    const side = tile.querySelector<HTMLElement>(".side")!;
+    const html = r ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${r.dist[i]}</span>` : "";
+    if (side.innerHTML !== html) side.innerHTML = html;
+    let fill = tile.querySelector<HTMLElement>(".fill");
+    if (!r) {
+      fill?.remove();
+      return;
+    }
+    const width = `${(100 * r.dist[i]) / max}%`;
+    if (!fill) {
+      // Grows from nothing at the reveal.
+      const f = document.createElement("span");
+      f.className = "fill";
+      f.style.width = "0";
+      tile.appendChild(f);
+      requestAnimationFrame(() => requestAnimationFrame(() => (f.style.width = width)));
+      fill = f;
+    } else fill.style.width = width;
+  });
+}
+
+/** Font size (em) for the question by its length; smaller when it shares the screen with a picture. */
+function questionSize(len: number, withPicture: boolean): number {
+  if (withPicture) return len <= 40 ? 3 : len <= 90 ? 2.5 : len <= 160 ? 2.1 : 1.8;
+  return len <= 40 ? 3.6 : len <= 90 ? 3 : len <= 160 ? 2.4 : 1.9;
+}
+
+/**
+ * The question, its picture and the tiles in the room below the bar. The
+ * picture goes between the question and the tiles, or beside both: whichever
+ * shows it larger, from its shape (known before it has loaded) and the room
+ * the question's text leaves. Wide figures such as number lines end up
+ * between; square and upright ones beside a short question. Beside needs the
+ * question to stay readable in the narrower column, so a long question keeps
+ * the picture between.
+ */
+function layQuestion(stage: HTMLElement, q: NonNullable<ScreenView["question"]>): void {
+  const n = q.answers.length;
   const longest = Math.max(...q.answers.map((a) => a.length));
   const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
-  // The mark and count have their place at the right of every tile from the
-  // start, so the reveal adds them without moving the answer text.
-  main.innerHTML = `
-    <div class="bar">
-      <span>${q.n} / ${q.total}</span><span class="grow"></span>
-      ${r && r.void ? `<span class="voided">${ICON.void}</span>` : ""}
-      <span>${ICON.person} <span id="answered">${v.answered} / ${v.players.length}</span></span>
-    </div>
-    <h2 class="qtext" id="qtext">${lines(q.text)}</h2>
-    <div class="tiles" id="tiles">
-      ${q.answers
-        .map((a, i) => {
-          const right = r ? r.counts[i] : false;
-          const dim = r && !right ? " dim" : "";
-          return `<div class="tile a${i}${dim}">
-            ${shapeSvg(i)}<span class="txt">${lines(a)}</span>
-            <span class="side">${r ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${r.dist[i]}</span>` : ""}</span>
-            ${r ? `<span class="fill" style="width:${(100 * r.dist[i]) / max}%"></span>` : ""}
-          </div>`;
-        })
-        .join("")}
-    </div>`;
-  fitText($("#qtext"), q.text.length);
-  fitTiles($("#tiles"), tileSize);
+  const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
+  const tilesHtml = `<div class="tiles" id="tiles">${q.answers
+    .map((a, i) => `<div class="tile a${i}">${shapeSvg(i)}<span class="txt">${lines(a)}</span><span class="side"></span></div>`)
+    .join("")}</div>`;
+  const img = q.image;
+  if (!img) {
+    stage.className = "stage";
+    stage.innerHTML = qHtml + tilesHtml;
+    fitText($("#qtext"), questionSize(q.text.length, false), window.innerHeight * 0.34);
+    fitTiles($("#tiles"), tileSize);
+    return;
+  }
+  const W = stage.clientWidth;
+  const H = stage.clientHeight;
+  const gap = parseFloat(getComputedStyle(stage).rowGap) || 0;
+  const aspect = img.w / img.h;
+  const figure = (w: number, h: number) =>
+    `<div class="figure" id="figure" data-zoom style="width:${Math.floor(w)}px;height:${Math.floor(h)}px">${picImg(img.src, img.w, img.h)}</div>`;
+
+  const between = (): number => {
+    stage.className = "stage fig between";
+    stage.innerHTML = qHtml + figure(0, 0) + tilesHtml;
+    fitText($("#qtext"), questionSize(q.text.length, true), H * 0.3);
+    const qh = $("#qtext").offsetHeight;
+    // The tiles keep room for their answers: a row of short numbers needs less than a row of sentences.
+    const rows = n > 2 ? 2 : 1;
+    const tilesMin = rows * H * (longest <= 12 ? 0.135 : longest <= 30 ? 0.16 : 0.2);
+    const h = Math.max(40, Math.min(W / aspect, H - qh - tilesMin - 2 * gap, H * 0.62));
+    const fig = $("#figure");
+    fig.style.width = `${Math.floor(h * aspect)}px`;
+    fig.style.height = `${Math.floor(h)}px`;
+    fitTiles($("#tiles"), tileSize);
+    return h * h * aspect;
+  };
+
+  const betweenArea = between();
+  // Beside, the picture takes up to 58% of the width, else half; the text
+  // must stay readable in the column that leaves, or it's between after all.
+  let beside = false;
+  for (const share of [0.58, 0.5]) {
+    const sideH = Math.min(H, (share * W) / aspect);
+    if (sideH * sideH * aspect <= 1.3 * betweenArea) break;
+    stage.className = "stage fig beside";
+    stage.innerHTML = figure(sideH * aspect, sideH) + `<div class="col">${qHtml}${tilesHtml}</div>`;
+    const textSize = fitText($("#qtext"), questionSize(q.text.length, true), H * 0.42);
+    const tiles = fitTiles($("#tiles"), tileSize);
+    if (textSize >= 1.5 && !tiles.squeezed && tiles.size >= Math.min(tileSize, 1.3)) {
+      beside = true;
+      break;
+    }
+  }
+  if (!beside && stage.classList.contains("beside")) between();
+  fillPictures(stage);
 }
 
 /** Largest font, from `start` down, at which no answer word is cut and no answer overflows its tile. */
-function fitTiles(box: HTMLElement, start: number): void {
+function fitTiles(box: HTMLElement, start: number): { size: number; squeezed: boolean } {
   const tiles = [...box.querySelectorAll<HTMLElement>(".tile")];
   const overflows = () =>
     tiles.some((t) => t.scrollHeight > t.clientHeight + 1 || [...t.querySelectorAll<HTMLElement>(".txt")].some((x) => x.scrollWidth > x.clientWidth + 1));
@@ -294,18 +396,75 @@ function fitTiles(box: HTMLElement, start: number): void {
     box.style.fontSize = `${size}em`;
   }
   // Still too long at the smallest size: break inside words rather than hide text.
-  box.classList.toggle("squeezed", overflows());
+  const squeezed = overflows();
+  box.classList.toggle("squeezed", squeezed);
+  return { size, squeezed };
 }
 
-/** Largest font that keeps the question within its box. */
-function fitText(el: HTMLElement, len: number): void {
-  let size = len <= 40 ? 3.6 : len <= 90 ? 3 : len <= 160 ? 2.4 : 1.9;
+/** Largest font, from `start` down, that keeps the question within `limit` pixels of height. */
+function fitText(el: HTMLElement, start: number, limit: number): number {
+  let size = start;
   el.style.fontSize = `${size}em`;
-  const limit = window.innerHeight * 0.34;
   while (el.scrollHeight > limit && size > 1.1) {
     size -= 0.15;
     el.style.fontSize = `${size}em`;
   }
+  return size;
+}
+
+/**
+ * The picture over the whole screen, for the moment the teacher points at
+ * it: Z or a click on the picture here, or the Remote. It ends by itself
+ * with the next step.
+ */
+function renderZoom(v: ScreenView): void {
+  const img = v.zoom && (v.phase === "question" || v.phase === "reveal") ? v.question?.image : null;
+  let el = document.getElementById("zoom");
+  if (!img) {
+    el?.remove();
+    return;
+  }
+  const maxW = window.innerWidth * 0.96;
+  const maxH = (window.innerHeight - (v.steer ? 64 : 0)) * 0.94;
+  const scale = Math.min(maxW / img.w, maxH / img.h);
+  const key = JSON.stringify([img.src, scale]);
+  if (el?.dataset.key === key) return;
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "zoom";
+    el.dataset.zoom = "";
+    document.body.appendChild(el);
+  }
+  el.dataset.key = key;
+  el.classList.toggle("over-bar", !!v.steer);
+  el.innerHTML = `<div class="figure" style="width:${Math.floor(img.w * scale)}px;height:${Math.floor(img.h * scale)}px">${picImg(img.src, img.w, img.h)}</div>`;
+  fillPictures(el);
+}
+
+/**
+ * A background behind the whole screen, under a light veil so the question
+ * and tiles read from the back row: the question's own (or the quiz's) while
+ * a question is up, the quiz's in the lobby and at the rankings.
+ */
+function renderBackdrop(v: ScreenView): void {
+  const bg = v.phase === "question" || v.phase === "reveal" ? (v.question?.background ?? null) : v.background;
+  let el = document.getElementById("backdrop");
+  document.body.classList.toggle("has-backdrop", !!bg);
+  if (!bg) {
+    el?.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "backdrop";
+    el.setAttribute("aria-hidden", "true");
+    document.body.prepend(el);
+  }
+  if (el.dataset.src !== bg.src) {
+    el.dataset.src = bg.src;
+    el.innerHTML = picImg(bg.src, bg.w, bg.h);
+  }
+  fillPictures(el);
 }
 
 function renderRanking(v: ScreenView): void {
@@ -383,6 +542,9 @@ function renderBar(v: ScreenView, managing: boolean): void {
 
 function menu(v: ScreenView): void {
   const items: MenuItem[] = v.steer ? steerItems(v.steer, steer, true) : [];
+  if (v.question?.image && (v.phase === "question" || v.phase === "reveal")) {
+    items.unshift({ label: v.zoom ? "Back to the question (Z)" : "Enlarge the picture (Z)", run: () => toggleZoom() });
+  }
   if (v.steer) items.push({ label: "Players", run: () => showPlayers() });
   if (!v.steer) items.push({ label: "Steer from here", run: () => void steerHere() });
   else {
@@ -473,11 +635,28 @@ document.addEventListener("keydown", (e) => {
     toggleFullscreen();
     return;
   }
+  if ((e.key === "z" || e.key === "Z") && !e.repeat) {
+    toggleZoom();
+    return;
+  }
   // Space or Enter on a focused button is that button's click.
   if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
   if (!ADVANCE.has(e.key) || e.repeat || !line || !view) return;
   e.preventDefault();
   void line.send({ op: "advance", at: { phase: view.phase, current: view.current } });
+});
+
+/** The question's picture over the whole screen, or back. */
+function toggleZoom(): void {
+  const v = view;
+  if (!v || !line || !v.question?.image || (v.phase !== "question" && v.phase !== "reveal")) return;
+  void line.send({ op: "zoom", value: !v.zoom, at: { phase: v.phase, current: v.current } }).then((r) => {
+    if (!r.ok && r.error) toast(r.error);
+  });
+}
+// The picture beside the question, or the enlarged one: a click toggles.
+document.addEventListener("click", (e) => {
+  if ((e.target as HTMLElement).closest("[data-zoom]")) toggleZoom();
 });
 
 function toggleFullscreen(): void {
@@ -494,6 +673,9 @@ window.addEventListener("resize", () => {
     questionKey = "";
     render();
   }
+  const z = document.getElementById("zoom");
+  if (z) delete z.dataset.key;
+  if (view) renderZoom(view);
 });
 
 start();

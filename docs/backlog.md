@@ -36,7 +36,8 @@ Hold for every version; not picked as work.
   the teacher's file on disk is the durable copy.
 - **Survives school Wi-Fi** — connections drop, phones go to sleep, a device
   dies mid-quiz, and the lesson must go on. Failure in front of the class ends
-  adoption.
+  adoption. A deploy or a Durable Object restart in the middle of a run is the
+  same situation from the server's side, and nobody has tested it yet.
 - **Designed for Claude**; other mainstream AIs verified to produce usable
   quizzes from the guidance.
 - **Hosted on the owner's Cloudflare account, no domain of its own** — a
@@ -182,16 +183,39 @@ garbage.
    the question's image, and different questions can share images. The
    initial target is a teacher whose AI can make a zip — working and good
    first, flexible later.
-2. **Optional countdown** — game-show tempo for classes that want it.
+2. **Optional countdown** — game-show tempo for classes that want it. Owner's
+   thoughts, undecided: a smooth bar or circle might be better than a discrete
+   count; what the teacher needs to control it is unclear, a minimal solution
+   might be a "start the countdown" button; unclear whether the question
+   should appear first and the answers only during the countdown.
 3. **Speed scoring** — energy for classes that want it.
 4. **Hardening** — an open public instance: e.g. size limits, malformed
-   archives, abuse of upload and sessions.
+   archives, abuse of upload and sessions. Includes closing the door, which
+   every comparable tool has: after the start only a few late joiners get in,
+   a removed device stays out, and a class has a size limit.
+5. **Avatars the students find interesting** — the design question, in the
+   owner's words: how to make the avatars interesting to the students without
+   wasting everybody's time or having fights break out. Random assignment
+   scores very high on the last two and not perfectly on the first. Ideas,
+   not rulings: pick from three, or customise; background shapes (hexagon,
+   rhombus, square, star, heart, circle, a pond), hats, tools held to the
+   side (lantern, staff, pitchfork, shovel).
+6. **Spread, then key** — the reveal currently shows how the class answered
+   and the right answer in one step; showing the spread first gives the
+   pause-and-discuss moment the teaching moment asks for, and lets the
+   teacher see a broken question before the key is on the wall. Plickers
+   does it this way.
+7. **Who has answered, on the wall** — a child wonders whether the tap
+   counted; a mark on each avatar as its answer lands answers that from the
+   projector, and the "n of 25" should not count devices that are away.
 
 ## v3 — Answers as images
 
 "Which of these shows…" — and readers who are still slow.
 
 1. **Image answer options** — the question is visual, so is the choice.
+   Owner: will require an alpha channel — the current upload path flattens
+   pictures onto white, which would foreclose it.
 2. **Placement beyond the named layouts** — some content fits no layout;
    teacher-supplied layout would run in every student's browser on the shared
    site.
@@ -212,6 +236,11 @@ The quiz is already made; it can be more than one activity.
 - **Pictures for a teacher whose AI can't make a zip** — free tiers and some
   AIs may not crop figures and bundle them; e.g. attach and crop the photo in
   the lobby, or an AI-drawn figure inline in the pasted text.
+- **Sound** — some classes want it; off by default, a mute on the projector.
+- **Pairs and teams** — two children on one tablet already works as one
+  player; whether "of 25" and the ranking read sensibly when twelve tablets
+  stand for twenty-four children is unchecked, and team play is a mode of its
+  own.
 - **"Add remote" among the wall's admin options** — once the class has
   players, nobody can take a free Remote, so a teacher whose phone tab was
   closed mid-lesson is left steering from the wall; the wall deliberately

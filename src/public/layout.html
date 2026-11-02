@@ -24,25 +24,55 @@
 <body>
 <main>
 <h1>A question on screen</h1>
-<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, and how a student's device shows its answers: the markup, and the rules from the site's stylesheet. Two things the stylesheet doesn't carry are in comments: the type sizes, which a script sets from the length of the text, and what the reveal adds.</p>
+<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, with or without its picture, and how a student's device shows its answers: the markup, and the rules from the site's stylesheet. What the stylesheet doesn't carry is in comments: the type sizes and the picture's size and place, which a script sets from the length of the text and the picture's shape, and what the reveal adds.</p>
 
 <h2>Markup</h2>
 <pre><code>&lt;!-- The projector, one question. Always the light theme: projectors wash out dark backgrounds. --&gt;
 &lt;body class=&quot;screen&quot;&gt;&lt;main&gt;
   &lt;div class=&quot;bar&quot;&gt;&lt;span&gt;2 / 12&lt;/span&gt;&lt;span class=&quot;grow&quot;&gt;&lt;/span&gt;&lt;span&gt;👤 &lt;span&gt;17 / 24&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;
-  &lt;h2 class=&quot;qtext&quot;&gt;A jacket costs 80 francs and is reduced by 25%. What does it cost now?&lt;/h2&gt;
-  &lt;div class=&quot;tiles&quot;&gt;
-    &lt;div class=&quot;tile a0&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 12 L90 84 H10Z&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;55 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-    &lt;div class=&quot;tile a1&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 8 L92 50 L50 92 L8 50Z&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;20 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-    &lt;div class=&quot;tile a2&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;75 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-    &lt;div class=&quot;tile a3&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;74&quot; height=&quot;74&quot; rx=&quot;4&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;60 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;stage&quot;&gt;
+    &lt;h2 class=&quot;qtext&quot;&gt;A jacket costs 80 francs and is reduced by 25%. What does it cost now?&lt;/h2&gt;
+    &lt;div class=&quot;tiles&quot;&gt;
+      &lt;div class=&quot;tile a0&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 12 L90 84 H10Z&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;55 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;tile a1&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 8 L92 50 L50 92 L8 50Z&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;20 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;tile a2&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;75 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;tile a3&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;74&quot; height=&quot;74&quot; rx=&quot;4&quot;/&gt;&lt;/svg&gt;&lt;span class=&quot;txt&quot;&gt;60 francs&lt;/span&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
 &lt;/main&gt;&lt;/body&gt;
 &lt;!-- At the reveal: a tile that doesn&#x27;t count gets the class &quot;dim&quot;; every tile&#x27;s .side becomes
      &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; (only on a tile that counts) &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it),
-     and each tile gets &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;. --&gt;
+     and each tile gets &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;,
+     growing from 0. The tiles are marked in place: nothing else is redrawn, so neither text nor picture moves. --&gt;
 
-&lt;!-- A student&#x27;s phone or tablet: the answers as buttons, the question is on the projector. --&gt;
+&lt;!-- A question with a picture (its Image: line). Between the question and the tiles: --&gt;
+  &lt;div class=&quot;stage fig between&quot;&gt;
+    &lt;h2 class=&quot;qtext&quot;&gt;Welche Zahl ist mit dem Pfeil markiert?&lt;/h2&gt;
+    &lt;div class=&quot;figure&quot; style=&quot;width: 1298px; height: 214px&quot;&gt;&lt;img src=&quot;…&quot; width=&quot;2000&quot; height=&quot;330&quot; alt=&quot;&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;tiles&quot;&gt; … the tiles as above … &lt;/div&gt;
+  &lt;/div&gt;
+&lt;!-- Or beside them, the picture on the left: --&gt;
+  &lt;div class=&quot;stage fig beside&quot; style=&quot;grid-template-columns: auto minmax(0, 1fr)&quot;&gt;
+    &lt;div class=&quot;figure&quot; style=&quot;width: 606px; height: 606px&quot;&gt;&lt;img …&gt;&lt;/div&gt;
+    &lt;div class=&quot;col&quot;&gt;&lt;h2 class=&quot;qtext&quot;&gt;…&lt;/h2&gt;&lt;div class=&quot;tiles&quot;&gt; … one column … &lt;/div&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;!-- Which one, and the figure's size in px, the script works out from the picture's shape and the room the
+     question leaves (sizes for a 1366×768 screen above). It lays out &quot;between&quot;: the question first, at most
+     30% of the height; the tiles keep at least 13.5% of the height per row for answers up to 12 characters,
+     16% up to 30, 20% beyond; the picture gets the rest, at most 62% of the height, never wider than the screen.
+     It then takes &quot;beside&quot; if that shows the picture at least 1.3 times larger, with the picture at 58% (else 50%)
+     of the width, and only if the question stays at 1.5em or more and no answer drops below 1.3em in the
+     narrower column. So wide figures such as number lines go between, square and upright ones and photos
+     beside, and a long question keeps its picture between. A picture smaller than its box is enlarged.
+
+     Z, or a click on the picture, enlarges it over the whole screen until the next step:
+       &lt;div id=&quot;zoom&quot;&gt;&lt;div class=&quot;figure&quot; style=&quot;(as large as fits in 96% × 94% of the screen)&quot;&gt;&lt;img …&gt;&lt;/div&gt;&lt;/div&gt;
+
+     With a background (a Background: line), the body gets the class &quot;has-backdrop&quot; and, first in it:
+       &lt;div id=&quot;backdrop&quot;&gt;&lt;img …&gt;&lt;/div&gt;
+     The question and the bar then sit on white cards. --&gt;
+
+&lt;!-- A student&#x27;s phone or tablet: the answers as buttons, no picture; the question is on the projector. --&gt;
 &lt;body class=&quot;play&quot;&gt;&lt;main&gt;
   &lt;div class=&quot;buttons n4&quot;&gt;
     &lt;button class=&quot;ansbtn a0&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 12 L90 84 H10Z&quot;/&gt;&lt;/svg&gt;&lt;span&gt;55 francs&lt;/span&gt;&lt;/button&gt;
@@ -50,7 +80,10 @@
     &lt;button class=&quot;ansbtn a2&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/&gt;&lt;/svg&gt;&lt;span&gt;75 francs&lt;/span&gt;&lt;/button&gt;
     &lt;button class=&quot;ansbtn a3&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;74&quot; height=&quot;74&quot; rx=&quot;4&quot;/&gt;&lt;/svg&gt;&lt;span&gt;60 francs&lt;/span&gt;&lt;/button&gt;
   &lt;/div&gt;
-&lt;/main&gt;&lt;/body&gt;</code></pre>
+&lt;/main&gt;&lt;/body&gt;
+&lt;!-- .a0 to .a3 are places on screen, not places in the quiz text: the site shuffles each question&#x27;s answers at
+     upload (and again for another class), the same on the projector, every tablet and the teacher&#x27;s screens.
+     A question with the line &quot;Order: fixed&quot;, and answers that are letters in order (A, B, C), keep the text&#x27;s order. --&gt;</code></pre>
 
 <h2>Stylesheet</h2>
 <pre><code>:root { --bg: #fbf8f2; --fg: #1d1d1b; --muted: #5d5c57; --good: #1f8a4c; --bad: #c62828; }
@@ -66,20 +99,38 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
 .screen main { height: 100dvh; display: flex; flex-direction: column; padding: 2.2vh 2.5vw; gap: 2vh; }
 .screen .bar { display: flex; align-items: center; gap: 1.2em; font-weight: 700; color: var(--muted); font-size: 1.2em; }
 .screen .bar .grow { flex: 1; }
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2vh; overflow: hidden; }
 .qtext { font-weight: 700; text-align: center; line-height: 1.2; margin: 0; overflow-wrap: anywhere; display: flex; align-items: center; justify-content: center; flex: 0 1 auto; min-height: 18vh; }
 /* .qtext font-size is set by script from the question&#x27;s length: up to 40 characters 3.6em, up to 90 3em,
-   up to 160 2.4em, longer 1.9em; then reduced in 0.15em steps until the question fits in 34vh, down to 1.1em. */
+   up to 160 2.4em, longer 1.9em; then reduced in 0.15em steps until the question fits in 34vh, down to 1.1em.
+   With a picture: 3em, 2.5em, 2.1em, 1.8em, fitting in 30% of the stage&#x27;s height (42% beside). */
 .tiles { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vh; min-height: 0; }
 /* .tiles font-size is set by script from the longest answer: up to 12 characters 2.6em, up to 30 2em,
    up to 60 1.55em, longer 1.25em; then reduced in 0.1em steps until no tile overflows, down to 1em;
-   if it still overflows, words are broken. */
+   if it still overflows, words are broken. A number written in groups (&quot;73 000&quot;) stays on one line. */
 .tile { background: var(--ans); color: var(--ans-ink); border-radius: 18px; display: flex; align-items: center; gap: .6em; padding: 1.2vh 1.6vw; font-weight: 700; position: relative; overflow: hidden; min-height: 0; }
 .tile .shape { width: 1.6em; height: 1.6em; }
 .tile .txt { flex: 1; min-width: 0; line-height: 1.15; }
 .tile .side { flex: none; width: 3.4em; display: flex; align-items: center; justify-content: flex-end; gap: .2em; }
 .tile .n { font-size: 1.3em; font-weight: 800; font-variant-numeric: tabular-nums; }
-.tile .fill { position: absolute; left: 0; bottom: 0; height: 1.6vh; background: currentColor; opacity: .7; }
+.tile .fill { position: absolute; left: 0; bottom: 0; height: 1.6vh; background: currentColor; opacity: .7; transition: width .6s; }
 .tile.dim { opacity: .5; }
+
+/* A question&#x27;s picture: always on white, so a transparent drawing reads on any background. */
+.stage.fig .qtext { min-height: 0; flex: none; }
+.figure { flex: none; align-self: center; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0, 0, 0, .14); }
+.figure img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.stage.beside { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 2.5vw; }
+.stage.beside .col { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 2vh; }
+.stage.beside .tiles { grid-template-columns: minmax(0, 1fr); }
+#zoom { position: fixed; inset: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+
+/* A background: behind everything, under a light veil; the text on white cards. */
+#backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+#backdrop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#backdrop::after { content: &quot;&quot;; position: absolute; inset: 0; background: rgba(251, 248, 242, .55); }
+.has-backdrop .qtext { align-self: center; max-width: 100%; padding: .25em .7em; background: rgba(255, 255, 255, .9); border-radius: 18px; }
+body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-radius: 12px; padding: .2em .6em; }
 
 /* Student */
 .play main { min-height: 100dvh; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
