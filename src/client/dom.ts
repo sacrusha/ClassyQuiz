@@ -14,9 +14,14 @@ export function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
-/** Text with its line breaks kept (questions may run over several lines). */
+/**
+ * Text with its line breaks kept (questions may run over several lines), and
+ * a number written in digit groups ("1 000 000") kept on one line.
+ */
 export function lines(s: string): string {
-  return esc(s).replace(/\n/g, "<br>");
+  return esc(s)
+    .replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u00A0")
+    .replace(/\n/g, "<br>");
 }
 
 export const store = {

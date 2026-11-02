@@ -189,6 +189,8 @@ function renderQuestion(v: ScreenView): void {
   const max = r ? Math.max(1, ...r.dist) : 1;
   const longest = Math.max(...q.answers.map((a) => a.length));
   const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
+  // The mark and count have their place at the right of every tile from the
+  // start, so the reveal adds them without moving the answer text.
   main.innerHTML = `
     <div class="bar">
       <span>${q.n} / ${q.total}</span><span class="grow"></span>
@@ -196,19 +198,36 @@ function renderQuestion(v: ScreenView): void {
       <span>${ICON.person} <span id="answered">${v.answered} / ${v.players.length}</span></span>
     </div>
     <h2 class="qtext" id="qtext">${lines(q.text)}</h2>
-    <div class="tiles" style="font-size:${tileSize}em">
+    <div class="tiles" id="tiles">
       ${q.answers
         .map((a, i) => {
           const right = r ? r.counts[i] : false;
           const dim = r && !right ? " dim" : "";
           return `<div class="tile a${i}${dim}">
             ${shapeSvg(i)}<span class="txt">${lines(a)}</span>
-            ${r ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${r.dist[i]}</span><span class="fill" style="width:${(100 * r.dist[i]) / max}%"></span>` : ""}
+            <span class="side">${r ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${r.dist[i]}</span>` : ""}</span>
+            ${r ? `<span class="fill" style="width:${(100 * r.dist[i]) / max}%"></span>` : ""}
           </div>`;
         })
         .join("")}
     </div>`;
   fitText($("#qtext"), q.text.length);
+  fitTiles($("#tiles"), tileSize);
+}
+
+/** Largest font, from `start` down, at which no answer word is cut and no answer overflows its tile. */
+function fitTiles(box: HTMLElement, start: number): void {
+  const tiles = [...box.querySelectorAll<HTMLElement>(".tile")];
+  const overflows = () =>
+    tiles.some((t) => t.scrollHeight > t.clientHeight + 1 || [...t.querySelectorAll<HTMLElement>(".txt")].some((x) => x.scrollWidth > x.clientWidth + 1));
+  let size = start;
+  box.style.fontSize = `${size}em`;
+  while (overflows() && size > 1) {
+    size -= 0.1;
+    box.style.fontSize = `${size}em`;
+  }
+  // Still too long at the smallest size: break inside words rather than hide text.
+  box.classList.toggle("squeezed", overflows());
 }
 
 /** Largest font that keeps the question within its box. */

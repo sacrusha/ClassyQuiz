@@ -20,7 +20,10 @@ the teacher's phone as remote, and an AI account that may be a free one.
 Teachers understand English; students may read slowly, or not
 read English at all, and the teacher is in the room. The guidance to the AI is
 in English, which AIs are trained on; quizzes come out in whatever language the
-teacher and the sheets are in. The measure is teacher time.
+teacher and the sheets are in. The measure is teacher time. The failure mode to
+design against is a normal user who can't use it, not a malicious one: a
+disruptive student is handled by the teacher walking over to the tablet and
+taking care of the student.
 
 ## Constraints
 

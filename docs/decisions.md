@@ -698,6 +698,33 @@ teachers and points to the public repository. Its README has the setup
 steps an AI or a person can follow: a free Cloudflare account, one token,
 `npm run deploy`. Five to ten minutes.
 
+## 2026-11-02 — Projector tiles: the reveal doesn't move the text
+
+Serves: v1 item 6 (the reveal as a teaching moment); fixes the owner's
+"1 000 000" bug.
+
+The bug: at the reveal the right answer's tile gained a check mark and a
+count. They took about 190 px from the text, so "1 000 000" wrapped onto
+two lines and the tile grew. The parser also turned non-breaking spaces into
+ordinary ones, so an AI that wrote the number with them didn't help.
+
+- **Reserved space:** every tile reserves the space for the mark and count
+  from the start of the question. The reveal fills it, and the text keeps
+  its place.
+- **Shrink to fit:** the tile font starts at the size given by the longest
+  answer, as before. It then shrinks until no word is cut and no answer
+  overflows its tile, the way the question text already fits. Only at the
+  smallest size does a word break.
+- **Digit groups stay together:** "1 000 000" is kept on one line wherever
+  answers and questions are shown, even when written with ordinary spaces. A
+  false match only prevents one line break.
+- **Non-breaking spaces:** the parser keeps them. Its patterns read them as
+  spaces anyway.
+
+Checked in headless Edge: three spellings of the number, plus long, two-answer
+and short quizzes, at 1280×720, 1024×768 and 800×600. Question and reveal
+have identical text geometry in all of them.
+
 ## Open
 
 - Whether the default Cloudflare address passes the AIs' fetchers and school
