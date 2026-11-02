@@ -122,13 +122,13 @@
 
 <p><strong>Read from the back of the room.</strong> The question and its answers are read on a projector, often by students who read slowly or don't read the language well, with the teacher there to read aloud. Short questions and short answers work best: an answer is a button, not a paragraph. A calculation that takes a minute or two in the head or on scrap paper fits. A long derivation doesn't.</p>
 
-<p><strong>Up to four answers; usually one of them is right.</strong> Each answer position has its own colour and shape on every screen. The order in the text is the order on screen, so if the correct answer always sits in the same place, the class notices.</p>
+<p><strong>Up to four answers; usually one of them is right.</strong> Each answer position has its own colour and shape on every screen. The site shuffles each question's answers when the quiz is uploaded, the same way on every screen, so the class can't learn where the right one sits; writing the right answer first might be convenient. Where the order carries meaning, a question keeps it (see <code>Order:</code> below).</p>
 
 <p><strong>About fifteen minutes.</strong> With pauses to explain, that is often ten to fifteen questions. What the teacher asks for overrides this.</p>
 
 <p><strong>Used once.</strong> A quiz is usually made shortly before the lesson, often in the break, and played once, perhaps again in a parallel class. The teacher's time is the scarce resource. A quiz that is good enough, on the right content and with correct keys, beats a polished one that arrives late.</p>
 
-<p><strong>Any language.</strong> This page is in English. Quizzes are in the language of the teacher and the material. The few keywords of the format (<code>Title:</code>, <code>Image:</code>, <code>Background:</code>) stay in English whatever the quiz language, because the site recognises them.</p>
+<p><strong>Any language.</strong> This page is in English. Quizzes are in the language of the teacher and the material. The few keywords of the format (<code>Title:</code>, <code>Image:</code>, <code>Background:</code>, <code>Order: fixed</code>) stay in English whatever the quiz language, because the site recognises them.</p>
 
 <h2 id="format">How quizzes are built</h2>
 
@@ -159,6 +159,7 @@
   <li><strong>Questions</strong> are numbered <code>1.</code>, <code>2.</code>, … The text may run over several lines. A question line never starts with <code>+ </code> or <code>- </code>, because those mark answers.</li>
   <li><strong>Answers</strong> follow their question, one per line, between two and four of them. The correct answer's line starts with <code>+ </code>, each wrong answer's line with <code>- </code>. Usually exactly one answer is correct. A question may have more than one right answer, up to all of them; each is marked <code>+</code>, and a student who picks any one of them scores. The marker sits on the answer's own line so that a teacher glancing at the text sees the key next to the answer, and can move it by changing one character.</li>
   <li><strong>Pictures.</strong> A question can show one picture: the figure, diagram, chart or drawing its exercise depends on. The line <code>Image: q3.png</code> after the question text, before the answers, names the picture's file. It belongs on the projector with the question; the students' devices show only the answer buttons.</li>
+  <li><strong>Answer order.</strong> The site shuffles each question's answers. A question whose answers have an order that carries meaning, such as "none of these" last, the steps of a sequence, or numbers rising, keeps the order as written with the line <code>Order: fixed</code> after the question text, before the answers. Before the first question, the line keeps the order of every question. Answers that are just letters in order, such as A, B, C naming parts of a figure, keep their order anyway.</li>
   <li><strong>Backgrounds.</strong> A picture behind the question, for atmosphere or context rather than content, is a separate line: <code>Background: forest.jpg</code>. Before the first question it lies behind every question; after a question's text it lies behind that question only, in place of the quiz's. The question and its answers stay readable over it.</li>
 </ul>
 
@@ -171,7 +172,7 @@
 <h3>Getting the quiz to the site</h3>
 <p>In a chat, the quiz arrives as one code block. Two quizzes, e.g. one for each of two classes, are two blocks, pasted one at a time. The chat then shows a copy button, and the <code>+</code> and <code>-</code> markers survive the copy. Outside a code block, chat apps turn those lines into bullet points and the key is lost. The site takes no single text file; a file is a <code>.zip</code>. A quiz with pictures is always one: the quiz text as one <code>.txt</code> or <code>.md</code> file, and the picture files beside it. An assistant that can run code can crop figures out of the photographed or scanned sheets for it. The teacher pastes the text, or drops the <code>.zip</code>, on this site's start page.</p>
 
-<p>The site then shows the teacher the quiz's questions, with their right answers a tap away, so a wrong key can be spotted and fixed before the lesson. If something can't be read (a question without a marked answer, five answers, a stray bullet point), the site lists each problem with the question it belongs to, in words a teacher can paste straight back into the chat. Some things only get a warning: no title, the same answer twice, a very long answer, the correct answer always in the same position. The quiz runs anyway. A picture the quiz names that isn't in the <code>.zip</code>, or that the browser can't open, is listed the same way, and the teacher can also choose to run the quiz without it.</p>
+<p>The site then shows the teacher the quiz's questions, with their right answers a tap away, so a wrong key can be spotted and fixed before the lesson. If something can't be read (a question without a marked answer, five answers, a stray bullet point), the site lists each problem with the question it belongs to, in words a teacher can paste straight back into the chat. Some things only get a warning: no title, the same answer twice, a very long answer. The quiz runs anyway. A picture the quiz names that isn't in the <code>.zip</code>, or that the browser can't open, is listed the same way, and the teacher can also choose to run the quiz without it.</p>
 
 <h2 id="with-a-teacher">Making a quiz with a teacher</h2>
 

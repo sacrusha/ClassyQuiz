@@ -171,7 +171,7 @@ export class Instance extends DurableObject<Env> {
     // The pasting tab is about to open the Projector with it.
     this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
-    G.startRun(this.game, code, randomToken(9));
+    G.startRun(this.game, code, randomToken(9), Math.random);
     // The alarm goes first: should the write below fail halfway, the alarm
     // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
@@ -609,7 +609,9 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "tick") return { direct: [ack(true)] };
         if (cmd.op !== "answer") return { direct: [ack(false, "not allowed")] };
         const view = typeof cmd.v === "number" ? cmd.v : Infinity;
-        const recorded = G.answer(game, session.player, cmd.q, cmd.choice, cmd.seq, view, now);
+        // The tablet names the answer by its place on screen; it is stored by its place in the text.
+        const choice = Number.isInteger(cmd.choice) ? (G.orderOf(game, cmd.q)[cmd.choice] ?? -1) : -1;
+        const recorded = G.answer(game, session.player, cmd.q, choice, cmd.seq, view, now);
         if (recorded) {
           await this.persist(["run"]);
           this.broadcast();
@@ -634,6 +636,13 @@ export class Instance extends DurableObject<Env> {
           // The clicker in the room works whoever steers.
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           G.advance(game, now, this.nextView());
+          await this.afterTeacherChange(["run"]);
+          return { direct: [ack(true)] };
+        }
+        if (cmd.op === "zoom") {
+          // Like the clicker: the teacher at the projector points at the picture, whoever steers.
+          if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
+          G.setZoom(game, !!cmd.value);
           await this.afterTeacherChange(["run"]);
           return { direct: [ack(true)] };
         }
@@ -689,7 +698,8 @@ export class Instance extends DurableObject<Env> {
           break;
         }
         case "setCounts":
-          G.setCounts(game, cmd.q, cmd.counts);
+          // In screen order, like everything the teacher's views show.
+          G.setCounts(game, cmd.q, this.fromScreen(cmd.q, cmd.counts));
           changed = ["fixes"];
           break;
         case "setVoid":
@@ -699,6 +709,15 @@ export class Instance extends DurableObject<Env> {
         case "setSkip":
           G.setSkip(game, cmd.q, !!cmd.value);
           changed = ["fixes"];
+          break;
+        case "setHidePicture":
+          G.setHidePicture(game, cmd.q, !!cmd.value);
+          changed = ["fixes"];
+          break;
+        case "zoom":
+          if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
+          G.setZoom(game, !!cmd.value);
+          changed = ["run"];
           break;
         case "remove":
           G.removePlayer(game, cmd.player);
@@ -722,7 +741,7 @@ export class Instance extends DurableObject<Env> {
   /** A fresh lobby with the same code; the tablets of the class before are told it has finished. */
   private newClass(): void {
     const game = this.game!;
-    G.startRun(game, this.meta!.code!, randomToken(9));
+    G.startRun(game, this.meta!.code!, randomToken(9), Math.random);
     this.sentToPoller.clear();
     for (const [k] of this.lastPoll) if (!k.includes(":")) this.lastPoll.delete(k);
     for (const ws of this.ctx.getWebSockets()) {
@@ -900,6 +919,20 @@ export class Instance extends DurableObject<Env> {
     return run && run.current >= 0 ? G.activeAnswers(run, run.current).length : 0;
   }
 
+  /** Per-answer values of question q, from the text's order into the order on screen. */
+  private onScreen<T>(q: number, values: T[]): T[] {
+    return G.orderOf(this.game!, q).map((i) => values[i]);
+  }
+
+  /** Per-answer values in the order on screen, back into the text's order. */
+  private fromScreen<T>(q: number, values: T[]): T[] {
+    const order = G.orderOf(this.game!, q);
+    if (!Array.isArray(values) || values.length !== order.length) return values;
+    const out = new Array<T>(order.length);
+    order.forEach((i, pos) => (out[i] = values[pos]));
+    return out;
+  }
+
   private screenView(cache: ViewCache, exclude?: WebSocket): ScreenView {
     const game = this.game!;
     const meta = this.meta!;
@@ -909,12 +942,21 @@ export class Instance extends DurableObject<Env> {
     const q = run && run.current >= 0 ? game.quiz.questions[run.current] : null;
     const prog = G.progress(game);
     const showQ = q && (phase === "question" || phase === "reveal");
+    const shownImage = (i: number) => (game.fixes[i].hidePicture ? "" : game.quiz.questions[i].image);
+    const pictures = new Set<string>();
+    for (const name of [game.quiz.background, ...game.quiz.questions.flatMap((x, i) => (game.fixes[i].skip ? [] : [shownImage(i), x.background]))]) {
+      const ref = this.imageRef(name);
+      if (ref) pictures.add(ref.src);
+    }
+    const image = showQ ? this.imageRef(shownImage(run!.current)) : null;
     return {
       role: "screen",
       v: meta.v,
       title: game.quiz.title,
       code: meta.code!,
       background: this.imageRef(game.quiz.background),
+      pictures: [...pictures],
+      zoom: !!image && G.zoomed(game),
       phase,
       current: run ? run.current : -1,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
@@ -925,14 +967,14 @@ export class Instance extends DurableObject<Env> {
             n: prog.n,
             total: prog.total,
             text: q!.text,
-            answers: q!.answers.map((a) => a.text),
-            image: this.imageRef(q!.image),
+            answers: this.onScreen(run!.current, q!.answers.map((a) => a.text)),
+            image,
             background: this.imageRef(q!.background || game.quiz.background),
           }
         : null,
       reveal:
         run && phase === "reveal"
-          ? { counts: game.fixes[run.current].counts, dist: G.distribution(game, run.current), void: game.fixes[run.current].void }
+          ? { counts: this.onScreen(run.current, game.fixes[run.current].counts), dist: this.onScreen(run.current, G.distribution(game, run.current)), void: game.fixes[run.current].void }
           : null,
       ranking: phase === "ranking" || phase === "final" ? this.ranking() : null,
       remote: this.shown("remote", exclude),
@@ -964,8 +1006,9 @@ export class Instance extends DurableObject<Env> {
         return {
           text: q.text,
           image: this.imageRef(q.image),
+          pictureHidden: !!fix.hidePicture,
           background: this.imageRef(q.background || game.quiz.background),
-          answers: q.answers.map((a, j) => ({ text: a.text, counts: fix.counts[j], marked: a.correct })),
+          answers: this.onScreen(i, q.answers.map((a, j) => ({ text: a.text, counts: fix.counts[j], marked: a.correct }))),
           void: fix.void,
           skip: fix.skip,
           status,
@@ -975,13 +1018,14 @@ export class Instance extends DurableObject<Env> {
       current: run ? run.current : -1,
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
+      zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
       run: run
         ? {
             n: prog.n,
             total: prog.total,
             players: G.activePlayers(run).map((p) => ({ id: p.id, avatar: p.avatar, connected: connected.has(p.id), score: scores.get(p.id) ?? 0 })),
             answered: this.answeredNow(),
-            dist: run.current >= 0 && (run.phase === "question" || run.phase === "reveal") ? G.distribution(game, run.current) : null,
+            dist: run.current >= 0 && (run.phase === "question" || run.phase === "reveal") ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
             ranking: this.ranking(),
           }
         : null,
@@ -998,7 +1042,8 @@ export class Instance extends DurableObject<Env> {
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
       const phase = run ? run.phase : "idle";
-      const mine = run && run.current >= 0 ? (run.answers[run.current]?.[player]?.choice ?? null) : null;
+      const stored = run && run.current >= 0 ? (run.answers[run.current]?.[player]?.choice ?? null) : null;
+      const mine = stored === null ? null : G.orderOf(game, run!.current).indexOf(stored);
       const q = run && run.current >= 0 ? game.quiz.questions[run.current] : null;
       const s = byId.get(player);
       return {
@@ -1008,8 +1053,8 @@ export class Instance extends DurableObject<Env> {
         current: run ? run.current : -1,
         removed: !p || p.removed,
         me: p && s ? { avatar: p.avatar, score: s.score, place: s.place, of: st.length } : p ? { avatar: p.avatar, score: 0, place: 0, of: st.length } : null,
-        question: q && (phase === "question" || phase === "reveal") ? { q: run!.current, n: prog.n, total: prog.total, answers: q.answers.map((a) => a.text), mine } : null,
-        reveal: run && phase === "reveal" ? { counts: game.fixes[run.current].counts, mine, void: game.fixes[run.current].void } : null,
+        question: q && (phase === "question" || phase === "reveal") ? { q: run!.current, n: prog.n, total: prog.total, answers: this.onScreen(run!.current, q.answers.map((a) => a.text)), mine } : null,
+        reveal: run && phase === "reveal" ? { counts: this.onScreen(run.current, game.fixes[run.current].counts), mine, void: game.fixes[run.current].void } : null,
       };
     };
   }

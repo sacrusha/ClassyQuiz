@@ -22,6 +22,8 @@ export interface Question {
   image: string;
   /** The picture behind this question, in place of the quiz's background; "" for none of its own. */
   background: string;
+  /** "Order: fixed": the answers keep the text's order on screen; otherwise the site shuffles them. */
+  keepOrder: boolean;
 }
 
 export interface Quiz {
@@ -100,7 +102,7 @@ const LEADING_BIDI = /^[‎‏؜‪-‮⁦-⁩]+/;
 
 type Classified =
   | { kind: "blank" }
-  | { kind: "keyword"; key: "title" | "note" | "image" | "background"; value: string }
+  | { kind: "keyword"; key: "title" | "note" | "image" | "background" | "order"; value: string }
   | { kind: "answer"; correct: boolean; text: string; indent: number }
   | { kind: "ambiguous"; marker: string; text: string }
   | { kind: "text"; text: string; indent: number };
@@ -143,11 +145,11 @@ function classify(raw: string): Classified {
 
   // Keywords, possibly dressed up as Markdown: "## Title: x", "**Title:** x", "**Note**: x".
   const unheaded = s.replace(/^#{1,6}\s+/, "");
-  m = unheaded.match(/^([*_]{0,2})(title|note|image|background)[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
+  m = unheaded.match(/^([*_]{0,2})(title|note|image|background|order)[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
   if (m) {
     let value = m[3].trim();
     if (m[1]) value = value.replace(/(\*\*|__)$/, "").trim();
-    return { kind: "keyword", key: m[2].toLowerCase() as "title" | "note" | "image" | "background", value };
+    return { kind: "keyword", key: m[2].toLowerCase() as "title" | "note" | "image" | "background" | "order", value };
   }
 
   return { kind: "text", text: stripWrappingEmphasis(unheaded), indent };
@@ -237,6 +239,8 @@ interface Block {
   answerIndent: number;
   image: string;
   background: string;
+  /** An "Order:" line asked for the text's order. */
+  keepOrder: boolean;
   /** Problems with the block's Image:/Background: lines, worded once the question's number is known. */
   pictureProblems: ((label: string) => string)[];
   /** Image:/Background: lines after the answers so far; errors unless more answers follow. */
@@ -265,6 +269,7 @@ export function parseQuiz(input: string): ParseResult {
 
   let title: string | null = null;
   let quizBackground = "";
+  let quizKeepOrder = false;
   const blocks: Block[] = [];
   let current: Block | null = null;
 
@@ -280,7 +285,7 @@ export function parseQuiz(input: string): ParseResult {
       text = text.slice(m[0].length);
       number = expected;
     }
-    current = { textLines: [text], answers: [], noted: false, number, answerIndent: 0, image: "", background: "", pictureProblems: [], afterAnswers: [] };
+    current = { textLines: [text], answers: [], noted: false, number, answerIndent: 0, image: "", background: "", keepOrder: false, pictureProblems: [], afterAnswers: [] };
     blocks.push(current);
   };
 
@@ -310,6 +315,17 @@ export function parseQuiz(input: string): ParseResult {
           // The quiz carries no messages from the AI to the teacher (backlog
           // item 1); one an AI still writes is dropped, not a failed paste.
           if (block !== null) block.noted = true;
+        } else if (c.key === "order") {
+          // "Order: fixed" keeps the answers as written; the site shuffles
+          // them otherwise. Before the first question it holds for all. After
+          // the answers it still means the question above: unlike a picture,
+          // it can't be meant for the next one, whose text hasn't started.
+          const keep = !/^(shuffle|shuffled|random|mixed|mix)\b/i.test(c.value);
+          if (block === null) quizKeepOrder = keep;
+          else {
+            block.keepOrder = keep;
+            if (block.answers.length > 0) block.noted = true;
+          }
         } else {
           // Image: (the question's picture) or Background: (behind it).
           const kind = c.key;
@@ -399,7 +415,7 @@ export function parseQuiz(input: string): ParseResult {
   blocks.forEach((b, i) => {
     const text = b.textLines.join("\n").trim();
     if (b.answers.length > 0) {
-      questions.push({ text, answers: b.answers, image: b.image, background: b.background });
+      questions.push({ text, answers: b.answers, image: b.image, background: b.background, keepOrder: b.keepOrder });
       questionBlocks.push(b);
       return;
     }
@@ -410,6 +426,7 @@ export function parseQuiz(input: string): ParseResult {
       for (const problem of b.pictureProblems) err(problem("Before the first question"));
       if (b.background && quizBackground) err(`The quiz has more than one "Background:" line before the first question.`);
       else if (b.background) quizBackground = b.background;
+      if (b.keepOrder) quizKeepOrder = true;
       if (b.image) {
         err(
           `The picture "${b.image}" comes before any question. A question's picture goes after the question text, before the answers; ` +
@@ -470,16 +487,9 @@ export function parseQuiz(input: string): ParseResult {
     }
   });
 
-  // Answer order is display order (each position has its colour). If the key
-  // always sits in the same place, the class will notice. Questions where
-  // more than one answer counts don't have a single position and are left out.
-  const single = questions.filter((q) => q.answers.filter((a) => a.correct).length === 1);
-  if (single.length >= 4) {
-    const positions = single.map((q) => q.answers.findIndex((a) => a.correct));
-    if (positions.every((p) => p === positions[0])) {
-      warn(`The correct answer is in position ${positions[0] + 1} in every question.`);
-    }
-  }
+  // Where the key sits in the text isn't checked: the site shuffles the
+  // answers (decisions.md, "Answers shuffled at upload").
+  if (quizKeepOrder) for (const q of questions) q.keepOrder = true;
 
   if (title === null || title === "") warn(`The quiz has no title.`);
 

@@ -20,6 +20,8 @@ export interface Fix {
   void: boolean;
   /** Not shown at all. */
   skip: boolean;
+  /** The question's picture stays off the projector (a wrong or revealing crop). Missing in fixes stored before it existed. */
+  hidePicture?: boolean;
 }
 
 export interface Avatar {
@@ -68,6 +70,18 @@ export interface Run {
   /** Question index → player id → answer. */
   answers: Record<string, Record<string, AnswerRecord>>;
   ended: number | null;
+  /**
+   * Per question, the order its answers are shown in: position on screen →
+   * index in the quiz text. Everything stored (answers, fixes) is by the
+   * text's index; the views show this order. Missing in runs stored before
+   * it existed, and in tests: the text's order.
+   */
+  order?: number[][];
+  /**
+   * The open question's picture fills the projector: "phase|current" of the
+   * step it was enlarged in, so moving on (or revealing) ends it by itself.
+   */
+  zoom?: string;
 }
 
 export interface Game {
@@ -89,8 +103,49 @@ export function newGame(quiz: Quiz): Game {
   };
 }
 
-export function startRun(g: Game, code: string, id: string): void {
+/**
+ * A new class: at upload, and with "Again with another class". With
+ * `random`, each question's answers get a fresh order, the same on every
+ * screen, unless the quiz keeps it ("Order: fixed", or letters A, B, C).
+ * Decisions.md, "Answers shuffled at upload".
+ */
+export function startRun(g: Game, code: string, id: string, random?: () => number): void {
   g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
+  if (random) g.run.order = g.quiz.questions.map((q) => (q.keepOrder ? q.answers.map((_, i) => i) : shownOrder(q.answers.map((a) => a.text), random)));
+}
+
+/** Letters naming parts of the figure, in order: A, B, C (or a, b, c). */
+function labelsInOrder(texts: string[]): boolean {
+  return texts.length >= 2 && texts.every((t, i) => /^\p{L}$/u.test(t.trim()) && (i === 0 || t.trim().toLowerCase() > texts[i - 1].trim().toLowerCase()));
+}
+
+/**
+ * Letters naming parts of a figure, in order (A, B, C), optionally followed
+ * by one longer answer ("A, B, C, none of them"), keep their order without
+ * an "Order:" line: the key's place follows from the figure, and "C, A,
+ * none, B" would be harder to read. Quizzes made before "Order:" existed
+ * (the owner's number-line quiz) rely on it.
+ */
+export function keepsOrder(texts: string[]): boolean {
+  return labelsInOrder(texts) || (texts.length >= 3 && labelsInOrder(texts.slice(0, -1)) && texts[texts.length - 1].trim().length > 1);
+}
+
+/** Position on screen → index in the text. */
+export function shownOrder(texts: string[], random: () => number): number[] {
+  const order = texts.map((_, i) => i);
+  if (keepsOrder(texts)) return order;
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}
+
+/** The order question q's answers are shown in. */
+export function orderOf(g: Game, q: number): number[] {
+  const n = g.quiz.questions[q]?.answers.length ?? 0;
+  const o = g.run?.order?.[q];
+  return o && o.length === n ? o : Array.from({ length: n }, (_, i) => i);
 }
 
 function needRun(g: Game): Run {
@@ -281,6 +336,27 @@ export function setSkip(g: Game, q: number, skip: boolean): void {
   if (run && run.phase !== "lobby" && q <= run.current && !skip)
     throw new GameError("The class has moved past this question; it can't come back in this run.");
   fix.skip = skip;
+}
+
+export function setHidePicture(g: Game, q: number, hide: boolean): void {
+  const fix = g.fixes[q];
+  if (!fix) throw new GameError("No such question.");
+  fix.hidePicture = hide;
+}
+
+/** Whether the open question's picture fills the projector. */
+export function zoomed(g: Game): boolean {
+  const run = g.run;
+  return !!run && (run.phase === "question" || run.phase === "reveal") && run.zoom === `${run.phase}|${run.current}`;
+}
+
+/** The picture of the question on screen fills the projector, or goes back beside the question. */
+export function setZoom(g: Game, on: boolean): void {
+  const run = needRun(g);
+  if (run.phase !== "question" && run.phase !== "reveal") throw new GameError("There is no question on screen.");
+  if (on && (!g.quiz.questions[run.current]?.image || g.fixes[run.current].hidePicture)) throw new GameError("This question has no picture on screen.");
+  if (on) run.zoom = `${run.phase}|${run.current}`;
+  else delete run.zoom;
 }
 
 /** The open question goes away unscored and the next one comes up. */

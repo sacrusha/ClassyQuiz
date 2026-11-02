@@ -6,8 +6,10 @@
 // besides the picture (camera, time, GPS: "nothing identified"); it shrinks a
 // phone photo to what a projector shows (a class's devices load it over school
 // Wi-Fi); and it leaves the server only PNG and JPEG to take, so no SVG, with
-// the scripts it may hold, is ever served. Pictures are flattened onto white:
-// a transparent line drawing would vanish on a dark screen.
+// the scripts it may hold, is ever served. A question's picture keeps its
+// transparency as PNG (v3's answers as pictures need it); every screen shows
+// pictures on white, so a transparent line drawing doesn't vanish on a dark
+// page. Backgrounds are flattened onto white.
 //
 // Kept apart from the upload page so whichever page takes the quiz can call
 // prepareImages() and uploadQuiz().
@@ -92,7 +94,7 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
       try {
         const raw = await entries[0].read();
         const ext = (entries[0].name.match(/\.(\w+)$/)?.[1] ?? "").toLowerCase();
-        const blob = await redraw(new Blob([raw], { type: TYPES[ext] ?? "" }), ext, kind === "background" ? BACKGROUND_LONG_SIDE : IMAGE_LONG_SIDE);
+        const blob = await redraw(new Blob([raw], { type: TYPES[ext] ?? "" }), ext, kind === "background" ? BACKGROUND_LONG_SIDE : IMAGE_LONG_SIDE, kind !== "background");
         images.push({ name, blob });
       } catch {
         const hint = /\.hei[cf]$/i.test(entries[0].name) ? " HEIC pictures from iPhones can't be read by most browsers; PNG or JPEG work everywhere." : " PNG or JPEG work everywhere.";
@@ -104,8 +106,8 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
   return { images, problems };
 }
 
-/** The picture redrawn: at most `longSide` pixels on its long side, on white, as PNG or JPEG. */
-async function redraw(blob: Blob, ext: string, longSide: number): Promise<Blob> {
+/** The picture redrawn: at most `longSide` pixels on its long side, as PNG (transparency kept when `keepAlpha`) or JPEG on white. */
+async function redraw(blob: Blob, ext: string, longSide: number, keepAlpha: boolean): Promise<Blob> {
   if (ext === "svg") blob = await sizedSvg(blob, longSide);
   const url = URL.createObjectURL(blob);
   try {
@@ -119,12 +121,21 @@ async function redraw(blob: Blob, ext: string, longSide: number): Promise<Blob> 
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(w0 * scale));
     canvas.height = Math.max(1, Math.round(h0 * scale));
-    const g = canvas.getContext("2d");
+    const g = canvas.getContext("2d", { willReadFrequently: true });
     if (!g) throw new Error("no canvas");
-    g.fillStyle = "#fff";
-    g.fillRect(0, 0, canvas.width, canvas.height);
     g.imageSmoothingQuality = "high";
     g.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // A question's picture keeps its transparency (answers as pictures, v3,
+    // need it; the screens put every picture on white). A background, and a
+    // transparent picture too large as PNG, are flattened onto white for JPEG.
+    if (keepAlpha && hasTransparency(g, canvas.width, canvas.height)) {
+      const png = await encode(canvas, "image/png");
+      if (png.size <= MAX_IMAGE_BYTES) return png;
+    }
+    g.globalCompositeOperation = "destination-over";
+    g.fillStyle = "#fff";
+    g.fillRect(0, 0, canvas.width, canvas.height);
+    g.globalCompositeOperation = "source-over";
     if (KEEP_AS_PNG.test(`.${ext}`)) {
       const png = await encode(canvas, "image/png");
       if (png.size <= PNG_KEEP_BYTES) return png;
@@ -137,6 +148,12 @@ async function redraw(blob: Blob, ext: string, longSide: number): Promise<Blob> 
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+function hasTransparency(g: CanvasRenderingContext2D, w: number, h: number): boolean {
+  const d = g.getImageData(0, 0, w, h).data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 255) return true;
+  return false;
 }
 
 function encode(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {

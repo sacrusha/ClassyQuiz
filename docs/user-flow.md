@@ -345,4 +345,5 @@ student, no new tab gets the steering, which narrows §1 rules 5–7.
 | Root page | Run in the browser. The Build copy is a draft for the owner to judge on the live site: only the address is copied; "in your own words" and "write in the language the quiz should be in" replace the English sentence |
 | Projector, Remote, `/teacher`, students | Styled in `public/app.css` and run; the obsolete pairing, notes and key-check rules removed. Changes to §3.3/§3.4 listed in decisions.md |
 | `scripts/simulate.mjs` | Rewritten for the roles (see decisions.md) |
-| Pictures on the screens | Not started: decisions.md, "Pictures in the archive" |
+| Pictures on the screens | Done, uncommitted: the projector puts the picture between question and tiles or beside them, enlarges it (Z, a click, the Remote), and shows backgrounds; thumbnails in the question list (§3.3), the picture on the Remote's current question (§3.5), "Hide the picture" among the fixes. decisions.md, "Pictures on the screens" |
+| Answer order | Done, uncommitted: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |

@@ -46,6 +46,10 @@ export type Command =
   | { op: "setCounts"; q: number; counts: boolean[] }
   | { op: "setVoid"; q: number; value: boolean }
   | { op: "setSkip"; q: number; value: boolean }
+  /** Keep the question's picture off the projector (a wrong or revealing crop). */
+  | { op: "setHidePicture"; q: number; value: boolean }
+  /** The picture of the question on screen fills the projector, or goes back; also from the Projector itself. */
+  | { op: "zoom"; value: boolean; at: At }
   | { op: "remove"; player: string }
   | { op: "endInstance" }
   // the Projector: the clicker or keyboard's next usual step, at any time
@@ -158,6 +162,10 @@ export interface ScreenView {
   code: string;
   /** The quiz's background (a question's own is in `question`). */
   background: ImageRef | null;
+  /** Every picture the projector may show, to fetch ahead (in the lobby) so no question waits on one. */
+  pictures: string[];
+  /** The question's picture fills the screen. */
+  zoom: boolean;
   phase: Phase | "idle";
   current: number;
   players: { id: string; avatar: Avatar }[];
@@ -172,7 +180,10 @@ export interface ScreenView {
 
 export interface TeacherQuestion {
   text: string;
+  /** Also when hidden, so the teacher can show it again. */
   image: ImageRef | null;
+  /** Fixed: the picture stays off the projector. */
+  pictureHidden: boolean;
   /** What the class sees behind it: its own background, else the quiz's. */
   background: ImageRef | null;
   answers: { text: string; counts: boolean; marked: boolean }[];
@@ -194,6 +205,8 @@ export interface TeacherView {
   current: number;
   screen: Presence;
   remote: Presence;
+  /** The question's picture fills the projector. */
+  zoom: boolean;
   run: null | {
     n: number;
     total: number;

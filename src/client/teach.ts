@@ -6,8 +6,9 @@
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { avatarSvg } from "./look.ts";
-import { Steer, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, toast, type MenuItem } from "./manage.ts";
+import { Steer, answersBlock, live, newUI, nextStep, openMenu, patch, playersRow, questionList, sideStep, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
 import { Line } from "./net.ts";
+import { fillPictures } from "./pictures.ts";
 
 const main = $("#main");
 const actions = $("#actions");
@@ -84,6 +85,7 @@ function render(): void {
     if (showAll) body += questionList(v, steer.ui);
   }
   patch(main, body);
+  fillPictures(main);
 
   const next = nextStep(v);
   const side = sideStep(v);
@@ -121,8 +123,19 @@ function current(v: TeacherView): string {
   const q = v.questions[v.current];
   const present = run.players.filter((p) => p.connected).length;
   const away = run.players.length - present;
+  // The picture, so a teacher whose projector died can still show it around;
+  // and the button that puts it over the whole projector screen.
+  const pic = q.image
+    ? `<div class="curpic">${thumb(q.image, q.pictureHidden ? "hidden" : "")}
+        ${
+          q.pictureHidden
+            ? `<p class="hint">Hidden from the projector.</p>`
+            : `<button class="btn" data-act="zoom">${v.zoom ? "Back to the question on the projector" : "Enlarge on the projector"}</button>`
+        }</div>`
+    : "";
   return `<section class="card current">
     <div class="qt">${lines(q.text)}</div>
+    ${pic}
     ${q.void ? `<p class="hint">Void: counts for nobody.</p>` : ""}
     ${answersBlock(q, v.current, steer.ui, run.dist)}
     <p class="answered"><strong>${live("answered", run.answered)}</strong> of ${live("present", present)} answered${away ? ` · ${live("away", away)} away` : ""}</p>
