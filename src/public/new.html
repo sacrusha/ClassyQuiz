@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>classyQuiz · new quiz</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 12 L90 84 H10Z' fill='%23d93b3b'/%3E%3C/svg%3E">
+</head>
+<body class="follows-dark">
+<main class="wrap">
+<h1 style="font-size:1.4rem;margin:.5rem 0">New quiz</h1>
+<form id="form">
+  <p style="margin-top:0">Paste your AI's answer: the quiz block, or the whole answer with the chat around it.</p>
+  <textarea id="text" class="paste" spellcheck="false" placeholder="Title: …&#10;&#10;1. …&#10;+ right answer&#10;- wrong answer"></textarea>
+  <div class="row" style="margin-top:10px">
+    <button class="btn primary" id="go" type="submit">Check the quiz</button>
+    <label class="btn">or a file (.txt, .md, .zip)<input id="file" type="file" accept=".txt,.md,.markdown,.zip,text/plain,text/markdown,application/zip" hidden></label>
+  </div>
+</form>
+<div id="out"></div>
+<p class="muted">The next screen shows the key check. On a laptop connected to the projector, keep the projector off or on a second screen while you check. How quizzes are written: <a href="/#format">the format</a>.</p>
+</main>
+<script src="/js/new.js" defer></script>
+</body>
+</html>

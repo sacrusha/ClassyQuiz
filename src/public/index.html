@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>classyQuiz</title>
+<meta name="description" content="Live classroom quizzes made from a teacher's exercise sheets by the teacher's own AI assistant. This page describes the site, the quizzes, their text format, and how they are made with a teacher.">
+<style>
+  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; }
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 16px 4rem; }
+  h1 { font-size: 2rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.3rem; margin: 2.5rem 0 .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  h3 { font-size: 1.05rem; margin: 1.5rem 0 .25rem; }
+  p, ul, ol { margin: .5rem 0; }
+  li { margin: .2rem 0; }
+  .lede { color: var(--muted); margin-bottom: 1.5rem; }
+  pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .9rem; line-height: 1.45; }
+  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  a { color: var(--accent); }
+  .entry { margin: 0 0 2rem; padding: 1rem; border: 1px solid var(--rule); border-radius: 14px; }
+  .entry form { display: flex; gap: .5rem; }
+  .entry label { display: block; font-weight: 600; margin-bottom: .35rem; }
+  .entry input { flex: 1; min-width: 0; font: 700 2.6rem/1 ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .2em; text-align: center; padding: .4rem; border: 2px solid var(--rule); border-radius: 12px; background: var(--bg); color: var(--fg); }
+  .entry button { font: 700 1.6rem/1 system-ui, sans-serif; padding: 0 1.2rem; min-width: 4.5rem; border: 0; border-radius: 12px; background: var(--accent); color: var(--bg); cursor: pointer; }
+  .entry p { margin: .75rem 0 0; font-size: .95rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+<section class="entry" aria-label="Join or start a quiz">
+  <form id="join" action="/play" method="get" autocomplete="off">
+    <div style="flex:1;min-width:0">
+      <label for="code">Quiz code</label>
+      <div style="display:flex;gap:.5rem"><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="12345" aria-label="Quiz code"><button type="submit">&#9654;</button></div>
+    </div>
+  </form>
+  <p>Teachers: <a href="/new">paste or upload a quiz</a> · <a href="/screen">projector</a> · <a href="/remote">connect a phone</a> · <a href="/check">check this network</a></p>
+  <p id="mine" hidden></p>
+</section>
+
+<h1>classyQuiz</h1>
+<p class="lede">Live classroom quizzes, made from a teacher's exercise sheet by the teacher's own AI assistant. This page describes the site for teachers and for the assistants that make quizzes with them: what the site is for, what the quizzes are for, how a quiz is written, and what making one with a teacher is like.</p>
+
+<h2 id="site">What this site is for</h2>
+
+<p>A teacher has an exercise sheet and wants fifteen minutes of practice on exactly that content, in a form the class enjoys. Ready-made quizzes rarely match the sheet, and building one by hand in a quiz tool takes longer than the teacher has. Here the teacher's AI assistant reads the material and writes the quiz as plain text. The teacher pastes the text into this site, or uploads the file, and the class plays it.</p>
+
+<p>During a quiz there are three screens. The <strong>projector</strong> shows the question and the answers to the class. Each <strong>student</strong> answers on their own phone or tablet by tapping a colour. The <strong>teacher</strong> steers from a second device, usually their phone: next question, reveal, ranking, and fixing a question that turns out to be wrong.</p>
+
+<p>Nobody has an account. Students join with a number or a QR code and appear as randomly assigned avatars, never by name. Nothing is public and nothing is kept beyond its use: a quiz can only be reached through its teacher's link and, while it runs, by the class. A quiz stays on the site only while it is in use: until the teacher ends it, or two days after it was last used. The teacher's lasting copy is the text or file the assistant produced. A run's answers and scores are deleted an hour after the run ends. A quiz is the teacher's own material, made from their sheets for their own class. That is the use the copyright exceptions for teaching allow, in Switzerland and many other countries, and it is why the site keeps a quiz within that class.</p>
+
+<p>This site runs on a free hosting plan meant for a few teachers. Anyone can run their own copy for their school or for themselves: the code is public at <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a>, and setting it up on a free Cloudflare account takes five to ten minutes, with an AI assistant's help or by following the guide there.</p>
+
+<p>An assistant reading this page has usually been given just the site's address, by a teacher who has material in hand and a lesson coming up. Assistants can't upload to the site. The teacher pastes or uploads what the assistant wrote.</p>
+
+<h2 id="quizzes">What the quizzes are for</h2>
+
+<p><strong>Practice, not testing.</strong> The quiz is a short, lively way to go through the content the class is working on. Nobody is graded. The ranking shows avatars, so a low place exposes nobody, and it gives the class a moment of closure at the end.</p>
+
+<p><strong>A teaching moment.</strong> The teacher sets the tempo: a question stays up as long as the teacher wants, and the teacher reveals the answer when the class is ready. The reveal shows how many students picked each answer. That is where the wrong answers earn their place. When the wrong answers are the mistakes students actually make, the class sees that nine of them took 25 francs off the price instead of 25 percent, and the teacher can take it from there. Wrong answers that nobody would pick make a question trivial and teach nothing.</p>
+
+<p><strong>Read from the back of the room.</strong> The question and its answers are read on a projector, often by students who read slowly or don't read the language well, with the teacher there to read aloud. Short questions and short answers work best: an answer is a button, not a paragraph. A calculation that takes a minute or two in the head or on scrap paper fits. A long derivation doesn't.</p>
+
+<p><strong>Up to four answers; usually one of them is right.</strong> Each answer position has its own colour and shape on every screen. The order in the text is the order on screen, so if the correct answer always sits in the same place, the class notices.</p>
+
+<p><strong>About fifteen minutes.</strong> With pauses to explain, that is often ten to fifteen questions. What the teacher asks for overrides this.</p>
+
+<p><strong>Used once.</strong> A quiz is usually made shortly before the lesson, often in the break, and played once, perhaps again in a parallel class. The teacher's time is the scarce resource. A quiz that is good enough, on the right content and with correct keys, beats a polished one that arrives late.</p>
+
+<p><strong>Any language.</strong> This page is in English. Quizzes are in the language of the teacher and the material. The few keywords of the format (<code>Title:</code>, <code>Note:</code>) stay in English whatever the quiz language, because the site recognises them.</p>
+
+<h2 id="format">How quizzes are built</h2>
+
+<p>A quiz is plain text. An example, made from a photographed sheet on percentages:</p>
+
+<pre><code>Title: Percentages
+Note: Exercise 5 was cut off in the photo and is left out.
+
+1. What is 10% of 250?
+- 2.5
++ 25
+- 250
+- 10
+
+2. A jacket costs 80 francs and is reduced by 25%. What does it cost now?
+- 55 francs
+- 20 francs
+- 75 francs
++ 60 francs
+Note: The sheet's solution for exercise 3b says 65 francs; I calculated 60 and used that.
+
+3. Which is the most?
++ 50% of 40
+- 30% of 50
+- 10% of 120</code></pre>
+
+<h3>The parts</h3>
+<ul>
+  <li><strong>Title.</strong> The first line, <code>Title:</code> followed by the title. It is shown to the class at the start.</li>
+  <li><strong>Notes on the whole quiz.</strong> <code>Note:</code> lines before the first question are for the teacher only: what the quiz leaves out, or how the assistant read the teacher's wishes where it had to guess.</li>
+  <li><strong>Questions</strong> are numbered <code>1.</code>, <code>2.</code>, … The text may run over several lines. A question line never starts with <code>+ </code> or <code>- </code>, because those mark answers.</li>
+  <li><strong>Answers</strong> follow their question, one per line, between two and four of them. The correct answer's line starts with <code>+ </code>, each wrong answer's line with <code>- </code>. Usually exactly one answer is correct. A question may have more than one right answer, up to all of them; each is marked <code>+</code>, and a student who picks any one of them scores. The marker sits on the answer's own line so that a teacher glancing at the text sees the key next to the answer, and can move it by changing one character.</li>
+  <li><strong>Notes on a question.</strong> <code>Note:</code> lines after a question's answers carry the assistant's doubts about that question. Typical doubts:
+    <ul>
+      <li>a part of the scan it couldn't read with confidence;</li>
+      <li>a key it isn't sure of;</li>
+      <li>a sheet solution that disagrees with its own;</li>
+      <li>a question it had to change from the sheet.</li>
+    </ul>
+    The teacher sees the note in the key check after upload and on their own device while the question is up; students never do. Most questions have no note.</li>
+</ul>
+
+<p>Notes are how a doubt reaches a teacher who is skimming. After a few quizzes that turned out fine, a teacher reads the next one less closely, which is natural when the quizzes are good. A note stands out in the key check and on the teacher's screen only as long as notes are rare. When every question carries one, about its source exercise or what the wrong answers stand for, the one note that matters reads like all the others. A wrong key is the most common flaw of a quiz made in a hurry. The teacher can still fix a key during the run, and a note is what makes them look.</p>
+
+<p>Nothing else belongs to the quiz: no answer letters, explanations or solutions sections. Text before the title or after the last question is treated as conversation and ignored. Text between questions that isn't a question, an answer or a note is reported as an error. The site doesn't handle images yet, and it shows text as written, without Markdown formatting. Mathematical notation is written in plain text with ordinary characters: <code>x²</code>, <code>½</code>, <code>√2</code>, <code>3 × 4</code>, <code>12 ÷ 3</code>, <code>a ≤ b</code>.</p>
+
+<h3>Getting the quiz to the site</h3>
+<p>In a chat, the quiz arrives as one code block. Two quizzes, e.g. one for each of two classes, are two blocks, pasted one at a time. The chat then shows a copy button, and the <code>+</code> and <code>-</code> markers survive the copy. Outside a code block, chat apps turn those lines into bullet points and the key is lost. An assistant that can produce files can hand over a <code>.txt</code> or <code>.md</code> file instead, or a <code>.zip</code> containing one. The teacher pastes the text or uploads the file on this site's start page.</p>
+
+<p>The site then shows the teacher a key check: every question with the answer marked correct and its notes, on one screen. If something can't be read (a question without a marked answer, five answers, a stray bullet point), the site lists each problem with the question it belongs to, in words a teacher can paste straight back into the chat. Some things only get a warning: no title, the same answer twice, a very long answer, the correct answer always in the same position. The quiz runs anyway.</p>
+
+<h2 id="with-a-teacher">Making a quiz with a teacher</h2>
+
+<p>Making a quiz is a conversation, not a delivery. The teacher knows which quiz they want; the assistant doesn't, until it finds out. What the teacher wants can arrive in any form:</p>
+<ul>
+  <li>in the message;</li>
+  <li>in a handwritten note photographed among the sheets;</li>
+  <li>in the margins of the sheet itself: ticked exercises, crossed-out ones, "only 3 to 5";</li>
+  <li>or not at all, until someone asks.</li>
+</ul>
+
+<p>Three wishes come up again and again, often mixed in one quiz:</p>
+<ul>
+  <li><strong>Transfer.</strong> The sheet's exercises become questions one to one. The class meets in the quiz what it practised or is about to practise. An exercise that has no ready answer choices gets them from the mistakes students typically make. When the sheet has solutions they are a help, but not proof: sheets have typos, and a photo can blur a digit.</li>
+  <li><strong>Variants.</strong> The exercises are multiplied: same skill, new numbers or new words, so the class practises the method rather than remembering the sheet. A parallel class may get a different set of variants.</li>
+  <li><strong>Topic.</strong> The assistant takes the topic from the sheet and explores which questions work in quiz form. This is useful when the sheet's own exercises don't fit multiple choice, e.g. proofs, essays, drawings or experiments.</li>
+</ul>
+
+<p>Much of what shapes a good quiz is something only the teacher knows:</p>
+<ul>
+  <li>which exercises;</li>
+  <li>how many questions;</li>
+  <li>how hard, for this class;</li>
+  <li>whether the class has already done the sheet (a review) or is about to (a preview);</li>
+  <li>whether the sheet's own numbers or new ones.</li>
+</ul>
+<p>Some of it is visible in the material, some of it in what the teacher wrote, and some of it in neither.</p>
+
+<p>Time shapes the conversation. Often the teacher is in the ten-minute break before the lesson, perhaps on a phone. Every round of questions costs some of those minutes. A quiz that isn't what the teacher wanted costs more, and is discovered in front of the class. A teacher who sent a full brief has already answered everything. A pile of photos with contradictory markings may need a question or two. A question that offers a reading of the material is quick to answer, e.g. "I read the note as: exercises 2 to 6, as variants with new numbers." So is one that offers a choice. An open question is slower. Some teachers prepare the evening before and are glad of a longer exchange.</p>
+
+<p>The material is usually photos taken with a phone: skewed, partly cut off, with handwriting in the margins. Sometimes it is a PDF or a document. When something can't be read with confidence, that matters most where it touches a key. The note on that question is how the doubt reaches the teacher at the moment it counts, during the run, even if the chat was only skimmed.</p>
+
+<p>The conversation often goes on after the quiz is delivered:</p>
+<ul>
+  <li>the teacher asks for changes;</li>
+  <li>pastes back a message from the site;</li>
+  <li>reports a key that was wrong in class;</li>
+  <li>or asks for a fresh set of variants for the next class.</li>
+</ul>
+<p>The conversation itself is in the teacher's language. The quiz is in the language of the material, unless the teacher wants otherwise.</p>
+
+</main>
+<script src="/js/home.js" defer></script>
+</body>
+</html>

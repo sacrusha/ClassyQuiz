@@ -1,0 +1,5 @@
+.tmp/
+node_modules/
+# build output and wrangler local state
+src/dist/
+.wrangler/

@@ -1,0 +1,27 @@
+# The state Worker: hosts the Durable Objects the site's functions bind to.
+name = "classyquiz-state"
+main = "worker.ts"
+compatibility_date = "2026-10-01"
+workers_dev = false
+preview_urls = false
+
+[[durable_objects.bindings]]
+name = "INSTANCE"
+class_name = "Instance"
+
+[[durable_objects.bindings]]
+name = "JOIN"
+class_name = "JoinCode"
+
+[[durable_objects.bindings]]
+name = "PAIR"
+class_name = "Pairing"
+
+# The Free plan only offers SQLite-backed Durable Objects.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Instance", "JoinCode", "Pairing"]
+
+# No request logs: they would hold IP addresses (decisions.md, lifetime).
+[observability]
+enabled = false
