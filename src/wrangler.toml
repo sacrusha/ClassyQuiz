@@ -1,0 +1,21 @@
+# The site: static pages from dist/ (built by build.mjs) and the /api
+# functions in functions/. The Durable Objects live in the state Worker
+# (server/wrangler.toml); Pages can't host them itself.
+name = "classyquiz"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
+
+[[durable_objects.bindings]]
+name = "INSTANCE"
+class_name = "Instance"
+script_name = "classyquiz-state"
+
+[[durable_objects.bindings]]
+name = "JOIN"
+class_name = "JoinCode"
+script_name = "classyquiz-state"
+
+[[durable_objects.bindings]]
+name = "PAIR"
+class_name = "Pairing"
+script_name = "classyquiz-state"
