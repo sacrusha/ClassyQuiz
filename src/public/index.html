@@ -35,19 +35,27 @@
   .start ol ul { list-style: "\2013  "; padding-left: 1.1em; margin: .3rem 0 0; color: var(--muted); font-size: .95rem; }
   .start ol ul li { margin: .2rem 0; }
   .addr { display: inline-flex; align-items: center; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 2px 4px 2px 10px; font-weight: 600; white-space: nowrap; }
-  .addr button, .resume .del { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
+  .addr button, .mine .del { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
   .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 22px 16px; text-align: center; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
-  .runbox .open { border: 0; background: var(--accent); color: var(--bg); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
+  .runbox .open { text-wrap: balance; border: 0; background: var(--accent); color: var(--bg); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
   .runbox p { color: var(--muted); margin: .6rem 0 0; }
-  .resume { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; margin: 14px 0 0; }
-  .resume .go { color: var(--accent); font-weight: 600; text-decoration: none; }
-  .resume .go:hover { text-decoration: underline; }
-  .resume .t { color: var(--muted); font-size: .95rem; flex: 1; }
-  .resume .confirm { flex-basis: 100%; }
-  #mine details { margin-top: 6px; }
-  #mine summary { cursor: pointer; color: var(--muted); font-size: .95rem; }
-  #mine details .resume { margin-top: 8px; }
+  .mine { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px 16px; margin-top: 14px; }
+  .mine .row { display: contents; }
+  .mine .row[hidden] { display: none; }
+  .mine .go { color: var(--accent); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+  .mine .go:hover { text-decoration: underline; }
+  .mine .t { color: var(--muted); font-size: .95rem; white-space: nowrap; }
+  .mine .confirm, .mine .more { grid-column: 1 / -1; }
+  .mine .confirm .err { color: #c62828; }
+  .mine .more { justify-self: start; border: 0; background: none; padding: 0; color: var(--muted); font: inherit; font-size: .95rem; cursor: pointer; }
+  @media (max-width: 560px) {
+    .mine { display: block; }
+    .mine .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; margin-top: 12px; }
+    .mine .row:first-child { margin-top: 0; }
+    .mine .go { grid-column: 1 / -1; }
+    .mine .more { display: block; margin-top: 10px; }
+  }
   #out:empty { display: none; }
   .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0; }
   .problem .err { color: #c62828; font-weight: 600; }
@@ -71,17 +79,16 @@
     <li>Use a good AI. Claude's free version works with Sonnet on high effort; Opus works better.</li>
     <li>Ask it, in your own words, to build you a quiz for <span class="addr">classyquiz.pages.dev</span>
       <ul>
-        <li>Fastest: give it photos or PDFs of the exercises, write in the language the quiz should be in, and say what kind of questions you need.</li>
+        <li>Fastest: give it photos or PDFs of the exercises, write in the language the quiz should be in, and say how many questions you need and what kind.</li>
         <li>Or leave it open and steer turn by turn.</li>
         <li>You can also ask it how the quizzes on this site work and what it needs to build one.</li>
       </ul>
     </li>
-    <li>It hands you the quiz as a <strong>.zip</strong> file. Download it.</li>
   </ol>
 
   <h2>Run a quiz</h2>
   <div class="runbox" id="runbox">
-    <button type="button" class="open" id="open">Open the quiz's .zip</button>
+    <button type="button" class="open" id="open">Upload the quiz your AI made&nbsp;(.zip)</button>
     <p>or drop it here</p>
     <input id="file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
   </div>
@@ -89,8 +96,8 @@
   <div id="mine"></div>
 
   <div class="foot">
-    <p>Some school networks block live quizzes. <a href="/check">Check this network</a>: one click tells you it works, or what to ask IT.</p>
-    <p>This site is free, and shared by everyone who uses it: a few dozen classes a day in all. If that's too tight, your AI can set up <a href="/own-copy">your own copy</a>.</p>
+    <p>Some school networks block live quizzes. <a href="/check">A quick check</a>, run on the school's Wi-Fi, shows whether yours does and, if so, what to tell IT.</p>
+    <p>This site is free and shared by everyone who uses it, with room for a few dozen classes a day. An AI can set up a copy just for your classes, also free: <a href="/own-copy">how that works</a>.</p>
   </div>
 </section>
 

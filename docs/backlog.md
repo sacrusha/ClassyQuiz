@@ -157,7 +157,11 @@ so there is something to click early; authoring closes the loop.
     account, have the AI tell them where to find a token and how to give it
     to the AI), the GitHub link. Better solutions welcome.
     Third look, on the live page after the rework: "ChatGPT works as well"
-    may be more valuable information than "Opus works better". The bullets
+    may be more valuable information than "Opus works better" — corrected:
+    ChatGPT currently breaks with two attachments, maybe temporarily. Sonnet
+    was only tested on a paid account; that the free tier offers Sonnet was
+    checked, whether it produces a working zip was not — "the free version
+    works" is unverified and needs a more thorough test. The bullets
     under step 2 should mention the number of questions — it helps the user
     specify, and makes the model more likely to ask when it isn't. "Download
     it." is an order for the sake of ordering the user around, extremely
