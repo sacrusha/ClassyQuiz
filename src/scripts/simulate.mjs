@@ -36,10 +36,11 @@
 // leaves; a tab on HTTP answers "Show the quiz here" and the one that steered
 // itself becomes the Remote; ⇄ Swap three times, from either side; once the
 // next class has a student, the class code reaches no role, the teacher code
-// still does, and so does the uploading device's secret; with nothing there,
-// a device takes the Projector and steers. Last, wrong teacher codes: the
-// fifth from one device locks its teacher codes, the secret still gets in.
-// The quiz is deleted.
+// still does, and so does the uploading device's secret; with nothing
+// there, a device takes the Projector and steers. Last, wrong teacher codes: the
+// fifth from one device locks its teacher codes, the secret still gets in;
+// from ever new addresses, the quiz's allowance runs out within ten. The
+// quiz is deleted.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -93,9 +94,12 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const log = (...a) => console.log(`[${((Date.now() - T0) / 1000).toFixed(1)}s]`, ...a);
 const T0 = Date.now();
 
-async function post(path, body, signal) {
+async function post(path, body, signal, ip) {
   requests++;
-  const res = await fetch(BASE + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
+  const headers = { "content-type": "application/json" };
+  // A device's address as Cloudflare would give it; the local stack passes it through, the platform sets its own.
+  if (ip) headers["cf-connecting-ip"] = ip;
+  const res = await fetch(BASE + path, { method: "POST", headers, body: JSON.stringify(body), signal });
   return { status: res.status, body: await res.json() };
 }
 
@@ -873,8 +877,26 @@ log("nothing was there; a device took the Projector and steers");
   check(owner.status === 200, `the uploading device's secret still gets in (${owner.status})`);
   const students = await post("/api/join", { code });
   check(students.status === 200, "the class code still opens the quiz for students");
+  // A sweep from ever new addresses (an IPv6 /64, a botnet): the quiz's own
+  // allowance, at most ten wrong endings and one more every six minutes,
+  // refuses it whatever the address (review D #1).
+  const fresh = (n) => `198.51.100.${n}`;
+  let spent = 0;
+  let refused = null;
+  for (let n = 1; n <= 12 && !refused; n++) {
+    const r = await post("/api/join", { code: code + wrongDigits }, undefined, fresh(n));
+    if (r.status === 429) refused = n;
+    else spent++;
+  }
+  check(refused !== null && refused <= 10, `from new addresses, the quiz's allowance runs out within ten (${spent} wrong, refused at ${refused})`);
+  const rightNew = await post("/api/join", { code: code + teacher }, undefined, fresh(50));
+  check(rightNew.status === 429, `with the allowance spent, the right teacher code from a new address is refused too (${rightNew.status})`);
+  const ownerAgain = await post("/api/join", { code: code + teacher, secret: up.body.secret }, undefined, fresh(51));
+  check(ownerAgain.status === 200, `with the allowance spent, the uploading device's secret still gets in (${ownerAgain.status})`);
+  const studentsAgain = await post("/api/join", { code }, undefined, fresh(52));
+  check(studentsAgain.status === 200, "with the allowance spent, the class code still opens the quiz");
 }
-log("wrong teacher codes: locked after five; the secret and the class code unaffected");
+log("wrong teacher codes: locked after five; the quiz's allowance holds against new addresses; the secret and the class code unaffected");
 
 const ended = await anyone.d.send({ op: "endInstance" });
 check(ended.ok, "ending the instance is acknowledged");

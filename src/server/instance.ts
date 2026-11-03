@@ -47,17 +47,28 @@ const FRESH_MS = 45_000;
 /** A role's tab not heard from for this long is "quiet": the choice screen says it frees up soon. */
 const QUIET_MS = 25_000;
 /**
- * Wrong teacher codes (docs/after-upload.md §4): a device that gets the two
- * digits wrong GUESS_MAX times within GUESS_WINDOW_MS has its teacher codes
- * for this quiz refused for GUESS_LOCK_MS. The device is told apart by its
- * address, held only as a salted hash in this object's memory for the
- * window and never stored or logged; without one (local development), the
- * count is the quiz's.
+ * Wrong teacher codes (docs/after-upload.md §4), counted two ways, both in
+ * the instance's storage: a count in memory went with an idle instance, so a
+ * script that paused got its tries back (review D #1).
+ * - Per device: GUESS_MAX wrong endings within GUESS_WINDOW_MS refuse that
+ *   device's teacher codes for this quiz for GUESS_LOCK_MS. The device is
+ *   told apart by its address, kept only as a hash salted per quiz, and only
+ *   while it counts: the alarm clears it. Without an address (local
+ *   development) the device is the quiz.
+ * - Per quiz, whatever addresses: at most QUIZ_GUESSES wrong endings, one
+ *   more allowed every QUIZ_GUESS_EVERY_MS. Used up, every teacher code for
+ *   the quiz is refused, the right one too (else the answers would tell it),
+ *   until the next is allowed. A sweep of the 100 endings takes about nine
+ *   hours, half of it on average to hit; a teacher whose class used them up
+ *   waits at most six minutes.
+ * The uploading device's secret is exempt from both.
  */
 const GUESS_MAX = 5;
 const GUESS_WINDOW_MS = 60_000;
 const GUESS_LOCK_MS = 10 * 60_000;
-/** Devices counted at once; beyond it the oldest entries go (many addresses at once is beyond what this limit is for). */
+const QUIZ_GUESSES = 10;
+const QUIZ_GUESS_EVERY_MS = 6 * 60_000;
+/** Devices counted at once; beyond it the oldest entries go (the quiz's allowance bounds many addresses). */
 const GUESS_KEYS = 500;
 /** Join command ids remembered per class, to answer a resent join with the same player. */
 const JOINS_KEPT = 300;
@@ -82,6 +93,17 @@ interface QuizRecord {
    * get this one, and it opens the packs only, not the questions' pictures.
    */
   packSecret?: string;
+}
+
+/** Wrong teacher codes (GUESS_MAX, QUIZ_GUESSES). Written on a wrong one, and by the alarm when a device's count runs out. */
+interface Guesses {
+  /** Salts the devices' addresses before they are counted; drawn per quiz, deleted with it. */
+  salt: string;
+  /** Per device (its salted hash): wrong endings within the window, and until when it is refused. */
+  devs: Record<string, { fails: number[]; until: number }>;
+  /** Wrong endings the quiz still allows, as of `at`. */
+  left: number;
+  at: number;
 }
 
 /** Small; written with every change. */
@@ -150,10 +172,9 @@ export class Instance extends DurableObject<Env> {
   private looksWaiting: { resolve: () => void; reject: (e: unknown) => void }[] = [];
   private looksTimer: ReturnType<typeof setTimeout> | null = null;
   private looksStored = 0;
-  /** Wrong teacher codes per device (GUESS_MAX); memory only. */
-  private guesses = new Map<string, { fails: number[]; until: number }>();
-  /** Salts the devices' addresses before they are counted; memory only, so a key means nothing once the object is gone. */
-  private salt = randomToken();
+  /** Wrong teacher codes, as stored; a quiz without any keeps a salt in memory until its first. */
+  private guesses: Guesses = { salt: randomToken(), devs: {}, left: QUIZ_GUESSES, at: 0 };
+
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -166,12 +187,14 @@ export class Instance extends DurableObject<Env> {
   /** The instance as stored; also after a write failed, so nothing shows that isn't stored. */
   private async load(): Promise<void> {
     const storage = this.ctx.storage;
-    const [meta, record, fixes, run] = await Promise.all([
+    const [meta, record, fixes, run, guesses] = await Promise.all([
       storage.get<Meta>("meta"),
       storage.get<QuizRecord>("quiz"),
       storage.get<G.Fix[]>("fixes"),
       storage.get<G.Run | null>("run"),
+      storage.get<Guesses>("guesses"),
     ]);
+    if (guesses) this.guesses = guesses;
     if (meta && record && fixes) {
       // A quiz from before teacher codes gets its digits now, kept at once:
       // its teacher's screens show them from their next view on.
@@ -241,7 +264,8 @@ export class Instance extends DurableObject<Env> {
     // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
     try {
-      await this.ctx.storage.put({ ...pictures.files, quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: this.game.run });
+      // The guesses' salt with it, so a device's count keeps its key after the object idles.
+      await this.ctx.storage.put({ ...pictures.files, quiz: this.quizRecord, meta: this.meta, fixes: this.game.fixes, run: this.game.run, guesses: this.guesses });
     } catch (e) {
       await this.budget().release(this.ctx.id.toString()).catch(() => {});
       throw e;
@@ -381,30 +405,79 @@ export class Instance extends DurableObject<Env> {
   /** A device as the limit on wrong teacher codes counts it: its address, salted and hashed; the quiz itself without one. */
   private async deviceKey(ip: string | null): Promise<string> {
     if (!ip) return "quiz";
-    const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${this.salt}|${ip}`)));
+    const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${this.guesses.salt}|${ip}`)));
     return btoa(String.fromCharCode(...d.slice(0, 12)));
   }
 
-  /** Checks the two digits, counting a wrong one against the device (GUESS_MAX). */
-  private checkTeacher(digits: unknown, dev: string): "ok" | "wrong" | "locked" {
+  /** The quiz's allowance of wrong endings now: one more per QUIZ_GUESS_EVERY_MS since `at`, up to QUIZ_GUESSES. */
+  private allowance(now: number): number {
+    const g = this.guesses;
+    if (g.left >= QUIZ_GUESSES) return QUIZ_GUESSES;
+    const grown = Math.max(0, Math.floor((now - g.at) / QUIZ_GUESS_EVERY_MS));
+    return Math.min(QUIZ_GUESSES, g.left + grown);
+  }
+
+  /** Devices whose count has run out are forgotten; true when one was. */
+  private pruneGuesses(now: number): boolean {
+    let changed = false;
+    for (const [k, d] of Object.entries(this.guesses.devs)) {
+      const fails = d.fails.filter((t) => now - t < GUESS_WINDOW_MS);
+      if (d.until <= now && fails.length === 0) {
+        delete this.guesses.devs[k];
+        changed = true;
+      } else if (fails.length !== d.fails.length) {
+        d.fails = fails;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  /** When the next device's count runs out, for the alarm; null when none is counted. */
+  private guessesExpire(): number | null {
+    let at: number | null = null;
+    for (const d of Object.values(this.guesses.devs)) {
+      const end = Math.max(d.until, ...d.fails.map((t) => t + GUESS_WINDOW_MS));
+      if (at === null || end < at) at = end;
+    }
+    return at;
+  }
+
+  /**
+   * Checks the two digits, counting a wrong one against the device
+   * (GUESS_MAX) and the quiz (QUIZ_GUESSES), stored before the answer goes.
+   * A right code or a refusal writes nothing.
+   */
+  private async checkTeacher(digits: unknown, dev: string): Promise<"ok" | "wrong" | "locked"> {
     const now = Date.now();
-    for (const [k, g] of this.guesses) if (g.until <= now && !g.fails.some((t) => now - t < GUESS_WINDOW_MS)) this.guesses.delete(k);
-    const g = this.guesses.get(dev) ?? { fails: [], until: 0 };
-    if (g.until > now) return "locked";
+    const g = this.guesses;
+    if ((g.devs[dev]?.until ?? 0) > now) return "locked";
+    const left = this.allowance(now);
+    if (left < 1) return "locked";
     const teacher = this.meta?.teacher;
     if (typeof digits === "string" && teacher && safeEqual(digits, teacher)) return "ok";
     // No two digits at all (the class code alone) is no guess at them.
     if (typeof digits !== "string" || !/^\d{2}$/.test(digits)) return "wrong";
-    g.fails = g.fails.filter((t) => now - t < GUESS_WINDOW_MS);
-    g.fails.push(now);
-    if (g.fails.length >= GUESS_MAX) {
-      g.until = now + GUESS_LOCK_MS;
-      g.fails = [];
+    this.pruneGuesses(now);
+    const d = g.devs[dev] ?? { fails: [], until: 0 };
+    d.fails.push(now);
+    if (d.fails.length >= GUESS_MAX) {
+      d.until = now + GUESS_LOCK_MS;
+      d.fails = [];
     }
-    this.guesses.delete(dev);
-    this.guesses.set(dev, g);
-    if (this.guesses.size > GUESS_KEYS) this.guesses.delete(this.guesses.keys().next().value!);
-    return g.until > now ? "locked" : "wrong";
+    // Last in the order, so GUESS_KEYS drops the oldest.
+    delete g.devs[dev];
+    g.devs[dev] = d;
+    const keys = Object.keys(g.devs);
+    if (keys.length > GUESS_KEYS) delete g.devs[keys[0]];
+    // A full allowance grows again from this one; a part-spent one keeps its rhythm.
+    if (left >= QUIZ_GUESSES) g.at = now;
+    else g.at += Math.floor((now - g.at) / QUIZ_GUESS_EVERY_MS) * QUIZ_GUESS_EVERY_MS;
+    g.left = left - 1;
+    await this.ctx.storage.put("guesses", g);
+    // The alarm forgets the device once its count runs out.
+    if (this.meta) await this.scheduleAlarm();
+    return d.until > now || g.left < 1 ? "locked" : "wrong";
   }
 
   // -------------------------------------------------------------------------
@@ -779,7 +852,7 @@ export class Instance extends DurableObject<Env> {
           // uploading device's secret (Resume) needs no digits and isn't counted.
           const owner = typeof cmd.secret === "string" && safeEqual(cmd.secret, meta.secret);
           if (!owner) {
-            const check = this.checkTeacher(cmd.teacher, session.dev ?? "quiz");
+            const check = await this.checkTeacher(cmd.teacher, session.dev ?? "quiz");
             if (check !== "ok") return { direct: [ack(false, check === "locked" ? TOO_MANY_CODES : WRONG_TEACHER_CODE)] };
           }
           const token = this.takeRole(cmd.role);
@@ -1118,6 +1191,9 @@ export class Instance extends DurableObject<Env> {
     // A running countdown: time's up is the server's step, as the reveal is the teacher's.
     const deadline = this.game ? G.deadline(this.game) : null;
     if (deadline != null) at = Math.min(at, deadline);
+    // A device's wrong teacher codes are forgotten once they no longer count.
+    const guesses = this.guessesExpire();
+    if (guesses != null) at = Math.min(at, guesses);
     await this.ctx.storage.setAlarm(at);
   }
 
@@ -1148,6 +1224,7 @@ export class Instance extends DurableObject<Env> {
       await this.endInstance();
       return;
     }
+    if (this.pruneGuesses(now)) await this.ctx.storage.put("guesses", this.guesses);
     const deadline = G.deadline(this.game!);
     if (deadline != null && now >= deadline) {
       // Time's up: answering closes; the reveal waits for the teacher.
