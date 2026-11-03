@@ -107,43 +107,42 @@ tablets, and a quiz made in the break.
 
 `[ ]` is a button, `[_]` an input, `›` expands, `⋯` a menu.
 
-### 3.1 Root page (item 16)
+### 3.1 Root page (v4 items 1, 2, 4)
 
-Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
-(item 2); decisions.md, "The landing page by attention budget". Revised
-again for his third look; decisions.md, "The landing page, third look".
+The design is docs/landing-story.md (draft 4); built 2026-11-03, decisions.md,
+"The landing page: the strip, two steps, resume, four languages". Earlier
+versions: "The landing page by attention budget", "The landing page, third
+look".
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│ classyQuiz                            Code [_ _ _ _ _]  ▶  │
-├────────────────────────────────────────────────────────────┤
-│  Build a quiz                                              │
-│  1  Use a good AI. Claude's free version works …           │
-│  2  Ask it, in your own words, to build you a quiz for     │
-│     classyquiz.pages.dev [Copy]                            │
-│       – Fastest: photos or PDFs, your quiz's language,     │
-│         how many questions and what kind                   │
-│       – Or leave it open and steer turn by turn.           │
-│       – You can also ask it how the quizzes work …         │
-│                                                            │
-│  Run a quiz                                                │
-│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐  │
-│  │       [ Upload the quiz your AI made (.zip) ]        │  │
-│  │                    or drop it here                   │  │
-│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  │
-│  Resume Prozente ▶                  closes 16:20  Delete…  │  only on a device that
-│  ▸ 1 more quiz                                             │  opened it, while open
-│                                                            │
-│  Some school networks block live quizzes. A quick check,   │
-│  run on the school's Wi-Fi, shows whether yours does and,  │
-│  if so, what to tell IT.                                   │
-│  This site is free and shared by everyone who uses it,     │
-│  with room for a few dozen classes a day. An AI can set up │
-│  a copy just for your classes, also free: how that works.  │
-├────────────────────────────────────────────────────────────┤
-│  About classyQuiz (the guidance for AIs, static HTML)      │
+┌──────────────────────────────────────────────────────────────────────┐
+│ classyQuiz                         Code [_ _ _ _ _]  ▶      EN ▾     │
+├──────────────────────────────────────────────────────────────────────┤
+│   [two sheet pages] → [phone: photos up, .zip back] → [tablet] [wall] │
+│   Your exercise sheet   Your AI   Each student taps  What the class sees │
+├──────────────────────────────────┬───────────────────────────────────┤
+│ Build a quiz                     │ Run a quiz                         │
+│ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
+│   Claude Opus wrote the example  │ │ [Back to the quiz ▶] Class code  ││ quiz this device
+│   quiz, 3 Nov 2026.              │ │ On another device: type 63953 47 ││ started, until its
+│ 2 Ask it to build you a quiz for │ └──────────────────────────────────┘│ final ranking
+│   classyquiz.pages.dev [Copy]    │ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
+│   For example, with photos of    │ │ [ Upload the quiz your AI      │ │
+│   two pages:                     │ │   made (.zip) ] or drop it here│ │
+│  ( Hi! Can you make me a quiz … )│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
+│     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
+│   A second message reshapes the  │                                   │ uploaded before, the
+│   quiz.                          │                                   │ site full lately
+├──────────────────────────────────┴───────────────────────────────────┤
+│ About classyQuiz … (English, for AIs)                                 │
 ```
 
+- **The block above About** speaks DE, EN, FR or IT: the device's choice
+  (`cq.lang`), else the browser's language, else English. The static HTML is
+  English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
+  English.
+- **The strip** links `/example` in the chosen language until the video
+  exists; no ▶. On a phone it is one row that scrolls sideways.
 - **Run a quiz takes a .zip and nothing else.** The button opens the file
   chooser; a .zip can also be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
@@ -153,26 +152,24 @@ again for his third look; decisions.md, "The landing page, third look".
     download from the chat and upload here." It is counted as "paste".
   - Any other file gets "The site takes the quiz as a .zip file, not a
     .docx file." and the same sentence. Attempts are counted by format.
+  - No connection, or an answer that isn't the site's (a filter's page):
+    the network is named as a possible cause, with "What to tell IT ›" to
+    `/check#it`.
 - **Problems with the quiz:** listed in place, with "Copy the message for your
-  AI" (which asks for a corrected .zip), plus "Continue without these
-  pictures" when it's pictures.
-- **On success:** straight to the lobby, in this tab as the Projector.
-- **Coming back (item 17):** the latest quiz this device opened that is still
-  open, as one line under the box; any others fold under "n more quizzes".
-  A title uploaded again is one line, the newest upload; Delete… ends every
-  upload of it on this device. On a laptop the lines align as columns; on a
-  phone each is two lines.
-  - Resume goes to `/teacher#<code>`.
-  - "closes 16:20" is the only place the product mentions the closing time.
-  - Delete… sits at the far end of the line and asks inline: "Delete
-    *Prozente*? The class can't join it any more. [Delete] [Keep]".
-  - Closed quizzes drop off the list.
-- **The two lines at the foot** say what their links are for:
-  - `/check` ends in one of three verdicts; the two that aren't "all good"
-    carry a message to forward to IT, with the site's address in it.
-  - `/own-copy` is the self-hosting guide for a teacher (item 14).
-- "About this site" is gone: the guidance below is for the AI, and a teacher
-  who scrolls finds it anyway.
+  AI" (which asks for a corrected .zip, in English), plus "Continue without
+  these pictures" when it's pictures.
+- **On success:** straight to the check, in this tab as the Projector.
+- **Coming back (v4 item 2):** the latest quiz this device started, while it
+  hasn't reached its final ranking: its title, where it stands, Back to the
+  quiz (`/play#` + the teacher code), the class code, and "On another device:
+  type 63953 47 in the code box". No closing time, no Delete, no older
+  quizzes.
+- **The own copy (v4 item 4):** one line under Run, only on a device that has
+  uploaded before (`cq.days`, dates only) and only when the site refused an
+  upload on a day of the last 30 (`GET /api/site`).
+- **The network check** is no longer on the root page: the upload error,
+  the wall's "Nobody in yet?" line after 90 s, and a device that can't
+  reach the quiz carry the help where the failure shows (landing story §7).
 
 ### 3.2 The two entrances after a code
 
@@ -516,4 +513,5 @@ student, no new tab gets the steering, which narrows §1 rules 5–7.
 | Spread, then key; who has answered (v2 items 6, 7) | Done: Show votes, then Show answer, on every steering tab and the clicker; avatars popping into the wall's bar as answers arrive; "of" without away devices; the Remote's "Waiting for". §3.4, §3.5, §3.7; decisions.md, "Spread, then key; who has answered, on the wall" |
 | Avatars the children dress (v2 item 5) | Done: a shape and a hat in the lobby, live on the wall and the Remote with a wiggle, fixed at Start; the lobbies' avatar rows kept in place. docs/avatars.md; decisions.md, "Avatars the children dress" |
 | After upload (v4 item 8) | Done: the check, then the join screen; the teacher code in the students' box; the one question; ⇄ Swap; `/example`. §1 rules 2, 4–7, §3.2–3.5; decisions.md, "After upload: the check, the teacher code, one question, Swap" |
+| Landing page (v4 items 1, 2, 4) | Done: the strip, Build in two steps with the labelled ask, Run with the resume card, the own-copy line, four languages; the network help at the upload, the wall's lobby, the tablet and `/check#it`. §3.1; decisions.md, "The landing page: the strip, two steps, resume, four languages" |
 | Pictures as answers (v3 item 1) | Done: `+ Image: b.png` answer lines; picture tiles on the wall (§3.4), pictures on the students' buttons from one pack per device (§3.6), thumbnails with the key in the question list and on the Remote (§3.3, §3.5). decisions.md, "Pictures as answers" |

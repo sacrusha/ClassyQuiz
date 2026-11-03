@@ -2,13 +2,49 @@
 
 What the root page says, to whom, in what order, and where the rest goes:
 backlog v4 items 1, 2 and 4, with v1 items 16–19's history. Written for the
-owner's reaction, like docs/user-flow.md. It ends in subtasks (§9). Nothing
-here is built.
+owner's reaction, like docs/user-flow.md. It ends in subtasks (§9). Draft 4
+is built (as-built note below; decisions.md, "The landing page: the strip,
+two steps, resume, four languages").
 
 The example content: the first runs are in `.tmp/example/run*`, and the
 redo on the new guidance is in `.tmp/example/v2-de`, `v2-en`, `v2-fr` and
 `v2-it`. The redo is still in progress, so any number quoted here from it
 gets checked against its final state.
+
+**As built, 2026-11-03** (branch `landing`; S3–S6 and S8 of §9, S7 in part,
+S5 with the redo's final zips). Where it differs from the draft below:
+- **The strip's frames are stills, not drawn rooms** (§2, §5). Frame 1 is
+  the rendered sheet's two pages, fanned, until the owner's photographs
+  replace them; frame 2 a placeholder drawing of the act (a phone, two
+  pages going up, a .zip coming back), no words; frames 3 and 4 the real
+  screens from the redo, set in a dark bezel. The tablet is the plain
+  colour buttons (`11-tablet-focus-buttons`) in every language: the
+  example's second asks wanted pictures to tap, which a first-time teacher
+  wouldn't ask for (coordinator). The wall is `30-projector-focus-reveal`
+  for DE, EN and IT, i.e. question 2's votes and tick, not question 1's as
+  §2 and §5 have it; their focus answers aren't the "tick read as 100" pair
+  either (DE 56 640 against 56 320). French was re-shot with question 1
+  as the focus (327 000 against 320 700, 12/6/2 votes,
+  `.tmp/example/v2-fr/screens-q1/`), since its 30 leans on the question
+  before it.
+- **Step 1's detail** is neither the dated free test nor the personal
+  frame: "Claude Opus wrote the example quiz, 3 Nov 2026." It is what is
+  verified, with no claim about tiers. The personal frame's "expect paid
+  Gemini or ChatGPT to work just fine" is untested, so it isn't used.
+- **The wall's caption** is "What the class sees" (four words; §2's sketch
+  had seven against its own five-word rule).
+- **The labels** sit under their words, out of the text's flow; ruby
+  spread the words when a label was wider than them.
+- **Words at rest** above About: about 110 in English, against §2's 80.
+- **The own-copy line** is item 4's one rule, not §6's table: a device that
+  has uploaded, a site full on a day of the last 30; "On 3 of the last 30
+  days this shared site was full, and new quizzes had to wait for the next
+  day. A copy for you or your school is yours alone: how ›". §6's "every
+  class stops" isn't true of the upload cap, which is what is recorded; a
+  spent request allowance isn't recorded at all, so the count understates.
+  At an upload the full site and the spent allowance say so in the chosen
+  language, with "Your own copy: how ›".
+- **The tablet's notice** says "This device", since a phone joins too.
 
 **Draft 4, 2026-11-03.** `/example` is the example quiz on the Check
 screen after upload, without codes (docs/after-upload.md §8), and nothing

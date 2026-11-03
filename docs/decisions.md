@@ -3323,3 +3323,159 @@ device", "Show the class the code" and "Swap" are the words they reach for;
 a phone casting by Miracast; the limit against a real attacker on
 Cloudflare (it ran locally, where the address may be absent and the count
 the quiz's; which applied wasn't checked).
+
+## 2026-11-03 — The landing page: the strip, two steps, resume, four languages
+
+Serves: v4 items 1, 2 and 4, the last part of delivery A. Design:
+`docs/landing-story.md`, draft 4, with an as-built note there; user-flow.md
+§3.1 describes the page as built. Branch `landing`.
+
+**Built:**
+- **The strip,** four frames in the video's order (sheet, ask, tablet, wall),
+  the class frames the largest, captions of at most four words. Until the
+  video exists it is one link to `/example?lang=<chosen>`, with no ▶. On a
+  phone it is one row that scrolls sideways, the sheet first at about 60 %
+  of the width and the next frame peeking in. The frames:
+  - the sheet: the rendered pages (`.tmp/example/sheet/`), two fanned, until
+    the owner's photographs replace them;
+  - the ask: a drawing of the act, a phone with two pages going up and a
+    .zip coming back, no words; a placeholder for the storyboard's K2;
+  - the tablet: `11-tablet-focus-buttons`, the plain colour buttons, in
+    every language (coordinator: the example's second asks wanted pictures
+    to tap, which a first-time teacher wouldn't ask for; the first
+    impression shows what a plain ask produces);
+  - the wall: `30-projector-focus-reveal` for DE, EN and IT. French was
+    re-shot with question 1 as the focus (327 000 against 320 700, 12/6/2
+    votes), since its 30 leans on the question before it; the screens are in
+    `.tmp/example/v2-fr/screens-q1/`, from the class walk adapted to the
+    check-first flow (`.tmp/example/screens-tool/class-walk-checkfirst.mjs`).
+  The images are WebP in `public/landing/`, about 170 KB for all four
+  languages.
+- **Build, two steps.** "Choose any good AI.", with "Claude Opus wrote the
+  example quiz, 3 Nov 2026." under it, and "Ask it to build you a quiz for
+  `<address>` [Copy]", then "For example, with photos of two pages:", the
+  ask as a chat bubble, and "A second message reshapes the quiz." The
+  bubble is each language's real first ask, verbatim (checked by script
+  against `v2-*/teacher-1.txt`); its five parts are underlined, with their
+  labels under them (this site · which exercises · your class · how many ·
+  which language), and on a phone as one line after the bubble. The address
+  in the bubble and in Copy is the one the browser opened; the static
+  English bubble gets SITE_ADDRESS from the build like the rest of the page.
+- **Run:** the resume card above the box, the box, and the own-copy line
+  under it. The foot lines are gone.
+- **Four languages** for the block above About (`client/landing-text.ts`, one
+  table per language, Run's messages included). The switch "EN ▾" sits top
+  right over a native select listing Deutsch, English, Français, Italiano;
+  it is made by the script, so a fetcher doesn't read four language names.
+  The choice is kept on the device (`cq.lang`); otherwise the browser's
+  first language among the four, otherwise English. The static HTML stays
+  English. `/example` takes `?lang=` from the strip, else `cq.lang`. The
+  quiz's problems, the archive's messages and the text copied for the AI
+  stay English. Address: German "du" (the asks' own register; Swiss
+  spelling), French "vous", Italian "tu".
+- **Resume (item 2).** The latest quiz this device started; if it is gone
+  from the site the next newest is asked, three at most, one request each.
+  Shown only until its final ranking: the title, where it stands ("before
+  the first question", "question 4 of 10"), Back to the quiz ▶ (`/play#` +
+  the teacher code), the class code, and "On another device: type 63953 47
+  in the code box." No closing time, no Delete, no "n more" (item 2; item
+  3's "Delete-by-title on the landing").
+- **Device history:** the days this device uploaded, dates only, at most
+  60 (`cq.days`, `client/history.ts`).
+- **The own copy (item 4, the product owner's default).** The budget records
+  each day on which it refused an upload (the daily cap or the bytes
+  stored), once a day, kept 31 days; `GET /api/site` answers `{full: n}` for
+  the last 30 days, today included. The page asks only on a device that has
+  uploaded before, once per visit, and shows one line under Run only when n
+  > 0: "On 3 of the last 30 days this shared site was full, and new quizzes
+  had to wait for the next day. A copy for you or your school is yours
+  alone: how ›". At an upload, the full site and a spent allowance are said
+  in the chosen language with "Your own copy: how ›".
+- **Network help where failure shows (item 4; landing story §7):**
+  - the upload: no connection, or an answer that isn't the site's (a
+    filter's page), names the school network as a possible cause, with
+    "What to tell IT ›" to `/check#it`;
+  - `/check#it`: "If the site doesn't open at school at all", readable
+    without running anything, with the text for IT and this site's address
+    (the build substitutes it in `check.html` too);
+  - the wall's lobby, steering or not: after 90 s with the join screen up
+    and nobody in, "Nobody in yet? If the tablets can't open
+    classyquiz.pages.dev, the school network may block it: what to tell IT
+    ›" (a new tab, so the wall stays), gone with the first avatar;
+  - a device that reaches the page but not the quiz: after 15 s, at joining
+    or in the offline banner, "This device can't reach the quiz. Tell your
+    teacher." (a teacher device without the second sentence).
+- **`/example`** carries the redo's final zips under the names it served,
+  in place of the placeholders.
+
+**Differs from the design, and why:**
+- **Step 1's detail** is neither the dated free test nor the personal frame.
+  Owner's rule: no claim that isn't true, and none about free tiers. What is
+  verified is that Claude Opus wrote the four example quizzes, through the
+  claude CLI with Read and Write (the harness zipped the folder; claude.ai
+  itself not tested). The personal frame's "expect paid Gemini or ChatGPT
+  to work just fine" is untested, so it is left out.
+- **The wall frame** shows question 2's votes for DE, EN and IT, and their
+  focus wrong answer isn't the "tick read as 100" one (§2 and §5 name
+  question 1); only the French re-shoot has that pair.
+- **The labels** are positioned under their words, not ruby: ruby spread
+  the words apart whenever a label was wider ("in   English").
+- **The own-copy wording** says what is recorded: the upload cap, so new
+  quizzes had to wait. The story's "every class stops until 01:00" is true
+  only of a spent request allowance, which isn't recorded (below).
+- **§6's other rows** (busy today, a regular's dismissable line, full now
+  before an upload) are not built: item 4 resolved them to the one rule.
+- **"This device"** for the story's "This tablet": a phone joins too.
+- **Words at rest:** about 110 in English, against the story's 80. The
+  rendered ask, the five labels and step 1's detail are most of the gap.
+
+**Checked:**
+- Both typechecks; 99 unit tests (new: the full-days count, the language
+  choice, each language's ask labelling the same five parts in order).
+- `simulate.mjs`, all three modes, OK (1,400 HTTP requests with all
+  polling). The first `--tempo` run scored one student 59 where 45 was
+  expected; two re-runs passed. The game and the instance are untouched
+  here; it is the intermittent mismatch in bugs.md, seen a second time.
+- Headless Edge through the real pages on the local stack
+  (`.tmp/shots-tool/landing-v4-walk.mjs`, 71 checks, no page errors):
+  1366×768, 1280×800, 1024×768, 390×844 and 360×740, no sideways scroll of
+  the page in any language; the strip above the fold at 1366, Build and Run
+  side by side and above the fold at 1366 and 1280, Build above the fold at
+  390; the labels inside the bubble and apart in all four languages; the
+  switch, the remembered choice, a French browser getting French, About
+  English in every language; the strip opening the French example; the
+  upload refused offline and by a filter's page; `/check#it`; the resume
+  card before the start and at question 1, in English and German; the
+  own-copy line with the site's answer stood in; a tablet whose joins fail;
+  the wall's line at 90 s and its going with the first avatar; dark mode.
+- The own copy's server side on a stack copy with the daily cap at 2
+  (`.tmp/shots-tool/full-walk.mjs`): `/api/site` 0 before, 1 after three
+  refusals and still 1 after a fourth; the line on a device with history,
+  in German; the upload's "full for today" with the own-copy link.
+- A build with `SITE_ADDRESS=https://quiz.example-school.ch/`: the address
+  in `index.html` (bubble included) and `check.html`, none of the demo's
+  left.
+
+**Learnt:**
+- Puppeteer hangs on evaluating in a tab whose window has another tab in
+  front; `bringToFront()` before driving it.
+- The class walk that shot the redo's screens predates the check-first
+  flow; it ran before after-upload was merged. The copy adapted to it is
+  beside the original.
+- The four runs named their zips as they liked; the English one is
+  `zahlenstrahl-quiz.zip` too. `/example` serves them under per-language
+  names, so the download's name isn't the AI's.
+
+**Deploy:** no migration. The Pages project gains a binding to the state
+Worker's `SiteBudget`, which gains `fullDays()`: the state Worker goes
+first, as `deploy.mjs` does it. Full days start counting at the deploy, so
+the line can't show before the site is first full after it.
+
+**Not established:** whether teachers read the strip in five seconds (the
+story's §9 test); the German and French wording by a native reader, and
+the Italian by anyone (no checker on this side; shipped as written); the
+storyboard's drawn frames; how a fetcher's text conversion reads the
+labelled ask (the static HTML has the plain bubble and the labels as one
+line after it); a spent request allowance, which the full days don't
+record, so the line understates a site that runs out of requests rather
+than uploads; the free-tier test, which step 1 waits for.
