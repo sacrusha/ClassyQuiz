@@ -28,7 +28,7 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { CLASS_IDLE_MS, SITE_FULL, isQuotaError } from "../shared/limits.ts";
+import { CLASS_IDLE_MS, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
 /** An instance ends this long after its last activity (upload, a teacher's step, a role taken). */
@@ -241,7 +241,7 @@ export class Instance extends DurableObject<Env> {
     smalls: UploadedImage[] = [],
   ): Promise<
     | { ok: true; secret: string; code: string; teacher: string; token: string }
-    | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string }
+    | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull }
   > {
     if (this.meta) throw new Error("instance exists");
     const r = parseQuiz(text);
@@ -254,7 +254,8 @@ export class Instance extends DurableObject<Env> {
     const codeUntil = now + INSTANCE_IDLE_MS + CODE_SLACK_MS;
     // The site's share of the free plan: uploads today, bytes stored at once.
     const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
-    if (!(await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil))) return { ok: false, errors: [], warnings: [], error: SITE_FULL };
+    const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil);
+    if (booked !== true) return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
     const code = await this.claimCode(codeUntil);
     this.quizRecord = {
       quiz: r.quiz,

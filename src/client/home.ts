@@ -12,7 +12,7 @@
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
-import { SITE_FULL, quotaResetAt } from "../shared/limits.ts";
+import { quotaResetAt } from "../shared/limits.ts";
 import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
 import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, store, tabLobby, tabRole, teacherCode, teacherEntry, type SavedQuiz } from "./dom.ts";
 import { prepareImages, uploadQuiz } from "./images.ts";
@@ -235,7 +235,7 @@ async function submit(value: string, archive: ZipEntry[] | null, leaveOut = fals
     }
     if ((r.errors?.length ?? 0) > 0) showProblems(r.errors, (r.missingImages?.length ?? 0) > 0, () => void submit(value, archive, true));
     else if (r.quota) out.innerHTML = problem(t.quota(quotaResetAt()), `<p><a href="/own-copy">${esc(t.ownCopyLink)}</a></p>`);
-    else if (r.error === SITE_FULL) out.innerHTML = problem(t.siteFull, `<p><a href="/own-copy">${esc(t.ownCopyLink)}</a></p>`);
+    else if (r.full) out.innerHTML = problem(t.siteFull(r.full, quotaResetAt()), `<p><a href="/own-copy">${esc(t.ownCopyLink)}</a></p>`);
     // Not the site's answer: most likely a filter's page in between.
     else if (r.json === false) out.innerHTML = networkHelp();
     else out.innerHTML = problem(r.error ?? t.notTaken);

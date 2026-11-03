@@ -17,6 +17,7 @@
 
 import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
+import type { SiteFull } from "./limits.ts";
 import type { Tempo } from "./tempo.ts";
 
 export type { Answering, Avatar, Phase, Problem, Tempo };
@@ -421,7 +422,7 @@ export const MAX_UPLOAD_BYTES = 16_000_000;
  */
 export type UploadResult =
   | { ok: true; id: string; secret: string; code: string; teacher: string; token: string }
-  | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string };
+  | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull };
 
 /** Answer to POST /api/i/:id/info, for the device that pasted the quiz. */
 export interface QuizInfo {

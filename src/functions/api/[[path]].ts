@@ -66,7 +66,7 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
   const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing");
-  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error } satisfies UploadResult);
+  if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error, full: r.full } satisfies UploadResult);
   return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token } satisfies UploadResult);
 }
 
