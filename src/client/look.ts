@@ -58,9 +58,10 @@ const ANIMALS: (() => string)[] = [
   () =>
     `<circle cx="26" cy="32" r="15" fill="#a7a9ad"/><circle cx="74" cy="32" r="15" fill="#a7a9ad"/><circle cx="26" cy="32" r="9" fill="#f2a7b5"/><circle cx="74" cy="32" r="9" fill="#f2a7b5"/>` +
     `<ellipse cx="50" cy="58" rx="24" ry="25" fill="#a7a9ad"/>${EYES(54, 9)}<circle cx="50" cy="66" r="3.6" fill="#e8798e"/>${WHISKERS(66)}`,
-  // lion
+  // lion: the mane within 33 of the centre (it was 40, past every other head), so a
+  // shape reads behind it as behind the others (the owner: a lion on a star)
   () =>
-    `<circle cx="50" cy="54" r="36" fill="#b5651d"/><g fill="#9a5418">${[0, 45, 90, 135, 180, 225, 270, 315].map((d) => `<circle cx="${50 + 31 * Math.cos((d * Math.PI) / 180)}" cy="${54 + 31 * Math.sin((d * Math.PI) / 180)}" r="9"/>`).join("")}</g>` +
+    `<circle cx="50" cy="54" r="29" fill="#b5651d"/><g fill="#9a5418">${[0, 45, 90, 135, 180, 225, 270, 315].map((d) => `<circle cx="${50 + 25 * Math.cos((d * Math.PI) / 180)}" cy="${54 + 25 * Math.sin((d * Math.PI) / 180)}" r="7.5"/>`).join("")}</g>` +
     `<circle cx="50" cy="55" r="24" fill="#e3a63a"/><ellipse cx="50" cy="64" rx="10" ry="7" fill="#f3d08b"/>${EYES(51, 9)}<path d="M45 60 H55 L50 65Z" fill="#5a3311"/>${SMILE(68, 4)}`,
   // panda
   () =>
