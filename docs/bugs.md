@@ -7,3 +7,4 @@ Bugs in what is built, as distinct from backlog omissions. Remove an entry when 
 
 - 2026-11-03, seen once, not reproduced: a plain `simulate.mjs` run scored one student 4 where 3 was expected (the server counted an answer the simulated tablet never saw confirmed); 28 further runs on the same and the previous commit passed. `.tmp/sim-diag/make_diag.py` builds an instrumented copy of the simulation that prints that student's taps, acknowledgements, drops and the server's record on the next mismatch.
   Owner, 2026-11-03: off by one is typically a race, solved by architecture, not debugging — if it can't happen by design there's nothing to hunt. Not to be chased with the instrumented copy.
+  Seen a second time, 2026-11-03, on branch `landing` (which doesn't touch the game or the instance): `simulate.mjs --tempo` scored one student 59 where 45 was expected, one answer with speed points; two re-runs passed.
