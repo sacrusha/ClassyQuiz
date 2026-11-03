@@ -366,8 +366,9 @@ test("the example on the guidance page parses without errors or warnings", async
   const r = parseQuiz(text);
   assert.deepEqual(r.errors, []);
   assert.deepEqual(r.warnings, []);
-  assert.equal(r.quiz.questions.length, 3);
-  assert.deepEqual(keys(text), [1, 3, 0]);
+  assert.equal(r.quiz.questions.length, 4);
+  assert.deepEqual(keys(text), [0, 0, 0, 0]);
+  assert.ok(r.quiz.questions[3].answers.every((a) => a.correct), "the vote: every answer right");
 });
 
 test("two quizzes in one pasted answer (e.g. one per class) are an error, not merged", () => {
