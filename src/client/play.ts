@@ -12,7 +12,7 @@
 import type { Auth, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
-import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, store, tabRole } from "./dom.ts";
+import { $, esc, findQuiz, keepAwake, lines, rolePage, saveQuiz, siteAddress, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
@@ -180,6 +180,9 @@ function onMessage(m: ServerMessage): void {
   } else if (m.t === "role") {
     clearInterval(tickTimer);
     line?.stop();
+    // Taken while setting up: this device comes back without asking, and
+    // its root page offers Resume (docs/second-teacher-device.md, rule 2).
+    if (m.secret && !findQuiz(instanceId)) saveQuiz({ id: instanceId, secret: m.secret, code, title: choice?.title ?? "", at: Date.now() });
     tabRole.set(instanceId, { role: m.role, token: m.token, code });
     location.replace(rolePage(instanceId, m.role) + (wantScreen ? "&drag=1" : ""));
   } else if (m.t === "state" && m.view.role === "player") {
@@ -267,7 +270,14 @@ function showAvatars(): void {
   );
 }
 
+/** This device set the quiz up (it opened the .zip, or took a role before the class was in). */
+function ownSecret(): string | undefined {
+  return findQuiz(instanceId)?.secret;
+}
+
 function roleButton(role: "screen" | "remote", state: ChoiceState): string {
+  // The gate doesn't apply to a device that set the quiz up.
+  if (state === "closed" && ownSecret()) state = "free";
   const free = state === "free" || state === "movable";
   const label = role === "screen" ? "Projector" : "Remote";
   const what = role === "screen" ? "shows the quiz to the class" : "steers the quiz";
@@ -275,9 +285,7 @@ function roleButton(role: "screen" | "remote", state: ChoiceState): string {
     state === "quiet"
       ? "in use – free in under a minute"
       : state === "closed"
-        ? role === "remote"
-          ? "not once students are in: the projector steers"
-          : "not once students are in"
+        ? "students are in: first, on the projector screen, ⋯ Allow a device to join"
         : free
           ? what
           : "in use";
@@ -302,7 +310,7 @@ async function takeRole(role: "screen" | "remote"): Promise<void> {
   if (!line) return;
   busy = true;
   showWaiting();
-  const a = await line.send({ op: "takeRole", role });
+  const a = await line.send({ op: "takeRole", role, secret: ownSecret() });
   if (!a.ok) {
     // Taken in the meantime: the new choice has come with the answer.
     busy = false;

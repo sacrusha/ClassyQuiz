@@ -23,7 +23,11 @@ in English, which AIs are trained on; quizzes come out in whatever language the
 teacher and the sheets are in. The measure is teacher time. The failure mode to
 design against is a normal user who can't use it, not a malicious one: a
 disruptive student is handled by the teacher walking over to the tablet and
-taking care of the student.
+taking care of the student. Children actively and openly sabotaging the class
+while in class is not a technical problem that needs a technical solution.
+By contrast, children automating a denial of service from outside the class,
+to vandalise while in class or to vandalise another class's quiz, is a
+realistic problem.
 
 ## Constraints
 
@@ -152,6 +156,16 @@ so there is something to click early; authoring closes the loop.
     sample prompt for the AI, what work they'll have to do (create a free
     account, have the AI tell them where to find a token and how to give it
     to the AI), the GitHub link. Better solutions welcome.
+    Third look, on the live page after the rework: "ChatGPT works as well"
+    may be more valuable information than "Opus works better". The bullets
+    under step 2 should mention the number of questions — it helps the user
+    specify, and makes the model more likely to ask when it isn't. "Download
+    it." is an order for the sake of ordering the user around, extremely
+    off-putting; "It hands you the quiz as a .zip file. Download it." and
+    "Open the quiz's .zip" are a bad way of saying "Upload the quiz the AI
+    created (*.zip)". The list of open quizzes got broken: worse formatting,
+    still an accumulating count, and an expander that goes out of sync. The
+    two lines with the links are incompetently written.
 17. **Coming back to a quiz, from the teacher's side** — a quiz already
     uploaded is worth resuming, but "your quizzes on this device" reads as if
     the server held a shared list. The teacher's view is: resume, how long
@@ -230,7 +244,13 @@ garbage.
 4. **Hardening** — an open public instance: e.g. size limits, malformed
    archives, abuse of upload and sessions. Includes closing the door, which
    every comparable tool has: after the start only a few late joiners get in,
-   a removed device stays out, and a class has a size limit.
+   a removed device stays out, and a class has a size limit. Open: automated
+   vandalism from outside the class is realistic, and on the default pages.dev
+   address nothing stops a script from spending the account's daily allowance
+   for every class — the code can only bound what one quiz costs, which it
+   does. The known remedy is a domain in front of the site with a rate-limiting
+   rule at the edge, which the free plan includes; that reopens the no-domain
+   decision.
 5. **Avatars the students find interesting** — the design question, in the
    owner's words: how to make the avatars interesting to the students without
    wasting everybody's time or having fights break out. Random assignment

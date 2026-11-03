@@ -44,6 +44,8 @@ const POLL_HOLD_MS = 25_000;
 const FRESH_MS = 45_000;
 /** A role's tab not heard from for this long is "quiet": the choice screen says it frees up soon. */
 const QUIET_MS = 25_000;
+/** "Allow a device to join" stays open this long, or until a device takes a role. */
+const JOIN_OPEN_MS = 2 * 60_000;
 /** Join command ids remembered per class, to answer a resent join with the same player. */
 const JOINS_KEPT = 300;
 /** The code is claimed for this long beyond the instance's end, and claimed again before that runs out. */
@@ -72,6 +74,11 @@ interface Meta {
   codeUntil?: number;
   /** The token of the tab holding each role. */
   roles?: Record<RoleName, string | null>;
+  /**
+   * Until when Projector + Remote lets the next device at /teacher take a
+   * role, once the class is in ("Allow a device to join"); 0 or absent: shut.
+   */
+  joinUntil?: number;
   lastActivity: number;
   v: number;
 }
@@ -496,20 +503,46 @@ export class Instance extends DurableObject<Env> {
    * accident). A tab that holds a role keeps it and comes back to it; a dead
    * phone means the wall steers; another computer can still take a free
    * Projector while a Remote steers. "Again with another class" opens a
-   * lobby without students, so the roles are open again.
+   * lobby without students, so the roles are open again. Narrowed by
+   * docs/second-teacher-device.md: a device that set the quiz up comes back,
+   * Projector + Remote can allow a device to join, and when nothing steers
+   * any device may take a role.
    */
   private classIn(): boolean {
     const run = this.game?.run;
     return !!run && G.activePlayers(run).length > 0;
   }
 
-  private choiceState(role: RoleName): ChoiceState {
+  /**
+   * Projector + Remote's "Allow a device to join" is open: the next device
+   * at /teacher takes the free or dropped role, or the Projector itself
+   * (docs/second-teacher-device.md, rule 3).
+   */
+  private joinOpen(): boolean {
+    return (this.meta?.joinUntil ?? 0) > Date.now();
+  }
+
+  /** A tab steers the quiz: a Remote that is there, or else a Projector that is. */
+  private someoneSteers(): boolean {
+    if (!this.steering()) return true;
+    const s = this.presence("screen");
+    return s === "present" || s === "quiet";
+  }
+
+  /**
+   * owner: a tab holding the quiz's secret, which set the quiz up (rule 2):
+   * the gate doesn't apply to it, but it pushes no tab aside that is there.
+   */
+  private choiceState(role: RoleName, owner = false): ChoiceState {
     const p = this.presence(role);
     const steers = role === "remote" || this.steering();
-    if (p === "none" || p === "away") return steers && this.classIn() ? "closed" : "free";
-    if (role === "screen" && this.steering()) return this.classIn() ? "taken" : "movable";
+    // The gate: once the class is in, nobody new steers, unless the
+    // steering screen allows a device to join or nothing steers at all.
+    const gated = steers && this.classIn() && !this.joinOpen() && this.someoneSteers();
+    if (p === "none" || p === "away") return gated && !owner ? "closed" : "free";
+    if (role === "screen" && this.steering()) return this.classIn() && !this.joinOpen() ? "taken" : "movable";
     // Quiet means "free soon"; not when it would come back closed.
-    return p === "quiet" && !(steers && this.classIn()) ? "quiet" : "taken";
+    return p === "quiet" && !gated ? "quiet" : "taken";
   }
 
   /**
@@ -543,10 +576,12 @@ export class Instance extends DurableObject<Env> {
   }
 
   /** A guest takes a role, if it's free; the Projector also when it steers itself (rule 4). */
-  private takeRole(role: RoleName): string | null {
+  private takeRole(role: RoleName, owner = false): string | null {
     const roles = this.meta!.roles!;
-    const state = this.choiceState(role);
+    const state = this.choiceState(role, owner);
     if (state !== "free" && state !== "movable") return null;
+    // One device per "Allow a device to join".
+    if (this.classIn()) this.meta!.joinUntil = 0;
     const token = randomToken();
     const old = roles[role];
     if (old) {
@@ -593,13 +628,21 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "tick") return { direct: [ack(true), this.chooseMessage()] };
         if (cmd.op === "takeRole") {
           if (cmd.role !== "screen" && cmd.role !== "remote") return { direct: [ack(false, "unknown role")] };
-          const token = this.takeRole(cmd.role);
+          const owner = typeof cmd.secret === "string" && safeEqual(cmd.secret, meta.secret);
+          // A device setting the quiz up (no student yet) keeps the secret: it comes back without the button.
+          const setup = !this.classIn();
+          const token = this.takeRole(cmd.role, owner);
           if (!token) {
-            const error = this.classIn() ? "Students have joined: the steering stays where it is." : cmd.role === "screen" ? "Another screen shows the quiz." : "Another device steers the quiz.";
+            const error = this.classIn()
+              ? "Students have joined. First, on the projector screen: ⋯, Allow a device to join."
+              : cmd.role === "screen"
+                ? "Another screen shows the quiz."
+                : "Another device steers the quiz.";
             return { direct: [ack(false, error), this.chooseMessage()] };
           }
           await this.afterTeacherChange(["meta"]);
-          return { direct: [ack(true), { t: "role", role: cmd.role, token }], session: { role: cmd.role, token, since: now } };
+          const role: ServerMessage = setup ? { t: "role", role: cmd.role, token, secret: meta.secret } : { t: "role", role: cmd.role, token };
+          return { direct: [ack(true), role], session: { role: cmd.role, token, since: now } };
         }
         if (cmd.op !== "newPlayer" && cmd.op !== "claim") return { direct: [ack(false, "not joined")] };
         const run = game.run;
@@ -691,6 +734,11 @@ export class Instance extends DurableObject<Env> {
           return { direct: [ack(true)] };
         }
         if (!this.steering()) return { direct: [ack(false, "The remote steers the quiz. To steer here: ⋯, Steer from here.")] };
+        if (cmd.op === "allowJoin") {
+          meta.joinUntil = cmd.value ? now + JOIN_OPEN_MS : 0;
+          await this.afterTeacherChange(["meta"]);
+          return { direct: [ack(true)] };
+        }
       } else if (cmd.op === "projectorHere") {
         // The Remote becomes the Projector that steers itself.
         const old = roles.screen;
@@ -1142,6 +1190,7 @@ export class Instance extends DurableObject<Env> {
       current: run ? run.current : -1,
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
+      join: this.joinOpen() ? meta.joinUntil! - Date.now() : null,
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
       tempo: G.tempoOf(game),
       timed: G.timed(game),

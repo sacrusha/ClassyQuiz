@@ -58,10 +58,15 @@ second design:
 6. **Phone gone.** The Remote's tab counts as gone after 45 s without a
    sign. From then on the Projector steers again with its bar. On the
    Projector, ⋯ → "Steer from here" does the same at once. When the phone
-   comes back, it is the Remote again.
-7. **Projector gone.** The teacher reads the questions off the Remote. A role
-   whose tab is gone is offered again at `/teacher`, so another computer can
-   take the Projector. Nothing on the screens advertises this.
+   comes back, it is the Remote again. Once students are in, a phone without
+   its tab gets back in two ways: a device that set the quiz up (opened the
+   .zip, or took a role in the lobby) takes its role at `/teacher` directly;
+   any other device needs "Allow a device to join" on the wall first. When
+   nothing steers at all, any device at `/teacher` takes a role.
+   docs/second-teacher-device.md.
+7. **Projector gone.** The teacher reads the questions off the Remote, which
+   says "Projector gone" and how to bring it back. A Projector whose tab is
+   gone is offered again at `/teacher`, so another computer can take it.
 
 ## 2. The usual lesson
 
@@ -249,10 +254,13 @@ throughout. While it steers, the bottom line is the bar:
   while a Remote steers only a clicker's keys (PageDown, →, ↓) move on
   from the Projector.
 - **⋯ while steering:** Skip this question · Change the right answer · Final
-  ranking now · Players · Leave · Delete the quiz…
+  ranking now · Players · Allow a device to join (once students are in) ·
+  Leave · Delete the quiz…
 - **⋯ while a Remote steers:** Steer from here · Leave.
-- **Notices on the wall:** "Remote connected", and "Remote gone – steer here,
-  or enter the code on another device".
+- **Notices on the wall:** "Remote connected", and "Remote gone – steering
+  here". While a Remote that was there is away, the bar keeps "Remote gone
+  [Allow a device to join]"; while that is open, "One device can join at
+  /teacher [Close]".
 - **A window opened by "a new window here"** says "Drag this window
   to the projector screen, then press F for full screen" until it is full
   screen.
@@ -345,8 +353,8 @@ step:
 | Tablets still joining after Start | They get in (first five minutes and the first question; then five more) | Nothing |
 | A tablet from the last lesson, left at its final ranking | "This quiz has finished" and ← | ←, then the code |
 | Any teacher tab reloads, sleeps or loses Wi-Fi | The same role again | Nothing |
-| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …" and shows the bar | Steer at the laptop. The phone is the Remote again when it's back |
-| Projector dies | — | Read off the Remote. Optionally another computer: `/teacher`, code, Projector (offered after 45 s) |
+| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …", shows the bar, and keeps "Remote gone [Allow a device to join]" on it | Steer at the laptop. The phone is the Remote again when it's back; without its tab, Resume or `/teacher` on it (set up in the lobby), else Allow a device to join on the wall first |
+| Projector dies | The Remote says "Projector gone" and how to bring it back | Read off the Remote. Optionally another computer: `/teacher`, code, Projector (offered after 45 s), or the projector window on a two-screen laptop |
 | Wrong code | "No quiz with the code …" | Type it again |
 | Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Open the .zip again |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |
