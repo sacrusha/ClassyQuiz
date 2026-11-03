@@ -44,7 +44,10 @@ const POLL_HOLD_MS = 25_000;
  * free for another tab (user flow, rule 5).
  */
 const FRESH_MS = 45_000;
-/** A role's tab not heard from for this long is "quiet": the choice screen says it frees up soon. */
+/**
+ * A role's tab not heard from for this long is "quiet", as is one whose line
+ * closed and hasn't come back: a teacher code takes a quiet Remote (entry()).
+ */
 const QUIET_MS = 25_000;
 /**
  * Wrong teacher codes (docs/after-upload.md §4), counted two ways, both in
@@ -174,7 +177,13 @@ export class Instance extends DurableObject<Env> {
   private looksStored = 0;
   /** Wrong teacher codes, as stored; a quiz without any keeps a salt in memory until its first. */
   private guesses: Guesses = { salt: randomToken(), devs: {}, left: QUIZ_GUESSES, at: 0 };
-
+  /**
+   * "<role>:<token>" → when that teacher tab's line closed (webSocketClose),
+   * the same time as its lastPoll then: until it is heard from again, the
+   * role is quiet rather than present (a closed tab, a phone locked), so the
+   * teacher code takes it at once instead of "full" for 45 s (review D #4).
+   */
+  private closed = new Map<string, number>();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -646,7 +655,21 @@ export class Instance extends DurableObject<Env> {
     // A teacher's tab that closed its socket (reload, a phone locking its
     // screen) fades like one that went quiet: away after FRESH_MS, not at
     // once, so a reload doesn't flip the steering to the Projector and back.
-    if (session.role === "screen" || session.role === "remote") this.lastPoll.set(`${session.role}:${session.token}`, Date.now());
+    // Until it is heard from again it is quiet, not present (`closed`).
+    if (session.role === "screen" || session.role === "remote") {
+      const key = `${session.role}:${session.token}`;
+      const now = Date.now();
+      this.lastPoll.set(key, now);
+      const another = this.ctx.getWebSockets().some((o) => {
+        if (o === ws || o.readyState !== WebSocket.OPEN) return false;
+        const s = o.deserializeAttachment() as Session | null;
+        return s?.role === session.role && s.token === session.token;
+      });
+      if (!another) {
+        this.closed.set(key, now);
+        if (this.closed.size > 20) this.closed.delete(this.closed.keys().next().value!);
+      }
+    }
     this.broadcastStaff(ws);
   }
 
@@ -703,20 +726,32 @@ export class Instance extends DurableObject<Env> {
   // -------------------------------------------------------------------------
   // Roles (user flow §1)
 
-  /** Whether the tab holding a role is there, quiet (soon away), or away; "none" when nobody holds it. */
+  /**
+   * Whether the tab holding a role is there, quiet (soon away), or away;
+   * "none" when nobody holds it. Quiet: not heard from for QUIET_MS, or its
+   * line closed and it hasn't been heard from since (`closed`). A polling
+   * tab whose poll is held is heard from now.
+   */
   private presence(role: RoleName, exclude?: WebSocket): "none" | "present" | "quiet" | "away" {
     const token = this.meta?.roles?.[role];
     if (!token) return "none";
-    let last = this.lastPoll.get(`${role}:${token}`) ?? 0;
+    const key = `${role}:${token}`;
+    const now = Date.now();
+    let last = this.lastPoll.get(key) ?? 0;
+    let open = false;
     for (const ws of this.ctx.getWebSockets()) {
       if (ws === exclude || ws.readyState !== WebSocket.OPEN) continue;
       const s = ws.deserializeAttachment() as Session | null;
       if (!s || s.role !== role || s.token !== token) continue;
       const pinged = this.ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? 0;
       last = Math.max(last, pinged, s.since);
+      open = true;
     }
-    const age = Date.now() - last;
-    return age < QUIET_MS ? "present" : age < FRESH_MS ? "quiet" : "away";
+    for (const w of this.waiters) if (w.session.role === role && w.session.token === token) last = now;
+    const age = now - last;
+    if (age >= FRESH_MS) return "away";
+    if (age >= QUIET_MS || (!open && this.closed.get(key) === last)) return "quiet";
+    return "present";
   }
 
   private shown(role: RoleName, exclude?: WebSocket): Presence {
@@ -730,10 +765,20 @@ export class Instance extends DurableObject<Env> {
     return p === "none" || p === "away";
   }
 
-  /** A tab holds the role and is there (quiet counts: a present tab is never pushed aside). */
+  /** A tab holds the role and is there (quiet counts: a swap waits for it, the wall doesn't take over). */
   private there(role: RoleName): boolean {
     const p = this.presence(role);
     return p === "present" || p === "quiet";
+  }
+
+  /**
+   * A Remote the teacher code may not take: its tab is present. A quiet one
+   * (a closed tab, a phone locked, nothing heard for QUIET_MS) is taken at
+   * once, rather than "full" until it is away (review D #4); the wall still
+   * waits FRESH_MS before it steers.
+   */
+  private remoteHeld(): boolean {
+    return this.presence("remote") === "present";
   }
 
   /**
@@ -745,7 +790,7 @@ export class Instance extends DurableObject<Env> {
    */
   private entry(): Entry {
     const s = this.there("screen");
-    const r = this.there("remote");
+    const r = this.remoteHeld();
     if (s && r) return "full";
     if (s) return this.meta!.roles!.remote ? "remote" : "ask";
     return "screen";
@@ -773,6 +818,7 @@ export class Instance extends DurableObject<Env> {
       }
     }
     this.lastPoll.delete(`${role}:${token}`);
+    this.closed.delete(`${role}:${token}`);
     this.moved.set(`${role}:${token}`, msg);
     if (this.moved.size > 20) this.moved.delete(this.moved.keys().next().value!);
   }
@@ -807,7 +853,7 @@ export class Instance extends DurableObject<Env> {
       // Nothing was there: the newcomer shows and steers, as a tab that just
       // uploaded; a gone steering tab's token goes with it, so the next
       // device is asked rather than sent to it.
-      if (role === "screen" && roles.remote && !this.there("remote")) {
+      if (role === "screen" && roles.remote && !this.remoteHeld()) {
         this.evict("remote", roles.remote, { t: "lost", role: "remote" });
         roles.remote = null;
       }
