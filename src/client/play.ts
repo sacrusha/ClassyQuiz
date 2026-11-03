@@ -1,18 +1,24 @@
-// A tab that came with the quiz's code. Two entrances (docs/user-flow.md §1):
+// A tab that came with a code from the code box, which routes by length
+// (docs/user-flow.md §1, docs/after-upload.md §4):
 //
-//   /play#63953      a student's device: straight to an avatar, then colours.
-//                    No teacher choices here, so a child can't take the remote
-//                    by accident. Built for young readers on shared tablets:
-//                    pictures, colours, shapes and numbers.
-//   /teacher#63953   the teacher's other screen or phone: Projector or Remote.
-//   /teacher?role=screen#63953
-//                    takes the Projector at once (the lobby's "Open the
-//                    projector window").
+//   /play#63953      the class code: a student's device, straight to an
+//                    avatar, then colours. Built for young readers on shared
+//                    tablets: pictures, colours, shapes and numbers. The
+//                    class code never reaches a teacher role.
+//   /play#6395347    the teacher code, the class code and two digits: a
+//                    teacher device. When one tab shows and steers, it asks
+//                    "Show the quiz here, or steer it from here?"; otherwise
+//                    it takes the role that is free.
+//   /play?win=1#…    the same from "a new window here": a window opened by
+//                    a teacher tab, whose copy of that tab's role isn't its own.
+//   /teacher#63953   the old way in, kept for old links: it asks for the
+//                    teacher code, except on the device that uploaded the
+//                    quiz, which comes in with the quiz's secret.
 
-import type { Auth, Avatar, ChoiceState, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
-import { JOIN_CODE, viewKey } from "../shared/protocol.ts";
+import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
+import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
-import { $, esc, findQuiz, keepAwake, lines, rolePage, saveQuiz, siteAddress, statusDot, store, tabRole } from "./dom.ts";
+import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
@@ -32,10 +38,18 @@ type Choice = Extract<ServerMessage, { t: "choose" }>;
 const main = $("main");
 const dot = $("#dot");
 const banner = $("#offline");
-const teacher = location.pathname.startsWith("/teacher");
 const params = new URLSearchParams(location.search);
-const code = (location.hash.slice(1) || params.get("c") || "").replace(/\D/g, "");
-const wantScreen = teacher && params.get("role") === "screen";
+const typed = (location.hash.slice(1) || params.get("c") || "").replace(/\D/g, "");
+/** The old address, /teacher: it asks for the teacher code. */
+const oldAddress = location.pathname.startsWith("/teacher");
+const code = TEACHER_CODE.test(typed) ? typed.slice(0, 5) : typed;
+/** The teacher code's two digits, when they were typed. */
+const digits = TEACHER_CODE.test(typed) ? typed.slice(5) : "";
+/** The uploading device needs no digits: it has the quiz's secret (Resume, or an old /teacher link). */
+const savedHere = JOIN_CODE.test(code) ? (savedQuizzes().find((q) => q.code === code) ?? null) : null;
+const teacher = !!digits || (oldAddress && !!savedHere);
+/** Opened by "a new window here" or "open the projector window" from a teacher tab. */
+const fromWindow = params.get("win") === "1";
 const key = `cq.player.${code}`;
 
 let line: Line | null = null;
@@ -77,25 +91,31 @@ let dressing = false;
 let dressSpent = false;
 
 async function start(): Promise<void> {
-  if (!JOIN_CODE.test(code)) {
-    if (teacher) showCodeForm(false);
-    else location.replace("/");
+  if (oldAddress && !teacher) {
+    showTeacherForm(JOIN_CODE.test(code) ? "This quiz now takes the teacher code." : "");
     return;
   }
+  if (!JOIN_CODE.test(code)) {
+    location.replace("/");
+    return;
+  }
+  if (teacher) document.body.classList.add("follows-dark");
   keepAwake();
   showWaiting();
   let instance = "";
   for (;;) {
     try {
-      const r = await api<{ instance?: string }>("/api/join", { code });
+      const r = await api<{ instance?: string; message?: string }>("/api/join", teacher ? { code: typed, secret: savedHere?.secret } : { code });
       if (r.body.instance) {
         instance = r.body.instance;
         break;
       }
-      if (r.status === 404) {
+      if (r.status === 404 || (r.status === 429 && r.body.error === "locked")) {
         store.remove(key);
-        if (teacher) showCodeForm(true);
-        else showNoQuiz();
+        if (!teacher) showNoQuiz();
+        else if (r.body.error === "locked") showTeacherForm(TOO_MANY_CODES);
+        else if (r.body.error === "teacher") showTeacherForm(WRONG_TEACHER_CODE);
+        else showTeacherForm(`No quiz with the code ${code}.`);
         return;
       }
       if (r.body.quota) {
@@ -111,9 +131,9 @@ async function start(): Promise<void> {
   }
   instanceId = instance;
   if (teacher) {
-    if (wantScreen) {
-      // A window opened from the lobby: it may carry a copy of its opener's
-      // role, which stays with the opener.
+    if (fromWindow) {
+      // A window opened from a teacher tab: it may carry a copy of its
+      // opener's role, which stays with the opener.
       tabRole.remove(instance);
     } else {
       const held = tabRole.get(instance);
@@ -173,8 +193,14 @@ function onMessage(m: ServerMessage): void {
     choice = m;
     if (view || busy) return;
     if (teacher) {
-      if (wantScreen && (m.screen === "free" || m.screen === "movable")) void takeRole("screen");
-      else showRoles();
+      // Acted on once, as the device arrives; later choices (another tab
+      // came or went) wait for the teacher's tap, so a device left lying
+      // here never takes a role by itself.
+      if (!entered) {
+        entered = true;
+        enter(m);
+      }
+      return;
     } else if (m.phase === "final") {
       showFinished();
     } else if (refused && refused.phase === m.phase && m.avatars.length === 0) {
@@ -195,11 +221,9 @@ function onMessage(m: ServerMessage): void {
   } else if (m.t === "role") {
     clearInterval(tickTimer);
     line?.stop();
-    // Taken while setting up: this device comes back without asking, and
-    // its root page offers Resume (docs/second-teacher-device.md, rule 2).
-    if (m.secret && !findQuiz(instanceId)) saveQuiz({ id: instanceId, secret: m.secret, code, title: choice?.title ?? "", at: Date.now() });
-    tabRole.set(instanceId, { role: m.role, token: m.token, code });
-    location.replace(rolePage(instanceId, m.role) + (wantScreen ? "&drag=1" : ""));
+    tabRole.set(instanceId, { role: m.role, token: m.token, code, teacher: digits || findQuiz(instanceId)?.teacher });
+    // A window opened to be dragged to the projector says so until it is full screen.
+    location.replace(rolePage(instanceId, m.role) + (fromWindow && m.role === "screen" ? "&drag=1" : ""));
   } else if (m.t === "state" && m.view.role === "player") {
     // Every answer in the class bumps the version; only redraw when this
     // device's own view changed, or a tap could land on a button being
@@ -230,19 +254,30 @@ function showWaiting(): void {
   main.innerHTML = `<div class="center"><div class="dot" data-status="connecting" style="width:28px;height:28px"></div></div>`;
 }
 
-function codeForm(): string {
-  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="12345" aria-label="Quiz code"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
+/** The code box again, as on the root page: five digits for a student, seven for a teacher; it routes by length. */
+function codeForm(value = ""): string {
+  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="12345" aria-label="Quiz code" value="${esc(value)}"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
 }
 
 function wireCodeForm(): void {
   const input = $("#c") as HTMLInputElement;
   input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  input.addEventListener("input", () => {
+    const c = input.value.replace(/\D/g, "");
+    if (c !== input.value) input.value = c;
+  });
   $("#codeform").addEventListener("submit", (e) => {
     e.preventDefault();
     const c = input.value.replace(/\D/g, "");
-    if (!JOIN_CODE.test(c)) return;
-    location.hash = c;
-    location.reload();
+    if (!JOIN_CODE.test(c) && !TEACHER_CODE.test(c)) {
+      input.select();
+      return;
+    }
+    if (location.pathname.startsWith("/play")) {
+      location.hash = c;
+      location.reload();
+    } else location.href = `/play#${c}`;
   });
 }
 
@@ -254,14 +289,20 @@ function showNoQuiz(): void {
   wireCodeForm();
 }
 
-/** The teacher's entrance without a code, or with one that opens nothing. */
-function showCodeForm(wrong: boolean): void {
+/**
+ * A teacher device without a working teacher code: the old /teacher
+ * address, a wrong code, or too many wrong ones. The box takes the class
+ * code too, for a student who ends up here.
+ */
+function showTeacherForm(note: string): void {
+  document.body.classList.add("follows-dark");
   document.title = "classyQuiz · teacher";
   main.innerHTML = `<div class="center teacher-entry">
     <h1>Show or steer a quiz from here</h1>
-    <p class="muted">${wrong ? `No quiz with the code ${esc(code)}.` : "The quiz's code:"}</p>
-    ${codeForm()}
-    <p class="muted">Students go to <a href="/">${esc(siteAddress())}</a>.</p>
+    ${note ? `<p class="muted">${esc(note)}</p>` : ""}
+    <p class="muted">The teacher code:</p>
+    ${codeForm(JOIN_CODE.test(code) ? code : "")}
+    <p class="muted">It is the class code and two more digits, as the quiz's own screen shows it.</p>
   </div>`;
   wireCodeForm();
 }
@@ -288,36 +329,46 @@ function showAvatars(): void {
   );
 }
 
-/** This device set the quiz up (it opened the .zip, or took a role before the class was in). */
+/** This device uploaded the quiz: it comes in with the quiz's secret, needing no digits. */
 function ownSecret(): string | undefined {
-  return findQuiz(instanceId)?.secret;
+  return findQuiz(instanceId)?.secret ?? savedHere?.secret;
 }
 
-function roleButton(role: "screen" | "remote", state: ChoiceState): string {
-  // The gate doesn't apply to a device that set the quiz up.
-  if (state === "closed" && ownSecret()) state = "free";
-  const free = state === "free" || state === "movable";
-  const label = role === "screen" ? "Projector" : "Remote";
-  const what = role === "screen" ? "shows the quiz to the class" : "steers the quiz";
-  const note =
-    state === "quiet"
-      ? "in use – free in under a minute"
-      : state === "closed"
-        ? "students are in: first, on the projector screen, ⋯ Allow a device to join"
-        : free
-          ? what
-          : "in use";
-  return `<button class="btn role" data-role="${role}"${free ? "" : " disabled"}>${label}<small>${note}</small></button>`;
-}
+/** A teacher device has acted on what the quiz said when it came in. */
+let entered = false;
 
-/** The teacher's entrance: what this tab is for. */
-function showRoles(): void {
-  const c = choice!;
+/**
+ * What a teacher device does on arriving (docs/after-upload.md §4): the
+ * question when one tab shows and steers; the role whose tab is gone,
+ * without asking; or the note that both are there, which pushes nobody
+ * aside. Nothing the device senses decides it.
+ */
+function enter(c: Choice): void {
   document.title = `${c.title || "Quiz"} · teacher`;
+  const entry: Entry = c.entry;
+  if (entry === "screen" || entry === "remote") {
+    void takeRole(entry);
+    return;
+  }
+  if (entry === "full") {
+    main.innerHTML = `<div class="center choice">
+      <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
+      <p class="muted">This quiz already has a screen for the class and one that steers.</p>
+      <button class="btn" data-retry>Try again</button>
+    </div>`;
+    main.querySelector("[data-retry]")!.addEventListener("click", () => {
+      entered = false;
+      showWaiting();
+      void line?.send({ op: "tick" });
+    });
+    return;
+  }
   main.innerHTML = `<div class="center choice">
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
-    <p class="muted">This screen is the…</p>
-    <div class="row roles">${roleButton("screen", c.screen)}${roleButton("remote", c.remote)}</div>
+    <div class="entry-roles">
+      <button class="btn role" data-role="screen">Show the quiz here<small>the class watches this screen</small></button>
+      <button class="btn role" data-role="remote">Steer it from here<small>Start, next, the answers</small></button>
+    </div>
   </div>`;
   main.querySelectorAll<HTMLButtonElement>("button[data-role]").forEach((b) =>
     b.addEventListener("click", () => void takeRole(b.dataset.role as "screen" | "remote")),
@@ -328,12 +379,17 @@ async function takeRole(role: "screen" | "remote"): Promise<void> {
   if (!line) return;
   busy = true;
   showWaiting();
-  const a = await line.send({ op: "takeRole", role, secret: ownSecret() });
-  if (!a.ok) {
-    // Taken in the meantime: the new choice has come with the answer.
-    busy = false;
-    showRoles();
+  const a = await line.send({ op: "takeRole", role, teacher: digits || undefined, secret: ownSecret() });
+  if (a.ok) return; // the role follows
+  busy = false;
+  if (a.error === WRONG_TEACHER_CODE || a.error === TOO_MANY_CODES) {
+    line.stop();
+    clearInterval(tickTimer);
+    showTeacherForm(a.error);
+    return;
   }
+  // The tabs changed in the meantime: the new choice has come with the answer.
+  if (choice) enter(choice);
 }
 
 function newPlayer(): void {

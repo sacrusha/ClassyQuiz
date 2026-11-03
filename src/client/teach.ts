@@ -4,7 +4,7 @@
 // is in the ⋯ menu.
 
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
-import { $, esc, findQuiz, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
+import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
 import { Steer, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, syncCrowd, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
@@ -52,14 +52,16 @@ function onMessage(m: ServerMessage): void {
     view = m.view;
     render();
   } else if (m.t === "role") {
-    // ⋯ → "Show the projector here": this tab is the Projector now.
+    // ⇄ Swap, from here or from the wall: this tab shows the quiz now.
     line?.stop();
-    tabRole.set(instance, { role: m.role, token: m.token, code: held!.code });
+    tabRole.set(instance, { role: m.role, token: m.token, code: held!.code, teacher: teacherDigits() });
     location.replace(rolePage(instance, m.role));
   } else if (m.t === "lost") {
+    // Another device took the steering while this one was away: back in with the teacher code.
     line?.stop();
     tabRole.remove(instance);
-    location.replace(`/teacher#${held!.code}`);
+    const d = teacherDigits();
+    location.replace(d ? teacherEntry(held!.code, d) : `/teacher#${held!.code}`);
   } else if (m.t === "gone") {
     line?.stop();
     tabRole.remove(instance);
@@ -114,9 +116,22 @@ function render(): void {
   if (steer.locked()) actions.querySelectorAll<HTMLButtonElement>("button[data-step]").forEach((b) => (b.disabled = true));
 }
 
+/** The teacher code's two digits: the view's, else what the tab was given. */
+function teacherDigits(): string {
+  return view?.teacher || held?.teacher || "";
+}
+
+/**
+ * The steering tab's lobby is the check (docs/after-upload.md §3): the class
+ * code, count and avatars, the tempo, the teacher code at rest, ⇄ Swap while
+ * the wall is there, and the questions; Start in the bar below.
+ */
 function lobby(v: TeacherView): string {
   const n = v.run?.players.length ?? 0;
-  const projector = v.screen === "present" ? `<p class="device ok">Projector ✓</p>` : projectorLine(v);
+  const projector =
+    v.screen === "present"
+      ? `<p class="device"><span class="ok">Projector ✓</span> · <button class="link" data-act="swap">&#8644; Swap</button></p><p class="device">${secondDevice(v)}</p>`
+      : projectorLine(v);
   return `<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
@@ -128,15 +143,20 @@ function lobby(v: TeacherView): string {
     ${questionList(v, steer.ui)}`;
 }
 
+/** The teacher code at rest, in the sentence the wall's check uses. */
+function secondDevice(v: TeacherView): string {
+  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.`;
+}
+
 /**
- * How to bring the projector (back): another computer at /teacher, which
- * takes a free Projector while this Remote steers; or, on the two-screen
+ * How to bring the projector (back): the teacher code on the projector
+ * computer, which takes the free wall without asking; or, on the two-screen
  * laptop whose projector window got closed, that window again. During the
- * quiz it says the projector is gone (docs/second-teacher-device.md).
+ * quiz it says the projector is gone.
  */
 function projectorLine(v: TeacherView): string {
   const gone = v.phase === "lobby" ? "" : "Projector gone. ";
-  return `<p class="device">${gone}On the projector computer: open <strong>${esc(siteAddress())}/teacher</strong>, type <strong>${esc(v.code)}</strong>, choose <strong>Projector</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open the projector window</button> here.</span></p>`;
+  return `<p class="device">${gone}On the projector computer: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open the projector window</button> here.</span></p>`;
 }
 
 function current(v: TeacherView): string {
@@ -221,25 +241,22 @@ function menu(v: TeacherView): void {
     items.push({ label: showAll ? "Hide the questions" : "All questions", run: () => ((showAll = !showAll), render()) });
     items.push({ label: "Players", run: () => ((showPlayers = true), render()) });
   }
-  items.push({ label: "Show the projector here", run: () => void projectorHere() });
+  // ⇄ Swap while the wall is there: a wrong answer to the second device's question, undone from either.
+  if (v.screen === "present") items.push({ label: "&#8644; Swap: show the quiz here, steer from the other device", run: () => void swap() });
+  else items.push({ label: "A second device…", run: () => toast(`On ${siteAddress()}, type ${teacherCode(v.code, v.teacher)}.`, 8000) });
   items.push({ label: "Stop being the remote", run: () => void leave() });
   items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }
 
-async function projectorHere(): Promise<void> {
-  if (view?.screen === "present" && !confirm("The projector moves to this screen; the other screen stops showing the quiz.")) return;
-  const r = await line?.send({ op: "projectorHere" });
+/** ⇄ Swap (docs/after-upload.md §4): no confirmation, the same tap on either device undoes it. */
+async function swap(): Promise<void> {
+  const r = await line?.send({ op: "swap" });
   if (r && !r.ok && r.error) toast(r.error);
 }
 
 async function leave(): Promise<void> {
-  const inClass = (view?.run?.players.length ?? 0) > 0;
-  const back = !inClass
-    ? ""
-    : findQuiz(instance)
-      ? ` This device can come back at ${siteAddress()}/teacher.`
-      : " To come back: on the projector, ⋯ Allow a device to join.";
+  const back = view ? ` To steer again: on ${siteAddress()}, type ${teacherCode(view.code, view.teacher)}.` : "";
   if (!confirm(`Stop steering from this device? The projector steers again.${back}`)) return;
   await line?.send({ op: "leave" });
   line?.stop();
@@ -258,8 +275,12 @@ for (const area of [main, actions]) {
     if (!el) return;
     if (el.dataset.act === "projector-window") {
       // A second monitor: the window takes the free Projector; this tab stays the Remote.
-      const w = window.open(`/teacher?role=screen#${held!.code}`, "_blank", "popup,width=1280,height=720");
-      if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open the code in another window and choose Projector.", 8000);
+      const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
+      if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type the teacher code.", 8000);
+      return;
+    }
+    if (el.dataset.act === "swap") {
+      void swap();
       return;
     }
     if (el.dataset.act === "close-players") {

@@ -10,8 +10,10 @@
 //
 // Roles (docs/user-flow.md §1): one code per quiz. A tab with the code is a
 // guest until it plays (a player) or takes one of the two teacher roles, the
-// Projector ("screen") or the Remote. Each role is held by one tab at a time,
-// named by a token the tab keeps for its lifetime (sessionStorage).
+// Projector ("screen", the wall) or the Remote (the steering tab). Each role
+// is held by one tab at a time, named by a token the tab keeps for its
+// lifetime (sessionStorage). A teacher role takes the teacher code, the class
+// code plus two digits (docs/after-upload.md §4), or the quiz's secret.
 
 import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
@@ -83,19 +85,18 @@ export type Command =
   | { op: "endInstance" }
   // the Projector: the clicker or keyboard's next usual step, at any time
   | { op: "advance"; at: At }
-  /** Projector: take the steering back from the Remote (the screen in the room). */
-  | { op: "steerHere" }
-  /** Projector + Remote: let the next device at /teacher take a role once the class is in, or shut that again. */
-  | { op: "allowJoin"; value: boolean }
-  /** Remote: this tab becomes the Projector that steers itself. */
-  | { op: "projectorHere" }
+  /** Projector or Remote, while both tabs are there: the wall becomes the steering tab and the steering tab the wall. */
+  | { op: "swap" }
   /** Projector or Remote: give the role up. */
   | { op: "leave" }
   /** Any tab: send me my current view (presence changes with time, not with events). */
   | { op: "tick" }
   // a guest
-  /** secret: the quiz's, kept by a device that set the quiz up; the gate doesn't apply to it. */
-  | { op: "takeRole"; role: RoleName; secret?: string }
+  /**
+   * teacher: the teacher code's last two digits. secret: the quiz's, kept by
+   * the uploading device (Resume); it needs no digits and isn't limited.
+   */
+  | { op: "takeRole"; role: RoleName; teacher?: string; secret?: string }
   | { op: "newPlayer" }
   | { op: "claim"; player: string }
   // a player
@@ -111,18 +112,16 @@ export type Command =
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
 
 /**
- * How a role looks to a guest choosing what its tab is:
- * - free: nobody holds it, or its tab has been gone about a minute;
- * - taken: a tab holds it;
- * - quiet: a tab holds it but hasn't been heard from for a while; free soon;
- * - movable (Projector only): held by a Projector that steers itself; taking
- *   it turns that tab into the Remote;
- * - closed: free, but the class has students, taking it would steer the
- *   quiz, and the steering screen hasn't allowed a device to join
- *   (docs/second-teacher-device.md). A device holding the quiz's secret may
- *   take it anyway.
+ * What a teacher device that comes in with the teacher code does
+ * (docs/after-upload.md §4):
+ * - ask: one tab does both (the wall steers itself): "Show the quiz here, or
+ *   steer it from here?";
+ * - screen / remote: that role is free, or its tab is gone: it takes it
+ *   without asking. "screen" also when nothing is there: it does both;
+ * - full: a wall and a steering tab are both there; a present tab is never
+ *   pushed aside.
  */
-export type ChoiceState = "free" | "taken" | "quiet" | "movable" | "closed";
+export type Entry = "ask" | "screen" | "remote" | "full";
 
 /** Whether a role is held, and by a tab that is there. */
 export type Presence = "none" | "present" | "away";
@@ -132,14 +131,8 @@ export type ServerMessage =
   | { t: "ack"; id: string; ok: boolean; error?: string; result?: unknown }
   /** A guest became a player; it keeps the token to come back. */
   | { t: "welcome"; player: string; token: string; run: string }
-  /** This tab holds a role now (taken, or handed to it when its Projector moved to another tab). */
-  | {
-      t: "role";
-      role: RoleName;
-      token: string;
-      /** The quiz's secret, to a tab that took its role before the class was in: it comes back without asking. */
-      secret?: string;
-    }
+  /** This tab holds a role now (taken, handed to it when its Projector moved to another tab, or swapped). */
+  | { t: "role"; role: RoleName; token: string }
   /** The role this tab held went to another tab. */
   | { t: "lost"; role: RoleName }
   /**
@@ -152,8 +145,8 @@ export type ServerMessage =
       title: string;
       phase: Phase | "idle";
       avatars: { id: string; avatar: Avatar }[];
-      screen: ChoiceState;
-      remote: ChoiceState;
+      /** For a teacher device with the teacher code: what taking a role would do. */
+      entry: Entry;
       /**
        * The tab came with a player token that isn't this class's player: of
        * an earlier class, or an avatar another device took back. Without
@@ -247,6 +240,8 @@ export interface ScreenView {
   v: number;
   title: string;
   code: string;
+  /** The teacher code's two digits after the class code: a second device types both (docs/after-upload.md §4). */
+  teacher: string;
   /** The quiz's background (a question's own is in `question`). */
   background: ImageRef | null;
   /** Every picture the projector may show, to fetch ahead (in the lobby) so no question waits on one. */
@@ -299,6 +294,8 @@ export interface TeacherView {
   id: string;
   title: string;
   code: string;
+  /** The teacher code's two digits after the class code. */
+  teacher: string;
   background: ImageRef | null;
   warnings: Problem[];
   questions: TeacherQuestion[];
@@ -306,8 +303,6 @@ export interface TeacherView {
   current: number;
   screen: Presence;
   remote: Presence;
-  /** "Allow a device to join" is open: ms left; null: shut. */
-  join: number | null;
   /** The question's picture fills the projector. */
   zoom: boolean;
   /** The teacher's choice in the lobby, else the quiz's "Tempo:", else the teacher's pace. */
@@ -384,6 +379,12 @@ export function viewKey(view: View): string {
 }
 
 export const JOIN_CODE = /^\d{5}$/;
+/** The teacher code: the class code and two digits, typed in the same box (docs/after-upload.md §4). */
+export const TEACHER_CODE = /^\d{7}$/;
+/** Said to a device whose teacher code's last two digits are wrong. */
+export const WRONG_TEACHER_CODE = "That isn't this quiz's teacher code.";
+/** Said to a device after too many wrong teacher codes. */
+export const TOO_MANY_CODES = "Too many wrong codes for this quiz. Try again in a few minutes.";
 export const MAX_QUIZ_BYTES = 200_000;
 
 // Pictures (decisions.md, "Pictures in the archive"). The browser redraws each
@@ -412,20 +413,29 @@ export const PACK_BYTES = 1_500_000;
 export const MAX_UPLOAD_BYTES = 16_000_000;
 
 /**
- * Answer to POST /api/quiz. On success: the quiz's code, the secret this
- * device keeps to delete it, and the Projector token for the tab that pasted
- * it. `missingImages`: pictures the quiz names that didn't come with it.
+ * Answer to POST /api/quiz. On success: the quiz's code and the teacher
+ * code's two digits, the secret this device keeps to delete it, and the
+ * Projector token for the tab that pasted it. `missingImages`: pictures the quiz names that didn't come with it.
  * `error`: the site couldn't take it (full, or out of its daily allowance),
  * for the teacher, not a problem with the quiz to hand back to the AI.
  */
 export type UploadResult =
-  | { ok: true; id: string; secret: string; code: string; token: string }
+  | { ok: true; id: string; secret: string; code: string; teacher: string; token: string }
   | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string };
 
 /** Answer to POST /api/i/:id/info, for the device that pasted the quiz. */
 export interface QuizInfo {
   title: string;
   code: string;
+  /** The teacher code's two digits: Resume goes in with them, and another device types them. */
+  teacher: string;
+  /**
+   * Where the quiz stands, for the resume line (v4 item 2): the class's
+   * phase ("lobby": waiting for the class; "final": finished), and the
+   * question on screen as n of total among those not skipped (n 0 before
+   * the first).
+   */
+  stands: { phase: Phase | "idle"; n: number; total: number };
   /** When the quiz closes unless used before. */
   closes: number;
 }

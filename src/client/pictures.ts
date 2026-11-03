@@ -50,6 +50,11 @@ export function load(src: string, first = false): Promise<string | null> {
   return p;
 }
 
+/** A picture this page already has (the /example page's, read from its .zip): <img data-pic="src"> gets `url`. */
+export function provide(src: string, url: string): void {
+  urls.set(src, url);
+}
+
 /** Fetches these ahead, in order. */
 export function preload(srcs: string[]): void {
   for (const s of srcs) void load(s);

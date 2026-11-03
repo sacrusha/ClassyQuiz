@@ -1,5 +1,17 @@
 # classyQuiz — A second teacher device once the class is in
 
+> **Superseded in part, 2026-11-03, by the after-upload flow**
+> (docs/after-upload.md, draft 5; decisions.md, "After upload: the check,
+> the teacher code, one question, Swap"). The teacher code, the class code
+> plus two digits, is the gate, before and after the first student alike;
+> the class code never reaches a role. So rule 2 (the secret on devices that
+> took a role) is no longer needed: the secret stays for Resume and Delete
+> on the uploading device only. Rule 3 ("Allow a device to join" and its
+> two-minute window) and rule 4 (any device at `/teacher` when nothing
+> steers) are gone: a dead phone, a closed tab or a new phone mid-lesson
+> types the teacher code again. Rules 1 and 5 hold. The screens and words
+> below are as built before; user-flow.md §3 has the current ones.
+
 Backlog v2 item 8. **Revision 2, 2026-11-03.** It narrows the gate in
 decisions.md, "One code per quiz, two teacher roles per tab" ("No new
 steering once students are in"). Once settled, it goes into user-flow.md §1

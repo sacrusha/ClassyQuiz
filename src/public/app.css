@@ -270,7 +270,24 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .mbelow { max-width: 50rem; margin: 0 auto; padding: 16px 16px 64px; font-size: 18px; border-top: 1px solid var(--rule); }
 .mfoot { text-align: right; }
 .device { margin: 0; color: var(--muted); text-align: center; }
-.device.ok { color: var(--good); font-weight: 700; }
+.device.ok, .device .ok { color: var(--good); font-weight: 700; }
+/* The join screen's quiet line under Start: back to the check, the teacher code in a sheet, ⋯. */
+.joinnav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 28px; margin: 4px 0 0; font-size: 16px; }
+.joinnav .link { color: var(--muted); }
+
+/* The single tab's check (docs/after-upload.md §3): the teacher's page, at a
+   reading size rather than the wall's; private until the teacher shares it. */
+.check { max-width: 50rem; margin: 0 auto; padding: 20px 16px 64px; font-size: 18px; }
+.has-backdrop .check { background: var(--bg); }
+.checkhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.ctitle { font-size: 1.5em; line-height: 1.2; margin: 0; overflow-wrap: anywhere; }
+.ctitle .cnum { color: var(--muted); font-size: .72em; font-weight: 600; white-space: nowrap; }
+.classcode { margin: 0; color: var(--muted); white-space: nowrap; }
+.classcode strong { color: var(--fg); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.classcode .joinedn { display: inline-flex; align-items: center; gap: .15em; margin-left: .5em; color: var(--fg); font-weight: 700; }
+.cstart { text-align: right; margin: 14px 0 10px; }
+.cstart .btn.big { width: auto; padding: 0 1.4em; }
+.check .cline { text-align: left; font-size: 16px; margin: 6px 0; }
 
 /* -------------------------------------------------------------------------
    What the steering tab shows, on the Remote and on the steering Projector
@@ -372,13 +389,14 @@ body.teach { padding-bottom: 96px; }
 .row.spread { justify-content: space-between; }
 
 /* -------------------------------------------------------------------------
-   The teacher's entrance (/teacher): the code, then Projector or Remote */
+   A teacher device coming in: the teacher code, then at most one question */
 
 .teacher-entry h1, .choice h1 { font-size: 1.5rem; margin: 0; line-height: 1.2; }
 .codeform { display: flex; gap: 8px; width: min(100%, 340px); }
 .codeform .code-input { flex: 1; min-width: 0; }
 .codeform .btn { width: 64px; font-size: 1.3rem; }
-.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: min(100%, 520px); }
+/* A teacher device's one question (docs/after-upload.md §4): what it will do, in plain words. */
+.entry-roles { display: grid; grid-template-columns: 1fr; gap: 12px; width: min(100%, 420px); }
 .btn.role { flex-direction: column; gap: 4px; min-height: 120px; font-size: 1.35rem; }
 .btn.role:not(:disabled) { border-color: var(--accent); }
 .btn.role small { font-size: .8rem; font-weight: 500; color: var(--muted); }
@@ -393,7 +411,7 @@ body.teach { padding-bottom: 96px; }
   body.screen .lobby .bigcode { font-size: 4.2em; }
   body.screen .lobby .qr, .mfold .lobby .qr { width: 38vw; height: 38vw; }
   .crowdcol .avatars > *, .lobby .crowd .av { width: 7vh; height: 7vh; }
-  .mstart .twoscreens, .teach .twoscreens { display: none; } /* no second monitor on a phone */
+  .mstart .twoscreens, .teach .twoscreens, .check .twoscreens, .sheet .twoscreens { display: none; } /* no second monitor on a phone */
 }
 
 /* -------------------------------------------------------------------------
@@ -432,6 +450,10 @@ body.teach { padding-bottom: 96px; }
   .steerbar .nudge .len { min-width: 2.6em; }
   .steerbar .nudge .len svg { display: none; }
   .steerbar .joinchip { display: none; } /* in ⋯ on a phone */
+  /* The code, not the address cut to "classyquiz.pa…" or the code to a
+     lone digit (bugs.md, the stray "1"); with −5/+5 the code gives way. */
+  .steerbar .codeline .addr { display: none; }
+  .steerbar:has(.nudge) .codeline { visibility: hidden; }
 }
 /* The class reads the question first: the tiles keep their place, colours and shapes, without text. */
 .tiles.veiled .txt { visibility: hidden; }
