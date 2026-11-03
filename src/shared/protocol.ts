@@ -179,6 +179,19 @@ export interface ImageRef {
   h: number;
 }
 
+/**
+ * An answer picture on a student's device: a slice of one of the packs the
+ * view names (`packs`), `l` bytes from `o`, of `type`, `w`×`h` pixels.
+ */
+export interface PackPic {
+  p: number;
+  o: number;
+  l: number;
+  type: string;
+  w: number;
+  h: number;
+}
+
 export interface QuestionView {
   /** Index in the quiz. */
   q: number;
@@ -186,7 +199,10 @@ export interface QuestionView {
   n: number;
   total: number;
   text: string;
+  /** In the order on screen; "" for a picture answer. */
   answers: string[];
+  /** Pictures as answers (v3 item 1), in the order on screen, null for a text answer; absent when the question has none. */
+  pics?: (ImageRef | null)[];
   image: ImageRef | null;
   /** Behind the question: its own background, else the quiz's. */
   background: ImageRef | null;
@@ -268,7 +284,8 @@ export interface TeacherQuestion {
   pictureHidden: boolean;
   /** What the class sees behind it: its own background, else the quiz's. */
   background: ImageRef | null;
-  answers: { text: string; counts: boolean; marked: boolean }[];
+  /** image: a picture answer's (v3 item 1); null for one whose file was left out. */
+  answers: { text: string; counts: boolean; marked: boolean; image?: ImageRef | null }[];
   void: boolean;
   skip: boolean;
   status: "upcoming" | "current" | "revealed" | "skipped";
@@ -327,6 +344,12 @@ export interface PlayerView {
   removed: boolean;
   me: { avatar: Avatar; score: number; place: number; of: number } | null;
   /**
+   * The answer pictures' small copies, in packs (v3 item 1): fetched once,
+   * as soon as a view names them, so they are on the device before Go.
+   * Absent when the quiz has no picture answers.
+   */
+  packs?: string[];
+  /**
    * answers: empty while the class reads the question (countdown tempos).
    * sinceMs: how long the answers had been showing when the view was made;
    * the device adds its own time to it for the points for speed.
@@ -336,6 +359,8 @@ export interface PlayerView {
     n: number;
     total: number;
     answers: string[];
+    /** Pictures as answers, in the order on screen, null for a text answer; absent when the question has none. */
+    pics?: (PackPic | null)[];
     mine: number | null;
     answering: Answering;
     clock: ClockView | null;
@@ -368,7 +393,21 @@ export const IMAGE_LONG_SIDE = 1600;
 /** A background fills the projector, 1920 pixels wide at most. */
 export const BACKGROUND_LONG_SIDE = 1920;
 export const MAX_IMAGE_BYTES = 1_500_000;
-export const MAX_IMAGES = 60;
+/** Pictures per quiz, answers' included (v3 item 1: 15 questions with four picture answers are 60). */
+export const MAX_IMAGES = 120;
+/**
+ * A picture only used as an answer: a tile on the wall is at most half the
+ * screen across, or a row of it for a wide strip.
+ */
+export const ANSWER_LONG_SIDE = 1200;
+/**
+ * An answer picture's second copy, for the students' devices (v3 item 1):
+ * small, since every tablet of the class loads all of them in the lobby.
+ */
+export const SMALL_LONG_SIDE = 640;
+export const MAX_SMALL_BYTES = 300_000;
+/** The small copies travel in packs of at most this size, one request per pack and device. */
+export const PACK_BYTES = 1_500_000;
 /** The whole upload with its pictures, as multipart/form-data. */
 export const MAX_UPLOAD_BYTES = 16_000_000;
 

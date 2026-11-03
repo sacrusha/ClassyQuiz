@@ -93,3 +93,57 @@ test("backgrounds: the quiz's and a question's own are matched like pictures, an
   assert.ok(!missing.ok);
   assert.match(missing.errors[0].message, /^The quiz has the background "wald.jpg", which didn't come with the quiz/);
 });
+
+test("answer pictures: stored like any picture, their small copies packed for the devices", () => {
+  const q = parseQuiz(`Title: T
+1. Which?
+Image: q.png
++ Image: a.png
+- Image: b.png
+- Image: c.png
+- Image: q.png
+2. Again?
++ Image: d.png
+- Image: e.png
+- Image: f.png
+- Image: a.png
+`).quiz;
+  const names = ["q", "a", "b", "c", "d", "e", "f"];
+  const small = (extra: number) => {
+    const b = new Uint8Array(33 + extra);
+    b.set(pngHeader(320, 320));
+    return b;
+  };
+  const r = matchImages(
+    q,
+    names.map((n) => ({ name: `${n}.png`, bytes: pngHeader(600, 600) })),
+    false,
+    [...names.map((n) => ({ name: `${n}.png`, bytes: small(290_000) })), { name: "stray.png", bytes: pngHeader(4, 4) }, { name: "toobig.png", bytes: small(400_000) }],
+  );
+  assert.ok(r.ok);
+  // Seven files, each stored once; five small copies of 290 KB fill a pack, the sixth starts the next.
+  assert.equal(Object.keys(r.files).filter((k) => k.startsWith("img:")).length, 7);
+  assert.equal(r.packs, 2);
+  assert.deepEqual(r.index["a.png"].small, { type: "image/png", w: 320, h: 320, p: 0, o: 0, l: 290_033 });
+  assert.deepEqual(r.index["q.png"].small, { type: "image/png", w: 320, h: 320, p: 0, o: 3 * 290_033, l: 290_033 });
+  assert.deepEqual(r.index["f.png"].small, { type: "image/png", w: 320, h: 320, p: 1, o: 290_033, l: 290_033 });
+  assert.equal(r.files["pack:0"].byteLength, 5 * 290_033);
+  assert.equal(r.files["pack:1"].byteLength, 2 * 290_033);
+  assert.deepEqual(r.warnings, []);
+});
+
+test("answer pictures: a missing small copy is no error; different proportions get a warning", () => {
+  const q = parseQuiz(`Title: T\n1. Which?\n+ Image: a.png\n- Image: b.png\n`).quiz;
+  const r = matchImages(q, [{ name: "a.png", bytes: pngHeader(600, 600) }, { name: "b.png", bytes: pngHeader(1200, 300) }], false);
+  assert.ok(r.ok);
+  assert.equal(r.packs, 0);
+  assert.equal(r.index["a.png"].small, undefined);
+  assert.equal(r.warnings.length, 1);
+  assert.match(r.warnings[0].message, /^Question 1's answer pictures have different proportions \(from 1:1 to 4:1\)/);
+
+  const left = parseQuiz(`Title: T\n1. Which?\n+ Image: a.png\n- Image: b.png\n`).quiz;
+  const l = matchImages(left, [{ name: "a.png", bytes: pngHeader(600, 600) }], true);
+  assert.ok(l.ok);
+  assert.deepEqual(l.warnings.map((w) => w.message), ['Question 1 runs without its answer picture "b.png": that answer shows only its colour and shape.']);
+  assert.equal(left.questions[0].answers[1].image, "");
+});

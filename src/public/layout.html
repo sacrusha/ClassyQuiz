@@ -81,7 +81,29 @@
        &lt;div id=&quot;backdrop&quot;&gt;&lt;img …&gt;&lt;/div&gt;
      The question and the bar then sit on white cards. --&gt;
 
-&lt;!-- A student&#x27;s phone or tablet: the answers as buttons, no picture; the question is on the projector. --&gt;
+&lt;!-- Pictures as answers (&quot;+ Image: pie-3.png&quot;): each picture sits on its tile&#x27;s colour, which shows wherever
+     the picture is transparent; a picture with a ground of its own (white or any other) shows as drawn. The shape
+     and the room for the votes&#x27; count and tick sit beside the picture (&quot;row&quot;) or above it (&quot;col&quot;). A text
+     answer among them (&quot;none of these&quot;) takes a picture&#x27;s place. --&gt;
+  &lt;div class=&quot;stage picans&quot;&gt;
+    &lt;h2 class=&quot;qtext&quot;&gt;Which picture shows three quarters?&lt;/h2&gt;
+    &lt;div class=&quot;tiles pics&quot; style=&quot;grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(1, minmax(0, 1fr)); height: (the room below the question, in px)&quot;&gt;
+      &lt;div class=&quot;tile pic a0 col&quot;&gt;&lt;svg class=&quot;shape&quot; …&gt;&lt;/svg&gt;&lt;div class=&quot;apic&quot;&gt;&lt;img src=&quot;…&quot; alt=&quot;&quot;&gt;&lt;/div&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+      … one tile per answer; for a text answer &lt;div class=&quot;apic text&quot;&gt;&lt;span class=&quot;txt&quot;&gt;None of these&lt;/span&gt;&lt;/div&gt; …
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;!-- The script arranges the tiles by the pictures&#x27; shape: one, two or four columns (three for three answers),
+     each tile &quot;row&quot; or &quot;col&quot;, whichever shows the smallest picture largest; two by two when that is within 85%
+     of the best. Square pictures come out two by two or four in a row, wide strips two by two or one under the
+     other, upright ones side by side. With the question&#x27;s own picture (an Image: line), that picture goes into
+     a band beside the question&#x27;s text, &lt;div class=&quot;qband&quot;&gt;&lt;div class=&quot;figure&quot;&gt;…&lt;/div&gt;&lt;h2 class=&quot;qtext&quot;&gt;…&lt;/h2&gt;&lt;/div&gt;,
+     or between text and tiles at the full width, the room split so that it and the smallest answer picture come
+     out about alike. The votes and the reveal fill .side and add .fill and .dim as for text tiles. --&gt;
+
+&lt;!-- A student&#x27;s phone or tablet: the answers as buttons, without the question&#x27;s picture; the question is on
+     the projector. Picture answers show their pictures, in a smaller copy, on the buttons:
+     &lt;button class=&quot;ansbtn pic a0 col&quot;&gt;&lt;svg class=&quot;shape&quot; …&gt;&lt;/svg&gt;&lt;span class=&quot;apic&quot;&gt;&lt;img …&gt;&lt;/span&gt;&lt;/button&gt;,
+     arranged by the pictures&#x27; shape like the projector&#x27;s tiles, though not always the same way. --&gt;
 &lt;body class=&quot;play&quot;&gt;&lt;main&gt;
   &lt;div class=&quot;buttons n4&quot;&gt;
     &lt;button class=&quot;ansbtn a0&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;path d=&quot;M50 12 L90 84 H10Z&quot;/&gt;&lt;/svg&gt;&lt;span&gt;55 francs&lt;/span&gt;&lt;/button&gt;
@@ -151,7 +173,22 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .play .buttons { flex: 1; display: grid; gap: 12px; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
 .play .buttons.n2 { grid-template-columns: 1fr; }
 .ansbtn { background: var(--ans); color: var(--ans-ink); border: 0; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px; font-size: clamp(1.3rem, 4.5vmin, 2.6rem); font-weight: 700; min-height: 90px; overflow-wrap: anywhere; }
-.ansbtn .shape { width: clamp(52px, 12vmin, 140px); height: clamp(52px, 12vmin, 140px); }</code></pre>
+.ansbtn .shape { width: clamp(52px, 12vmin, 140px); height: clamp(52px, 12vmin, 140px); }
+
+/* Pictures as answers, projector */
+.stage.picans .qtext { min-height: 0; flex: none; }
+.qband { flex: none; display: flex; align-items: center; gap: 2.5vw; min-height: 0; }
+.stage.picans .qband .qtext { flex: 1 1 0; min-width: 0; height: 100%; }
+.tiles.pics { flex: none; font-size: 1.25em; }
+.tile.pic { display: grid; gap: .3em; padding: .3em .3em calc(1.6vh + .35em); align-items: center; border-radius: 16px; }
+.tile.pic.row { grid-template-columns: 1.6em minmax(0, 1fr) 3.4em; grid-template-areas: &quot;badge card side&quot;; }
+.tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 3.4em; grid-template-rows: 1.6em minmax(0, 1fr); grid-template-areas: &quot;badge . side&quot; &quot;card card card&quot;; }
+.tile.pic .apic { grid-area: card; align-self: stretch; display: flex; align-items: center; justify-content: center; overflow: hidden; } /* no ground of its own: the tile's colour */
+.tile.pic .apic img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* Pictures as answers, student */
+.ansbtn.pic { display: grid; gap: 6px; padding: 8px; }
+.ansbtn.pic .apic { overflow: hidden; } /* on the button's colour */</code></pre>
 </main>
 </body>
 </html>

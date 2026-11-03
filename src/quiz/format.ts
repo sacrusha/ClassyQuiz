@@ -12,9 +12,16 @@
 import { COUNTDOWN_MAX, COUNTDOWN_MIN, type Tempo } from "../shared/tempo.ts";
 
 export interface Answer {
+  /** "" for a picture answer. */
   text: string;
   /** Picking this answer counts as right. Any number of a question's answers may count, at least one. */
   correct: boolean;
+  /**
+   * A picture as the answer ("+ Image: b.png", v3 item 1): a file name as
+   * written, matched by `imageKey`. Absent for a text answer; "" for a
+   * picture answer whose file was left out (it shows its colour and shape alone).
+   */
+  image?: string;
 }
 
 export interface Question {
@@ -48,16 +55,18 @@ export const MAX_SECONDS = COUNTDOWN_MAX;
 /** A picture the quiz names, with the words that name it in messages. */
 export interface PictureRef {
   name: string;
-  kind: "image" | "background";
+  kind: "image" | "background" | "answer";
   /** The question's index, or null for the quiz's background. */
   question: number | null;
+  /** For kind "answer": the answer's index in the text. */
+  answer?: number;
   /** "Question 3 shows the picture "q3.png"", "The quiz has the background "x.jpg"". */
   label: string;
   /** "Question 3 runs without its picture "q3.png"". */
   leftOut: string;
 }
 
-/** Every picture the quiz names, in order: the quiz's background, then each question's picture and background. */
+/** Every picture the quiz names, in order: the quiz's background, then each question's picture, background and answer pictures. */
 export function pictureRefs(quiz: Quiz): PictureRef[] {
   const refs: PictureRef[] = [];
   if (quiz.background) {
@@ -72,6 +81,17 @@ export function pictureRefs(quiz: Quiz): PictureRef[] {
       const b = q.background;
       refs.push({ name: b, kind: "background", question: i, label: `Question ${i + 1} has the background "${b}"`, leftOut: `Question ${i + 1} runs without its background "${b}".` });
     }
+    q.answers.forEach((a, j) => {
+      if (!a.image) return;
+      refs.push({
+        name: a.image,
+        kind: "answer",
+        question: i,
+        answer: j,
+        label: `Question ${i + 1} has the picture "${a.image}" as an answer`,
+        leftOut: `Question ${i + 1} runs without its answer picture "${a.image}": that answer shows only its colour and shape.`,
+      });
+    });
   });
   return refs;
 }
@@ -79,6 +99,7 @@ export function pictureRefs(quiz: Quiz): PictureRef[] {
 /** Takes a picture off the quiz, for a quiz that runs without it. */
 export function dropPicture(quiz: Quiz, ref: PictureRef): void {
   if (ref.question === null) quiz.background = "";
+  else if (ref.kind === "answer") quiz.questions[ref.question].answers[ref.answer!].image = "";
   else quiz.questions[ref.question][ref.kind] = "";
 }
 
@@ -196,6 +217,29 @@ function pictureName(value: string): string | null {
  */
 export function imageKey(name: string): string {
   return name.replace(/^.*[/\\]/, "").normalize("NFC").toLowerCase();
+}
+
+/** An answer that is only a file name: probably meant as a picture, but shown as text. */
+const BARE_PICTURE = /^[^\s/\\]+\.(?:png|jpe?g|gif|webp|svg)$/i;
+
+/**
+ * An answer line's text as a picture answer: "Image: b.png", dressed like
+ * an Image: line ("**Image:** b.png", "![a pie](b.png)", a description after
+ * the name). The file name; a problem when it names none or points to the
+ * web; null when the answer is text.
+ */
+function answerPicture(text: string): string | { problem: (label: string) => string } | null {
+  let value: string;
+  const kw = text.match(/^[*_]{0,2}image[*_]{0,2}\s*:\s*[*_]{0,2}\s*(.*)$/i);
+  if (kw) value = kw[1].replace(/(\*\*|__)$/, "").trim();
+  else if (/^!\[[^\]]*\]\(/.test(text)) value = text;
+  else return null;
+  const line = excerpt(text, 40);
+  if (/[a-z]:\/\//i.test(value))
+    return { problem: (label) => `${label}: the answer "${line}" points to the web. The site doesn't load pictures from the web; a picture comes as a file in the .zip, together with the quiz text.` };
+  const name = pictureName(value);
+  if (name === null) return { problem: (label) => `${label}: the answer "${line}" names no picture file. It names the file in the .zip, e.g. "+ Image: b.png".` };
+  return name;
 }
 
 // ---------------------------------------------------------------------------
@@ -396,7 +440,10 @@ export function parseQuiz(input: string): ParseResult {
           if (problem) block.pictureProblems.push(problem);
           else if (block[kind] !== "") {
             block.pictureProblems.push((label) =>
-              kind === "image" ? `${label} has more than one picture. A question shows one; combine them into one picture file.` : `${label} has more than one background.`,
+              kind === "image"
+                ? `${label} has more than one picture. A question shows one; combine them into one picture file. ` +
+                  `Pictures as answers are answer lines, each with its mark: "+ Image: b.png", "- Image: c.png".`
+                : `${label} has more than one background.`,
             );
           } else {
             block[kind] = name!;
@@ -513,8 +560,31 @@ export function parseQuiz(input: string): ParseResult {
     if (q.answers.length > MAX_ANSWERS) err(`${label} has ${q.answers.length} answers; a question has at most ${MAX_ANSWERS}.`);
     if (!q.answers.some((a) => a.correct))
       err(`${label} has no answer marked correct. The correct answer's line starts with "+", the others with "-".`);
+    // Pictures as answers (v3 item 1): "+ Image: b.png". Read here, after
+    // the answer letters are gone, so "A) Image: b.png" is a picture too.
+    for (const a of q.answers) {
+      const pic = answerPicture(a.text);
+      if (pic === null) {
+        if (BARE_PICTURE.test(a.text))
+          warn(`${label}: the answer "${excerpt(a.text, 40)}" is shown as text. A picture as an answer is written "+ Image: ${a.text}" (or "- Image: …").`);
+        continue;
+      }
+      a.text = "";
+      if (typeof pic === "string") a.image = pic;
+      else {
+        err(pic.problem(label));
+        a.image = "";
+      }
+    }
     const seen = new Set<string>();
     for (const a of q.answers) {
+      if (a.image !== undefined) {
+        if (a.image === "") continue;
+        const key = `\u0000${imageKey(a.image)}`;
+        if (seen.has(key)) warn(`${label} has the picture "${excerpt(a.image, 40)}" as two answers.`);
+        seen.add(key);
+        continue;
+      }
       const key = a.text.toLowerCase();
       if (a.text === "") err(`${label} has an empty answer line.`);
       else if (seen.has(key)) warn(`${label} has the answer "${excerpt(a.text, 40)}" twice.`);
@@ -532,7 +602,8 @@ export function parseQuiz(input: string): ParseResult {
     for (const { kind, line } of b.afterAnswers) {
       err(
         `${label}: the line "${line}" comes after the answers, so it's unclear which question the ${kind === "image" ? "picture" : "background"} belongs to. ` +
-          `Its line goes after the question text, before the answers.`,
+          `Its line goes after the question text, before the answers.` +
+          (kind === "image" ? ` A picture as an answer is an answer line with its mark: "+ Image: b.png", "- Image: c.png".` : ""),
       );
       q[kind] = "";
     }

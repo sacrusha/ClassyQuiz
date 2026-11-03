@@ -294,6 +294,13 @@ teacher's pace and with a countdown, after Go:
 - **Nothing moves** on the wall between the question, the votes and the
   answer: the bar has a fixed height, and the tiles keep room for the count
   and tick from the start.
+- **Pictures as answers** (v3 item 1): each picture sits on its tile's
+  colour, which shows where the picture is transparent, with its shape
+  beside or above it.
+  The tiles are arranged by the pictures' shape (two by two, four in a
+  row, one under the other); a question's own picture sits in a band
+  beside its text, or between text and tiles. The votes and the answer
+  mark these tiles as they do text tiles, and nothing moves.
 
 ### 3.5 Remote during the quiz
 
@@ -330,7 +337,9 @@ teacher's pace and with a countdown, after Go:
 The student screens are as in v1, with the lobby's pictures to dress the
 animal (docs/avatars.md §3): avatar and 👁 in the lobby, colour
 buttons, locked with 👁 at the votes, ✓ or ✗ with the answer, place and
-stars at the ranking. A tablet
+stars at the ranking. Picture answers show their pictures on the buttons,
+from a small copy fetched once in the lobby, and the chosen picture under
+the ✓ or ✗. A tablet
 still showing the previous class is told "This quiz has finished"; it
 doesn't slip into the next class's lobby. A tablet switched off after the
 previous class and opened again for the next one joins it like any other.
@@ -450,3 +459,4 @@ student, no new tab gets the steering, which narrows §1 rules 5–7.
 | Answer order | Done: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |
 | Spread, then key; who has answered (v2 items 6, 7) | Done: Show votes, then Show answer, on every steering tab and the clicker; avatars popping into the wall's bar as answers arrive; "of" without away devices; the Remote's "Waiting for". §3.4, §3.5, §3.7; decisions.md, "Spread, then key; who has answered, on the wall" |
 | Avatars the children dress (v2 item 5) | Done: a shape and a hat in the lobby, live on the wall and the Remote with a wiggle, fixed at Start; the lobbies' avatar rows kept in place. docs/avatars.md; decisions.md, "Avatars the children dress" |
+| Pictures as answers (v3 item 1) | Done: `+ Image: b.png` answer lines; picture tiles on the wall (§3.4), pictures on the students' buttons from one pack per device (§3.6), thumbnails with the key in the question list and on the Remote (§3.3, §3.5). decisions.md, "Pictures as answers" |

@@ -911,7 +911,7 @@ takes the quiz after the flow redesign calls `prepareImages()` and
 **Storage and serving** (`server/images.ts`, `instance.ts`):
 - The server checks every file: PNG or JPEG by its signature, size read
   from the file, at most 1.5 MB per file (a Durable Object value holds 2 MB),
-  at most 60 pictures, 16 MB per upload. Files the quiz doesn't name are
+  at most 60 pictures (120 since "Pictures as answers"), 16 MB per upload. Files the quiz doesn't name are
   dropped.
 - Each picture is stored once as `img:<n>` in the instance's own storage, in
   the same write as the quiz. The alarm is set before that write, so a
@@ -2816,6 +2816,242 @@ repeatedly.
 **Deploy:** no migration. The protocol additions are optional fields:
 pages from before the deploy draw every avatar plain and offer no picker;
 an old student page ignores the view that comes with its welcome.
+
+## 2026-11-03 — Pictures as answers
+
+Serves: backlog v3 item 1 ("which of these shows…", readers who are still
+slow); v1 items 7 (colour-coded answers), 9 (fixing a question) and 19
+(the right quiz at a glance); v2 items 6 and 7 (votes, then the answer;
+nothing moves); the constraints "nothing kept beyond its use" and the Free
+plan. Settled by the product owner within the owner's words, before code:
+- the tablets show the answer pictures, from one bundle fetched in the
+  lobby (the owner's "nothing on the voting devices" was about the
+  question's picture, and for a picture answer the choice is the picture);
+- the picture sits on the tile's colour, with the shape badge: no white
+  card by design. Built first with a white card inside a frame of the
+  colour, and the cut-out rendered beside it for the owner's look. The
+  owner: "Cut out should be creator's choice, simply by using alpha
+  channel, no?" So transparent areas show the tile's colour, and a creator
+  who wants a white ground draws one in. The contrast question moves into
+  the guidance, and the tablet does the same;
+- the picture cap goes from 60 to 120, one constant; 16 MB per upload and
+  the site's 1 GB stay;
+- a question's own picture together with picture answers is supported.
+
+No model calls: the owner tests with his own AI on real sheets, so the
+guidance is written for his next zip to be the test.
+
+**Format** (`quiz/format.ts`; guidance "The parts" and "Pictures as answers"):
+- `+ Image: pie-3.png` / `- Image: pie-1.png`: an answer line whose text
+  is a picture line. The mark stays in its column.
+- Forgiven, as for `Image:` lines: `**Image:**`, `![…](b.png)`, quotes, a
+  description after the name, a continuation line. Read after the answer
+  letters are dropped, so `A) Image: x.png` is a picture too.
+- Text and picture answers mix in one question ("none of these").
+- A question with picture answers may have its own `Image:` line.
+- `Answer.image` holds the name; the text is "". A picture answer left out
+  (missing from the zip, "Continue without") keeps `image: ""` and shows
+  its colour and shape alone; the teacher's list says "(picture left out)".
+- Errors: a picture answer naming no file, or a web address.
+- Warnings:
+  - the same picture as two answers;
+  - an answer that is only a file name ("cat.jpg"): it shows as text, and
+    the message gives the picture form. It isn't taken as a picture,
+    because "Which file is a picture? + cat.jpg" is a real question;
+  - a question whose answer pictures differ in proportions by more than
+    1.5× (server, once sizes are known): the class picks by shape or crop.
+- The messages for `Image:` lines that were meant as answers (several on
+  one question, or after the answers) now show the answer form.
+
+**Upload** (`client/images.ts`):
+- A file's wall size follows its largest use: 1920 for a background, 1600
+  for a question's picture, 1200 (`ANSWER_LONG_SIDE`) for one used only as
+  an answer. A question's or an answer's picture keeps its alpha.
+- Each answer picture also gets a small copy for the devices:
+  `SMALL_LONG_SIDE` 640, at most `MAX_SMALL_BYTES` 300 KB. It goes as
+  `small` plus `smallName` in the multipart. Without one the answer still
+  works and the devices show its colour and shape.
+
+**Storage and serving** (`server/images.ts`, `instance.ts`):
+- The small copies are concatenated into packs of at most `PACK_BYTES`
+  (1.5 MB; a Durable Object value holds 2 MB), stored as `pack:<k>` in the
+  same write as the quiz. `StoredImage.small` = `{p, o, l, type, w, h}`.
+  They count towards the site's booked bytes.
+- Served as `GET /api/i/:id/img/<packSecret>/p<k>` through the existing
+  `img` route, so the Function is unchanged. `application/octet-stream`,
+  `no-store`, `nosniff`, sandbox CSP.
+- `packSecret` is separate from `imageSecret`: the students' devices get
+  it, and it opens the packs only, never a question's picture.
+- Views:
+  - the projector's question carries `pics` (`ImageRef` or null per
+    answer, in the order on screen), and its `pictures` (fetched ahead)
+    include the answer pictures;
+  - the teacher's answers carry `image`;
+  - the player view carries `packs` (the URLs, in every view, the lobby
+    included) and, once the answers are up, `pics` (a `PackPic` per answer
+    or null).
+
+**The wall** (`client/screen.ts`, `layPictureAnswers`; `client/answergrid.ts`):
+- A picture tile: the picture on the answer's colour (no ground of its
+  own, so its transparent areas show the colour), the shape badge, and
+  `.side` for the count and tick.
+  - "row": badge, card and side across;
+  - "col": badge and side above the card.
+
+  The side and the bar's strip are reserved from the start, so the votes
+  and the reveal move nothing.
+- The arrangement is one, two or four columns (three for three answers)
+  in either orientation, whichever shows the smallest picture largest. It
+  is computed from the chrome a tile takes around its card, measured once.
+  Two by two wins when within 85 % of the best: the arrangement the class
+  knows from the text tiles.
+- With the question's own picture: either between (text, picture at full
+  width, tiles) or in a band beside the text, at three or four heights.
+  The choice maximises the smaller of the question's picture and the
+  smallest answer picture, so both come out about alike. The band needs
+  the text at 1.5em or more.
+- Measured at 1366×768 on the test quiz:
+  - four square pictures: four in a row, each 299 px (277 with a question
+    picture in the band);
+  - four 6:1 number lines: two by two, 626×104;
+  - three upright 1:2.7 thermometers: side by side, 180×480;
+  - two squares: 473 each.
+  At 1920×1080 the squares come out at 420 px, at 800×600 at 168 px (two by two).
+- A text answer among pictures takes a picture's place, in the tile's ink, its font fitted.
+- The countdown's veil hides the cards' contents until Go. Enlarging (Z)
+  stays with the question's picture.
+
+**The tablet** (`client/play.ts`, `client/packs.ts`):
+- Every view that names `packs` makes sure they are fetched, one at a
+  time. Retries at 5, 15, 45 s and so on, at most five tries. Each picture
+  is cut out of its pack into a blob URL by offset.
+- The buttons get the picture on the button's colour with the shape, arranged by
+  the same rule in the room the page leaves. That room is fixed in px,
+  because a cached picture otherwise stretched the page when it was
+  measured; this was found in the walk.
+- A picture arriving after the buttons is filled in place, with no redraw
+  that could swallow a tap. The time for speed points starts once the
+  question's pictures are there.
+- Under the ✓ or ✗, and while a late tap is on its way, the chosen
+  picture shows beside its shape.
+
+**The teacher's side** (`client/manage.ts`): in the question list, the
+Remote's current question and the wall's fix sheet, a picture answer's row
+shows its picture (64 px; tap for full size), with the key's green ring.
+While fixing, the row toggles and the picture is no button.
+
+**Guidance** (`public/index.html`):
+- a "Pictures as answers" bullet under "The parts";
+- a section "Pictures as answers" with an example (a test parses it):
+  - the room an answer picture gets, with the measured sizes;
+  - the ground: a transparent picture shows its tile's colour (red,
+    blue, yellow or green, shuffled), so a drawing whose contrast or
+    colours matter brings its own white ground, the same for every answer
+    of the question;
+  - **pictures made alike**: the right one cropped from the sheet among
+    drawn ones stands out before anyone thinks;
+  - no labelling letters;
+  - why four answer pictures beat one picture labelled A–D with
+    `Order: fixed`;
+- the limits now say 120 pictures and 1200 px for answer pictures.
+
+`/layout.html` has the picture-tile markup and rules.
+
+**Cost on the Free plan:**
+- The wall fetches each picture once: 21 requests (each one Function and
+  one Durable Object request) for the test quiz.
+- Each student device makes one request per pack: one for the test quiz,
+  whose 20 small copies made a 398 KB pack. 25 tablets are 25 requests and
+  about 10 MB over the school's Wi-Fi in the lobby.
+- Fetching per picture would have been 25 × 4 × 15 = 1,500 requests for a
+  quiz of picture answers.
+- Rows: the packs are written with the quiz, a few more values.
+
+**Checked:**
+- Typecheck; unit tests 96. Parser: picture forms, mixing, errors,
+  warnings, left out, the guidance example. Server: packing across packs,
+  a stray or oversized small copy dropped, a missing small copy, the
+  proportions warning, left out.
+- `simulate.mjs` (no picture answers) on the same stack, as a regression
+  check:
+  - `--all-poll`: OK, 1,395 HTTP requests (1,345 before);
+  - plain: the first run failed with "s10: score 4, expected 3" (the
+    server counted one more right answer than the simulated device saw
+    acknowledged). Then 16 runs passed on this tree: 8 plain and 8 with
+    an instrumented copy. 12 instrumented runs on 73ec32d also passed.
+
+  Not reproduced, so not attributed. For a quiz without picture answers,
+  which is the simulation's, the server behaves as 73ec32d by
+  construction:
+  - every server change is guarded on a picture answer being present (the
+    view fields are conditional spreads, absent otherwise);
+  - `game.ts` (answers, fixes, scoring) is unchanged;
+  - an answer text only becomes a picture when it starts with `Image:` or
+    `![`.
+
+  s10 was not the device the simulation kills (that is always s0), so a
+  tap lost with a frozen device doesn't explain it. The instrumented copy
+  is made by `.tmp/sim-diag/make_diag.py` from `scripts/simulate.mjs`. On a
+  mismatch it prints the student's taps, acknowledgements, drops and the
+  server's own record at each answer: the next occurrence explains itself.
+- Headless Edge, `.tmp/picture-answers/v3-walk.mjs` with the generated zip
+  (`make_v3_zip.py`, drawn SVGs: pies, 6:1 number lines, thermometers, an
+  L-shape question with mirror answers, three "photos" and "Keines davon",
+  two answers, and a text question). 86 checks, no page errors:
+  - the wall fetched the 21 pictures ahead, each once, and no pack;
+  - the lobby list showed the 20 answer pictures loaded with the 6 right
+    ones ringed, and no warnings;
+  - a 960×600 tablet and a 360×740 phone each made one request for the
+    pictures, in the lobby, and none afterwards;
+  - for every question: all pictures from blobs, nothing outside the stage
+    at 1366×768, 1920×1080, 1280×800, 1024×768 and 800×600;
+  - tiles, cards, pictures and question at the same pixels before the
+    votes, at the votes and at the answer;
+  - the votes' counts as tapped, the tablets' ✓/✗ matching the wall's
+    ticks, the chosen picture under the verdict;
+  - buttons inside the screen on both devices.
+- The Remote on a 390 px phone: the current question's pictures, and a key
+  fixed by tapping a picture row (no lightbox opened).
+- The owner's number-line zip: Q1 between as before, the tablet with text
+  buttons and no picture request.
+
+**The owner's look, and his call:** a comparison at 1366×768 showed the
+white card beside the cut-out on the tile's colour. On transparent drawings
+the cut-out lost the unshaded quarters to the tile's colour, the blue L on
+the blue tile, and the red thermometer's mercury on the red tile. The owner
+chose the cut-out as the creator's choice, by the alpha channel. So the
+site adds no ground, and the guidance tells the AI when to draw a white
+one. `.tmp/picture-answers/q1…q5-colour-vs-whiteground.png` show what is
+built beside the same drawings with a white ground, the creator's other
+choice.
+- Found while switching: the picture's element first had the class
+  `card`, which the site's stylesheet already uses for its white panels
+  (padding, border, white). The white background hid it, and without it a
+  text answer turned white on white. It is now `apic`, and the sizes above
+  are measured after the rename.
+- In the teacher's lists the thumbnails sit on the answer's colour too, so
+  the key check shows what the class will see.
+- The tablet's chosen picture under the verdict also sits on its colour.
+- One edge case: a transparent picture too large as PNG is flattened onto
+  white at upload (for the wall above 1.5 MB, for a tablet's small copy
+  above 300 KB), so it shows on white there. Line drawings stay far below
+  that.
+
+**Not established:**
+- How large an answer picture reads from the back row on a real
+  projector.
+- Whether AIs draw a question's answer pictures alike, given the guidance;
+  the owner's next zip is the test.
+- Whether 85 % is the right preference for two by two. At 1366×768 the
+  squares went four in a row.
+- How children take pictures on their tablets.
+
+**Pages from before the deploy:** an old Remote or list shows a picture
+answer as an empty row. An old tablet shows its colour and shape without
+text. An old wall shows empty text tiles.
+
+**Deploy:** no migration. The protocol additions are optional fields, and
+the packs are new storage keys in the instance.
 
 ## Open
 
