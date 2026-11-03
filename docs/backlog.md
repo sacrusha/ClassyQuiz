@@ -501,41 +501,56 @@ lifetime; the avatars (item 9) fit B as client-side work.
    after the cut.
 6. **Tempo, in the instance** — owner: `Tempo:` on the quiz's definition is the
    wrong place; the pace belongs to the instance and to the teacher's hand.
-   Settled 2026-11-03: not a mode and not a timer button but a two-button bar,
-   on the wall and on the Remote, that steps the question through its states.
-   The owner on the steps: "Show votes" hides that answering closes and says
-   nothing about why to press it; gameshow vocabulary does better — Lock in,
-   Reveal. Five states per question times twenty questions is a hundred
-   states; expectation management, not count, is the problem, but the default
-   must be short. The blank state before the question is skipped. The other
-   states exist already (the countdown mode's question-alone state, answering,
-   locked with the spread, revealed, ranking), so this is wiring.
-   The bar: two buttons, fixed size and fixed place so a hand in flow always
-   finds them — a white single-triangle button that advances one slice ("too
-   fast"), a blue double-triangle button that advances the big slice ("too
-   slow"). By state:
-   - Question (answers hidden): white shows the answers; blue shows them with
-     Last call running.
-   - Answering: white is Last call — fifteen seconds, then it locks in by
-     itself; blue is time's up — locks in now, with the spread on the wall
-     (blue is the fast-forward; without it there is no way past answering).
-   - Locked (the spread, no key): both Reveal, blue drawn with a single
-     triangle.
-   - Revealed (the key, the winners): white shows the ranking; blue goes to
-     the next question.
-   - Ranking: both go to the next question.
-   Space bar and a clicker's forward are white, the arrow key blue. Reveal
-   stays the teacher's press: the timer says "we're done answering", not "show
-   the key". Every question starts with the answers hidden; the
-   question-and-answers-together start is part of a later configuration item:
-   presets such as Quick (Reveal, Next) and Teaching (Show answers, Lock in,
-   Reveal, Next), with every skipped state reachable as a detour — optional,
-   Later.
-   `Tempo:` and `Time:` leave the quiz format and the guidance; −5/+5 go with
-   them. The points-for-speed switch stays on the join screen as item 8 placed
-   it, its reference time the implementer's. The score race seen twice in the
-   simulator's tempo mode is designed out here. Delivery B is this, the
-   lifetime (item 3) and the avatars (item 9, in progress).
+   Settled 2026-11-03, last form: not a mode and not a timer button but a
+   bar of two buttons, on the wall and on the Remote, that steps the question
+   through its states. Five states per question times twenty questions is a
+   hundred states; expectation management, not count, is the problem, but the
+   default must be short. The blank state before the question is skipped. The
+   other states exist already (the countdown mode's question-alone state,
+   answering, locked with the spread, revealed, ranking), so this is wiring.
+   The bar: two buttons of fixed size and fixed place, so a hand in flow
+   always finds them.
+   - Play ▶ advances one slice and is labelled with where it goes: Show
+     answers (from the question, answers hidden), Lock in (closes answering,
+     the spread on the wall), Reveal (the key, the winners' band), Ranking,
+     Next.
+   - Last call is its own button, in Question and Answering: fifteen
+     seconds, then it locks in by itself. From Question it shows the answers
+     and runs the fifteen seconds. Reveal stays the teacher's press: the
+     timer says "we're done answering", not "show the key".
+   - There is no fast-forward button. A deliberate double press of Play is
+     the fast-forward: Answering → Reveal, Locked → Reveal then Ranking,
+     Revealed → Next. Except from Question: a second slice (Lock in with
+     nobody answered) is never wanted, and one slice already is the
+     destination.
+   - Space bar and a clicker's forward are Play.
+   The owner on labels: "Reveal" and "Ranking" name a thing the class sees;
+   "Next question" and "Straight to answering" name a motion, which is why a
+   fast-forward button had no labels that worked.
+   The press guard: today a 700 ms lock after a press, built on 2026-11-02
+   against a bouncing clicker. Its purpose stands: a press in flow does what
+   the teacher meant, a bounce or a click landing on a screen that just moved
+   does nothing, a deliberate double fast-forwards. The owner's observation
+   is that the screen moving is what misleads a hand, so a double is two
+   clicks close to each other, while a lone click just after a slice change
+   is blocked, measured from the screen update rather than the click. The
+   numbers are the implementer's, from what the bounce case needs.
+   Every question starts with the answers hidden; the question-and-answers-
+   together start is part of a later configuration item with presets (Quick,
+   Teaching) — optional, Later.
+   `Tempo:` and `Time:` leave the quiz format, the parser, the lobby and the
+   guidance; −5/+5 go with them. The points-for-speed switch stays on the
+   join screen as item 8 placed it, its reference time the implementer's.
+   The score race seen twice in the simulator's tempo mode is designed out
+   here, not hunted: a question's answers settle when the class leaves its
+   reveal; acknowledgements carry the server's stored record; a tablet shows
+   a tap as accepted only on that record, and as on its way until then; the
+   simulator checks scores once every device is quiet. What the tablet shows
+   and what the server counts are one fact by construction.
+   A first build on branch `tempo-bar` was given these decisions piecemeal
+   while in flight; a fresh implementer restarts from this item and reads
+   that branch's decisions entry only for what it learnt. Delivery B is this,
+   the lifetime (item 3) and the avatars (item 9, in progress).
    History, the earlier conclusion this replaces: the solution to beat before
    any complexity is justified was an "end question in 15 seconds" button on
    each question — the teacher's pace by default, the energy moment when the
