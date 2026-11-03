@@ -8,6 +8,10 @@ wand's star sat off centre, and the penguin's hats could be smaller.
 **Built** as below; what was built and the evidence are in decisions.md,
 "Avatars the children dress". The figures in `docs/avatars/` show the
 design as he saw it, before the frog and penguin changes.
+**Since:** the lion's mane is drawn smaller, so a shape reads behind it as
+behind the other animals (backlog v4 item 9; the measurement is in
+decisions.md, "The winners jump; the lion's mane; the lobby's wiggle";
+figure `lion-before-after.png`).
 
 **The proposal.** An avatar does two jobs: it tells the children apart, and
 it belongs to a child. Today random assignment does both. Keep the first

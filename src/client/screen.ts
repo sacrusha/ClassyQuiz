@@ -9,7 +9,7 @@ import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
-import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
+import { ICON, avatarSvg, partySize, shapeSvg, syncAvatars } from "./look.ts";
 import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, syncCrowd, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
@@ -128,6 +128,7 @@ function render(): void {
   renderFix(v);
   renderBackdrop(v);
   renderZoom(v);
+  renderParty(v);
 }
 
 /**
@@ -445,6 +446,76 @@ function stripSize(n: number, w: number, h: number): number {
     if (rows * s + (rows - 1) * gap <= h) return s;
   }
   return 8;
+}
+
+// ---------------------------------------------------------------------------
+// The winners jump (backlog v4 item 9, the class's own wish): after every
+// reveal, the avatars of everyone whose answer counts jump for a few
+// seconds, in a band over the top of the stage, where the question was read.
+// The tiles with the key stay in view. Up to ten are as large as the band
+// allows and apart (in two rows on a narrow wall); more get smaller, then
+// overlap and blur together, which the owner accepts (client/look.ts,
+// partySize). In the lobby's order, so the first isn't the fastest. Once
+// per key: a view that comes again (a tick, a reconnect) doesn't restart
+// it; a fix of the key does, for its new winners.
+
+/** How long they jump, before the band goes (ms); app.css times the jumps. */
+const PARTY_MS = 4200;
+let partyKey = "";
+let partyTimer: number | undefined;
+
+function endParty(): void {
+  clearTimeout(partyTimer);
+  document.getElementById("party")?.remove();
+}
+
+function renderParty(v: ScreenView): void {
+  const r = v.phase === "reveal" ? v.reveal : null;
+  if (!r) partyKey = "";
+  const byId = new Map(v.players.map((p) => [p.id, p.avatar]));
+  const winners = (r && !r.void ? (r.winners ?? []) : []).flatMap((id) => (byId.has(id) ? [{ id, avatar: byId.get(id)! }] : []));
+  const stage = document.getElementById("stage");
+  if (!r || !stage || v.zoom || winners.length === 0) {
+    endParty();
+    return;
+  }
+  const key = `${v.current}|${r.winners!.join()}`;
+  if (key === partyKey) return;
+  partyKey = key;
+  endParty();
+  const box = stage.getBoundingClientRect();
+  // The band stops above the first tile: the key stays in view whatever the
+  // layout (a short question beside its picture leaves little room).
+  const tiles = [...stage.querySelectorAll("#tiles .tile")].map((t) => t.getBoundingClientRect().top);
+  const room = tiles.length ? Math.min(...tiles) - box.top - 2 : Infinity;
+  const L = partySize(winners.length, box.width, box.height, room);
+  const el = document.createElement("div");
+  el.id = "party";
+  el.setAttribute("aria-hidden", "true");
+  // The band over the top of the stage; the rows stand on its floor, the
+  // back one higher, room above them for the jump.
+  el.style.cssText = `left:${box.left}px;top:${box.top}px;width:${box.width}px;height:${L.band}px`;
+  const pad = Math.max(4, 0.06 * L.s);
+  const rows = Math.ceil(winners.length / L.perRow);
+  el.innerHTML = winners
+    .map((w, i) => {
+      const row = Math.floor(i / L.perRow);
+      const inRow = Math.min(L.perRow, winners.length - row * L.perRow);
+      const width = L.s + (inRow - 1) * L.step;
+      // A back row half a step aside, its faces between the front row's.
+      const shift = rows > 1 && width + L.step / 2 <= box.width ? ((row % 2 ? -1 : 1) * L.step) / 4 : 0;
+      const x = (box.width - width) / 2 + shift + (i - row * L.perRow) * L.step;
+      const y = pad + (rows - 1 - row) * L.rise;
+      // Neighbours out of step, so ten side by side read as ten.
+      const delay = (0.3 + ((i * 0.618) % 1) * 0.5).toFixed(2);
+      return `<div class="jumper" data-id="${esc(w.id)}" style="left:${x.toFixed(1)}px;bottom:${y.toFixed(1)}px;width:${L.s}px;height:${L.s}px"><span style="animation-delay:${delay}s">${avatarSvg(w.avatar, false)}</span></div>`;
+    })
+    .join("");
+  document.body.appendChild(el);
+  partyTimer = window.setTimeout(() => {
+    el.classList.add("out");
+    partyTimer = window.setTimeout(() => el.remove(), 400);
+  }, PARTY_MS);
 }
 
 /**
@@ -1011,6 +1082,8 @@ document.addEventListener("fullscreenchange", () => {
   if (view) renderBar(view, !!view.steer && view.phase === "lobby");
 });
 window.addEventListener("resize", () => {
+  // The band is laid out for the old size; it doesn't come back for this key.
+  endParty();
   // A window dragged to the projector screen: fit the question to its size.
   if (view && (view.phase === "question" || view.phase === "reveal")) {
     questionKey = "";
