@@ -399,7 +399,8 @@ function render(): void {
         .join("")}
     </div>`;
     if (out) {
-      main.querySelector(".top")?.insertAdjacentHTML("beforeend", `<span class="timeup">${ICON.timer}</span>`);
+      // The votes on the wall: look up. Otherwise the countdown ran out.
+      main.querySelector(".top")?.insertAdjacentHTML("beforeend", q.votes ? `<span class="timeup look">${ICON.eye}</span>` : `<span class="timeup">${ICON.timer}</span>`);
       return;
     }
     if (end !== null) {

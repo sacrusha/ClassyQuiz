@@ -124,6 +124,17 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 .tile.dim { opacity: .5; }
 .tile .mark .icon { width: 1.3em; height: 1.3em; display: block; }
 .voided { display: inline-flex; gap: .3em; align-items: center; color: var(--bad); }
+/* The question's bar: a fixed height, so the avatars landing in it, the
+   count appearing at Go and the reveal move nothing below (v2 item 7). */
+#qbar { height: 1.9em; flex: none; box-sizing: border-box; }
+#qbar #qpos, #qbar #qicons, #qbar .qcount { flex: none; display: inline-flex; align-items: center; gap: .3em; }
+#qbar .qcount[hidden] { display: none; }
+#qbar .qcount { font-variant-numeric: tabular-nums; min-width: 4.6em; justify-content: flex-end; }
+#qbar .qcount.all { color: var(--good); }
+#qbar .strip { flex: 1; min-width: 0; height: 100%; display: flex; flex-wrap: wrap; align-content: center; gap: 4px; overflow: hidden; }
+#qbar .strip .av { width: var(--av, 32px); height: var(--av, 32px); flex: none; animation: pop .35s cubic-bezier(.3, 1.6, .5, 1); }
+#qbar .strip .av.still { animation: none; }
+#qbar .strip .av svg { width: 100%; height: 100%; display: block; }
 
 /* A question's picture (client/screen.ts, layQuestion): between the question
    and the tiles, or beside both. The script sets the figure's size in px from
@@ -328,6 +339,8 @@ body.teach { padding-bottom: 96px; }
 .current .answers { padding-left: 0; }
 .current .answered { color: var(--muted); margin: 10px 0 0; }
 .current .answered strong { color: var(--fg); }
+.current .waiting { color: var(--muted); margin: 6px 0 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.current .waiting .avatars > span { width: 32px; height: 32px; }
 .teach .stat { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .avatars > .ranked { width: auto; height: auto; border-radius: 0; display: flex; flex-direction: column; align-items: center; }
 .ranked .avatar { width: 44px; height: 44px; }
@@ -375,6 +388,7 @@ body.teach { padding-bottom: 96px; }
 #clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
 .clockbar.wall { height: max(10px, 1.7vh); border-radius: 0; }
 .timeup { display: inline-flex; color: #d9480f; }
+.timeup.look { color: var(--accent); }
 .timeup-line { color: #d9480f; font-weight: 700; margin: .4em 0; }
 .clockslot { margin: 6px 0 10px; }
 /* The teacher's −5/+5 on the countdown: the Remote's card, and the wall's steering bar. */

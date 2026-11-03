@@ -36,3 +36,7 @@ Pages deployment 659be631, state Worker version 5ef3adb4 (migration v4 adds the 
 ## 2026-11-03 — sixth deploy, 844df97
 
 Pages deployment 2fb91b32, state Worker version d59ad472, no migration. Countdown with points for speed and the quiz carrying its tempo; tempo offset with −5/+5; pictures section of the guidance; landing page by attention budget, zip only, /own-copy; the lobby's Start naming the mode; review C fixes. Run by the owner from the clean worktree.
+
+## 2026-11-03 — seventh deploy, 3601d2b
+
+Pages deployment fac1734a, state Worker version 513efd47, no migration. A second teacher device once the class is in; the landing page's third look (one line per quiz, upload wording, foot lines); the guidance says upload. Run by the owner from the clean worktree.

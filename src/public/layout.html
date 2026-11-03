@@ -29,7 +29,7 @@
 <h2>Markup</h2>
 <pre><code>&lt;!-- The projector, one question. Always the light theme: projectors wash out dark backgrounds. --&gt;
 &lt;body class=&quot;screen&quot;&gt;&lt;main&gt;
-  &lt;div class=&quot;bar&quot;&gt;&lt;span&gt;2 / 12&lt;/span&gt;&lt;span class=&quot;grow&quot;&gt;&lt;/span&gt;&lt;span&gt;👤 &lt;span&gt;17 / 24&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;bar&quot; id=&quot;qbar&quot;&gt;&lt;span id=&quot;qpos&quot;&gt;2 / 12&lt;/span&gt;&lt;span class=&quot;strip&quot; id=&quot;strip&quot;&gt;&lt;!-- an avatar per answer that has arrived --&gt;&lt;/span&gt;&lt;span id=&quot;qicons&quot;&gt;&lt;/span&gt;&lt;span class=&quot;qcount&quot;&gt;👤 &lt;span&gt;17 / 24&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;
   &lt;div class=&quot;stage&quot;&gt;
     &lt;h2 class=&quot;qtext&quot;&gt;A jacket costs 80 francs and is reduced by 25%. What does it cost now?&lt;/h2&gt;
     &lt;div class=&quot;tiles&quot;&gt;
@@ -40,10 +40,13 @@
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/main&gt;&lt;/body&gt;
-&lt;!-- At the reveal: a tile that doesn&#x27;t count gets the class &quot;dim&quot;; every tile&#x27;s .side becomes
-     &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; (only on a tile that counts) &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it),
-     and each tile gets &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;,
-     growing from 0. The tiles are marked in place: nothing else is redrawn, so neither text nor picture moves. --&gt;
+&lt;!-- The bar has a fixed height (1.9em). While the class answers, the avatar of each student whose answer has
+     arrived pops into .strip, sized so the whole class fits, in one row or more.
+     At the votes: every tile&#x27;s .side becomes &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it), and each tile gets
+     &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;, growing from 0.
+     At the reveal, the answer: a tile that doesn&#x27;t count gets the class &quot;dim&quot;, and a tile that counts gets
+     &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; before its count. The tiles are marked in place: nothing else is redrawn, so
+     neither text nor picture moves. --&gt;
 
 &lt;!-- With a countdown (the quiz&#x27;s Tempo: line, or the teacher&#x27;s choice in the lobby), a question first comes up for reading: the same
      layout, the tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their

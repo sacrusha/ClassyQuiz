@@ -43,11 +43,20 @@ export interface At {
    * Reveal. Absent: not compared (the picture's zoom; older pages).
    */
   reading?: boolean;
+  /**
+   * The votes were on the wall, the key not yet (v2 item 6). The votes and
+   * the reveal are steps within one phase too: a doubled press must not show
+   * the key. Absent: not compared.
+   */
+  votes?: boolean;
 }
 
 export type Command =
   // steering: the Remote, or the Projector while no Remote is there
   | { op: "begin"; at: At }
+  /** How the class answered goes on the wall, without the key; answering closes. The reveal follows. */
+  | { op: "votes"; at: At }
+  /** The key: from the votes, or straight from the question (a page from before the votes step). */
   | { op: "reveal"; at: At }
   | { op: "next"; at: At }
   | { op: "ranking"; at: At }
@@ -231,7 +240,17 @@ export interface ScreenView {
   current: number;
   players: { id: string; avatar: Avatar }[];
   answered: number;
+  /**
+   * Who has answered the open question, in the order the answers arrived:
+   * each avatar pops in on the wall as its answer lands (v2 item 7). Only
+   * those who answered; nobody is shown as missing.
+   */
+  answeredBy: { id: string; avatar: Avatar }[];
+  /** "answered of n": the players whose device is there, or who have answered; away devices don't count. */
+  of: number;
   question: QuestionView | null;
+  /** The votes on the wall, in screen order, before the key (v2 item 6); null otherwise. */
+  votes: number[] | null;
   reveal: RevealView | null;
   ranking: RankingView | null;
   remote: Presence;
@@ -284,11 +303,14 @@ export interface TeacherView {
   playing: Tempo | null;
   /** The open question: being read, open, or closed until the reveal; null between questions. */
   answering: Answering | null;
+  /** The open question's votes are on the wall, its key not yet: the next step is the reveal. */
+  votes: boolean;
   clock: ClockView | null;
   run: null | {
     n: number;
     total: number;
-    players: { id: string; avatar: Avatar; connected: boolean; score: number }[];
+    /** answered: the open question (who the class waits for is the teacher's to see, not the wall's). */
+    players: { id: string; avatar: Avatar; connected: boolean; score: number; answered: boolean }[];
     answered: number;
     dist: number[] | null;
     ranking: RankingView | null;
@@ -316,6 +338,8 @@ export interface PlayerView {
     answering: Answering;
     clock: ClockView | null;
     sinceMs: number | null;
+    /** The votes are on the wall: answering is closed, look up. */
+    votes?: boolean;
   } | null;
   /** points: what the answer scored, with points for speed; null otherwise. */
   reveal: { counts: boolean[]; mine: number | null; void: boolean; points: number | null } | null;
