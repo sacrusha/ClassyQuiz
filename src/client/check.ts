@@ -87,5 +87,8 @@ async function main(): Promise<void> {
       : `<p>${ICON.check} The quiz runs on this network, a little slower: answers and screens follow a moment later, because live connections are blocked. That is fine for a lesson. To make it live:</p>${forIt("At the moment the WebSocket connections are blocked, and the quiz runs more slowly.")}`;
 }
 
+// The part for a network that blocks the site entirely names this site's address.
+for (const el of document.querySelectorAll<HTMLElement>("[data-host]")) el.textContent = location.host;
+
 $("#again").addEventListener("click", () => void main());
 void main();

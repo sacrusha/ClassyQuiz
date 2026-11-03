@@ -61,6 +61,21 @@ let choice: Choice | null = null;
 let busy = false;
 let tickTimer: number | undefined;
 let offlineTimer: number | undefined;
+let unreachedTimer: number | undefined;
+
+// A device that reaches the page but not the quiz (landing story §7): after a
+// while, plain words for the student, who tells the teacher; the teacher's
+// side is the wall's "Nobody in yet?" line. A teacher device is told only
+// what is wrong. Gone once the line is back.
+
+/** How long without the quiz before the words show. */
+const UNREACHED_MS = 15_000;
+const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell your teacher.");
+/** The offline banner's words, after UNREACHED_MS. */
+const bannerWords = document.createElement("span");
+bannerWords.hidden = true;
+bannerWords.textContent = unreachedText();
+banner.append(bannerWords);
 /** The last tap, until the server confirms it. It counts when it arrives, even after the reveal. */
 let waiting: { q: number; choice: number } | null = null;
 /**
@@ -103,6 +118,7 @@ async function start(): Promise<void> {
   keepAwake();
   showWaiting();
   let instance = "";
+  const joinFrom = Date.now();
   for (;;) {
     try {
       const r = await api<{ instance?: string; message?: string }>("/api/join", teacher ? { code: typed, secret: savedHere?.secret } : { code });
@@ -126,6 +142,11 @@ async function start(): Promise<void> {
       }
     } catch {
       /* offline: try again */
+      const words = document.getElementById("unreached");
+      if (words && Date.now() - joinFrom >= UNREACHED_MS) {
+        words.textContent = unreachedText();
+        words.hidden = false;
+      }
     }
     await new Promise((res) => setTimeout(res, 2000));
   }
@@ -158,8 +179,14 @@ async function start(): Promise<void> {
     onStatus: (s) => {
       statusDot(dot, s);
       clearTimeout(offlineTimer);
-      if (s === "live") banner.hidden = true;
-      else offlineTimer = window.setTimeout(() => (banner.hidden = false), 2500);
+      clearTimeout(unreachedTimer);
+      if (s === "live") {
+        banner.hidden = true;
+        bannerWords.hidden = true;
+      } else {
+        offlineTimer = window.setTimeout(() => (banner.hidden = false), 2500);
+        unreachedTimer = window.setTimeout(() => (bannerWords.hidden = false), UNREACHED_MS);
+      }
     },
   });
   line.start();
@@ -251,7 +278,7 @@ function onMessage(m: ServerMessage): void {
 // Before a player or a role
 
 function showWaiting(): void {
-  main.innerHTML = `<div class="center"><div class="dot" data-status="connecting" style="width:28px;height:28px"></div></div>`;
+  main.innerHTML = `<div class="center"><div class="dot" data-status="connecting" style="width:28px;height:28px"></div><p class="muted" id="unreached" hidden></p></div>`;
 }
 
 /** The code box again, as on the root page: five digits for a student, seven for a teacher; it routes by length. */

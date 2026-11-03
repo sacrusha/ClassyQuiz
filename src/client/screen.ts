@@ -242,6 +242,33 @@ function renderCheck(v: ScreenView): void {
   steer.noteStep(t, main);
 }
 
+// --- nobody in yet (landing story §7, backlog v4 item 4): the laptop got
+// through, the tablets may not (a student network with a stricter filter).
+// After NOBODY_MS with the class's join screen up and nobody in, one muted
+// line under the avatars; gone with the first avatar. It shows on a mirrored
+// laptop, in front of the class: harmless text, at the moment the class
+// watches the teacher wait. The link opens a new tab, so the wall stays.
+
+const NOBODY_MS = 90_000;
+/** When this tab first showed the class the code, per class; the wait counts from there, across ‹ Questions and back. */
+let joinSince: { code: string; at: number } | null = null;
+let nobodyTimer: number | undefined;
+
+function nobodyYet(v: ScreenView): boolean {
+  if (v.players.length > 0) return false;
+  if (joinSince?.code !== v.code) joinSince = { code: v.code, at: Date.now() };
+  const left = joinSince.at + NOBODY_MS - Date.now();
+  if (left <= 0) return true;
+  clearTimeout(nobodyTimer);
+  nobodyTimer = window.setTimeout(() => render(), left + 50);
+  return false;
+}
+
+function nobodyLine(): string {
+  const host = esc(siteAddress());
+  return `Nobody in yet? If the tablets can't open ${host}, the school network may block it: <a href="/check#it" target="_blank" rel="noopener">what to tell IT ›</a>`;
+}
+
 /**
  * Join, the class's: today's fold, the code large, the avatars arriving, and
  * Start. The class's screen ends at the fold; "‹ Questions" goes back to the
@@ -262,6 +289,7 @@ function renderJoin(v: ScreenView): void {
         <div class="crowdcol">
           <div class="count">${ICON.person}${live("joined", n)}</div>
           <div class="avatars" data-crowd></div>
+          ${nobodyYet(v) ? `<p class="nobody">${nobodyLine()}</p>` : ""}
         </div>
       </div>
       <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>
@@ -294,9 +322,11 @@ function renderLobby(v: ScreenView): void {
         <div style="display:flex;flex-direction:column;min-height:0">
           <div class="count">${ICON.person}<span id="count">0</span></div>
           <div class="crowd" id="crowd"></div>
+          <p class="nobody" id="nobody" hidden>${nobodyLine()}</p>
         </div>
       </div>`;
   }
+  $("#nobody").hidden = !nobodyYet(v);
   // Newcomers pop in once; a changed look wiggles (the child dressing it).
   syncAvatars($("#crowd"), v.players, () => ({ tag: "div", className: "av" }));
   $("#count").textContent = String(v.players.length);

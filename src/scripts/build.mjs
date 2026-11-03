@@ -56,12 +56,16 @@ await writeFile(join(dist, "_headers"), headers);
 // address is something else) names its own, so the teacher's AI is sent to
 // it rather than to the demo. The page's script shows the address the
 // browser opened anyway; this is for AIs, which read the page without it.
+// /check's part for a network that blocks the site is read the same way,
+// often without its script (the page may be saved, or read elsewhere).
 const DEMO = "classyquiz.pages.dev";
 const project = (await readFile(join(root, "wrangler.toml"), "utf8")).match(/^name\s*=\s*"([^"]+)"/m)?.[1];
 const address = (process.env.SITE_ADDRESS || (project ? `${project}.pages.dev` : DEMO)).replace(/^https?:\/\//, "").replace(/\/+$/, "");
 if (address !== DEMO) {
-  const page = join(dist, "index.html");
-  await writeFile(page, (await readFile(page, "utf8")).replaceAll(DEMO, address));
+  for (const name of ["index.html", "check.html"]) {
+    const page = join(dist, name);
+    await writeFile(page, (await readFile(page, "utf8")).replaceAll(DEMO, address));
+  }
 }
 
 const options = {
