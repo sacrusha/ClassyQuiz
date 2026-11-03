@@ -78,7 +78,7 @@ tablets, and a quiz made in the break.
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
 | Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The lobby is on the wall (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "a new window here", drag it across, F. | — |
-| Lesson starts | "Type classyquiz.pages.dev and the number." | Tablets: address, code, ▶. Avatars pop up on the wall. |
+| Lesson starts | "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
 | Quiz | Start on whichever tab steers; Show votes → Show answer → Next … there, or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
@@ -156,7 +156,9 @@ again for his third look; decisions.md, "The landing page, third look".
 ### 3.2 The two entrances after a code
 
 Students (`/play#63953`) get no screen of their own:
-- in the lobby, straight to their avatar;
+- in the lobby, straight to their avatar, with two rows of pictures below
+  it to dress it until Start: six background shapes in its colour and
+  eight hats (docs/avatars.md);
 - once running, "Which one are you?" with the absent players' avatars and
   **+**, when there are any; a tablet whose avatar another device took
   back while it was away gets the same choice when it returns;
@@ -325,7 +327,8 @@ teacher's pace and with a countdown, after Go:
 
 ### 3.6 Student
 
-The student screens are as in v1: avatar and 👁 in the lobby, colour
+The student screens are as in v1, with the lobby's pictures to dress the
+animal (docs/avatars.md §3): avatar and 👁 in the lobby, colour
 buttons, locked with 👁 at the votes, ✓ or ✗ with the answer, place and
 stars at the ranking. A tablet
 still showing the previous class is told "This quiz has finished"; it
@@ -446,3 +449,4 @@ student, no new tab gets the steering, which narrows §1 rules 5–7.
 | Pictures on the screens | Done: the projector puts the picture between question and tiles or beside them, enlarges it (Z, a click, the Remote), and shows backgrounds; thumbnails in the question list (§3.3), the picture on the Remote's current question (§3.5), "Hide the picture" among the fixes. decisions.md, "Pictures on the screens" |
 | Answer order | Done: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |
 | Spread, then key; who has answered (v2 items 6, 7) | Done: Show votes, then Show answer, on every steering tab and the clicker; avatars popping into the wall's bar as answers arrive; "of" without away devices; the Remote's "Waiting for". §3.4, §3.5, §3.7; decisions.md, "Spread, then key; who has answered, on the wall" |
+| Avatars the children dress (v2 item 5) | Done: a shape and a hat in the lobby, live on the wall and the Remote with a wiggle, fixed at Start; the lobbies' avatar rows kept in place. docs/avatars.md; decisions.md, "Avatars the children dress" |

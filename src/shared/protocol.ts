@@ -104,7 +104,9 @@ export type Command =
    * device showed answering closed counts. ms: how long after the answers
    * appeared on this device it was tapped (points for speed).
    */
-  | { op: "answer"; q: number; choice: number; seq: number; v: number; ms?: number };
+  | { op: "answer"; q: number; choice: number; seq: number; v: number; ms?: number }
+  /** In the lobby: the child's look, whole (shared/looks.ts); the latest one sent counts. */
+  | { op: "dress"; b: number; h: number };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
 

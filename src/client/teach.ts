@@ -6,7 +6,7 @@
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, findQuiz, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
-import { Steer, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
+import { Steer, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, syncCrowd, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures } from "./pictures.ts";
@@ -95,6 +95,7 @@ function render(): void {
     if (showAll) body += questionList(v, steer.ui);
   }
   patch(main, body);
+  syncCrowd(main, v);
   fillPictures(main);
   renderClock(v);
 
@@ -120,7 +121,7 @@ function lobby(v: TeacherView): string {
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
       <div class="joined">${live("joined", n)} joined</div>
-      ${playersRow(v, true)}
+      <div class="avatars" data-crowd></div>
       <p class="device">${tempoLine(v)}</p>
     </section>
     ${projector}

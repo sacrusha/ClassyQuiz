@@ -71,6 +71,8 @@ export class Line {
   private lastKey = "";
   /** Out of the allowance: "http" when the site turned requests away, "write" when the quiz couldn't store. */
   private quota: "http" | "write" | null = null;
+  /** The poll being held, to let go of when the tab's identity changes. */
+  private pollAbort: AbortController | null = null;
 
   private opts: LineOptions;
 
@@ -135,6 +137,16 @@ export class Line {
 
   start(): void {
     this.connect();
+  }
+
+  /**
+   * The tab is someone else now (a guest became a player): a poll held under
+   * the old identity is let go, and the next one asks as the new one. Over
+   * HTTP the guest's poll would otherwise be held until the guest's choice
+   * changed, and the tablet's own view with it. Nothing to do on a socket.
+   */
+  repoll(): void {
+    this.pollAbort?.abort();
   }
 
   stop(): void {
@@ -401,7 +413,18 @@ export class Line {
     while (!this.stopped && !this.asleep) {
       try {
         const t0 = Date.now();
-        const res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v });
+        const ctl = new AbortController();
+        this.pollAbort = ctl;
+        let res: { messages?: ServerMessage[] };
+        try {
+          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v }, ctl.signal);
+        } catch (e) {
+          // Let go on purpose (repoll): ask again at once, as whoever the tab is now.
+          if (ctl.signal.aborted && !this.stopped) continue;
+          throw e;
+        } finally {
+          this.pollAbort = null;
+        }
         if (this.asleep) break;
         first = false;
         delay = 500;
@@ -434,9 +457,10 @@ export class Line {
   }
 }
 
-async function post(path: string, body: unknown): Promise<{ messages?: ServerMessage[] }> {
+async function post(path: string, body: unknown, signal?: AbortSignal): Promise<{ messages?: ServerMessage[] }> {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), 35_000);
+  signal?.addEventListener("abort", () => ctl.abort(), { once: true });
   try {
     const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: ctl.signal });
     const r = await readApi<{ messages?: ServerMessage[] }>(res);

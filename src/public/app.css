@@ -204,6 +204,30 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .verdict.right { background: var(--good); }
 .verdict.wrong { background: var(--bad); }
 .verdict.none, .verdict.void { background: #8a8f98; }
+/* The lobby: the child's animal and the pictures to dress it (backlog v2
+   item 5, docs/avatars.md). Beside each other on a tablet held sideways,
+   one above the other when upright. No words. */
+.play .dress { flex: 1; display: grid; gap: 16px; align-items: center; justify-items: center; grid-template: "hero picker" 1fr "look picker" auto / auto 1fr; }
+.dress .hero { grid-area: hero; width: min(44vw, 58vh); height: min(44vw, 58vh); }
+.dress .picker { grid-area: picker; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 560px; }
+.dress .prow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.dress .pick { width: 60px; height: 60px; border-radius: 14px; border: 3px solid var(--rule); background: var(--card); padding: 6px; touch-action: manipulation; }
+.dress .pick svg { width: 100%; height: 100%; display: block; }
+.dress .pick.on { border-color: var(--accent); background: #e9f0fc; }
+.dress.spent .pick { opacity: .45; }
+.dress .look { grid-area: look; color: var(--muted); }
+.dress .look .icon { width: 44px; height: 44px; }
+@media (orientation: portrait) {
+  .play .dress { grid-template: "hero" auto "picker" auto "look" auto / 1fr; align-content: center; gap: 28px; }
+  .dress .hero { width: min(62vw, 40vh); height: min(62vw, 40vh); }
+}
+@media (max-width: 420px) {
+  .dress .pick { width: 46px; height: 46px; padding: 4px; }
+  .dress .prow { gap: 6px; }
+}
+/* A changed look: the child sees which one on the wall is theirs. */
+@keyframes wiggle { 0% { transform: none; } 25% { transform: scale(1.12) rotate(-8deg); } 50% { transform: scale(1.12) rotate(8deg); } 75% { transform: scale(1.05) rotate(-4deg); } 100% { transform: none; } }
+.dress .hero.wiggle, .lobby .crowd .av.wiggle, .avatars > .wiggle { animation: wiggle .55s ease-out; }
 .choose { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 12px; width: 100%; max-width: 640px; }
 .choose button { border: 0; background: none; padding: 0; aspect-ratio: 1; border-radius: 50%; }
 .choose button.new { background: var(--card); border: 3px dashed var(--rule); display: flex; align-items: center; justify-content: center; font-size: 2rem; }

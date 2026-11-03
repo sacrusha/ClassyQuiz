@@ -1,9 +1,13 @@
 # classyQuiz — Avatars the students find interesting
 
-Backlog v2 item 5. **Revision 1, 2026-11-03: a design for the owner's
-reaction; nothing is built.** Figures in `docs/avatars/`, drawn by a
-prototype in the same 100×100 SVG frame as `src/client/look.ts` and
-rendered headless at the wall's real sizes.
+Backlog v2 item 5. **Revision 1, 2026-11-03: the design the owner reacted
+to ("good changes").** His answers to §8 went with the recommendations:
+dress the assigned animal, shapes and hats without tools, a plain start,
+fixed at Start. His drawing notes: the hats fitted the frog poorly, the
+wand's star sat off centre, and the penguin's hats could be smaller.
+**Built** as below; what was built and the evidence are in decisions.md,
+"Avatars the children dress". The figures in `docs/avatars/` show the
+design as he saw it, before the frog and penguin changes.
 
 **The proposal.** An avatar does two jobs: it tells the children apart, and
 it belongs to a child. Today random assignment does both. Keep the first

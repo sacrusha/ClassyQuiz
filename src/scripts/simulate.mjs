@@ -41,6 +41,8 @@
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
 const TEMPO = process.argv.includes("--tempo");
+// --no-dress: the class doesn't dress in the lobby (to measure what dressing costs).
+const DRESS = !process.argv.includes("--no-dress");
 const SECONDS = 10;
 // shared/tempo.ts
 const POINTS_RIGHT = 10;
@@ -88,9 +90,9 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const log = (...a) => console.log(`[${((Date.now() - T0) / 1000).toFixed(1)}s]`, ...a);
 const T0 = Date.now();
 
-async function post(path, body) {
+async function post(path, body, signal) {
   requests++;
-  const res = await fetch(BASE + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const res = await fetch(BASE + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
   return { status: res.status, body: await res.json() };
 }
 
@@ -161,6 +163,10 @@ class Device {
       if (ws) ws.close();
       this.connect();
     } else if (!this.polling) this.pollLoop();
+  }
+  /** Like client/net.ts `repoll`: a guest became a player; a poll held as the guest is let go. */
+  repoll() {
+    this.pollAbort?.abort();
   }
   kill() {
     this.stopped = true;
@@ -239,7 +245,13 @@ class Device {
         continue;
       }
       try {
-        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v });
+        this.pollAbort = new AbortController();
+        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v }, this.pollAbort.signal).catch((e) => {
+          // Like client/net.ts: let go on purpose, ask again at once.
+          if (this.pollAbort?.signal.aborted) return { body: { messages: [] }, repolled: true };
+          throw e;
+        });
+        if (r.repolled) continue;
         const msgs = r.body.messages ?? [];
         for (const m of msgs) this.handle(m);
         if (msgs.some((m) => m.t === "gone" || m.t === "lost")) break;
@@ -345,6 +357,7 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
       p.run = m.run;
       p.token = m.token;
       d.auth = { role: "player", token: m.token, run: m.run };
+      d.repoll();
     }
     if (m.t === "state" && m.view.role === "player") {
       p.view = m.view;
@@ -412,6 +425,86 @@ await phone.send({ op: "remove", player: ghost.id });
 ghost.d.kill();
 log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} over long-polling), ghost removed`);
 
+// Dressing in the lobby (backlog v2 item 5, docs/avatars.md). Like
+// client/play.ts: one `dress` in flight per device, the latest pick sent
+// next, so a burst of taps sends the first and the last. Every student
+// picks a few looks; the server stores the class's looks once a second.
+const looks = new Map(); // player id → the look last acknowledged
+const sameLook = (x, y) => (x.b ?? 0) === (y.b ?? 0) && (x.h ?? 0) === (y.h ?? 0);
+function dresser(p) {
+  let want = null;
+  let inFlight = false;
+  const pump = () => {
+    if (inFlight || !want) return;
+    const sent = want;
+    inFlight = true;
+    void p.d.send({ op: "dress", b: sent.b, h: sent.h }).then((a) => {
+      inFlight = false;
+      if (a.ok) looks.set(p.id, sent);
+      else want = null; // refused: the device shows what is stored
+      if (want === sent) want = null;
+      pump();
+    });
+  };
+  return { pick: (look) => ((want = look), pump()), idle: () => !inFlight && !want };
+}
+if (DRESS) {
+const requestsBeforeDressing = requests;
+const dressStarted = Date.now();
+let taps = 0;
+const dressers = players.map((p) => ({ p, d: dresser(p) }));
+await Promise.all(
+  dressers.map(async ({ p, d }) => {
+    const n = 1 + Math.floor(Math.random() * 6);
+    for (let i = 0; i < n; i++) {
+      await sleep(rnd(50, 600));
+      d.pick({ b: Math.floor(Math.random() * 6), h: Math.floor(Math.random() * 9) });
+      taps++;
+    }
+  }),
+);
+await until(() => dressers.every(({ d }) => d.idle()), 20_000, "the looks to be stored");
+const dressSends = requests - requestsBeforeDressing;
+// Every screen shows the look each student last had acknowledged.
+await until(
+  () => players.every((p) => !looks.has(p.id) || (p.view?.me && sameLook(p.view.me.avatar, looks.get(p.id)))),
+  10_000,
+  "every tablet to show its look",
+).catch(() => {});
+await until(() => projector.view.players.every((w) => !looks.has(w.id) || sameLook(w.avatar, looks.get(w.id))), 10_000, "the wall to show the looks").catch(() => {});
+for (const p of players) {
+  const want = looks.get(p.id) ?? { b: 0, h: 0 };
+  check(!!p.view?.me && sameLook(p.view.me.avatar, want), `${p.name}: the tablet shows the look acknowledged (${JSON.stringify(p.view?.me?.avatar)} vs ${JSON.stringify(want)})`);
+  const onWall = projector.view.players.find((w) => w.id === p.id);
+  check(!!onWall && sameLook(onWall.avatar, want), `${p.name}: the wall shows the look acknowledged`);
+  const onRemote = tv().run.players.find((w) => w.id === p.id);
+  check(!!onRemote && sameLook(onRemote.avatar, want) && onRemote.avatar.a === p.view?.me?.avatar.a && onRemote.avatar.c === p.view?.me?.avatar.c, `${p.name}: the Remote shows the look, on the same animal and colour`);
+}
+log(`dressing: ${taps} taps by ${players.length} students in ${((Date.now() - dressStarted) / 1000).toFixed(1)} s${ALL_POLL ? `, ${dressSends} HTTP requests` : ""}`);
+
+// A device that doesn't wait for its answers (not our page): the server
+// stores MAX_LOOK_CHANGES (30) changes per student and refuses the rest.
+{
+  // Over a WebSocket, so the 40 arrive in order and each one is a change.
+  const rogue = [...players].reverse().find((p) => p.d.mode === "ws") ?? players[players.length - 1];
+  const before = looks.get(rogue.id) ?? { b: 0, h: 0 };
+  const flips = Array.from({ length: 40 }, (_, i) => ({ b: (before.b + 1 + (i % 2)) % 6, h: before.h }));
+  const acks = await Promise.all(flips.map((l) => rogue.d.send({ op: "dress", ...l })));
+  // Taken until the changes are spent; after that only the look already
+  // stored is acknowledged (nothing to store), every change refused.
+  const first = acks.findIndex((a) => !a.ok);
+  const kept = first > 0 ? flips[first - 1] : null;
+  check(first > 0 && first <= 30, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 40)`);
+  check(!!kept && acks.every((a, i) => i < first || a.ok === sameLook(flips[i], kept)), "after that, every change is refused");
+  // What counts is what is stored; the Remote's view says which.
+  await sleep(1500);
+  const shown = tv().run.players.find((w) => w.id === rogue.id).avatar;
+  looks.set(rogue.id, { b: shown.b ?? 0, h: shown.h ?? 0 });
+  await until(() => rogue.view?.me && sameLook(rogue.view.me.avatar, shown), 10_000, "the hammering tablet to show the stored look").catch(() => {});
+  check(sameLook(rogue.view.me.avatar, shown), "the hammering tablet shows the look that is stored");
+}
+}
+
 // Random sleep and Wi-Fi loss during the quiz.
 let chaos = true;
 void (async () => {
@@ -433,6 +526,13 @@ if (TEMPO) {
   check(tv().countdown === null, "no -5/+5 in the lobby");
 }
 await steerer().send({ op: "begin", at: at() });
+{
+  // The look is fixed at Start.
+  const p = players[0];
+  const now = looks.get(p.id) ?? { b: 0, h: 0 };
+  const late = await p.d.send({ op: "dress", b: (now.b + 1) % 6, h: now.h });
+  check(!late.ok, "dressing is refused once the quiz has started");
+}
 let closedByAll = 0;
 let closedByTime = 0;
 let deadPlayer = null;
@@ -538,6 +638,8 @@ for (;;) {
       const back = await joinPlayer(`${dead.name}-again`, "ws", dead.id, dead.acked, 120_000);
       check(back.id === dead.id, `the dead device's student got their avatar back (${back.id} vs ${dead.id})`);
       players[players.indexOf(dead)] = back;
+      await until(() => back.view?.me, 10_000, "the revived student's view").catch(() => {});
+      check(sameLook(back.view?.me?.avatar ?? { b: -1 }, looks.get(dead.id) ?? {}), "the student back on another device has their look");
       log(`${dead.name} is back on another device as the same avatar`);
     })();
   }
@@ -586,6 +688,11 @@ for (const p of players) {
   total += expected;
   check(got === expected, `${p.name}: score ${got}, expected ${expected}`);
 }
+for (const p of players) {
+  const got = byId.get(p.id)?.avatar;
+  check(!!got && sameLook(got, looks.get(p.id) ?? {}), `${p.name}: the look at the end is the one from the lobby`);
+}
+for (const e of fin.run.ranking.top) check(e.avatar && [...byId.values()].some((p) => p.avatar.a === e.avatar.a && p.avatar.c === e.avatar.c && sameLook(p.avatar, e.avatar)), "the ranking shows the avatars dressed");
 log(`final: ${players.length} students, ${total} points in total, ranking top: ${fin.run.ranking.top.map((e) => `${e.place}.${e.score}`).join(" ")}`);
 if (TEMPO) {
   log(`answering closed: ${closedByAll} times by everyone present having answered, ${closedByTime} times by time's up`);

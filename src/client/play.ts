@@ -9,11 +9,12 @@
 //                    takes the Projector at once (the lobby's "Open the
 //                    projector window").
 
-import type { Auth, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
+import type { Auth, Avatar, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
 import { $, esc, findQuiz, keepAwake, lines, rolePage, saveQuiz, siteAddress, statusDot, store, tabRole } from "./dom.ts";
-import { ICON, avatarSvg, shapeSvg } from "./look.ts";
+import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
+import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
 
@@ -62,6 +63,16 @@ let refused: { reason: string; phase: string } | null = null;
 let shown: { q: number; at: number } | null = null;
 /** The countdown ran out on this device: the buttons stop taking taps until the server says otherwise. */
 let outTimer: number | undefined;
+/**
+ * Dressing the animal in the lobby (backlog v2 item 5, docs/avatars.md):
+ * the look the child picked, shown at once, until the server's view shows
+ * it back; the latest pick wins. One `dress` is in flight at a time, so a
+ * burst of taps sends the first and then the last.
+ */
+let look: Required<Look> | null = null;
+let dressing = false;
+/** The server took no more changes of look (MAX_LOOK_CHANGES): the pictures stay, without effect. */
+let dressSpent = false;
 
 async function start(): Promise<void> {
   if (!JOIN_CODE.test(code)) {
@@ -136,6 +147,8 @@ function onMessage(m: ServerMessage): void {
   if (m.t === "welcome") {
     auth = { role: "player", token: m.token, run: m.run };
     store.set(key, { instance: instanceId, token: m.token, run: m.run } satisfies Saved);
+    // Over HTTP, a poll held for the guest would hold back this player's views.
+    line?.repoll();
     busy = false;
     displaced = false;
     clearInterval(tickTimer);
@@ -373,6 +386,11 @@ function render(): void {
        <span>${ICON.star} ${me.score}</span></div>`
     : "";
 
+  if (v.phase === "lobby" && me) {
+    renderDress(me.avatar);
+    return;
+  }
+  look = null;
   if (v.phase === "lobby" || v.phase === "idle" || !me) {
     main.innerHTML = `<div class="center">${me ? `<div class="hero">${avatarSvg(me.avatar)}</div>` : ""}<div class="big">${ICON.eye}</div></div>`;
     return;
@@ -467,6 +485,75 @@ function render(): void {
       ${v.phase === "final" ? `<div class="big">${ICON.trophy}</div>` : ""}
     </div>`;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Dressing the animal, in the lobby: a background shape and a hat, the same
+// menu for everyone, no words. Built once and patched in place: a view
+// arriving (a classmate joining changes "of") must not replace a picture
+// under a finger.
+
+function renderDress(stored: Avatar): void {
+  // The server's view has caught up with what the child picked.
+  if (look && !dressing && sameLook(stored, look)) look = null;
+  const shown = look ? { ...stored, ...look } : stored;
+  let box = main.querySelector<HTMLElement>(".dress");
+  if (!box) {
+    const backgrounds = Array.from({ length: BACKGROUND_COUNT }, (_, b) => `<button class="pick" data-b="${b}">${backgroundSvg(b, stored.c)}</button>`).join("");
+    const hats = Array.from({ length: HAT_COUNT - 1 }, (_, i) => `<button class="pick" data-h="${i + 1}">${hatSvg(i + 1)}</button>`).join("");
+    main.innerHTML = `<div class="dress">
+      <div class="hero"></div>
+      <div class="picker"><div class="prow">${backgrounds}</div><div class="prow">${hats}</div></div>
+      <div class="look">${ICON.eye}</div>
+    </div>`;
+    box = main.querySelector<HTMLElement>(".dress")!;
+    box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => btn.addEventListener("click", () => pick(btn)));
+  }
+  const hero = box.querySelector<HTMLElement>(".hero")!;
+  const key = `${shown.a}.${shown.c}.${shown.b ?? 0}.${shown.h ?? 0}`;
+  if (hero.dataset.key !== key) {
+    const changed = hero.dataset.key !== undefined;
+    hero.dataset.key = key;
+    hero.innerHTML = avatarSvg(shown);
+    if (changed) wiggle(hero);
+  }
+  box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => {
+    const on = btn.dataset.b !== undefined ? Number(btn.dataset.b) === (shown.b ?? 0) : Number(btn.dataset.h) === (shown.h ?? 0);
+    btn.classList.toggle("on", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
+  box.classList.toggle("spent", dressSpent);
+}
+
+function pick(btn: HTMLButtonElement): void {
+  const me = view?.me;
+  if (!me || view?.phase !== "lobby" || dressSpent) return;
+  const now: Required<Look> = look ?? { b: me.avatar.b ?? 0, h: me.avatar.h ?? 0 };
+  // A shape is always worn; the hat worn comes off with a second tap.
+  const next = btn.dataset.b !== undefined ? { ...now, b: Number(btn.dataset.b) } : { ...now, h: Number(btn.dataset.h) === now.h ? 0 : Number(btn.dataset.h) };
+  if (sameLook(next, now)) return;
+  look = next;
+  renderDress(me.avatar);
+  sendLook();
+}
+
+function sendLook(): void {
+  if (dressing || !look || !line) return;
+  const sent = look;
+  dressing = true;
+  void line.send({ op: "dress", b: sent.b, h: sent.h }).then((a) => {
+    dressing = false;
+    if (!a.ok) {
+      // Not taken: the quiz started, or the changes are spent. The device
+      // shows the look that is stored, as the wall does.
+      look = null;
+      if (view?.phase === "lobby" && a.error === undefined) dressSpent = true;
+    } else if (look && !sameLook(look, sent)) {
+      sendLook();
+      return;
+    }
+    if (view?.phase === "lobby" && view.me) renderDress(view.me.avatar);
+  });
 }
 
 void start();

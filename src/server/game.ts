@@ -11,6 +11,7 @@
 
 import type { Quiz } from "../quiz/format.ts";
 import { CLASS_FULL, CLASS_STARTED, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
+import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
 import { COUNTDOWN_DEFAULT, NUDGE_SECONDS, POINTS_RIGHT, TEMPOS, clampCountdown, speedBonus, type Tempo } from "../shared/tempo.ts";
 
 export type Phase = "lobby" | "question" | "reveal" | "ranking" | "final";
@@ -52,6 +53,10 @@ export interface Avatar {
   a: number;
   /** Index into the colour set. */
   c: number;
+  /** The background shape the child chose in the lobby (shared/looks.ts); absent: the disc. */
+  b?: number;
+  /** The hat the child chose in the lobby; absent: none. */
+  h?: number;
 }
 
 export interface Player {
@@ -66,6 +71,8 @@ export interface Player {
    * the start.
    */
   late?: boolean;
+  /** Changes of look stored for this player (MAX_LOOK_CHANGES); absent until the first. */
+  looks?: number;
 }
 
 export interface AnswerRecord {
@@ -260,6 +267,27 @@ export function addPlayer(g: Game, id: string, token: string, now: number, rando
   const p: Player = { id, token, avatar: pickAvatar(run, random), joined: now, removed: false, ...(late ? { late: true } : {}) };
   run.players[id] = p;
   return p;
+}
+
+/**
+ * A child dresses their animal (backlog v2 item 5, docs/avatars.md): the
+ * background shape and the hat, set as a whole so a resend changes nothing.
+ * Only in the lobby; the look is fixed at Start, so the wall's avatars stay
+ * as the children last saw them. "same": nothing to store. "refused": not
+ * now, not a look the menu has, or MAX_LOOK_CHANGES spent; the device then
+ * shows the look that is stored.
+ */
+export function dress(g: Game, playerId: string, b: unknown, h: unknown): "stored" | "same" | "refused" {
+  const run = g.run;
+  const p = run ? playerById(run, playerId) : null;
+  if (!run || !p || p.removed || run.phase !== "lobby" || !validLook(b, h)) return "refused";
+  const look = { b: b as number, h: h as number };
+  if (sameLook(p.avatar, look)) return "same";
+  if ((p.looks ?? 0) >= MAX_LOOK_CHANGES) return "refused";
+  p.looks = (p.looks ?? 0) + 1;
+  const { a, c } = p.avatar;
+  p.avatar = { a, c, ...(look.b ? { b: look.b } : {}), ...(look.h ? { h: look.h } : {}) };
+  return "stored";
 }
 
 /** The player with this id, if any (ids come from devices: no prototype lookups). */
