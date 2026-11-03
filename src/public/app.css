@@ -142,6 +142,35 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 #qbar .strip .av.still { animation: none; }
 #qbar .strip .av svg { width: 100%; height: 100%; display: block; }
 
+/* The winners jump (client/screen.ts, renderParty; backlog v4 item 9): a
+   band over the top of the stage after the reveal, stopping above the
+   tiles, so the key stays in view. Each avatar pops in, then jumps five
+   times, crouching before and landing after each, up to half its size
+   (client/look.ts, JUMP); neighbours out of step. */
+#party {
+  position: fixed; z-index: 4; pointer-events: none; border-radius: 18px 18px 0 0;
+  /* A veil over the question, its foot soft above the tiles. */
+  background: linear-gradient(color-mix(in srgb, var(--bg) 90%, transparent) 82%, transparent);
+  animation: party-in .3s ease-out both;
+}
+#party.out { animation: party-out .4s ease-in both; }
+#party .jumper { position: absolute; animation: pop .35s cubic-bezier(.3, 1.6, .5, 1) both; }
+#party .jumper > span { display: block; width: 100%; height: 100%; transform-origin: 50% 100%; animation: jump .62s ease-in-out 5 both; }
+#party .jumper svg { width: 100%; height: 100%; display: block; }
+@keyframes jump {
+  0%, 100% { transform: none; }
+  14% { transform: scale(1.1, .86); }
+  32% { transform: translateY(-32%) scale(.94, 1.08); }
+  50% { transform: translateY(-48%) scale(1, 1); }
+  70% { transform: translateY(-25%) scale(.97, 1.04); }
+  86% { transform: scale(1.08, .9); }
+}
+@keyframes party-in { from { opacity: 0; } }
+@keyframes party-out { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  #party .jumper > span { animation: none; }
+}
+
 /* A question's picture (client/screen.ts, layQuestion): between the question
    and the tiles, or beside both. The script sets the figure's size in px from
    the picture's shape, so nothing moves when the file arrives. */

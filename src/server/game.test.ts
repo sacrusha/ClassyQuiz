@@ -227,6 +227,27 @@ test("votes, then the final ranking now: a question whose key wasn't shown doesn
   assert.equal(score(g, ids[0]), 0);
 });
 
+test("winners: who got it right, in the lobby's order; a fix of the key moves them, a void clears them", () => {
+  const { g, ids } = setup(4);
+  G.begin(g, 100);
+  // Answers arrive in another order than the class joined.
+  G.answer(g, ids[3], 0, 0, 1, 0, 150);
+  G.answer(g, ids[1], 0, 1, 1, 0, 160);
+  G.answer(g, ids[0], 0, 0, 1, 0, 170);
+  assert.deepEqual(G.winners(g, 0), ["p0", "p3"], "the lobby's order");
+  G.reveal(g, 10);
+  assert.deepEqual(G.winners(g, 0), ["p0", "p3"]);
+  G.setCounts(g, 0, [true, true, false]);
+  assert.deepEqual(G.winners(g, 0), ["p0", "p1", "p3"], "a second right answer adds its children");
+  G.removePlayer(g, ids[3]);
+  assert.deepEqual(G.winners(g, 0), ["p0", "p1"], "a removed avatar doesn't jump");
+  G.setVoid(g, 0, true);
+  assert.deepEqual(G.winners(g, 0), [], "a void question has no winners");
+  G.next(g, 200);
+  G.reveal(g, 10);
+  assert.deepEqual(G.winners(g, 1), [], "nobody answered");
+});
+
 test("avatars: the first dozen players all get different animals", () => {
   const { g } = setup(12);
   const animals = new Set(Object.values(g.run!.players).map((p) => p.avatar.a));

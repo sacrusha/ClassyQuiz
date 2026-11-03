@@ -762,6 +762,20 @@ export function standings(g: Game): Standing[] {
   return list;
 }
 
+/**
+ * Who got question q right, in the order they joined (the lobby's order,
+ * not the answers'): the wall's celebration after the reveal (backlog v4
+ * item 9). Nobody for a void question; a removed avatar never.
+ */
+export function winners(g: Game, q: number): string[] {
+  const run = g.run;
+  if (!run || g.fixes[q]?.void) return [];
+  const answers = run.answers[q] ?? {};
+  return activePlayers(run)
+    .filter((p) => answers[p.id] && isRight(g, q, answers[p.id].choice))
+    .map((p) => p.id);
+}
+
 /** How many players picked each answer of question q. */
 export function distribution(g: Game, q: number): number[] {
   const counts = new Array(g.quiz.questions[q]?.answers.length ?? 0).fill(0);

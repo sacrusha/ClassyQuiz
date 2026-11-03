@@ -3677,3 +3677,123 @@ True of the uploads a day (back at 00:00 UTC), wrong for the bytes stored
   as with the rest of the landing. The two caps' wording was not shown in a
   browser; the uploads cap is 300 a day, the bytes cap 1 GB, neither
   reachable on a local stack without lowering them.
+
+## 2026-11-03 — The winners jump; the lion's mane; the lobby's wiggle
+
+Serves: backlog v4 item 9, the students' own wish (winners only, after
+every question, jumping; ten easily told apart, crowding accepted beyond),
+and the two wall bugs the owner saw; v1 item 5 (fun on the big screen).
+Tools beside the avatar stay the owner's open call, not built.
+
+**The winners jump.** After every reveal the avatars of everyone whose
+answer counts jump on the wall for about four seconds; then the band fades.
+- *Where:* a band over the top of the stage, where the question was read,
+  stopping above the first tile: the tick and the counts stay in view, the
+  teaching moment is the key. At 1366×768 with a text question the band
+  runs from 82 to 251 px, the question's text to 239, the tiles from 255.
+  Its veil is the page's background at 90 %. Nothing moves: the band is a
+  layer over the wall.
+- *How many, how large* (`partySize`, client/look.ts): up to ten side by
+  side and apart, as large as the band allows; the band at most three
+  tenths of the stage and never past the first tile. On the 1366 wall: 104
+  px, also when it steers itself. More than ten get smaller, down to two
+  thirds of ten's size, then overlap in the row: twenty at 69 px
+  overlapping 6 %, twenty-four overlapping 23 %. On a narrow wall, where
+  one row would leave ten tiny, they stand in two rows (a 360 px phone
+  steering itself: ten at 65 px in two rows of five, the back row half a
+  step aside; twenty at 43 px, overlapping 23 %; three at 102 px). The band
+  is as high whatever the count, so it covers the same part of the wall.
+- *Where the question leaves little room:* a short question beside its
+  picture, or above pictures as answers, has its tiles 80–95 px below the
+  stage's top; the band keeps to that, and ten are 47–56 px there (the
+  bar's avatars are 37). A question picture between the text and the tiles
+  leaves the full band: 111 px.
+- *Order:* the lobby's, not the answers': the first in the row isn't the
+  fastest.
+- *Motion:* each pops in, then jumps five times (0.62 s each: a crouch, up
+  to half its size, a landing), the starts scattered over half a second so
+  neighbours are out of step; ten side by side read as ten because some are
+  up while others are down. With reduced motion asked for, they stand still
+  for the same time.
+- *When:* once per key. A view that comes again (the wall's tick every
+  15 s, a reconnect, the Remote coming or going) doesn't restart it. A fix
+  of the key during the reveal starts it again for the new winners, all of
+  them. A void question, or nobody right: no band. The next step, an
+  enlarged picture or a resized window ends it; a teacher pressing on
+  within four seconds cuts it short.
+- *Data:* `RevealView.winners`, ids in the lobby's order, on the wall's
+  view only (`G.winners`: whose stored answer counts under the current fix;
+  a removed avatar never; nobody on a void). The tablets already show ✓ or
+  ✗; the Remote and the ranking are unchanged.
+- *"Exposes nobody":* the band shows who was right, so by their absence who
+  wasn't. The who-answered bar was built to show nobody missing; the
+  owner's ruling on item 9 (winners jump after every reveal, also when most
+  of the class got it right) takes that on. Nothing else shows it.
+
+**The lion's mane.** The owner saw a lion on a star whose colour hardly
+showed. Measured, rasterising every animal on every shape at 200 px: the
+share of the shape's area and of its outline the animal leaves uncovered.
+The lion was the one outlier: on the star 14 % of the area and 48 % of the
+outline (the frog, next hardest, 32 and 70; the others 36–46 and 74–89),
+on the heart 30 and 71 (others 46–59 and 92–100). Its mane was a ring 40
+in radius round the face, where the other heads are 24–32 with only ears
+or eyes reaching further. Now 32.5 (the outer
+circle 36 to 29, the eight tufts 9 to 7.5 at 25 instead of 31); the face
+and the hat's seat unchanged. After: star 31 / 77, heart 52 / 100, pond
+60 / 71 (from 40 / 66), every shape within the other eleven's range.
+Figure `docs/avatars/lion-before-after.png`, the lion before and after
+beside the frog, at the lobby's size and the bar's.
+
+**The lobby's wiggle, cut.** The lobby's rows of avatars (the class's wall
+and the one that steers itself) have `overflow: hidden`, so the rows a big
+class has past the screen are hidden; their box was as large as the
+avatars, with 1 vh above them. The wiggle of a changed look (12 % larger,
+turned 8°) and a newcomer's pop grew past it: the left column and the
+bottom row were cut mid-wiggle, and the top and right had too little room.
+The hat is just the commonest change. Now a margin of 15 % of an avatar's
+size all round, inside the clip, with negative margins so the avatars stay
+where they were, and a wiggling avatar is drawn over its neighbours.
+Frozen at five moments of the wiggle with 24 dressed children, the
+drawing's box lay up to 9 px outside the clip at 1366×768 and 7 px on a
+360 px phone; after, none, in both lobbies.
+
+**Checked:**
+- Typecheck; unit tests 102 (new: the winners in the lobby's order, a
+  second right answer adding its children, a removed avatar out, a void
+  clearing them, nobody answering; the band's layout for 1 to 40 winners on
+  four stage sizes and in a band of 94 px: inside the width and the band,
+  ten apart, more no smaller than two thirds, forty overlapping, one row on
+  the 1366 wall and two on a phone).
+- `simulate.mjs`, plain, `--all-poll` and `--tempo`, all passing. New
+  check: after every reveal, the wall's winners are exactly the students
+  whose acknowledged answer counts under the key as it then stands, the fix
+  of question 1 included, none on the void question 4 (`--tempo`: 5, 15,
+  3, 0 and 10 winners).
+- Headless Edge through the real wall (`.tmp/shots-tool/winners-walk.mjs`,
+  134 checks, all passed, no page errors): a 1366×768 wall with a phone
+  Remote and 24 dressed children (3, 10, 20, 24, 0 and 2 right; a fix of
+  question 1's key taking 3 to 13); a 360 px phone steering itself with 20
+  (10, 20, 3); a 1366 wall steering itself with 10; the same with an
+  uploaded zip (a picture beside a short question, a wide one between,
+  pictures as answers with and without a question picture). At every
+  reveal: no band at the votes; exactly the winners, in the lobby's order;
+  inside the band and the screen, no sideways scroll; ten or fewer apart;
+  the question and the tiles where they were at the votes; the band above
+  the first tile; jumping, up to half their size; gone after five seconds;
+  not back with the wall's next tick. The lobbies' wiggle frozen inside
+  their rows at 1366 and 360. `.tmp/shots-tool/wiggle-probe.mjs` measured
+  the cut before the fix.
+
+**Not established:** whether ten at 104 px read from the back row of a
+classroom, and twenty as a crowd; whether four seconds is long enough for a
+child to find themselves, and short enough for the teacher; how children
+take being seen not jumping; how the projector's colours treat the veil.
+Whether the 47–56 px of a short question beside a picture are enough, or
+the band should go elsewhere there.
+One walk run saw the question or the tiles of the phone wall's last
+question at another place at the reveal than at the votes; five runs since
+didn't, and what moved wasn't recorded (the walk prints it now).
+
+**Deploy:** no migration. `winners` is an optional field: a wall from
+before ignores it; a server from before sends none, and the wall shows no
+band.

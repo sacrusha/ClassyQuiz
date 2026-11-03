@@ -106,7 +106,7 @@ tablets, and a quiz made in the break.
 | Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The check: the right quiz, a spot fix, the tempo (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
-| Quiz | Start on whichever tab steers; Show votes → Show answer → Next … there, or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer. |
+| Quiz | Start on whichever tab steers; Show votes → Show answer → Next … there, or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
 ## 3. Screens
@@ -343,7 +343,7 @@ teacher's pace and with a countdown, after Go:
 |---|---|---|---|
 | The question | the question and tiles; in the bar at the top, the avatar of each student whose answer has arrived pops in, and "answered / of" | buttons | the counts with the key; **Show votes** |
 | Show votes | each tile's count and a bar; no tick, nothing faded | buttons locked, the chosen one marked, 👁 | "The votes are on the wall, without the right answer"; **Show answer** |
-| Show answer | the tick, the other tiles faded | ✓ or ✗ | Ranking, Next |
+| Show answer | the tick, the other tiles faded; the avatars of those right jump for about four seconds in a band over the question | ✓ or ✗ | Ranking, Next |
 
 - **Show votes closes answering**, as time's up does. A tap made before the
   tablet showed it closed still counts when it arrives, and the votes grow

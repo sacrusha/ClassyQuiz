@@ -687,6 +687,19 @@ for (;;) {
     })();
   }
   if (current === 3) await steerer().send({ op: "setVoid", q: 3, value: true });
+  // The winners jump on the wall (v4 item 9): exactly those whose answer counts
+  // under the key as it now stands, the fix above included; nobody on a void.
+  {
+    const want = () => {
+      const t = tv().questions[current];
+      const active = new Set((projector.view?.players ?? []).map((p) => p.id));
+      return t.void ? [] : players.filter((p) => active.has(p.id) && p.acked[current] && t.answers[p.acked[current].choice]?.counts).map((p) => p.id).sort();
+    };
+    const got = () => [...(projector.view?.reveal?.winners ?? [])].sort();
+    const same = await until(() => JSON.stringify(got()) === JSON.stringify(want()), 5000, "the wall's winners").then(() => true, () => false);
+    check(same, `question ${current + 1}: the wall's winners are those right (${got().length} of ${want().length})`);
+    log(`question ${current + 1}: ${got().length} winners jump on the wall`);
+  }
   if (qi === 1) {
     await steerer().send({ op: "ranking", at: at() });
     await until(() => tv().phase === "ranking", 5000, "ranking");

@@ -276,6 +276,63 @@ export function syncAvatars<P extends { id: string; avatar: Avatar }>(
   }
 }
 
+/** How a group of jumpers is laid out (px): see partySize. */
+export interface PartyLayout {
+  /** A jumper's size, and the step to the next in its row. */
+  s: number;
+  step: number;
+  /** Rows, the back one first; how many in a row; how far each row stands above the one in front. */
+  rows: number;
+  perRow: number;
+  rise: number;
+  /** The band's height: the rows, room for the jump above them, a margin. */
+  band: number;
+}
+
+/** How high a jumper jumps, in its own size (app.css, @keyframes jump). */
+export const JUMP = 0.5;
+
+/**
+ * The winners' band on the wall (client/screen.ts, renderParty), for n of
+ * them over a stage w wide and h high, with `room` above its first tile:
+ * the band never reaches the tiles, where the key is. Ten as large as the
+ * band allows and apart: in one row on a wide wall, the band no more than
+ * three tenths of the stage; in two or three rows on a narrow one, where
+ * one row would leave them tiny. More than ten get smaller, down to two
+ * thirds of ten's size, then overlap in their rows: twenty blur together,
+ * which the owner accepts (backlog v4 item 9). The band is as high as ten's,
+ * so it covers the same whatever the count.
+ */
+export function partySize(n: number, w: number, h: number, room = Infinity): PartyLayout {
+  const gap = Math.max(4, Math.round(w * 0.008));
+  const RISE = 0.85;
+  // The rows and the jump within the band, less its margins.
+  const most = Math.min(0.3 * h, room);
+  const cap = most - 2 * Math.max(4, 0.04 * most);
+  const height = (s: number, rows: number) => s * (1 + RISE * (rows - 1)) + JUMP * s;
+  const fit = (k: number, rows: number) => Math.floor(Math.max(16, Math.min((w - (k - 1) * gap) / k, cap / (1 + RISE * (rows - 1) + JUMP))));
+  // Ten's layout: the row count that shows them largest, fewer rows on a tie.
+  let rows = 1;
+  for (const r of [2, 3]) if (fit(Math.ceil(10 / r), r) > fit(Math.ceil(10 / rows), rows) * 1.15) rows = r;
+  const ten = fit(Math.ceil(10 / rows), rows);
+  const band = Math.ceil(height(ten, rows) + 2 * Math.max(4, 0.06 * ten));
+  const k = Math.max(1, Math.min(n, 10));
+  if (n <= 10) {
+    // Fewer than ten: as few rows as show them largest, within ten's band.
+    const inner = band - 2 * Math.max(4, 0.06 * ten);
+    let best = { s: 0, r: 1 };
+    for (let r = 1; r <= Math.min(rows, k); r++) {
+      const s = Math.min(fit(Math.ceil(k / r), r), Math.floor(inner / (1 + RISE * (r - 1) + JUMP)));
+      if (s > best.s) best = { s, r };
+    }
+    const perRow = Math.ceil(k / best.r);
+    return { s: best.s, step: best.s + gap, rows: Math.ceil(k / perRow), perRow, rise: RISE * best.s, band };
+  }
+  const perRow = Math.ceil(n / rows);
+  const s = Math.min(ten, Math.floor(Math.max((2 / 3) * ten, (w - (perRow - 1) * gap) / perRow)));
+  return { s, step: Math.min(s + gap, (w - s) / (perRow - 1)), rows, perRow, rise: RISE * s, band };
+}
+
 /** For the test that the drawings match shared/looks.ts. */
 export const LOOK_DRAWINGS = { backgrounds: BACKGROUNDS.length, hats: HATS.length, seats: SEATS.length, animals: ANIMALS.length };
 
