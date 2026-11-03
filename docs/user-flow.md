@@ -45,7 +45,9 @@ second design:
      5). The uploading device's Resume goes in the same way, with the quiz's
      secret besides. Wrong teacher codes are limited: the fifth within a
      minute from one device refuses that device's teacher codes for this
-     quiz for 10 minutes.
+     quiz for 10 minutes, and the quiz takes at most ten wrong ones, one
+     more every six minutes, from whatever devices; the uploading device is
+     exempt from both.
    - `/teacher` stays for old links: it asks for the teacher code.
 3. **Two teacher roles, one tab each.**
    - The **Projector** is what the class sees.
@@ -69,7 +71,9 @@ second design:
    - *A Projector and a Remote, one of them gone:* no question; it takes the
      role that is free.
    - *Both there:* "This quiz already has a screen for the class and one that
-     steers." A tab that is there is never pushed aside.
+     steers." A tab that is there is never pushed aside. A Remote whose tab
+     closed, or that hasn't been heard from for 25 s, isn't there for this:
+     the teacher code takes it at once.
    - *Nothing there:* no question; it shows and steers, as a tab that just
      uploaded.
 
@@ -81,10 +85,12 @@ second design:
    confirmation; the same tap undoes it.
 6. **Phone gone.** The Remote's tab counts as gone after 45 s without a
    sign. From then on the Projector steers again with its bar, which says
-   "Remote gone: type 63953 47 on another device". When the phone comes
-   back, it is the Remote again. A dead phone, a closed tab or a new phone
-   mid-lesson: the teacher code takes the free steering, before and after
-   the first student alike.
+   "Remote gone: another device via ⋯"; the teacher code itself is on the
+   wall only under ⋯ → A second device…, not in the bar in front of the
+   class. When the phone comes back, it is the Remote again. A dead phone, a
+   closed tab or a new phone mid-lesson: the teacher code takes the
+   steering, before and after the first student alike, and a closed tab's
+   at once (rule 5).
 7. **Projector gone.** The teacher reads the questions off the Remote, which
    says "Projector gone" and how to bring it back: the teacher code on the
    projector computer, which takes the free Projector without a question.
@@ -168,8 +174,10 @@ look".
   uploaded before (`cq.days`, dates only) and only when the site refused an
   upload on a day of the last 30 (`GET /api/site`).
 - **The network check** is no longer on the root page: the upload error,
-  the wall's "Nobody in yet?" line after 90 s, and a device that can't
-  reach the quiz carry the help where the failure shows (landing story §7).
+  the wall's "Nobody in yet?" line after 90 s of an empty lobby (counted
+  anew for each class, so "Again with another class" waits its 90 s too),
+  and a device that can't reach the quiz carry the help where the failure
+  shows (landing story §7).
 
 ### 3.2 The two entrances after a code
 
@@ -202,12 +210,14 @@ uploading device), when one tab shows and steers:
 ```
 
 Otherwise there is no question (rule 5): it takes the free role, or says
-both are there, with "Try again". The question is acted on once, as the
-device arrives: a device left lying on the question never takes a role by
-itself later. A wrong teacher code shows the box again with "That isn't
-this quiz's teacher code."; after five, "Too many wrong codes for this quiz.
-Try again in a few minutes." `/teacher#63953`, the old way in, shows the
-same box with the class code in it.
+both are there, with "If one of them was on this device a moment ago, try
+again in half a minute." and "Try again". The question is acted on once, as
+the device arrives: a device left lying on the question never takes a role
+by itself later. A wrong teacher code shows the box again with "That isn't
+this quiz's teacher code."; after five from the device, or the quiz's ten,
+"Too many wrong codes for this quiz. Try again in a few minutes."
+`/teacher#63953`, the old way in, shows the same box with the class code in
+it.
 
 ### 3.3 The lobby: the check, then the join screen (item 19; docs/after-upload.md §3)
 
@@ -312,8 +322,8 @@ throughout. While it steers, the bottom line is the bar:
   the Remote is gone.)
 - **Notices on the wall:** "Remote connected", and "Remote gone – steering
   here". While a Remote that was there is away, the bar keeps "Remote gone:
-  type 63953 47 on another device"; on a phone-sized wall it gives way, and
-  ⋯ → A second device… has the code.
+  another device via ⋯" (on a phone-sized wall it gives way), and ⋯ → A
+  second device… has the code: on demand, not in front of the class.
 - **A window opened by "a new window here"** that answered "Show the quiz
   here" says "Drag this window to the projector screen, then press F for
   full screen" until it is full screen.
@@ -449,10 +459,11 @@ step:
 | Tablets still joining after Start | They get in (first five minutes and the first question; then five more) | Nothing |
 | A tablet from the last lesson, left at its final ranking | "This quiz has finished" and ← | ←, then the code |
 | Any teacher tab reloads, sleeps or loses Wi-Fi | The same role again | Nothing |
-| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …", shows the bar, and keeps "Remote gone: type 63953 47 on another device" on it | Steer at the laptop. The phone is the Remote again when it's back; without its tab, or another phone: the teacher code, which takes the free steering without a question |
+| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …", shows the bar, and keeps "Remote gone: another device via ⋯" on it | Steer at the laptop. The phone is the Remote again when it's back; without its tab, or another phone: the teacher code, which takes the steering without a question |
+| The Remote's tab closed by mistake | Nothing on the wall for 45 s | The teacher code again, at once: a closed tab's Remote is taken without waiting (on the HTTP fallback, within 25 s) |
 | A wrong answer to the second device's question | The wall steers where the phone should, or the other way round | ⇄ Swap, on either device |
 | Projector dies | The Remote says "Projector gone" and how to bring it back | Read off the Remote. Optionally another computer: the teacher code (the free Projector, after 45 s), or the projector window on a two-screen laptop |
-| Wrong code | Students: the code, ✗, the box. Teacher: "That isn't this quiz's teacher code." | Type it again; after five wrong teacher codes in a minute, that device waits 10 minutes |
+| Wrong code | Students: the code, ✗, the box. Teacher: "That isn't this quiz's teacher code." | Type it again; after five wrong teacher codes in a minute, that device waits 10 minutes; after ten for the quiz, any device waits up to six minutes. The device that uploaded gets in with Resume regardless |
 | Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Open the .zip again |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |
 
