@@ -104,8 +104,8 @@ tablets, and a quiz made in the break.
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
 | Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The check: the right quiz, a spot fix, the tempo (§3.3). | — |
-| Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "a new window here", Show the quiz here, drag it across, F. | — |
-| Lesson starts | **Show the class the code ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
+| Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
+| Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
 | Quiz | Start on whichever tab steers; Show votes → Show answer → Next … there, or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
@@ -124,8 +124,10 @@ look".
 ┌──────────────────────────────────────────────────────────────────────┐
 │ classyQuiz                         Code [_ _ _ _ _]  ▶      EN ▾     │
 ├──────────────────────────────────────────────────────────────────────┤
-│   [two sheet pages] → [phone: photos up, .zip back] → [tablet] [wall] │
-│   Your exercise sheet   Your AI   Each student taps  What the class sees │
+│ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
+│   → [wall] [tablet]                                                  │
+│ Your exercise sheet · Your AI · The .zip, uploaded here ·            │
+│ What the class sees · Each student taps                              │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
@@ -137,8 +139,9 @@ look".
 │   two pages:                     │ │   made (.zip) ] or drop it here│ │
 │  ( Hi! Can you make me a quiz … )│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
-│   A second message reshapes the  │                                   │ uploaded before, the
-│   quiz.                          │                                   │ site full lately
+│   Or, with nothing decided yet:  │                                   │ uploaded before, the
+│  ( I need a quiz for classyquiz… )│                                  │ site full lately
+│   It then asks what it needs.    │                                   │
 ├──────────────────────────────────┴───────────────────────────────────┤
 │ About classyQuiz … (English, for AIs)                                 │
 ```
@@ -147,8 +150,13 @@ look".
   (`cq.lang`), else the browser's language, else English. The static HTML is
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
-- **The strip** links `/example` in the chosen language until the video
-  exists; no ▶. On a phone it is one row that scrolls sideways.
+- **The strip** follows the workflow: the sheet, the ask, the .zip going up
+  to the site, the wall, a tablet. It links `/example` in the chosen language
+  until the video exists; no ▶. Below 720 px wide it is one row that scrolls
+  sideways.
+- **Build's step 2** has two example asks: the labelled one with photos, and
+  the open one ("I need a quiz for classyquiz.pages.dev. Help?"), after which
+  the AI asks what it needs.
 - **Run a quiz takes a .zip and nothing else.** The button opens the file
   chooser; a .zip can also be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
@@ -230,11 +238,11 @@ doesn't know whether it is shared.
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ Prozente · 12 questions                 Class code 63953   │
-│                               [ Show the class the code ▶ ]│
+│                                      [ Let the class in ▶ ]│
 │  Tempo: Teacher's pace ›                                   │
 │  A second device, to steer from or to show the quiz on:    │
-│  on classyquiz.pages.dev, type 63953 47. Or a new window   │
-│  here.                                                     │
+│  on classyquiz.pages.dev, type 63953 47. Or open a second  │
+│  screen in a new window with a click.                      │
 │   12 questions                         [Show all answers]  │
 │    1  Was sind 10% von 250?                             ›  │
 │    2  Eine Jacke kostet 80 Franken …                    ›  │
@@ -262,7 +270,7 @@ A question opened (or all of them, with Show all answers / Hide answers):
 │       Change the right answer                              │
 ```
 
-- **The tab that uploaded opens on the check;** "Show the class the code ▶"
+- **The tab that uploaded opens on the check;** "Let the class in ▶"
   is the one tap to the join screen, "‹ Questions" the way back. The tab
   remembers which it shows (sessionStorage): a reload stays there. A wall
   that takes the steering back in the lobby (its Remote left or went away)
@@ -272,7 +280,7 @@ A question opened (or all of them, with Show all answers / Hide answers):
   tap.
 - **The teacher code sits at rest** on the check, in one sentence naming
   both needs; on the join screen it is behind "A second device ›", a sheet.
-  "a new window here" (hidden on a phone) opens a window that asks the same
+  "open a second screen in a new window" (hidden on a phone) opens a window that asks the same
   question as any other device.
 - **Answers start folded,** so a shared check shows no key until the
   teacher presses a button that says it shows the answers.
@@ -324,7 +332,7 @@ throughout. While it steers, the bottom line is the bar:
   here". While a Remote that was there is away, the bar keeps "Remote gone:
   another device via ⋯" (on a phone-sized wall it gives way), and ⋯ → A
   second device… has the code: on demand, not in front of the class.
-- **A window opened by "a new window here"** that answered "Show the quiz
+- **A window opened by "open a second screen in a new window"** that answered "Show the quiz
   here" says "Drag this window to the projector screen, then press F for
   full screen" until it is full screen.
 
@@ -437,7 +445,7 @@ step:
 
 - **One laptop, mirrored.** The Projector steers itself all lesson. Changing
   a key before the reveal shows it on the wall; the button says what it does.
-- **Laptop with two screens.** "a new window here", Show the quiz here, drag it, F. Placing
+- **Laptop with two screens.** "open a second screen in a new window", Show the quiz here, drag it, F. Placing
   the window on the second screen automatically (the Window Management API)
   is untried.
 - **Phone only, no projector.** The phone is a Projector that steers itself.

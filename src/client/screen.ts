@@ -191,13 +191,13 @@ function comeBack(): string {
 
 /**
  * The teacher code at rest, in one sentence naming both needs
- * (docs/after-upload.md §3); it doesn't guess which device this is. "A new
- * window here" opens a window that asks the same question as any other
+ * (docs/after-upload.md §3); it doesn't guess which device this is. "Open a second
+ * screen in a new window" (the owner's words) opens a window that asks the same question as any other
  * device; it is always there, so a laptop that gains its second screen after
  * the check finds it where it was (hidden on a phone).
  */
 function secondDevice(v: ScreenView): string {
-  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">a new window here</button>.</span>`;
+  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open a second screen in a new window</button> with a click.</span>`;
 }
 
 /** The single tab's lobby screen; the class never sees the check unless the teacher shares it. */
@@ -222,7 +222,7 @@ function renderManagedLobby(v: ScreenView): void {
  * how many questions, which tells two versions apart), the class code small
  * ("upload is start": read aloud, the class joins without the tap), the
  * tempo, the teacher code at rest, and the questions with their fixes.
- * "Show the class the code" is the one tap to the join screen.
+ * "Let the class in" is the one tap to the join screen: the class may join now.
  */
 function renderCheck(v: ScreenView): void {
   const t = v.steer!;
@@ -233,7 +233,7 @@ function renderCheck(v: ScreenView): void {
       <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${t.questions.length} ${t.questions.length === 1 ? "question" : "questions"}</span></h1>
       <p class="classcode">Class code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
-    <p class="cstart"><button class="btn primary big" data-act="show-join">Show the class the code &#9654;</button></p>
+    <p class="cstart"><button class="btn primary big" data-act="show-join">Let the class in &#9654;</button></p>
     <p class="device cline">${tempoLine(t)}</p>
     <p class="device cline">${gone}${secondDevice(v)}</p>
     ${questionList(t, steer.ui)}
@@ -253,7 +253,7 @@ function renderCheck(v: ScreenView): void {
 
 const NOBODY_MS = 90_000;
 /**
- * When this tab first showed the class the code to an empty lobby; the wait
+ * When this tab first let the class in to an empty lobby; the wait
  * counts from there, across ‹ Questions and back. Each class starts its own:
  * the count goes with the first avatar and with the run's start, so "Again
  * with another class" waits its 90 s too (review D #3).

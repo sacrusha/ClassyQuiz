@@ -3598,6 +3598,59 @@ line after it); a spent request allowance, which the full days don't
 record, so the line understates a site that runs out of requests rather
 than uploads; the free-tier test, which step 1 waits for.
 
+**After the owner read it (before the deploy).** His seven corrections:
+- **The strip follows the workflow, five frames:** the sheet, the ask, the
+  .zip going up to the site, the wall, a tablet ("the step where the zip
+  goes to classyQuiz isn't obvious"; "students tap … after the big screen").
+  The new frame is a drawing like the ask's, wordless but for the logo: a
+  laptop showing classyQuiz's header, the dashed Run box with the yellow
+  .zip from the ask frame dropping in, and the blue upload button. Caption
+  "The .zip, uploaded here" (DE "Die .zip, hier hochgeladen", FR "Le .zip,
+  importé ici", IT "Lo .zip, caricato qui"). Arrows run up to the wall;
+  wall and tablet stand together. The strip is now a two-row grid, so the
+  pictures stand on one line whatever their captions' lengths, and its
+  height is computed so the row fits the width (about 190 px at 1366, 160
+  at 768); below 720 px it is the row that scrolls on its own (was 600).
+- **Build step 2, a second example ask** from the other end: "Or, with
+  nothing decided yet:" / "I need a quiz for classyquiz.pages.dev. Help?" /
+  "It then asks what it needs." (the owner's ask, translated; the address
+  substituted like the first's). That the AI asks back is the guidance's
+  "Building with the teacher"; seen with an open ask and the sheet attached
+  (the guidance entry's runs), not run with this ask, which brings no
+  material at all.
+- **"A second message reshapes the quiz." is gone** (it sounded off in
+  German and French; the second ask carries the multi-turn fact).
+- **The French ask greets with "Salut"**, the owner's, to match its "tu";
+  the run's `teacher-1.txt` says "Bonjour". The greeting is the only
+  difference from the run.
+- **About names no address:** "opens that copy's own address" (was "not
+  classyquiz.pages.dev", which a copy's build turned into its own name),
+  and the own-copy and layout links read `/own-copy` and `/layout` "on
+  this site". The build's substitution now touches the Build step and the
+  two bubbles only.
+- **The check's button: "Let the class in ▶"** (was "Show the class the
+  code ▶"; the owner offered "Open the lobby"). The tap means the class may
+  join now, said in the teacher's words; "lobby" is the software's. It
+  reads on to the join screen's "Start quiz ▶".
+- **"Or open a second screen in a new window with a click."** (the owner's
+  words; the link is "open a second screen in a new window") for "Or a new
+  window here.", on the check and in the join screen's second-device sheet.
+  The Remote's "open the projector window here" is unchanged.
+- Checked: typechecks, 100 unit tests; headless Edge
+  (`.tmp/shots-tool/owner5-walk.mjs`, all passed, no page errors): the
+  frames' order, one row with the pictures on one line and the captions
+  apart at 1920 to 721 px in French and German and at 1366 in all four, the
+  wall the largest; no sideways page scroll at any of 15 sizes from
+  1920×1080 to 360×740 (tablets 1280×800, 1180×820, 1024×768 sideways,
+  820×1180 and 768×1024 upright, a phone sideways 844×390); 390 and 360
+  scroll the strip on its own with the sheet at 62 %; at 1366 the strip,
+  Build and Run above the fold, and "It then asks what it needs." too in
+  EN, DE and IT (French ends 14 px below); About without pages.dev; the
+  check's button, the window line and its popup, the line hidden on a
+  phone.
+- Not established: the German, French and Italian wording of the new
+  lines by a native reader; whether the new frame reads in five seconds.
+
 ## 2026-11-03 — A refused upload says which cap it hit
 
 The site said "full for today" and "works again the next day" for both caps.

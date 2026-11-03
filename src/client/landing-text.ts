@@ -10,9 +10,12 @@
 // verified and says nothing about free tiers.
 //
 // The example asks are each language's real first ask from the example's
-// redo (.tmp/example/v2-*/teacher-1.txt), verbatim; the marked parts carry
-// the labels. The site's address in them is replaced by the one the browser
-// opened.
+// redo (.tmp/example/v2-*/teacher-1.txt), verbatim but for the French
+// greeting (the run's "Bonjour", here "Salut", the owner's, to match its
+// "tu"); the marked parts carry the labels. The second ask is the other end,
+// nothing decided yet: the owner's, translated; that the AI then asks what it
+// needs is the guidance's "Building with the teacher". The site's address in
+// both is replaced by the one the browser opened.
 
 import type { SiteFull } from "../shared/limits.ts";
 
@@ -34,8 +37,10 @@ export interface Text {
   strip: string;
   capSheet: string;
   capAi: string;
-  capTap: string;
+  /** The .zip going up to the site, the strip's third frame. */
+  capZip: string;
   capWall: string;
+  capTap: string;
   build: string;
   step1: string;
   step1detail: string;
@@ -43,7 +48,10 @@ export interface Text {
   forExample: string;
   ask: AskPart[];
   labels: string[];
-  second: string;
+  /** The second example ask, with its lead-in and what follows it. */
+  orOpen: string;
+  ask2: string;
+  asksBack: string;
   copy: string;
   copied: string;
   run: string;
@@ -91,8 +99,9 @@ const en: Text = {
   strip: "The example quiz, from an exercise sheet to the class: see its questions",
   capSheet: "Your exercise sheet",
   capAi: "Your AI",
-  capTap: "Each student taps",
+  capZip: "The .zip, uploaded here",
   capWall: "What the class sees",
+  capTap: "Each student taps",
   build: "Build a quiz",
   step1: "Choose any good AI.",
   step1detail: "Claude Opus wrote the example quiz, 3 Nov 2026.",
@@ -112,7 +121,9 @@ const en: Text = {
     { s: "." },
   ],
   labels: ["this site", "which exercises", "your class", "how many", "which language"],
-  second: "A second message reshapes the quiz.",
+  orOpen: "Or, with nothing decided yet:",
+  ask2: "I need a quiz for classyquiz.pages.dev. Help?",
+  asksBack: "It then asks what it needs.",
   copy: "Copy",
   copied: "Copied",
   run: "Run a quiz",
@@ -157,8 +168,9 @@ const de: Text = {
   strip: "Das Beispiel-Quiz, vom Aufgabenblatt bis zur Klasse: seine Fragen ansehen",
   capSheet: "Dein Aufgabenblatt",
   capAi: "Deine KI",
-  capTap: "Jedes Kind tippt",
+  capZip: "Die .zip, hier hochgeladen",
   capWall: "Was die Klasse sieht",
+  capTap: "Jedes Kind tippt",
   build: "Ein Quiz bauen",
   step1: "Wähle eine gute KI.",
   step1detail: "Das Beispiel-Quiz hat Claude Opus geschrieben, 3. Nov. 2026.",
@@ -178,7 +190,9 @@ const de: Text = {
     { s: "." },
   ],
   labels: ["diese Seite", "welche Aufgaben", "deine Klasse", "wie viele", "welche Sprache"],
-  second: "Eine zweite Nachricht formt das Quiz um.",
+  orOpen: "Oder, wenn noch nichts feststeht:",
+  ask2: "Ich brauche ein Quiz für classyquiz.pages.dev. Hilfst du mir?",
+  asksBack: "Dann fragt sie, was sie braucht.",
   copy: "Kopieren",
   copied: "Kopiert",
   run: "Ein Quiz starten",
@@ -223,15 +237,16 @@ const fr: Text = {
   strip: "Le quiz d'exemple, de la fiche d'exercices à la classe : voir ses questions",
   capSheet: "Votre fiche d'exercices",
   capAi: "Votre IA",
-  capTap: "Chaque élève touche",
+  capZip: "Le .zip, importé ici",
   capWall: "Ce que voit la classe",
+  capTap: "Chaque élève touche",
   build: "Créer un quiz",
   step1: "Choisissez une bonne IA.",
   step1detail: "Le quiz d'exemple a été écrit par Claude Opus, le 3 nov. 2026.",
   step2: "Demandez-lui un quiz pour",
   forExample: "Par exemple, avec les photos de deux pages :",
   ask: [
-    { s: "Bonjour ! Tu peux me faire un quiz pour " },
+    { s: "Salut ! Tu peux me faire un quiz pour " },
     { s: "classyquiz.pages.dev", l: 0 },
     { s: " à partir de ces deux pages, avec des exercices " },
     { s: "comme les n° 1, 3 et 4", l: 1 },
@@ -244,7 +259,9 @@ const fr: Text = {
     { s: "." },
   ],
   labels: ["ce site", "quels exercices", "votre classe", "combien", "quelle langue"],
-  second: "Un second message remodèle le quiz.",
+  orOpen: "Ou, sans rien avoir décidé :",
+  ask2: "J'ai besoin d'un quiz pour classyquiz.pages.dev. Tu m'aides ?",
+  asksBack: "Elle vous demande alors ce qu'il lui faut.",
   copy: "Copier",
   copied: "Copié",
   run: "Lancer un quiz",
@@ -289,8 +306,9 @@ const it: Text = {
   strip: "Il quiz di esempio, dalla scheda alla classe: vedi le sue domande",
   capSheet: "La tua scheda",
   capAi: "La tua IA",
-  capTap: "Ogni alunno tocca",
+  capZip: "Lo .zip, caricato qui",
   capWall: "Cosa vede la classe",
+  capTap: "Ogni alunno tocca",
   build: "Crea un quiz",
   step1: "Scegli una buona IA.",
   step1detail: "Il quiz di esempio l'ha scritto Claude Opus, 3 nov 2026.",
@@ -310,7 +328,9 @@ const it: Text = {
     { s: "." },
   ],
   labels: ["questo sito", "quali esercizi", "la tua classe", "quante", "quale lingua"],
-  second: "Un secondo messaggio rimodella il quiz.",
+  orOpen: "Oppure, senza aver ancora deciso nulla:",
+  ask2: "Mi serve un quiz per classyquiz.pages.dev. Mi aiuti?",
+  asksBack: "Allora ti chiede ciò che le serve.",
   copy: "Copia",
   copied: "Copiato",
   run: "Avvia un quiz",
