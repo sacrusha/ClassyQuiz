@@ -2418,6 +2418,75 @@ stranger with the code still can't wander into a quiz under way.
 student page from before the deploy doesn't send `fresh` and behaves as
 before; it ignores `stale`.
 
+## 2026-11-03 — The landing page, third look: one line per quiz, upload, two foot lines
+
+Serves: v1 item 16, the owner's third look at the live page. Revises "The
+landing page by attention budget; zip only" where named.
+
+**The resume list (the bug).**
+- *The count only ever grew.* Every upload is its own quiz on the site,
+  open for two days, and only Delete on the start page ends one early. A
+  corrected quiz from the AI keeps its title, so a test round, or a key
+  fixed before the lesson, left one line per upload. Now a title is one
+  line: the newest upload of it. Delete… ends every upload of that title
+  this device holds. The older ones are out of the list but stay on the
+  site until they close by themselves; nothing ends them unasked, because a
+  quiz with the same title may be running in another tab. Ending them at
+  upload instead would be "nothing kept beyond its use" taken further; it
+  is the product owner's call.
+- Titles are learnt from the site (`/info`) and kept with the device's
+  entry, so a second visit doesn't ask about older uploads of a known
+  title. At most 6 are asked per visit, each a request against the daily
+  allowance. An untitled quiz is its own line.
+- *The expander went out of sync.* It was a `<details>` whose count was
+  written once: deleting the top line left "2 more quizzes" with nothing
+  above it. The list now renders from its state after every change; the
+  fold is a button ("▸ 2 more quizzes"), and goes when one quiz is left.
+- *Worse formatting.* The rows were flex lines, so "closes" landed wherever
+  the title ended, and a long title pushed it onto a line of its own. On a
+  laptop the rows now share one grid: Resume and the title, then "closes",
+  then Delete…, aligned down the list. Under 560 px each quiz is two lines:
+  Resume and the title, then "closes" with Delete… at the right.
+
+**Run a quiz:** the button is "Upload the quiz your AI made (.zip)", the
+owner's wording with ".zip" for "*.zip". Build's third step ("It hands you
+the quiz as a .zip file. Download it.") is gone: the button now says what
+the AI makes and what happens to it, so the step only ordered. The
+messages for text or another file say what the AI can do ("Your AI can make
+the quiz as one .zip file, to download from the chat and upload here")
+instead of ordering three steps; the fix hint says "upload" for "open".
+
+**Build, step 2:** "say how many questions you need and what kind". It
+helps the teacher specify, and an AI reading the page sees the number
+belongs to the brief and asks when it's missing ("Making a quiz with a
+teacher" already lists it among what only the teacher knows). **Step 1 is
+unchanged,** by the owner's word: rewording which AI works risked making it
+worse. It still says "Claude's free version works", which the owner has
+since said was tested only on a paid account.
+
+**The foot lines** each say what the link is, what for, and when:
+- "Some school networks block live quizzes. *A quick check*, run on the
+  school's Wi-Fi, shows whether yours does and, if so, what to tell IT."
+  "Check this network" didn't say that the network to check is the
+  school's, which is rarely where a teacher first reads the page.
+- "This site is free and shared by everyone who uses it, with room for a
+  few dozen classes a day. An AI can set up a copy just for your classes,
+  also free: *how that works*." The link names its destination, a guide;
+  "If that's too tight" asked the teacher to judge a limit they can't see.
+  `/own-copy`'s first sentence repeated the old wording and now matches.
+
+**Checked:** typecheck, 82 tests; headless Edge on the built page with the
+API mocked (`shots-tool/lp3-walk.mjs`), at 1366×768 and 390×844, no page
+errors, no sideways scroll on the phone: two uploads titled Prozente show as
+one line and "2 more quizzes" for the other two; the second visit asks only
+about the newest Prozente; Delete… on it ends both; the fold and its count
+follow each delete down to an empty list.
+
+**Not changed, for whoever owns the guidance:** it still says the teacher
+"opens" the `.zip` on the start page ("How a lesson runs", "Getting the quiz
+to the site", the paragraph on what assistants can't do). An AI relaying
+that sends the teacher looking for "Open"; "uploads" matches the button.
+
 ## Open
 
 - Whether the default Cloudflare address passes the AIs' fetchers and school
