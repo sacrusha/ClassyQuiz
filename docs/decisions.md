@@ -2705,6 +2705,118 @@ height); whether teachers use the votes to talk, or press through them.
 **Deploy:** no migration; the protocol additions are optional fields. The
 guidance page and `/layout.html` name the two steps and the avatars.
 
+## 2026-11-03 — Avatars the children dress
+
+Serves: backlog v2 item 5; v1 items 4 and 5 ("exposes nobody", "stores
+nothing about them"); the constraints "nothing kept beyond its use" and the
+Free plan. The design, the owner's reaction and the figures are in
+`docs/avatars.md`. The owner took the four recommendations: dress the
+assigned animal; shapes and hats, no tools; a plain start; fixed at Start.
+
+**What a child does.** In the lobby, below their animal: six background
+shapes in its colour (disc, hexagon, star, heart, flower, pond) and eight
+hats (crown, top hat, cap, wizard hat, party hat, flower, beanie, viking
+helmet). Tapping a shape puts the animal on it; tapping a hat puts it on,
+tapping the worn hat takes it off. The tablet shows it at once, the wall
+and the Remote about a second later, where the avatar wiggles. At Start
+the pictures go and the look is fixed. No words.
+
+**The owner's drawing notes.**
+- *The frog's hats:* a new head. The eyes moved from the top to the sides
+  and the head became a dome, so a hat sits on top as on the other animals.
+  Tried first and dropped: the hat tucked between and behind the old eyes,
+  with the eyes moved apart or not; too small to read at 34 px.
+- *The penguin:* its hats grow 1.05× the brim's width, against 1.3× on the
+  others.
+- *The wand:* tools aren't built; the prototype's star now sits on the tip.
+
+**Built.**
+- `shared/looks.ts`: the menu's size (`BACKGROUND_COUNT`, `HAT_COUNT`),
+  `MAX_LOOK_CHANGES` (30 a child per class), `LOOK_WRITE_MS` (1 s).
+- `Avatar` gains `b` and `h`, absent at their defaults. `G.dress` sets the
+  look whole (a resend changes nothing): only in the lobby, only what the
+  menu has, never for a removed avatar; "same" stores nothing; past 30
+  changes it refuses. The animal and colour, which tell the children
+  apart, are never touched.
+- Command `dress`. **The class's looks are written at most once a second:**
+  a change waits for the next write of the run (its own after up to 1 s,
+  or a join's), and is acknowledged once stored; the views go out after
+  the write, so nothing shows that isn't stored. A look changed while a
+  write is under way waits for the next one.
+- `client/play.ts`: the picker, built once and patched in place. The tablet
+  shows the pick at once and keeps showing it until its view shows it
+  back. One `dress` in flight; the latest pick is sent next, so a burst of
+  taps sends the first and the last. Refused (the quiz started, or the
+  changes spent): the stored look, and the pictures stop responding.
+- `client/look.ts`: the shapes, the hats and a seat per animal (brim
+  centre, width, growth; a hat never reaches past the top). `syncAvatars`
+  keeps a lobby's row in place: newcomers pop in, a changed look wiggles,
+  nothing else is replaced.
+- **The lobbies' rows are kept in place** on the wall (class lobby and
+  the one that steers itself) and on the Remote. Before, any change to the
+  players redrew the steering wall's whole lobby, Start button included,
+  and the Remote's body; with a class dressing, that would happen several
+  times a second while the teacher reaches for Start.
+
+**Found and fixed beside it: a tablet joining over HTTP waited up to 25 s
+for its first view.** The guest's poll was held until the guest's choice
+changed, which a new player doesn't do; the welcome came with the command's
+answer, the view didn't. Now the welcome over HTTP carries the view, as
+over a WebSocket, and the page lets the guest's poll go (`Line.repoll`) so
+the next one asks as the player. Seen as the simulation's polling tablets
+never showing their own look.
+
+**Cost** (`simulate.mjs --all-poll`, 25 students, two runs each way):
+- With dressing: 80 taps by 25 students took 112 HTTP requests (the
+  commands and the polls they answered), in a run of 1,345 in all.
+- Without (`--no-dress`): 1,178 and 1,174.
+- So dressing costs about 110–170 requests a class with every device on
+  the fallback, under +15%, as the design estimated. The absolute numbers
+  are above the 822 measured for "Spread, then key"; I didn't isolate why
+  (run lengths differed, 170–210 s, and idle polls count with time).
+- On WebSockets a change is one incoming message, 1/20 of a request.
+Rows: a change is two rows (the run and its meta), at most one write a
+second for the whole class; the simulation's 25 children made about 90
+taps in 5–10 s.
+
+**Checked:**
+- Unit tests 89: the look set whole and kept apart from animal and colour,
+  a classmate wearing the same, a resend storing nothing, back to the
+  defaults, the menu's bounds, a removed avatar, fixed at Start; 30
+  changes then refused, the stored look's "same" still fine; every animal
+  with every shape and hat draws.
+- Typecheck.
+- `simulate.mjs`, plain and `--all-poll`, passing, with new checks: every
+  tablet, the wall and the Remote show the look last acknowledged, on the
+  same animal and colour; a device sending 40 changes without waiting is
+  refused once its changes are spent, and only its stored look is
+  acknowledged after that; dressing after Start refused; the student whose
+  tablet died gets their look back with their avatar; the look at the end
+  and in the ranking is the lobby's.
+- Headless Edge through the real pages (`.tmp/avatars-pass/avatar-walk.mjs`,
+  24 checks, no page errors): the picker's six shapes and eight hats,
+  no words, a plain start; the star on the tablet at once and on the wall
+  about 0.1 s later locally; the crown on the Remote; a wiggle per change on
+  the wall and the Remote; the hat off with a second tap; a burst of eight
+  taps ending on the last on the tablet and the wall; the Remote's lobby
+  and the steering wall's Start button not replaced while 24 children join
+  and dress; Start removes the picker; the dressed avatars in the tablet's
+  top bar, the wall's bar (24 at 36 px) and the ranking. Tablets at
+  960×600, 600×960 and a 360 px phone.
+
+**Not established:** whether children dress at all, and whether teachers
+wait for it; whether the shapes help a child find their avatar from the
+back row.
+
+**Seen once, not attributed:** the local site's runtime crashed ("Workers
+runtime crashed unexpectedly") while a simulation and a browser walk ran
+against it at the same time, about 75 connections; each alone passed
+repeatedly.
+
+**Deploy:** no migration. The protocol additions are optional fields:
+pages from before the deploy draw every avatar plain and offer no picker;
+an old student page ignores the view that comes with its welcome.
+
 ## Open
 
 - Whether the default Cloudflare address passes the AIs' fetchers and school

@@ -28,6 +28,7 @@ import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, viewKey, type ClockView, 
 import type { Env } from "./env.ts";
 import { randomCode, randomToken } from "./random.ts";
 import { CLASS_IDLE_MS, SITE_FULL, isQuotaError } from "../shared/limits.ts";
+import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
 /** An instance ends this long after its last activity (upload, a teacher's step, a role taken). */
 export const INSTANCE_IDLE_MS = 48 * 3600_000;
@@ -120,6 +121,15 @@ export class Instance extends DurableObject<Env> {
    * happened; in memory only, which covers the seconds that matter.
    */
   private moved = new Map<string, ServerMessage>();
+  /**
+   * Children who dressed their animal and wait for it to be stored: the
+   * class's looks are written at most every LOOK_WRITE_MS, one write for
+   * everyone who changed in between (docs/avatars.md §7). Any write of the
+   * run settles them.
+   */
+  private looksWaiting: { resolve: () => void; reject: (e: unknown) => void }[] = [];
+  private looksTimer: ReturnType<typeof setTimeout> | null = null;
+  private looksStored = 0;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -300,6 +310,19 @@ export class Instance extends DurableObject<Env> {
       // A command over HTTP: the reply is its acknowledgement plus, for a
       // guest becoming a player or taking a role, who it is now.
       const replies = await this.command(session, body.cmd.id, body.cmd.cmd);
+      // A guest that became a player: its view comes with the welcome, as
+      // over a WebSocket. Its poll may still be held as a guest's, which a
+      // new player doesn't change: the tablet showed a spinner for up to
+      // POLL_HOLD_MS (found with the lobby's dressing; the page also asks
+      // again as the player, client/net.ts `repoll`).
+      const next = replies.session;
+      if (next?.role === "player") {
+        const view = this.viewFor(next) as PlayerView | null;
+        if (view) {
+          this.sentToPoller.set(next.player, { key: viewKey(view), v: view.v });
+          return json({ messages: [...out, ...replies.direct, { t: "state", view }] });
+        }
+      }
       return json({ messages: [...out, ...replies.direct] });
     }
     if (action === "poll") {
@@ -680,6 +703,13 @@ export class Instance extends DurableObject<Env> {
       // --- a student
       if (session.role === "player") {
         if (cmd.op === "tick") return { direct: [ack(true)] };
+        if (cmd.op === "dress") {
+          // In the lobby: the child's look. Acknowledged once stored, with
+          // the class's other changes of the same second.
+          const outcome = G.dress(game, session.player, cmd.b, cmd.h);
+          if (outcome === "stored") await this.storeLooks();
+          return { direct: [ack(outcome !== "refused")] };
+        }
         if (cmd.op !== "answer") return { direct: [ack(false, "not allowed")] };
         const view = typeof cmd.v === "number" ? cmd.v : Infinity;
         // The tablet names the answer by its place on screen; it is stored by its place in the text.
@@ -893,7 +923,40 @@ export class Instance extends DurableObject<Env> {
     const entries: Record<string, unknown> = { meta };
     if (keys.includes("run")) entries.run = game.run;
     if (keys.includes("fixes")) entries.fixes = game.fixes;
-    await this.ctx.storage.put(entries);
+    // The run as written now carries every look changed so far; a look
+    // changed while the write is under way waits for the next one.
+    const covered = entries.run !== undefined ? this.looksWaiting.splice(0) : [];
+    try {
+      await this.ctx.storage.put(entries);
+    } catch (e) {
+      for (const w of covered) w.reject(e);
+      throw e;
+    }
+    for (const w of covered) w.resolve();
+  }
+
+  /** Resolves once a write of the run has stored the looks changed so far; the views follow it. */
+  private storeLooks(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.looksWaiting.push({ resolve, reject });
+      if (this.looksTimer) return;
+      const wait = Math.max(0, this.looksStored + LOOK_WRITE_MS - Date.now());
+      this.looksTimer = setTimeout(() => void this.flushLooks(), wait);
+    });
+  }
+
+  private async flushLooks(): Promise<void> {
+    this.looksTimer = null;
+    // Another write (a join, an answer, Start) may have taken them along.
+    if (this.looksWaiting.length === 0) return;
+    this.looksStored = Date.now();
+    try {
+      await this.persist(["run"]);
+    } catch (e) {
+      for (const w of this.looksWaiting.splice(0)) w.reject(e);
+      return;
+    }
+    this.broadcast();
   }
 
   // -------------------------------------------------------------------------

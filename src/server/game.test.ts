@@ -6,6 +6,8 @@ import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";
 import * as G from "./game.ts";
 import { speedBonus } from "../shared/tempo.ts";
+import { BACKGROUND_COUNT, HAT_COUNT, MAX_LOOK_CHANGES } from "../shared/looks.ts";
+import { LOOK_DRAWINGS, avatarSvg } from "../client/look.ts";
 
 const quiz = parseQuiz(`Title: T
 1. One?
@@ -233,6 +235,55 @@ test("avatars: the first dozen players all get different animals", () => {
   const { g: big } = setup(G.MAX_PLAYERS);
   const combos = new Set(Object.values(big.run!.players).map((p) => `${p.avatar.a}/${p.avatar.c}`));
   assert.equal(combos.size, G.MAX_PLAYERS);
+});
+
+test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start", () => {
+  const { g, ids } = setup(3);
+  const before = { ...g.run!.players[ids[0]].avatar };
+  assert.equal(G.dress(g, ids[0], 2, 1), "stored");
+  const av = g.run!.players[ids[0]].avatar;
+  // The animal and its colour, which tell the children apart, stay.
+  assert.deepEqual(av, { a: before.a, c: before.c, b: 2, h: 1 });
+  // Not scarce: a classmate may wear the same.
+  assert.equal(G.dress(g, ids[1], 2, 1), "stored");
+  // A resend, or the same look again, stores nothing.
+  assert.equal(G.dress(g, ids[0], 2, 1), "same");
+  assert.equal(g.run!.players[ids[0]].looks, 1);
+  // Back to the disc without a hat: the fields go.
+  assert.equal(G.dress(g, ids[0], 0, 0), "stored");
+  assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c });
+  // Only what the menu has.
+  for (const [b, h] of [[6, 0], [0, 9], [-1, 0], [1.5, 0], ["1", 0], [null, 0]] as [unknown, unknown][]) assert.equal(G.dress(g, ids[0], b, h), "refused");
+  assert.equal(G.dress(g, "nobody", 1, 1), "refused");
+  // Not for a removed avatar.
+  G.removePlayer(g, ids[2]);
+  assert.equal(G.dress(g, ids[2], 1, 1), "refused");
+  // Fixed at Start.
+  G.begin(g, 100);
+  assert.equal(G.dress(g, ids[1], 3, 3), "refused");
+  assert.deepEqual(g.run!.players[ids[1]].avatar.b, 2);
+});
+
+test("dressing: a child who hammers the pictures stops at MAX_LOOK_CHANGES", () => {
+  const { g, ids } = setup(1);
+  let stored = 0;
+  for (let i = 0; i < MAX_LOOK_CHANGES + 10; i++) if (G.dress(g, ids[0], i % 2, 1) === "stored") stored++;
+  assert.equal(stored, MAX_LOOK_CHANGES);
+  // The look that counts is the last one stored, and its same again is still fine.
+  const av = g.run!.players[ids[0]].avatar;
+  assert.equal(G.dress(g, ids[0], av.b ?? 0, av.h ?? 0), "same");
+});
+
+test("dressing: every look has a drawing", () => {
+  assert.deepEqual(LOOK_DRAWINGS, { backgrounds: BACKGROUND_COUNT, hats: HAT_COUNT, seats: G.ANIMAL_COUNT, animals: G.ANIMAL_COUNT });
+  // Every combination draws, inside the picture.
+  for (let a = 0; a < G.ANIMAL_COUNT; a++)
+    for (let b = 0; b < BACKGROUND_COUNT; b++)
+      for (let h = 0; h < HAT_COUNT; h++) {
+        const svg = avatarSvg({ a, c: 0, b, h });
+        assert.match(svg, /^<svg class="avatar" viewBox="0 0 100 100"/);
+        assert.doesNotMatch(svg, /undefined|NaN/);
+      }
 });
 
 test("the door: a class takes MAX_PLAYERS, removed ones included, and a few late joiners once under way", () => {

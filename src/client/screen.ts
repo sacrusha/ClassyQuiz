@@ -7,8 +7,8 @@
 import qrcode from "qrcode-generator";
 import type { ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
-import { ICON, avatarSvg, shapeSvg } from "./look.ts";
-import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
+import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
+import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, syncCrowd, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
@@ -244,7 +244,7 @@ function renderManagedLobby(v: ScreenView): void {
         </div>
         <div class="crowdcol">
           <div class="count">${ICON.person}${live("joined", n)}</div>
-          ${playersRow(t, true)}
+          <div class="avatars" data-crowd></div>
         </div>
       </div>
       <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start as Projector + Remote &#9654;</button>
@@ -256,6 +256,7 @@ function renderManagedLobby(v: ScreenView): void {
     </div>
   </div>`;
   patch(main, html);
+  syncCrowd(main, t);
   fillPictures(main);
   steer.noteStep(t, main);
 }
@@ -280,19 +281,8 @@ function renderLobby(v: ScreenView): void {
         </div>
       </div>`;
   }
-  // Add newcomers without redrawing everyone, so each pops in once.
-  const crowd = $("#crowd");
-  const present = new Set(v.players.map((p) => p.id));
-  for (const el of [...crowd.children] as HTMLElement[]) if (!present.has(el.dataset.id!)) el.remove();
-  const shown = new Set(([...crowd.children] as HTMLElement[]).map((el) => el.dataset.id));
-  for (const p of v.players) {
-    if (shown.has(p.id)) continue;
-    const d = document.createElement("div");
-    d.className = "av";
-    d.dataset.id = p.id;
-    d.innerHTML = avatarSvg(p.avatar);
-    crowd.appendChild(d);
-  }
+  // Newcomers pop in once; a changed look wiggles (the child dressing it).
+  syncAvatars($("#crowd"), v.players, () => ({ tag: "div", className: "av" }));
   $("#count").textContent = String(v.players.length);
 }
 

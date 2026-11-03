@@ -6,7 +6,7 @@
 import type { ImageRef, TeacherQuestion, TeacherView, Tempo } from "../shared/protocol.ts";
 import { COUNTDOWN_MAX, COUNTDOWN_MIN, NUDGE_SECONDS, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
-import { ICON, avatarSvg, shapeSvg } from "./look.ts";
+import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import type { Line } from "./net.ts";
 import { fillPictures, picImg } from "./pictures.ts";
 
@@ -146,6 +146,22 @@ export function playersRow(v: TeacherView, removable: boolean): string {
         : `<span class="${p.connected ? "" : "away"}">${avatarSvg(p.avatar)}</span>`,
     )
     .join("")}</div>`;
+}
+
+/**
+ * The lobby's players, kept in place in its `[data-crowd]` row rather than
+ * in the patched page: children dressing their animals change the row
+ * often, and a page redrawn under the teacher's finger loses the tap on
+ * Start. Tapping an avatar removes it, as in playersRow.
+ */
+export function syncCrowd(root: HTMLElement, v: TeacherView): void {
+  const box = root.querySelector<HTMLElement>("[data-crowd]");
+  if (!box) return;
+  syncAvatars(box, v.run?.players ?? [], (p) => ({
+    tag: "button",
+    className: p.connected ? "" : "away",
+    attrs: { "data-act": "remove", "data-player": p.id, "aria-label": "remove" },
+  }));
 }
 
 // ---------------------------------------------------------------------------
