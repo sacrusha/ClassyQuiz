@@ -31,8 +31,8 @@ export const SLEEP_AFTER_MS = 45 * 60_000;
 
 /**
  * The self-hosting nudge (backlog items 14, 16). The start page and
- * public/own-copy.html say the site serves "a few dozen classes a day in
- * all": the account's daily allowance covers about 30 classes when every
+ * public/own-copy.html say the site has "room for a few dozen classes a
+ * day": the account's daily allowance covers about 30 classes when every
  * device polls and about 75 on stored rows (decisions.md, "Hardening"),
  * below MAX_UPLOADS_PER_DAY. Raise these and that sentence no longer holds.
  */
