@@ -2,7 +2,7 @@
 // story §3.3). The example quiz's title and questions as the teacher's check
 // shows them after an upload, answers folded, read in the visitor's browser
 // from the example's static .zip. No upload, no lobby, no code, and nothing
-// booked against the site's budget. In place of "Show the class the code",
+// booked against the site's budget. In place of "Let the class in",
 // the .zip to download.
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";

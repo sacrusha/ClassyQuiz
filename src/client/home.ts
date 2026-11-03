@@ -1,7 +1,7 @@
 // The root page's top (docs/landing-story.md, draft 4): the code box for
 // students and the language in the header; the strip, which until the video
 // exists links the example's questions (/example); Build a quiz in two steps
-// with the labelled example ask; Run a quiz: the resume card for the latest
+// with the labelled example ask and the open one (nothing decided yet); Run a quiz: the resume card for the latest
 // open quiz this device started, the box for the .zip, and, under a
 // condition, the own-copy line. The guidance for AIs below reads without this
 // script, in English; this script puts the block above it in the visitor's
@@ -92,7 +92,7 @@ if (addr && navigator.clipboard?.writeText) {
   });
 }
 
-/** The example ask with each labelled part's label under it; on a phone the CSS hides those and shows the labels as one line. */
+/** The example asks: the first with each labelled part's label under it (on a phone the CSS hides those and shows the labels as one line), the open one plain. */
 function renderAsk(): void {
   const bubble = $("#bubble");
   bubble.innerHTML = t.ask
@@ -104,6 +104,9 @@ function renderAsk(): void {
   bubble.classList.add("inplace");
   bubble.lang = lang;
   $("#labels").innerHTML = t.labels.map((l) => `<span class="nb">${esc(l)}</span>`).join(" · ");
+  const openAsk = $("#bubble2");
+  openAsk.textContent = t.ask2.replaceAll(DEMO, host);
+  openAsk.lang = lang;
 }
 
 /** Everything above About in language `l`. */

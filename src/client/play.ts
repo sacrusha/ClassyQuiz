@@ -9,7 +9,7 @@
 //                    teacher device. When one tab shows and steers, it asks
 //                    "Show the quiz here, or steer it from here?"; otherwise
 //                    it takes the role that is free.
-//   /play?win=1#…    the same from "a new window here": a window opened by
+//   /play?win=1#…    the same from "open a second screen in a new window": a window opened by
 //                    a teacher tab, whose copy of that tab's role isn't its own.
 //   /teacher#63953   the old way in, kept for old links: it asks for the
 //                    teacher code, except on the device that uploaded the
@@ -48,7 +48,7 @@ const digits = TEACHER_CODE.test(typed) ? typed.slice(5) : "";
 /** The uploading device needs no digits: it has the quiz's secret (Resume, or an old /teacher link). */
 const savedHere = JOIN_CODE.test(code) ? (savedQuizzes().find((q) => q.code === code) ?? null) : null;
 const teacher = !!digits || (oldAddress && !!savedHere);
-/** Opened by "a new window here" or "open the projector window" from a teacher tab. */
+/** Opened by "open a second screen in a new window" or "open the projector window" from a teacher tab. */
 const fromWindow = params.get("win") === "1";
 const key = `cq.player.${code}`;
 
