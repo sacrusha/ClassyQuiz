@@ -33,7 +33,10 @@
 // the old class's tablets are told it has finished; the Remote leaves; a tab
 // on HTTP takes the Projector from the one that steers itself, which becomes
 // the Remote; that Remote shows the projector itself; once the next class
-// has a student, a new tab at /teacher gets no steering; the quiz is deleted.
+// has a student, a new tab at /teacher gets no steering, except
+// (docs/second-teacher-device.md): a device holding the quiz's secret; the
+// one next device after "Allow a device to join" on the Projector; and any
+// device once nothing steers (the Projector left). The quiz is deleted.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -290,7 +293,10 @@ async function guestTakes(name, role, mode) {
       offered = m;
       void d.send({ op: "takeRole", role });
     }
-    if (m.t === "role") d.reconnectAs({ role: m.role, token: m.token });
+    if (m.t === "role") {
+      d.roleMsg ??= m;
+      d.reconnectAs({ role: m.role, token: m.token });
+    }
   });
   d.start();
   // On HTTP, the guest's poll held at the time runs out first (up to 25 s);
@@ -300,6 +306,7 @@ async function guestTakes(name, role, mode) {
 }
 const phone = (await guestTakes("phone", "remote", "ws")).d;
 check(phone.view.role === "teacher", "the phone's tab is the Remote");
+check(phone.roleMsg?.secret === up.body.secret, "a role taken before the class is in comes with the quiz's secret");
 await until(() => projector.view.steer === null && projector.view.remote === "present", 5000, "the Projector to stop steering");
 const refused = await projector.send({ op: "setVoid", q: 0, value: true });
 check(!refused.ok, "the Projector doesn't steer while the Remote is there");
@@ -653,14 +660,81 @@ await until(() => projector.view?.players?.length === 1, 5000, "the new student 
 }
 log("the next class is in; a new tab at /teacher gets no steering");
 
-const ended = await projector.send({ op: "endInstance" });
+// docs/second-teacher-device.md. A guest at /teacher that takes a role on demand.
+async function guestTry(name, role, extra = {}) {
+  const r = await post("/api/join", { code });
+  const d = new Device(name, r.body.instance, { role: "guest" }, "ws");
+  let offered = null;
+  let roleMsg = null;
+  d.on((m) => {
+    if (m.t === "choose") offered ??= m;
+    if (m.t === "role") {
+      roleMsg ??= m;
+      d.reconnectAs({ role: m.role, token: m.token });
+    }
+  });
+  d.start();
+  await until(() => offered, 5000, `${name}'s choice`);
+  const ack = await d.send({ op: "takeRole", role, ...extra });
+  if (ack.ok) await until(() => d.view, 8000, `${name} holding the ${role}`);
+  return { d, offered, ack, roleMsg };
+}
+
+// Rule 2: a device that set the quiz up comes back without asking.
+{
+  const own = await guestTry("own-phone", "remote", { secret: up.body.secret });
+  check(own.ack.ok, "with the quiz's secret, a device takes the Remote once students are in");
+  await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the returning phone");
+  await own.d.send({ op: "leave" });
+  own.d.kill();
+  await until(() => projector.view?.steer, 5000, "the Projector to steer after the returning phone left");
+  const wrong = await guestTry("wrong-secret", "remote", { secret: "x".repeat(up.body.secret.length) });
+  check(!wrong.ack.ok, "a wrong secret doesn't open the gate");
+  wrong.d.kill();
+}
+log("a device holding the secret took the Remote with the class in");
+
+// Rule 3: "Allow a device to join" lets the next device in, one, and no secret goes with it.
+{
+  const opened = await projector.send({ op: "allowJoin", value: true });
+  check(opened.ok, "allow a device to join is acknowledged");
+  await until(() => (projector.view?.steer?.join ?? 0) > 60_000, 5000, "the window open on the Projector");
+  const next = await guestTry("borrowed-phone", "remote");
+  check(next.offered.remote === "free", `while the window is open, the Remote is offered (${next.offered.remote})`);
+  check(next.ack.ok && !next.roleMsg?.secret, "the next device takes the Remote, without the secret");
+  await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the let-in phone");
+  await next.d.send({ op: "leave" });
+  next.d.kill();
+  await until(() => projector.view?.steer, 5000, "the Projector to steer again");
+  check(projector.view.steer.join === null, "the window shut once a device joined");
+  const late = await guestTry("after-window", "remote");
+  check(late.offered.remote === "closed" && !late.ack.ok, "after that, a new device is refused again");
+  late.d.kill();
+  // Closed by hand.
+  await projector.send({ op: "allowJoin", value: true });
+  await until(() => projector.view?.steer?.join !== null, 5000, "the window open again");
+  await projector.send({ op: "allowJoin", value: false });
+  await until(() => projector.view?.steer?.join === null, 5000, "the window closed by hand");
+}
+log("allow a device to join: one device in, then shut");
+
+// Rule 4: nothing steers (Leave on Projector + Remote with the class in): any device takes a role.
+await projector.send({ op: "leave" });
+projector.kill();
+const anyone = await guestTry("any-laptop", "screen");
+check(anyone.offered.screen === "free" && anyone.offered.remote === "free", `with nothing steering, both roles are offered (${anyone.offered.screen}/${anyone.offered.remote})`);
+check(anyone.ack.ok, "with nothing steering, a device takes the Projector");
+await until(() => anyone.d.view?.steer, 5000, "the new Projector to steer itself");
+log("nothing steered; a device took the Projector and steers");
+
+const ended = await anyone.d.send({ op: "endInstance" });
 check(ended.ok, "ending the instance is acknowledged");
-const after = await post(`/api/i/${instance}/poll`, { auth: projector.auth, v: -1 });
+const after = await post(`/api/i/${instance}/poll`, { auth: anyone.d.auth, v: -1 });
 check((after.body.messages ?? []).some((m) => m.t === "gone"), "after the end, the instance is gone");
 const joinAfter = await post("/api/join", { code });
 check(joinAfter.status === 404, "after the end, the code opens nothing");
 newKid.d.kill();
-projector.kill();
+anyone.d.kill();
 wall.kill();
 
 if (ALL_POLL) log(`HTTP requests by all devices: ${requests}`);

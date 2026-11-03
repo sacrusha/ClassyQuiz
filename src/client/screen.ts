@@ -5,7 +5,7 @@
 // moves the quiz on at any time; the quiz's code stays in a corner throughout.
 
 import qrcode from "qrcode-generator";
-import type { ScreenView, ServerMessage } from "../shared/protocol.ts";
+import type { ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg } from "./look.ts";
 import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
@@ -54,6 +54,7 @@ function onMessage(m: ServerMessage): void {
     view = m.view;
     // Every picture of the quiz, fetched ahead: the one on screen first.
     if (view.question?.image) void load(view.question.image.src, true);
+    noteJoin(view);
     preload(view.pictures);
     if (before && before.remote !== view.remote) {
       if (view.remote === "present") toast("Remote connected");
@@ -166,6 +167,44 @@ function qrSvg(code: string): string {
 }
 
 /** How a phone or another screen joins the teacher's side. */
+/**
+ * "Allow a device to join" (docs/second-teacher-device.md, rule 3), once
+ * the class is in: open, with how a device joins; or offered, after "Remote
+ * gone" when one was there. The address stays the class's in the bar: the
+ * chip only names /teacher, so a late student still reads where to go.
+ */
+let joinEnd = 0;
+let joinTimer: number | undefined;
+function noteJoin(v: ScreenView): void {
+  const left = v.steer?.join ?? null;
+  joinEnd = left !== null ? Date.now() + left : 0;
+  clearTimeout(joinTimer);
+  // The window shuts by itself on the server; here too, without a message.
+  if (left !== null)
+    joinTimer = window.setTimeout(() => {
+      lastBar = "";
+      render();
+    }, left + 250);
+}
+function joinOpen(): boolean {
+  return joinEnd > Date.now();
+}
+function joinLine(t: TeacherView, inBar: boolean): string {
+  if (joinOpen()) {
+    return inBar
+      ? `<span class="joinchip">One device can join at <strong>/teacher</strong> <button class="link" data-act="close-join">Close</button></span>`
+      : `One device can join: <strong>${esc(siteAddress())}/teacher</strong> with the code. <button class="link" data-act="close-join">Close</button>`;
+  }
+  const allow = `<button class="${inBar ? "btn" : "link"}" data-act="allow-join">Allow a device to join</button>`;
+  if (t.remote === "away") return inBar ? `<span class="joinchip">Remote gone ${allow}</span>` : `Remote gone. ${allow}`;
+  return inBar ? "" : allow;
+}
+
+async function allowJoin(value: boolean): Promise<void> {
+  const r = await line?.send({ op: "allowJoin", value });
+  if (r && !r.ok && r.error) toast(r.error);
+}
+
 function deviceHelp(): string {
   return `Your phone or another screen: open <strong>${esc(siteAddress())}/teacher</strong>, type the code, choose <strong>Remote</strong> or <strong>Projector</strong>.`;
 }
@@ -191,7 +230,7 @@ function renderManagedLobby(v: ScreenView): void {
       ? `<p class="device ok">Remote connected ✓</p>`
       : n === 0
         ? `<p class="device">For a separate projector and remote, open <strong>${esc(siteAddress())}/teacher</strong> on the other screen (a phone, another computer<span class="twoscreens">, or <button class="link" data-act="projector-window">a new window here</button></span>), type <strong>${esc(v.code)}</strong> and choose.</p>`
-        : "";
+        : `<p class="device">${joinLine(t, false)}</p>`;
   const html = `<div class="mlobby">
     <div class="mfold">
       <div class="bar"><span class="grow">${esc(v.title || "Quiz")}</span></div>
@@ -555,6 +594,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = `<div class="steerbar">
       <button class="btn more" data-menu aria-label="more">⋯</button>
       <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
+      ${v.players.length > 0 ? joinLine(v.steer, true) : ""}
       ${nudgePair(v.steer)}
       ${side ? `<button class="btn" data-step data-act="${side.act}">${side.label}</button>` : ""}
       ${next ? `<button class="btn primary" data-step data-act="${next.act}">${next.label}</button>` : ""}
@@ -595,6 +635,8 @@ function menu(v: ScreenView): void {
   else {
     // Once students are in, no new tab gets the steering (decisions.md).
     if (v.players.length === 0) items.push({ label: "Steer from your phone…", run: () => showNote(deviceHelp()) });
+    else if (joinOpen()) items.push({ label: "Close: no other device joins", run: () => void allowJoin(false) });
+    else items.push({ label: "Allow a device to join", run: () => void allowJoin(true) });
     if (v.phase === "lobby") items.push({ label: "Two screens: open the projector window", run: () => projectorWindow() });
   }
   items.push({ label: "Leave: stop showing the quiz here", run: () => void leave() });
@@ -631,13 +673,15 @@ function showNote(html: string): void {
 }
 
 async function steerHere(): Promise<void> {
-  if ((view?.players.length ?? 0) > 0 && !confirm("Steer from here? The remote stops steering, and while students are in it can't take the steering back.")) return;
+  if ((view?.players.length ?? 0) > 0 && !confirm("Steer from here? The remote stops steering. To steer from it again: ⋯, Allow a device to join.")) return;
   const r = await line?.send({ op: "steerHere" });
   if (r && !r.ok && r.error) toast(r.error);
 }
 
 async function leave(): Promise<void> {
-  if (!confirm("Stop showing the quiz on this screen?")) return;
+  // Projector + Remote with the class in: nothing steers after this, until a device takes a role at /teacher.
+  const last = !!view?.steer && view.players.length > 0;
+  if (!confirm(last ? `Stop showing the quiz on this screen? Nothing steers it until a device opens ${siteAddress()}/teacher with the code.` : "Stop showing the quiz on this screen?")) return;
   await line?.send({ op: "leave" });
   line?.stop();
   tabRole.remove(instance);
@@ -665,6 +709,10 @@ for (const area of [main, sbar]) {
     if (!el) return;
     if (el.dataset.act === "projector-window") {
       projectorWindow();
+      return;
+    }
+    if (el.dataset.act === "allow-join" || el.dataset.act === "close-join") {
+      void allowJoin(el.dataset.act === "allow-join");
       return;
     }
     void steer.act(el);

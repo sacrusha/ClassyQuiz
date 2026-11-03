@@ -76,6 +76,8 @@ export type Command =
   | { op: "advance"; at: At }
   /** Projector: take the steering back from the Remote (the screen in the room). */
   | { op: "steerHere" }
+  /** Projector + Remote: let the next device at /teacher take a role once the class is in, or shut that again. */
+  | { op: "allowJoin"; value: boolean }
   /** Remote: this tab becomes the Projector that steers itself. */
   | { op: "projectorHere" }
   /** Projector or Remote: give the role up. */
@@ -83,7 +85,8 @@ export type Command =
   /** Any tab: send me my current view (presence changes with time, not with events). */
   | { op: "tick" }
   // a guest
-  | { op: "takeRole"; role: RoleName }
+  /** secret: the quiz's, kept by a device that set the quiz up; the gate doesn't apply to it. */
+  | { op: "takeRole"; role: RoleName; secret?: string }
   | { op: "newPlayer" }
   | { op: "claim"; player: string }
   // a player
@@ -103,8 +106,10 @@ export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string;
  * - quiet: a tab holds it but hasn't been heard from for a while; free soon;
  * - movable (Projector only): held by a Projector that steers itself; taking
  *   it turns that tab into the Remote;
- * - closed: free, but the class has students, and taking it would steer the
- *   quiz (decisions.md: no new tab gets the steering once students are in).
+ * - closed: free, but the class has students, taking it would steer the
+ *   quiz, and the steering screen hasn't allowed a device to join
+ *   (docs/second-teacher-device.md). A device holding the quiz's secret may
+ *   take it anyway.
  */
 export type ChoiceState = "free" | "taken" | "quiet" | "movable" | "closed";
 
@@ -117,7 +122,13 @@ export type ServerMessage =
   /** A guest became a player; it keeps the token to come back. */
   | { t: "welcome"; player: string; token: string; run: string }
   /** This tab holds a role now (taken, or handed to it when its Projector moved to another tab). */
-  | { t: "role"; role: RoleName; token: string }
+  | {
+      t: "role";
+      role: RoleName;
+      token: string;
+      /** The quiz's secret, to a tab that took its role before the class was in: it comes back without asking. */
+      secret?: string;
+    }
   /** The role this tab held went to another tab. */
   | { t: "lost"; role: RoleName }
   /**
@@ -257,6 +268,8 @@ export interface TeacherView {
   current: number;
   screen: Presence;
   remote: Presence;
+  /** "Allow a device to join" is open: ms left; null: shut. */
+  join: number | null;
   /** The question's picture fills the projector. */
   zoom: boolean;
   /** The teacher's choice in the lobby, else the quiz's "Tempo:", else the teacher's pace. */

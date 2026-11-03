@@ -2418,6 +2418,95 @@ stranger with the code still can't wander into a quiz under way.
 student page from before the deploy doesn't send `fresh` and behaves as
 before; it ignores `stale`.
 
+## 2026-11-03 — A second teacher device once the class is in
+
+Serves: v2 item 8; review C point 4. Design and the owner's reaction in
+`docs/second-teacher-device.md`. Revision 1 guarded against a child at
+`/teacher` with a number and a yes for each request. The owner: "why would
+a child rejoin at /teacher? Imaginary problems don't need solving." Built
+to his direction instead: one button on the screen that steers, and no
+handshake. Narrows "No new steering once students are in" in "One code per
+quiz, two teacher roles per tab".
+
+- **A device that set the quiz up comes back without asking.**
+  - That is the device that opened the .zip, and any tab that took a role
+    before the first student joined.
+  - Each holds the quiz's secret. The server sends the secret with a role
+    taken while the class is empty, and the page keeps it in `cq.quizzes`,
+    like an upload. So the phone's root page also offers Resume and
+    Delete.
+  - `takeRole` carries the secret. With it, the gate doesn't apply, but a
+    tab that is there is never pushed aside.
+  - A device let in mid-class gets no secret.
+- **"Allow a device to join"**, on Projector + Remote once students are in.
+  - Where: in the lobby under Start, in ⋯, and on the bar after "Remote gone".
+  - The next device at `/teacher` takes the free or dropped Remote, or the
+    Projector itself. Then this screen becomes the Remote: a phone-only
+    start handing the wall to a laptop, allowed without a warning (owner).
+  - It is open until one device takes a role, or 2 minutes pass
+    (`JOIN_OPEN_MS`), or Close.
+  - It is stored in `meta.joinUntil`. Memory alone would shut it when a
+    hibernating object is evicted.
+  - The bar names only "/teacher": the class's address and code stay
+    beside it, so a late student isn't sent to the teacher's page.
+- **When nothing steers, any device at `/teacher` takes a role.** Before,
+  Leave on Projector + Remote with students in, or a dead self-steering
+  laptop without its tab, ended the steering for that class. Leave says so
+  now.
+- **The wall says the Remote is gone for as long as it is.** Before, only
+  an 8 s notice did. In the lobby: "Remote gone. Allow a device to join".
+- **The Remote says "Projector gone"** during the quiz, not only in the
+  lobby. On a wide screen it adds "open the projector window": the
+  two-screen laptop whose projector window got closed. A free Projector
+  while a Remote steers stays open to any device, as before. Review C's
+  lock-out of the laptop needs another device at `/teacher`, which is the
+  scenario the owner dismissed.
+- **Notices let clicks through** (`pointer-events: none`). The 8 s "Remote
+  gone – steering here" sat over the middle of the lobby's Start button,
+  and a click there did nothing: seen in the walk below.
+- **Words:**
+  - `/teacher` names the way in on a closed Remote: "students are in:
+    first, on the projector screen, ⋯ Allow a device to join".
+  - "Steer from here" and "Stop being the remote" no longer say the
+    steering can't come back.
+
+**What it gives up.** On the free plan, an outside script that guesses a
+5-digit code can take a role while nothing steers, or within a 2-minute
+window. That is the same kind of exposure as an empty lobby, where any
+guessed code gets the Remote today. It belongs to the open hardening
+question about vandalism from outside the class (backlog v2 item 4).
+
+**Checked:**
+- Typecheck; 82 unit tests.
+- `simulate.mjs`, all three modes (761 HTTP requests with all polling).
+  New checks:
+  - a role taken in the lobby comes with the secret;
+  - the secret takes the Remote with the class in, and a wrong one
+    doesn't;
+  - after Allow a device to join, one device takes the Remote without the
+    secret, the window shuts, and the next device is refused;
+  - Close shuts it;
+  - after Leave on Projector + Remote with the class in, both roles are
+    offered and a new tab steers.
+- Headless Edge (`shots-tool/item8-walk.mjs`), 24 checks, no page errors:
+  - the phone keeps the secret and its root page offers Resume;
+  - the phone dies, and the lobby and then the bar say Remote gone;
+  - a new phone is refused with the way in named;
+  - Allow, Close, and Allow from ⋯; the new phone becomes the Remote and
+    the wall stops steering;
+  - the first phone, with a fresh tab, takes the Remote back without the
+    button;
+  - the projector dies, and the Remote says so, with the window link only
+    on a wide screen;
+  - the window takes the Projector, and the line goes.
+- Lesson: `build.mjs --watch` doesn't copy `public/`. After a CSS change,
+  run `node scripts/build.mjs` once.
+
+**Deploy:** no migration. The protocol additions are optional.
+- A page from before the deploy sends no secret, and shows a closed role
+  as "in use".
+- The wall's "Allow a device to join" needs the new page.
+
 ## Open
 
 - Whether the default Cloudflare address passes the AIs' fetchers and school

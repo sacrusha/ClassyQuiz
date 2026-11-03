@@ -4,7 +4,7 @@
 // is in the ⋯ menu.
 
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
-import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
+import { $, esc, findQuiz, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
 import { Steer, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, closeTempoSheet, tempoLine, thumb, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
@@ -90,6 +90,7 @@ function render(): void {
   // Between questions the pair acts on the next countdown (during one, it sits in the card).
   if ((v.phase === "reveal" || v.phase === "ranking") && v.countdown !== null) body += `<p class="nudgeline">Next countdown ${nudgePair(v)}</p>`;
   if (v.phase !== "lobby") {
+    if (v.screen !== "present") body += projectorLine(v);
     if (showPlayers) body += playersPanel(v);
     if (showAll) body += questionList(v, steer.ui);
   }
@@ -114,10 +115,7 @@ function render(): void {
 
 function lobby(v: TeacherView): string {
   const n = v.run?.players.length ?? 0;
-  const projector =
-    v.screen === "present"
-      ? `<p class="device ok">Projector ✓</p>`
-      : `<p class="device">On the projector computer: open <strong>${esc(siteAddress())}/teacher</strong>, type <strong>${esc(v.code)}</strong>, choose <strong>Projector</strong>.</p>`;
+  const projector = v.screen === "present" ? `<p class="device ok">Projector ✓</p>` : projectorLine(v);
   return `<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
@@ -127,6 +125,17 @@ function lobby(v: TeacherView): string {
     </section>
     ${projector}
     ${questionList(v, steer.ui)}`;
+}
+
+/**
+ * How to bring the projector (back): another computer at /teacher, which
+ * takes a free Projector while this Remote steers; or, on the two-screen
+ * laptop whose projector window got closed, that window again. During the
+ * quiz it says the projector is gone (docs/second-teacher-device.md).
+ */
+function projectorLine(v: TeacherView): string {
+  const gone = v.phase === "lobby" ? "" : "Projector gone. ";
+  return `<p class="device">${gone}On the projector computer: open <strong>${esc(siteAddress())}/teacher</strong>, type <strong>${esc(v.code)}</strong>, choose <strong>Projector</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open the projector window</button> here.</span></p>`;
 }
 
 function current(v: TeacherView): string {
@@ -214,7 +223,11 @@ async function projectorHere(): Promise<void> {
 
 async function leave(): Promise<void> {
   const inClass = (view?.run?.players.length ?? 0) > 0;
-  const back = inClass ? " While students are in, no device can take the steering back from it." : "";
+  const back = !inClass
+    ? ""
+    : findQuiz(instance)
+      ? ` This device can come back at ${siteAddress()}/teacher.`
+      : " To come back: on the projector, ⋯ Allow a device to join.";
   if (!confirm(`Stop steering from this device? The projector steers again.${back}`)) return;
   await line?.send({ op: "leave" });
   line?.stop();
@@ -231,6 +244,12 @@ for (const area of [main, actions]) {
     }
     const el = t.closest<HTMLElement>("[data-act]");
     if (!el) return;
+    if (el.dataset.act === "projector-window") {
+      // A second monitor: the window takes the free Projector; this tab stays the Remote.
+      const w = window.open(`/teacher?role=screen#${held!.code}`, "_blank", "popup,width=1280,height=720");
+      if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open the code in another window and choose Projector.", 8000);
+      return;
+    }
     if (el.dataset.act === "close-players") {
       showPlayers = false;
       render();

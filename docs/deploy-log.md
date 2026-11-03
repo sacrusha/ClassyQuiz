@@ -32,3 +32,7 @@ Pages deployment fc1f647f, state Worker version 28ec17c1, no migration. Pictures
 ## 2026-11-02 — fifth deploy, 5c536d6
 
 Pages deployment 659be631, state Worker version 5ef3adb4 (migration v4 adds the SiteBudget Durable Object). Hardening merged with the picture screens. Run by the owner from the clean worktree. Unverified until the platform refuses: the wording of the allowance-spent state.
+
+## 2026-11-03 — sixth deploy, 844df97
+
+Pages deployment 2fb91b32, state Worker version d59ad472, no migration. Countdown with points for speed and the quiz carrying its tempo; tempo offset with −5/+5; pictures section of the guidance; landing page by attention budget, zip only, /own-copy; the lobby's Start naming the mode; review C fixes. Run by the owner from the clean worktree.
