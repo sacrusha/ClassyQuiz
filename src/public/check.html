@@ -7,7 +7,7 @@
 <title>classyQuiz · network check</title>
 <link rel="stylesheet" href="/app.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 12 L90 84 H10Z' fill='%23d93b3b'/%3E%3C/svg%3E">
-<style>#verdict .it { border-left: 3px solid var(--rule); padding: 4px 12px; user-select: all; }</style>
+<style>.it { border-left: 3px solid var(--rule); padding: 4px 12px; user-select: all; } #it { margin-top: 2.5rem; border-top: 1px solid var(--rule); padding-top: .5rem; }</style>
 </head>
 <body class="follows-dark">
 <main class="wrap">
@@ -16,6 +16,11 @@
 <ul id="results" style="list-style:none;padding:0;display:grid;gap:10px"></ul>
 <div id="verdict"></div>
 <p><button class="btn" id="again" type="button">Check again</button> <a class="btn" href="/">Back</a></p>
+<section id="it">
+<h2 style="font-size:1.15rem">If the site doesn't open at school at all</h2>
+<p>Some school networks block sites they don't know. Then nothing of the site opens there, this page included, and the check above can't run: read this at home or on a phone's mobile data. The school's IT can allow the site. What to send them:</p>
+<p class="it">Please allow <span data-host>classyquiz.pages.dev</span> on the school network. It is a site for classroom quizzes: students answer on their own devices. It needs HTTPS and WebSocket connections to <span data-host>classyquiz.pages.dev</span>.</p>
+</section>
 </main>
 <script src="/js/check.js" defer></script>
 </body>
