@@ -40,18 +40,19 @@ from what you know.
 
 New chat, not in a Project. Leave the model picker alone.
 
-**1a.** Attach both photos. Type exactly:
-
-> Hi! Can you make me a quiz for classyquiz.pages.dev from these two pages, with exercises like no. 1, 3 and 4? For my 5th grade class, about 10 questions, in English.
+**1a.** Attach both photos and ask as a teacher would, in your own words: the
+site (classyquiz.pages.dev), which exercises (no. 1, 3 and 4), your class (5th
+grade), how many questions (about 10), the language (English). Write down the
+words you used.
 
 Write down: time sent, time the answer was complete, whether it fetched the
 site or guessed, and what it handed back (a .zip, a link, an artifact, text
 only, or a question). If it asks a question, answer briefly, once, as a
 teacher would.
 
-**1b.** If it gave a .zip, download it, then type once:
-
-> Thanks! Could you show the number lines as pictures in the questions, and in the last three questions make the answers pictures to tap?
+**1b.** If it gave a .zip, download it, then ask once, in your own words, for
+the number lines as pictures in the questions and pictures to tap as the
+answers in the last three questions.
 
 If 1a's zip already has picture answers, skip 1b and note that. Download the
 new zip. Keep both, named with date and step.
@@ -77,7 +78,8 @@ minutes.
 
 ## Part 2: the own copy
 
-**New chat**, so it starts cold. Start the clock. Type exactly:
+**New chat**, so it starts cold. Start the clock. Type exactly (this one is the
+site's own prompt, the thing under test):
 
 > Please set up my own copy of classyQuiz from https://github.com/sacrusha/ClassyQuiz on a free Cloudflare account, following its README. Tell me each step I have to do myself.
 
