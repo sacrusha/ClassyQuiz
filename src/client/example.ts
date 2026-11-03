@@ -7,7 +7,8 @@
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { imageKey, parseQuiz } from "../quiz/format.ts";
-import { $, esc, lines } from "./dom.ts";
+import { $, esc, lines, store } from "./dom.ts";
+import { LANG_KEY, chosenLang } from "./landing-text.ts";
 import { prepareImages } from "./images.ts";
 import { lightbox, newUI, questionList } from "./manage.ts";
 import { fillPictures, provide } from "./pictures.ts";
@@ -25,14 +26,11 @@ const main = $("#main");
 const ui = newUI();
 let view: TeacherView | null = null;
 
+/** ?lang= from the landing's strip, else the language chosen there on this device, else the browser's. */
 function language(): string {
   const asked = new URLSearchParams(location.search).get("lang") ?? "";
   if (asked in EXAMPLES) return asked;
-  for (const l of navigator.languages ?? [navigator.language]) {
-    const two = (l ?? "").slice(0, 2).toLowerCase();
-    if (two in EXAMPLES) return two;
-  }
-  return "en";
+  return chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
 }
 
 async function start(): Promise<void> {

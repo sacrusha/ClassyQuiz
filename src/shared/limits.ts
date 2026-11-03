@@ -45,16 +45,20 @@ export const CLASS_STARTED = "This quiz has started and takes no more players. A
 /** The site-wide caps refuse an upload (owner's voice, from the self-hosting nudge). */
 export const SITE_FULL = `The free site is full for today. ${OWN_COPY}`;
 
-/** Cloudflare's daily allowance is used up; it comes back at 00:00 UTC, said in Swiss time. */
-export function quotaMessage(now = new Date()): string {
-  let at = "midnight UTC";
+/** When Cloudflare's daily allowance comes back, 00:00 UTC, as Swiss time ("01:00"); null without time zone data. */
+export function quotaResetAt(now = new Date()): string | null {
   try {
     const reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-    at = `${reset.toLocaleTimeString("de-CH", { timeZone: "Europe/Zurich", hour: "2-digit", minute: "2-digit" })} Swiss time`;
+    return reset.toLocaleTimeString("de-CH", { timeZone: "Europe/Zurich", hour: "2-digit", minute: "2-digit" });
   } catch {
-    /* no time zone data: say it in UTC */
+    return null;
   }
-  return `The free site has used up today's allowance. It works again at ${at}. ${OWN_COPY}`;
+}
+
+/** Cloudflare's daily allowance is used up; it comes back at 00:00 UTC, said in Swiss time. */
+export function quotaMessage(now = new Date()): string {
+  const at = quotaResetAt(now);
+  return `The free site has used up today's allowance. It works again at ${at ? `${at} Swiss time` : "midnight UTC"}. ${OWN_COPY}`;
 }
 
 /**
