@@ -8,6 +8,12 @@ export function randomToken(bytes = 24): string {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+/** Digits only, any of them 0: the teacher code's two after the class code (docs/after-upload.md §4). */
+export function randomDigits(digits: number): string {
+  const b = crypto.getRandomValues(new Uint32Array(digits));
+  return Array.from(b, (x) => String(x % 10)).join("");
+}
+
 /** Digits only, never starting with 0 (a leading zero gets dropped when said aloud or typed). */
 export function randomCode(digits: number): string {
   const b = crypto.getRandomValues(new Uint32Array(digits));

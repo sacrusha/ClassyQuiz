@@ -1,13 +1,14 @@
 // The Projector: what the class sees (docs/user-flow.md §3.3, §3.4). No key
 // before the reveal. While no Remote is there it steers itself: in the lobby
-// it is the teacher's lobby (join box on top, questions below the fold), and
-// during the quiz a slim bar carries the next step. A clicker or the keyboard
-// moves the quiz on at any time; the quiz's code stays in a corner throughout.
+// it is the single tab's two screens, the teacher's check and then, one tap
+// on, the class's join screen (docs/after-upload.md §3); during the quiz a
+// slim bar carries the next step. A clicker or the keyboard moves the quiz on
+// at any time; the quiz's code stays in a corner throughout.
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
-import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
+import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, syncCrowd, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
 import { clockBar, localEnd } from "./clock.ts";
@@ -28,6 +29,8 @@ let view: ScreenView | null = null;
 let lastBar = "";
 let wasFull = false;
 let tickTimer: number | undefined;
+/** The single tab's lobby screen: the teacher's check, or the class's join screen. */
+let lobbyScreen: "check" | "join" = instance ? tabLobby.get(instance) : "join";
 const steer = new Steer(() => line, () => view?.steer ?? null, newUI(), () => render());
 
 function start(): void {
@@ -55,8 +58,10 @@ function onMessage(m: ServerMessage): void {
     view = m.view;
     // Every picture of the quiz, fetched ahead: the one on screen first.
     if (view.question?.image) void load(view.question.image.src, true);
-    noteJoin(view);
     preload(view.pictures);
+    // A wall that takes the steering back in the lobby (its steering tab left
+    // or went away) keeps showing the class's screen, not the check.
+    if (before && !before.steer && view.steer && view.phase === "lobby") setLobby("join", false);
     if (before && before.remote !== view.remote) {
       if (view.remote === "present") toast("Remote connected");
       // On the wall: nothing here invites the class to the teacher's page.
@@ -73,14 +78,15 @@ function onMessage(m: ServerMessage): void {
     }
     render();
   } else if (m.t === "role") {
-    // Another tab took the Projector: this one steers from now on.
+    // Another device chose to show the quiz, or ⇄ Swap: this tab steers from now on.
     line?.stop();
-    tabRole.set(instance, { role: m.role, token: m.token, code: held!.code });
+    tabRole.set(instance, { role: m.role, token: m.token, code: held!.code, teacher: teacherDigits() });
     location.replace(rolePage(instance, m.role));
   } else if (m.t === "lost") {
+    // Another device took this screen's place while it was away: back in with the teacher code.
     line?.stop();
     tabRole.remove(instance);
-    location.replace(`/teacher#${held!.code}`);
+    location.replace(comeBack());
   } else if (m.t === "gone") {
     line?.stop();
     tabRole.remove(instance);
@@ -170,71 +176,80 @@ function qrSvg(code: string): string {
   return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
 }
 
-/** How a phone or another screen joins the teacher's side. */
-/**
- * "Allow a device to join" (docs/second-teacher-device.md, rule 3), once
- * the class is in: open, with how a device joins; or offered, after "Remote
- * gone" when one was there. The address stays the class's in the bar: the
- * chip only names /teacher, so a late student still reads where to go.
- */
-let joinEnd = 0;
-let joinTimer: number | undefined;
-function noteJoin(v: ScreenView): void {
-  const left = v.steer?.join ?? null;
-  joinEnd = left !== null ? Date.now() + left : 0;
-  clearTimeout(joinTimer);
-  // The window shuts by itself on the server; here too, without a message.
-  if (left !== null)
-    joinTimer = window.setTimeout(() => {
-      lastBar = "";
-      render();
-    }, left + 250);
-}
-function joinOpen(): boolean {
-  return joinEnd > Date.now();
-}
-function joinLine(t: TeacherView, inBar: boolean): string {
-  if (joinOpen()) {
-    return inBar
-      ? `<span class="joinchip">One device can join at <strong>/teacher</strong> <button class="link" data-act="close-join">Close</button></span>`
-      : `One device can join: <strong>${esc(siteAddress())}/teacher</strong> with the code. <button class="link" data-act="close-join">Close</button>`;
-  }
-  const allow = `<button class="${inBar ? "btn" : "link"}" data-act="allow-join">Allow a device to join</button>`;
-  if (t.remote === "away") return inBar ? `<span class="joinchip">Remote gone ${allow}</span>` : `Remote gone. ${allow}`;
-  return inBar ? "" : allow;
+/** The teacher code's two digits: the view's, else what the tab was given. */
+function teacherDigits(): string {
+  return view?.teacher || held?.teacher || "";
 }
 
-async function allowJoin(value: boolean): Promise<void> {
-  const r = await line?.send({ op: "allowJoin", value });
-  if (r && !r.ok && r.error) toast(r.error);
-}
-
-function deviceHelp(): string {
-  return `Your phone or another screen: open <strong>${esc(siteAddress())}/teacher</strong>, type the code, choose <strong>Remote</strong> or <strong>Projector</strong>.`;
+/** The way back in for a tab that lost its role. */
+function comeBack(): string {
+  const d = teacherDigits();
+  return d ? teacherEntry(held!.code, d) : `/teacher#${held!.code}`;
 }
 
 /**
- * The lobby while this screen steers: the class's part on top and large,
- * laid out like the class lobby; the Start button and the teacher's
- * questions below it (item 19). Start says the mode: this screen is the
- * Projector and the Remote at once. One sentence says how to split them,
- * with "a new window here" as the shortcut for a second monitor (owner, item
- * 19: the window button and the device line did the same job). On a mirrored
- * laptop all of it is on the wall, so the sentence shows only until the
- * first student is in: after that it would invite the class to the teacher's
- * page (backlog item 18, "children accidentally taking the remote"). It
- * stays in ⋯.
+ * The teacher code at rest, in one sentence naming both needs
+ * (docs/after-upload.md §3); it doesn't guess which device this is. "A new
+ * window here" opens a window that asks the same question as any other
+ * device; it is always there, so a laptop that gains its second screen after
+ * the check finds it where it was (hidden on a phone).
  */
+function secondDevice(v: ScreenView): string {
+  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">a new window here</button>.</span>`;
+}
+
+/** The single tab's lobby screen; the class never sees the check unless the teacher shares it. */
+function setLobby(screen: "check" | "join", draw = true): void {
+  if (lobbyScreen === screen) return;
+  lobbyScreen = screen;
+  tabLobby.set(instance, screen);
+  if (!draw) return;
+  window.scrollTo(0, 0);
+  render();
+}
+
+/** The lobby while this screen steers: the check, or the join screen. */
 function renderManagedLobby(v: ScreenView): void {
   lobbyKey = "";
+  if (lobbyScreen === "check") renderCheck(v);
+  else renderJoin(v);
+}
+
+/**
+ * Check, the teacher's (docs/after-upload.md §3): the right quiz (title and
+ * how many questions, which tells two versions apart), the class code small
+ * ("upload is start": read aloud, the class joins without the tap), the
+ * tempo, the teacher code at rest, and the questions with their fixes.
+ * "Show the class the code" is the one tap to the join screen.
+ */
+function renderCheck(v: ScreenView): void {
   const t = v.steer!;
   const n = v.players.length;
-  const devices =
-    t.remote === "present"
-      ? `<p class="device ok">Remote connected ✓</p>`
-      : n === 0
-        ? `<p class="device">For a separate projector and remote, open <strong>${esc(siteAddress())}/teacher</strong> on the other screen (a phone, another computer<span class="twoscreens">, or <button class="link" data-act="projector-window">a new window here</button></span>), type <strong>${esc(v.code)}</strong> and choose.</p>`
-        : `<p class="device">${joinLine(t, false)}</p>`;
+  const gone = t.remote === "away" ? "Remote gone. " : "";
+  const html = `<div class="check">
+    <div class="checkhead">
+      <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${t.questions.length} ${t.questions.length === 1 ? "question" : "questions"}</span></h1>
+      <p class="classcode">Class code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
+    </div>
+    <p class="cstart"><button class="btn primary big" data-act="show-join">Show the class the code &#9654;</button></p>
+    <p class="device cline">${tempoLine(t)}</p>
+    <p class="device cline">${gone}${secondDevice(v)}</p>
+    ${questionList(t, steer.ui)}
+    <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
+  </div>`;
+  patch(main, html);
+  fillPictures(main);
+  steer.noteStep(t, main);
+}
+
+/**
+ * Join, the class's: today's fold, the code large, the avatars arriving, and
+ * Start. The class's screen ends at the fold; "‹ Questions" goes back to the
+ * check, "A second device ›" shows the teacher code in a sheet.
+ */
+function renderJoin(v: ScreenView): void {
+  const t = v.steer!;
+  const n = v.players.length;
   const html = `<div class="mlobby">
     <div class="mfold">
       <div class="bar"><span class="grow">${esc(v.title || "Quiz")}</span></div>
@@ -249,17 +264,16 @@ function renderManagedLobby(v: ScreenView): void {
           <div class="avatars" data-crowd></div>
         </div>
       </div>
-      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start as Projector + Remote &#9654;</button>
-        <p class="device">${tempoLine(t)}</p>${devices}</div>
-    </div>
-    <div class="mbelow">
-      ${questionList(t, steer.ui)}
-      <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
+      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>
+        <p class="device">${tempoLine(t)}</p>
+        <p class="joinnav"><button class="link" data-act="show-check">‹ Questions</button>
+          <button class="link" data-act="second-device">${t.remote === "away" ? "Remote gone: a" : "A"} second device ›</button>
+          <button class="link" data-menu aria-label="more">⋯</button></p>
+      </div>
     </div>
   </div>`;
   patch(main, html);
   syncCrowd(main, t);
-  fillPictures(main);
   steer.noteStep(t, main);
 }
 
@@ -763,7 +777,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = `<div class="steerbar">
       <button class="btn more" data-menu aria-label="more">⋯</button>
       <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
-      ${v.players.length > 0 ? joinLine(v.steer, true) : ""}
+      ${v.steer.remote === "away" ? `<span class="joinchip">Remote gone: type <strong>${esc(teacherCode(v.code, v.teacher))}</strong> on another device</span>` : ""}
       ${nudgePair(v.steer)}
       ${side ? `<button class="btn" data-step data-act="${side.act}">${side.label}</button>` : ""}
       ${next ? `<button class="btn primary" data-step data-act="${next.act}">${next.label}</button>` : ""}
@@ -772,6 +786,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = `<div class="corner">
       ${v.phase === "lobby" ? "" : `<span class="codeline">${addressAndCode(v.code)}</span>`}
       <span class="grow"></span><span class="dot" id="dot"></span>
+      ${v.phase === "lobby" && v.remote === "present" ? `<button data-act="swap" type="button">&#8644; Swap</button>` : ""}
       ${full ? "" : `<button data-full type="button">Full screen (F)</button>`}
       <button data-menu type="button" aria-label="more">⋯</button>
     </div>`;
@@ -800,14 +815,9 @@ function menu(v: ScreenView): void {
     items.unshift({ label: v.zoom ? "Back to the question (Z)" : "Enlarge the picture (Z)", run: () => toggleZoom() });
   }
   if (v.steer) items.push({ label: "Players", run: () => showPlayers() });
-  if (!v.steer) items.push({ label: "Steer from here", run: () => void steerHere() });
-  else {
-    // Once students are in, no new tab gets the steering (decisions.md).
-    if (v.players.length === 0) items.push({ label: "Steer from your phone…", run: () => showNote(deviceHelp()) });
-    else if (joinOpen()) items.push({ label: "Close: no other device joins", run: () => void allowJoin(false) });
-    else items.push({ label: "Allow a device to join", run: () => void allowJoin(true) });
-    if (v.phase === "lobby") items.push({ label: "Two screens: open the projector window", run: () => projectorWindow() });
-  }
+  // ⇄ Swap while both tabs are there: this wall steers, the steering tab shows the quiz.
+  if (!v.steer && v.remote === "present") items.push({ label: "&#8644; Swap: steer here, show the quiz on the other device", run: () => void swap() });
+  if (v.steer) items.push({ label: "A second device…", run: () => showNote(secondDevice(v)) });
   items.push({ label: "Leave: stop showing the quiz here", run: () => void leave() });
   if (v.steer) items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
   openMenu(items);
@@ -836,31 +846,38 @@ function showNote(html: string): void {
   back.className = "sheet-back";
   back.innerHTML = `<div class="sheet"><p>${html}</p><button class="cancel" data-close>Close</button></div>`;
   back.addEventListener("click", (e) => {
-    if ((e.target as HTMLElement).closest("[data-close]") || e.target === back) back.remove();
+    const t = e.target as HTMLElement;
+    if (t.closest("[data-act=projector-window]")) {
+      back.remove();
+      projectorWindow();
+      return;
+    }
+    if (t.closest("[data-close]") || e.target === back) back.remove();
   });
   document.body.appendChild(back);
 }
 
-async function steerHere(): Promise<void> {
-  if ((view?.players.length ?? 0) > 0 && !confirm("Steer from here? The remote stops steering. To steer from it again: ⋯, Allow a device to join.")) return;
-  const r = await line?.send({ op: "steerHere" });
+/** ⇄ Swap (docs/after-upload.md §4): no confirmation, the same tap on either device undoes it. */
+async function swap(): Promise<void> {
+  const r = await line?.send({ op: "swap" });
   if (r && !r.ok && r.error) toast(r.error);
 }
 
 async function leave(): Promise<void> {
-  // Projector + Remote with the class in: nothing steers after this, until a device takes a role at /teacher.
+  // The single tab with the class in: nothing steers after this, until a device comes in with the teacher code.
   const last = !!view?.steer && view.players.length > 0;
-  if (!confirm(last ? `Stop showing the quiz on this screen? Nothing steers it until a device opens ${siteAddress()}/teacher with the code.` : "Stop showing the quiz on this screen?")) return;
+  const back = view ? `type ${teacherCode(view.code, view.teacher)} at ${siteAddress()}` : "";
+  if (!confirm(last ? `Stop showing the quiz on this screen? Nothing steers it until a device comes in: ${back}.` : "Stop showing the quiz on this screen?")) return;
   await line?.send({ op: "leave" });
   line?.stop();
   tabRole.remove(instance);
   location.replace("/");
 }
 
-/** Two screens: a new window takes the Projector, and this tab becomes the Remote. */
+/** Two screens: a new window, which asks the same question as any other device. */
 function projectorWindow(): void {
-  const w = window.open(`/teacher?role=screen#${held!.code}`, "_blank", "popup,width=1280,height=720");
-  if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open the code in another window and choose Projector.", 8000);
+  const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
+  if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type the teacher code.", 8000);
 }
 
 for (const area of [main, sbar]) {
@@ -876,15 +893,14 @@ for (const area of [main, sbar]) {
     }
     const el = t.closest<HTMLElement>("[data-act]");
     if (!el) return;
-    if (el.dataset.act === "projector-window") {
-      projectorWindow();
-      return;
-    }
-    if (el.dataset.act === "allow-join" || el.dataset.act === "close-join") {
-      void allowJoin(el.dataset.act === "allow-join");
-      return;
-    }
-    void steer.act(el);
+    const act = el.dataset.act;
+    if (act === "projector-window") projectorWindow();
+    else if (act === "show-join") setLobby("join");
+    else if (act === "show-check") setLobby("check");
+    else if (act === "second-device") {
+      if (view) showNote(secondDevice(view));
+    } else if (act === "swap") void swap();
+    else void steer.act(el);
   });
 }
 

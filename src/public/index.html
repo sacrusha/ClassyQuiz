@@ -27,7 +27,7 @@
   header.top .logo { font-weight: 800; font-size: 1.2rem; flex: 1; margin: 0; }
   .join { display: flex; align-items: center; gap: 6px; }
   .join label { color: var(--muted); font-size: .95rem; }
-  .join input { width: 6.2em; min-width: 0; font: 700 1.25rem ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .15em; text-align: center; padding: 6px; border: 2px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--fg); }
+  .join input { width: 8.2em; min-width: 0; font: 700 1.25rem ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .15em; text-align: center; padding: 6px; border: 2px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--fg); }
   .join button { height: 42px; width: 46px; border: 0; border-radius: 10px; background: var(--accent); color: var(--bg); font-size: 1.1rem; cursor: pointer; }
   .start h2 { border: 0; padding: 0; margin: 2rem 0 .6rem; font-size: 1.35rem; }
   .start ol { padding-left: 1.4em; }
@@ -69,7 +69,7 @@
 <body>
 <header class="top"><div class="bar">
   <p class="logo">classyQuiz</p>
-  <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="12345"><button type="submit" aria-label="Join">&#9654;</button></form>
+  <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join">&#9654;</button></form>
 </div></header>
 <main>
 
@@ -109,11 +109,11 @@
 
 <p>The teacher's AI assistant, usually given just this address by a teacher with material in hand and a lesson coming up, writes the quiz as plain text and packs it with its pictures into a <code>.zip</code>; the teacher uploads it here (assistants can't), and the class plays it.</p>
 
-<p>Screens: the <strong>projector</strong> shows the question and its answers; each <strong>student</strong> answers on their own phone or tablet by tapping a colour, without the question; the teacher steers (votes, right answer, next, ranking, fixing a question that turns out wrong) from a <strong>remote</strong>, usually their phone, or, with no second device, from the projector as <strong>Projector + Remote</strong>. A second teacher device chooses Projector or Remote, and the first takes the other.</p>
+<p>Screens: the <strong>projector</strong> shows the question and its answers; each <strong>student</strong> answers on their own phone or tablet by tapping a colour, without the question; the teacher steers (votes, right answer, next, ranking, fixing a question that turns out wrong) from a <strong>remote</strong>, usually their phone, or, with no second device, from the projector itself. A second teacher device chooses whether it shows the quiz or steers it, and the first takes the other job.</p>
 
 <p>No accounts. Students join with the five-digit code or the QR code as random avatars, an animal on a colour that they dress with a shape and a hat in the lobby, never by name. Only the code reaches a quiz, and nothing in it is shared. A quiz is kept until the teacher ends it or two days after its last use; a class's answers and scores are deleted an hour after its final ranking, and a class unsteered for three hours ends. The teacher's lasting copy is the <code>.zip</code>. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device, projector, remote and students', opens that copy's address, not classyquiz.pages.dev.</p>
 
-<p>A lesson: the teacher uploads the <code>.zip</code> on this page, usually on the laptop at the projector, or on the phone that photographed the sheet. The lobby shows the title; the code and QR code (students scan it, or type the code into the box at the top of this page); the joined avatars; the button <strong>Start as Projector + Remote</strong>; how a second teacher device joins (<code>classyquiz.pages.dev/teacher</code>, the code, a role); and the questions for a last check, answers folded away. In play, a slim bar on the projector carries the next step (votes, answer, next, ranking), as do a presentation clicker and the space bar; avatars appear as their answers arrive. Once students have joined, a new device steers only if the projector lets it in; if the remote goes silent, a dead battery say, the projector steers again after 45 seconds.</p>
+<p>A lesson: the teacher uploads the <code>.zip</code> on this page, usually on the laptop at the projector, or on the phone that photographed the sheet. First comes the teacher's check: the title and number of questions, the questions themselves with their answers folded away, the tempo, the class code small, and the teacher code, which is the class code plus two digits. <strong>Show the class the code</strong> turns the screen into the class's: the code and QR code (students scan it, or type the code into the box at the top of this page), the joined avatars, and <strong>Start quiz</strong>. A second teacher device, a phone or another screen, types the teacher code into the same box; if the first does both jobs, it asks whether to show the quiz here or steer it from here, and the first takes the other job. <strong>Swap</strong>, on either, undoes a wrong choice. In play, a slim bar on the projector carries the next step (votes, answer, next, ranking), as do a presentation clicker and the space bar; avatars appear as their answers arrive. If the remote goes silent, a dead battery say, the projector steers again after 45 seconds, and the teacher code on any device brings a remote back.</p>
 
 <p>The tempo is the teacher's by default: no clock. In a countdown quiz (Tempo below) each question comes up alone; once the teacher has read it, Go shows the answers and starts a draining bar; at its end answering closes, and votes and answer still wait for the teacher. With points for speed, a right answer scores more the quicker it came. The teacher can change the tempo in the lobby, or mid-quiz from the next question on; &minus;5 and +5 shift the running countdown and all later ones by five seconds, within 10 to 60.</p>
 

@@ -10,9 +10,9 @@ import * as G from "./game.ts";
 import { matchImages, type StoredImage, type UploadedImage } from "./images.ts";
 import type {
   Auth,
-  ChoiceState,
   ClientMessage,
   Command,
+  Entry,
   ImageRef,
   PackPic,
   PlayerView,
@@ -25,9 +25,9 @@ import type {
   TeacherView,
   View,
 } from "../shared/protocol.ts";
-import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
+import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
-import { randomCode, randomToken } from "./random.ts";
+import { randomCode, randomDigits, randomToken } from "./random.ts";
 import { CLASS_IDLE_MS, SITE_FULL, isQuotaError } from "../shared/limits.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
@@ -46,8 +46,19 @@ const POLL_HOLD_MS = 25_000;
 const FRESH_MS = 45_000;
 /** A role's tab not heard from for this long is "quiet": the choice screen says it frees up soon. */
 const QUIET_MS = 25_000;
-/** "Allow a device to join" stays open this long, or until a device takes a role. */
-const JOIN_OPEN_MS = 2 * 60_000;
+/**
+ * Wrong teacher codes (docs/after-upload.md §4): a device that gets the two
+ * digits wrong GUESS_MAX times within GUESS_WINDOW_MS has its teacher codes
+ * for this quiz refused for GUESS_LOCK_MS. The device is told apart by its
+ * address, held only as a salted hash in this object's memory for the
+ * window and never stored or logged; without one (local development), the
+ * count is the quiz's.
+ */
+const GUESS_MAX = 5;
+const GUESS_WINDOW_MS = 60_000;
+const GUESS_LOCK_MS = 10 * 60_000;
+/** Devices counted at once; beyond it the oldest entries go (many addresses at once is beyond what this limit is for). */
+const GUESS_KEYS = 500;
 /** Join command ids remembered per class, to answer a resent join with the same player. */
 const JOINS_KEPT = 300;
 /** The code is claimed for this long beyond the instance's end, and claimed again before that runs out. */
@@ -84,10 +95,10 @@ interface Meta {
   /** The token of the tab holding each role. */
   roles?: Record<RoleName, string | null>;
   /**
-   * Until when Projector + Remote lets the next device at /teacher take a
-   * role, once the class is in ("Allow a device to join"); 0 or absent: shut.
+   * The teacher code's two digits after the class code (docs/after-upload.md
+   * §4). Drawn at upload; given on first load to a quiz from before them.
    */
-  joinUntil?: number;
+  teacher?: string;
   lastActivity: number;
   v: number;
 }
@@ -97,8 +108,9 @@ type Session =
   | { role: "screen"; token: string; since: number }
   | { role: "remote"; token: string; since: number }
   | { role: "player"; player: string; since?: number }
-  | { role: "guest" }
-  | { role: null };
+  /** dev: the device, as counted for wrong teacher codes (GUESS_MAX). */
+  | { role: "guest"; dev?: string }
+  | { role: null; dev?: string };
 
 interface Waiter {
   session: Session;
@@ -138,6 +150,10 @@ export class Instance extends DurableObject<Env> {
   private looksWaiting: { resolve: () => void; reject: (e: unknown) => void }[] = [];
   private looksTimer: ReturnType<typeof setTimeout> | null = null;
   private looksStored = 0;
+  /** Wrong teacher codes per device (GUESS_MAX); memory only. */
+  private guesses = new Map<string, { fails: number[]; until: number }>();
+  /** Salts the devices' addresses before they are counted; memory only, so a key means nothing once the object is gone. */
+  private salt = randomToken();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -157,6 +173,12 @@ export class Instance extends DurableObject<Env> {
       storage.get<G.Run | null>("run"),
     ]);
     if (meta && record && fixes) {
+      // A quiz from before teacher codes gets its digits now, kept at once:
+      // its teacher's screens show them from their next view on.
+      if (meta.code && meta.roles && !meta.teacher) {
+        meta.teacher = randomDigits(2);
+        await storage.put("meta", meta);
+      }
       this.meta = meta;
       this.quizRecord = record;
       this.game = { quiz: record.quiz, fixes, run: run ?? null };
@@ -186,7 +208,7 @@ export class Instance extends DurableObject<Env> {
     /** The answer pictures' small copies, for the students' devices. */
     smalls: UploadedImage[] = [],
   ): Promise<
-    | { ok: true; secret: string; code: string; token: string }
+    | { ok: true; secret: string; code: string; teacher: string; token: string }
     | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string }
   > {
     if (this.meta) throw new Error("instance exists");
@@ -209,7 +231,8 @@ export class Instance extends DurableObject<Env> {
       imageSecret: randomToken(),
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
-    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, lastActivity: now, v: 1 };
+    const teacher = randomDigits(2);
+    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, teacher, lastActivity: now, v: 1 };
     // The pasting tab is about to open the Projector with it.
     this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
@@ -223,7 +246,7 @@ export class Instance extends DurableObject<Env> {
       await this.budget().release(this.ctx.id.toString()).catch(() => {});
       throw e;
     }
-    return { ok: true, secret, code, token };
+    return { ok: true, secret, code, teacher, token };
   }
 
   /**
@@ -263,7 +286,7 @@ export class Instance extends DurableObject<Env> {
     const images = await read(files, names);
     const smalls = await read(smallFiles, smallNames);
     const r = await this.create(text, images, form.get("leaveOut") === "missing", smalls);
-    const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, token: r.token } : r;
+    const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token } : r;
     return json(body);
   }
 
@@ -344,6 +367,46 @@ export class Instance extends DurableObject<Env> {
     return this.live() && this.meta!.code === code;
   }
 
+  /**
+   * For the code box: are these the teacher code's last two digits? ip: the
+   * requesting device's address, for the limit on wrong ones; secret: the
+   * uploading device's, which needs no digits and isn't limited.
+   */
+  async teacherCheck(digits: string, ip: string | null, secret?: string): Promise<"ok" | "wrong" | "locked"> {
+    if (!this.live()) return "wrong";
+    if (typeof secret === "string" && safeEqual(secret, this.meta!.secret)) return "ok";
+    return this.checkTeacher(digits, await this.deviceKey(ip));
+  }
+
+  /** A device as the limit on wrong teacher codes counts it: its address, salted and hashed; the quiz itself without one. */
+  private async deviceKey(ip: string | null): Promise<string> {
+    if (!ip) return "quiz";
+    const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${this.salt}|${ip}`)));
+    return btoa(String.fromCharCode(...d.slice(0, 12)));
+  }
+
+  /** Checks the two digits, counting a wrong one against the device (GUESS_MAX). */
+  private checkTeacher(digits: unknown, dev: string): "ok" | "wrong" | "locked" {
+    const now = Date.now();
+    for (const [k, g] of this.guesses) if (g.until <= now && !g.fails.some((t) => now - t < GUESS_WINDOW_MS)) this.guesses.delete(k);
+    const g = this.guesses.get(dev) ?? { fails: [], until: 0 };
+    if (g.until > now) return "locked";
+    const teacher = this.meta?.teacher;
+    if (typeof digits === "string" && teacher && safeEqual(digits, teacher)) return "ok";
+    // No two digits at all (the class code alone) is no guess at them.
+    if (typeof digits !== "string" || !/^\d{2}$/.test(digits)) return "wrong";
+    g.fails = g.fails.filter((t) => now - t < GUESS_WINDOW_MS);
+    g.fails.push(now);
+    if (g.fails.length >= GUESS_MAX) {
+      g.until = now + GUESS_LOCK_MS;
+      g.fails = [];
+    }
+    this.guesses.delete(dev);
+    this.guesses.set(dev, g);
+    if (this.guesses.size > GUESS_KEYS) this.guesses.delete(this.guesses.keys().next().value!);
+    return g.until > now ? "locked" : "wrong";
+  }
+
   // -------------------------------------------------------------------------
   // HTTP: WebSocket upgrade, the long-polling fallback, the pasting device's calls
 
@@ -357,7 +420,8 @@ export class Instance extends DurableObject<Env> {
       if (req.headers.get("Upgrade") !== "websocket") return new Response("expected a WebSocket", { status: 426 });
       const pair = new WebSocketPair();
       this.ctx.acceptWebSocket(pair[1]);
-      pair[1].serializeAttachment({ role: null } satisfies Session);
+      // The device, should it come with a teacher code (GUESS_MAX); the address is Cloudflare's, not the browser's.
+      pair[1].serializeAttachment({ role: null, dev: await this.deviceKey(req.headers.get("cf-connecting-ip")) } satisfies Session);
       return new Response(null, { status: 101, webSocket: pair[0] });
     }
     if (req.method !== "POST") return new Response("not found", { status: 404 });
@@ -373,6 +437,8 @@ export class Instance extends DurableObject<Env> {
     const session = this.authenticate(body.auth, out);
     // Gone, or a role that moved: the tab hears it with the reply, whatever it asked.
     if (session.role === null) return json({ messages: out });
+    // The device's address, passed on by the API function (GUESS_MAX).
+    if (session.role === "guest" && action === "cmd") session.dev = await this.deviceKey(req.headers.get("x-cq-ip"));
     this.notePoll(session);
     if (action === "cmd" && body.cmd && session.role !== null) {
       // A command over HTTP: the reply is its acknowledgement plus, for a
@@ -437,7 +503,9 @@ export class Instance extends DurableObject<Env> {
       return json({ ok: true });
     }
     const meta = this.meta!;
-    return json({ title: this.game!.quiz.title, code: meta.code!, closes: meta.lastActivity + INSTANCE_IDLE_MS } satisfies QuizInfo);
+    const game = this.game!;
+    const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
+    return json({ title: game.quiz.title, code: meta.code!, teacher: meta.teacher ?? "", stands, closes: meta.lastActivity + INSTANCE_IDLE_MS } satisfies QuizInfo);
   }
 
   private notePoll(session: Session): void {
@@ -471,6 +539,8 @@ export class Instance extends DurableObject<Env> {
       const out: ServerMessage[] = [];
       let session = this.authenticate(msg.auth, out);
       if (session.role === "player") session = { ...session, since: Date.now() };
+      // A guest keeps the device it connected from, for a teacher code it may send.
+      if (session.role === "guest") session = { role: "guest", dev: (ws.deserializeAttachment() as { dev?: string } | null)?.dev };
       ws.serializeAttachment(session);
       for (const m of out) send(ws, m);
       if (session.role === null) {
@@ -587,53 +657,25 @@ export class Instance extends DurableObject<Env> {
     return p === "none" || p === "away";
   }
 
-  /**
-   * Once the class has a student, no new tab gets the steering: not the
-   * Remote, not a Projector that would steer itself, not by taking over the
-   * one that does (backlog item 18: children must not take the remote by
-   * accident). A tab that holds a role keeps it and comes back to it; a dead
-   * phone means the wall steers; another computer can still take a free
-   * Projector while a Remote steers. "Again with another class" opens a
-   * lobby without students, so the roles are open again. Narrowed by
-   * docs/second-teacher-device.md: a device that set the quiz up comes back,
-   * Projector + Remote can allow a device to join, and when nothing steers
-   * any device may take a role.
-   */
-  private classIn(): boolean {
-    const run = this.game?.run;
-    return !!run && G.activePlayers(run).length > 0;
-  }
-
-  /**
-   * Projector + Remote's "Allow a device to join" is open: the next device
-   * at /teacher takes the free or dropped role, or the Projector itself
-   * (docs/second-teacher-device.md, rule 3).
-   */
-  private joinOpen(): boolean {
-    return (this.meta?.joinUntil ?? 0) > Date.now();
-  }
-
-  /** A tab steers the quiz: a Remote that is there, or else a Projector that is. */
-  private someoneSteers(): boolean {
-    if (!this.steering()) return true;
-    const s = this.presence("screen");
-    return s === "present" || s === "quiet";
-  }
-
-  /**
-   * owner: a tab holding the quiz's secret, which set the quiz up (rule 2):
-   * the gate doesn't apply to it, but it pushes no tab aside that is there.
-   */
-  private choiceState(role: RoleName, owner = false): ChoiceState {
+  /** A tab holds the role and is there (quiet counts: a present tab is never pushed aside). */
+  private there(role: RoleName): boolean {
     const p = this.presence(role);
-    const steers = role === "remote" || this.steering();
-    // The gate: once the class is in, nobody new steers, unless the
-    // steering screen allows a device to join or nothing steers at all.
-    const gated = steers && this.classIn() && !this.joinOpen() && this.someoneSteers();
-    if (p === "none" || p === "away") return gated && !owner ? "closed" : "free";
-    if (role === "screen" && this.steering()) return this.classIn() && !this.joinOpen() ? "taken" : "movable";
-    // Quiet means "free soon"; not when it would come back closed.
-    return p === "quiet" && !gated ? "quiet" : "taken";
+    return p === "present" || p === "quiet";
+  }
+
+  /**
+   * What a teacher device coming in with the teacher code does
+   * (docs/after-upload.md §4): the question when one tab shows and steers;
+   * the role whose tab is gone; "screen", to do both, when nothing is there;
+   * nothing when both tabs are there. The class code never reaches a role,
+   * so this holds before and after the first student alike.
+   */
+  private entry(): Entry {
+    const s = this.there("screen");
+    const r = this.there("remote");
+    if (s && r) return "full";
+    if (s) return this.meta!.roles!.remote ? "remote" : "ask";
+    return "screen";
   }
 
   /**
@@ -641,8 +683,10 @@ export class Instance extends DurableObject<Env> {
    * hold another role now) and closes their line: the tab reconnects as what
    * it is now.
    */
-  private evict(role: RoleName, token: string, msg: ServerMessage): void {
+  private evict(role: RoleName, token: string, msg: ServerMessage, keep?: WebSocket): void {
     for (const ws of this.ctx.getWebSockets()) {
+      // keep: the socket whose command this is; it hears it with the reply.
+      if (ws === keep) continue;
       const s = ws.deserializeAttachment() as Session | null;
       if (!s || s.role !== role || s.token !== token) continue;
       send(ws, msg);
@@ -666,23 +710,33 @@ export class Instance extends DurableObject<Env> {
     this.lastPoll.set(`${role}:${token}`, Date.now());
   }
 
-  /** A guest takes a role, if it's free; the Projector also when it steers itself (rule 4). */
-  private takeRole(role: RoleName, owner = false): string | null {
+  /**
+   * A teacher device takes a role, as entry() says: the one whose tab is
+   * gone, or either when one tab does both. "Show here" (the screen) turns
+   * that tab into the steering tab; "Steer from here" (the remote) leaves it
+   * the wall, which stops steering. Null when the entry has changed.
+   */
+  private takeRole(role: RoleName): string | null {
     const roles = this.meta!.roles!;
-    const state = this.choiceState(role, owner);
-    if (state !== "free" && state !== "movable") return null;
-    // One device per "Allow a device to join".
-    if (this.classIn()) this.meta!.joinUntil = 0;
+    const entry = this.entry();
+    if (entry === "full" || (entry !== "ask" && entry !== role)) return null;
     const token = randomToken();
     const old = roles[role];
-    if (old) {
-      if (state === "movable") {
-        // The tab that had the Projector becomes the Remote.
+    if (entry === "ask") {
+      if (role === "screen" && old) {
+        // The tab that showed and steered becomes the steering tab.
         const remote = randomToken();
+        this.evict("screen", old, { t: "role", role: "remote", token: remote });
         this.hand("remote", remote);
-        this.evict(role, old, { t: "role", role: "remote", token: remote });
-      } else {
-        this.evict(role, old, { t: "lost", role });
+      }
+    } else {
+      if (old) this.evict(role, old, { t: "lost", role });
+      // Nothing was there: the newcomer shows and steers, as a tab that just
+      // uploaded; a gone steering tab's token goes with it, so the next
+      // device is asked rather than sent to it.
+      if (role === "screen" && roles.remote && !this.there("remote")) {
+        this.evict("remote", roles.remote, { t: "lost", role: "remote" });
+        roles.remote = null;
       }
     }
     this.hand(role, token);
@@ -721,21 +775,18 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "tick") return { direct: [ack(true), this.chooseMessage()] };
         if (cmd.op === "takeRole") {
           if (cmd.role !== "screen" && cmd.role !== "remote") return { direct: [ack(false, "unknown role")] };
+          // The teacher code, checked here whatever the page did before; the
+          // uploading device's secret (Resume) needs no digits and isn't counted.
           const owner = typeof cmd.secret === "string" && safeEqual(cmd.secret, meta.secret);
-          // A device setting the quiz up (no student yet) keeps the secret: it comes back without the button.
-          const setup = !this.classIn();
-          const token = this.takeRole(cmd.role, owner);
-          if (!token) {
-            const error = this.classIn()
-              ? "Students have joined. First, on the projector screen: ⋯, Allow a device to join."
-              : cmd.role === "screen"
-                ? "Another screen shows the quiz."
-                : "Another device steers the quiz.";
-            return { direct: [ack(false, error), this.chooseMessage()] };
+          if (!owner) {
+            const check = this.checkTeacher(cmd.teacher, session.dev ?? "quiz");
+            if (check !== "ok") return { direct: [ack(false, check === "locked" ? TOO_MANY_CODES : WRONG_TEACHER_CODE)] };
           }
+          const token = this.takeRole(cmd.role);
+          // The tabs changed since the page was told: it hears what holds now.
+          if (!token) return { direct: [ack(false, "changed"), this.chooseMessage()] };
           await this.afterTeacherChange(["meta"]);
-          const role: ServerMessage = setup ? { t: "role", role: cmd.role, token, secret: meta.secret } : { t: "role", role: cmd.role, token };
-          return { direct: [ack(true), role], session: { role: cmd.role, token, since: now } };
+          return { direct: [ack(true), { t: "role", role: cmd.role, token }], session: { role: cmd.role, token, since: now } };
         }
         if (cmd.op !== "newPlayer" && cmd.op !== "claim") return { direct: [ack(false, "not joined")] };
         const run = game.run;
@@ -829,30 +880,24 @@ export class Instance extends DurableObject<Env> {
           await this.afterTeacherChange(["run"]);
           return { direct: [ack(true)] };
         }
-        if (cmd.op === "steerHere") {
-          const old = roles.remote;
-          if (old) this.evict("remote", old, { t: "lost", role: "remote" });
-          roles.remote = null;
-          await this.afterTeacherChange(["meta"]);
-          return { direct: [ack(true)] };
-        }
-        if (!this.steering()) return { direct: [ack(false, "The remote steers the quiz. To steer here: ⋯, Steer from here.")] };
-        if (cmd.op === "allowJoin") {
-          meta.joinUntil = cmd.value ? now + JOIN_OPEN_MS : 0;
-          await this.afterTeacherChange(["meta"]);
-          return { direct: [ack(true)] };
-        }
-      } else if (cmd.op === "projectorHere") {
-        // The Remote becomes the Projector that steers itself.
-        const old = roles.screen;
-        if (old) this.evict("screen", old, { t: "lost", role: "screen" });
-        const token = randomToken();
-        this.hand("screen", token);
-        roles.remote = null;
-        this.moved.set(`remote:${session.token}`, { t: "role", role: "screen", token });
-        await this.afterTeacherChange(["meta"]);
-        return { direct: [ack(true), { t: "role", role: "screen", token }], session: { role: null } };
       }
+      if (cmd.op === "swap") {
+        // ⇄ Swap (docs/after-upload.md §4): the wall becomes the steering tab
+        // and the steering tab the wall, at once, from either; the same tap
+        // undoes it. Both get new tokens, as a role handed over always does.
+        const other: RoleName = session.role === "screen" ? "remote" : "screen";
+        const otherToken = roles[other];
+        if (!otherToken || !this.there(other)) return { direct: [ack(false, "There is no other screen to swap with.")] };
+        const mine = randomToken();
+        const theirs = randomToken();
+        this.evict(other, otherToken, { t: "role", role: session.role, token: theirs });
+        this.evict(session.role, session.token, { t: "role", role: other, token: mine }, ws);
+        this.hand(session.role, theirs);
+        this.hand(other, mine);
+        await this.afterTeacherChange(["meta"]);
+        return { direct: [ack(true), { t: "role", role: other, token: mine }], session: { role: null } };
+      }
+      if (session.role === "screen" && !this.steering()) return { direct: [ack(false, "The remote steers the quiz.")] };
 
       // --- steering
       let changed: ("run" | "fixes" | "meta")[] = [];
@@ -1176,8 +1221,7 @@ export class Instance extends DurableObject<Env> {
       title: this.game?.quiz.title ?? "",
       phase: run ? run.phase : "idle",
       avatars: away.map((p) => ({ id: p.id, avatar: p.avatar })),
-      screen: this.choiceState("screen"),
-      remote: this.choiceState("remote"),
+      entry: this.meta?.roles ? this.entry() : "full",
     };
   }
 
@@ -1287,6 +1331,7 @@ export class Instance extends DurableObject<Env> {
       v: meta.v,
       title: game.quiz.title,
       code: meta.code!,
+      teacher: meta.teacher ?? "",
       background: this.imageRef(game.quiz.background),
       pictures: [...pictures],
       zoom: !!image && G.zoomed(game),
@@ -1337,6 +1382,7 @@ export class Instance extends DurableObject<Env> {
       id: this.ctx.id.toString(),
       title: game.quiz.title,
       code: meta.code!,
+      teacher: meta.teacher ?? "",
       background: this.imageRef(game.quiz.background),
       warnings: this.quizRecord?.warnings ?? [],
       questions: game.quiz.questions.map((q, i) => {
@@ -1364,7 +1410,6 @@ export class Instance extends DurableObject<Env> {
       current: run ? run.current : -1,
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
-      join: this.joinOpen() ? meta.joinUntil! - Date.now() : null,
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
       tempo: G.tempoOf(game),
       timed: G.timed(game),
