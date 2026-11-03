@@ -220,6 +220,12 @@ export interface RevealView {
   counts: boolean[];
   dist: number[];
   void: boolean;
+  /**
+   * The players whose answer counts, in the lobby's order: they jump on the
+   * wall (backlog v4 item 9). Follows a fix of the key; empty for a void
+   * question. Absent from a server from before.
+   */
+  winners?: string[];
 }
 
 export interface RankingView {
