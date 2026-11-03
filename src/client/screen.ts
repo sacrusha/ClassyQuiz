@@ -822,7 +822,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = `<div class="steerbar">
       <button class="btn more" data-menu aria-label="more">⋯</button>
       <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
-      ${v.steer.remote === "away" ? `<span class="joinchip">Remote gone: type <strong>${esc(teacherCode(v.code, v.teacher))}</strong> on another device</span>` : ""}
+      ${v.steer.remote === "away" ? `<span class="joinchip">Remote gone: another device via ⋯</span>` : ""}
       ${nudgePair(v.steer)}
       ${side ? `<button class="btn" data-step data-act="${side.act}">${side.label}</button>` : ""}
       ${next ? `<button class="btn primary" data-step data-act="${next.act}">${next.label}</button>` : ""}
