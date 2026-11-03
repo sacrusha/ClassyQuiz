@@ -3069,3 +3069,105 @@ the packs are new storage keys in the instance.
 ## 2026-11-03 — Tooling kept on disk, outside the repo
 
 The headless-browser walks every implementer built on (Edge via the scratchpad's `shots-tool`) are copied to `E:\Projects\classyQuiz\.tmp\shots-tool\` (36 scripts, no screenshots), and the per-implementer local-stack scripts to `E:\Projects\classyQuiz\.tmp\stacks\<name>\`. `.tmp/` is ignored by git and survives sessions on this machine; the session scratchpad doesn't. Also there: `.tmp/sim-diag/` (the instrumented simulation for the score mismatch in bugs.md), `.tmp/picture-answers/` (the generated test zip and its generator), `.tmp/samples/` (the owner's number-line zip), `.tmp/avatars-prototype/`. None of it is reviewed for the repo; a future implementer reads before running.
+
+## 2026-11-03 — Guidance: the owner's rewrite, merged with what's built
+
+Serves: v4 item 5 (and v1 item 11, whose part 4 the owner took over). Branch
+`guidance-merge`; delivery A of v4, so the page describes the site as it runs
+today.
+
+**Structure, from the owner's draft** (`docs/drafts/guidance-rewrite-2026-11-03.md`):
+About; the manual for AIs and people who like to get their hands dirty
+(anchor kept as `#site`); what informs the shape of the quizzes; how quizzes
+are built; building with the teacher. The draft's facts are all in, in the
+page's descriptive voice: the hybrid Projector + Remote and the second device
+choosing its role, the lobby as a list, the code box at the top of the page,
+upload from the phone, privacy concerns answered by the open code and an own
+copy (with every device on the own copy's address), about fifteen questions,
+the poll with every answer right under `Order: fixed`, line endings, the
+picture on the left.
+The draft's "about 15 minutes" for an own copy is left out until a free-tier
+test has timed it; its eventual form is a dated statement, e.g. "Tested to
+take 14 minutes with free Claude Sonnet, 4 Nov 2026" (owner).
+
+**Reconciled with what's built:**
+- Pictures as answers, the wall's layout and the limits kept from the live
+  page; 120 pictures, not 60.
+- The remote fades after 45 s (`FRESH_MS`), not a minute; the projector then
+  steers and can let a new device join.
+- Lifetime as the site runs now: until ended or 48 h after last use; a
+  class's data an hour after its final ranking; a class unsteered for 3 h
+  ends. The draft's figures (48 h or 1 h after the end, whichever is sooner)
+  come with v4 item 3, delivery B; the paragraph changes with it.
+- Tempo exactly as the live page; v4 item 6 replaces it.
+- Spread, then key, as built, where the draft's reveal showed both at once.
+- "A question number with no text": the parser accepts `1.` alone, but keeps
+  "1." as the question's text, so the wall shows a large "1." (NUMBERING
+  needs whitespace after the dot; an empty text is an error). The page says
+  instead that a few words do when the pictures carry the question. Allowing
+  it properly is a parser and wall change, not made here.
+- Kept from the live page because the AI needs them and the draft doesn't
+  contradict them: zip only, `.txt` or `.md` inside, nothing else in the
+  quiz text, what the site shows after upload and its paste-back errors.
+- Dropped with the owner's part 4: Transfer/Variants/Topic, the ten-minute
+  break paragraph, "a blurred digit near a key goes in the conversation", the
+  after-delivery list.
+
+**Cut to what the reading AI can't know** (owner, on reviewing the merge:
+good direction, far too wordy). The section went from 4311 words to 2456,
+then to 2266 with the manual made denser: for people it only has to show that
+there are no secrets and they may look, not read easily (owner).
+What stays is the site's facts: what it is and does, the screens and how a
+lesson runs, privacy and lifetime, the format with both examples, the limits
+and the wall's layout, how the quiz reaches the site and what the upload
+shows, and the "build with the teacher" stance in two short paragraphs, still
+naming what a frontloading teacher gives. What went is advice a capable model
+derives from those facts or already knows: wrong answers as the mistakes
+students make (and the 25-francs example), short questions, good enough
+beats polished, why the mark sits on the answer's line, when `Order: fixed`
+fits, how long a countdown a kind of task needs and which classes suit one,
+all the cropping and legibility advice for pictures (margins, label size,
+grey photographed pages, names and filled-in answers in the crop), contrast
+of answer pictures on the tile colours and making them alike, letters as
+labels, four options in one picture, cropping with code, notes to the
+teacher outside the quiz text, and the reasoning about why guessing costs
+the teacher. The facts those rested on stay (spread before key, the class
+reads from the back, tiles in four colours with transparency showing
+through, the site's warning on mixed proportions, text outside the quiz
+ignored or an error).
+
+**Two passages changed after a test.** On the draft's wording the AI behaved
+as on the old page. "Building with the teacher" now lists what a frontloading
+teacher gives (exercises, number of questions, the sheet's numbers or new
+ones, language) and says the quiz follows the answer. "Any language" is the
+owner's instruction, plainly: if the language of the exercises and of the
+request pull in different directions and don't resolve cleanly, just ask. A
+first version named cases (a German sheet, an English message); the owner
+ruled that out: AIs resolve with location and memory, no list is exhaustive,
+and detail is more likely to break things.
+
+**Amends "Guidance page is information, not instruction" (2026-11-02).** That
+entry was a rule read as a rule. Its purposes are two: not tripping
+injection guards, and no pointless prescription. A plain, well-marked
+instruction about using an AI with the site trips no guard, and is the right
+form where it is the point, as in "Any language".
+
+**How an AI behaves on it** (Opus via the claude CLI, the page injected as if
+fetched, the derived number-line sheet as images; nothing fetched; one sample
+per cell unless said; runs in `.tmp/guidance-runs/`):
+
+| Ask | Old page (`.tmp/example/`) | Draft wording | Final wording |
+|---|---|---|---|
+| German, "etwa 10 Fragen" | quiz at once | quiz at once, closing offer | 1 of 2 samples: quiz at once (new numbers, said so); 1 of 2: summary + two questions (numbers, tempo) |
+| English, same, language unstated | German quiz at once, unsaid | German quiz at once, said so, offers translation | summary + two questions (language, numbers), both on the case-naming version (after the answer, a German quiz) and on the owner's instruction |
+| Frontloaded German brief | — | quiz at once | quiz at once |
+
+The table's last column is the merge before the cut. After the cut, one
+sample of the English ask (`.tmp/guidance-runs/page-v4/en/`): summary of the
+five exercises and a plan, and one question before the quiz, the language;
+new numbers, no timer and drawn number lines are stated as defaults the
+teacher can change. The ask-back survived the cut; one sample, so no rate.
+
+Every quiz produced parsed without errors or warnings. Not established: the
+claude.ai system prompt and real fetch behaviour, other models and the free
+tier, whether the drawn number lines match their keys.
