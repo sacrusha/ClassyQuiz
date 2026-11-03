@@ -314,3 +314,33 @@ The quiz is already made; it can be more than one activity.
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
   own.
+
+## Open decisions and checks, at the close of 2026-11-03
+
+With the owner:
+- A domain in front of the site, so a rate-limiting rule at the edge can
+  stop a script from spending the day's allowance; the free plan includes one
+  such rule, and a name children can type beats pages.dev on the slowest step.
+- The landing page's step 1: what it says about which AI, now that "the free
+  version works" is unverified.
+- The free-tier test: a logged-in free Claude account producing a working zip
+  with pictures; the zip it produces is the artifact to keep.
+
+Needs a real classroom or real devices, nobody has run it:
+- Android tablets and phones: the file picker with a zip, a killed browser tab
+  bringing back its role, the bar and the answered avatars from the back row,
+  −5/+5 during a countdown, whether children dress their avatars.
+- The school's Wi-Fi, through /check.
+- The platform's wording when the free allowance is spent.
+
+Done since the first deploy, all live: the redesigned teacher flow with one
+code per quiz and roles per tab, pictures on the screens and as answers,
+shuffled answers with Order: fixed, hardening for the free plan, countdown and
+points for speed with the quiz carrying its tempo and −5/+5 in the run, votes
+before the answer, answered avatars on the wall, a second teacher device from
+the wall, avatars the children dress, the landing page by attention budget,
+zip only, and /own-copy. Left in Later: printables, corrected quiz download,
+results export, localization, formula rendering, pictures for a teacher whose
+AI can't make a zip, sound, pairs and teams; v3 item 2, placement beyond the
+named layouts.
+
