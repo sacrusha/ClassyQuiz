@@ -1,4 +1,4 @@
-// The countdown as the screens draw it (backlog v2 item 2): a bar that
+// Last call as the screens draw it (backlog v2 item 2, v4 item 6): a bar that
 // drains smoothly, no digits. The owner leaned towards a bar or circle over
 // a discrete count; a bar along an edge reads from the back row and takes no
 // room from the question, its picture or the tiles.

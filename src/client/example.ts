@@ -63,10 +63,9 @@ async function start(): Promise<void> {
       void: false,
       skip: false,
       status: "upcoming",
-      seconds: q.seconds ?? quiz.seconds ?? 60,
     }));
     // Only what the question list reads; the rest of a steering view has no meaning here.
-    view = { title: quiz.title, questions, background: ref(quiz.background), warnings: parsed.warnings, tempo: "pace" } as unknown as TeacherView;
+    view = { title: quiz.title, questions, background: ref(quiz.background), warnings: parsed.warnings } as unknown as TeacherView;
     document.title = `${quiz.title || "The example"} · classyQuiz`;
     render(file);
   } catch {

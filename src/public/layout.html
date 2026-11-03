@@ -42,16 +42,16 @@
 &lt;/main&gt;&lt;/body&gt;
 &lt;!-- The bar has a fixed height (1.9em). While the class answers, the avatar of each student whose answer has
      arrived pops into .strip, sized so the whole class fits, in one row or more.
-     At the votes: every tile&#x27;s .side becomes &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it), and each tile gets
+     At the lock-in: every tile&#x27;s .side becomes &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it), and each tile gets
      &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;, growing from 0.
      At the reveal, the answer: a tile that doesn&#x27;t count gets the class &quot;dim&quot;, and a tile that counts gets
      &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; before its count. The tiles are marked in place: nothing else is redrawn, so
      neither text nor picture moves. --&gt;
 
-&lt;!-- With a countdown (the quiz&#x27;s Tempo: line, or the teacher&#x27;s choice in the lobby), a question first comes up for reading: the same
-     layout, the tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their
-     answers so nothing moves when the teacher presses Go. Then the text shows and a bar drains along the top edge
-     of the screen, over everything and outside the layout:
+&lt;!-- Every question first comes up with its answers hidden, while the teacher reads it out: the same layout, the
+     tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their answers so
+     nothing moves when the teacher shows them. During Last call a bar drains along the top edge of the screen
+     for fifteen seconds, over everything and outside the layout:
      &lt;div id=&quot;clock&quot;&gt;&lt;div class=&quot;clockbar wall&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;. --&gt;
 
 &lt;!-- A question with a picture (its Image: line). Between the question and the tiles: --&gt;
@@ -150,7 +150,7 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
 .tiles.veiled .tile { opacity: .55; }
 #clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
 .clockbar.wall { height: max(10px, 1.7vh); overflow: hidden; background: rgba(29, 29, 27, .12); }
-.clockbar > span { display: block; height: 100%; background: #2a5db0; transform-origin: left center; } /* drains to scaleX(0) over the countdown, turning orange in its last fifth */
+.clockbar > span { display: block; height: 100%; background: #2a5db0; transform-origin: left center; } /* drains to scaleX(0) over Last call, turning orange in its last fifth */
 
 /* A question&#x27;s picture: always on white, so a transparent drawing reads on any background. */
 .stage.fig .qtext { min-height: 0; flex: none; }

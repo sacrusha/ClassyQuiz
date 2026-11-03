@@ -417,7 +417,7 @@ test("Order: fixed keeps a question's answers as written; before the first quest
   assert.deepEqual(all.quiz.questions.map((q) => q.keepOrder), [true, true]);
 });
 
-test("tempo: Tempo: before the first question, Time: for the quiz or a question; missing means the teacher's pace", () => {
+test("Tempo: and Time: lines from an older guidance are dropped, without a warning: the pace is the teacher's", () => {
   const r = parseQuiz(`Title: T
 Tempo: countdown with points for speed
 Time: 20 s
@@ -437,30 +437,11 @@ Time: 0:50
 Time: 45
 `);
   assert.equal(r.ok, true);
-  assert.equal(r.quiz.tempo, "speed");
-  assert.equal(r.quiz.seconds, 20);
-  assert.deepEqual(r.quiz.questions.map((q) => q.seconds), [undefined, 50, 45]);
+  assert.deepEqual(r.quiz.questions.map((q) => q.text), ["Quick?", "A sum that takes a while?", "After the answers?"]);
+  assert.deepEqual(r.quiz.questions[2].answers.map((a) => a.text), ["a", "b"], "not taken as a continuation of the last answer");
   assert.equal(r.warnings.length, 0, JSON.stringify(r.warnings));
-
-  const plain = parseQuiz("Title: T\n\n1. Q?\n+ a\n- b\n");
-  assert.equal(plain.quiz.tempo, undefined, "no line: the teacher's pace, as before");
-  assert.equal(plain.quiz.seconds, undefined);
-
-  const odd = parseQuiz("Title: T\nTempo: whenever\n\n1. Q?\nTime: soon\n+ a\n- b\n\n2. R?\nTime: 2 s\nTempo: countdown\n+ a\n- b\n");
-  assert.equal(odd.ok, true, "a tempo line the site can't read is a warning, not an error");
-  assert.equal(odd.quiz.tempo, undefined);
-  assert.equal(odd.quiz.questions[0].seconds, undefined);
-  assert.equal(odd.quiz.questions[1].seconds, 10, "clamped to the shortest countdown");
-  assert.equal(odd.warnings.length, 4, JSON.stringify(odd.warnings));
-  const long = parseQuiz(`Title: T
-Time: 2 min
-
-1. Q?
-+ a
-- b
-`);
-  assert.equal(long.quiz.seconds, 60, "clamped to the longest: 10 to 60 s, the range the teacher's -5/+5 moves in");
-  assert.match(long.warnings[0].message, /10 to 60 seconds/);
+  assert.deepEqual(Object.keys(r.quiz).sort(), ["background", "questions", "title"]);
+  assert.equal("seconds" in r.quiz.questions[1], false);
 });
 
 test("answer letters an AI adds are dropped when the answers are shuffled; kept under Order: fixed or out of sequence", () => {
@@ -474,17 +455,6 @@ test("answer letters an AI adds are dropped when the answers are shuffled; kept 
   assert.deepEqual(fixedAll.quiz.questions[0].answers.map((a) => a.text), ["A) 3", "B) 4"]);
   const bare = parseQuiz(`Title: T\n1. Which point?\n+ A\n- B\n`);
   assert.deepEqual(bare.quiz.questions[0].answers.map((a) => a.text), ["A", "B"], "a letter on its own is the answer");
-});
-
-test("tempo: a clause that denies doesn't count", () => {
-  const tempo = (line: string) => parseQuiz(`Title: T\nTempo: ${line}\n\n1. Q?\n+ a\n- b\n`).quiz.tempo;
-  assert.equal(tempo("countdown (no points)"), "countdown");
-  assert.equal(tempo("countdown, without speed points"), "countdown");
-  assert.equal(tempo("countdown with points for speed"), "speed");
-  assert.equal(tempo("speed"), "speed");
-  assert.equal(tempo("no countdown"), undefined, "the teacher's pace");
-  assert.equal(tempo("off"), undefined);
-  assert.equal(tempo("teacher's pace (no clock)"), undefined);
 });
 
 // ---------------------------------------------------------------------------
