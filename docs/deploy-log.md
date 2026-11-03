@@ -40,3 +40,7 @@ Pages deployment 2fb91b32, state Worker version d59ad472, no migration. Countdow
 ## 2026-11-03 — seventh deploy, 3601d2b
 
 Pages deployment fac1734a, state Worker version 513efd47, no migration. A second teacher device once the class is in; the landing page's third look (one line per quiz, upload wording, foot lines); the guidance says upload. Run by the owner from the clean worktree.
+
+## 2026-11-03 — eighth deploy, c82b402
+
+Pages deployment 0f832b7c, state Worker version e54cd788, no migration. Votes before the answer; answered avatars on the wall. Run by the owner from the clean worktree.
