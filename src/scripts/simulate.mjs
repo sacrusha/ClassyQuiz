@@ -36,8 +36,9 @@
 // leaves; a tab on HTTP answers "Show the quiz here" and the one that steered
 // itself becomes the Remote; ⇄ Swap three times, from either side; once the
 // next class has a student, the class code reaches no role, the teacher code
-// still does, and so does the uploading device's secret; with nothing
-// there, a device takes the Projector and steers. Last, wrong teacher codes: the
+// still does, and so does the uploading device's secret; a Remote whose tab
+// just closed is taken at once with the teacher code; with nothing there, a
+// device takes the Projector and steers. Last, wrong teacher codes: the
 // fifth from one device locks its teacher codes, the secret still gets in;
 // from ever new addresses, the quiz's allowance runs out within ten. The
 // quiz is deleted.
@@ -847,8 +848,16 @@ await until(() => projector.view?.players?.length === 1, 5000, "the new student 
   const next = await guestTry("borrowed-phone", "remote", { teacher });
   check(next.offered.entry === "ask" && next.ack.ok, `with students in, the teacher code takes the Remote (${next.offered.entry})`);
   await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the new phone");
-  await next.d.send({ op: "leave" });
+  // Its tab is closed by accident and the teacher types the code again at
+  // once: the closed Remote is quiet, and taken, not "full" until it is away
+  // (review D #4). The wall doesn't steer in between.
   next.d.kill();
+  await sleep(500);
+  const retyped = await guestTry("retyped-phone", "remote", { teacher });
+  check(retyped.offered.entry === "remote" && retyped.ack.ok, `a Remote whose tab just closed is taken at once with the teacher code (${retyped.offered.entry}, ${retyped.ack.error ?? "ok"})`);
+  check(!projector.view?.steer, "the Projector didn't steer while the Remote changed hands");
+  await retyped.d.send({ op: "leave" });
+  retyped.d.kill();
   await until(() => projector.view?.steer, 5000, "the Projector to steer again");
 }
 log("the class code reached no role; the secret and the teacher code did");

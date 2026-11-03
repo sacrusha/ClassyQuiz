@@ -381,6 +381,7 @@ function enter(c: Choice): void {
     main.innerHTML = `<div class="center choice">
       <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
       <p class="muted">This quiz already has a screen for the class and one that steers.</p>
+      <p class="muted">If one of them was on this device a moment ago, try again in half a minute.</p>
       <button class="btn" data-retry>Try again</button>
     </div>`;
     main.querySelector("[data-retry]")!.addEventListener("click", () => {
