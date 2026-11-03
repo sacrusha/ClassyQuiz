@@ -3065,3 +3065,7 @@ the packs are new storage keys in the instance.
 - Free-tier verification: the harness runs the claude CLI under the owner's
   login, not claude.ai's free tier. Testing the free tier, and ChatGPT,
   Gemini and Copilot, needs a person or those accounts.
+
+## 2026-11-03 — Tooling kept on disk, outside the repo
+
+The headless-browser walks every implementer built on (Edge via the scratchpad's `shots-tool`) are copied to `E:\Projects\classyQuiz\.tmp\shots-tool\` (36 scripts, no screenshots), and the per-implementer local-stack scripts to `E:\Projects\classyQuiz\.tmp\stacks\<name>\`. `.tmp/` is ignored by git and survives sessions on this machine; the session scratchpad doesn't. Also there: `.tmp/sim-diag/` (the instrumented simulation for the score mismatch in bugs.md), `.tmp/picture-answers/` (the generated test zip and its generator), `.tmp/samples/` (the owner's number-line zip), `.tmp/avatars-prototype/`. None of it is reviewed for the repo; a future implementer reads before running.
