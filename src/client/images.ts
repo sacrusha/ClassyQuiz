@@ -6,16 +6,28 @@
 // besides the picture (camera, time, GPS: "nothing identified"); it shrinks a
 // phone photo to what a projector shows (a class's devices load it over school
 // Wi-Fi); and it leaves the server only PNG and JPEG to take, so no SVG, with
-// the scripts it may hold, is ever served. A question's picture keeps its
-// transparency as PNG (v3's answers as pictures need it); every screen shows
-// pictures on white, so a transparent line drawing doesn't vanish on a dark
-// page. Backgrounds are flattened onto white.
+// the scripts it may hold, is ever served. A question's or an answer's
+// picture keeps its transparency as PNG. The screens show a question's
+// picture on white, so a transparent line drawing doesn't vanish on a dark
+// page; an answer's picture sits on its tile's colour, which shows through
+// wherever it is transparent (the creator's choice). Backgrounds are
+// flattened onto white, and so is a transparent picture too large as PNG.
 //
 // Kept apart from the upload page so whichever page takes the quiz can call
 // prepareImages() and uploadQuiz().
 
 import { imageKey, parseQuiz, pictureRefs, type PictureRef, type Problem } from "../quiz/format.ts";
-import { BACKGROUND_LONG_SIDE, IMAGE_LONG_SIDE, MAX_IMAGE_BYTES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../shared/protocol.ts";
+import {
+  ANSWER_LONG_SIDE,
+  BACKGROUND_LONG_SIDE,
+  IMAGE_LONG_SIDE,
+  MAX_IMAGE_BYTES,
+  MAX_QUIZ_BYTES,
+  MAX_SMALL_BYTES,
+  MAX_UPLOAD_BYTES,
+  SMALL_LONG_SIDE,
+  type UploadResult,
+} from "../shared/protocol.ts";
 import { api, readApi } from "./net.ts";
 import type { ZipEntry } from "./unzip.ts";
 
@@ -23,6 +35,8 @@ export interface PreparedImage {
   /** The name as the quiz writes it; the server matches it the same way. */
   name: string;
   blob: Blob;
+  /** An answer picture's small copy, for the students' devices (v3 item 1). */
+  small?: Blob;
 }
 
 export interface PreparedImages {
@@ -64,8 +78,15 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
   const parsed = parseQuiz(text);
   // The first mention of each file names it in messages; the server matches every mention by the same key.
   const wanted = new Map<string, PictureRef>();
+  // Every way a file is used: its size on the wall follows the largest use,
+  // and an answer picture also gets a small copy for the devices.
+  const uses = new Map<string, Set<PictureRef["kind"]>>();
   if (parsed.ok) {
-    for (const ref of pictureRefs(parsed.quiz)) if (!wanted.has(imageKey(ref.name))) wanted.set(imageKey(ref.name), ref);
+    for (const ref of pictureRefs(parsed.quiz)) {
+      const key = imageKey(ref.name);
+      if (!wanted.has(key)) wanted.set(key, ref);
+      uses.set(key, (uses.get(key) ?? new Set()).add(ref.kind));
+    }
   }
   const images: PreparedImage[] = [];
   const problems: Problem[] = [];
@@ -81,7 +102,11 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
 
   let done = 0;
   progress?.(done, wanted.size);
-  for (const [key, { name, label, kind }] of wanted) {
+  for (const [key, { name, label }] of wanted) {
+    const used = uses.get(key)!;
+    const longSide = used.has("background") ? BACKGROUND_LONG_SIDE : used.has("image") ? IMAGE_LONG_SIDE : ANSWER_LONG_SIDE;
+    // Only a background is flattened: a question's or an answer's picture keeps its transparency.
+    const keepAlpha = used.has("image") || used.has("answer");
     const entries = inArchive.get(key) ?? [];
     if (archive === null) {
       problems.push({ message: `${label}. Pictures come as files in a .zip, together with the quiz text; a pasted quiz can't carry them.` });
@@ -94,8 +119,11 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
       try {
         const raw = await entries[0].read();
         const ext = (entries[0].name.match(/\.(\w+)$/)?.[1] ?? "").toLowerCase();
-        const blob = await redraw(new Blob([raw], { type: TYPES[ext] ?? "" }), ext, kind === "background" ? BACKGROUND_LONG_SIDE : IMAGE_LONG_SIDE, kind !== "background");
-        images.push({ name, blob });
+        const file = new Blob([raw], { type: TYPES[ext] ?? "" });
+        const blob = await redraw(file, ext, longSide, keepAlpha, MAX_IMAGE_BYTES);
+        // Without its small copy an answer still works: the devices show its colour and shape.
+        const small = used.has("answer") ? await redraw(file, ext, SMALL_LONG_SIDE, true, MAX_SMALL_BYTES).catch(() => undefined) : undefined;
+        images.push({ name, blob, ...(small ? { small } : {}) });
       } catch {
         const hint = /\.hei[cf]$/i.test(entries[0].name) ? " HEIC pictures from iPhones can't be read by most browsers; PNG or JPEG work everywhere." : " PNG or JPEG work everywhere.";
         problems.push({ message: `${label}, which this browser can't open.${hint}` });
@@ -106,8 +134,8 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
   return { images, problems };
 }
 
-/** The picture redrawn: at most `longSide` pixels on its long side, as PNG (transparency kept when `keepAlpha`) or JPEG on white. */
-async function redraw(blob: Blob, ext: string, longSide: number, keepAlpha: boolean): Promise<Blob> {
+/** The picture redrawn: at most `longSide` pixels on its long side and `maxBytes`, as PNG (transparency kept when `keepAlpha`) or JPEG on white. */
+async function redraw(blob: Blob, ext: string, longSide: number, keepAlpha: boolean, maxBytes: number): Promise<Blob> {
   if (ext === "svg") blob = await sizedSvg(blob, longSide);
   const url = URL.createObjectURL(blob);
   try {
@@ -130,7 +158,7 @@ async function redraw(blob: Blob, ext: string, longSide: number, keepAlpha: bool
     // transparent picture too large as PNG, are flattened onto white for JPEG.
     if (keepAlpha && hasTransparency(g, canvas.width, canvas.height)) {
       const png = await encode(canvas, "image/png");
-      if (png.size <= MAX_IMAGE_BYTES) return png;
+      if (png.size <= maxBytes) return png;
     }
     g.globalCompositeOperation = "destination-over";
     g.fillStyle = "#fff";
@@ -138,11 +166,11 @@ async function redraw(blob: Blob, ext: string, longSide: number, keepAlpha: bool
     g.globalCompositeOperation = "source-over";
     if (KEEP_AS_PNG.test(`.${ext}`)) {
       const png = await encode(canvas, "image/png");
-      if (png.size <= PNG_KEEP_BYTES) return png;
+      if (png.size <= Math.min(PNG_KEEP_BYTES, maxBytes)) return png;
     }
     for (const quality of [0.85, 0.7, 0.5]) {
       const jpg = await encode(canvas, "image/jpeg", quality);
-      if (jpg.size <= MAX_IMAGE_BYTES) return jpg;
+      if (jpg.size <= maxBytes) return jpg;
     }
     throw new Error("too large");
   } finally {
@@ -202,8 +230,12 @@ export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut
   images.forEach((im, i) => {
     form.append("image", im.blob, `${i}`);
     form.append("imageName", im.name);
+    if (im.small) {
+      form.append("small", im.small, `s${i}`);
+      form.append("smallName", im.name);
+    }
   });
-  const size = images.reduce((s, im) => s + im.blob.size, new Blob([text]).size);
+  const size = images.reduce((s, im) => s + im.blob.size + (im.small?.size ?? 0), new Blob([text]).size);
   if (size > MAX_UPLOAD_BYTES || new Blob([text]).size > MAX_QUIZ_BYTES) {
     return { ok: false, errors: [{ message: `The quiz with its pictures is larger than the site takes (${Math.round(MAX_UPLOAD_BYTES / 1e6)} MB).` }], warnings: [] };
   }

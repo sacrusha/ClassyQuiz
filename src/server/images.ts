@@ -4,7 +4,7 @@
 // else, and reads the size it needs for the layout from the file itself.
 
 import { dropPicture, imageKey, pictureRefs, type Problem, type Quiz } from "../quiz/format.ts";
-import { MAX_IMAGE_BYTES, MAX_IMAGES } from "../shared/protocol.ts";
+import { MAX_IMAGE_BYTES, MAX_IMAGES, MAX_SMALL_BYTES, PACK_BYTES } from "../shared/protocol.ts";
 
 export type ImageType = "image/png" | "image/jpeg";
 
@@ -14,7 +14,16 @@ export interface UploadedImage {
   bytes: Uint8Array;
 }
 
-export type StoredImage = ImageInfo & { n: number };
+/** An answer picture's small copy, for the students' devices: `l` bytes from `o` in the pack stored as `pack:<p>`. */
+export type SmallPart = ImageInfo & { p: number; o: number; l: number };
+
+export type StoredImage = ImageInfo & { n: number; small?: SmallPart };
+
+/**
+ * Two answer pictures of one question whose proportions differ more than
+ * this get a warning: drawn alike, they differ only in what the question asks.
+ */
+const ASPECT_SPREAD = 1.5;
 
 /**
  * Pairs the quiz's Image: and Background: lines with the uploaded files by
@@ -22,14 +31,19 @@ export type StoredImage = ImageInfo & { n: number };
  * than once (by two questions, or as a picture and a background) is stored
  * once. With `leaveOutMissing` (the teacher chose to run without them), a
  * picture that didn't come is taken off the quiz with a warning.
- * Returns the index for the quiz record and the files to store as `img:<n>`.
+ * `smalls`: the answer pictures' small copies for the students' devices (v3
+ * item 1), by the same names; they go into packs of at most PACK_BYTES. An
+ * answer picture without one shows on the devices as its colour and shape.
+ * Returns the index for the quiz record and the files to store as `img:<n>`
+ * and `pack:<p>`.
  */
 export function matchImages(
   quiz: Quiz,
   images: UploadedImage[],
   leaveOutMissing: boolean,
+  smalls: UploadedImage[] = [],
 ):
-  | { ok: true; warnings: Problem[]; index: Record<string, StoredImage>; files: Record<string, Uint8Array> }
+  | { ok: true; warnings: Problem[]; index: Record<string, StoredImage>; files: Record<string, Uint8Array>; packs: number }
   | { ok: false; errors: Problem[]; missing: string[] } {
   const byKey = new Map(images.map((f) => [imageKey(f.name), f]));
   const errors: Problem[] = [];
@@ -66,7 +80,70 @@ export function matchImages(
   }
   if (n > MAX_IMAGES) errors.push({ message: `The quiz has ${n} pictures; it can have at most ${MAX_IMAGES}.` });
   if (errors.length > 0) return { ok: false, errors, missing };
-  return { ok: true, warnings, index, files };
+  const packs = packSmalls(quiz, index, smalls, files);
+  warnings.push(...proportions(quiz, index));
+  return { ok: true, warnings, index, files, packs };
+}
+
+/**
+ * The answer pictures' small copies, one after another in packs: a device
+ * fetches a pack once, and cuts the pictures out of it by offset. Returns
+ * how many packs there are.
+ */
+function packSmalls(quiz: Quiz, index: Record<string, StoredImage>, smalls: UploadedImage[], files: Record<string, Uint8Array>): number {
+  const byKey = new Map(smalls.map((f) => [imageKey(f.name), f]));
+  const parts: Uint8Array[][] = [];
+  let size = 0;
+  for (const ref of pictureRefs(quiz)) {
+    if (ref.kind !== "answer") continue;
+    const key = imageKey(ref.name);
+    const stored = index[key];
+    const file = byKey.get(key);
+    if (!stored || stored.small || !file || file.bytes.byteLength > MAX_SMALL_BYTES) continue;
+    const info = imageInfo(file.bytes);
+    if (!info) continue;
+    if (parts.length === 0 || size + file.bytes.byteLength > PACK_BYTES) {
+      parts.push([]);
+      size = 0;
+    }
+    stored.small = { ...info, p: parts.length - 1, o: size, l: file.bytes.byteLength };
+    parts[parts.length - 1].push(file.bytes);
+    size += file.bytes.byteLength;
+  }
+  parts.forEach((list, p) => {
+    const pack = new Uint8Array(list.reduce((s, b) => s + b.byteLength, 0));
+    let o = 0;
+    for (const b of list) {
+      pack.set(b, o);
+      o += b.byteLength;
+    }
+    files[`pack:${p}`] = pack;
+  });
+  return parts.length;
+}
+
+/**
+ * A question whose answer pictures have different proportions: the class
+ * can pick by the shape or the crop of a picture rather than by what it
+ * shows, e.g. the one cut from the sheet among three drawn ones.
+ */
+function proportions(quiz: Quiz, index: Record<string, StoredImage>): Problem[] {
+  const out: Problem[] = [];
+  quiz.questions.forEach((q, i) => {
+    const sizes = q.answers.map((a) => (a.image ? index[imageKey(a.image)] : undefined)).filter((x): x is StoredImage => !!x);
+    if (sizes.length < 2) return;
+    const aspects = sizes.map((s) => s.w / s.h);
+    const lo = Math.min(...aspects);
+    const hi = Math.max(...aspects);
+    if (hi / lo <= ASPECT_SPREAD) return;
+    const ratio = (a: number) => (a >= 1 ? `${a.toFixed(1).replace(/\.0$/, "")}:1` : `1:${(1 / a).toFixed(1).replace(/\.0$/, "")}`);
+    out.push({
+      message:
+        `Question ${i + 1}'s answer pictures have different proportions (from ${ratio(lo)} to ${ratio(hi)}). ` +
+        `The class may pick by a picture's shape or crop rather than by what it shows. Drawn alike, on canvases of the same size, they differ only in what the question asks about.`,
+    });
+  });
+  return out;
 }
 
 export interface ImageInfo {

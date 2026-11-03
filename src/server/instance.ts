@@ -14,6 +14,7 @@ import type {
   ClientMessage,
   Command,
   ImageRef,
+  PackPic,
   PlayerView,
   Presence,
   QuizInfo,
@@ -63,6 +64,13 @@ interface QuizRecord {
   images?: Record<string, StoredImage>;
   /** Part of every picture's address, so the instance id alone doesn't open them. */
   imageSecret?: string;
+  /** The answer pictures' small copies for the students' devices, stored as `pack:<p>` (v3 item 1). */
+  packs?: number;
+  /**
+   * Part of the packs' address. Not the imageSecret: the students' devices
+   * get this one, and it opens the packs only, not the questions' pictures.
+   */
+  packSecret?: string;
 }
 
 /** Small; written with every change. */
@@ -175,6 +183,8 @@ export class Instance extends DurableObject<Env> {
     images: UploadedImage[] = [],
     /** The teacher chose to run the quiz without the pictures that didn't come with it. */
     leaveOutMissing = false,
+    /** The answer pictures' small copies, for the students' devices. */
+    smalls: UploadedImage[] = [],
   ): Promise<
     | { ok: true; secret: string; code: string; token: string }
     | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string }
@@ -182,7 +192,7 @@ export class Instance extends DurableObject<Env> {
     if (this.meta) throw new Error("instance exists");
     const r = parseQuiz(text);
     if (!r.ok) return { ok: false, errors: r.errors, warnings: r.warnings };
-    const pictures = matchImages(r.quiz, images, leaveOutMissing);
+    const pictures = matchImages(r.quiz, images, leaveOutMissing, smalls);
     if (!pictures.ok) return { ok: false, errors: pictures.errors, warnings: r.warnings, missingImages: pictures.missing };
     const now = Date.now();
     const secret = randomToken();
@@ -192,7 +202,13 @@ export class Instance extends DurableObject<Env> {
     const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
     if (!(await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil))) return { ok: false, errors: [], warnings: [], error: SITE_FULL };
     const code = await this.claimCode(codeUntil);
-    this.quizRecord = { quiz: r.quiz, warnings: [...r.warnings, ...pictures.warnings], images: pictures.index, imageSecret: randomToken() };
+    this.quizRecord = {
+      quiz: r.quiz,
+      warnings: [...r.warnings, ...pictures.warnings],
+      images: pictures.index,
+      imageSecret: randomToken(),
+      ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
+    };
     this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, lastActivity: now, v: 1 };
     // The pasting tab is about to open the Projector with it.
     this.lastPoll.set(`screen:${token}`, now);
@@ -213,7 +229,8 @@ export class Instance extends DurableObject<Env> {
   /**
    * The upload with pictures, as multipart/form-data: "text", "leaveOut",
    * and per picture an "image" file with its "imageName" (a text field: a
-   * non-ASCII file name in a multipart header isn't decoded reliably).
+   * non-ASCII file name in a multipart header isn't decoded reliably); per
+   * answer picture also a "small" file with its "smallName".
    */
   private async createFromForm(req: Request): Promise<Response> {
     const fail = (message: string) => json({ ok: false, errors: [{ message }], warnings: [] } satisfies UploadResult);
@@ -235,8 +252,17 @@ export class Instance extends DurableObject<Env> {
     if (names.length !== files.length || files.some((f) => typeof f === "string") || names.some((n) => typeof n !== "string")) {
       return json({ error: "The upload couldn't be read." }, 400);
     }
-    const images = await Promise.all(files.map(async (f, i) => ({ name: names[i] as string, bytes: new Uint8Array(await (f as File).arrayBuffer()) })));
-    const r = await this.create(text, images, form.get("leaveOut") === "missing");
+    const smallFiles = form.getAll("small");
+    const smallNames = form.getAll("smallName");
+    if (smallFiles.length > MAX_IMAGES) return fail(`The quiz has more than ${MAX_IMAGES} pictures.`);
+    if (smallNames.length !== smallFiles.length || smallFiles.some((f) => typeof f === "string") || smallNames.some((n) => typeof n !== "string")) {
+      return json({ error: "The upload couldn't be read." }, 400);
+    }
+    const read = (list: unknown[], names: unknown[]) =>
+      Promise.all(list.map(async (f, i) => ({ name: names[i] as string, bytes: new Uint8Array(await (f as File).arrayBuffer()) })));
+    const images = await read(files, names);
+    const smalls = await read(smallFiles, smallNames);
+    const r = await this.create(text, images, form.get("leaveOut") === "missing", smalls);
     const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, token: r.token } : r;
     return json(body);
   }
@@ -245,9 +271,23 @@ export class Instance extends DurableObject<Env> {
     return this.env.BUDGET.get(this.env.BUDGET.idFromName("site"));
   }
 
-  /** GET …/img/<secret>/<n>: a picture, for a device that was sent a view naming it. */
+  /**
+   * GET …/img/<secret>/<n>: a picture, for a device that was sent a view
+   * naming it; …/img/<packSecret>/p<k>: a pack of answer pictures' small
+   * copies, for the students' devices.
+   */
   private async image(secret: string, n: string): Promise<Response> {
     const record = this.quizRecord;
+    const pack = n.match(/^p(\d{1,3})$/);
+    if (pack) {
+      const k = Number(pack[1]);
+      if (!record?.packSecret || secret !== record.packSecret || k >= (record.packs ?? 0)) return new Response("not found", { status: 404 });
+      const bytes = await this.ctx.storage.get<Uint8Array>(`pack:${k}`);
+      if (!bytes) return new Response("not found", { status: 404 });
+      return new Response(bytes, {
+        headers: { "content-type": "application/octet-stream", "cache-control": "no-store", "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; sandbox" },
+      });
+    }
     const info = record?.images && Object.values(record.images).find((i) => String(i.n) === n);
     if (!record?.imageSecret || secret !== record.imageSecret || !info) return new Response("not found", { status: 404 });
     const bytes = await this.ctx.storage.get<Uint8Array>(`img:${info.n}`);
@@ -269,6 +309,34 @@ export class Instance extends DurableObject<Env> {
     const info = name ? record?.images?.[imageKey(name)] : undefined;
     if (!info || !record?.imageSecret) return null;
     return { src: `/api/i/${this.ctx.id.toString()}/img/${record.imageSecret}/${info.n}`, w: info.w, h: info.h };
+  }
+
+  /** The packs of answer pictures' small copies, for the students' devices; absent without picture answers. */
+  private packUrls(): string[] | undefined {
+    const record = this.quizRecord;
+    if (!record?.packs || !record.packSecret) return undefined;
+    return Array.from({ length: record.packs }, (_, k) => `/api/i/${this.ctx.id.toString()}/img/${record.packSecret}/p${k}`);
+  }
+
+  /** Question q's answer pictures in the order on screen, for the wall; absent when it has none. */
+  private answerPics(q: number): (ImageRef | null)[] | undefined {
+    const answers = this.game!.quiz.questions[q].answers;
+    if (!answers.some((a) => a.image !== undefined)) return undefined;
+    return this.onScreen(q, answers.map((a) => (a.image ? this.imageRef(a.image) : null)));
+  }
+
+  /** The same on a student's device: where each small copy sits in the packs. */
+  private answerSmalls(q: number): (PackPic | null)[] | undefined {
+    const record = this.quizRecord;
+    const answers = this.game!.quiz.questions[q].answers;
+    if (!answers.some((a) => a.image !== undefined)) return undefined;
+    return this.onScreen(
+      q,
+      answers.map((a) => {
+        const s = a.image ? record?.images?.[imageKey(a.image)]?.small : undefined;
+        return s ? { p: s.p, o: s.o, l: s.l, type: s.type, w: s.w, h: s.h } : null;
+      }),
+    );
   }
 
   /** For the code directory: does this code still open this quiz? */
@@ -1203,11 +1271,12 @@ export class Instance extends DurableObject<Env> {
     const showQ = q && (phase === "question" || phase === "reveal");
     const shownImage = (i: number) => (game.fixes[i].hidePicture ? "" : game.quiz.questions[i].image);
     const pictures = new Set<string>();
-    for (const name of [game.quiz.background, ...game.quiz.questions.flatMap((x, i) => (game.fixes[i].skip ? [] : [shownImage(i), x.background]))]) {
+    for (const name of [game.quiz.background, ...game.quiz.questions.flatMap((x, i) => (game.fixes[i].skip ? [] : [shownImage(i), x.background, ...x.answers.map((a) => a.image ?? "")]))]) {
       const ref = this.imageRef(name);
       if (ref) pictures.add(ref.src);
     }
     const image = showQ ? this.imageRef(shownImage(run!.current)) : null;
+    const pics = showQ ? this.answerPics(run!.current) : undefined;
     // Who answered, and of how many: the devices that are there, or that
     // answered and went away since. A dead tablet stops holding the count
     // below full once it is away (v2 item 7).
@@ -1235,6 +1304,7 @@ export class Instance extends DurableObject<Env> {
             total: prog.total,
             text: q!.text,
             answers: this.onScreen(run!.current, q!.answers.map((a) => a.text)),
+            ...(pics ? { pics } : {}),
             image,
             background: this.imageRef(q!.background || game.quiz.background),
             // After the reveal the answers are open as far as the wall goes.
@@ -1280,7 +1350,10 @@ export class Instance extends DurableObject<Env> {
           image: this.imageRef(q.image),
           pictureHidden: !!fix.hidePicture,
           background: this.imageRef(q.background || game.quiz.background),
-          answers: this.onScreen(i, q.answers.map((a, j) => ({ text: a.text, counts: fix.counts[j], marked: a.correct }))),
+          answers: this.onScreen(
+            i,
+            q.answers.map((a, j) => ({ text: a.text, counts: fix.counts[j], marked: a.correct, ...(a.image !== undefined ? { image: a.image ? this.imageRef(a.image) : null } : {}) })),
+          ),
           void: fix.void,
           skip: fix.skip,
           status,
@@ -1328,6 +1401,8 @@ export class Instance extends DurableObject<Env> {
     const speed = !!run && run.current >= 0 && G.playedAt(game, run.current) === "speed";
     const ans = G.answering(game) ?? "open";
     const votes = G.votesShown(game);
+    const packs = this.packUrls();
+    const smalls = run && run.current >= 0 && ans !== "reading" ? this.answerSmalls(run.current) : undefined;
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
       const phase = run ? run.phase : "idle";
@@ -1342,6 +1417,7 @@ export class Instance extends DurableObject<Env> {
         current: run ? run.current : -1,
         removed: !p || p.removed,
         me: p && s ? { avatar: p.avatar, score: s.score, place: s.place, of: st.length } : p ? { avatar: p.avatar, score: 0, place: 0, of: st.length } : null,
+        ...(packs ? { packs } : {}),
         question:
           q && (phase === "question" || phase === "reveal")
             ? {
@@ -1350,6 +1426,7 @@ export class Instance extends DurableObject<Env> {
                 total: prog.total,
                 // Not while the class reads the question: the tablet points at the board instead.
                 answers: ans === "reading" ? [] : this.onScreen(run!.current, q.answers.map((a) => a.text)),
+                ...(smalls ? { pics: smalls } : {}),
                 mine,
                 answering: ans,
                 clock,

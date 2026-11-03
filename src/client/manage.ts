@@ -69,8 +69,17 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
   const rows = q.answers
     .map((a, j) => {
       const tap = fixing ? ` fixable" data-act="toggle-count" data-q="${i}" data-i="${j}` : "";
+      // A picture answer (v3 item 1) shows its picture: the text says nothing
+      // about it, so this is where the teacher checks the key. While fixing,
+      // a tap on the row toggles the answer, so the picture isn't a button then.
+      const body =
+        a.image !== undefined
+          ? a.image
+            ? `<span class="t pic">${fixing ? picImg(a.image.src, a.image.w, a.image.h) : thumb(a.image, "ansthumb")}</span>`
+            : `<span class="t muted">(picture left out)</span>`
+          : `<span class="t">${lines(a.text)}</span>`;
       return `<div class="ans a${j}${a.counts ? " right" : ""}${tap}">
-        <span class="key">${a.counts ? ICON.check : ""}</span>${shapeSvg(j)}<span class="t">${lines(a.text)}</span>
+        <span class="key">${a.counts ? ICON.check : ""}</span>${shapeSvg(j)}${body}
         ${dist ? `<span class="cnt">${live(`d${i}-${j}`, dist[j])}</span>` : ""}
       </div>`;
     })

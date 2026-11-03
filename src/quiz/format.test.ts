@@ -485,3 +485,94 @@ test("tempo: a clause that denies doesn't count", () => {
   assert.equal(tempo("off"), undefined);
   assert.equal(tempo("teacher's pace (no clock)"), undefined);
 });
+
+// ---------------------------------------------------------------------------
+// Pictures as answers (v3 item 1)
+
+test("picture answers: + Image: b.png, mixed with text, with the dress AIs add", () => {
+  const r = parseQuiz(`Title: Brüche
+1. Welches Bild zeigt drei Viertel?
+Image: frage.png
++ Image: pie-a.png
+- **Image:** pie-b.png
+- ![zwei Viertel](pie-c.png)
+- Keines davon
+
+2. Which one?
+- A) Image: x.png
++ B) Image: y.png (the one with the hat)
+`);
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(r.warnings, []);
+  const [q1, q2] = r.quiz.questions;
+  assert.equal(q1.image, "frage.png");
+  assert.deepEqual(
+    q1.answers.map((a) => [a.text, a.image, a.correct]),
+    [["", "pie-a.png", true], ["", "pie-b.png", false], ["", "pie-c.png", false], ["Keines davon", undefined, false]],
+  );
+  assert.deepEqual(q2.answers.map((a) => a.image), ["x.png", "y.png"]);
+  const refs = pictureRefs(r.quiz);
+  assert.deepEqual(
+    refs.map((x) => [x.kind, x.name, x.question, x.answer]),
+    [["image", "frage.png", 0, undefined], ["answer", "pie-a.png", 0, 0], ["answer", "pie-b.png", 0, 1], ["answer", "pie-c.png", 0, 2], ["answer", "x.png", 1, 0], ["answer", "y.png", 1, 1]],
+  );
+});
+
+test("picture answers: no file, the web, the same picture twice, a bare file name", () => {
+  const r = parseQuiz(`Title: T
+1. Q?
++ Image: a.png
+- Image: A.PNG
+- Image: a drawing of a cat
+- Image: https://example.org/c.png
+
+2. Which file is a picture?
++ cat.jpg
+- notes.txt
+`);
+  assert.equal(r.ok, false);
+  assert.equal(r.errors.length, 2);
+  assert.match(r.errors[0].message, /Question 1 .*names no picture file/);
+  assert.match(r.errors[1].message, /points to the web/);
+  assert.equal(r.warnings.length, 2);
+  assert.match(r.warnings[0].message, /"a\.png" as two answers/i);
+  assert.match(r.warnings[1].message, /Question 2 .*"cat\.jpg" is shown as text.*\+ Image: cat\.jpg/);
+});
+
+test("picture answers written as Image: lines without marks get a message that shows the answer form", () => {
+  const r = parseQuiz(`Title: T
+1. Which pie shows 3/4?
+Image: a.png
+Image: b.png
++ 3/4
+- 1/4
+`);
+  assert.equal(r.ok, false);
+  assert.match(r.errors[0].message, /more than one picture.*"\+ Image: b\.png", "- Image: c\.png"/);
+});
+
+test("a picture answer left out shows its colour and shape alone", async () => {
+  const { dropPicture } = await import("./format.ts");
+  const r = parseQuiz(`Title: T
+1. Q?
++ Image: a.png
+- Image: b.png
+`);
+  const ref = pictureRefs(r.quiz).find((x) => x.name === "b.png")!;
+  assert.match(ref.leftOut, /Question 1 runs without its answer picture "b\.png": that answer shows only its colour and shape/);
+  dropPicture(r.quiz, ref);
+  assert.deepEqual(r.quiz.questions[0].answers.map((a) => [a.text, a.image]), [["", "a.png"], ["", ""]]);
+});
+
+test("the picture-answer example on the guidance page parses without errors or warnings", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const blocks = [...html.matchAll(/<pre><code>([\s\S]*?)<\/code><\/pre>/g)].map((m) => m[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
+  const text = blocks.find((b) => b.includes("+ Image:"));
+  assert.ok(text, "example with picture answers found");
+  const r = parseQuiz(text);
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(r.warnings, []);
+  assert.deepEqual(r.quiz.questions.map((q) => q.answers.filter((a) => a.image).length), [4, 3]);
+  assert.equal(r.quiz.questions[1].image, "l-shape.png");
+});

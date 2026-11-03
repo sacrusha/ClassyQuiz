@@ -5,7 +5,8 @@
 // moves the quiz on at any time; the quiz's code stays in a corner throughout.
 
 import qrcode from "qrcode-generator";
-import type { ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
+import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
+import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, syncCrowd, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
@@ -156,6 +157,7 @@ function renderFix(v: ScreenView): void {
   }
   const q = t.questions[i];
   patch(el.firstElementChild as HTMLElement, `<p class="fixq"><span class="num">${i + 1}</span> ${lines(q.text)}</p>${answersBlock(q, i, steer.ui)}`);
+  fillPictures(el);
 }
 
 function qrSvg(code: string): string {
@@ -297,7 +299,7 @@ function renderQuestion(v: ScreenView): void {
   // picture moves or flickers (decisions.md, "Projector tiles: the reveal
   // doesn't move the text"). The fit depends on the room the bar leaves and
   // on the window's size, so both are part of the key.
-  const key = JSON.stringify([q.q, q.text, q.answers, q.image, !!v.steer, innerWidth, innerHeight]);
+  const key = JSON.stringify([q.q, q.text, q.answers, q.pics, q.image, !!v.steer, innerWidth, innerHeight]);
   if (key !== questionKey || !main.querySelector("#stage")) {
     questionKey = key;
     barKey = "";
@@ -462,6 +464,10 @@ function questionSize(len: number, withPicture: boolean): number {
  * the picture between.
  */
 function layQuestion(stage: HTMLElement, q: NonNullable<ScreenView["question"]>): void {
+  if (q.pics) {
+    layPictureAnswers(stage, q, q.pics);
+    return;
+  }
   const n = q.answers.length;
   const longest = Math.max(...q.answers.map((a) => a.length));
   const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
@@ -518,6 +524,116 @@ function layQuestion(stage: HTMLElement, q: NonNullable<ScreenView["question"]>)
   }
   if (!beside && stage.classList.contains("beside")) between();
   fillPictures(stage);
+}
+
+/**
+ * Pictures as answers (v3 item 1). Each tile shows the picture on the
+ * answer's colour, which shows wherever the picture is transparent (the
+ * creator's choice: a white ground is drawn into the picture), its shape
+ * beside or above the picture, and the room for the votes' count and the
+ * tick reserved from the start, so the votes and the reveal move nothing. The tiles are arranged
+ * by the pictures' shape (client/answergrid.ts). A question's own picture
+ * goes above the tiles: beside the question's text when that leaves it
+ * larger, else between text and tiles; the room is shared so that the
+ * question's picture and the smallest answer picture come out about alike.
+ * A text answer among them ("none of these") takes a picture's place.
+ */
+function layPictureAnswers(stage: HTMLElement, q: NonNullable<ScreenView["question"]>, pics: (ImageRef | null)[]): void {
+  const aspects = pics.map((p) => (p ? p.w / p.h : null));
+  const longestText = Math.max(0, ...q.answers.map((a) => a.length));
+  const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
+  const tilesHtml = `<div class="tiles pics" id="tiles">${q.answers
+    .map((a, i) => {
+      const p = pics[i];
+      const card = p ? picImg(p.src, p.w, p.h) : a ? `<span class="txt">${lines(a)}</span>` : "";
+      return `<div class="tile pic a${i} row">${shapeSvg(i)}<div class="apic${p ? "" : " text"}">${card}</div><span class="side"></span></div>`;
+    })
+    .join("")}</div>`;
+  const W = stage.clientWidth;
+  const H = stage.clientHeight;
+  const gap = parseFloat(getComputedStyle(stage).rowGap) || 0;
+
+  // What a tile takes around its card, in either orientation: fixed by the tiles' font, not by their size.
+  stage.className = "stage picans";
+  stage.innerHTML = tilesHtml;
+  const tiles = $("#tiles");
+  const tileGap = parseFloat(getComputedStyle(tiles).rowGap) || 0;
+  const chromeOf = (orient: Orient): Chrome => {
+    const t = tiles.querySelector<HTMLElement>(".tile")!;
+    t.className = `tile pic a0 ${orient}`;
+    const c = t.querySelector<HTMLElement>(".apic")!;
+    return { w: t.offsetWidth - c.offsetWidth, h: t.offsetHeight - c.offsetHeight };
+  };
+  const chrome = { row: chromeOf("row"), col: chromeOf("col") };
+  const grid = (h: number) => chooseGrid(aspects, W, Math.max(0, h), tileGap, chrome);
+
+  const img = q.image;
+  let best: { html: string; tilesH: number; fit: () => void; score: number } | null = null;
+  if (!img) {
+    stage.innerHTML = qHtml;
+    fitText($("#qtext"), questionSize(q.text.length, true), H * 0.26);
+    const tilesH = H - $("#qtext").offsetHeight - gap;
+    best = { html: qHtml, tilesH, fit: () => fitText($("#qtext"), questionSize(q.text.length, true), H * 0.26), score: 0 };
+  } else {
+    const aspect = img.w / img.h;
+    const figure = (w: number, h: number) =>
+      `<div class="figure" id="figure" data-zoom style="width:${Math.floor(w)}px;height:${Math.floor(h)}px">${picImg(img.src, img.w, img.h)}</div>`;
+    // Between: the text, the picture at the full width, the tiles.
+    stage.innerHTML = qHtml;
+    fitText($("#qtext"), questionSize(q.text.length, true), H * 0.22);
+    const qh = $("#qtext").offsetHeight;
+    for (const share of [0.22, 0.3, 0.38, 0.46]) {
+      const fh = Math.min(W / aspect, H * share);
+      const tilesH = H - qh - fh - 2 * gap;
+      const score = Math.min(fh * fh * aspect, grid(tilesH).score);
+      if (!best || score > best.score)
+        best = { html: qHtml + figure(fh * aspect, fh), tilesH, fit: () => fitText($("#qtext"), questionSize(q.text.length, true), H * 0.22), score };
+    }
+    // Beside: the picture and the text in one band above the tiles, while the text stays readable.
+    for (const share of [0.3, 0.38, 0.46]) {
+      const bh = H * share;
+      const fw = Math.min(bh * aspect, W * 0.55);
+      const fh = fw / aspect;
+      const tilesH = H - bh - gap;
+      const score = Math.min(fh * fh * aspect, grid(tilesH).score);
+      if (best && score <= best.score) continue;
+      const html = `<div class="qband" style="height:${Math.floor(bh)}px">${figure(fw, fh)}${qHtml}</div>`;
+      stage.innerHTML = html;
+      const fit = () => fitText($("#qtext"), questionSize(q.text.length, true), bh);
+      if (fit() < 1.5 && q.text.length > 40) continue;
+      best = { html, tilesH, fit, score };
+    }
+  }
+  const b = best!;
+  const g = grid(b.tilesH);
+  stage.innerHTML = b.html + tilesHtml;
+  b.fit();
+  const box = $("#tiles");
+  box.style.gridTemplateColumns = `repeat(${g.cols}, minmax(0, 1fr))`;
+  box.style.gridTemplateRows = `repeat(${g.rows}, minmax(0, 1fr))`;
+  box.style.height = `${Math.floor(b.tilesH)}px`;
+  box.querySelectorAll<HTMLElement>(".tile").forEach((t) => {
+    t.classList.remove("row", "col");
+    t.classList.add(g.orient);
+  });
+  box.dataset.grid = `${g.cols}x${g.rows} ${g.orient}`;
+  fitCardTexts(box, longestText <= 12 ? 2.2 : longestText <= 30 ? 1.7 : 1.3);
+  fillPictures(stage);
+}
+
+/** A text answer among picture answers: the largest font, from `start` down, that fits its card. */
+function fitCardTexts(box: HTMLElement, start: number): void {
+  const texts = [...box.querySelectorAll<HTMLElement>(".apic.text .txt")];
+  if (texts.length === 0) return;
+  let size = start;
+  const set = () => texts.forEach((t) => (t.style.fontSize = `${size}em`));
+  // A word wider than its card, or lines taller than it.
+  const overflows = () => texts.some((t) => t.scrollWidth > t.clientWidth + 1 || t.parentElement!.scrollHeight > t.parentElement!.clientHeight + 1);
+  set();
+  while (overflows() && size > 0.6) {
+    size -= 0.1;
+    set();
+  }
 }
 
 /** Largest font, from `start` down, at which no answer word is cut and no answer overflows its tile. */

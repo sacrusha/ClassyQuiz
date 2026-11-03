@@ -453,3 +453,46 @@ button.link.tempo-line { color: var(--muted); }
 .tempo-sheet .seconds > span { font-weight: 600; flex-basis: 100%; }
 .tempo-sheet .seconds .btn { min-height: 44px; padding: .3em .9em; }
 .tempo-sheet .seconds .btn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* Pictures as answers (v3 item 1; client/screen.ts, layPictureAnswers). The
+   picture sits on the tile's colour: where it is transparent the colour
+   shows, and a creator who wants a white ground draws one in (the owner's
+   call). Its shape and the room for the votes' count and tick sit beside the
+   picture ("row") or above it ("col"), reserved from the start so the votes
+   and the reveal move nothing. The script sets the grid and the tiles'
+   height from the pictures' shape. */
+.stage.picans .qtext { min-height: 0; flex: none; }
+.qband { flex: none; display: flex; align-items: center; gap: 2.5vw; min-height: 0; }
+.stage.picans .qband .qtext { flex: 1 1 0; min-width: 0; height: 100%; }
+.tiles.pics { flex: none; font-size: 1.25em; }
+.tile.pic { display: grid; gap: .3em; padding: .3em .3em calc(1.6vh + .35em); align-items: center; border-radius: 16px; }
+.tile.pic.row { grid-template-columns: 1.6em minmax(0, 1fr) 3.4em; grid-template-rows: minmax(0, 1fr); grid-template-areas: "badge card side"; }
+.tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 3.4em; grid-template-rows: 1.6em minmax(0, 1fr); grid-template-areas: "badge . side" "card card card"; }
+.tile.pic .shape { grid-area: badge; }
+.tile.pic .side { grid-area: side; width: auto; height: 100%; }
+.tile.pic .apic { grid-area: card; align-self: stretch; min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.tile.pic .apic img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.tile.pic .apic.text { padding: 0 .4em; text-align: center; }
+.tile.pic .apic .txt { flex: 0 1 auto; min-width: 0; max-width: 100%; line-height: 1.15; }
+.tiles.pics.veiled .apic > * { visibility: hidden; }
+
+/* The same on a student's device (client/play.ts): the picture on the
+   button's colour, the shape beside or above it. */
+/* The room is what the page leaves, whatever the pictures measure: script sets it in px. */
+.play .buttons.pics { grid-auto-rows: unset; flex: 1 1 0; min-height: 0; }
+.ansbtn.pic { display: grid; gap: 6px; padding: 8px; min-height: 0; }
+.ansbtn.pic.row { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.ansbtn.pic.col { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); justify-items: start; }
+.ansbtn.pic .shape { width: clamp(28px, 6vmin, 56px); height: clamp(28px, 6vmin, 56px); align-self: center; }
+.ansbtn.pic .apic { justify-self: stretch; align-self: stretch; min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ansbtn.pic .apic img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.ansbtn.pic .apic.text { padding: 4px 8px; }
+.verdict-pic { width: min(44vw, 30vh); height: min(30vw, 22vh); background: var(--ans); padding: 6px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.verdict-pic img { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* A picture answer in the teacher's lists: its picture is the answer, on its
+   tile's colour as the class will see it. */
+.ans .t.pic { display: block; }
+.ans .t.pic img { display: block; height: 64px; width: auto; max-width: 100%; object-fit: contain; background: var(--ans); border-radius: 6px; border: 1px solid var(--rule); padding: 3px; }
+.ans .thumb.ansthumb { background: var(--ans); }
+.ans .thumb.ansthumb img { border: 0; border-radius: 0; }
+.ans.right .t.pic img, .ans.right .thumb { outline: 3px solid var(--good); outline-offset: 1px; }

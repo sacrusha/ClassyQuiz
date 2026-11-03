@@ -9,7 +9,7 @@
 //                    takes the Projector at once (the lobby's "Open the
 //                    projector window").
 
-import type { Auth, Avatar, ChoiceState, PlayerView, ServerMessage } from "../shared/protocol.ts";
+import type { Auth, Avatar, ChoiceState, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
 import { $, esc, findQuiz, keepAwake, lines, rolePage, saveQuiz, siteAddress, statusDot, store, tabRole } from "./dom.ts";
@@ -17,6 +17,8 @@ import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look
 import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
+import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
+import { packPicture, picturesHere, wantPacks } from "./packs.ts";
 
 interface Saved {
   instance: string;
@@ -205,7 +207,10 @@ function onMessage(m: ServerMessage): void {
     const k = viewKey(m.view);
     view = m.view;
     const q = view.question;
-    if (q && q.answering !== "reading" && q.sinceMs !== null && shown?.q !== q.q) shown = { q: q.q, at: performance.now() - q.sinceMs };
+    // Answer pictures: fetched as soon as a view names them, in the lobby.
+    wantPacks(view.packs, packsArrived);
+    // A picture answer's time for speed runs from when its pictures are here.
+    if (q && q.answering !== "reading" && q.sinceMs !== null && shown?.q !== q.q && picturesHere(q.pics)) shown = { q: q.q, at: performance.now() - q.sinceMs };
     if (k === lastKey) return;
     lastKey = k;
     render();
@@ -369,6 +374,68 @@ function claim(id: string): void {
 // ---------------------------------------------------------------------------
 // The student's device
 
+/**
+ * A pack of answer pictures arrived: the pictures on screen get their
+ * source in place (no redraw, which could swallow a tap), and the time for
+ * speed starts now if the question was waiting for them.
+ */
+function packsArrived(): void {
+  main.querySelectorAll<HTMLImageElement>("img[data-pack]").forEach((img) => {
+    if (img.getAttribute("src")) return;
+    const [p, o, l, type] = img.dataset.pack!.split(",");
+    const url = packPicture({ p: Number(p), o: Number(o), l: Number(l), type, w: 0, h: 0 });
+    if (url) img.src = url;
+  });
+  const q = view?.question;
+  if (q && q.answering !== "reading" && q.sinceMs !== null && shown?.q !== q.q && picturesHere(q.pics)) shown = { q: q.q, at: performance.now() };
+}
+
+/** An answer picture's <img>, with its source once its pack is here. */
+function packImg(p: PackPic): string {
+  const url = packPicture(p);
+  return `<img data-pack="${p.p},${p.o},${p.l},${esc(p.type)}"${url ? ` src="${url}"` : ""} alt="">`;
+}
+
+/**
+ * Picture answers' buttons arranged by the pictures' shape (client/answergrid.ts),
+ * in the room the buttons have; the room is fixed in px so a picture
+ * arriving doesn't push the buttons around.
+ */
+function arrangePictureButtons(box: HTMLElement, pics: (PackPic | null)[]): void {
+  const W = box.clientWidth;
+  const H = box.clientHeight;
+  box.style.height = `${H}px`;
+  const gap = parseFloat(getComputedStyle(box).rowGap) || 0;
+  const first = box.querySelector<HTMLElement>(".ansbtn")!;
+  const cls = first.className;
+  const chromeOf = (orient: Orient): Chrome => {
+    first.classList.remove("row", "col");
+    first.classList.add(orient);
+    first.style.width = "300px";
+    first.style.height = "300px";
+    const c = first.querySelector<HTMLElement>(".apic")!;
+    const r = { w: first.offsetWidth - c.offsetWidth, h: first.offsetHeight - c.offsetHeight };
+    first.style.width = first.style.height = "";
+    return r;
+  };
+  const chrome = { row: chromeOf("row"), col: chromeOf("col") };
+  first.className = cls;
+  const g = chooseGrid(pics.map((p) => (p ? p.w / p.h : null)), W, H, gap, chrome);
+  box.style.gridTemplateColumns = `repeat(${g.cols}, minmax(0, 1fr))`;
+  box.style.gridTemplateRows = `repeat(${g.rows}, minmax(0, 1fr))`;
+  box.dataset.grid = `${g.cols}x${g.rows} ${g.orient}`;
+  box.querySelectorAll<HTMLElement>(".ansbtn").forEach((b) => {
+    b.classList.remove("row", "col");
+    b.classList.add(g.orient);
+  });
+}
+
+/** The answer this device chose, as its picture, under the verdict. */
+function chosenPicture(i: number): string {
+  const p = view?.question?.pics?.[i];
+  return p ? `<div class="row" style="justify-content:center"><div class="verdict-pic a${i}">${packImg(p)}</div></div>` : "";
+}
+
 function render(): void {
   const v = view;
   if (!v) return;
@@ -411,11 +478,18 @@ function render(): void {
     const out = q.answering === "closed" || (end !== null && end <= performance.now());
     const pending = waiting && waiting.q === q.q ? waiting.choice : null;
     const mine = out && pending !== null ? pending : q.mine;
-    main.innerHTML = `${top}${q.clock && end !== null ? clockBar(q.clock.ms, end) : ""}<div class="buttons n${n}${mine !== null ? " chosen" : ""}${out ? " closed" : ""}">
+    const pics = q.pics;
+    main.innerHTML = `${top}${q.clock && end !== null ? clockBar(q.clock.ms, end) : ""}<div class="buttons n${n}${pics ? " pics" : ""}${mine !== null ? " chosen" : ""}${out ? " closed" : ""}">
       ${q.answers
-        .map((a, i) => `<button class="ansbtn a${i}${mine === i ? " mine" : ""}" data-i="${i}">${shapeSvg(i)}<span>${lines(a)}</span></button>`)
+        .map((a, i) => {
+          const sel = mine === i ? " mine" : "";
+          if (!pics) return `<button class="ansbtn a${i}${sel}" data-i="${i}">${shapeSvg(i)}<span>${lines(a)}</span></button>`;
+          const p = pics[i];
+          return `<button class="ansbtn pic col a${i}${sel}" data-i="${i}">${shapeSvg(i)}<span class="apic${p ? "" : " text"}">${p ? packImg(p) : `<span>${lines(a)}</span>`}</span></button>`;
+        })
         .join("")}
     </div>`;
+    if (pics) arrangePictureButtons(main.querySelector<HTMLElement>(".buttons")!, pics);
     if (out) {
       // The votes on the wall: look up. Otherwise the countdown ran out.
       main.querySelector(".top")?.insertAdjacentHTML("beforeend", q.votes ? `<span class="timeup look">${ICON.eye}</span>` : `<span class="timeup">${ICON.timer}</span>`);
@@ -464,14 +538,14 @@ function render(): void {
   if (v.phase === "reveal" && v.reveal && waiting && waiting.q === v.question?.q) {
     // Tapped before the reveal but not yet delivered: it will count.
     main.innerHTML = `${top}<div class="center"><div class="verdict none"><span class="dot" data-status="offline" style="width:30%;height:30%"></span></div>
-      <div class="row verdict-shape" style="justify-content:center"><span class="a${waiting.choice}" style="color:var(--ans)">${shapeSvg(waiting.choice)}</span></div></div>`;
+      <div class="row verdict-shape" style="justify-content:center"><span class="a${waiting.choice}" style="color:var(--ans)">${shapeSvg(waiting.choice)}</span></div>${chosenPicture(waiting.choice)}</div>`;
     return;
   }
   if (v.phase === "reveal" && v.reveal) {
     const r = v.reveal;
     const cls = r.void ? "void" : r.mine === null ? "none" : r.counts[r.mine] ? "right" : "wrong";
     const icon = r.void ? ICON.void : r.mine === null ? "–" : r.counts[r.mine] ? ICON.check : ICON.cross;
-    const mine = r.mine !== null ? `<div class="row verdict-shape" style="justify-content:center"><span class="a${r.mine}" style="color:var(--ans)">${shapeSvg(r.mine)}</span></div>` : "";
+    const mine = r.mine !== null ? `<div class="row verdict-shape" style="justify-content:center"><span class="a${r.mine}" style="color:var(--ans)">${shapeSvg(r.mine)}</span></div>${chosenPicture(r.mine)}` : "";
     // Points for speed: what this answer brought, the quicker the more.
     const gained = r.points ? `<div class="big gained">+${r.points}</div>` : "";
     main.innerHTML = `${top}<div class="center"><div class="verdict ${cls}">${icon}</div>${gained}${mine}</div>`;
