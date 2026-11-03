@@ -1,5 +1,5 @@
 // The root page's top (docs/user-flow.md §3.1): the code box for students in
-// the header, Build a quiz, and Run a quiz: open or drop the .zip the AI
+// the header, Build a quiz, and Run a quiz: upload or drop the .zip the AI
 // made, and the quizzes this device opened that are still open. The guidance
 // for AIs below reads without this script.
 //
@@ -9,7 +9,7 @@
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES } from "../shared/protocol.ts";
 import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
-import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, tabRole, type SavedQuiz } from "./dom.ts";
+import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, store, tabRole, type SavedQuiz } from "./dom.ts";
 import { prepareImages, uploadQuiz } from "./images.ts";
 import { api } from "./net.ts";
 import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
@@ -74,7 +74,7 @@ function countAttempt(format: UploadFormat): void {
 }
 
 /** What the box takes, said when something else arrives. */
-const ZIP_ONLY = `<p>Ask your AI for the quiz as one .zip file, download it, and open it here.</p>`;
+const ZIP_ONLY = `<p>Your AI can make the quiz as one .zip file, to download from the chat and upload here.</p>`;
 
 $("#open").addEventListener("click", () => file.click());
 file.addEventListener("change", () => {
@@ -175,7 +175,7 @@ function showProblems(errors: Problem[], pictures: boolean, without: () => void)
   out.innerHTML = `<div class="problem">
     <p class="err">${pictures ? "Some pictures can't go up with the quiz:" : "The site can't run this quiz yet:"}</p>
     <ul>${errors.map((e) => `<li>${esc(e.message)}</li>`).join("")}</ul>
-    <p>Your AI can fix this. Copy the message, paste it into the chat, then open the new .zip here.</p>
+    <p>Your AI can fix this. Copy the message into the chat, and upload the .zip it sends back.</p>
     <p><button class="primary" id="copymsg" type="button">Copy the message for your AI</button>
     ${pictures ? `<button id="without" type="button">Continue without these pictures</button>` : ""}</p>
   </div>`;
@@ -202,17 +202,47 @@ function closes(t: number): string {
   return sameDay ? time : `${d.toLocaleDateString([], { weekday: "short" })} ${time}`;
 }
 
+/** One quiz as the teacher sees it: the newest upload of a title, and every upload of it this device holds. */
+interface Entry {
+  newest: SavedQuiz;
+  info: QuizInfo;
+  /** All of this device's uploads with this title, the newest included: Delete ends them all. */
+  copies: SavedQuiz[];
+}
+
+/** How many saved quizzes are asked about per visit; each is a request against the site's daily allowance. */
+const ASK_AT_MOST = 6;
+
+let entries: Entry[] = [];
+let moreOpen = false;
+
 /**
- * One line per open quiz: Resume, when it closes, and Delete… apart at the
- * end, asking inline. The latest shows; the rest fold under "n more" (item
- * 16: the list overspent the page's attention; one open quiz is the usual
- * case, and a teacher with several already knows the page).
+ * One line per quiz: Resume, when it closes, and Delete… apart at the end,
+ * asking inline. The latest shows; the rest fold under "n more" (item 16:
+ * one open quiz is the usual case, and a teacher with several already knows
+ * the page).
+ *
+ * A title opened again is one quiz, not two (item 16, third look: the count
+ * only ever grew). A corrected quiz from the AI keeps its title, so a test
+ * round or a key fixed before the lesson left a line per upload. The newest
+ * upload of a title stands for it; the older ones stay on the site until they
+ * close by themselves, out of the list, and Delete ends them with it. Titles
+ * are learnt from the site and kept on the device, so older uploads of a
+ * known title aren't asked about at all. An untitled quiz is its own entry.
  */
 async function showMine(): Promise<void> {
-  const list = savedQuizzes().slice(0, 5);
+  const saved = savedQuizzes().sort((a, b) => b.at - a.at);
+  const seen = new Set<string>();
+  const ask: SavedQuiz[] = [];
+  for (const q of saved) {
+    if (ask.length >= ASK_AT_MOST) break;
+    if (q.title && seen.has(q.title)) continue;
+    if (q.title) seen.add(q.title);
+    ask.push(q);
+  }
   const open: { q: SavedQuiz; info: QuizInfo }[] = [];
   await Promise.all(
-    list.map(async (q) => {
+    ask.map(async (q) => {
       try {
         const r = await api<QuizInfo>(`/api/i/${q.id}/info`, { secret: q.secret });
         if (r.status === 404) forgetQuiz(q.id);
@@ -222,36 +252,79 @@ async function showMine(): Promise<void> {
       }
     }),
   );
+  const titles = new Map(open.filter((o) => o.info.title && o.info.title !== o.q.title).map((o) => [o.q.id, o.info.title]));
+  if (titles.size) store.set("cq.quizzes", savedQuizzes().map((q) => (titles.has(q.id) ? { ...q, title: titles.get(q.id)! } : q)));
+
   open.sort((a, b) => b.q.at - a.q.at);
-  const row = ({ q, info }: { q: SavedQuiz; info: QuizInfo }) => `<div class="resume" data-id="${esc(q.id)}">
-      <a class="go" href="/teacher#${esc(info.code)}">Resume ${esc(info.title || "the quiz")} &#9654;</a>
-      <span class="t">closes ${esc(closes(info.closes))}</span>
+  const byKey = new Map<string, Entry>();
+  for (const { q, info } of open) {
+    const key = info.title ? `t:${info.title}` : `i:${q.id}`;
+    const e = byKey.get(key);
+    if (e) e.copies.push(q);
+    else byKey.set(key, { newest: q, info, copies: [q] });
+  }
+  // Uploads not asked about because a newer one has their title.
+  for (const q of saved) {
+    const e = q.title ? byKey.get(`t:${q.title}`) : undefined;
+    if (e && !e.copies.some((c) => c.id === q.id)) e.copies.push(q);
+  }
+  entries = [...byKey.values()];
+  render();
+}
+
+function render(): void {
+  if (!entries.length) {
+    mine.innerHTML = "";
+    return;
+  }
+  const row = (e: Entry, i: number) => `<div class="row" data-i="${i}"${i > 0 && !moreOpen ? " hidden" : ""}>
+      <a class="go" href="/teacher#${esc(e.info.code)}">Resume ${esc(e.info.title || "the quiz")} &#9654;</a>
+      <span class="t">closes ${esc(closes(e.info.closes))}</span>
       <button class="del" type="button" data-del>Delete…</button>
     </div>`;
-  const [first, ...rest] = open;
-  mine.innerHTML = first ? row(first) + (rest.length ? `<details><summary>${rest.length} more ${rest.length === 1 ? "quiz" : "quizzes"}</summary>${rest.map(row).join("")}</details>` : "") : "";
-  mine.querySelectorAll<HTMLElement>("[data-del]").forEach((b) =>
-    b.addEventListener("click", () => {
-      const box = b.closest<HTMLElement>(".resume")!;
-      const q = open.find((o) => o.q.id === box.dataset.id)!;
-      if (box.querySelector(".confirm")) return;
-      box.insertAdjacentHTML(
-        "beforeend",
-        `<div class="confirm">Delete <strong>${esc(q.info.title || "this quiz")}</strong>? The class can't join it any more.
-          <button class="del" data-yes type="button">Delete</button> <button class="del" data-no type="button">Keep</button></div>`,
-      );
-      box.querySelector("[data-no]")!.addEventListener("click", () => box.querySelector(".confirm")?.remove());
-      box.querySelector("[data-yes]")!.addEventListener("click", async () => {
-        try {
-          await api(`/api/i/${q.q.id}/end`, { secret: q.q.secret });
-        } catch {
-          return;
-        }
-        forgetQuiz(q.q.id);
-        box.remove();
-      });
-    }),
+  const n = entries.length - 1;
+  const more = n
+    ? `<button class="more" type="button" aria-expanded="${moreOpen}">${moreOpen ? "&#9662;" : "&#9656;"} ${n} more ${n === 1 ? "quiz" : "quizzes"}</button>`
+    : "";
+  mine.innerHTML = `<div class="mine">${row(entries[0], 0)}${more}${entries.slice(1).map((e, i) => row(e, i + 1)).join("")}</div>`;
+  mine.querySelector(".more")?.addEventListener("click", () => {
+    moreOpen = !moreOpen;
+    render();
+  });
+  mine.querySelectorAll<HTMLElement>("[data-del]").forEach((b) => b.addEventListener("click", () => askDelete(b.closest<HTMLElement>(".row")!)));
+}
+
+function askDelete(box: HTMLElement): void {
+  if (box.querySelector(".confirm")) return;
+  const e = entries[Number(box.dataset.i)];
+  box.insertAdjacentHTML(
+    "beforeend",
+    `<div class="confirm">Delete <strong>${esc(e.info.title || "this quiz")}</strong>? The class can't join it any more.
+      <button class="del" data-yes type="button">Delete</button> <button class="del" data-no type="button">Keep</button></div>`,
   );
+  const confirm = box.querySelector<HTMLElement>(".confirm")!;
+  confirm.querySelector("[data-no]")!.addEventListener("click", () => confirm.remove());
+  confirm.querySelector("[data-yes]")!.addEventListener("click", async () => {
+    const done = await Promise.all(
+      e.copies.map(async (q) => {
+        try {
+          await api(`/api/i/${q.id}/end`, { secret: q.secret });
+          forgetQuiz(q.id);
+          return true;
+        } catch {
+          return false;
+        }
+      }),
+    );
+    if (done.some((ok) => !ok)) {
+      confirm.querySelector(".err")?.remove();
+      confirm.insertAdjacentHTML("beforeend", ` <span class="err">No connection to the site. Try again.</span>`);
+      return;
+    }
+    entries = entries.filter((x) => x !== e);
+    if (entries.length < 2) moreOpen = false;
+    render();
+  });
 }
 
 void showMine();

@@ -89,7 +89,8 @@ tablets, and a quiz made in the break.
 ### 3.1 Root page (item 16)
 
 Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
-(item 2); decisions.md, "The landing page by attention budget".
+(item 2); decisions.md, "The landing page by attention budget". Revised
+again for his third look; decisions.md, "The landing page, third look".
 
 ```
 ┌────────────────────────────────────────────────────────────┐
@@ -99,24 +100,25 @@ Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
 │  1  Use a good AI. Claude's free version works …           │
 │  2  Ask it, in your own words, to build you a quiz for     │
 │     classyquiz.pages.dev [Copy]                            │
-│       – Fastest: photos or PDFs, your quiz's language …    │
+│       – Fastest: photos or PDFs, your quiz's language,     │
+│         how many questions and what kind                   │
 │       – Or leave it open and steer turn by turn.           │
 │       – You can also ask it how the quizzes work …         │
-│  3  It hands you the quiz as a .zip file. Download it.     │
 │                                                            │
 │  Run a quiz                                                │
 │  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐  │
-│  │               [ Open the quiz's .zip ]               │  │
+│  │       [ Upload the quiz your AI made (.zip) ]        │  │
 │  │                    or drop it here                   │  │
 │  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  │
-│  Resume Prozente ▶   closes 16:20                Delete…   │  only on a device that
-│  › 1 more quiz                                             │  opened it, while open
+│  Resume Prozente ▶                  closes 16:20  Delete…  │  only on a device that
+│  ▸ 1 more quiz                                             │  opened it, while open
 │                                                            │
-│  Some school networks block live quizzes. Check this       │
-│  network: one click tells you it works, or what to ask IT. │
-│  This site is free, and shared by everyone who uses it: a  │
-│  few dozen classes a day in all. If that's too tight, your │
-│  AI can set up your own copy.                              │
+│  Some school networks block live quizzes. A quick check,   │
+│  run on the school's Wi-Fi, shows whether yours does and,  │
+│  if so, what to tell IT.                                   │
+│  This site is free and shared by everyone who uses it,     │
+│  with room for a few dozen classes a day. An AI can set up │
+│  a copy just for your classes, also free: how that works.  │
 ├────────────────────────────────────────────────────────────┤
 │  About classyQuiz (the guidance for AIs, static HTML)      │
 ```
@@ -126,8 +128,8 @@ Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
     chosen one.
   - Text pasted or dropped anyway gets "The site takes the quiz as a .zip
-    file, not as text. Ask your AI for the quiz as one .zip file, download
-    it, and open it here." It is counted as "paste".
+    file, not as text. Your AI can make the quiz as one .zip file, to
+    download from the chat and upload here." It is counted as "paste".
   - Any other file gets "The site takes the quiz as a .zip file, not a
     .docx file." and the same sentence. Attempts are counted by format.
 - **Problems with the quiz:** listed in place, with "Copy the message for your
@@ -136,6 +138,9 @@ Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
 - **On success:** straight to the lobby, in this tab as the Projector.
 - **Coming back (item 17):** the latest quiz this device opened that is still
   open, as one line under the box; any others fold under "n more quizzes".
+  A title uploaded again is one line, the newest upload; Delete… ends every
+  upload of it on this device. On a laptop the lines align as columns; on a
+  phone each is two lines.
   - Resume goes to `/teacher#<code>`.
   - "closes 16:20" is the only place the product mentions the closing time.
   - Delete… sits at the far end of the line and asks inline: "Delete
