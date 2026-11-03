@@ -205,7 +205,7 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .podium .entry.p1 .av { width: 19vh; height: 19vh; }
 .podium .place { font-size: 1.4em; }
 .classres { text-align: center; }
-.classres .pct { font-size: 6em; font-weight: 800; line-height: 1; }
+.classres .pct { font-size: min(6em, 17vw); font-weight: 800; line-height: 1; } /* within a phone-sized wall too: wider, the page zooms out and the steering bar leaves the screen */
 .classres .bars { display: flex; align-items: flex-end; gap: 4px; height: 16vh; justify-content: center; margin-top: 2vh; }
 .classres .bars span { width: 2.2vh; background: var(--good); border-radius: 4px 4px 0 0; min-height: 3px; }
 
@@ -234,6 +234,10 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .ansbtn:active { transform: scale(.97); }
 .buttons.chosen .ansbtn { opacity: .35; }
 .buttons.chosen .ansbtn.mine { opacity: 1; outline: 6px solid var(--fg); outline-offset: -6px; }
+/* A tap on its way: chosen, but not yet stored; solid once the server's view has it. */
+.buttons.chosen .ansbtn.mine.sending { outline-style: dashed; animation: sending 1s ease-in-out infinite; }
+@keyframes sending { 50% { outline-color: color-mix(in srgb, var(--fg) 35%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .buttons.chosen .ansbtn.mine.sending { animation: none; } }
 .verdict { width: 40vmin; height: 40vmin; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; }
 .verdict .icon { width: 60%; height: 60%; }
 .verdict.right { background: var(--good); }
@@ -397,7 +401,7 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); tex
 .err { color: var(--bad); font-weight: 600; }
 
 /* -------------------------------------------------------------------------
-   Remote (docs/user-flow.md §3.5): one card and one button */
+   Remote (docs/user-flow.md §3.5): one card and the steering bar */
 
 body.teach { padding-bottom: 96px; }
 .teach header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--rule); }
@@ -410,6 +414,11 @@ body.teach { padding-bottom: 96px; }
 .teach .actions .btn { flex: 1; }
 .teach .actions .btn.primary { flex: 2; }
 .teach .actions .btn.more { flex: 0 0 56px; padding: 0; font-size: 1.3rem; }
+/* The steering bar (client/steps.ts): Last call and Play keep their size and place whatever they say. */
+.teach .actions .btn.bar-last { flex: 0 0 34%; min-width: 0; min-height: 64px; padding: .3em .5em; gap: .35em; }
+.teach .actions .btn.bar-play { flex: 1 1 0; min-width: 0; min-height: 64px; padding: .3em .5em; gap: .35em; font-size: 1.15rem; }
+/* A narrow phone: a label takes two lines rather than being cut. */
+.teach .actions .btn.bar-last span, .teach .actions .btn.bar-play span { white-space: normal; line-height: 1.15; text-overflow: clip; }
 .joinbox { text-align: center; padding: 8px 0 4px; }
 .joinbox .addr { color: var(--muted); font-weight: 600; }
 .joinbox .codebig { font-size: 2.8rem; font-weight: 800; letter-spacing: .1em; line-height: 1.15; font-variant-numeric: tabular-nums; }
@@ -473,48 +482,47 @@ body.teach { padding-bottom: 96px; }
 .timeup.look { color: var(--accent); }
 .timeup-line { color: #d9480f; font-weight: 700; margin: .4em 0; }
 .clockslot { margin: 6px 0 10px; }
-/* The teacher's −5/+5 on the countdown: the Remote's card, and the wall's steering bar. */
-.nudge { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-.nudge .btn { min-height: 40px; padding: .2em .7em; font-variant-numeric: tabular-nums; }
-.nudge .len { display: inline-flex; align-items: center; gap: 4px; min-width: 4.2em; justify-content: center; font-weight: 700; font-variant-numeric: tabular-nums; }
-.nudge .len svg { width: 1.1em; height: 1.1em; }
-.nudgeline { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); margin: .4em 0; }
-.steerbar .nudge .btn { min-height: 46px; padding: .2em .8em; }
-/* A phone as the steering Projector: the bar's five controls only fit tight. */
+/* The steering bar's two buttons (client/steps.ts): fixed widths, so a
+   label that changes never moves them; Last call kept in its place, hidden,
+   where it doesn't apply. */
+.btn.bar-last, .btn.bar-play { white-space: nowrap; overflow: hidden; }
+.btn.bar-last span, .btn.bar-play span { overflow: hidden; text-overflow: ellipsis; }
+.btn.bar-last.running { opacity: .5; }
+.steerbar .btn.bar-last { flex: none; width: 8.4em; padding: .3em .5em; }
+.steerbar .btn.bar-play { flex: none; width: 10.2em; padding: .3em .5em; }
+.lastcall-line { display: flex; align-items: center; gap: 6px; font-weight: 700; margin: .4em 0 0; }
+/* A phone as the steering Projector: ⋯ and the two buttons; the code gives way. */
 @media (max-width: 600px) {
-  .steerbar { gap: 5px; padding: 0 6px; font-size: 16px; }
-  .steerbar .btn { padding: .3em .6em; }
+  .steerbar { gap: 5px; padding: 0 6px; font-size: 15px; }
   .steerbar .btn.more { width: 40px; }
-  .steerbar .nudge { gap: 3px; }
-  .steerbar .nudge .btn { padding: .2em .4em; }
-  .steerbar .nudge .len { min-width: 2.6em; }
-  .steerbar .nudge .len svg { display: none; }
+  .steerbar .btn.bar-last { width: 7.6em; padding: .3em .3em; gap: .3em; }
+  .steerbar .btn.bar-play { width: 9.2em; padding: .3em .3em; gap: .3em; }
   .steerbar .joinchip { display: none; } /* in ⋯ on a phone */
   /* The code, not the address cut to "classyquiz.pa…" or the code to a
-     lone digit (bugs.md, the stray "1"); with −5/+5 the code gives way. */
+     lone digit (bugs.md, the stray "1"). */
   .steerbar .codeline .addr { display: none; }
-  .steerbar:has(.nudge) .codeline { visibility: hidden; }
 }
-/* The class reads the question first: the tiles keep their place, colours and shapes, without text. */
+@media (max-width: 380px) {
+  .steerbar .codeline { display: none; }
+}
+/* The answers hidden while the class reads: the tiles keep their place, colours and shapes, without text. */
 .tiles.veiled .txt { visibility: hidden; }
 .tiles.veiled .tile { opacity: .55; }
-/* A student's tablet: reading, time's up, and what a right answer brought. */
+/* A student's tablet: reading, Last call run out, and what a right answer brought. */
 .play .big.reading .icon { width: 30vmin; height: 30vmin; }
 .play .clockbar { height: 16px; }
 .play .top .timeup .icon { width: 32px; height: 32px; }
 .buttons.closed .ansbtn { pointer-events: none; opacity: .35; }
 .buttons.closed .ansbtn.mine { opacity: 1; }
 .play .gained { color: var(--good); font-variant-numeric: tabular-nums; }
-/* The tempo's line in the lobby and its sheet. */
-button.link.tempo-line { color: var(--muted); }
-.tempo-sheet > .tempo-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
-.tempo-sheet > .tempo-choice small { font-weight: 400; color: var(--muted); }
-.tempo-sheet > .tempo-choice.on { background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 4px 0 0 var(--accent); }
-.tempo-sheet .seconds { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; }
-.tempo-sheet .seconds[hidden] { display: none; }
-.tempo-sheet .seconds > span { font-weight: 600; flex-basis: 100%; }
-.tempo-sheet .seconds .btn { min-height: 44px; padding: .3em .9em; }
-.tempo-sheet .seconds .btn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+/* Points for speed: the lobby's switch (client/manage.ts, speedSwitch). */
+.speed-switch { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; padding: 6px 0; color: var(--muted); font-weight: 600; }
+.speed-switch .knob { position: relative; width: 42px; height: 24px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 22%, transparent); transition: background .15s; flex: none; }
+.speed-switch .knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.speed-switch[aria-checked="true"] { color: var(--fg); }
+.speed-switch[aria-checked="true"] .knob { background: var(--accent); }
+.speed-switch[aria-checked="true"] .knob::after { transform: translateX(18px); }
+.speed-note { display: block; color: var(--muted); }
 
 /* Pictures as answers (v3 item 1; client/screen.ts, layPictureAnswers). The
    picture sits on the tile's colour: where it is transparent the colour

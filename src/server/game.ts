@@ -6,34 +6,37 @@
 // Scores are never stored. They are computed from the recorded answers and the
 // current fixes, so a key changed after the reveal moves the points with it
 // (backlog v1 item 9). Points for speed are the same kind of computation:
-// each answer keeps how long after the answers appeared it was tapped, and
-// each question that had a countdown keeps its length (shared/tempo.ts).
+// each answer keeps how long after the answers appeared it was tapped
+// (shared/tempo.ts).
+//
+// A question's answers settle when the class leaves its reveal (the
+// ranking, the next question, the final ranking): until then a tap made on
+// a view that showed answering open counts whenever it arrives (v1 item
+// 15); after it, nothing changes what the question scored except the
+// teacher's fixes. What a tablet shows as its accepted answer is this
+// record, read from its view or from the acknowledgement that carries it
+// (decisions.md, "The steering bar").
 
 import type { Quiz } from "../quiz/format.ts";
 import { CLASS_FULL, CLASS_STARTED, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
-import { COUNTDOWN_DEFAULT, NUDGE_SECONDS, POINTS_RIGHT, TEMPOS, clampCountdown, speedBonus, type Tempo } from "../shared/tempo.ts";
+import { LAST_CALL_MS, POINTS_RIGHT, speedBonus } from "../shared/tempo.ts";
 
 export type Phase = "lobby" | "question" | "reveal" | "ranking" | "final";
 
 /**
- * Within an open question: the class reads it (countdown tempos: the
- * answers aren't shown yet), the answers are open, or answering has closed
- * (time's up, or everyone present answered) and the reveal waits for the
- * teacher.
+ * Within an open question (backlog v4 item 6): the class reads it, its
+ * answers hidden; the answers are open; or answering is locked in, the
+ * spread on the wall, and the reveal waits for the teacher.
  */
 export type Answering = "reading" | "open" | "closed";
 
-/** The countdown of one question, from the moment its answers appeared (Go). */
+/** Last call on one question: from the teacher's press, LAST_CALL_MS, then answering locks in. */
 export interface Clock {
-  /** When the answers appeared (server time). */
+  /** When Last call was pressed (server time). */
   at: number;
-  /** Its length; kept when stopped, for the points for speed. */
+  /** Its length. */
   ms: number;
-  /** The teacher stopped it: the answers stay open without a clock. */
-  stopped?: boolean;
-  /** Time's up, or everyone present answered: answering is closed until the reveal. */
-  closed?: boolean;
 }
 
 /** The teacher's corrections to one question; they apply to every run of the instance. */
@@ -101,29 +104,22 @@ export interface Run {
   revealed: number[];
   /**
    * Question index → the view version that first showed its answering
-   * closed: time's up, or the reveal. An answer tapped on an older view was
-   * in time as far as the device showed, and counts whenever it arrives
-   * (backlog v1 item 15). Missing in runs stored before this was added.
+   * closed: locked in, or the reveal. An answer tapped on an older view was
+   * in time as far as the device showed, and counts when it arrives before
+   * the class leaves the question's reveal (backlog v1 item 15). Missing in
+   * runs stored before this was added.
    */
   closedView?: Record<string, number>;
   /** The same, as runs stored before the countdown named it (reveals only); read when closedView has no entry. */
   revealView?: Record<string, number>;
-  /** The tempo the teacher chose in the lobby (shared/tempo.ts); missing: the quiz's ("Tempo:"), else the teacher's pace. */
-  tempo?: Tempo;
-  /**
-   * Seconds the teacher's −5/+5 added to (or took from) the quiz's lengths,
-   * for every countdown from the one it was pressed on; missing: 0, the
-   * lengths as written. Each length stays within 10..60 s.
-   */
-  adjust?: number;
-  /** Question index → its countdown, once its answers appeared under one. */
+  /** Points for speed, the teacher's switch on the join screen; fixed at Start. Missing: off. */
+  speed?: boolean;
+  /** Question index → when its answers appeared (server time): answering opened, and the time for speed runs from here. */
+  shown?: Record<string, number>;
+  /** Question index → its Last call, once pressed. */
   clocks?: Record<string, Clock>;
-  /**
-   * Question index → the tempo it came up under. The tempo can change mid-quiz
-   * and applies from the next question; each question is read, timed and
-   * scored as it was played. Missing in runs stored before: the current tempo.
-   */
-  played?: Record<string, Tempo>;
+  /** How many questions have come up so far (the door narrows from the second). */
+  opened?: number;
   players: Record<string, Player>;
   /** Join command id → player it created, so a resent join doesn't make a second avatar. */
   joins?: Record<string, string>;
@@ -145,12 +141,42 @@ export interface Run {
    */
   zoom?: string;
   /**
-   * The question whose votes are on the wall, its key not yet shown (backlog
-   * v2 item 6): answering is closed, and the next step is the reveal. Only
-   * meaningful while that question is the open one; the run only moves
-   * forward, so an index left from an earlier question never matches.
+   * The question locked in, its spread on the wall and its key not yet shown
+   * (backlog v2 item 6, v4 item 6): answering is closed, and the next step is
+   * the reveal. Only meaningful while that question is the open one; the run
+   * only moves forward, so an index left from an earlier question never
+   * matches.
    */
   votes?: number;
+}
+
+/**
+ * A run stored before the steering bar (backlog v4 item 6), read as one
+ * after it: the lobby's tempo becomes the speed switch, a countdown's Go the
+ * moment the answers appeared, a countdown that closed the lock-in, and a
+ * question at the teacher's pace open from when it came up. A countdown
+ * still running carries on as a Last call of its length.
+ */
+export function upgradeRun(run: Run): Run {
+  const old = run as Run & {
+    tempo?: string;
+    adjust?: number;
+    played?: Record<string, string>;
+    clocks?: Record<string, Clock & { stopped?: boolean; closed?: boolean }>;
+  };
+  if (old.tempo === undefined && old.played === undefined && old.adjust === undefined) return run;
+  if (old.tempo === "speed" || Object.values(old.played ?? {}).includes("speed")) run.speed = true;
+  if (old.played) run.opened ??= Object.keys(old.played).length;
+  for (const [q, c] of Object.entries(old.clocks ?? {})) {
+    (run.shown ??= {})[q] ??= c.at;
+    if (c.closed && Number(q) === run.current && run.phase === "question") run.votes = run.current;
+    if (c.stopped || c.closed) delete old.clocks![q];
+  }
+  if (run.phase === "question" && run.current >= 0 && old.played?.[run.current] === "pace") (run.shown ??= {})[run.current] ??= run.openedAt;
+  delete old.tempo;
+  delete old.adjust;
+  delete old.played;
+  return run;
 }
 
 export interface Game {
@@ -177,14 +203,13 @@ export function newGame(quiz: Quiz): Game {
  * `random`, each question's answers get a fresh order, the same on every
  * screen, unless the quiz keeps it ("Order: fixed"; nothing else does:
  * a rule the AI and the teacher can't see is one they can't rely on).
- * Decisions.md, "Answers shuffled at upload". The tempo carries over from
- * the class before: the parallel class most likely plays the same way.
+ * Decisions.md, "Answers shuffled at upload". Points for speed carry over
+ * from the class before: the parallel class most likely plays the same way.
  */
 export function startRun(g: Game, code: string, id: string, random?: () => number): void {
   const before = g.run;
   g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
-  if (before?.tempo) g.run.tempo = before.tempo;
-  if (before?.adjust) g.run.adjust = before.adjust;
+  if (before?.speed) g.run.speed = true;
   if (random) g.run.order = g.quiz.questions.map((q) => (q.keepOrder ? q.answers.map((_, i) => i) : shownOrder(q.answers.map((a) => a.text), random)));
 }
 
@@ -254,7 +279,7 @@ export { DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
 export function doorOpen(run: Run, now: number): boolean {
   if (run.phase === "lobby") return true;
   if (run.phase === "final" || run.started === undefined) return false;
-  return now - run.started < DOOR_OPEN_MS || Object.keys(run.played ?? {}).length <= 1;
+  return now - run.started < DOOR_OPEN_MS || (run.opened ?? 0) <= 1;
 }
 
 export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number): Player {
@@ -327,7 +352,7 @@ function open(g: Game, run: Run, q: number, now: number): void {
   run.current = q;
   run.phase = "question";
   run.openedAt = now;
-  (run.played ??= {})[q] = tempoOf(g);
+  run.opened = (run.opened ?? 0) + 1;
 }
 
 /** Lobby → first question. */
@@ -339,199 +364,112 @@ export function begin(g: Game, now: number): void {
 }
 
 /**
- * The teacher's first step after answering (backlog v2 item 6): how the class
- * answered goes on the wall, without the key. Answering closes, as at time's
- * up, so nobody copies the majority; `view` is the version of the first view
- * that shows it closed, and a tap made on an older one still counts (v1 item
- * 15). The reveal, the next step, adds the key.
+ * The states of the open question (backlog v4 item 6): the class reads it,
+ * its answers hidden; answering is open; or it is locked in, the spread on
+ * the wall, and the key waits for the teacher.
  */
-export function showVotes(g: Game, view: number): void {
+export function answering(g: Game): Answering | null {
+  const run = g.run;
+  if (!run || run.phase !== "question" || run.current < 0) return null;
+  if (run.votes === run.current) return "closed";
+  return run.shown?.[run.current] !== undefined ? "open" : "reading";
+}
+
+/** The open question's answers appear: answering opens, and the time for speed starts. */
+export function showAnswers(g: Game, now: number): void {
+  const run = needRun(g);
+  if (answering(g) !== "reading") throw new GameError("The answers are already shown.");
+  (run.shown ??= {})[run.current] = now;
+}
+
+/**
+ * Last call: LAST_CALL_MS, then answering locks in by itself (the alarm, see
+ * `deadline`). From the question with its answers hidden it shows them too.
+ * Once per question.
+ */
+export function lastCall(g: Game, now: number): void {
+  const run = needRun(g);
+  const a = answering(g);
+  if (a === "reading") showAnswers(g, now);
+  else if (a !== "open") throw new GameError("Answering is already locked in.");
+  if (run.clocks?.[run.current]) throw new GameError("Last call is already running.");
+  (run.clocks ??= {})[run.current] = { at: now, ms: LAST_CALL_MS };
+}
+
+/**
+ * Lock in (backlog v2 item 6, v4 item 6): answering closes and how the class
+ * answered goes on the wall, without the key, so nobody copies the
+ * majority. By the teacher's press, at the end of Last call, or once
+ * everyone there has answered during it. `view` is the version of the first
+ * view that shows it locked; a tap made on an older one still counts (v1
+ * item 15). The reveal, the next step, adds the key.
+ */
+export function lockIn(g: Game, view: number): void {
   const run = needRun(g);
   if (run.phase !== "question") throw new GameError("There is no open question.");
   if (answering(g) === "reading") throw new GameError("The answers aren't shown yet.");
-  if (votesShown(g)) return;
-  const clock = runningClock(g);
-  if (clock) clock.closed = true;
+  if (lockedIn(g)) return;
   (run.closedView ??= {})[run.current] ??= view;
   run.votes = run.current;
-  // An enlarged picture would cover the votes; the reveal ends it the same way.
+  // An enlarged picture would cover the spread; the reveal ends it the same way.
   delete run.zoom;
 }
 
-/** The open question's votes are on the wall, its key not yet. */
-export function votesShown(g: Game): boolean {
+/** The open question is locked in: its spread on the wall, its key not yet. */
+export function lockedIn(g: Game): boolean {
   const run = g.run;
   return !!run && run.phase === "question" && run.votes === run.current;
 }
 
 /**
- * `view`: the version of the first view that will show the reveal. From the
- * votes, or straight from the question (a page from before the votes step).
+ * The key. `view`: the version of the first view that will show it. From
+ * the lock-in, or straight from answering (a page from before the lock-in).
  */
 export function reveal(g: Game, view: number): void {
   const run = needRun(g);
   if (run.phase !== "question") throw new GameError("There is no open question to reveal.");
+  if (answering(g) === "reading") throw new GameError("The answers aren't shown yet.");
   if (!run.revealed.includes(run.current)) run.revealed.push(run.current);
-  // Time's up may have closed answering earlier; that view is the one that counts.
+  // The lock-in may have closed answering earlier; that view is the one that counts.
   (run.closedView ??= {})[run.current] ??= view;
   run.phase = "reveal";
 }
 
-// ---------------------------------------------------------------------------
-// Tempo (backlog v2 items 2, 3; shared/tempo.ts)
-
-/** The class's tempo: the teacher's choice in the lobby, else what the quiz was written for, else the teacher's pace. */
-export function tempoOf(g: Game): Tempo {
-  return g.run?.tempo ?? g.quiz.tempo ?? "pace";
-}
-
-/** Question q's countdown as written: its "Time:", else the quiz's, else the safe default. */
-function writtenSeconds(g: Game, q: number): number {
-  return g.quiz.questions[q]?.seconds ?? g.quiz.seconds ?? COUNTDOWN_DEFAULT;
-}
-
-/** Question q's countdown in seconds: as written, moved by the teacher's −5/+5, within 10..60. */
-export function secondsFor(g: Game, q: number): number {
-  return clampCountdown(writtenSeconds(g, q) + (g.run?.adjust ?? 0));
-}
-
-/** Whether the quiz gives its own countdown lengths ("Time:" lines). */
-export function timed(g: Game): boolean {
-  return g.quiz.seconds !== undefined || g.quiz.questions.some((q) => q.seconds !== undefined);
-}
-
-/**
- * The class's tempo, in the lobby or mid-quiz (an unfun tempo is changed from
- * ⋯). It applies from the next question: the one on screen keeps how it came up.
- */
-export function setTempo(g: Game, tempo: Tempo): void {
-  const run = needRun(g);
-  if (!TEMPOS.includes(tempo)) throw new GameError("Unknown tempo.");
-  run.tempo = tempo;
-}
-
-/** The tempo question q came up under. */
-export function playedAt(g: Game, q: number): Tempo {
-  return g.run?.played?.[q] ?? tempoOf(g);
-}
-
-/**
- * Whether scores are on the speed scale: some question that scores was
- * played with points for speed. Then every right answer is worth
- * POINTS_RIGHT, plus its bonus where it was played for speed; otherwise a
- * right answer is 1, "right out of so many", as in v1.
- */
-export function speedScale(g: Game): boolean {
-  return scoringQuestions(g).some((q) => playedAt(g, q) === "speed");
-}
-
-/**
- * The countdown the teacher's −5/+5 acts on, during the quiz: the one
- * running now; else the open question's, while the class reads it; else the
- * next question's, when the class plays with a countdown. Null: no pair to
- * show (the lobby, the teacher's pace, the last question done).
- */
-export function nudgeTarget(g: Game): { q: number; clock: Clock | null } | null {
-  const run = g.run;
-  if (!run || (run.phase !== "question" && run.phase !== "reveal" && run.phase !== "ranking")) return null;
-  const clock = runningClock(g);
-  if (clock) return { q: run.current, clock };
-  if (answering(g) === "reading") return { q: run.current, clock: null };
-  if (tempoOf(g) === "pace") return null;
-  const q = nextShown(g, run.current);
-  return q === -1 ? null : { q, clock: null };
-}
-
-/** The length the −5/+5 pair shows, in seconds; null when there is none. */
-export function nudgeSeconds(g: Game): number | null {
-  const t = nudgeTarget(g);
-  return t ? (t.clock ? Math.round(t.clock.ms / 1000) : secondsFor(g, t.q)) : null;
-}
-
-/**
- * The teacher's −5 or +5: the countdown it acts on (nudgeTarget) gets that
- * much shorter or longer, within 10..60 s, and so does every one after it,
- * each against its own length as written. A running countdown changes at
- * once; cut below the time already gone, answering closes (`view`: as in
- * closeAnswers). At a bound the press changes nothing.
- */
-export function nudge(g: Game, by: number, now: number, view: number): void {
-  const run = needRun(g);
-  if (by !== NUDGE_SECONDS && by !== -NUDGE_SECONDS) throw new GameError("The countdown changes by 5 seconds.");
-  const t = nudgeTarget(g);
-  const from = nudgeSeconds(g);
-  if (!t || from === null) throw new GameError("No countdown to change.");
-  const to = clampCountdown(from + by);
-  if (to === from) return;
-  run.adjust = to - writtenSeconds(g, t.q);
-  if (run.adjust === 0) delete run.adjust;
-  if (t.clock) {
-    t.clock.ms = to * 1000;
-    if (now >= t.clock.at + t.clock.ms) closeAnswers(g, view);
-  }
-}
-
-/** Where the open question is: being read, open for answers, or closed until the reveal. */
-export function answering(g: Game): Answering | null {
-  const run = g.run;
-  if (!run || run.phase !== "question" || run.current < 0) return null;
-  if (run.votes === run.current) return "closed";
-  const clock = run.clocks?.[run.current];
-  if (clock) return clock.closed ? "closed" : "open";
-  return playedAt(g, run.current) === "pace" ? "open" : "reading";
-}
-
-/** The open question's countdown while it runs: neither stopped nor closed. */
+/** Last call, while it runs: pressed, and answering not yet locked in. */
 export function runningClock(g: Game): Clock | null {
   const run = g.run;
-  if (!run || run.phase !== "question") return null;
-  const clock = run.clocks?.[run.current];
-  return clock && !clock.stopped && !clock.closed ? clock : null;
+  if (!run || run.phase !== "question" || lockedIn(g)) return null;
+  return run.clocks?.[run.current] ?? null;
 }
 
-/** Go: the class has read the question; its answers appear and the countdown starts. */
-export function go(g: Game, now: number): void {
-  const run = needRun(g);
-  if (answering(g) !== "reading") throw new GameError("The answers are already shown.");
-  (run.clocks ??= {})[run.current] = { at: now, ms: secondsFor(g, run.current) * 1000 };
-}
-
-/**
- * Time's up, or everyone present answered: answering closes and the reveal
- * waits for the teacher. `view`: the version of the first view that will
- * show it closed; a tap made on an older one still counts (v1 item 15).
- */
-export function closeAnswers(g: Game, view: number): void {
-  const run = needRun(g);
-  const clock = runningClock(g);
-  if (!clock) return;
-  clock.closed = true;
-  (run.closedView ??= {})[run.current] ??= view;
-}
-
-/**
- * The teacher stops the clock: the answers stay open, or open again after
- * time's up, with no countdown, as at the teacher's pace. The clock's length
- * stays for the points for speed: a tap after it scores no bonus.
- */
-export function stopClock(g: Game): void {
-  const run = needRun(g);
-  const clock = run.phase === "question" ? run.clocks?.[run.current] : undefined;
-  if (!clock) throw new GameError("No countdown is running.");
-  // The votes are on the wall: answering again after seeing them would copy the majority.
-  if (votesShown(g)) throw new GameError("The votes are on the wall: show the answer next.");
-  clock.stopped = true;
-  if (clock.closed) {
-    delete clock.closed;
-    // Open again: a later close is a new one.
-    if (run.closedView) delete run.closedView[run.current];
-  }
-}
-
-/** When the running countdown ends (server time), or null. */
+/** When Last call ends (server time), or null. */
 export function deadline(g: Game): number | null {
   const clock = runningClock(g);
   return clock ? clock.at + clock.ms : null;
+}
+
+/** Last call ran out, or everyone there answered during it: answering locks in. `view`: as in lockIn. */
+export function closeAnswers(g: Game, view: number): void {
+  if (runningClock(g)) lockIn(g, view);
+}
+
+/** Points for speed, the teacher's switch on the join screen: only in the lobby, so the whole class plays one way. */
+export function setSpeed(g: Game, on: boolean): void {
+  const run = needRun(g);
+  if (run.phase !== "lobby") throw new GameError("Points for speed are set before the start.");
+  if (on) run.speed = true;
+  else delete run.speed;
+}
+
+/** Whether right answers score more the quicker they came. */
+export function speedScale(g: Game): boolean {
+  return !!g.run?.speed;
+}
+
+/** Whether no question comes after the current one: its reveal is followed by the final ranking. */
+export function lastQuestion(g: Game): boolean {
+  const run = g.run;
+  return !!run && nextShown(g, run.current) === -1;
 }
 
 /** Reveal or ranking → next question (or the final ranking after the last one). */
@@ -548,14 +486,29 @@ export function showRanking(g: Game): void {
   run.phase = "ranking";
 }
 
-/** The one key a clicker or keyboard has: whatever comes next in the usual flow. */
+/**
+ * Play, the steering bar's step (backlog v4 item 6): one slice on from where
+ * the question is. Question → Show answers → Lock in → Reveal → Ranking →
+ * Next; after the last question's reveal, the final ranking.
+ */
+export function play(g: Game, now: number, view: number): void {
+  const run = needRun(g);
+  const a = answering(g);
+  if (run.phase === "question" && a === "reading") showAnswers(g, now);
+  else if (run.phase === "question" && a === "open") lockIn(g, view);
+  else if (run.phase === "question") reveal(g, view);
+  else if (run.phase === "reveal" && lastQuestion(g)) finish(g, now);
+  else if (run.phase === "reveal") showRanking(g);
+  else if (run.phase === "ranking") next(g, now);
+  else throw new GameError("Nothing to step on to.");
+}
+
+/** A page from before the steering bar: its clicker's one key, which also started the quiz. */
 export function advance(g: Game, now: number, view: number): void {
   const run = needRun(g);
   if (run.phase === "lobby") begin(g, now);
-  else if (run.phase === "question" && answering(g) === "reading") go(g, now);
-  else if (run.phase === "question" && !votesShown(g)) showVotes(g, view);
-  else if (run.phase === "question") reveal(g, view);
-  else if (run.phase === "reveal" || run.phase === "ranking") next(g, now);
+  else if (run.phase === "reveal") next(g, now);
+  else play(g, now, view);
 }
 
 /** Final ranking, from any point (the bell rings at question 9). An unrevealed question doesn't count. */
@@ -602,13 +555,16 @@ export function answerOutcome(
   // with the connection) is confirmed, also after the reveal: it counts.
   const prev = run.answers[q]?.[playerId];
   if (prev && prev.seq >= seq) return "unchanged";
-  const current = run.phase === "question" && run.current === q;
-  const open = current && answering(g) === "open";
-  // Tapped before the device showed answering closed (time's up, or the
+  // The question is still on screen: being answered, locked in, or
+  // revealed. Once the class has left its reveal its answers are settled.
+  const onScreen = run.current === q && (run.phase === "question" || run.phase === "reveal");
+  const open = onScreen && answering(g) === "open";
+  // Tapped before the device showed answering closed (locked in, or the
   // reveal), delivered after it: the device showed the answers as open, so
-  // the answer counts. While the class reads the question nothing is open.
+  // the answer counts, as long as the question is still on screen. While the
+  // class reads the question nothing is open.
   const closedAt = run.closedView?.[q] ?? run.revealView?.[q];
-  const inTime = open || ((current || run.revealed.includes(q)) && closedAt !== undefined && view < closedAt);
+  const inTime = open || (onScreen && closedAt !== undefined && view < closedAt);
   if (!inTime) return "refused";
   const question = g.quiz.questions[q];
   if (!question || !Number.isInteger(choice) || choice < 0 || choice >= question.answers.length) return "refused";
@@ -626,8 +582,7 @@ export function answerOutcome(
   // appearing on its screen to the tap, so a slow line or a reconnect costs
   // no speed. It can't be longer than the server's count, which includes
   // both trips over the network.
-  const clock = run.clocks?.[q];
-  const serverMs = Math.max(0, now - (clock ? clock.at : run.openedAt));
+  const serverMs = Math.max(0, now - (run.shown?.[q] ?? run.openedAt));
   const ms = typeof deviceMs === "number" && Number.isFinite(deviceMs) ? Math.round(Math.max(0, Math.min(deviceMs, serverMs))) : serverMs;
   byPlayer[playerId] = { choice, ms, seq, ...(changes > 0 ? { changes } : {}) };
   return "recorded";
@@ -709,15 +664,23 @@ export function isRight(g: Game, q: number, choice: number): boolean {
 }
 
 /**
- * What an answer to question q scores under the class's tempo and the
- * current fixes: 0 when wrong; 1 when right; with points for speed
- * POINTS_RIGHT plus the speed bonus, when the question had a countdown.
+ * What an answer to question q scores under the current fixes: 0 when
+ * wrong; 1 when right; with points for speed POINTS_RIGHT plus the speed
+ * bonus, by how soon after the answers appeared it was tapped.
  */
 export function points(g: Game, q: number, a: AnswerRecord, scale = speedScale(g)): number {
   if (!isRight(g, q, a.choice)) return 0;
-  if (!scale) return 1;
-  const clock = g.run?.clocks?.[q];
-  return POINTS_RIGHT + (clock && playedAt(g, q) === "speed" ? speedBonus(a.ms, clock.ms) : 0);
+  return scale ? POINTS_RIGHT + speedBonus(a.ms) : 1;
+}
+
+/**
+ * A player's stored answer to question q, as the acknowledgement of a tap
+ * carries it back: the record the tablet shows as accepted, and the one that
+ * scores. Null when there is none.
+ */
+export function recordOf(g: Game, q: number, playerId: string): { choice: number; seq: number } | null {
+  const a = g.run?.answers[q]?.[playerId];
+  return a ? { choice: a.choice, seq: a.seq } : null;
 }
 
 export function scores(g: Game): Map<string, number> {

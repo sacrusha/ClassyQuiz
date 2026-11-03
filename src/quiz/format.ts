@@ -9,8 +9,6 @@
 // cannot read unambiguously; error messages name the question and are written
 // so a teacher can paste them back to the AI.
 
-import { COUNTDOWN_MAX, COUNTDOWN_MIN, type Tempo } from "../shared/tempo.ts";
-
 export interface Answer {
   /** "" for a picture answer. */
   text: string;
@@ -33,8 +31,6 @@ export interface Question {
   background: string;
   /** "Order: fixed": the answers keep the text's order on screen; otherwise the site shuffles them. */
   keepOrder: boolean;
-  /** "Time: 40": this question's countdown in seconds, when the quiz has one; absent: the quiz's. */
-  seconds?: number;
 }
 
 export interface Quiz {
@@ -42,15 +38,7 @@ export interface Quiz {
   /** The picture behind every question that has no background of its own; "" for none. */
   background: string;
   questions: Question[];
-  /** "Tempo: countdown" or "Tempo: speed" before the first question: the tempo the quiz was written for; absent: the teacher's pace. */
-  tempo?: Tempo;
-  /** "Time: 20" before the first question: the countdown of every question without its own. */
-  seconds?: number;
 }
-
-/** A countdown the format takes, in seconds: the range the teacher's −5/+5 moves in (shared/tempo.ts). */
-export const MIN_SECONDS = COUNTDOWN_MIN;
-export const MAX_SECONDS = COUNTDOWN_MAX;
 
 /** A picture the quiz names, with the words that name it in messages. */
 export interface PictureRef {
@@ -299,10 +287,6 @@ interface Block {
   background: string;
   /** An "Order:" line asked for the text's order. */
   keepOrder: boolean;
-  /** A "Time:" line's seconds. */
-  seconds?: number;
-  /** A "Tempo:" line in a block before the first question (under an unmarked title). */
-  tempo?: Tempo;
   /** Problems with the block's Image:/Background: lines, worded once the question's number is known. */
   pictureProblems: ((label: string) => string)[];
   /** Image:/Background: lines after the answers so far; errors unless more answers follow. */
@@ -332,8 +316,6 @@ export function parseQuiz(input: string): ParseResult {
   let title: string | null = null;
   let quizBackground = "";
   let quizKeepOrder = false;
-  let quizTempo: Tempo | undefined;
-  let quizSeconds: number | undefined;
   const blocks: Block[] = [];
   let current: Block | null = null;
 
@@ -379,29 +361,12 @@ export function parseQuiz(input: string): ParseResult {
           // The quiz carries no messages from the AI to the teacher (backlog
           // item 1); one an AI still writes is dropped, not a failed paste.
           if (block !== null) block.noted = true;
-        } else if (c.key === "tempo") {
-          // The tempo the quiz was written for (backlog v2 items 2, 3): one
-          // line before the first question. The teacher can still change it
-          // in the lobby.
-          const tempo = readTempo(c.value);
-          if (tempo === null) warn(`The line "Tempo: ${excerpt(c.value)}" was ignored. The site reads "Tempo: countdown", "Tempo: speed" or "Tempo: pace".`);
-          else if (answered > 0) warn(`The line "Tempo: ${excerpt(c.value)}" was ignored: the tempo is one line before the first question, for the whole quiz.`);
-          else if (block === null) quizTempo = tempo;
-          else block.tempo = tempo;
-        } else if (c.key === "time") {
-          // A countdown's length: before the first question for every
-          // question, after a question's text for that one. After the
-          // answers it still means the question above, like "Order:".
-          const seconds = readSeconds(c.value);
-          if (seconds === null) warn(`The line "Time: ${excerpt(c.value)}" was ignored. It gives the countdown in seconds, e.g. "Time: 30".`);
-          else {
-            if (seconds !== clampSeconds(seconds)) warn(`The line "Time: ${excerpt(c.value)}" was taken as ${clampSeconds(seconds)} seconds: a countdown is ${MIN_SECONDS} to ${MAX_SECONDS} seconds.`);
-            if (block === null) quizSeconds = clampSeconds(seconds);
-            else {
-              block.seconds = clampSeconds(seconds);
-              if (block.answers.length > 0) block.noted = true;
-            }
-          }
+        } else if (c.key === "tempo" || c.key === "time") {
+          // The pace is the teacher's, steered in the room (backlog v4 item
+          // 6); the format no longer has "Tempo:" or "Time:". A quiz an AI
+          // wrote from an older guidance still carries them: dropped, like a
+          // note, rather than read as question text.
+          if (block !== null && block.answers.length > 0) block.noted = true;
         } else if (c.key === "order") {
           // "Order: fixed" keeps the answers as written; the site shuffles
           // them otherwise. Before the first question it holds for all. After
@@ -505,7 +470,7 @@ export function parseQuiz(input: string): ParseResult {
   blocks.forEach((b, i) => {
     const text = b.textLines.join("\n").trim();
     if (b.answers.length > 0) {
-      questions.push({ text, answers: b.answers, image: b.image, background: b.background, keepOrder: b.keepOrder, ...(b.seconds ? { seconds: b.seconds } : {}) });
+      questions.push({ text, answers: b.answers, image: b.image, background: b.background, keepOrder: b.keepOrder });
       questionBlocks.push(b);
       return;
     }
@@ -517,8 +482,6 @@ export function parseQuiz(input: string): ParseResult {
       if (b.background && quizBackground) err(`The quiz has more than one "Background:" line before the first question.`);
       else if (b.background) quizBackground = b.background;
       if (b.keepOrder) quizKeepOrder = true;
-      if (b.tempo) quizTempo = b.tempo;
-      if (b.seconds) quizSeconds = b.seconds;
       if (b.image) {
         err(
           `The picture "${b.image}" comes before any question. A question's picture goes after the question text, before the answers; ` +
@@ -617,7 +580,7 @@ export function parseQuiz(input: string): ParseResult {
 
   return {
     ok: errors.length === 0,
-    quiz: { title: title ?? "", background: quizBackground, questions, ...(quizTempo && quizTempo !== "pace" ? { tempo: quizTempo } : {}), ...(quizSeconds ? { seconds: quizSeconds } : {}) },
+    quiz: { title: title ?? "", background: quizBackground, questions },
     errors,
     warnings,
   };
@@ -634,35 +597,4 @@ function dropAnswerLetters(answers: Answer[]): void {
   const ok = found.every((m, i) => m !== null && m[1] === String.fromCharCode(first[1].charCodeAt(0) + i) && m[2] === first[2]);
   if (!ok) return;
   answers.forEach((a, i) => (a.text = a.text.slice(found[i]![0].length)));
-}
-
-// ---------------------------------------------------------------------------
-// Tempo
-
-/** "countdown", "speed" (a countdown with points for speed), "pace"; null for anything else. */
-function readTempo(value: string): Tempo | null {
-  const v = value.toLowerCase();
-  // What a clause denies doesn't count: "countdown (no points)" is a
-  // countdown, "countdown, without speed points" too.
-  const said = v.replace(/\b(?:no|not|without|ohne|kein\w*)\b[^,;()/]*/g, " ");
-  if (/speed|fast|points|bonus/.test(said)) return "speed";
-  if (/count\s*-?down|clock|timer|timed/.test(said)) return "countdown";
-  if (/pace|teacher/.test(said) || /^\W*(?:none|off|no)\b/.test(v)) return "pace";
-  return null;
-}
-
-/** "30", "30 s", "30 seconds", "1 min", "1:30"; null when it isn't a length. */
-function readSeconds(value: string): number | null {
-  const v = value.trim().toLowerCase();
-  let m = v.match(/^(\d+):(\d{2})$/);
-  if (m) return Number(m[1]) * 60 + Number(m[2]);
-  m = v.match(/^(\d+(?:[.,]\d+)?)\s*(s|sec|secs|second|seconds|sek|sekunden|min|mins|minute|minutes|minuten)?\.?$/);
-  if (!m) return null;
-  const n = Number(m[1].replace(",", "."));
-  const minutes = m[2] !== undefined && m[2].startsWith("min");
-  return Math.round(minutes ? n * 60 : n);
-}
-
-function clampSeconds(n: number): number {
-  return Math.max(MIN_SECONDS, Math.min(MAX_SECONDS, n));
 }

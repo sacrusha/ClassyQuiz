@@ -9,6 +9,7 @@ import { imageKey, parseQuiz, type Quiz, type Problem } from "../quiz/format.ts"
 import * as G from "./game.ts";
 import { matchImages, type StoredImage, type UploadedImage } from "./images.ts";
 import type {
+  AnswerAck,
   Auth,
   ClientMessage,
   Command,
@@ -213,7 +214,8 @@ export class Instance extends DurableObject<Env> {
       }
       this.meta = meta;
       this.quizRecord = record;
-      this.game = { quiz: record.quiz, fixes, run: run ?? null };
+      // A run stored before the steering bar reads as one after it (backlog v4 item 6).
+      this.game = { quiz: record.quiz, fixes, run: run ? G.upgradeRun(run) : null };
     }
   }
 
@@ -878,14 +880,15 @@ export class Instance extends DurableObject<Env> {
     const roles = meta.roles!;
     const ack = (ok: boolean, error?: string, result?: unknown): ServerMessage => ({ t: "ack", id, ok, error, result });
     const now = Date.now();
-    const at = (c: { at: { phase: string; current: number; reading?: boolean; votes?: boolean } }) => {
+    const at = (c: { at: { phase: string; current: number; reading?: boolean; votes?: boolean; lastCall?: boolean } }) => {
       const run = game.run;
       const phase = run ? run.phase : "idle";
       const current = run ? run.current : -1;
       if (!c.at || c.at.phase !== phase || c.at.current !== current) return false;
-      // Go, the votes and the reveal are steps within one phase: a doubled
-      // Go mustn't show the votes, nor a doubled press on the votes the key.
-      if (typeof c.at.votes === "boolean" && c.at.votes !== G.votesShown(game)) return false;
+      // Showing the answers, Last call, the lock-in and the reveal are steps
+      // within one phase: a press sent twice mustn't take two steps.
+      if (typeof c.at.votes === "boolean" && c.at.votes !== G.lockedIn(game)) return false;
+      if (typeof c.at.lastCall === "boolean" && c.at.lastCall !== !!G.runningClock(game)) return false;
       return typeof c.at.reading !== "boolean" || c.at.reading === (G.answering(game) === "reading");
     };
 
@@ -958,8 +961,8 @@ export class Instance extends DurableObject<Env> {
         // comes out of the account's daily allowance).
         const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now, typeof cmd.ms === "number" ? cmd.ms : undefined);
         if (outcome === "recorded") {
-          // Everyone present has answered: the countdown ends now rather
-          // than leaving the class to watch it run out.
+          // Everyone present has answered during Last call: it locks in now
+          // rather than leaving the class to watch it run out.
           if (G.runningClock(game) && this.allAnswered()) {
             G.closeAnswers(game, this.nextView());
             await this.persist(["run"]);
@@ -967,7 +970,11 @@ export class Instance extends DurableObject<Env> {
           } else await this.persist(["run"]);
           this.broadcast();
         }
-        return { direct: [ack(outcome !== "refused")] };
+        // The acknowledgement carries what is stored for this question now,
+        // in screen order: the one fact the tablet shows as accepted and the
+        // one that scores, whatever this tap's fate (decisions.md, "The
+        // steering bar"). Its own view says the same.
+        return { direct: [ack(outcome !== "refused", undefined, { q: cmd.q, record: this.recordOnScreen(cmd.q, session.player) } satisfies AnswerAck)] };
       }
 
       // --- a teacher role: still the tab holding it?
@@ -986,10 +993,11 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(true)], session: { role: null } };
       }
       if (session.role === "screen") {
-        if (cmd.op === "advance") {
+        if (cmd.op === "advance" || cmd.op === "play") {
           // The clicker in the room works whoever steers.
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
-          G.advance(game, now, this.nextView());
+          if (cmd.op === "play") G.play(game, now, this.nextView());
+          else G.advance(game, now, this.nextView());
           await this.afterTeacherChange(["run"]);
           return { direct: [ack(true)] };
         }
@@ -1032,8 +1040,9 @@ export class Instance extends DurableObject<Env> {
           break;
         }
         case "begin":
+        case "play":
+        case "lastCall":
         case "go":
-        case "stopClock":
         case "votes":
         case "reveal":
         case "next":
@@ -1042,9 +1051,11 @@ export class Instance extends DurableObject<Env> {
         case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           if (cmd.op === "begin") G.begin(game, now);
-          else if (cmd.op === "go") G.go(game, now);
-          else if (cmd.op === "stopClock") G.stopClock(game);
-          else if (cmd.op === "votes") G.showVotes(game, this.nextView());
+          else if (cmd.op === "play") G.play(game, now, this.nextView());
+          else if (cmd.op === "lastCall") G.lastCall(game, now);
+          // "go" and "votes": a page from before the steering bar.
+          else if (cmd.op === "go") G.showAnswers(game, now);
+          else if (cmd.op === "votes") G.lockIn(game, this.nextView());
           else if (cmd.op === "reveal") G.reveal(game, this.nextView());
           else if (cmd.op === "next") G.next(game, now);
           else if (cmd.op === "ranking") G.showRanking(game);
@@ -1056,14 +1067,8 @@ export class Instance extends DurableObject<Env> {
           changed.push("run");
           break;
         }
-        case "tempo":
-          G.setTempo(game, cmd.tempo);
-          changed = ["run"];
-          break;
-        case "nudge":
-          // No `at`: two presses are meant as two, and one sent at the reveal
-          // that lands after Next acts on the same question, now being read.
-          G.nudge(game, cmd.by, now, this.nextView());
+        case "speed":
+          G.setSpeed(game, !!cmd.value);
           changed = ["run"];
           break;
         case "setCounts":
@@ -1394,12 +1399,17 @@ export class Instance extends DurableObject<Env> {
     return true;
   }
 
-  /** The open question's countdown as the screens draw it: running, or run out; null without one, stopped, or with the votes on the wall. */
+  /** Last call as the screens draw it, while it runs; null without one, or once answering is locked in. */
   private clockView(): ClockView | null {
-    const run = this.game?.run;
-    const clock = run && run.phase === "question" ? run.clocks?.[run.current] : undefined;
-    if (!clock || clock.stopped || G.votesShown(this.game!)) return null;
-    return { ms: clock.ms, leftMs: clock.closed ? 0 : Math.max(0, clock.at + clock.ms - Date.now()) };
+    const clock = this.game ? G.runningClock(this.game) : null;
+    if (!clock) return null;
+    return { ms: clock.ms, leftMs: Math.max(0, clock.at + clock.ms - Date.now()) };
+  }
+
+  /** A player's stored answer to question q, its choice in the order on screen. */
+  private recordOnScreen(q: number, player: string): AnswerAck["record"] {
+    const r = G.recordOf(this.game!, q, player);
+    return r ? { choice: G.orderOf(this.game!, q).indexOf(r.choice), seq: r.seq } : null;
   }
 
   private answeredNow(): number {
@@ -1459,7 +1469,6 @@ export class Instance extends DurableObject<Env> {
       background: this.imageRef(game.quiz.background),
       pictures: [...pictures],
       zoom: !!image && G.zoomed(game),
-      tempo: G.tempoOf(game),
       phase,
       current: run ? run.current : -1,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
@@ -1481,7 +1490,7 @@ export class Instance extends DurableObject<Env> {
             clock: this.clockView(),
           }
         : null,
-      votes: run && G.votesShown(game) ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
+      votes: run && G.lockedIn(game) ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
       reveal:
         run && phase === "reveal"
           ? {
@@ -1532,7 +1541,6 @@ export class Instance extends DurableObject<Env> {
           void: fix.void,
           skip: fix.skip,
           status,
-          seconds: G.secondsFor(game, i),
         };
       }),
       phase: run ? run.phase : "idle",
@@ -1540,14 +1548,11 @@ export class Instance extends DurableObject<Env> {
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
-      tempo: G.tempoOf(game),
-      timed: G.timed(game),
-      adjust: run?.adjust ?? 0,
-      countdown: G.nudgeSeconds(game),
-      playing: run && run.phase === "question" && run.current >= 0 ? G.playedAt(game, run.current) : null,
+      speed: G.speedScale(game),
       answering: G.answering(game),
-      votes: G.votesShown(game),
+      votes: G.lockedIn(game),
       clock: this.clockView(),
+      last: run ? G.lastQuestion(game) : false,
       run: run
         ? {
             n: prog.n,
@@ -1570,11 +1575,11 @@ export class Instance extends DurableObject<Env> {
     const prog = G.progress(game);
     const now = Date.now();
     const clock = this.clockView();
-    const clockRec = run && run.phase === "question" ? run.clocks?.[run.current] : undefined;
-    // The bonus is shown for a question played with points for speed.
-    const speed = !!run && run.current >= 0 && G.playedAt(game, run.current) === "speed";
+    const shownAt = run && run.phase === "question" ? run.shown?.[run.current] : undefined;
+    // The bonus is shown when the class plays with points for speed.
+    const speed = G.speedScale(game);
     const ans = G.answering(game) ?? "open";
-    const votes = G.votesShown(game);
+    const votes = G.lockedIn(game);
     const packs = this.packUrls();
     const smalls = run && run.current >= 0 && ans !== "reading" ? this.answerSmalls(run.current) : undefined;
     return (player: string): PlayerView => {
@@ -1604,7 +1609,7 @@ export class Instance extends DurableObject<Env> {
                 mine,
                 answering: ans,
                 clock,
-                sinceMs: clockRec ? Math.max(0, now - clockRec.at) : null,
+                sinceMs: shownAt !== undefined ? Math.max(0, now - shownAt) : null,
                 ...(votes ? { votes: true } : {}),
               }
             : null,
