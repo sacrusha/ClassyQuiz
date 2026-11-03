@@ -42,8 +42,12 @@ const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages
 export const CLASS_FULL = "This class is full. Ask your teacher.";
 export const CLASS_STARTED = "This quiz has started and takes no more players. Ask your teacher.";
 
-/** The site-wide caps refuse an upload (owner's voice, from the self-hosting nudge). */
-export const SITE_FULL = `The free site is full for today. ${OWN_COPY}`;
+/**
+ * Which site-wide cap refused an upload (server/budget.ts). They free up
+ * differently: the uploads cap at 00:00 UTC, the bytes cap as quizzes end or
+ * expire (two days after their last use), so each is said as it is.
+ */
+export type SiteFull = "uploads" | "bytes";
 
 /** When Cloudflare's daily allowance comes back, 00:00 UTC, as Swiss time ("01:00"); null without time zone data. */
 export function quotaResetAt(now = new Date()): string | null {
@@ -53,6 +57,15 @@ export function quotaResetAt(now = new Date()): string | null {
   } catch {
     return null;
   }
+}
+
+/** The site-wide caps refuse an upload (owner's voice, from the self-hosting nudge). */
+export function siteFullMessage(full: SiteFull, now = new Date()): string {
+  if (full === "bytes") {
+    return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (two days after their last use). ${OWN_COPY}`;
+  }
+  const at = quotaResetAt(now);
+  return `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
 /** Cloudflare's daily allowance is used up; it comes back at 00:00 UTC, said in Swiss time. */

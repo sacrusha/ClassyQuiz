@@ -3597,3 +3597,30 @@ labelled ask (the static HTML has the plain bubble and the labels as one
 line after it); a spent request allowance, which the full days don't
 record, so the line understates a site that runs out of requests rather
 than uploads; the free-tier test, which step 1 waits for.
+
+## 2026-11-03 — A refused upload says which cap it hit
+
+The site said "full for today" and "works again the next day" for both caps.
+True of the uploads a day (back at 00:00 UTC), wrong for the bytes stored
+(back as quizzes end or expire).
+
+- `SiteBudget.reserve` already knew which cap refused; it said only `false`.
+  It now answers `true`, `"uploads"` or `"bytes"`; `create` puts it in the
+  failure as `full`, beside `error` (`UploadResult`), and the Pages function
+  passes it on. `SITE_FULL` is gone (the client matched the sentence); the
+  server's `error` is `siteFullMessage(full)`, English, for any reader that
+  doesn't know `full`.
+- Uploads: "The free site can't take more quizzes today. It takes new ones
+  again at 01:00 Swiss time." (the daily reset, as the allowance's `quota`
+  line says it; "00:00 UTC" without time zone data). Bytes: "The free site
+  has no room for another quiz right now. It takes one again once others
+  have ended or expired (two days after their last use)." The two days are
+  `INSTANCE_IDLE_MS`; a quiz in use stays. Both in the four languages
+  (`siteFull(full, at)` in `landing-text.ts`), under the same own-copy link.
+- `own-copy.html` (English only, as before): "When that is used up, it says
+  so and takes new quizzes again once the day turns or older quizzes have
+  expired." The own-copy line already said only "turned new quizzes away".
+- Not established: German, French and Italian wording by a native reader,
+  as with the rest of the landing. The two caps' wording was not shown in a
+  browser; the uploads cap is 300 a day, the bytes cap 1 GB, neither
+  reachable on a local stack without lowering them.
