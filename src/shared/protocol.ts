@@ -18,9 +18,8 @@
 import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
 import type { SiteFull } from "./limits.ts";
-import type { Tempo } from "./tempo.ts";
 
-export type { Answering, Avatar, Phase, Problem, Tempo };
+export type { Answering, Avatar, Phase, Problem };
 
 export type RoleName = "screen" | "remote";
 
@@ -41,38 +40,40 @@ export interface At {
   phase: Phase | "idle";
   current: number;
   /**
-   * The class was reading the question, its answers not yet shown (countdown
-   * tempos). Go and Reveal share a phase, so a doubled Go must not land as a
-   * Reveal. Absent: not compared (the picture's zoom; older pages).
+   * The class was reading the question, its answers hidden. Showing them,
+   * Last call, the lock-in and the reveal share a phase, so a press sent
+   * twice must not take two steps. Absent: not compared (the picture's zoom;
+   * older pages).
    */
   reading?: boolean;
-  /**
-   * The votes were on the wall, the key not yet (v2 item 6). The votes and
-   * the reveal are steps within one phase too: a doubled press must not show
-   * the key. Absent: not compared.
-   */
+  /** Answering was locked in, the spread on the wall and the key not yet (v2 item 6). Absent: not compared. */
   votes?: boolean;
+  /** Last call was running. Absent: not compared. */
+  lastCall?: boolean;
 }
 
 export type Command =
   // steering: the Remote, or the Projector while no Remote is there
   | { op: "begin"; at: At }
-  /** How the class answered goes on the wall, without the key; answering closes. The reveal follows. */
+  /**
+   * Play, the steering bar's step (backlog v4 item 6): one slice on from
+   * `at`. Show answers, Lock in, Reveal, Ranking, Next; the final ranking
+   * after the last question's reveal.
+   */
+  | { op: "play"; at: At }
+  /** Last call: the answers shown if they weren't, and fifteen seconds, then answering locks in by itself. */
+  | { op: "lastCall"; at: At }
+  /** Points for speed on or off, in the lobby (the join screen's switch). */
+  | { op: "speed"; value: boolean }
+  // A page from before the steering bar: Go shows the answers, the votes lock in.
+  | { op: "go"; at: At }
   | { op: "votes"; at: At }
-  /** The key: from the votes, or straight from the question (a page from before the votes step). */
+  /** The key: from the lock-in, or straight from answering (a page from before the lock-in). */
   | { op: "reveal"; at: At }
   | { op: "next"; at: At }
   | { op: "ranking"; at: At }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
-  /** Countdown tempos: the answers appear and the clock starts. */
-  | { op: "go"; at: At }
-  /** The answers stay open, or open again after time's up, without a clock. */
-  | { op: "stopClock"; at: At }
-  /** The class's tempo, in the lobby or for the questions to come. */
-  | { op: "tempo"; tempo: Tempo }
-  /** The teacher's −5/+5 (by: −5 or 5): the countdown on now, or the next one, and every one after. */
-  | { op: "nudge"; by: number }
   /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
   | { op: "again"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
@@ -85,6 +86,7 @@ export type Command =
   | { op: "remove"; player: string }
   | { op: "endInstance" }
   // the Projector: the clicker or keyboard's next usual step, at any time
+  // (a page from before the steering bar; now "play", also from the wall)
   | { op: "advance"; at: At }
   /** Projector or Remote, while both tabs are there: the wall becomes the steering tab and the steering tab the wall. */
   | { op: "swap" }
@@ -111,6 +113,17 @@ export type Command =
   | { op: "dress"; b: number; h: number };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
+
+/**
+ * The result of a tap's acknowledgement: what is stored for this player
+ * and question now, the choice in the order on screen; null for nothing.
+ * Whether this tap was taken or not, the tablet shows this as its accepted
+ * answer, the same record that scores (decisions.md, "The steering bar").
+ */
+export interface AnswerAck {
+  q: number;
+  record: { choice: number; seq: number } | null;
+}
 
 /**
  * What a teacher device that comes in with the teacher code does
@@ -200,15 +213,15 @@ export interface QuestionView {
   image: ImageRef | null;
   /** Behind the question: its own background, else the quiz's. */
   background: ImageRef | null;
-  /** Reading: the tiles keep their place, their text hidden until Go. */
+  /** Reading: the tiles keep their place, their text hidden until the answers are shown. */
   answering: Answering;
   clock: ClockView | null;
 }
 
 /**
- * A running countdown, or one whose time is up (leftMs 0). Device clocks
- * aren't synchronised: a device runs it from when the view arrived, so it
- * ends a moment after the server's, never before.
+ * Last call while it runs. Device clocks aren't synchronised: a device runs
+ * it from when the view arrived, so it ends a moment after the server's,
+ * never before.
  */
 export interface ClockView {
   ms: number;
@@ -255,7 +268,6 @@ export interface ScreenView {
   pictures: string[];
   /** The question's picture fills the screen. */
   zoom: boolean;
-  tempo: Tempo;
   phase: Phase | "idle";
   current: number;
   players: { id: string; avatar: Avatar }[];
@@ -291,8 +303,6 @@ export interface TeacherQuestion {
   void: boolean;
   skip: boolean;
   status: "upcoming" | "current" | "revealed" | "skipped";
-  /** Its countdown in seconds, should the class play with one: as written, moved by the teacher's −5/+5. */
-  seconds: number;
 }
 
 export interface TeacherView {
@@ -312,21 +322,16 @@ export interface TeacherView {
   remote: Presence;
   /** The question's picture fills the projector. */
   zoom: boolean;
-  /** The teacher's choice in the lobby, else the quiz's "Tempo:", else the teacher's pace. */
-  tempo: Tempo;
-  /** The quiz gives its own lengths ("Time:" lines). */
-  timed: boolean;
-  /** Seconds the teacher's −5/+5 moved the lengths by; 0: as written. */
-  adjust: number;
-  /** The length the −5/+5 pair shows and acts on: the countdown running, or the next to start; null: no pair. */
-  countdown: number | null;
-  /** The tempo the open question came up under (a change applies from the next one); null between questions. */
-  playing: Tempo | null;
-  /** The open question: being read, open, or closed until the reveal; null between questions. */
+  /** Points for speed, the join screen's switch. */
+  speed: boolean;
+  /** The open question: its answers hidden, open, or locked in until the reveal; null between questions. */
   answering: Answering | null;
-  /** The open question's votes are on the wall, its key not yet: the next step is the reveal. */
+  /** The open question is locked in, its spread on the wall and its key not yet: the next step is the reveal. */
   votes: boolean;
+  /** Last call, while it runs. */
   clock: ClockView | null;
+  /** No question comes after the current one: its reveal is followed by the final ranking. */
+  last: boolean;
   run: null | {
     n: number;
     total: number;
@@ -352,9 +357,10 @@ export interface PlayerView {
    */
   packs?: string[];
   /**
-   * answers: empty while the class reads the question (countdown tempos).
+   * answers: empty while the class reads the question, its answers hidden.
    * sinceMs: how long the answers had been showing when the view was made;
-   * the device adds its own time to it for the points for speed.
+   * the device adds its own time to it for the points for speed. mine: the
+   * stored answer, the one the tablet shows as accepted.
    */
   question: {
     q: number;
@@ -367,7 +373,7 @@ export interface PlayerView {
     answering: Answering;
     clock: ClockView | null;
     sinceMs: number | null;
-    /** The votes are on the wall: answering is closed, look up. */
+    /** Locked in, the spread on the wall: answering is closed, look up. */
     votes?: boolean;
   } | null;
   /** points: what the answer scored, with points for speed; null otherwise. */

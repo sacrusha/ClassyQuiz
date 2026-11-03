@@ -3797,3 +3797,260 @@ didn't, and what moved wasn't recorded (the walk prints it now).
 **Deploy:** no migration. `winners` is an optional field: a wall from
 before ignores it; a server from before sends none, and the wall shows no
 band.
+
+## 2026-11-03 — The steering bar; points for speed on the join screen; answers settle when the class leaves the reveal
+
+Serves: backlog v4 item 6 as settled on 2026-11-03, with the owner's
+revision of the bar the same evening (below); v1 item 15 ("an answer that
+looked in time counts": what the device shows as accepted and what is
+counted must agree); the score race of `docs/bugs.md`, designed out, not
+hunted. Replaces "Countdown and points for speed" (2026-11-02) and "The
+tempo by the owner's decomposition" (2026-11-03) wherever they speak of the
+tempo, the countdown, `Tempo:`/`Time:` and −5/+5; their device-time,
+alarm and scoring parts stand as amended here.
+
+**The states, every question.** No mode, no tempo: each question steps
+through the states that existed already, each by the teacher's press.
+- *Question*: the answers hidden while the teacher reads it out (the
+  countdown's reading state, now for every question); the tiles veiled on
+  the wall, the eye on the tablets.
+- *Answering*: the answers open.
+- *Locked in*: answering closed, the spread on the wall without the key
+  (the old "Show votes" state; the owner: gameshow words do better).
+- *Revealed*: the key and the winners' band.
+- *Ranking*.
+
+The blank state before the question stays skipped. The question-and-answers
+start is left to the later configuration item (presets), as the backlog says.
+
+**The bar, as the owner revised it.** Two buttons, the same size and in the
+same place in every state, on the Remote and on the wall's steering bar:
+- **Play ▶** steps one slice and is labelled with where it goes: *Show
+  answers*, *Lock in*, *Reveal*, *Ranking*, *Next*; after the last
+  question's reveal *Final ranking* (no intermediate ranking right before
+  the final one). The lobby keeps "Start quiz ▶", the final ranking "Again
+  with another class".
+- **Last call** in Question and Answering: from Question it shows the
+  answers too; fifteen seconds (`LAST_CALL_MS`), then answering locks in by
+  itself, with the spread on the wall, or sooner once everyone there has
+  answered (the countdown's rule, kept). While it runs it is greyed; where
+  it doesn't apply its place stays, invisible, so Play never moves. Lock in
+  during Last call ends it at once.
+- Reveal stays the teacher's press: Last call says "we're done answering",
+  never "show the key".
+- No fast-forward button (the owner's first draft had a blue one): a
+  deliberate double press of Play is the fast-forward (next).
+- Sizes: on the Remote Play takes the larger share, Last call 34 % of the
+  row beside ⋯, a label taking two lines rather than being cut on a narrow
+  phone. On the wall: Play 10.2em, Last call 8.4em at 18 px; on a
+  phone-sized wall 9.2em and 7.6em at 15 px, the address gone and below
+  380 px the code too ("Show answers" fits at 360 px; checked below).
+
+**Presses: what the 700 ms guard was for, and what replaces it.** The guard
+(`STEP_LOCK_MS`, 2026-11-02) wasn't for the network: every step command
+names the state it was pressed in (`At`), so a resend or a stale press is
+ignored whatever its timing. It was for the hand: a clicker pressed twice
+about 150 ms apart took two steps once the first step's view was back (Go,
+then the reveal before anyone answered). The owner's purpose for its
+replacement: a press in flow does what the teacher meant; a bounce, or a
+press landing on a screen that has just moved, does nothing; a deliberate
+double press fast-forwards. His observation: the screen moving is what
+misleads a hand, not the time since the press. Built (`client/steps.ts`,
+`Presses`, one per steering tab, shared by its buttons, its keys and the
+clicker):
+- *A bounce*: a press within `BOUNCE_MS` (80 ms) of the last is the same
+  press. Switch bounce and a clicker repeating its code are far below that;
+  a person's deliberate double press is not (double-clicks run about
+  150–300 ms; the 2026-11-02 clicker double was 150 ms).
+- *A double*: a second press within `DOUBLE_MS` (450 ms) of the first is
+  one gesture, made before the screen moved for the first or just as it
+  did: it steps once more, sent with the `At` of the state the first press
+  leads to, so the server takes it only after the first and only from
+  there. 450 ms is a little under the usual 500 ms double-click setting,
+  long enough for a hand that means it, short of a second, separate press.
+  One double is two slices; a third press in it does nothing.
+- *Never across a question's start*: a double whose first press goes from
+  Question (Show answers), or onto Question (Next), steps once. The second
+  slice there is never wanted: Lock in with nobody answered, or the
+  answers before anyone read the question. That is also the accident the
+  700 ms guard was built against.
+- *A press on a screen that just moved*: otherwise, a press within
+  `SETTLE_MS` (400 ms) of the screen moving does nothing. It is counted
+  from the view arriving, not from the press: on a slow line the screen
+  moves late, and a press just after it was aimed at what was there before.
+  The same holds when the screen moves by itself (Last call locking in, or
+  everyone in): a Lock in landing just then doesn't become a Reveal. 400 ms
+  is about a reaction time to a changed screen.
+- Last call and Start follow the bounce and the settle rules, and a Play
+  press right after Last call (within the double window) does nothing.
+- Accepted cost, the coordinator's: a hardware bounce slower than 80 ms in
+  Answering reveals instead of locking in. None is known; a clicker that
+  does it shows in the walk below as two steps.
+- The buttons are no longer disabled for 700 ms after a step: a disabled
+  button would swallow a double's second press.
+
+**Keys.** Space, Enter, →, ↓, PageDown and N are Play (the settled item
+had → as the blue button; with no blue button every forward key is Play).
+No key for Last call: a clicker has forward only, and a stray key must
+not start a clock (review C). Unchanged: no key starts the quiz, Ctrl/Alt/
+Windows keys do nothing, and while a Remote steers only a clicker's keys
+(PageDown, →, ↓) move on from the wall.
+
+**`Tempo:` and `Time:` leave the format, the parser, the lobby and the
+guidance; −5/+5 go with them.** A quiz an AI writes from a cached older
+guidance still carries them: the parser recognises both lines and drops
+them without a warning, as it drops `Note:` (a warning on the teacher's
+check would be noise about something the teacher can't act on). The
+guidance's Tempo paragraph and its format item are gone; the lesson
+paragraph describes the bar and Last call. The tempo sheet, the lobby's
+tempo line, the Remote's "Countdown [−5] ⏱ 25 s [+5]", ⋯'s "Stop the
+countdown" and "Open the answers again" are gone: with the clock the
+teacher's own press, there is nothing to stop.
+
+**Points for speed: the join screen's switch.** Under Start on the join
+screen and in the Remote's lobby (the check has no switch), off by default,
+fixed at Start (`setSpeed` refuses after it), carried over to "Again with
+another class". On, it says "A right answer 10, up to 5 more the quicker it
+comes." The reference time, which the backlog left to the implementer: a
+fixed `SPEED_REFERENCE_MS`, 20 s, counted from the answers appearing on the
+device (the old countdown's default length). Not the question's own time:
+the teacher's pace has none, and Last call starts whenever the teacher
+presses it, so a bonus by its share would reward the class the teacher
+hurried. From the answers appearing, not from the question: the reading
+happens while they are hidden, so a slow reader who listened starts level
+(the countdown's reasoning, kept). A tap after 20 s scores 10 and no bonus.
+Device time as before (capped by the server's count); the 10/5 ratio
+unchanged. `speedScale` is now the switch: no more rescaling of earlier
+questions, since it can't change mid-quiz.
+
+**The score race, designed out.** Seen twice in the simulator (bugs.md:
+one student 4 where 3 was expected; once in the countdown mode, 59 where
+45, one fast right answer with its bonus). What it was, from reading the
+code rather than hunting: a tap reached the server and was stored, and its
+acknowledgement was lost when the simulated tablet's socket closed right
+after sending it (15 % of taps drop the line just after sending). The
+server counted it at once; the tablet would only learn it on reconnecting,
+when its resend is confirmed. The simulator compared the scores 0.5 s after
+the final ranking, before the last drops had ended, so a tablet still
+asleep didn't yet know what the server counted. Under that sat two facts
+where there must be one: the acknowledgement of a command (this tap's
+fate, at that moment) and the stored record (which later taps and resends
+change), and a record that never settled (a tap from an open view counted
+whenever it arrived, after the final ranking too). Now, by construction:
+- *One fact: the stored record.* Each answer's acknowledgement carries the
+  record as it stands after the tap, `{q, record: {choice, seq}}` in screen
+  order (`AnswerAck`), whatever happened to this tap; the tablet's view
+  carries the same record (`mine`). The simulator's tablets copy what the
+  acknowledgements say is stored, instead of inferring it from which taps
+  were acknowledged.
+- *The tablet shows an answer as accepted only on the server's word.* A
+  tapped button is marked at once with a dashed, pulsing outline (on its
+  way); it turns solid when the tablet's view has it stored. Before, the
+  tap was shown as chosen at once, the same as stored. A refused tap falls
+  back to what the view says is stored. Only the marks change in place,
+  so a tap landing as the view arrives isn't swallowed by a redraw.
+- *The record settles when the class leaves the question's reveal* (the
+  ranking, the next question, the final ranking). Until then item 15's rule
+  holds: a tap made on a view that showed answering open counts when it
+  arrives, after the lock-in and during the reveal too, and the spread grows
+  by one. After it, nothing changes what the question scored except the
+  teacher's fixes. Before, such a tap counted however late, after the final
+  ranking too, so a podium could change after it was shown. A tablet whose
+  tap is still on its way when the class moves on showed it as on its way,
+  never as accepted, and it doesn't count: device and score agree.
+- *The simulator compares once every device is quiet*: the drops ended and
+  every command answered, then the scores. After the final ranking nothing
+  can change, so quiet is reachable and final. Also fixed in the simulator:
+  a frozen ("dead battery") device could still send a tap whose
+  acknowledgement it would ignore; a dead device now sends nothing.
+
+**Protocol and state.**
+- Commands: `play` (one slice from `at`), `lastCall`, `speed`. `At` gains
+  `lastCall`. Kept for a page from before: `begin`, `go` (shows the
+  answers), `votes` (locks in), `reveal` (also straight from answering),
+  `next`, `ranking`, `advance` (the old clicker: Play, and Next from the
+  reveal). Gone: `tempo`, `nudge`, `stopClock` (an old page gets "unknown
+  command").
+- `Run`: `speed`, `shown[q]` (when the answers appeared), `clocks[q]` (Last
+  call: `at`, `ms`), `opened` (questions come up, for the door); gone
+  `tempo`, `adjust`, `played`. `upgradeRun` reads a run stored before: the
+  tempo "speed" becomes the switch, a countdown's Go the answers' moment, a
+  closed countdown the lock-in, a question at the teacher's pace open from
+  when it came up, a running countdown a Last call of its length.
+- Views: the teacher's gains `speed` and `last` and loses `tempo`,
+  `timed`, `adjust`, `countdown`, `playing` and each question's `seconds`;
+  the wall's loses `tempo`; `clock` is Last call while it runs.
+- `shared/tempo.ts`: `LAST_CALL_MS`, `POINTS_RIGHT`, `SPEED_BONUS`,
+  `SPEED_REFERENCE_MS`, `speedBonus(ms)`.
+
+**Checked:**
+- Both typechecks; unit tests 101. New or rewritten: Play's walk from the
+  hidden answers to the final ranking (no ranking before it), the old
+  clicker's walk; lock-in not while hidden, no key before the answers,
+  Reveal straight from answering; Last call from the question and from
+  answering, once per question, its deadline, time's up locking in with the
+  spread, a tap on the older view counting and one on the locked view not,
+  Lock in during it; a tap counting during the reveal, refused once the
+  class moved on or at the ranking, a resend of what is stored still
+  confirmed, the record the acknowledgement carries; points for speed by
+  the fixed reference, the switch only in the lobby, carried to the next
+  class, 1 point without it; the device's time capped; a run stored before
+  read as one after; `Tempo:`/`Time:` dropped without a warning; the
+  presses (`client/steps.test.ts`): Play's labels, a bounce, a double from
+  Answering, Locked and Revealed (before and after the screen moved),
+  none from Question or onto it, a third press, a press on a screen that
+  moved late on a slow line, Last call then Play.
+- `scripts/simulate.mjs`, plain, `--all-poll` and `--speed` (the old
+  `--tempo`, renamed; it still answers to the old name), all passing:
+  every question opens with its answers hidden and no tablet has them;
+  each press sent twice from one state takes one step (Play, Last call, the
+  old Next); a double press of two commands takes two (from the reveal:
+  the ranking and the next question; from answering: the lock-in and the
+  reveal); Last call from answering and from the hidden answers, locking in
+  by everyone in and, with one child leaving a question alone, by its
+  fifteen seconds (`--all-poll` and `--speed`: once each), on time; a page
+  from before (Go, then Reveal straight from answering); a tap made offline
+  counting when it arrives during the reveal, and one arriving after the
+  class left the reveal refused; the wall's winners after every reveal;
+  speed switched on in the lobby and refused after Start; the scores
+  compared once every device was quiet. `--all-poll` made 1520 HTTP
+  requests (822 on the votes branch, 2026-11-03; not like for like: this
+  run steps each question through four or five states instead of three,
+  each a view to every device, two requests each on long-polling, and it
+  waits out one Last call).
+- Headless Edge through the real pages (`.tmp/shots-tool/bar-walk.mjs`):
+  91 checks, all passed, no page errors.
+  A 1366×768 wall with a phone Remote (390 px), a real tablet and three
+  bots: a quiz still carrying `Tempo:`/`Time:` uploads without a warning;
+  no tempo or −5/+5 anywhere; the switch off, then on, saying what it does;
+  every question opening hidden on the wall, the eye on the tablet; Play
+  reading Show answers, Lock in, Reveal, Ranking, Next in turn, Last call
+  on, greyed while running, absent where it doesn't apply; a double press
+  from Question showing the answers only, from Locked revealing and showing
+  the ranking, from the ranking bringing up the next question only; the
+  tablet's tap dashed first, solid once stored; Last call from Question
+  with the bar on the wall and the tablet, locking in once all were in; the
+  verdict following the stored answer; on the wall, a clicker's PageDown as
+  Play with a bounce 30 ms later stepping once, Space doing nothing while
+  the Remote steers; Play and Last call in the same place and size in every
+  state (Remote: 160×64 and 122×64). A 360 px phone wall steering itself:
+  no switch on the check, the switch under Start on the join screen, every
+  label whole, both buttons on screen, no sideways scroll, the same place
+  in every state (114 and 138 px). A 1366 wall steering itself: Space as
+  Play, a double → from answering locking in and revealing.
+  The phone wall's ranking was wider than the screen, so the page zoomed
+  out and the steering bar left it: the percentage is now at most 17vw
+  (no change at projector widths, where 6em is about 9.6vw).
+
+**Not established:** whether teachers find Last call and use it, and
+whether fifteen seconds is right; whether a deliberate double press is
+found at all, and whether 450/400 ms suit a real clicker and a real hand
+(only headless timing so far); whether the dashed "on its way" outline is
+noticed, or needed, on school Wi-Fi; whether 20 s as the speed reference
+suits questions much longer than that (every slow right answer scores 10).
+The older walks in `.tmp/shots-tool/` press the old buttons (Show votes,
+Go, −5/+5) and no longer fit the pages.
+
+**Deploy:** no migration. Runs stored before read as above. The Worker
+deploys first, as `npm run deploy` does; a cached page from before keeps
+working through the old commands, without Last call.

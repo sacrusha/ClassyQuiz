@@ -562,6 +562,16 @@ lifetime; the avatars (item 9) fit B as client-side work.
    relative, never seconds. Points for speed survive as a lobby switch; its
    reference time (answers shown?) is the implementer's to size. The existing
    countdown code is the subset the button needs — good enough to forge from.
+   As built on branch `tempo-bar` (decisions.md, "The steering bar"), with
+   the owner's revision of the bar: Play ▶ one slice, labelled with where it
+   goes (Show answers, Lock in, Reveal, Ranking, Next), and Last call its own
+   button in Question and Answering; no fast-forward button: a deliberate
+   double press of Play steps twice, except across a question's start; every
+   forward key is Play. Points for speed: the join screen's switch, by a
+   fixed 20 s from the answers appearing. The score race: answers settle
+   when the class leaves the reveal, the tablet shows an answer accepted only
+   once the server has it, and the simulator compares once every device is
+   quiet.
 8. **After upload** — the flow from upload to Start, designed in
    `docs/after-upload.md` (draft 5 is the design). Owner's
    decomposition: opening a quiz has two uses — run through it in the real
@@ -667,7 +677,8 @@ The quiz is already made; it can be more than one activity.
 `docs/bugs.md` is the implementers'; here only what the owner has ruled. The
 score race was seen a second time, in the simulator's tempo mode. B's Tempo
 rework is where it gets designed out, per the owner — a race is solved by
-architecture, not debugging.
+architecture, not debugging. Designed out on branch `tempo-bar`
+(decisions.md, "The steering bar"); removed from bugs.md.
 
 ## Open decisions and checks, at the close of 2026-11-03
 
@@ -696,7 +707,8 @@ With the owner:
 Needs a real classroom or real devices, nobody has run it:
 - Android tablets and phones: the file picker with a zip, a killed browser tab
   bringing back its role, the bar and the answered avatars from the back row,
-  −5/+5 during a countdown, whether children dress their avatars.
+  the steering bar's double press with a real clicker and hand, whether
+  children dress their avatars.
 - The school's Wi-Fi, through /check.
 - The platform's wording when the free allowance is spent.
 

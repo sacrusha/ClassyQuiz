@@ -76,7 +76,13 @@ const bannerWords = document.createElement("span");
 bannerWords.hidden = true;
 bannerWords.textContent = unreachedText();
 banner.append(bannerWords);
-/** The last tap, until the server confirms it. It counts when it arrives, even after the reveal. */
+/**
+ * The last tap, until the server's view shows it stored (or the server
+ * refused it). Until then the button shows it on its way, never as
+ * accepted: what the tablet shows as accepted is the server's record, the
+ * one that scores (decisions.md, "The steering bar"). It counts if it
+ * arrives while the question is still on screen.
+ */
 let waiting: { q: number; choice: number } | null = null;
 /**
  * This page played as an avatar another device has since taken back: it
@@ -92,7 +98,7 @@ let refused: { reason: string; phase: string } | null = null;
  * on this device, so a slow line costs no speed.
  */
 let shown: { q: number; at: number } | null = null;
-/** The countdown ran out on this device: the buttons stop taking taps until the server says otherwise. */
+/** Last call ran out on this device: the buttons stop taking taps until the server says otherwise. */
 let outTimer: number | undefined;
 /**
  * Dressing the animal in the lobby (backlog v2 item 5, docs/avatars.md):
@@ -256,14 +262,24 @@ function onMessage(m: ServerMessage): void {
     // device's own view changed, or a tap could land on a button being
     // replaced and get lost.
     const k = viewKey(m.view);
+    const before = view;
     view = m.view;
     const q = view.question;
+    // The server's word on the last tap: stored, so no longer on its way.
+    const stored = view.reveal ? view.reveal.mine : q?.mine;
+    if (waiting && q && waiting.q === q.q && stored === waiting.choice) waiting = null;
     // Answer pictures: fetched as soon as a view names them, in the lobby.
     wantPacks(view.packs, packsArrived);
     // A picture answer's time for speed runs from when its pictures are here.
     if (q && q.answering !== "reading" && q.sinceMs !== null && shown?.q !== q.q && picturesHere(q.pics)) shown = { q: q.q, at: performance.now() - q.sinceMs };
     if (k === lastKey) return;
     lastKey = k;
+    // Only the stored answer changed while the buttons are up: they are marked
+    // in place, since a redraw could swallow a tap landing just then.
+    if (before && onlyMineChanged(before, view) && main.querySelector(".buttons")) {
+      markChosen();
+      return;
+    }
     render();
   } else if (m.t === "gone") {
     store.remove(key);
@@ -520,6 +536,33 @@ function chosenPicture(i: number): string {
   return p ? `<div class="row" style="justify-content:center"><div class="verdict-pic a${i}">${packImg(p)}</div></div>` : "";
 }
 
+/** The answer the buttons show as chosen: the stored one, or the last tap on its way (sending). */
+function chosen(q: NonNullable<PlayerView["question"]>): { mine: number | null; sending: boolean } {
+  if (waiting && waiting.q === q.q && waiting.choice !== q.mine) return { mine: waiting.choice, sending: true };
+  return { mine: q.mine, sending: false };
+}
+
+/** The buttons' marks, in place: the stored answer, or the tap on its way. */
+function markChosen(): void {
+  const q = view?.question;
+  const box = main.querySelector<HTMLElement>(".buttons");
+  if (!q || !box) return;
+  const { mine, sending } = chosen(q);
+  box.classList.toggle("chosen", mine !== null);
+  box.querySelectorAll<HTMLElement>(".ansbtn").forEach((b) => {
+    const i = Number(b.dataset.i);
+    b.classList.toggle("mine", i === mine);
+    b.classList.toggle("sending", i === mine && sending);
+  });
+}
+
+/** The two views differ only in the stored answer of the open question (the buttons can stay). */
+function onlyMineChanged(a: PlayerView, b: PlayerView): boolean {
+  if (a.phase !== "question" || b.phase !== "question" || !a.question || !b.question || a.question.q !== b.question.q) return false;
+  const strip = (x: PlayerView) => viewKey({ ...x, question: { ...x.question!, mine: null } });
+  return strip(a) === strip(b);
+}
+
 function render(): void {
   const v = view;
   if (!v) return;
@@ -555,18 +598,16 @@ function render(): void {
   if (v.phase === "question" && v.question) {
     const q = v.question;
     const n = q.answers.length;
-    // Time's up, here or on the server: the buttons stay, the chosen one
-    // marked, and take no more taps. A tap still on its way shows as chosen.
-    // Keyed by the length too: the teacher's −5/+5 can change a running countdown.
+    // Locked in, or Last call run out here: the buttons stay, the chosen one
+    // marked, and take no more taps. A tap still on its way shows as on its way.
     const end = q.clock ? localEnd(`${v.current}|${q.clock.ms}`, q.clock) : null;
     const out = q.answering === "closed" || (end !== null && end <= performance.now());
-    const pending = waiting && waiting.q === q.q ? waiting.choice : null;
-    const mine = out && pending !== null ? pending : q.mine;
+    const { mine, sending } = chosen(q);
     const pics = q.pics;
     main.innerHTML = `${top}${q.clock && end !== null ? clockBar(q.clock.ms, end) : ""}<div class="buttons n${n}${pics ? " pics" : ""}${mine !== null ? " chosen" : ""}${out ? " closed" : ""}">
       ${q.answers
         .map((a, i) => {
-          const sel = mine === i ? " mine" : "";
+          const sel = mine === i ? (sending ? " mine sending" : " mine") : "";
           if (!pics) return `<button class="ansbtn a${i}${sel}" data-i="${i}">${shapeSvg(i)}<span>${lines(a)}</span></button>`;
           const p = pics[i];
           return `<button class="ansbtn pic col a${i}${sel}" data-i="${i}">${shapeSvg(i)}<span class="apic${p ? "" : " text"}">${p ? packImg(p) : `<span>${lines(a)}</span>`}</span></button>`;
@@ -575,7 +616,7 @@ function render(): void {
     </div>`;
     if (pics) arrangePictureButtons(main.querySelector<HTMLElement>(".buttons")!, pics);
     if (out) {
-      // The votes on the wall: look up. Otherwise the countdown ran out.
+      // Locked in, the spread on the wall: look up. Otherwise Last call ran out here.
       main.querySelector(".top")?.insertAdjacentHTML("beforeend", q.votes ? `<span class="timeup look">${ICON.eye}</span>` : `<span class="timeup">${ICON.timer}</span>`);
       return;
     }
@@ -593,27 +634,21 @@ function render(): void {
         const choice = Number(b.dataset.i);
         // The same button again changes nothing; it isn't sent (children
         // hammer buttons, and each stored tap is spent from the site's day).
-        if (q.mine === choice) return;
-        const before = q.mine;
-        // Shown at once; the line delivers it, resending until the server confirms.
-        q.mine = choice;
-        lastKey = viewKey(view!);
+        if (chosen(q).mine === choice) return;
         const ms = shown && shown.q === q.q ? Math.round(performance.now() - shown.at) : undefined;
-        render();
+        // Shown at once as on its way; as accepted once the server's view
+        // has it. The line delivers it, resending until the server answers.
         const tap = { q: q.q, choice };
         waiting = tap;
+        markChosen();
         void line!.send({ op: "answer", q: q.q, choice, seq: Date.now(), v: v.v, ms }).then((a) => {
           if (waiting !== tap) return;
+          // Taken: its view says so (above). Not taken (too late, too many
+          // changes of mind): the device shows what is stored, as its view has it.
+          if (a.ok) return;
           waiting = null;
-          // Not taken (e.g. too many changes of mind): the device shows what counts.
-          const current = view?.question;
-          if (!a.ok && current && current.q === tap.q && current.mine === choice) {
-            current.mine = before;
-            lastKey = viewKey(view!);
-          }
-          // During the question the buttons stay as they are: a redraw could
-          // swallow a tap. Once answering has closed there is none to swallow.
-          if (!a.ok || view?.phase === "reveal" || view?.question?.answering === "closed") render();
+          if (main.querySelector(".buttons")) markChosen();
+          else render();
         });
       }),
     );
