@@ -3,7 +3,7 @@
 Project → versions as goals → items that get picked, worked and delivered. Each
 item names the problem it solves for the teacher or the class; the versions tell
 the story of what comes before and after. Items get resorted, split and combined
-as understanding grows. Last settled: 2026-11-03.
+as understanding grows. Last settled: 2026-11-04.
 
 ## Project
 
@@ -315,17 +315,25 @@ the teacher code are one story. Tempo text as the site works today. B — the
 Tempo bar (6), the points-for-speed switch and the "upload is start"
 lifetime (3); server-side. A is three implementers' worth and gets a review
 before the owner deploys. The landing story is in `docs/landing-story.md`.
-Where it stands at the close of 2026-11-03: A is built and reviewed on main at
-20cab09 — the guidance rewrite cut to the facts, the after-upload flow, the
-landing page, review D (`docs/reviews/2026-11-03-review-d.md`) and its five
-fixes — and waits for the owner's deploy from the clean worktree. Deploy note:
-the Pages project gains a BUDGET binding to the state Worker's SiteBudget; no
-migration; the Worker deploys first, as `npm run deploy` already does. After A
-is live: the free-tier sitting (`docs/free-tier-check.md`), the owner's sheet
-photographs replacing the strip's rendered frame 1, and the storyboard video
-from the real screens (landing story §5), which needs the new join screen for
-its first beat. B: the Tempo bar, the points-for-speed switch, the
-lifetime; the avatars (item 9) fit B as client-side work.
+Where it stands at the close of 2026-11-04: A, the avatars (item 9) and the
+steering bar (item 6) are live — the tenth deploy, 56ebf87
+(`docs/deploy-log.md`). B's remainder: the lifetime (item 3), and review E's follow-ups on the bar
+(`docs/reviews/2026-11-04-review-e.md`):
+- an accidental Last call can't be cancelled; the old bar had "Stop the
+  countdown";
+- a press blocked by the settle window gives no feedback, and the 80/450/400 ms
+  timings need a real hand, clicker and phone;
+- the guidance doesn't yet say every question opens with its answers hidden;
+- `Tempo:` and `Time:` are dropped silently where the item said they leave the
+  parser;
+- stale "Go" / "countdown" / "Show votes" words in code comments and in
+  `user-flow.md`, `second-teacher-device.md` and the landing story's
+  storyboard;
+- the capacity sentence ("a few dozen classes a day", landing and /own-copy) is
+  not re-derived now that a question has four or five steps;
+- a 320 px wall still clips the ranking.
+Later, unplaced, unchanged. With the owner, after this deploy: the list under
+"Open decisions and checks".
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -547,10 +555,6 @@ lifetime; the avatars (item 9) fit B as client-side work.
    a tap as accepted only on that record, and as on its way until then; the
    simulator checks scores once every device is quiet. What the tablet shows
    and what the server counts are one fact by construction.
-   A first build on branch `tempo-bar` was given these decisions piecemeal
-   while in flight; a fresh implementer restarts from this item and reads
-   that branch's decisions entry only for what it learnt. Delivery B is this,
-   the lifetime (item 3) and the avatars (item 9, in progress).
    History, the earlier conclusion this replaces: the solution to beat before
    any complexity is justified was an "end question in 15 seconds" button on
    each question — the teacher's pace by default, the energy moment when the
@@ -562,16 +566,14 @@ lifetime; the avatars (item 9) fit B as client-side work.
    relative, never seconds. Points for speed survive as a lobby switch; its
    reference time (answers shown?) is the implementer's to size. The existing
    countdown code is the subset the button needs — good enough to forge from.
-   As built on branch `tempo-bar` (decisions.md, "The steering bar"), with
-   the owner's revision of the bar: Play ▶ one slice, labelled with where it
-   goes (Show answers, Lock in, Reveal, Ranking, Next), and Last call its own
-   button in Question and Answering; no fast-forward button: a deliberate
-   double press of Play steps twice, except across a question's start; every
-   forward key is Play. Points for speed: the join screen's switch, by a
-   fixed 20 s from the answers appearing. The score race: answers settle
-   when the class leaves the reveal, the tablet shows an answer accepted only
-   once the server has it, and the simulator compares once every device is
-   quiet.
+   Built as settled, reviewed (review E: merge, no severe findings) and live
+   since the tenth deploy (`decisions.md`, "The steering bar"). The race is
+   designed out: answers settle when the class leaves the reveal,
+   acknowledgements carry the stored record, a tapped button is dashed until
+   the server's view has it. Two choices of the implementer's, for the owner:
+   Last call locks in early once everyone present has answered; points for
+   speed uses a fixed 20 s from the answers appearing. What is left of the bar
+   is review E's list, under the delivery plan above.
 8. **After upload** — the flow from upload to Start, designed in
    `docs/after-upload.md` (draft 5 is the design). Owner's
    decomposition: opening a quiz has two uses — run through it in the real
@@ -634,6 +636,12 @@ lifetime; the avatars (item 9) fit B as client-side work.
    and left the call to the owner, still open.
    Winners jump after every reveal, including the ones where most of the class
    got it right; that they are then hard to make out is accepted.
+   Built and live (tenth deploy): the winners' band above the stage for about
+   four seconds after every reveal, the lobby clip given room so a wiggle isn't
+   cut, the lion's mane reduced so the star reads. The weak spot is a short
+   question beside its picture, where ten winners come out small because the
+   key stays visible. Whether four seconds is long enough for a child to find
+   themselves is for the owner; tools are still the owner's open call.
 
 ## Later — Paper and memory
 
@@ -677,12 +685,24 @@ The quiz is already made; it can be more than one activity.
 `docs/bugs.md` is the implementers'; here only what the owner has ruled. The
 score race was seen a second time, in the simulator's tempo mode. B's Tempo
 rework is where it gets designed out, per the owner — a race is solved by
-architecture, not debugging. Designed out on branch `tempo-bar`
-(decisions.md, "The steering bar"); removed from bugs.md.
+architecture, not debugging. Designed out in the steering bar,
+live since the tenth deploy (decisions.md, "The steering bar"); removed from
+bugs.md.
 
-## Open decisions and checks, at the close of 2026-11-03
+## Open decisions and checks, at the close of 2026-11-04
 
-With the owner:
+With the owner, after the tenth deploy:
+- The free-tier sitting (`docs/free-tier-check.md`) — the free account, with its owner;
+  the two free-tier bullets below say what it settles.
+- The sheet photographs in daylight, replacing the strip's rendered first
+  frame.
+- The storyboard video from the real screens (`.tmp/example/v2-*/screens/`,
+  landing story §5); its first beat needs a screen of the new join screen.
+- A read of the German "du" and French "vous" and the translations' nits.
+- The personal line in step 1, if wanted.
+- The bar's timings with a real clicker.
+
+Also with the owner:
 - Standing authorization for implementers' branches and merges to main,
   the owner's rule: commit in meaningful, likely working units, no churn
   commits, and squash what slips.
@@ -719,8 +739,22 @@ points for speed with the quiz carrying its tempo and −5/+5 in the run (revise
 by v4 item 6), votes
 before the answer, answered avatars on the wall, a second teacher device from
 the wall, avatars the children dress, the landing page by attention budget,
-zip only, and /own-copy. Left in Later: printables, corrected quiz download,
-results export, localization, formula rendering, pictures for a teacher whose
-AI can't make a zip, sound, pairs and teams; v3 item 2, placement beyond the
-named layouts.
+zip only, and /own-copy; since the tenth deploy, delivery A (the guidance
+rewrite, the after-upload flow with the teacher code, the landing page), the
+steering bar and the winners' band. Left in Later: printables, corrected quiz
+download, results export, localization, formula rendering, pictures for a
+teacher whose AI can't make a zip, sound, pairs and teams; v3 item 2,
+placement beyond the named layouts.
 
+## Housekeeping and process, for the next session
+
+- The merged worktrees under `.worktrees/` (guidance, after-upload, landing,
+  review-d-fixes, owner-five, winners-jump, tempo-bar) can be removed.
+- The deploy worktree is at 56ebf87; the credentials stay in the main
+  checkout's `secrets/`.
+- This session's scratchpad tooling and shots are copied to
+  `.tmp/session-2026-11-03/`.
+- Process, the owner's words this session, for whoever orchestrates next:
+  delegate on purpose and situation, not steps; no spec changes to an agent in
+  flight — settle the item first, then brief a fresh one; no runs whose outcome
+  is already known; a backlog edit rides with the delivery it belongs to.
