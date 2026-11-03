@@ -137,6 +137,13 @@ export interface Run {
    * step it was enlarged in, so moving on (or revealing) ends it by itself.
    */
   zoom?: string;
+  /**
+   * The question whose votes are on the wall, its key not yet shown (backlog
+   * v2 item 6): answering is closed, and the next step is the reveal. Only
+   * meaningful while that question is the open one; the run only moves
+   * forward, so an index left from an earlier question never matches.
+   */
+  votes?: number;
 }
 
 export interface Game {
@@ -303,7 +310,36 @@ export function begin(g: Game, now: number): void {
   open(g, run, nextShown(g, -1), now);
 }
 
-/** `view`: the version of the first view that will show the reveal. */
+/**
+ * The teacher's first step after answering (backlog v2 item 6): how the class
+ * answered goes on the wall, without the key. Answering closes, as at time's
+ * up, so nobody copies the majority; `view` is the version of the first view
+ * that shows it closed, and a tap made on an older one still counts (v1 item
+ * 15). The reveal, the next step, adds the key.
+ */
+export function showVotes(g: Game, view: number): void {
+  const run = needRun(g);
+  if (run.phase !== "question") throw new GameError("There is no open question.");
+  if (answering(g) === "reading") throw new GameError("The answers aren't shown yet.");
+  if (votesShown(g)) return;
+  const clock = runningClock(g);
+  if (clock) clock.closed = true;
+  (run.closedView ??= {})[run.current] ??= view;
+  run.votes = run.current;
+  // An enlarged picture would cover the votes; the reveal ends it the same way.
+  delete run.zoom;
+}
+
+/** The open question's votes are on the wall, its key not yet. */
+export function votesShown(g: Game): boolean {
+  const run = g.run;
+  return !!run && run.phase === "question" && run.votes === run.current;
+}
+
+/**
+ * `view`: the version of the first view that will show the reveal. From the
+ * votes, or straight from the question (a page from before the votes step).
+ */
 export function reveal(g: Game, view: number): void {
   const run = needRun(g);
   if (run.phase !== "question") throw new GameError("There is no open question to reveal.");
@@ -411,6 +447,7 @@ export function nudge(g: Game, by: number, now: number, view: number): void {
 export function answering(g: Game): Answering | null {
   const run = g.run;
   if (!run || run.phase !== "question" || run.current < 0) return null;
+  if (run.votes === run.current) return "closed";
   const clock = run.clocks?.[run.current];
   if (clock) return clock.closed ? "closed" : "open";
   return playedAt(g, run.current) === "pace" ? "open" : "reading";
@@ -453,6 +490,8 @@ export function stopClock(g: Game): void {
   const run = needRun(g);
   const clock = run.phase === "question" ? run.clocks?.[run.current] : undefined;
   if (!clock) throw new GameError("No countdown is running.");
+  // The votes are on the wall: answering again after seeing them would copy the majority.
+  if (votesShown(g)) throw new GameError("The votes are on the wall: show the answer next.");
   clock.stopped = true;
   if (clock.closed) {
     delete clock.closed;
@@ -486,6 +525,7 @@ export function advance(g: Game, now: number, view: number): void {
   const run = needRun(g);
   if (run.phase === "lobby") begin(g, now);
   else if (run.phase === "question" && answering(g) === "reading") go(g, now);
+  else if (run.phase === "question" && !votesShown(g)) showVotes(g, view);
   else if (run.phase === "question") reveal(g, view);
   else if (run.phase === "reveal" || run.phase === "ranking") next(g, now);
 }

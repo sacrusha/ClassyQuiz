@@ -5,6 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";
 import * as G from "./game.ts";
+import { speedBonus } from "../shared/tempo.ts";
 
 const quiz = parseQuiz(`Title: T
 1. One?
@@ -153,14 +154,75 @@ test("a removed avatar leaves the counts and the ranking", () => {
   assert.deepEqual(G.standings(g).map((s) => s.id), [ids[0]]);
 });
 
-test("the clicker key walks lobby → question → reveal → next", () => {
+test("the clicker key walks lobby → question → votes → reveal → next", () => {
   const { g } = setup(0);
   G.advance(g, 0, 10);
   assert.equal(g.run!.phase, "question");
   G.advance(g, 1, 10);
+  assert.deepEqual([g.run!.phase, G.votesShown(g)], ["question", true]);
+  G.advance(g, 2, 11);
   assert.equal(g.run!.phase, "reveal");
-  G.advance(g, 2, 10);
-  assert.deepEqual([g.run!.phase, g.run!.current], ["question", 1]);
+  G.advance(g, 3, 12);
+  assert.deepEqual([g.run!.phase, g.run!.current, G.votesShown(g)], ["question", 1, false], "the next question opens without its votes");
+});
+
+// ---------------------------------------------------------------------------
+// Spread, then key (backlog v2 item 6)
+
+test("votes: answering closes without the key; a tap made before still counts; the reveal adds the key", () => {
+  const { g, ids } = setup(3);
+  G.begin(g, 0);
+  assert.equal(G.answer(g, ids[0], 0, 0, 1, 5, 100), true);
+  G.showVotes(g, 7);
+  assert.equal(g.run!.phase, "question", "the votes are not the reveal");
+  assert.equal(G.answering(g), "closed");
+  assert.deepEqual(G.distribution(g, 0), [1, 0, 0]);
+  assert.equal(G.answer(g, ids[1], 0, 1, 1, 6, 200), true, "tapped on a view that still showed the answers open: counts");
+  assert.deepEqual(G.distribution(g, 0), [1, 1, 0], "and joins the votes on the wall");
+  assert.equal(G.answer(g, ids[2], 0, 0, 1, 7, 300), false, "tapped once the device showed the votes: doesn't");
+  assert.equal(G.answer(g, ids[0], 0, 2, 2, 7, 300), false, "nor a change of mind");
+  assert.equal(score(g, ids[0]), 0, "nothing scores before the key");
+  G.showVotes(g, 8);
+  assert.equal(g.run!.closedView![0], 7, "a second press changes nothing");
+  G.reveal(g, 9);
+  assert.equal(g.run!.phase, "reveal");
+  assert.equal(g.run!.closedView![0], 7, "the reveal keeps the votes' view");
+  assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [1, 0]);
+});
+
+test("votes: not while the class reads; the reveal straight from the question still works (a page from before the votes)", () => {
+  const { g } = setup(1);
+  G.setTempo(g, "countdown");
+  G.begin(g, 0);
+  assert.throws(() => G.showVotes(g, 1), G.GameError);
+  G.go(g, 10);
+  G.reveal(g, 2);
+  assert.equal(g.run!.phase, "reveal");
+  assert.throws(() => G.showVotes(g, 3), G.GameError, "no votes after the key");
+});
+
+test("votes during a countdown: the clock stops, it can't be reopened, the −5/+5 moves to the next question", () => {
+  const { g, ids } = setup(2, 20);
+  G.setTempo(g, "speed");
+  G.begin(g, 0);
+  G.go(g, 0);
+  assert.equal(G.answer(g, ids[0], 0, 0, 1, 1, 4000, 4000), true);
+  G.showVotes(g, 5);
+  assert.equal(G.deadline(g), null, "no time's up after the votes");
+  assert.equal(G.runningClock(g), null);
+  assert.throws(() => G.stopClock(g), G.GameError, "answering again after the votes would copy the majority");
+  assert.equal(G.nudgeTarget(g)?.q, 1);
+  G.reveal(g, 6);
+  assert.equal(score(g, ids[0]), 10 + speedBonus(4000, 20_000), "the clock's length still sets the bonus");
+});
+
+test("votes, then the final ranking now: a question whose key wasn't shown doesn't count", () => {
+  const { g, ids } = setup(1);
+  G.begin(g, 0);
+  G.answer(g, ids[0], 0, 0, 1, 1, 10);
+  G.showVotes(g, 2);
+  G.finish(g, 20);
+  assert.equal(score(g, ids[0]), 0);
 });
 
 test("avatars: the first dozen players all get different animals", () => {
@@ -268,7 +330,10 @@ Image: c.png
   G.begin(g, 0);
   G.setZoom(g, true);
   assert.equal(G.zoomed(g), true);
-  G.reveal(g, 1);
+  G.showVotes(g, 1);
+  assert.equal(G.zoomed(g), false, "the votes show the tiles again");
+  G.setZoom(g, true);
+  G.reveal(g, 2);
   assert.equal(G.zoomed(g), false, "the reveal shows the tiles again");
   G.setZoom(g, true);
   G.setZoom(g, false);
@@ -336,8 +401,10 @@ test("countdown: the question first, Go opens the answers, time's up closes them
   assert.equal(G.answer(g, ids[1], 0, 0, 1, 4, 10_300, 9_900), true, "tapped on a view that still showed the answers open: counts");
   assert.equal(G.answer(g, ids[1], 0, 1, 2, 5, 10_400), false, "tapped once the device showed time's up: doesn't");
   G.advance(g, 11_000, 6);
+  assert.deepEqual([g.run!.phase, G.votesShown(g)], ["question", true], "after time's up the clicker shows the votes");
+  G.advance(g, 11_500, 7);
   assert.equal(g.run!.phase, "reveal");
-  assert.equal(g.run!.closedView![0], 5, "the reveal keeps the close's view");
+  assert.equal(g.run!.closedView![0], 5, "the votes and the reveal keep the close's view");
   assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [1, 1], "without points for speed a right answer is 1, as before");
 });
 

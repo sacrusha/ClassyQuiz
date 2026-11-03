@@ -2575,6 +2575,136 @@ follow each delete down to an empty list.
 to the site", the paragraph on what assistants can't do). An AI relaying
 that sends the teacher looking for "Open"; "uploads" matches the button.
 
+## 2026-11-03 — Spread, then key; who has answered, on the wall
+
+Serves: backlog v2 items 6 and 7, together, since both live between a
+question and its key; v1 items 5 ("exposes nobody"), 6 (the teaching
+moment), 9 (fixing a question) and 15 (a tap that looked in time counts).
+The landscape doc's requirements 2 and 3. The product owner settled the
+three open points within the owner's words (below); he relays to the owner.
+
+**What was already there.** The Remote showed the live counts beside the
+key during the question, and "18 of 22 answered · 1 away". So a teacher
+with a phone could already see a broken question before the key. The wall
+showed only "answered / players", away devices included, and the tablet
+marks a tap chosen at once, delivered or not: nothing told a child their
+answer had arrived.
+
+**The steps.** After the question (and Go, with a countdown) the teacher
+presses twice. Fixed sequence, both presses the teacher's, countdown or
+not (product owner): the wall never changes while the teacher is
+mid-sentence, the clicker has one key, and the owner wants few elements.
+One more press per question is the price of the teaching moment.
+
+| Step | Wall | Tablets | Steering tab |
+|---|---|---|---|
+| Show votes | each tile's count and bar; no tick, nothing faded | buttons locked, the choice marked, 👁 | "The votes are on the wall, without the right answer"; **Show answer** |
+| Show answer | the tick, the others faded | ✓ or ✗ (+points) | Ranking, Next |
+
+- **The votes close answering**, like time's up, so nobody copies the
+  majority (Socrative's advice for its pause). `Run.closedView` takes the
+  votes' view, so a tap made on an older view still counts when it arrives
+  (item 15), and the votes on the wall grow by one.
+- **No re-vote** (product owner): ⋯ doesn't offer "Open the answers again"
+  at the votes, and `stopClock` refuses there.
+- **The clock** stops at the votes: no time's up after them, no bar, no
+  timer mark. Points for speed still use its length. The −5/+5 pair moves
+  to the next question.
+- **"Final ranking now" at the votes**: the question doesn't count, as
+  before for any question whose key wasn't shown.
+- **An enlarged picture** goes back beside the question at the votes, as
+  it does at the reveal: it would cover the votes.
+- **Button words:** "Show votes" (a bars icon) and "Show answer" (the ✓).
+  They fit the wall's steering bar at 360 px with the −5/+5 pair.
+- **State:** `Run.votes`, the index of the question whose votes are up;
+  the phase stays `question`. `answering()` reads it as closed. Command
+  `votes`; `At.votes` keeps a doubled press from landing on the key, as
+  `At.reading` does for Go. The clicker's `advance` goes reading → Go →
+  votes → reveal → next.
+- **Pages from before the deploy:** an old Remote's Reveal goes straight to
+  the key (`reveal` still works from the question); an old tablet shows
+  the votes as time's up; an old wall shows the question until the key.
+
+**Who has answered (item 7).** Only answered avatars, popping into the
+wall's top bar as the answers arrive, in arrival order; no placeholders
+(product owner: "exposes nobody" and the top-three ranking decide it). A
+child sees theirs land; nobody is shown as missing. The mark says the
+answer arrived, never which: no answer colour, and a change of mind
+changes nothing.
+- **"Of"** is the players whose device is there, or who answered and went
+  away since (without the second part a device that answered and dropped
+  would give 26/25). A tablet away 45 s (`FRESH_MS`) stops holding the
+  count below full. When everyone there is in, the count turns green.
+- **The wall asks for its view every 15 s during a question**, as it did
+  only while a Remote was there: presence changes with time, not events.
+- **The Remote shows who the class waits for**: "Waiting for" with their
+  avatars, once six or fewer are left, until the votes. The product owner's
+  decision assumed the Remote had this; it had only the count.
+- **Nothing moves.** The question's bar (`#qbar`) has a fixed height, 1.9em
+  (about 6.5 % of a 720 px wall); the avatars are sized when the question
+  opens so the whole class fits, in one row or more, and don't shrink as
+  answers come in. The count appearing at Go and the key change nothing
+  below it.
+
+**The countdown closes once the last missing device is away.** Before,
+"everyone present has answered" was checked only when an answer arrived:
+if the one tablet still missing died, the clock ran out. Now the teacher
+tabs' ticks (the wall's 15 s, the Remote's 20 s) check it too
+(`closeIfAllIn`). With item 7's count that matters: the wall would read
+"all in" while the bar kept draining.
+
+**Not done:** a hint on the Remote when most of the class chose an answer
+that isn't marked right. The counts sit beside the key already; a teacher
+on one mirrored laptop can't check the key privately anyway, and fixes it
+after the answer, with the points following.
+
+**Free plan.** One more step per question, which reaches every device:
+`simulate.mjs --all-poll` made 822 HTTP requests (761 before, +8 %), and one
+more stored write per question. The wall's tick adds about four requests a
+minute while a question is up.
+
+**Checked:**
+- Typecheck; unit tests 86: the clicker's walk with the votes; votes
+  closing answering, a tap on the older view counting and joining the
+  votes, one on the votes' view refused, nothing scoring before the key, a
+  second press changing nothing, the reveal keeping the votes' view; no
+  votes while reading or after the key; the reveal straight from the
+  question; votes stopping a running clock, refusing to reopen, the pair
+  moving to the next question, the bonus from the clock's length; the
+  final ranking at the votes not counting the question.
+- `simulate.mjs`, plain, `--tempo` and `--all-poll`, all passing. New: on
+  every question but one, a doubled Show votes and a doubled Show answer,
+  the wall showing the votes without the key, and the wall's avatars
+  matching the answers counted with "of" no more than the class; question
+  4 revealed straight from the question, like a page from before.
+- Headless Edge (`shots-tool/votes-walk.mjs`), 47 checks, no page errors:
+  - a wall steering itself with four tablets: avatars popping in one per
+    answer, none for a change of mind, no answer colour on them; "3 / 4";
+    Show votes with counts and bars, no tick, nothing faded; the tablets
+    locked with the eye, the choice marked, no verdict; a tap after the
+    votes not taken; Show answer with one tick and the others faded, the
+    verdicts matching it; the question's text, tiles and bar in exactly the
+    same place across answers landing, the votes and the key; the next
+    question with an empty bar; a closed tablet not counted ("3 / 3",
+    green);
+  - a phone Remote with a 60 s countdown: "Waiting for" with the missing
+    avatar; that tablet closed, answering closed 14 s later by the tick
+    with 50 s left; the Remote's votes line and Show answer; the wall
+    without clock or time's-up mark at the votes; no "Open the answers
+    again" in ⋯;
+  - the steering bar at 360 px fitting with the −5/+5 pair, at the
+    question and at the votes;
+  - 25 answers at 1280×720 (avatars 34 px), 1366×768 (37), 1920×1080 (53),
+    1024×768 (26), 800×600 (18), and 60 at 1280×720 (21), all inside the
+    bar, nothing below moving.
+
+**Not established:** whether a child finds their avatar at 26 px on a
+1024-wide projector from the back row (the lobby shows them at 9 % of the
+height); whether teachers use the votes to talk, or press through them.
+
+**Deploy:** no migration; the protocol additions are optional fields. The
+guidance page and `/layout.html` name the two steps and the avatars.
+
 ## Open
 
 - Whether the default Cloudflare address passes the AIs' fetchers and school

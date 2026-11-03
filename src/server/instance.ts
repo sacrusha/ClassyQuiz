@@ -613,12 +613,14 @@ export class Instance extends DurableObject<Env> {
     const roles = meta.roles!;
     const ack = (ok: boolean, error?: string, result?: unknown): ServerMessage => ({ t: "ack", id, ok, error, result });
     const now = Date.now();
-    const at = (c: { at: { phase: string; current: number; reading?: boolean } }) => {
+    const at = (c: { at: { phase: string; current: number; reading?: boolean; votes?: boolean } }) => {
       const run = game.run;
       const phase = run ? run.phase : "idle";
       const current = run ? run.current : -1;
       if (!c.at || c.at.phase !== phase || c.at.current !== current) return false;
-      // Go and Reveal are steps within one phase: a doubled Go mustn't reveal.
+      // Go, the votes and the reveal are steps within one phase: a doubled
+      // Go mustn't show the votes, nor a doubled press on the votes the key.
+      if (typeof c.at.votes === "boolean" && c.at.votes !== G.votesShown(game)) return false;
       return typeof c.at.reading !== "boolean" || c.at.reading === (G.answering(game) === "reading");
     };
 
@@ -702,6 +704,9 @@ export class Instance extends DurableObject<Env> {
       // --- a teacher role: still the tab holding it?
       if (roles[session.role] !== session.token) return { direct: [ack(false), { t: "lost", role: session.role }] };
       if (cmd.op === "tick") {
+        // A device gone away (FRESH_MS) may have been the last one the
+        // countdown waited for; the wall's count already says everyone is in.
+        await this.closeIfAllIn();
         const view = this.viewFor(session);
         return { direct: view ? [ack(true), { t: "state", view }] : [ack(true)] };
       }
@@ -766,6 +771,7 @@ export class Instance extends DurableObject<Env> {
         case "begin":
         case "go":
         case "stopClock":
+        case "votes":
         case "reveal":
         case "next":
         case "ranking":
@@ -775,6 +781,7 @@ export class Instance extends DurableObject<Env> {
           if (cmd.op === "begin") G.begin(game, now);
           else if (cmd.op === "go") G.go(game, now);
           else if (cmd.op === "stopClock") G.stopClock(game);
+          else if (cmd.op === "votes") G.showVotes(game, this.nextView());
           else if (cmd.op === "reveal") G.reveal(game, this.nextView());
           else if (cmd.op === "next") G.next(game, now);
           else if (cmd.op === "ranking") G.showRanking(game);
@@ -1073,17 +1080,39 @@ export class Instance extends DurableObject<Env> {
     return active.some((p) => Object.hasOwn(given, p.id)) && active.every((p) => Object.hasOwn(given, p.id) || !connected.has(p.id));
   }
 
-  /** The open question's countdown as the screens draw it: running, or run out; null without one (or stopped). */
+  /**
+   * Answering closes early when every device that is there has answered,
+   * also when the last one the countdown waited for went away rather than
+   * answered (checked on the teacher tabs' ticks). True when it closed.
+   */
+  private async closeIfAllIn(): Promise<boolean> {
+    const game = this.game;
+    if (!game || !G.runningClock(game) || !this.allAnswered()) return false;
+    G.closeAnswers(game, this.nextView());
+    await this.persist(["run"]);
+    await this.scheduleAlarm();
+    this.broadcast();
+    return true;
+  }
+
+  /** The open question's countdown as the screens draw it: running, or run out; null without one, stopped, or with the votes on the wall. */
   private clockView(): ClockView | null {
     const run = this.game?.run;
     const clock = run && run.phase === "question" ? run.clocks?.[run.current] : undefined;
-    if (!clock || clock.stopped) return null;
+    if (!clock || clock.stopped || G.votesShown(this.game!)) return null;
     return { ms: clock.ms, leftMs: clock.closed ? 0 : Math.max(0, clock.at + clock.ms - Date.now()) };
   }
 
   private answeredNow(): number {
     const run = this.game?.run;
     return run && run.current >= 0 ? G.activeAnswers(run, run.current).length : 0;
+  }
+
+  /** The players who answered the current question, in the order their answers arrived (a change of mind keeps its place). */
+  private answeredIds(): Set<string> {
+    const run = this.game?.run;
+    if (!run || run.current < 0) return new Set();
+    return new Set(Object.keys(run.answers[run.current] ?? {}).filter((id) => G.playerById(run, id)?.removed === false));
   }
 
   /** Per-answer values of question q, from the text's order into the order on screen. */
@@ -1116,6 +1145,11 @@ export class Instance extends DurableObject<Env> {
       if (ref) pictures.add(ref.src);
     }
     const image = showQ ? this.imageRef(shownImage(run!.current)) : null;
+    // Who answered, and of how many: the devices that are there, or that
+    // answered and went away since. A dead tablet stops holding the count
+    // below full once it is away (v2 item 7).
+    const inIds = showQ ? this.answeredIds() : new Set<string>();
+    const connected = this.connectedPlayers(exclude);
     return {
       role: "screen",
       v: meta.v,
@@ -1129,6 +1163,8 @@ export class Instance extends DurableObject<Env> {
       current: run ? run.current : -1,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
       answered: this.answeredNow(),
+      answeredBy: [...inIds].map((id) => ({ id, avatar: run!.players[id].avatar })),
+      of: active.filter((p) => connected.has(p.id) || inIds.has(p.id)).length,
       question: showQ
         ? {
             q: run!.current,
@@ -1143,6 +1179,7 @@ export class Instance extends DurableObject<Env> {
             clock: this.clockView(),
           }
         : null,
+      votes: run && G.votesShown(game) ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
       reveal:
         run && phase === "reveal"
           ? { counts: this.onScreen(run.current, game.fixes[run.current].counts), dist: this.onScreen(run.current, G.distribution(game, run.current)), void: game.fixes[run.current].void }
@@ -1160,6 +1197,7 @@ export class Instance extends DurableObject<Env> {
     const connected = this.connectedPlayers(exclude);
     const scores = G.scores(game);
     const prog = G.progress(game);
+    const inIds = run && (run.phase === "question" || run.phase === "reveal") ? this.answeredIds() : new Set<string>();
     return {
       role: "teacher",
       v: meta.v,
@@ -1198,12 +1236,13 @@ export class Instance extends DurableObject<Env> {
       countdown: G.nudgeSeconds(game),
       playing: run && run.phase === "question" && run.current >= 0 ? G.playedAt(game, run.current) : null,
       answering: G.answering(game),
+      votes: G.votesShown(game),
       clock: this.clockView(),
       run: run
         ? {
             n: prog.n,
             total: prog.total,
-            players: G.activePlayers(run).map((p) => ({ id: p.id, avatar: p.avatar, connected: connected.has(p.id), score: scores.get(p.id) ?? 0 })),
+            players: G.activePlayers(run).map((p) => ({ id: p.id, avatar: p.avatar, connected: connected.has(p.id), score: scores.get(p.id) ?? 0, answered: inIds.has(p.id) })),
             answered: this.answeredNow(),
             dist: run.current >= 0 && (run.phase === "question" || run.phase === "reveal") ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
             ranking: this.ranking(),
@@ -1225,6 +1264,7 @@ export class Instance extends DurableObject<Env> {
     // The bonus is shown for a question played with points for speed.
     const speed = !!run && run.current >= 0 && G.playedAt(game, run.current) === "speed";
     const ans = G.answering(game) ?? "open";
+    const votes = G.votesShown(game);
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
       const phase = run ? run.phase : "idle";
@@ -1251,6 +1291,7 @@ export class Instance extends DurableObject<Env> {
                 answering: ans,
                 clock,
                 sinceMs: clockRec ? Math.max(0, now - clockRec.at) : null,
+                ...(votes ? { votes: true } : {}),
               }
             : null,
         reveal:

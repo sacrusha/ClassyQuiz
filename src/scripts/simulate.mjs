@@ -422,7 +422,7 @@ void (async () => {
   }
 })();
 
-const at = () => ({ phase: tv().phase, current: tv().current, reading: tv().answering === "reading" });
+const at = () => ({ phase: tv().phase, current: tv().current, reading: tv().answering === "reading", votes: tv().votes });
 const active = () => players.filter((p) => !p.dead).length;
 let qi = 0;
 if (TEMPO) {
@@ -494,11 +494,30 @@ for (;;) {
     log(`${p.name} taps while offline; the reveal goes out before the tap arrives`);
   }
   log(`question ${current + 1}: ${tv().run.answered}/${tv().run.players.length} answered, revealing (${remoteSteers ? "Remote" : "Projector"})`);
-  // A double tap on Reveal (or a retry) must not skip anything.
-  const a1 = steerer().send({ op: "reveal", at: at() });
-  const a2 = steerer().send({ op: "reveal", at: at() });
-  await Promise.all([a1, a2]);
-  await until(() => tv().phase === "reveal", 5000, "reveal");
+  // The wall's "who has answered" (v2 item 7): exactly the answers counted, of no more than the class.
+  {
+    const w = projector.view;
+    check(w.answeredBy.length === w.answered && w.answered <= w.of && w.of <= w.players.length, `question ${current + 1}: the wall shows ${w.answeredBy.length} avatars for ${w.answered} answers of ${w.of} (${w.players.length} players)`);
+  }
+  if (current === 3) {
+    // A Remote page from before the votes step reveals straight from the question.
+    await steerer().send({ op: "reveal", at: { phase: "question", current } });
+    await until(() => tv().phase === "reveal", 5000, "reveal without the votes");
+  } else {
+    // Spread, then key (v2 item 6); a double tap on either (or a retry) must not skip anything.
+    const v0 = at();
+    await Promise.all([steerer().send({ op: "votes", at: v0 }), steerer().send({ op: "votes", at: v0 })]);
+    await until(() => tv().votes, 5000, "the votes");
+    await sleep(300);
+    check(tv().phase === "question" && tv().answering === "closed", `a doubled press on the votes doesn't show question ${current + 1}'s key (${tv().phase}, ${tv().answering})`);
+    await until(() => projector.view?.votes, 5000, "the votes on the wall");
+    check(!projector.view.reveal && projector.view.votes.reduce((a, b) => a + b, 0) <= projector.view.answered, `question ${current + 1}: the wall shows the votes without the key`);
+    const v1 = at();
+    const a1 = steerer().send({ op: "reveal", at: v1 });
+    const a2 = steerer().send({ op: "reveal", at: v1 });
+    await Promise.all([a1, a2]);
+    await until(() => tv().phase === "reveal", 5000, "reveal");
+  }
   if (current === 0) {
     // The key was wrong: "cat" counts instead of "bee". The teacher's view
     // lists the answers in the order on screen, which the command follows.

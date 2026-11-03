@@ -141,8 +141,16 @@ function projectorLine(v: TeacherView): string {
 function current(v: TeacherView): string {
   const run = v.run!;
   const q = v.questions[v.current];
-  const present = run.players.filter((p) => p.connected).length;
+  // Of the devices that are there, or that answered and went away since.
+  const counted = run.players.filter((p) => p.connected || p.answered);
+  const present = counted.length;
   const away = run.players.length - present;
+  // The last few the class waits for: the teacher's to see, not the wall's (v2 item 7).
+  const waiting = v.phase === "question" && v.answering !== "reading" && !v.votes ? counted.filter((p) => !p.answered) : [];
+  const waitLine =
+    waiting.length > 0 && waiting.length <= 6 && run.answered > 0
+      ? `<p class="waiting">Waiting for <span class="avatars">${waiting.map((p) => `<span>${avatarSvg(p.avatar)}</span>`).join("")}</span></p>`
+      : "";
   // The picture, so a teacher whose projector died can still show it around;
   // and the button that puts it over the whole projector screen.
   const pic = q.image
@@ -158,8 +166,10 @@ function current(v: TeacherView): string {
     ${pic}
     ${q.void ? `<p class="hint">Void: counts for nobody.</p>` : ""}
     ${tempoState(v)}
+    ${v.votes ? `<p class="hint">The votes are on the wall, without the right answer.</p>` : ""}
     ${answersBlock(q, v.current, steer.ui, run.dist)}
     <p class="answered"><strong>${live("answered", run.answered)}</strong> of ${live("present", present)} answered${away ? ` · ${live("away", away)} away` : ""}</p>
+    ${waitLine}
   </section>`;
 }
 
@@ -173,6 +183,7 @@ function tempoState(v: TeacherView): string {
   // The pair acts on the countdown being read or running; after it, on the next one.
   const pair = v.countdown !== null ? `<p class="nudgeline">${v.answering === "reading" || (v.answering === "open" && v.clock) ? "Countdown" : "Next countdown"} ${nudgePair(v)}</p>` : "";
   if (v.answering === "reading") return `<p class="hint">The class reads the question. <strong>Go</strong> shows the answers and starts the countdown.</p>${pair}`;
+  if (v.votes) return pair;
   if (v.answering === "closed") return `<p class="timeup-line">${ICON.timer} Time's up: answering is closed.</p>${pair}`;
   return v.clock ? `<div class="clockslot"></div>${pair}` : `<p class="hint">Countdown stopped: the answers stay open.</p>${pair}`;
 }

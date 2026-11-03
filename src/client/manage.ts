@@ -168,7 +168,9 @@ export function nextStep(v: TeacherView): Step | null {
     case "question":
       // Countdown tempos: the class has read the question; Go shows the answers and starts the clock.
       if (v.answering === "reading") return { act: "go", label: "Go &#9654;" };
-      return { act: "reveal", label: `${ICON.eye} Reveal` };
+      // Spread, then key (v2 item 6): how the class answered, then the right answer.
+      if (!v.votes) return { act: "votes", label: `${ICON.bars} Show votes` };
+      return { act: "reveal", label: `${ICON.check} Show answer` };
     case "reveal":
     case "ranking":
       return isLast(v) ? { act: "next", label: `${ICON.trophy} Final ranking` } : { act: "next", label: "Next &#9654;" };
@@ -188,7 +190,7 @@ export function sideStep(v: TeacherView): Step | null {
 // ---------------------------------------------------------------------------
 // Acting
 
-const STEPS = new Set(["begin", "go", "reveal", "next", "ranking", "finish", "skip-current", "again"]);
+const STEPS = new Set(["begin", "go", "votes", "reveal", "next", "ranking", "finish", "skip-current", "again"]);
 /** After each step the buttons stay inert for a moment, so a double tap on Reveal doesn't land on the Next that replaces it. */
 export const STEP_LOCK_MS = 700;
 
@@ -209,8 +211,8 @@ export class Steer {
 
   /** Call on every view: a new step locks the step buttons for a moment. */
   noteStep(v: TeacherView, buttons: ParentNode): void {
-    // Go and Reveal share a phase: a double tap on Go mustn't land on the Reveal that replaces it.
-    const step = `${v.phase}|${v.current}|${v.answering === "reading"}`;
+    // Go, the votes and the answer share a phase: a double tap on one mustn't land on the next.
+    const step = `${v.phase}|${v.current}|${v.answering === "reading"}|${v.votes}`;
     if (step === this.lastStep) return;
     this.lastStep = step;
     this.lockUntil = Math.max(this.lockUntil, Date.now() + STEP_LOCK_MS);
@@ -243,7 +245,7 @@ export class Steer {
       if (this.locked()) return true;
       this.lockUntil = Date.now() + STEP_LOCK_MS;
     }
-    const at = { phase: v.phase, current: v.current, reading: v.answering === "reading" };
+    const at = { phase: v.phase, current: v.current, reading: v.answering === "reading", votes: v.votes };
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
       if (!r.ok && r.error) toast(r.error);
@@ -252,6 +254,7 @@ export class Steer {
     switch (a) {
       case "begin":
       case "go":
+      case "votes":
       case "reveal":
       case "next":
       case "ranking":
@@ -370,7 +373,8 @@ export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuIt
   // The clock presses the class, never the teacher: it can be stopped, and
   // after time's up the answers can open again.
   if (v.phase === "question" && v.clock && v.answering === "open") items.push({ label: "Stop the countdown: answers stay open", run: () => open("stop-clock") });
-  if (v.phase === "question" && v.answering === "closed") items.push({ label: "Open the answers again, without a countdown", run: () => open("stop-clock") });
+  // Not once the votes are on the wall: answering again after seeing them copies the majority.
+  if (v.phase === "question" && v.answering === "closed" && !v.votes) items.push({ label: "Open the answers again, without a countdown", run: () => open("stop-clock") });
   // An unfun tempo is changed here, from the next question on.
   if (v.phase !== "lobby" && v.phase !== "final") items.push({ label: `Tempo: ${esc(tempoName(v))}…`, run: () => open("tempo-sheet") });
   if (v.phase === "question") {

@@ -79,7 +79,7 @@ tablets, and a quiz made in the break.
 | Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The lobby is on the wall (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "a new window here", drag it across, F. | — |
 | Lesson starts | "Type classyquiz.pages.dev and the number." | Tablets: address, code, ▶. Avatars pop up on the wall. |
-| Quiz | Start on whichever tab steers; Reveal → Next … there, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
+| Quiz | Start on whichever tab steers; Show votes → Show answer → Next … there, or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
 ## 3. Screens
@@ -252,8 +252,8 @@ throughout. While it steers, the bottom line is the bar:
 
 - **With a countdown in play** the bar also carries the −5/+5 pair (§3.7).
   On a phone the code gives way to it.
-- **The bar's main button** is the next step: Go, Reveal, Next or
-  Final ranking. Space, Enter, →, ↓, PageDown, N and a clicker do the same;
+- **The bar's main button** is the next step: Go, Show votes, Show answer,
+  Next or Final ranking. Space, Enter, →, ↓, PageDown, N and a clicker do the same;
   F toggles full screen. No key starts the quiz from the lobby (Start is
   the button), a key held with Ctrl, Alt or Windows/Cmd does nothing, and
   while a Remote steers only a clicker's keys (PageDown, →, ↓) move on
@@ -270,6 +270,29 @@ throughout. While it steers, the bottom line is the bar:
   to the projector screen, then press F for full screen" until it is full
   screen.
 
+**A question, its votes, its answer** (backlog v2 items 6 and 7; decisions.md,
+"Spread, then key; who has answered, on the wall"). The same steps at the
+teacher's pace and with a countdown, after Go:
+
+| Step | Wall | Tablets | Steering tab |
+|---|---|---|---|
+| The question | the question and tiles; in the bar at the top, the avatar of each student whose answer has arrived pops in, and "answered / of" | buttons | the counts with the key; **Show votes** |
+| Show votes | each tile's count and a bar; no tick, nothing faded | buttons locked, the chosen one marked, 👁 | "The votes are on the wall, without the right answer"; **Show answer** |
+| Show answer | the tick, the other tiles faded | ✓ or ✗ | Ranking, Next |
+
+- **Show votes closes answering**, as time's up does. A tap made before the
+  tablet showed it closed still counts when it arrives, and the votes grow
+  by one.
+- **Only students who have answered appear**, in the order the answers
+  arrive, never with the colour of their answer. Nobody is shown as
+  missing; the Remote shows the teacher the last few it waits for.
+- **"Of"** counts the devices that are there, or that answered and went
+  away since: a tablet away for 45 s stops holding it below full. When
+  everyone there has answered, the count turns green.
+- **Nothing moves** on the wall between the question, the votes and the
+  answer: the bar has a fixed height, and the tiles keep room for the count
+  and tick from the start.
+
 ### 3.5 Remote during the quiz
 
 ```
@@ -284,23 +307,27 @@ throughout. While it steers, the bottom line is the bar:
 │ ✓ ■ 60 Franken           12  │
 │ Change the right answer      │
 │ 18 of 22 answered · 1 away   │
+│ Waiting for 🐸 🐻 🐷 🐧        │
 ├──────────────────────────────┤
-│ [⋯]            [ Reveal ▶ ]  │
+│ [⋯]        [ ▥ Show votes ]  │
 └──────────────────────────────┘
 ```
 
-- **The buttons:** Reveal during a question; Ranking and Next after the
-  reveal; Final ranking after the last question; "Again with another class"
+- **The buttons:** Show votes, then Show answer, during a question;
+  Ranking and Next after the answer; Final ranking after the last question; "Again with another class"
   at the end, which opens a new lobby with the same code and keeps the
   corrections.
+- **Waiting for** shows the avatars of the students who are there and
+  haven't answered, once at most six are left, until the votes.
 - **⋯:** Skip this question · Change the right answer · Final ranking now ·
   All questions · Players · Show the projector here · Stop being the remote ·
   Delete the quiz…
 
 ### 3.6 Student
 
-The student screens are unchanged from v1: avatar and 👁 in the lobby, colour
-buttons, ✓ or ✗ at the reveal, place and stars at the ranking. A tablet
+The student screens are as in v1: avatar and 👁 in the lobby, colour
+buttons, locked with 👁 at the votes, ✓ or ✗ with the answer, place and
+stars at the ranking. A tablet
 still showing the previous class is told "This quiz has finished"; it
 doesn't slip into the next class's lobby. A tablet switched off after the
 previous class and opened again for the next one joins it like any other.
@@ -317,9 +344,9 @@ step:
 | Step | Wall | Tablets | Steering tab |
 |---|---|---|---|
 | Next | the question and picture; tiles coloured, without text | the eye | **Go ▶** ("The class reads the question…") |
-| Go | the answers; a bar drains along the top edge | buttons, the same bar | the bar; **Reveal** |
-| Time's up, or all present answered | the bar empty, a timer by the count | buttons locked, the chosen one marked | "Time's up: answering is closed"; **Reveal** |
-| Reveal | as at the teacher's pace | ✓ or ✗, and "+13" with speed points | as at the teacher's pace |
+| Go | the answers; a bar drains along the top edge | buttons, the same bar | the bar; **Show votes** |
+| Time's up, or all present answered | the bar empty, a timer by the count | buttons locked, the chosen one marked | "Time's up: answering is closed"; **Show votes** |
+| Show votes, Show answer | as at the teacher's pace (§3.4); the bar gone | as at the teacher's pace, and "+13" with speed points at the answer | as at the teacher's pace |
 
 - The clicker's next step from reading is Go; it ignores a second press
   within 0.7 s.
@@ -418,3 +445,4 @@ student, no new tab gets the steering, which narrows §1 rules 5–7.
 | `scripts/simulate.mjs` | Rewritten for the roles (see decisions.md) |
 | Pictures on the screens | Done: the projector puts the picture between question and tiles or beside them, enlarges it (Z, a click, the Remote), and shows backgrounds; thumbnails in the question list (§3.3), the picture on the Remote's current question (§3.5), "Hide the picture" among the fixes. decisions.md, "Pictures on the screens" |
 | Answer order | Done: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |
+| Spread, then key; who has answered (v2 items 6, 7) | Done: Show votes, then Show answer, on every steering tab and the clicker; avatars popping into the wall's bar as answers arrive; "of" without away devices; the Remote's "Waiting for". §3.4, §3.5, §3.7; decisions.md, "Spread, then key; who has answered, on the wall" |

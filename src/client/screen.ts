@@ -61,9 +61,11 @@ function onMessage(m: ServerMessage): void {
       // On the wall: nothing here invites the class to the teacher's page.
       else if (before.remote === "present") toast("Remote gone – steering here", 8000);
     }
-    // Whether the Remote's tab is still there changes with time, not with an event: ask now and then.
+    // Whether the Remote's tab is still there, and during a question which
+    // tablets are (the count's "of"), changes with time, not with an event:
+    // ask now and then.
     clearInterval(tickTimer);
-    if (view.remote === "present") {
+    if (view.remote === "present" || (view.phase === "question" && view.question?.answering !== "reading")) {
       tickTimer = window.setInterval(() => {
         if (line) void line.send({ op: "tick" });
       }, 15_000);
@@ -310,21 +312,28 @@ function renderQuestion(v: ScreenView): void {
     questionKey = key;
     barKey = "";
     delete main.dataset.skeleton;
-    main.innerHTML = `<div class="bar" id="qbar"></div><div class="stage" id="stage"></div>`;
+    // The bar has a fixed height (app.css, #qbar), so the avatars landing in
+    // it, the count appearing at Go and the reveal move nothing below.
+    main.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="strip" id="strip"></span><span id="qicons"></span>
+      <span class="qcount" id="qcount">${ICON.person} <span id="answered"></span></span></div><div class="stage" id="stage"></div>`;
   }
   // The bar first: the layout measures the room it leaves.
   const reading = q.answering === "reading";
-  const timeUp = !r && q.answering === "closed";
-  const bk = JSON.stringify([q.n, q.total, !!r?.void, reading, timeUp]);
+  const timeUp = !r && !v.votes && q.answering === "closed";
+  const bk = JSON.stringify([q.n, q.total, !!r?.void, timeUp]);
   if (bk !== barKey) {
     barKey = bk;
-    $("#qbar").innerHTML = `<span>${q.n} / ${q.total}</span><span class="grow"></span>
-      ${r && r.void ? `<span class="voided">${ICON.void}</span>` : ""}
-      ${timeUp ? `<span class="timeup">${ICON.timer}</span>` : ""}
-      ${reading ? "" : `<span>${ICON.person} <span id="answered"></span></span>`}`;
+    $("#qpos").textContent = `${q.n} / ${q.total}`;
+    $("#qicons").innerHTML = `${r && r.void ? `<span class="voided">${ICON.void}</span>` : ""}${timeUp ? `<span class="timeup">${ICON.timer}</span>` : ""}`;
   }
-  const answered = document.getElementById("answered");
-  if (answered) answered.textContent = `${v.answered} / ${v.players.length}`;
+  // Nobody can answer while the class reads the question.
+  $("#qcount").hidden = reading;
+  // "Of" counts the devices that are there (or answered and went away), so a
+  // dead tablet doesn't hold it below full; an older server sends no `of`.
+  const of = typeof v.of === "number" ? v.of : v.players.length;
+  $("#answered").textContent = `${v.answered} / ${of}`;
+  $("#qcount").classList.toggle("all", of > 0 && v.answered >= of);
+  renderStrip(q.q, reading ? [] : (v.answeredBy ?? []), of);
   const stage = $("#stage");
   if (!stage.dataset.laid) {
     stage.dataset.laid = "1";
@@ -333,7 +342,58 @@ function renderQuestion(v: ScreenView): void {
   // Countdown tempos: the tiles are laid out with their answers from the
   // start, so nothing moves at Go; until then only their colours and shapes show.
   document.getElementById("tiles")?.classList.toggle("veiled", reading);
-  markTiles(r);
+  markTiles(r, v.votes ?? null);
+}
+
+/**
+ * Who has answered (v2 item 7): each avatar pops into the bar as its answer
+ * lands, in the order they arrive. Only those who answered: nobody is shown
+ * as missing (the count says how many, the Remote who). The mark says the
+ * answer arrived, never which one, and a change of mind changes nothing.
+ * The avatars are as large as the bar allows for the whole class in one or
+ * more rows, so they don't shrink as the answers come in.
+ */
+let stripQ = -1;
+let stripFit = "";
+const popped = new Set<string>();
+function renderStrip(q: number, inList: { id: string; avatar: ScreenView["players"][number]["avatar"] }[], of: number): void {
+  const strip = document.getElementById("strip");
+  if (!strip) return;
+  if (q !== stripQ) {
+    stripQ = q;
+    popped.clear();
+  }
+  const n = Math.max(1, of, inList.length);
+  const fit = `${n}|${strip.clientWidth}|${strip.clientHeight}`;
+  if (fit !== stripFit) {
+    stripFit = fit;
+    strip.style.setProperty("--av", `${stripSize(n, strip.clientWidth, strip.clientHeight)}px`);
+  }
+  const want = new Set(inList.map((p) => p.id));
+  for (const el of [...strip.children] as HTMLElement[]) if (!want.has(el.dataset.id!)) el.remove();
+  const shown = new Set(([...strip.children] as HTMLElement[]).map((el) => el.dataset.id));
+  for (const p of inList) {
+    if (shown.has(p.id)) continue;
+    const d = document.createElement("span");
+    d.className = "av";
+    d.dataset.id = p.id;
+    // Only the first time on this question: a redraw (a resized window) doesn't pop them all again.
+    if (popped.has(p.id)) d.classList.add("still");
+    popped.add(p.id);
+    d.innerHTML = avatarSvg(p.avatar);
+    strip.appendChild(d);
+  }
+}
+
+/** The largest avatar (px) such that n of them fit in w×h, in as many rows as that takes. */
+function stripSize(n: number, w: number, h: number): number {
+  const gap = 4;
+  for (let s = Math.floor(h); s >= 8; s--) {
+    const perRow = Math.max(1, Math.floor((w + gap) / (s + gap)));
+    const rows = Math.ceil(n / perRow);
+    if (rows * s + (rows - 1) * gap <= h) return s;
+  }
+  return 8;
 }
 
 /**
@@ -363,26 +423,29 @@ function renderClock(v: ScreenView): void {
 }
 
 /**
- * The reveal on the tiles: a tick on the ones that count, the others faded,
- * and how many picked each. The mark and count have their place at the
- * right of every tile from the start, so this moves no answer text.
+ * The votes, then the reveal, on the tiles (v2 item 6). The votes: how many
+ * picked each, with a bar, and no answer marked or faded. The reveal adds a
+ * tick on the ones that count and fades the others; the bars stay. The mark
+ * and count have their place at the right of every tile from the start, so
+ * neither step moves any answer text.
  */
-function markTiles(r: ScreenView["reveal"]): void {
-  const max = r ? Math.max(1, ...r.dist) : 1;
+function markTiles(r: ScreenView["reveal"], votes: number[] | null): void {
+  const dist = r ? r.dist : votes;
+  const max = dist ? Math.max(1, ...dist) : 1;
   main.querySelectorAll<HTMLElement>("#tiles .tile").forEach((tile, i) => {
     const right = r ? r.counts[i] : false;
     tile.classList.toggle("dim", !!r && !right);
     const side = tile.querySelector<HTMLElement>(".side")!;
-    const html = r ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${r.dist[i]}</span>` : "";
+    const html = dist ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${dist[i]}</span>` : "";
     if (side.innerHTML !== html) side.innerHTML = html;
     let fill = tile.querySelector<HTMLElement>(".fill");
-    if (!r) {
+    if (!dist) {
       fill?.remove();
       return;
     }
-    const width = `${(100 * r.dist[i]) / max}%`;
+    const width = `${(100 * dist[i]) / max}%`;
     if (!fill) {
-      // Grows from nothing at the reveal.
+      // Grows from nothing at the votes (or at the reveal, from a page that skipped them).
       const f = document.createElement("span");
       f.className = "fill";
       f.style.width = "0";
@@ -753,7 +816,10 @@ document.addEventListener("keydown", (e) => {
   e.preventDefault();
   if (Date.now() - lastAdvance < STEP_LOCK_MS) return;
   lastAdvance = Date.now();
-  void line.send({ op: "advance", at: { phase: view.phase, current: view.current, reading: view.phase === "question" && view.question?.answering === "reading" } });
+  void line.send({
+    op: "advance",
+    at: { phase: view.phase, current: view.current, reading: view.phase === "question" && view.question?.answering === "reading", votes: view.phase === "question" && !!view.votes },
+  });
 });
 
 /** The question's picture over the whole screen, or back. */
