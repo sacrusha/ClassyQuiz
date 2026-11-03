@@ -461,3 +461,27 @@ Time: 2 min
   assert.equal(long.quiz.seconds, 60, "clamped to the longest: 10 to 60 s, the range the teacher's -5/+5 moves in");
   assert.match(long.warnings[0].message, /10 to 60 seconds/);
 });
+
+test("answer letters an AI adds are dropped when the answers are shuffled; kept under Order: fixed or out of sequence", () => {
+  const r = parseQuiz(`Title: T\n1. Q?\n- A) 3\n+ B) 4\n- C) 5\n\n2. R?\nOrder: fixed\n- A) first\n+ B) second\n\n3. S?\n+ A. Einstein\n- C. Darwin\n\n4. T?\n- (a) x\n+ (b) y\n`);
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.quiz.questions[0].answers.map((a) => a.text), ["3", "4", "5"]);
+  assert.deepEqual(r.quiz.questions[1].answers.map((a) => a.text), ["A) first", "B) second"], "Order: fixed keeps them");
+  assert.deepEqual(r.quiz.questions[2].answers.map((a) => a.text), ["A. Einstein", "C. Darwin"], "not A, B, …: not letters");
+  assert.deepEqual(r.quiz.questions[3].answers.map((a) => a.text), ["x", "y"]);
+  const fixedAll = parseQuiz(`Title: T\nOrder: fixed\n\n1. Q?\n- A) 3\n+ B) 4\n`);
+  assert.deepEqual(fixedAll.quiz.questions[0].answers.map((a) => a.text), ["A) 3", "B) 4"]);
+  const bare = parseQuiz(`Title: T\n1. Which point?\n+ A\n- B\n`);
+  assert.deepEqual(bare.quiz.questions[0].answers.map((a) => a.text), ["A", "B"], "a letter on its own is the answer");
+});
+
+test("tempo: a clause that denies doesn't count", () => {
+  const tempo = (line: string) => parseQuiz(`Title: T\nTempo: ${line}\n\n1. Q?\n+ a\n- b\n`).quiz.tempo;
+  assert.equal(tempo("countdown (no points)"), "countdown");
+  assert.equal(tempo("countdown, without speed points"), "countdown");
+  assert.equal(tempo("countdown with points for speed"), "speed");
+  assert.equal(tempo("speed"), "speed");
+  assert.equal(tempo("no countdown"), undefined, "the teacher's pace");
+  assert.equal(tempo("off"), undefined);
+  assert.equal(tempo("teacher's pace (no clock)"), undefined);
+});

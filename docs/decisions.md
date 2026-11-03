@@ -519,7 +519,8 @@ keeps the quiz's code; a class opens at upload.
   time would need two uploads; rejected as rare.
 - **Keyboard and presentation clicker on the projector:** Space, Enter, →,
   ↓ or PageDown takes the next usual step (start, reveal, next). F toggles
-  full screen.
+  full screen. Amended by "Review C": no key starts the quiz, none with
+  Ctrl, Alt or Windows/Cmd, and only a clicker's keys while a Remote steers.
 - **On the teacher's device, a step can't be tapped twice.** After each step
   (start, reveal, next, …) the buttons stay inert for 0.7 s. Otherwise a
   double tap on "Reveal" lands on the "Next" that replaces it, and the class
@@ -601,7 +602,7 @@ quiz, not per run; no "8 hours" projector resume (a tab keeps its role,
 
 - **Getting to the quiz:**
   - The projector shows the address, the join code, and a QR code for
-    `https://<address>/#<code>`.
+    `https://<address>/#<code>` (since "Review C", `/play#<code>`).
   - Typing the address leads to the root page, whose top is a big number
     box. Without JavaScript it still submits to `/play?c=…`.
 - **Join codes have 5 digits** and never start with 0. With four digits, a
@@ -1468,7 +1469,9 @@ rows, 30 on requests with every device polling.
   stored value rewritten with every answer, and it has to stay under the
   2 MB a value holds; the projector draws every avatar. The owner's design
   target is about 25.
-- **The door, automatic, no new control** (owner's "few elements"). Once
+- **The door, automatic, no new control** (owner's "few elements").
+  Amended by "Review C": the door stays open while the class is still
+  arriving, and the 5 count from when the quiz is under way. Once
   the quiz has started, 5 more players get in, then "This quiz has started
   and takes no more players. Ask your teacher." A student whose tablet
   died picks their avatar back as before; that isn't a new player.
@@ -2282,6 +2285,138 @@ The guidance's account of a lesson names the button and the link.
 - the link opening a window that took the Projector, while the first tab
   went to `/teach`;
 - a lobby screenshot at 1366×768.
+
+## 2026-11-03 — Review C: the next class on the same tablets, the door, stray keys
+
+Serves: the constraint "survives school Wi-Fi"; v1 items 2, 4, 6, 16; v2
+items 2 and 4. Fixes findings 1, 2, 3 and 5 of
+`docs/reviews/2026-11-03-review-c.md`, each verified against the code at
+4be4d59 first. Not finding 4 (the Remote once students are in): v2 item
+8, the owner's.
+
+**1. A tablet switched off after one class opens the quiz for the next.**
+- *Verified:* a player token with another class's run id got "This quiz
+  has finished" from `authenticate()`, also on a page opened anew. The
+  page cleared the token, so a reload worked. The next class after
+  "Again", or after the new class the site opens an hour after a final
+  ranking, met it on most tablets.
+- *Now:* the page says whether it has shown its class yet (`fresh` on the
+  player's auth). A page opened anew with an earlier class's token is a
+  newcomer: in the lobby it joins at once. A page still showing the
+  earlier class (left on at its final ranking, offline when "Again" came)
+  is still told it has finished. That is the "doesn't slip into the next
+  class" case the check was written for.
+- *Found beside it:* an unrecognised token got the guest's choice, which a
+  page holding a view ignored. So a tablet whose avatar another device
+  took back while it was away froze on its last question, its taps
+  refused. The server now marks that choice `stale`. The page drops its
+  token and offers "Which one are you?" with +. It doesn't join by itself:
+  the tablet may be lying on a desk, and a connected phantom would hold
+  up the countdown's early close ("everyone present answered").
+- *Also, read in the code, not seen:* a guest's choice reaching a page
+  that had become a player was acted on while its first view was still on
+  the way. That happens to the answer to a poll made as a guest, racing
+  the welcome over HTTP, and it sends a second join, a second avatar. Now
+  a player page ignores a choice unless it is `stale`.
+
+**2. The door.** The requirement, relayed by the product owner: slow
+tablets in a normal class never stranded; no new control if avoidable; a
+stranger with the code still can't wander into a quiz under way.
+- *Verified:* after Start, 5 new players got in, then the refusal, with
+  nothing the teacher could do.
+- *What tells a slow tablet from a stranger is when it comes.* Slow
+  tablets arrive in the first minutes after Start. A teacher who pressed
+  Start before handing the tablets out waits at the first question,
+  because nobody answers. So the door is open, up to the 60, in the lobby,
+  for 5 minutes after Start (`DOOR_OPEN_MS`), and while the first question
+  is up (its reveal and a ranking after it included). Once the second
+  question is up and the 5 minutes are over, the quiz is under way: 5
+  more, then "This quiz has started and takes no more players. Ask your
+  teacher." Only joiners under way count toward the 5. `server/game.ts`,
+  `doorOpen`.
+- *Considered:*
+  - A cap relative to the class at Start: a teacher who starts with 3 of
+    25 strands 17.
+  - A window after the last join: a teacher who starts and then fetches
+    the tablet cart strands the class.
+  - "Let more in" in ⋯: a new control, and a teacher in front of a class
+    doesn't know to look for it.
+- *What it gives up:* a stranger in the first minutes or during the first
+  question gets in, as one in the lobby always did. The avatar shows on
+  the wall, and Remove sticks. Runs stored before this (a deploy during a
+  class) have no start time and keep the narrow door.
+
+**3. Stray keys on the Projector.**
+- *Verified:* Space, Enter, →, ↓, PageDown and N started the quiz from the
+  lobby and advanced it while a Remote steered. Ctrl+N advanced, and
+  Ctrl+F toggled full screen.
+- *Now:*
+  - No key starts the quiz. Start is the lobby's button: one deliberate
+    press on the steering screen, while the class is still joining.
+  - A key held with Ctrl, Alt or Windows/Cmd does nothing, F and Z
+    included.
+  - While a Remote steers, only a clicker's keys (PageDown, →, ↓) move on
+    from the Projector. The teacher is on the phone, and Space, Enter and
+    N are the keys a lean on the laptop hits.
+  - While the Projector steers itself, the keys work as before.
+- *Left:* a single stray Space during a question on a self-steering
+  Projector still reveals. That keyboard is the teacher's steering.
+
+**4. The smaller ones (review point 5).**
+- *Zip with several text files:* the reader parses each `.md`/`.txt` and
+  takes the one without errors with the most questions. A tie goes to the
+  top level, then the shortest path. When none has a question it takes
+  that first file, so the error message is about the likeliest one.
+- *"Tempo: countdown (no points)"* read as speed. A clause that starts with
+  no, not, without, ohne or kein… no longer counts. "Tempo: no countdown",
+  "off" and "none" are still the teacher's pace.
+- *Letter prefixes:* dropped, not warned. This applies when every answer
+  of a question carries the next letter from A with the same mark ("A) ",
+  "(a) ", "B. ", "C: ") and the question's answers are shuffled. Shuffled,
+  "A)" lands third, which is wrong, and a warning would ask the teacher to
+  fix what the site can, the same way question numbers are dropped. Under
+  `Order: fixed` the letters stay, since the guidance names letters that
+  label parts of a picture. A bare letter is an answer, not a prefix.
+- *QR code:* it now points at `/play#<code>`. The root page still forwards
+  `/#<code>`.
+- *A copy's Build text:* the build writes `<name>.pages.dev` (the `name` in
+  `wrangler.toml`), or `SITE_ADDRESS` when set, into the start page's
+  three mentions of the address: the Build step, and the own-copy and
+  layout links. That is for AIs, which read the page without its script.
+  The script shows the address the browser opened in the Build step,
+  which also covers a name that was taken. `own-copy.html` keeps the
+  demo's name, which it uses as the demo's. *Not done:* the "free site is
+  full" and spent-allowance messages (`shared/limits.ts`, also in the
+  server bundle) still name `classyquiz.pages.dev/own-copy`. A copy that
+  raises its limits rarely shows them.
+
+**Checked:**
+- Unit tests: 82. The door is open while the class arrives (3 of 25 at
+  Start; Start before the tablet cart, 15 minutes at the first question),
+  narrow under way (5, a removed one counts), letters, tempo clauses, the
+  zip's choice.
+- Typecheck.
+- `simulate.mjs` in all three modes, with a new check: the old class's
+  token without `fresh` still gets "finished", and on a page opened anew
+  it gets the new lobby.
+- Headless Edge (`shots-tool/fixc-walk.mjs`, 27 checks):
+  - The first class's token on a page opened anew joins the new class.
+  - A page left at its final ranking and offline during "Again" is told
+    it has finished.
+  - A tablet whose away avatar was taken by another device offers + on
+    its return and doesn't join on the next tick.
+  - Twelve joins after Start all get in.
+  - The keys, as above, both with the Projector steering and with a
+    Remote.
+  - A zip with `notes.txt` beside `prozente-quiz.md` opens.
+  - The Build step shows the opened address.
+- The reviewer's `stale.mjs`: the first load now lands on the question.
+- A build with `SITE_ADDRESS` puts the address in all three places.
+- Not measured: whether 5 minutes is long enough for real tablets.
+
+**Deploy:** no migration. The protocol additions are optional fields. A
+student page from before the deploy doesn't send `fresh` and behaves as
+before; it ignores `stale`.
 
 ## Open
 

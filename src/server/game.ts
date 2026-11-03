@@ -10,7 +10,7 @@
 // each question that had a countdown keeps its length (shared/tempo.ts).
 
 import type { Quiz } from "../quiz/format.ts";
-import { CLASS_FULL, CLASS_STARTED, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 import { COUNTDOWN_DEFAULT, NUDGE_SECONDS, POINTS_RIGHT, TEMPOS, clampCountdown, speedBonus, type Tempo } from "../shared/tempo.ts";
 
 export type Phase = "lobby" | "question" | "reveal" | "ranking" | "final";
@@ -60,7 +60,11 @@ export interface Player {
   avatar: Avatar;
   joined: number;
   removed: boolean;
-  /** Joined after the quiz started (MAX_LATE_JOINERS). */
+  /**
+   * Joined once the class had arrived (`doorOpen` false): MAX_LATE_JOINERS
+   * of these. In runs stored before the door opened wider, any joiner after
+   * the start.
+   */
   late?: boolean;
 }
 
@@ -119,6 +123,8 @@ export interface Run {
   /** Question index → player id → answer. */
   answers: Record<string, Record<string, AnswerRecord>>;
   ended: number | null;
+  /** When the teacher started the quiz (server time); missing before the start, and in runs stored before it was kept. */
+  started?: number;
   /**
    * Per question, the order its answers are shown in: position on screen →
    * index in the quiz text. Everything stored (answers, fixes) is by the
@@ -220,14 +226,29 @@ export function pickAvatar(run: Run, random: () => number): Avatar {
   return pool[Math.floor(random() * pool.length)];
 }
 
-export { MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
+export { DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
+
+/**
+ * Whether a new player comes in freely: the class is still arriving. That
+ * is the lobby, and after the start the first DOOR_OPEN_MS and the first
+ * question, however long the teacher keeps it up: slow tablets arrive in
+ * the first minutes, and a teacher who started before handing the tablets
+ * out waits at the first question for the class. Once the second question
+ * is up and the minutes are over, the quiz is under way and the door
+ * narrows to MAX_LATE_JOINERS (decisions.md, "Hardening", amended).
+ */
+export function doorOpen(run: Run, now: number): boolean {
+  if (run.phase === "lobby") return true;
+  if (run.phase === "final" || run.started === undefined) return false;
+  return now - run.started < DOOR_OPEN_MS || Object.keys(run.played ?? {}).length <= 1;
+}
 
 export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number): Player {
   const run = needRun(g);
   if (run.phase === "final") throw new GameError("This quiz has finished.");
   const all = Object.values(run.players);
   if (all.length >= MAX_PLAYERS) throw new GameError(CLASS_FULL);
-  const late = run.phase !== "lobby";
+  const late = !doorOpen(run, now);
   if (late && all.filter((p) => p.late).length >= MAX_LATE_JOINERS) throw new GameError(CLASS_STARTED);
   const p: Player = { id, token, avatar: pickAvatar(run, random), joined: now, removed: false, ...(late ? { late: true } : {}) };
   run.players[id] = p;
@@ -278,6 +299,7 @@ function open(g: Game, run: Run, q: number, now: number): void {
 export function begin(g: Game, now: number): void {
   const run = needRun(g);
   if (run.phase !== "lobby") throw new GameError("The quiz has already started.");
+  run.started = now;
   open(g, run, nextShown(g, -1), now);
 }
 

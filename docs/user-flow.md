@@ -44,7 +44,7 @@ second design:
 4. **The tab you open the quiz in becomes the Projector, and it steers itself.**
    In the lobby it shows the teacher's lobby (§3.3). During the quiz a slim
    bar carries the next step. One mirrored laptop needs nothing else. A
-   clicker or the keyboard works on any Projector.
+   clicker or the keyboard works on any Projector during the quiz (§3.4).
 5. **Splitting the roles:**
    - *Phone as Remote:* on the phone, `/teacher` and the code, then Remote.
      The Projector stops showing its bar.
@@ -74,7 +74,7 @@ tablets, and a quiz made in the break.
 | Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The lobby is on the wall (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev/teacher`, the code, Remote. The wall says "Remote connected". Or, with two screens: "a new window here", drag it across, F. | — |
 | Lesson starts | "Type classyquiz.pages.dev and the number." | Tablets: address, code, ▶. Avatars pop up on the wall. |
-| Quiz | Start → Reveal → Next … on whichever tab steers, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
+| Quiz | Start on whichever tab steers; Reveal → Next … there, or with the clicker. | Tap a colour; ✓ or ✗ at the reveal. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
 ## 3. Screens
@@ -148,7 +148,12 @@ Revised 2026-11-03 for the owner's attention budget (item 16) and zip only
 Students (`/play#63953`) get no screen of their own:
 - in the lobby, straight to their avatar;
 - once running, "Which one are you?" with the absent players' avatars and
-  **+**, when there are any;
+  **+**, when there are any; a tablet whose avatar another device took
+  back while it was away gets the same choice when it returns;
+- after the start, tablets still arriving get in, however many: during
+  the first five minutes and the whole first question. After that, five
+  more, then "This quiz has started and takes no more players. Ask your
+  teacher.";
 - after the final ranking, a trophy and ←;
 - with a wrong code, the code, ✗, and the code box again.
 
@@ -239,7 +244,10 @@ throughout. While it steers, the bottom line is the bar:
   On a phone the code gives way to it.
 - **The bar's main button** is the next step: Go, Reveal, Next or
   Final ranking. Space, Enter, →, ↓, PageDown, N and a clicker do the same;
-  F toggles full screen.
+  F toggles full screen. No key starts the quiz from the lobby (Start is
+  the button), a key held with Ctrl, Alt or Windows/Cmd does nothing, and
+  while a Remote steers only a clicker's keys (PageDown, →, ↓) move on
+  from the Projector.
 - **⋯ while steering:** Skip this question · Change the right answer · Final
   ranking now · Players · Leave · Delete the quiz…
 - **⋯ while a Remote steers:** Steer from here · Leave.
@@ -279,9 +287,10 @@ throughout. While it steers, the bottom line is the bar:
 ### 3.6 Student
 
 The student screens are unchanged from v1: avatar and 👁 in the lobby, colour
-buttons, ✓ or ✗ at the reveal, place and stars at the ranking. A tablet of
-the previous class is told "This quiz has finished"; it doesn't slip into
-the next class's lobby.
+buttons, ✓ or ✗ at the reveal, place and stars at the ranking. A tablet
+still showing the previous class is told "This quiz has finished"; it
+doesn't slip into the next class's lobby. A tablet switched off after the
+previous class and opened again for the next one joins it like any other.
 
 ### 3.7 Tempo: countdown and points for speed (v2 items 2, 3)
 
@@ -332,6 +341,9 @@ step:
 |---|---|---|
 | Tablet sleeps, Wi-Fi drops | Same avatar and screen on waking | Nothing |
 | Tablet dies | — | Another tablet: code, own avatar under "Which one are you?" (it appears within a minute). Score kept |
+| The dead tablet comes back after that | "Which one are you?" with **+** | Leave it, or **+** for another student |
+| Tablets still joining after Start | They get in (first five minutes and the first question; then five more) | Nothing |
+| A tablet from the last lesson, left at its final ranking | "This quiz has finished" and ← | ←, then the code |
 | Any teacher tab reloads, sleeps or loses Wi-Fi | The same role again | Nothing |
 | Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …" and shows the bar | Steer at the laptop. The phone is the Remote again when it's back |
 | Projector dies | — | Read off the Remote. Optionally another computer: `/teacher`, code, Projector (offered after 45 s) |
@@ -374,7 +386,7 @@ New entries:
 - Whether children find the code box in the header. The first lesson will
   show.
 
-## 8. State of the working tree (2026-11-02, uncommitted)
+## 8. As built (2026-11-03)
 
 On top of main at 8959cc4 (the pictures merge). Built and run: both
 typechecks, 64 tests, the simulator in both modes, and headless Edge
@@ -391,5 +403,5 @@ student, no new tab gets the steering, which narrows §1 rules 5–7.
 | Root page | Run in the browser. The Build copy is a draft for the owner to judge on the live site: only the address is copied; "in your own words" and "write in the language the quiz should be in" replace the English sentence |
 | Projector, Remote, `/teacher`, students | Styled in `public/app.css` and run; the obsolete pairing, notes and key-check rules removed. Changes to §3.3/§3.4 listed in decisions.md |
 | `scripts/simulate.mjs` | Rewritten for the roles (see decisions.md) |
-| Pictures on the screens | Done, uncommitted: the projector puts the picture between question and tiles or beside them, enlarges it (Z, a click, the Remote), and shows backgrounds; thumbnails in the question list (§3.3), the picture on the Remote's current question (§3.5), "Hide the picture" among the fixes. decisions.md, "Pictures on the screens" |
-| Answer order | Done, uncommitted: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |
+| Pictures on the screens | Done: the projector puts the picture between question and tiles or beside them, enlarges it (Z, a click, the Remote), and shows backgrounds; thumbnails in the question list (§3.3), the picture on the Remote's current question (§3.5), "Hide the picture" among the fixes. decisions.md, "Pictures on the screens" |
+| Answer order | Done: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |

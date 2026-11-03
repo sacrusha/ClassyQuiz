@@ -173,19 +173,46 @@ test("avatars: the first dozen players all get different animals", () => {
   assert.equal(combos.size, G.MAX_PLAYERS);
 });
 
-test("the door: a class takes MAX_PLAYERS, removed ones included, and a few late joiners once started", () => {
+test("the door: a class takes MAX_PLAYERS, removed ones included, and a few late joiners once under way", () => {
   const { g, ids } = setup(G.MAX_PLAYERS - 1);
   G.removePlayer(g, ids[0]);
   G.addPlayer(g, "last", "tl", 1, Math.random);
   assert.throws(() => G.addPlayer(g, "one-more", "t", 1, Math.random), /full/);
 
+  // Under way: past the first question and the first minutes after the start.
   const { g: small } = setup(3);
   G.begin(small, 10);
-  for (let i = 0; i < G.MAX_LATE_JOINERS; i++) G.addPlayer(small, `late${i}`, `tl${i}`, 11, Math.random);
-  assert.throws(() => G.addPlayer(small, "late-too", "t", 12, Math.random), /started/);
+  G.reveal(small, 1);
+  G.next(small, 20);
+  const later = 10 + G.DOOR_OPEN_MS;
+  assert.equal(G.doorOpen(small.run!, later - 1), true, "the first minutes after the start");
+  assert.equal(G.doorOpen(small.run!, later), false);
+  for (let i = 0; i < G.MAX_LATE_JOINERS; i++) G.addPlayer(small, `late${i}`, `tl${i}`, later + 1, Math.random);
+  assert.throws(() => G.addPlayer(small, "late-too", "t", later + 2, Math.random), /started/);
   // A removed late joiner still took a place: removing and rejoining isn't a way in.
   G.removePlayer(small, "late0");
-  assert.throws(() => G.addPlayer(small, "late-again", "t", 13, Math.random), /started/);
+  assert.throws(() => G.addPlayer(small, "late-again", "t", later + 3, Math.random), /started/);
+});
+
+test("the door: slow tablets of a class get in, however many, while the class is arriving", () => {
+  // Started with 3 of 25 in: the rest arrive in the first minutes.
+  const { g } = setup(3);
+  G.begin(g, 0);
+  for (let i = 0; i < 22; i++) G.addPlayer(g, `slow${i}`, `ts${i}`, 1000 + i * 10_000, Math.random);
+  assert.equal(Object.values(g.run!.players).filter((p) => p.late).length, 0, "none of them counts as late");
+
+  // Started before the tablets were handed out: the teacher waits at the
+  // first question, however long that takes, also after its reveal.
+  const { g: early } = setup(0);
+  G.begin(early, 0);
+  const much = 3 * G.DOOR_OPEN_MS;
+  for (let i = 0; i < 20; i++) G.addPlayer(early, `cart${i}`, `tc${i}`, much + i, Math.random);
+  G.reveal(early, 1);
+  G.addPlayer(early, "after-reveal", "tr", much + 100, Math.random);
+  G.next(early, much + 200);
+  // The second question is up and the minutes are over: a few more, then no one.
+  for (let i = 0; i < G.MAX_LATE_JOINERS; i++) G.addPlayer(early, `late${i}`, `tl${i}`, much + 300, Math.random);
+  assert.throws(() => G.addPlayer(early, "stranger", "t", much + 400, Math.random), /started/);
 });
 
 test("taps that change nothing aren't stored; changes of mind are capped; the last accepted tap counts", () => {

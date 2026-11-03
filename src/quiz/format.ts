@@ -499,6 +499,12 @@ export function parseQuiz(input: string): ParseResult {
     );
   }
 
+  // Answer letters an AI adds out of habit ("A) 3", "B) 4") would land on
+  // shuffled tiles, the "A" third: dropped, like a question's number. Only
+  // when every answer of the question carries the next letter from A, and
+  // the answers are shuffled; under "Order: fixed" letters may be meant.
+  for (const q of questions) if (!q.keepOrder && !quizKeepOrder) dropAnswerLetters(q.answers);
+
   questions.forEach((q, i) => {
     const num = i + 1;
     const label = q.text ? `Question ${num} ("${excerpt(q.text)}")` : `Question ${num}`;
@@ -546,15 +552,31 @@ export function parseQuiz(input: string): ParseResult {
   };
 }
 
+// "A) ", "(a) ", "B. ", "C: ": a letter in front of an answer.
+const ANSWER_LETTER = /^\(?([A-Za-z])\s*([).:])\s+(?=\S)/;
+
+function dropAnswerLetters(answers: Answer[]): void {
+  if (answers.length < 2) return;
+  const found = answers.map((a) => a.text.match(ANSWER_LETTER));
+  const first = found[0];
+  if (!first || !/[Aa]/.test(first[1])) return;
+  const ok = found.every((m, i) => m !== null && m[1] === String.fromCharCode(first[1].charCodeAt(0) + i) && m[2] === first[2]);
+  if (!ok) return;
+  answers.forEach((a, i) => (a.text = a.text.slice(found[i]![0].length)));
+}
+
 // ---------------------------------------------------------------------------
 // Tempo
 
 /** "countdown", "speed" (a countdown with points for speed), "pace"; null for anything else. */
 function readTempo(value: string): Tempo | null {
   const v = value.toLowerCase();
-  if (/speed|fast|points/.test(v)) return "speed";
-  if (/count\s*-?down|clock|timer|timed/.test(v)) return "countdown";
-  if (/pace|teacher|none|off|no\b/.test(v)) return "pace";
+  // What a clause denies doesn't count: "countdown (no points)" is a
+  // countdown, "countdown, without speed points" too.
+  const said = v.replace(/\b(?:no|not|without|ohne|kein\w*)\b[^,;()/]*/g, " ");
+  if (/speed|fast|points|bonus/.test(said)) return "speed";
+  if (/count\s*-?down|clock|timer|timed/.test(said)) return "countdown";
+  if (/pace|teacher/.test(said) || /^\W*(?:none|off|no)\b/.test(v)) return "pace";
   return null;
 }
 

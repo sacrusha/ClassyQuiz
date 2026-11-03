@@ -599,6 +599,10 @@ check(reason === "This quiz has finished.", `an old class's tablet is told the q
 // A tablet of the old class that was asleep, coming back with its token.
 const sleeper = await post(`/api/i/${instance}/poll`, { auth: { role: "player", token: "not-in-this-class", run: old.run }, v: -1 });
 check((sleeper.body.messages ?? []).some((m) => m.t === "gone"), "an old class's tablet coming back doesn't slip into the new lobby");
+// The same token on a page opened anew (the tablet was off between lessons): the next class's newcomer.
+const reopened = await post(`/api/i/${instance}/poll`, { auth: { role: "player", token: "not-in-this-class", run: old.run, fresh: true }, v: -1 });
+const reopenedMsgs = reopened.body.messages ?? [];
+check(!reopenedMsgs.some((m) => m.t === "gone") && reopenedMsgs.some((m) => m.t === "choose" && m.stale === true && m.phase === "lobby"), "an old class's token on a page opened anew is offered the new lobby");
 for (const p of players) p.d.kill();
 log("again: new lobby, same code, old tablets finished");
 

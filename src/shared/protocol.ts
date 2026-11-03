@@ -24,8 +24,13 @@ export type RoleName = "screen" | "remote";
 export type Auth =
   | { role: "screen"; token: string }
   | { role: "remote"; token: string }
-  /** run: the class the token belongs to; a tablet of an earlier class is told it has finished. */
-  | { role: "player"; token: string; run?: string }
+  /**
+   * run: the class the token belongs to. fresh: the page was just opened
+   * and hasn't shown that class. A page still showing an earlier class is
+   * told it has finished; a page opened anew with an earlier class's token
+   * (the tablet was switched off between lessons) joins as a newcomer.
+   */
+  | { role: "player"; token: string; run?: string; fresh?: boolean }
   | { role: "guest" };
 
 /** The state a flow command was given in. */
@@ -127,6 +132,13 @@ export type ServerMessage =
       avatars: { id: string; avatar: Avatar }[];
       screen: ChoiceState;
       remote: ChoiceState;
+      /**
+       * The tab came with a player token that isn't this class's player: of
+       * an earlier class, or an avatar another device took back. Without
+       * it, a choice reaching a tab that is a player now is out of date (an
+       * answer to a poll it made as a guest) and ignored.
+       */
+      stale?: boolean;
     }
   /** The quiz is gone (ended, expired), or this tablet's class has finished. */
   | { t: "gone"; reason: string }

@@ -157,7 +157,10 @@ function renderFix(v: ScreenView): void {
 
 function qrSvg(code: string): string {
   const qr = qrcode(0, "M");
-  qr.addData(`${location.origin}/#${code}`);
+  // Straight to the student page: the root page would load the whole
+  // guidance first, on the step the owner calls the slowest (item 4). The
+  // root still forwards "/#code" for anyone who types it.
+  qr.addData(`${location.origin}/play#${code}`);
   qr.make();
   return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
 }
@@ -672,11 +675,21 @@ for (const area of [main, sbar]) {
 // it stays inert for a moment after a press: a clicker pressed twice (or a
 // bouncing key) would otherwise take two steps once the first one's view is
 // back, e.g. Go and straight on to the reveal before anyone could answer.
+//
+// A stray key must not move the quiz (review C): a teacher leaning on the
+// laptop, a shortcut. So no key starts the quiz from the lobby: Start is the
+// lobby's button, pressed once while the class is still joining. A key
+// held with Ctrl, Alt or the Windows/Cmd key is a shortcut, not a step.
+// While a Remote steers, the teacher is on the phone and the laptop's big
+// keys (Space, Enter, N) are the likeliest strays; only a clicker's keys
+// (PageDown, and the arrows some clickers send) move on from here.
 const ADVANCE = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
+const CLICKER = new Set(["PageDown", "ArrowRight", "ArrowDown"]);
 let lastAdvance = 0;
 document.addEventListener("keydown", (e) => {
   const tag = (e.target as HTMLElement).tagName;
   if (tag === "INPUT" || tag === "TEXTAREA") return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.key === "f" || e.key === "F") {
     toggleFullscreen();
     return;
@@ -688,6 +701,7 @@ document.addEventListener("keydown", (e) => {
   // Space or Enter on a focused button is that button's click.
   if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
   if (!ADVANCE.has(e.key) || e.repeat || !line || !view) return;
+  if (view.phase === "lobby" || view.phase === "idle" || (!view.steer && !CLICKER.has(e.key))) return;
   e.preventDefault();
   if (Date.now() - lastAdvance < STEP_LOCK_MS) return;
   lastAdvance = Date.now();

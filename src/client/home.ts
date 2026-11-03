@@ -38,9 +38,13 @@ codeInput.addEventListener("input", () => {
 
 // --- Build a quiz: copy the address
 
-// The button is made here, not in the HTML: an AI's fetcher converting the
-// page to text would otherwise read the address as "classyquiz.pages.devCopy".
+// The address is this site's, also on a copy under another name (the build
+// writes the copy's expected name into the page for AIs; this is the one the
+// teacher's browser actually opened). The button is made here, not in the
+// HTML: an AI's fetcher converting the page to text would otherwise read the
+// address as "classyquiz.pages.devCopy".
 const addr = document.querySelector<HTMLElement>(".addr");
+if (addr && location.host) addr.textContent = location.host;
 if (addr && navigator.clipboard?.writeText) {
   const copy = document.createElement("button");
   copy.type = "button";

@@ -2,6 +2,8 @@
 // decompression (DecompressionStream "deflate-raw"); no library. Entries are
 // read one at a time, when asked for (images.ts).
 
+import { parseQuiz } from "../quiz/format.ts";
+
 export interface ZipEntry {
   name: string;
   read(): Promise<Uint8Array<ArrayBuffer>>;
@@ -56,11 +58,29 @@ export async function quizTextFromZip(buf: ArrayBuffer): Promise<string> {
   return quizTextFromEntries(listZip(buf));
 }
 
-/** The quiz text among an archive's entries: its one .md/.txt file (ignoring system clutter). */
+/**
+ * The quiz text among an archive's entries (ignoring system clutter). With
+ * several .md/.txt files (a README, the AI's notes beside the quiz), the
+ * one that reads as a quiz: no errors, then the most questions; a tie goes
+ * to the file at the top level, then the shortest path. When none has a
+ * question, that first file, so the teacher sees what's wrong with it.
+ */
 export async function quizTextFromEntries(entries: ZipEntry[]): Promise<string> {
   const texts = entries.filter((e) => /\.(md|txt|markdown)$/i.test(e.name) && !/(^|\/)(__MACOSX|\.)/.test(e.name));
   if (texts.length === 0) throw new Error("The archive contains no .txt or .md file with the quiz.");
-  // Prefer a file at the top level, then the shortest path.
   texts.sort((a, b) => a.name.split("/").length - b.name.split("/").length || a.name.length - b.name.length);
-  return new TextDecoder().decode(await texts[0].read());
+  const dec = new TextDecoder();
+  if (texts.length === 1) return dec.decode(await texts[0].read());
+  const read = await Promise.all(texts.map(async (e) => dec.decode(await e.read())));
+  let best = 0;
+  let bestRank = [-1, -1];
+  read.forEach((text, i) => {
+    const r = parseQuiz(text);
+    const rank = [r.ok ? 1 : 0, r.quiz.questions.length];
+    if (rank[0] > bestRank[0] || (rank[0] === bestRank[0] && rank[1] > bestRank[1])) {
+      best = i;
+      bestRank = rank;
+    }
+  });
+  return bestRank[1] > 0 ? read[best] : read[0];
 }
