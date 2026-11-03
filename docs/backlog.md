@@ -314,8 +314,18 @@ written once, for the flow that ships with it, so the landing's resume line and
 the teacher code are one story. Tempo text as the site works today. B — the
 Tempo button, the points-for-speed switch (6) and the "upload is start"
 lifetime (3); server-side. A is three implementers' worth and gets a review
-before the owner deploys. In progress: the guidance merge on a branch; the
-landing story in `docs/landing-story.md`.
+before the owner deploys. The landing story is in `docs/landing-story.md`.
+Where it stands at the close of 2026-11-03: A is built and reviewed on main at
+20cab09 — the guidance rewrite cut to the facts, the after-upload flow, the
+landing page, review D (`docs/reviews/2026-11-03-review-d.md`) and its five
+fixes — and waits for the owner's deploy from the clean worktree. Deploy note:
+the Pages project gains a BUDGET binding to the state Worker's SiteBudget; no
+migration; the Worker deploys first, as `npm run deploy` already does. After A
+is live: the free-tier sitting (`docs/free-tier-check.md`), the owner's sheet
+photographs replacing the strip's rendered frame 1, and the storyboard video
+from the real screens (landing story §5), which needs the new join screen for
+its first beat. B unchanged: the Tempo button, the points-for-speed switch, the
+lifetime; the avatars (item 9) fit B as client-side work.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -348,12 +358,12 @@ landing story in `docs/landing-story.md`.
    language the teacher needs, and the AI asks rather than guesses; the landing
    step must say to name the language.
    The four runs were made on the old guidance and are redone once item 5
-   settles. Real transcripts are edited for visuals only — they are walls of
-   text — never in content. The owner's own earlier exchange (plaintext era,
-   saved at `docs/drafts/example-exchange-2026-11-03.md`) shows the shape to
-   aim for: an ask by exercise numbers, and a closing that names the typical
-   errors behind the wrong answers and offers a second set for a parallel
-   class.
+   settles (done, as built below). Real transcripts are edited for visuals
+   only — they are walls of text — never in content. The owner's own earlier
+   exchange (plaintext era, saved at
+   `docs/drafts/example-exchange-2026-11-03.md`) shows the shape to aim for:
+   an ask by exercise numbers, and a closing that names the typical errors
+   behind the wrong answers and offers a second set for a parallel class.
    Owner's reaction to `docs/landing-story.md`, 2026-11-03. One story must
    work on a desktop and on horizontal tablets as well as on vertical phones:
    the sheet recognizable as a sheet, readability on a phone may suffer, and
@@ -381,6 +391,18 @@ landing story in `docs/landing-story.md`.
    Build for the teacher; each carries weight where it is. A human-facing "see
    the questions" is a proxy for what a quiz is, and once the storyboard exists
    it duplicates it toward noise.
+   As built: the strip's tablet frame shows plain colour buttons, because the
+   example runs' second ask was feature-driven (pictures to tap — the
+   sheet-maker's choice to exercise pictures-as-answers), which a first-time
+   teacher wouldn't ask; if the conversation is ever shown — the video's beats,
+   a future example page — turn 2 is redone with a teacher's ask. Frame 2 (the
+   ask) is a wordless placeholder drawing until something better exists. Step 1
+   states only the verified fact: "Claude Opus wrote the example quiz, 3 Nov
+   2026". Italian ships unverified; German "du", French "vous", Italian "tu"
+   await the owner's read. The example content:
+   `.tmp/example/v2-{de,en,fr,it}/`, real two-turn runs on the settled
+   guidance, 25 screens per language from a local stack showing the real
+   address.
 2. **Resume, from purpose** — item 17 was built as a feature (list, count,
    fold, "closes", delete) without a defined purpose; the questions come
    before the implementation. Who resumes: the device that started the
@@ -443,6 +465,9 @@ landing story in `docs/landing-story.md`.
    programs, or a colleague by hand from the README. It needs the free
    account the owner expects; the agents prepare the protocol so that it
    costs one sitting.
+   As built, the own-copy line can only count days the upload cap refused
+   uploads — a spent request allowance can't be recorded — so it understates
+   and says only what it knows; a refused upload now says which cap it hit.
 5. **The guidance, the owner's rewrite** — the lower section of the page,
    verbatim at `docs/drafts/guidance-rewrite-2026-11-03.md`: About, the manual
    for the AI, what informs the quizzes' shape, how quizzes are built, and
@@ -529,6 +554,16 @@ landing story in `docs/landing-story.md`.
    from item 19; the mode is named where the choice is. `/example` is the check
    screen without codes, linked from the landing strip only until the
    storyboard video exists.
+   As built, with review D's fixes: the wrong-code counts persist in storage,
+   per device (five a minute, ten minutes out) and per quiz (ten, then one every
+   six minutes — a sweep of the hundred endings takes hours whatever the
+   addresses), the uploading device exempt; the wall never prints the teacher
+   code, it shows under ⋯ on demand; a quiet or closed Remote is taken by the
+   teacher code at once; "Again" restarts the 90 s counter. Trade-offs accepted
+   on the owner's stance: a class typing seven-digit codes can keep the
+   teacher's second device out for a while, resume on the uploading device
+   staying; a locked phone counts as free after 25 s; the salted address hash is
+   stored only while it counts.
 9. **Avatars: celebration, the lion's mane, tools** — student feedback:
    celebrating avatars, winners only, after every question; jumping seems
    easiest; at least ten winners easily distinguishable, crowding allowed
@@ -576,6 +611,13 @@ The quiz is already made; it can be more than one activity.
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
   own.
+
+## Known bugs, the owner's view
+
+`docs/bugs.md` is the implementers'; here only what the owner has ruled. The
+score race was seen a second time, in the simulator's tempo mode. B's Tempo
+rework is where it gets designed out, per the owner — a race is solved by
+architecture, not debugging.
 
 ## Open decisions and checks, at the close of 2026-11-03
 
