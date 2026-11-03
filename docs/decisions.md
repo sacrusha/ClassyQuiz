@@ -1552,6 +1552,14 @@ rows, 30 on requests with every device polling.
   identified"). What a guess wins is an avatar in someone's class, which
   the cap, the door and Remove now handle. Taking a role is already closed
   once students are in.
+  *Amended 2026-11-03 ("After upload"):* that last reason went with the
+  gate. A role now takes the teacher code, and wrong teacher codes are
+  limited per device in the quiz's instance, which the check reaches
+  anyway: no extra request. The owner: the "no IP addresses" decision is
+  about logs and retention, not attack detection, so the device's address
+  may be counted transiently (salted, in memory, for the window, never
+  stored or logged). Class codes stay unlimited, for the reasons above: a
+  wrong class code finds no instance to count in.
 - **Stripping bidi characters** (review A). The only text anyone sees is
   the teacher's own quiz, on their own class's screens: avatars are
   assigned, nobody types a name. Stripping could damage legitimate
@@ -3171,3 +3179,147 @@ teacher can change. The ask-back survived the cut; one sample, so no rate.
 Every quiz produced parsed without errors or warnings. Not established: the
 claude.ai system prompt and real fetch behaviour, other models and the free
 tier, whether the drawn number lines match their keys.
+
+## 2026-11-03 — After upload: the check, the teacher code, one question, Swap
+
+Serves: v4 item 8 (delivery A). Design: `docs/after-upload.md`, draft 5,
+closed; its §4 corrected by the owner on the limit (below). Branch
+`after-upload`. Supersedes the gate in "One code per quiz, two teacher roles
+per tab" and rules 2–4 of "A second teacher device once the class is in";
+user-flow.md §1 and §3 describe the flow as built.
+
+**Built:**
+- **The single tab after upload opens on the check:** title and number of
+  questions, the class code small (with the count once someone joined), today's
+  tempo line, the teacher code at rest in one sentence ("A second device, to
+  steer from or to show the quiz on: on classyquiz.pages.dev, type 63953 47.
+  Or a new window here."), the question list with its fixes. **Show the
+  class the code ▶** is the one tap to the join screen: today's fold, Start
+  quiz ▶, the tempo line, and a quiet line "‹ Questions · A second device ›
+  · ⋯". Which of the two the tab shows is kept per tab (sessionStorage), so
+  a reload stays; a wall that takes the steering back in the lobby shows the
+  join screen, never the check.
+- **The teacher code** is the class code plus two digits, drawn at upload
+  (`meta.teacher`, any digit 0–9), returned with the upload and in `/info`,
+  carried in every teacher view. The code box on the root page and on `/play`
+  routes by length: five digits are a student, seven a teacher device
+  (`/play#6395347`). `/api/join` takes seven: the first five find the
+  instance, the instance checks the two. `takeRole` checks them again
+  itself, whatever the page did; the uploading device's secret (Resume)
+  needs no digits.
+- **The device that comes in** acts on `choose.entry`, which replaces the
+  per-role `ChoiceState`: `ask` when one tab shows and steers ("Show the quiz
+  here" / "Steer it from here"); `remote` or `screen` when that tab is gone,
+  taken without a question; `screen` too when nothing is there, and then a
+  gone Remote's token goes with it, so the next device is asked; `full` when
+  both are there. It acts once, on arrival: a device left on the question or
+  on "full" never takes a role by itself later ("Try again" asks anew).
+- **⇄ Swap**, a new op from either tab while the other is there: both get
+  new tokens; the other tab hears its new role through `evict`, the sender
+  in its reply. On the wall: faint in the lobby's corner, and in ⋯; on the
+  steering tab: "Projector ✓ · ⇄ Swap" in the lobby, and in ⋯.
+- **Gone:** the class-in gate in `choiceState`, `allowJoin`, `joinUntil`,
+  `projectorHere`, `steerHere` and the wall's "Steer from here", the secret
+  sent with a role, `/teacher`'s two buttons. The bar's "Remote gone [Allow a
+  device to join]" is "Remote gone: type 63953 47 on another device".
+  `/teacher` asks for the teacher code, with the class code in the box,
+  except on the device that uploaded the quiz, which goes in with its secret.
+- **Wrong teacher codes:** the fifth within a minute from one device refuses
+  that device's teacher codes for this quiz for 10 minutes ("Too many wrong
+  codes for this quiz. Try again in a few minutes."), at `/api/join` (429)
+  and at `takeRole` alike. Counted in the instance, which the check reaches
+  anyway. An attempt without two digits (the class code alone) isn't counted:
+  it is no guess at them.
+- **`/example`:** the check without codes, read in the browser from a static
+  .zip in `public/examples/` (the four language runs in `.tmp/example/`, by
+  the browser's language or `?lang=`), with "Download the example (.zip)" in
+  place of Show the class the code, no fixes, pictures from the .zip.
+- **The guide's account of a lesson** (index.html) describes this flow; the
+  root page's code box takes seven digits (`maxlength` 8, so "63953 47" pasted
+  with its space fits; the box keeps digits only).
+- **Where a quiz stands,** in the owner's `/info` answer (`stands`: phase, n of
+  total), for the landing's resume line (v4 item 2), which reads it.
+- **The steering bar on a phone-sized wall** shows the code without the
+  address, and gives the code's room to −5/+5 when they are there: the
+  address cut the code to a lone digit before the ellipsis (bugs.md, the
+  stray "1").
+
+**Differs from the design, and why:**
+- **The limit keys on the device, not the quiz** (owner, correcting §4: the
+  "no IP addresses" decision is about logs and retention, not attack
+  detection). The address is hashed with a salt that lives in the object's
+  memory, held for the window, never stored or logged. Per quiz only where
+  there is no address (local development). Consequence: memory-only means an
+  evicted (hibernated) instance forgets its counts; a script that pauses long
+  enough between bursts of five gets more tries than the numbers say. Behind
+  a school's NAT a class shares an address: a pupil's five wrong codes lock
+  the teacher's second device out too, for ten minutes, on the school Wi-Fi;
+  the uploading device is exempt.
+- **No migration by expiry.** The design kept `/teacher` for quizzes open at
+  the deploy until they expire. Instead an instance without digits gets them
+  on its first load after the deploy, stored at once; its teacher's screens
+  show them from their next view. One code path, and no gate kept alive for
+  old quizzes.
+- **"Steer from here" is gone entirely,** not kept "for a wall whose steering
+  tab is gone": the wall already steers by itself 45 s after its Remote is
+  gone, so the case has no item left to serve.
+- **Today's tempo line, not the speed switch:** delivery A carries
+  today's tempo control onto the check (and the join screen) as it is; the
+  design's "Points for speed" line comes with v4 item 6 in delivery B.
+- **The Remote without a wall** offers "A second device…" in ⋯ instead of
+  "Show the projector here"; the card says how to bring the projector back
+  with the teacher code.
+- **Resume on the landing** only changes its link (`/play#<teacher code>`);
+  the card's "On another device: type 63953 47 in the code box" is the
+  landing's resume line (v4 item 2), on its own branch, from `/info`'s
+  `teacher`.
+- **`/example`'s .zip files are the old guidance's runs,** placeholders until
+  the redo (landing story S1); the page reads whatever .zip is there.
+
+**Checked:**
+- Both typechecks; 96 unit tests (none touch the instance).
+- `simulate.mjs`, all three modes, OK (1,399 HTTP requests with all polling,
+  1,345 before: the added role cases). New checks: the upload returns the
+  digits; `/api/join` takes the teacher code and tells a wrong one; the phone
+  is asked while one tab shows and steers; with the Remote gone, a new device
+  is sent to it; with both there, a third takes nothing; a tab on HTTP answers
+  Show the quiz here and the old tab becomes the Remote; three swaps, from
+  either side, over WebSocket and HTTP; with students in, the class code
+  alone takes no role, the secret and the teacher code do; with nothing
+  there, a device takes the Projector and steers; five wrong teacher codes
+  lock the device (the right code and `takeRole` refused too), the secret
+  and the class code unaffected.
+- Headless Edge through the real pages (`.tmp/shots-tool/after-upload-walk.mjs`,
+  41 checks, no page errors): upload through the file input to the check;
+  the join screen, a reload staying on it, the sheet, the way back; "63953 47"
+  typed with its space in the root page's box, the question, Steer it from
+  here; the wall's class lobby with Swap; a student with five digits; four
+  swaps, from the wall's corner and the steering tab's lobby line; a third device
+  told both are there; a wrong code; the old `/teacher` link; Resume's link;
+  the phone dying, the wall back on the join screen with "Remote gone", the
+  bar's line; the 360 px bar; a new phone taking the free steering without
+  the question; the wall's ⋯; `/example` in German and English, pictures
+  from the .zip, no fixes.
+
+**Learnt:**
+- A click within 0.7 s of the steering view first appearing is swallowed by
+  the step lock (`STEP_LOCK_MS`), silently: the walk's Start did nothing
+  until it waited. A person is unlikely to be that fast; noted, not changed.
+- Two local stacks at once collide in wrangler's dev registry when their
+  Pages projects share the name `classyquiz`, and a stack killed hard leaves
+  a stale registry entry the next start keeps using (uploads fail with
+  "Network connection lost"). The stack scripts in `.tmp/stacks/after-upload/`
+  rename the project and delete their own entries before starting.
+
+**Deploy:** no migration. Old pages open at the deploy: a `/teacher` choice
+screen's buttons are refused (no digits), a wall's "Allow a device to join"
+and a Remote's "Show the projector here" answer "unknown command"; a reload
+gives the new pages. Quizzes open at the deploy get their digits on first
+load.
+
+**Not established:** whether teachers read "63953 47" as theirs and "63953" as
+the class's; whether "Show the quiz here", "Steer it from here", "A second
+device", "Show the class the code" and "Swap" are the words they reach for;
+a phone casting by Miracast; the limit against a real attacker on
+Cloudflare (it ran locally, where the address may be absent and the count
+the quiz's; which applied wasn't checked).
