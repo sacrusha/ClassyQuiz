@@ -3,7 +3,7 @@
 Project → versions as goals → items that get picked, worked and delivered. Each
 item names the problem it solves for the teacher or the class; the versions tell
 the story of what comes before and after. Items get resorted, split and combined
-as understanding grows. Last settled: 2026-11-02.
+as understanding grows. Last settled: 2026-11-03.
 
 ## Project
 
@@ -20,7 +20,8 @@ the teacher's phone as remote, and an AI account that may be a free one.
 Teachers understand English; students may read slowly, or not
 read English at all, and the teacher is in the room. The guidance to the AI is
 in English, which AIs are trained on; quizzes come out in whatever language the
-teacher and the sheets are in. The measure is teacher time. The failure mode to
+teacher needs, and the AI asks when the sheet's language and the ask's differ.
+The measure is teacher time. The failure mode to
 design against is a normal user who can't use it, not a malicious one: a
 disruptive student is handled by the teacher walking over to the tablet and
 taking care of the student. Children actively and openly sabotaging the class
@@ -161,7 +162,9 @@ so there is something to click early; authoring closes the loop.
     ChatGPT currently breaks with two attachments, maybe temporarily. Sonnet
     was only tested on a paid account; that the free tier offers Sonnet was
     checked, whether it produces a working zip was not — "the free version
-    works" is unverified and needs a more thorough test. The bullets
+    works" is unverified and needs a more thorough test. Owner, on the step 1
+    wording: no need to be overly specific yet; if Sonnet tests successfully
+    on a free account the step says so, if not we adapt. The bullets
     under step 2 should mention the number of questions — it helps the user
     specify, and makes the model more likely to ask when it isn't. "Download
     it." is an order for the sake of ordering the user around, extremely
@@ -244,6 +247,7 @@ garbage.
    the teacher to adjust — a −5/+5 s pair during the run, persisting across
    questions, minimum 10 s, maximum 60 s — which keeps the lobby less
    cluttered than a length picker.
+   Revised by v4 item 6: tempo moves from the quiz to the instance.
 3. **Speed scoring** — energy for classes that want it.
 4. **Hardening** — an open public instance: e.g. size limits, malformed
    archives, abuse of upload and sessions. Includes closing the door, which
@@ -293,6 +297,249 @@ garbage.
    teacher-supplied layout would run in every student's browser on the shared
    site.
 
+## v4 — Adoption: the first visit
+
+The deliverable holds; what makes or breaks adoption is the landing page,
+before anything else comes into play. Owner and product owner, 2026-11-03.
+
+Pattern, for every item below: any claim about what an AI can do carries the
+tier and the date it was tested — "free Claude Sonnet, tested 4 Nov 2026". It
+is a qualifier and a trust signal at once. Never "the free version works",
+never "about 15 minutes".
+
+Delivery, in two steps. A — landing: the instance rendering (item 1), resume
+(2), the foot-line problems (4) and the language step, plus the guidance merge
+(5) and the after-upload flow (8); the guidance's account of a lesson is
+written once, for the flow that ships with it, so the landing's resume line and
+the teacher code are one story. Tempo text as the site works today. B — the
+Tempo button, the points-for-speed switch (6) and the "upload is start"
+lifetime (3); server-side. A is three implementers' worth and gets a review
+before the owner deploys. In progress: the guidance merge on a branch; the
+landing story in `docs/landing-story.md`.
+
+1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
+   — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
+   "how do I ask?" and "what even is a quiz?", and one concrete instance
+   answers both: what the AI hands over *is* what the class plays, and the
+   words that produced it are the how-to-ask. The forms are renderings of that
+   one instance, so more than one can exist; not a closed list: a video; a
+   static display of the input leading into the playable quiz as its
+   deliverable; a carousel or slideshow. The sheet: the owner's real photos (a
+   textbook's number-line pages, German, numbers to a million, photographed in
+   hand) can't be published; they are in `.tmp/examplesheets/` for deriving a
+   sheet of the same form, level, language and exercise shapes with other
+   content.
+   Built so far: the derived sheet and a real two-turn conversation with its
+   quiz, in `.tmp/example/` (sheet/, run/, zahlenstrahl-quiz.zip), run for four
+   languages — German, English, French, Italian — each needing the language
+   named in the ask. Owner: the renders stand; they print and photograph once
+   the sheet is final; "5. Klasse" stays (the real sheet is Swiss 4th grade,
+   close enough). The example is maths, readable across languages; the one
+   barrier for a non-German reader is the German ask, so the rendering cycles
+   the same sheet and the same ask through languages, each producing a quiz in
+   that language.
+   Finding: on a complete ask Claude delivers at once and asks nothing back, so
+   the page must not promise a dialogue; the second turn is where the teacher
+   shapes the quiz. Finding: the page contradicted itself on quiz language —
+   landing step 2 "write in the language the quiz should be in" against the
+   guidance's "language of the material unless the teacher wants otherwise"; an
+   English ask on the German sheet gave a German quiz, correctly by the
+   guidance. The owner's rewrite (item 5) settles it: the quiz is in whatever
+   language the teacher needs, and the AI asks rather than guesses; the landing
+   step must say to name the language.
+   The four runs were made on the old guidance and are redone once item 5
+   settles. Real transcripts are edited for visuals only — they are walls of
+   text — never in content. The owner's own earlier exchange (plaintext era,
+   saved at `docs/drafts/example-exchange-2026-11-03.md`) shows the shape to
+   aim for: an ask by exercise numbers, and a closing that names the typical
+   errors behind the wrong answers and offers a second set for a parallel
+   class.
+   Owner's reaction to `docs/landing-story.md`, 2026-11-03. One story must
+   work on a desktop and on horizontal tablets as well as on vertical phones:
+   the sheet recognizable as a sheet, readability on a phone may suffer, and
+   phone variants such as clickable or scrollable are allowed. DE·EN·FR·IT
+   translates the block above About; About is for the AI and stays English;
+   the switch sits top right, like on 99% of pages. "Try the example" opening
+   as host is likely overwhelming — they just want to see the questions. The
+   classroom interaction still needs visualizing: the job of a South-Park-ish
+   2D video, from the owner's storyboard project (agents working on purpose
+   and situation, after-action reports distilled into Grundsätze), fed the
+   real screens once the stills exist, and never autoplaying on the root.
+   How the page addresses teachers, in the owner's words: commands only for
+   what must be done ("Ask it" is one; advice on how follows well). "Send
+   your AI photos" and "Tell it what to change" are commands nobody must
+   follow. "It hands you the quiz and says what's in it" isn't necessarily
+   true — not how you address users. "Choose any good AI" is milder than
+   "Use a"; then detail: a link beats naming tiers, a dated test statement
+   beats both. A personal frame is possible: "I typically use paid Opus;
+   expect paid Gemini or ChatGPT to work just fine."
+   Landing story draft 2 is in `docs/landing-story.md`. Still with the owner:
+   the video brief (§5); the own-copy thresholds and the network help at
+   failure points are resolved by item 4. Owner on the example quiz, which
+   revises "Try the example" above: both humans and AIs learn a format through
+   a prototype — the txt example in the manual for the AI, the example ask in
+   Build for the teacher; each carries weight where it is. A human-facing "see
+   the questions" is a proxy for what a quiz is, and once the storyboard exists
+   it duplicates it toward noise.
+2. **Resume, from purpose** — item 17 was built as a feature (list, count,
+   fold, "closes", delete) without a defined purpose; the questions come
+   before the implementation. Who resumes: the device that started the
+   quiz. When: during that lesson — tab closed, laptop slept, lesson
+   interrupted, or the teacher uploaded on the phone and stands at the
+   laptop. What they need: the way back, and certainty it's the right quiz.
+   An open quiz is one this device started that hasn't reached its final
+   ranking; shown: the title, where it stands, the code — the way back from
+   another device is `/teacher` + code, which the page doesn't say. Only the
+   latest. Not shown: when it closes, delete.
+   The landing stops offering resume at the final ranking; the server keeps the
+   quiz an hour past it, so a tablet reloaded to see its place still finds it
+   (item 3).
+3. **Upload is start** — owner: "uploaded the evening before" is not real;
+   the parallel class's quiz is its own quiz, started by its own upload. A
+   quiz is one class's lesson. This revises the lifetime decision's patterns
+   and what was built on them: the 48 h instance with several runs, "Again
+   with another class" (its one hidden value, carrying in-run key fixes,
+   belongs to the Later item "corrected quiz download"), "closes" on the
+   landing, and Delete there duplicating End at the ranking. The landing
+   page doesn't wait for the server-side simplification; an implementer
+   sizes it.
+   Sized 2026-11-03: small to medium, mostly removal — the `again` command, the
+   lobby reopened an hour after the ranking, "closes" and Delete-by-title on
+   the landing, tempo carry-over between runs; game logic, scoring and the
+   connection code untouched. The one decision is the new lifetime: never end
+   at the final ranking (an interrupted lesson, a tablet reloaded to see its
+   place) — the ranking plus the existing one-hour keep, or idle; the 3 h
+   class-idle ceiling in `limits.ts` is the number to check. Lost until
+   "corrected quiz download" ships: a key fixed in class dies with the quiz.
+4. **The foot lines from the teacher's side** — both serve real purposes
+   but speak for the site. Own copy: the teacher's question is "I'll run
+   20–30 a month, whenever I need to; can I rely on this?" — this site can't
+   promise it, and there is something they can do proactively. Not a
+   first-visit question; its moment is after the first success, or on a
+   return visit. Network check: the upload proves HTTP, the lobby degrades
+   to HTTP by itself, a tablet joining the lobby is the tablet-side check —
+   on the day the site checks itself. What `/check` uniquely has is the
+   failure explanation, "it's the network, tell IT this", which belongs
+   where the failure shows. Placement not yet confirmed by the owner.
+   Owner on the own copy: knowing it can and probably should be self-hosted is
+   important, but realistically first-time viewers won't read, unless the site
+   is close to running out of quizzes and tells them. Needs a design assessment
+   focused on the problem, not the solution — part of the landing story.
+   Resolved with product-owner defaults, the owner to adjust: the own-copy line
+   shows only on a device that has uploaded before and only once the site has
+   been full at least once in the last 30 days, stating the fact ("full on N
+   days this month"); the exact thresholds are the implementer's to size.
+   Network help at the failure points as the landing story has it — the lobby
+   after about 90 s with nobody joined, the upload error, and a part of
+   `/check` readable at home — is accepted. The video brief (landing story §5)
+   stays with the owner.
+   "Your AI does it" and a number serve one purpose — it's not scary, you can
+   do it — and are only true if the AI a normie has can do it; setting up a
+   local environment is almost impossible for a normie without AI. The check
+   that gates the own-copy wording: free Claude, through its own sandbox,
+   from the own-copy prompt to a copy online. If yes, time it and state it
+   dated. If not, no number anywhere — people with a paid AI derive it from
+   theirs — and own-copy says who can: someone with an AI that runs
+   programs, or a colleague by hand from the README. It needs the free
+   account the owner expects; the agents prepare the protocol so that it
+   costs one sitting.
+5. **The guidance, the owner's rewrite** — the lower section of the page,
+   verbatim at `docs/drafts/guidance-rewrite-2026-11-03.md`: About, the manual
+   for the AI, what informs the quizzes' shape, how quizzes are built, and
+   "Build with the teacher", which is item 11's part 4 taken over by the owner
+   (take in what's provided, then a short summary of what you got and what you
+   still need, not a wall of text; previews from the layout page where the
+   tools allow; a teacher who frontloads everything wants delivery). It is
+   based on a version before pictures as answers. The merge reconciles it with
+   what's built: pictures as answers and the pictures guidance; the limits (120
+   pictures, not 60); the Remote fading after 45 s; "a question number with no
+   text" to verify against the parser; the lifetime figures follow item 3; the
+   Tempo paragraph follows item 6 — the live page must describe the live site
+   at every deploy. Structure and detail kept, wording free.
+   Owner's notes on the merge, 2026-11-03: the bare question number was a
+   feature mixed in prematurely — dropped; a few words are enough when
+   pictures carry the question. The "Any language" passage is the just-ask
+   instruction — "if the exercise language and the request language pull in
+   different directions and don't resolve cleanly, just ask" — not named
+   cases: AIs use location and memory to resolve, there is no exhaustive
+   list, and detail breaks things. "About 15 minutes" is out until tested.
+   The 2026-11-02 decision "Guidance page is information, not instruction"
+   was a rule read as a rule; its purposes are two — not tripping injection
+   guards, and no pointless prescription — and a well-marked example of
+   using an AI trips no guard.
+   The standard the owner set on the merge: the guidance says only what the
+   reading model can't already know; "all the useful advice derived from model
+   knowledge the reading model already knows" went (4311 → 2266 words). The
+   Manual section's human-facing job is only "there are no secrets, it's not
+   magic, you're allowed to look", so it reads dense. Branch `guidance-merge`
+   at e93954f, tests pass; one partial-ask sample still asked before building
+   after the cut.
+6. **Tempo, in the instance** — owner: `Tempo:` on the quiz's definition is the
+   wrong place; the mode, the pace and whether speed scores belong to the
+   instance, chosen in the lobby. The solution to beat before any complexity is
+   justified: an "end question in 15 seconds" button on each question — the
+   teacher's pace by default, the energy moment when the teacher chooses it,
+   and the teacher's eyes on the answered avatars replacing the AI's prediction
+   of difficulty. `Tempo:` and `Time:` leave the definition. Per-question hints
+   ("needs more time", "less") stay parked until a teacher asks for them:
+   reading load is derivable from the text and a picture, only load beyond
+   reading is the AI's alone, and if ever, relative, never seconds. Points for
+   speed survive as a lobby switch; its reference time (answers shown?) is the
+   implementer's to size. The existing countdown code is the subset the button
+   needs — good enough to forge from.
+8. **After upload** — the flow from upload to Start, designed in
+   `docs/after-upload.md` (draft 5 is the design). Owner's
+   decomposition: opening a quiz has two uses — run through it in the real
+   environment; start it, get people to join, set up — not exclusive; a quick
+   check that it's the right version of the right quiz is value for the second
+   and captures most of the first. Setup steps, some perhaps more complexity
+   than value: check it's the right quiz, spot fix, set presenter and remote
+   roles, advanced config (tempo now, others later), show the join code on the
+   big screen, know whether pupils are joining and at what rate, know when
+   everybody is ready, start. A new user doesn't yet think about remote and
+   projector and must be taught efficiently with low friction. Teachers differ:
+   some join the remote on the last screen in parallel with the students, some
+   set up before students are involved.
+   Sharing and not sharing a screen is a button press — every teacher uses the
+   laptop for shared and unshared sections — so a private check screen exists;
+   the exception is big all-in-one touch screens, out of scope. "/teacher is
+   clunky"; a dedicated teacher code, two digits longer, typed in the same box
+   as the students', serving both workflows: all on the phone (snap hand-drawn
+   notes, AI, zip, open, then connect the projector) and all on the laptop that
+   serves as projector or hybrid. Second-screen detection is unreliable and
+   would need to add real value: phones and Miracast, laptops gaining the
+   screen after the check, window size versus screen size, tablets in between.
+   A child reading the teacher code off a shared wall: the teacher is in the
+   room, a teachable moment; otherwise start with the projector off or from the
+   remote — if they don't, they will next time.
+   Closed, draft 5. The owner's purpose for connecting the remote: easy to go
+   right, hard to go wrong. Hardening against outside attackers and 14-year-olds
+   writing automated scripts is real; the same 14-year-olds inside the
+   classroom won't be stopped from disrupting class by a random key — "they can
+   just steal the projector's power plug". So the teacher code is the class code
+   plus two digits, and a device that tries many codes in seconds is refused for
+   a while — to be done anyway. Shape: private check screen first (questions,
+   the second-device steps, the speed switch, the code small), one tap to the
+   join screen; a device arriving with the teacher code gets one plain-words
+   question — show here or steer here — only when the one tab already there
+   does both; nothing sensed decides a role. One tap on the second device, in
+   plain words, is fine: by then the user knows projector and remote and which
+   this device is, and a misclick is recoverable by ⇄ Swap on either device.
+   Start's label: "Start quiz ▶" everywhere that steers — the owner's words
+   from item 19; the mode is named where the choice is. `/example` is the check
+   screen without codes, linked from the landing strip only until the
+   storyboard video exists.
+9. **Avatars: celebration, the lion's mane, tools** — student feedback:
+   celebrating avatars, winners only, after every question; jumping seems
+   easiest; at least ten winners easily distinguishable, crowding allowed
+   beyond that if required. Bug: lion on a star — the star's colour is hard to
+   see because the mane is bigger than the shape. Tools: not built;
+   `docs/avatars.md` recommended against (1–2 px wide at wall sizes, floating
+   beside a head without paws; the balloon and the lantern survive as blobs)
+   and left the call to the owner, still open.
+   Winners jump after every reveal, including the ones where most of the class
+   got it right; that they are then hard to make out is accepted.
+
 ## Later — Paper and memory
 
 The quiz is already made; it can be more than one activity.
@@ -310,6 +557,21 @@ The quiz is already made; it can be more than one activity.
   AIs may not crop figures and bundle them; e.g. attach and crop the photo in
   the lobby, or an AI-drawn figure inline in the pasted text.
 - **Sound** — some classes want it; off by default, a mute on the projector.
+- **Runs by itself** — design item, moved here from v4 item 7. Not core
+  purpose, but value: the quiz carries on while the teacher's hands are
+  elsewhere — a student who needs them, the next thing to set up, a small
+  group — teacher in the room, not steering. Needs a cadence with nobody
+  pressing (show, close, votes, key, next; votes-then-key may collapse to one
+  step), a close rule per question — the wall can watch instead of the
+  teacher: close when everyone present has answered, or some seconds after the
+  last answer, with a cap — and a way back: any press by the teacher makes it
+  manual. Limit: nobody reads aloud, so it is for classes that read for
+  themselves; an option, never the default. Lives in the instance beside pace
+  and points for speed; shares the clock machinery with v4 item 6 so neither
+  forecloses the other. Owner: the cheap version — closes on the last
+  student's answer or max time, with fixed, generous durations for the result
+  pages — messes with deliberate pauses, so a proper design item rather than
+  a quick build. The Tempo implementer (v4 item 6) doesn't foreclose it.
 - **Pairs and teams** — two children on one tablet already works as one
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
@@ -318,13 +580,28 @@ The quiz is already made; it can be more than one activity.
 ## Open decisions and checks, at the close of 2026-11-03
 
 With the owner:
+- Standing authorization for implementers' branches and merges to main,
+  the owner's rule: commit in meaningful, likely working units, no churn
+  commits, and squash what slips.
+- The free-tier test waits until the landing and guidance pages are settled:
+  every fetch from claude.ai restarts the fetch cache's clock on whatever the
+  page is that day. Until then, no fetch tests of the live root.
+- v4 item 4: the own-copy and network-help defaults, to adjust if the owner
+  wants; placement of the foot lines follows the landing story.
 - A domain in front of the site, so a rate-limiting rule at the edge can
   stop a script from spending the day's allowance; the free plan includes one
   such rule, and a name children can type beats pages.dev on the slowest step.
 - The landing page's step 1: what it says about which AI, now that "the free
-  version works" is unverified.
+  version works" is unverified; not to be overly specific yet — it says
+  Sonnet works on a free account if the test succeeds, otherwise we adapt.
 - The free-tier test: a logged-in free Claude account producing a working zip
-  with pictures; the zip it produces is the artifact to keep.
+  with pictures; the zip it produces is the artifact to keep. The owner
+  expects access to someone else's free account soon, and won't make their
+  own, to avoid a ToS hammer.
+- The free-tier setup check (v4 item 4): free Claude, through its own
+  sandbox, from the own-copy prompt to a copy online; it gates the own-copy
+  wording and any number. Same account, same sitting as the test above; the
+  agents prepare the protocol.
 
 Needs a real classroom or real devices, nobody has run it:
 - Android tablets and phones: the file picker with a zip, a killed browser tab
@@ -336,7 +613,8 @@ Needs a real classroom or real devices, nobody has run it:
 Done since the first deploy, all live: the redesigned teacher flow with one
 code per quiz and roles per tab, pictures on the screens and as answers,
 shuffled answers with Order: fixed, hardening for the free plan, countdown and
-points for speed with the quiz carrying its tempo and −5/+5 in the run, votes
+points for speed with the quiz carrying its tempo and −5/+5 in the run (revised
+by v4 item 6), votes
 before the answer, answered avatars on the wall, a second teacher device from
 the wall, avatars the children dress, the landing page by attention budget,
 zip only, and /own-copy. Left in Later: printables, corrected quiz download,
