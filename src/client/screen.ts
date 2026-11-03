@@ -117,6 +117,8 @@ function render(): void {
   document.body.classList.toggle("manage", managing);
   document.body.classList.toggle("steering", !!v.steer && !managing);
   if (v.phase !== "question" && v.phase !== "reveal") questionKey = "";
+  // The lobby's wait for the first avatar is per class (nobodyYet).
+  if (v.phase !== "lobby") forgetJoinWait();
   if (managing) renderManagedLobby(v);
   else if (v.phase === "lobby") renderLobby(v);
   else if ((v.phase === "question" || v.phase === "reveal") && v.question) renderQuestion(v);
@@ -250,12 +252,25 @@ function renderCheck(v: ScreenView): void {
 // watches the teacher wait. The link opens a new tab, so the wall stays.
 
 const NOBODY_MS = 90_000;
-/** When this tab first showed the class the code, per class; the wait counts from there, across ‹ Questions and back. */
+/**
+ * When this tab first showed the class the code to an empty lobby; the wait
+ * counts from there, across ‹ Questions and back. Each class starts its own:
+ * the count goes with the first avatar and with the run's start, so "Again
+ * with another class" waits its 90 s too (review D #3).
+ */
 let joinSince: { code: string; at: number } | null = null;
 let nobodyTimer: number | undefined;
 
+function forgetJoinWait(): void {
+  joinSince = null;
+  clearTimeout(nobodyTimer);
+}
+
 function nobodyYet(v: ScreenView): boolean {
-  if (v.players.length > 0) return false;
+  if (v.players.length > 0 || v.phase !== "lobby") {
+    forgetJoinWait();
+    return false;
+  }
   if (joinSince?.code !== v.code) joinSince = { code: v.code, at: Date.now() };
   const left = joinSince.at + NOBODY_MS - Date.now();
   if (left <= 0) return true;
