@@ -85,7 +85,7 @@ second design:
    confirmation; the same tap undoes it.
 6. **Phone gone.** The Remote's tab counts as gone after 45 s without a
    sign. From then on the Projector steers again with its bar, which says
-   "Remote gone: another device via ⋯"; the teacher code itself is on the
+   "Remote gone"; the teacher code itself is on the
    wall only under ⋯ → A second device…, not in the bar in front of the
    class. When the phone comes back, it is the Remote again. A dead phone, a
    closed tab or a new phone mid-lesson: the teacher code takes the
@@ -329,8 +329,7 @@ throughout. While it steers, the bottom line is the bar:
   here", which left the phone stranded; the wall steers by itself 45 s after
   the Remote is gone.)
 - **Notices on the wall:** "Remote connected", and "Remote gone – steering
-  here". While a Remote that was there is away, the bar keeps "Remote gone:
-  another device via ⋯" (on a phone-sized wall it gives way), and ⋯ → A
+  here". While a Remote that was there is away, the bar keeps "Remote gone" (on a phone-sized wall it gives way), and ⋯ → A
   second device… has the code: on demand, not in front of the class.
 - **A window opened by "open a second screen in a new window"** that answered "Show the quiz
   here" says "Drag this window to the projector screen, then press F for
@@ -467,7 +466,7 @@ step:
 | Tablets still joining after Start | They get in (first five minutes and the first question; then five more) | Nothing |
 | A tablet from the last lesson, left at its final ranking | "This quiz has finished" and ← | ←, then the code |
 | Any teacher tab reloads, sleeps or loses Wi-Fi | The same role again | Nothing |
-| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …", shows the bar, and keeps "Remote gone: another device via ⋯" on it | Steer at the laptop. The phone is the Remote again when it's back; without its tab, or another phone: the teacher code, which takes the steering without a question |
+| Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …", shows the bar, and keeps "Remote gone" on it | Steer at the laptop. The phone is the Remote again when it's back; without its tab, or another phone: the teacher code, which takes the steering without a question |
 | The Remote's tab closed by mistake | Nothing on the wall for 45 s | The teacher code again, at once: a closed tab's Remote is taken without waiting (on the HTTP fallback, within 25 s) |
 | A wrong answer to the second device's question | The wall steers where the phone should, or the other way round | ⇄ Swap, on either device |
 | Projector dies | The Remote says "Projector gone" and how to bring it back | Read off the Remote. Optionally another computer: the teacher code (the free Projector, after 45 s), or the projector window on a two-screen laptop |
