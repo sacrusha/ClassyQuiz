@@ -442,8 +442,12 @@ export class Instance extends DurableObject<Env> {
         // still shows its final place.
         const p = Object.values(run.players).find((pl) => safeEqual(pl.token, auth.token));
         if (p) return { role: "player", player: p.id };
-        // A tablet of an earlier class doesn't slip into this one.
-        if (typeof auth.run === "string" && auth.run !== run.id) {
+        // A page still showing an earlier class doesn't slip into this one
+        // (a tablet left on at its final ranking, offline when "Again" was
+        // pressed). One opened anew with that class's token is a newcomer:
+        // the tablet was switched off between lessons, and the next class
+        // is on it now.
+        if (typeof auth.run === "string" && auth.run !== run.id && auth.fresh !== true) {
           out.push({ t: "gone", reason: "This quiz has finished." });
           return { role: null };
         }
@@ -451,7 +455,7 @@ export class Instance extends DurableObject<Env> {
     }
     // A guest is told what it can be: a player (or, once the quiz is under
     // way, one of the players whose devices are away), or a free role.
-    out.push(this.chooseMessage());
+    out.push(auth.role === "player" ? { ...this.chooseMessage(), stale: true } : this.chooseMessage());
     return { role: "guest" };
   }
 

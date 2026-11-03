@@ -6,7 +6,7 @@
 //   node scripts/build.mjs --watch   rebuild on change (local development)
 
 import { build, context } from "esbuild";
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -50,6 +50,19 @@ await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 await cp(join(root, "public"), dist, { recursive: true });
 await writeFile(join(dist, "_headers"), headers);
+
+// The site's address in the guidance page: the demo's in the source; a copy
+// under another name (wrangler.toml's `name`, or SITE_ADDRESS when the
+// address is something else) names its own, so the teacher's AI is sent to
+// it rather than to the demo. The page's script shows the address the
+// browser opened anyway; this is for AIs, which read the page without it.
+const DEMO = "classyquiz.pages.dev";
+const project = (await readFile(join(root, "wrangler.toml"), "utf8")).match(/^name\s*=\s*"([^"]+)"/m)?.[1];
+const address = (process.env.SITE_ADDRESS || (project ? `${project}.pages.dev` : DEMO)).replace(/^https?:\/\//, "").replace(/\/+$/, "");
+if (address !== DEMO) {
+  const page = join(dist, "index.html");
+  await writeFile(page, (await readFile(page, "utf8")).replaceAll(DEMO, address));
+}
 
 const options = {
   entryPoints: Object.fromEntries(pages.map((p) => [p, join(root, "client", `${p}.ts`)])),

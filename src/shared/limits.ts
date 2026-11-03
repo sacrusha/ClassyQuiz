@@ -10,7 +10,13 @@
  * own copy of the site is for.
  */
 export const MAX_PLAYERS = 60;
-/** New players once the quiz has started: stragglers get in, a stream of strangers with the code doesn't. */
+/**
+ * After the start the door stays open while the class is still arriving:
+ * this long, and through the first question however long it is up
+ * (server/game.ts, `doorOpen`). Slow tablets in a class get in.
+ */
+export const DOOR_OPEN_MS = 5 * 60_000;
+/** New players once the quiz is under way (past DOOR_OPEN_MS and the first question): a latecomer gets in, a stream of strangers with the code doesn't. */
 export const MAX_LATE_JOINERS = 5;
 /** Changes of mind per student and question; the last accepted tap counts. */
 export const MAX_ANSWER_CHANGES = 10;

@@ -46,6 +46,12 @@ let tickTimer: number | undefined;
 let offlineTimer: number | undefined;
 /** The last tap, until the server confirms it. It counts when it arrives, even after the reveal. */
 let waiting: { q: number; choice: number } | null = null;
+/**
+ * This page played as an avatar another device has since taken back: it
+ * offers the choice ("+") rather than joining by itself, from now on. It may
+ * be lying on a desk with nobody at it.
+ */
+let displaced = false;
 /** The class turned this device away (full, or started), in the phase it was then; asked again when that changes. */
 let refused: { reason: string; phase: string } | null = null;
 /**
@@ -112,7 +118,9 @@ async function start(): Promise<void> {
   }
   line = new Line({
     instance,
-    auth: () => auth,
+    // A token from storage, before this page has shown its class: the
+    // server takes a token of an earlier class as a newcomer (protocol.ts).
+    auth: () => (auth.role === "player" && !view ? { ...auth, fresh: true } : auth),
     onMessage,
     onStatus: (s) => {
       statusDot(dot, s);
@@ -129,8 +137,24 @@ function onMessage(m: ServerMessage): void {
     auth = { role: "player", token: m.token, run: m.run };
     store.set(key, { instance: instanceId, token: m.token, run: m.run } satisfies Saved);
     busy = false;
+    displaced = false;
     clearInterval(tickTimer);
   } else if (m.t === "choose") {
+    if (auth.role === "player") {
+      // A choice for a guest reaching a player: the answer to a poll made
+      // before the welcome. Joining again would make a second avatar.
+      if (!m.stale) return;
+      // The token isn't this class's player: from an earlier class (the
+      // page was opened anew), or another device took the avatar back while
+      // this one was away. Choose again rather than stay on a view that no
+      // longer moves.
+      if (view !== null) displaced = true;
+      auth = { role: "guest" };
+      store.remove(key);
+      view = null;
+      lastKey = "";
+      waiting = null;
+    }
     choice = m;
     if (view || busy) return;
     if (teacher) {
@@ -140,8 +164,10 @@ function onMessage(m: ServerMessage): void {
       showFinished();
     } else if (refused && refused.phase === m.phase && m.avatars.length === 0) {
       showRefused(refused.reason);
-    } else if (m.avatars.length > 0) {
-      // A student whose tablet died picks their avatar back.
+    } else if (m.avatars.length > 0 || displaced) {
+      // A student whose tablet died picks their avatar back. A tablet whose
+      // avatar went to another device offers "+" rather than joining by
+      // itself: it may be lying on a desk, nobody at it.
       showAvatars();
     } else {
       newPlayer();

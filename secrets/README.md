@@ -9,8 +9,8 @@ Copy the template and fill it in:
 
     cp src/cloudflare.env.example secrets/cloudflare.env
 
-`npm run deploy` (in src/) reads this file and passes the two values to
-wrangler as environment variables. Nothing else reads it.
+`npm run deploy` (in src/) reads this file and passes its values to
+wrangler and the build as environment variables. Nothing else reads it.
 
 - `CLOUDFLARE_ACCOUNT_ID` — the 32-character account ID. In the Cloudflare
   dashboard, Workers & Pages → Overview, right-hand column; or in the URL
@@ -24,6 +24,10 @@ wrangler as environment variables. Nothing else reads it.
 
   No zone permissions are needed: the site uses its default `pages.dev`
   address. A TTL (expiry date) on the token is a good idea.
+
+- `SITE_ADDRESS` (optional, not secret) — the site's address when it isn't
+  `<name>.pages.dev` with the name in `src/wrangler.toml` (the name was
+  taken, or an own domain); the build writes it into the start page.
 
 If the token leaks, roll it in the dashboard (API Tokens → ⋯ → Roll) and put
 the new value here.
