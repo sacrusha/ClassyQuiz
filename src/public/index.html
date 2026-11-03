@@ -6,13 +6,13 @@
 <title>classyQuiz</title>
 <meta name="description" content="Live classroom quizzes made from a teacher's exercise sheets by the teacher's own AI assistant. This page describes the site, the quizzes, their text format, and how they are made with a teacher.">
 <style>
-  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
+  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; --bubble: #e8eefa; --frame: #2b2b29; --err: #c62828; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; }
+    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; --bubble: #1f2a3d; --frame: #000; --err: #ff8a80; }
   }
   html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 42rem; margin: 0 auto; padding: 2rem 16px 4rem; }
+  main { max-width: 42rem; margin: 0 auto; padding: 0 16px 4rem; }
   h1 { font-size: 2rem; margin: 0 0 .25rem; }
   h2 { font-size: 1.3rem; margin: 2.5rem 0 .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
   h3 { font-size: 1.05rem; margin: 1.5rem 0 .25rem; }
@@ -22,85 +22,168 @@
   pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .9rem; line-height: 1.45; }
   code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
   a { color: var(--accent); }
+
+  /* The header: the logo, the students' code box, the language (top right). */
   header.top { border-bottom: 1px solid var(--rule); }
-  header.top .bar { max-width: 42rem; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
-  header.top .logo { font-weight: 800; font-size: 1.2rem; flex: 1; margin: 0; }
+  .wide { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  header.top .bar { display: flex; align-items: center; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
+  header.top .logo { font-weight: 800; font-size: 1.2rem; flex: 1; margin: 0; min-width: 0; }
   .join { display: flex; align-items: center; gap: 6px; }
   .join label { color: var(--muted); font-size: .95rem; }
   .join input { width: 8.2em; min-width: 0; font: 700 1.25rem ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .15em; text-align: center; padding: 6px; border: 2px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--fg); }
   .join button { height: 42px; width: 46px; border: 0; border-radius: 10px; background: var(--accent); color: var(--bg); font-size: 1.1rem; cursor: pointer; }
-  .start h2 { border: 0; padding: 0; margin: 2rem 0 .6rem; font-size: 1.35rem; }
-  .start ol { padding-left: 1.4em; }
-  .start li { margin: .45rem 0; }
-  .start ol ul { list-style: "\2013  "; padding-left: 1.1em; margin: .3rem 0 0; color: var(--muted); font-size: .95rem; }
-  .start ol ul li { margin: .2rem 0; }
+  .lang { position: relative; display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; font-weight: 600; font-size: .95rem; color: var(--muted); white-space: nowrap; }
+  .lang select { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; font-size: 16px; }
+  .lang:focus-within { outline: 2px solid var(--accent); }
+
+  /* The strip: the example from the sheet to the class in four frames; until the video exists, a link to /example. */
+  .strip { --h: clamp(150px, 17vw, 232px); display: flex; align-items: flex-end; justify-content: center; gap: 14px; margin: 22px 0 6px; color: inherit; text-decoration: none; }
+  .strip figure { margin: 0; display: flex; flex-direction: column; align-items: center; flex: none; }
+  .strip figcaption { margin-top: 8px; font-size: .9rem; line-height: 1.3; color: var(--muted); text-align: center; max-width: 12em; }
+  .strip:hover figcaption, .strip:focus-visible figcaption { color: var(--fg); }
+  .strip .arrow { align-self: center; color: var(--muted); font-size: 1.4rem; margin-bottom: 1.6rem; }
+  .strip .pic { position: relative; }
+  .strip img { display: block; }
+  .f-sheet .pic { height: calc(var(--h) * .8); aspect-ratio: .86; }
+  .f-sheet img { position: absolute; height: 92%; width: auto; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  .f-sheet .p2 { right: 0; top: 0; transform: rotate(4deg); }
+  .f-sheet .p1 { left: 0; bottom: 0; transform: rotate(-3deg); }
+  .f-ask .pic { height: calc(var(--h) * .8); aspect-ratio: .62; }
+  .f-ask svg { width: 100%; height: 100%; display: block; }
+  .f-tablet .pic { height: var(--h); aspect-ratio: .66; background: var(--frame); border-radius: 12px; padding: 6px; box-sizing: border-box; }
+  .f-tablet img { width: 100%; height: 100%; border-radius: 4px; }
+  .f-wall .pic { height: var(--h); aspect-ratio: 16 / 9; background: var(--frame); padding: 4px; box-sizing: border-box; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+  .f-wall img { width: 100%; height: 100%; }
+
+  /* Build and Run, side by side where there is room. */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; }
+  .cols h2 { border: 0; padding: 0; margin: 1.6rem 0 .6rem; font-size: 1.35rem; }
+  .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
+  .steps > li { position: relative; padding-left: 2rem; margin: 0 0 .9rem; counter-increment: step; }
+  .steps > li::before { content: counter(step); position: absolute; left: 0; top: .05em; width: 1.45rem; height: 1.45rem; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; font-size: .85rem; line-height: 1.45rem; text-align: center; }
+  .steps p { margin: 0; }
+  .steps .do { font-weight: 600; }
+  .steps .detail { color: var(--muted); font-size: .95rem; margin: .15rem 0 0; }
   .addr { display: inline-flex; align-items: center; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 2px 4px 2px 10px; font-weight: 600; white-space: nowrap; }
-  .addr button, .mine .del { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
+  .addr button { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; font-weight: 400; cursor: pointer; }
+  .example { margin: .6rem 0 0; }
+  .example .eg { color: var(--muted); font-size: .95rem; margin: 0 0 .35rem; }
+  .bubble { margin: 0; background: var(--bubble); border-radius: 16px 16px 16px 4px; padding: 10px 14px; font-size: .98rem; line-height: 1.5; }
+  .bubble u { text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  /* Each label under its words, out of the text's flow, so a label wider than its words doesn't spread them. */
+  .bubble .part { position: relative; display: inline-block; white-space: nowrap; }
+  .bubble .lab { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: -.35em; font-size: .68rem; line-height: 1; color: var(--accent); font-weight: 600; white-space: nowrap; pointer-events: none; user-select: none; }
+  .bubble.inplace { line-height: 2.3; padding-bottom: 12px; }
+  .labels { color: var(--accent); font-size: .85rem; font-weight: 600; margin: .3rem 0 0; }
+  .labels .nb { white-space: nowrap; }
+  .bubble.inplace + .labels { display: none; }
+  .steps .second { margin: .7rem 0 0; }
+
   .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 22px 16px; text-align: center; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
   .runbox .open { text-wrap: balance; border: 0; background: var(--accent); color: var(--bg); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
   .runbox p { color: var(--muted); margin: .6rem 0 0; }
-  .mine { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px 16px; margin-top: 14px; }
-  .mine .row { display: contents; }
-  .mine .row[hidden] { display: none; }
-  .mine .go { color: var(--accent); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
-  .mine .go:hover { text-decoration: underline; }
-  .mine .t { color: var(--muted); font-size: .95rem; white-space: nowrap; }
-  .mine .confirm, .mine .more { grid-column: 1 / -1; }
-  .mine .confirm .err { color: #c62828; }
-  .mine .more { justify-self: start; border: 0; background: none; padding: 0; color: var(--muted); font: inherit; font-size: .95rem; cursor: pointer; }
-  @media (max-width: 560px) {
-    .mine { display: block; }
-    .mine .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; margin-top: 12px; }
-    .mine .row:first-child { margin-top: 0; }
-    .mine .go { grid-column: 1 / -1; }
-    .mine .more { display: block; margin-top: 10px; }
-  }
-  #out:empty { display: none; }
+  #out:empty, #resume:empty { display: none; }
+  .muted { color: var(--muted); }
   .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0; }
-  .problem .err { color: #c62828; font-weight: 600; }
+  .problem .err { color: var(--err); font-weight: 600; }
   .problem button { border: 2px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; margin: 4px 6px 0 0; }
   .problem button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-  .foot { margin-top: 2.2rem; color: var(--muted); font-size: .95rem; }
-  .foot p { margin: .4rem 0; }
-  .guide { margin-top: 3rem; }
+
+  /* Coming back (backlog v4 item 2): the latest open quiz this device started. */
+  .resume { border: 2px solid var(--accent); border-radius: 16px; padding: 12px 16px; margin: 0 0 14px; }
+  .resume .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; }
+  .resume .title { font-weight: 700; overflow-wrap: anywhere; flex: 1 1 12em; }
+  .resume .stands { color: var(--muted); font-size: .95rem; white-space: nowrap; }
+  .resume .go { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: .5rem 0 0; }
+  .resume .back { display: inline-block; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 18px; }
+  .resume .code { color: var(--muted); font-size: .95rem; }
+  .resume b { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
+  .resume .other { color: var(--muted); font-size: .95rem; margin: .5rem 0 0; }
+  .owncopy { color: var(--muted); font-size: .95rem; margin: 14px 0 0; }
+
+  .guide { margin-top: 3.5rem; padding-top: .5rem; border-top: 1px solid var(--rule); }
+
+  @media (max-width: 860px) {
+    .cols { grid-template-columns: minmax(0, 1fr); }
+  }
+  /* A phone held upright: the strip is one row that scrolls sideways, the sheet first at about 60 % of the width. */
+  @media (max-width: 600px) {
+    header.top .logo { font-size: 1.05rem; }
+    .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
+    .strip { --h: min(72vw, 300px); justify-content: flex-start; overflow-x: auto; scroll-snap-type: x proximity; margin: 16px -16px 0; padding: 0 16px 8px; gap: 12px; scrollbar-width: thin; }
+    .strip figure { scroll-snap-align: start; scroll-margin-left: 16px; }
+    .f-sheet .pic, .f-ask .pic { height: var(--h); }
+    .strip .arrow { display: none; }
+    .bubble .part { display: inline; white-space: normal; }
+    .bubble .lab { display: none; }
+    .bubble.inplace { line-height: 1.5; padding-bottom: 10px; }
+    .bubble.inplace + .labels { display: block; }
+  }
 </style>
 </head>
 <body>
-<header class="top"><div class="bar">
+<header class="top"><div class="bar wide">
   <p class="logo">classyQuiz</p>
-  <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join">&#9654;</button></form>
+  <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code" data-t="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join" data-t-aria="join">&#9654;</button></form>
 </div></header>
-<main>
 
-<section class="start" aria-label="Build or run a quiz">
-  <h2>Build a quiz</h2>
-  <ol>
-    <li>Use a good AI. Claude's free version works with Sonnet on high effort; Opus works better.</li>
-    <li>Ask it, in your own words, to build you a quiz for <span class="addr">classyquiz.pages.dev</span>
-      <ul>
-        <li>Fastest: give it photos or PDFs of the exercises, write in the language the quiz should be in, and say how many questions you need and what kind.</li>
-        <li>Or leave it open and steer turn by turn.</li>
-        <li>You can also ask it how the quizzes on this site work and what it needs to build one.</li>
-      </ul>
-    </li>
+<div class="landing wide" id="landing">
+<a class="strip" id="strip" href="/example" aria-label="The example quiz, from an exercise sheet to the class: see its questions" data-t-aria="strip">
+  <figure class="f-sheet"><div class="pic"><img class="p2" src="/landing/sheet-2.webp" alt="" width="440" height="622"><img class="p1" src="/landing/sheet-1.webp" alt="" width="440" height="622"></div><figcaption data-t="capSheet">Your exercise sheet</figcaption></figure>
+  <span class="arrow" aria-hidden="true">&rarr;</span>
+  <figure class="f-ask"><div class="pic"><svg viewBox="0 0 124 200" aria-hidden="true">
+    <rect x="2" y="2" width="120" height="196" rx="16" fill="var(--frame)"/>
+    <rect x="8" y="14" width="108" height="172" rx="6" fill="var(--bg)"/>
+    <rect x="48" y="7" width="28" height="3" rx="1.5" fill="#555"/>
+    <rect x="34" y="24" width="76" height="64" rx="10" fill="var(--accent)"/>
+    <rect x="41" y="31" width="27" height="36" rx="1" fill="#fff" transform="rotate(-4 54 49)"/>
+    <rect x="73" y="31" width="27" height="36" rx="1" fill="#fff" transform="rotate(3 86 49)"/>
+    <g stroke="#9aa6b8" stroke-width="1.6"><path d="M45 40h18M45 46h14M45 53h18M45 59h12"/><path d="M77 40h18M77 46h15M77 53h18M77 59h10"/></g>
+    <rect x="41" y="73" width="62" height="4" rx="2" fill="#fff" opacity=".75"/><rect x="41" y="80" width="40" height="4" rx="2" fill="#fff" opacity=".75"/>
+    <rect x="14" y="98" width="80" height="78" rx="10" fill="var(--code-bg)" stroke="var(--rule)"/>
+    <rect x="21" y="106" width="58" height="4" rx="2" fill="var(--muted)" opacity=".55"/><rect x="21" y="114" width="44" height="4" rx="2" fill="var(--muted)" opacity=".55"/>
+    <path d="M22 125h22l6 6v34H22z" fill="#f2c94c"/><path d="M44 125v6h6" fill="#d9ad2b"/>
+    <g fill="#8a6d12"><rect x="32" y="128" width="3" height="3"/><rect x="35" y="132" width="3" height="3"/><rect x="32" y="136" width="3" height="3"/><rect x="35" y="140" width="3" height="3"/><rect x="31" y="145" width="8" height="8" rx="1.5"/></g>
+    <text x="56" y="151" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--fg)">.zip</text>
+  </svg></div><figcaption data-t="capAi">Your AI</figcaption></figure>
+  <span class="arrow" aria-hidden="true">&rarr;</span>
+  <figure class="f-tablet"><div class="pic"><img src="/landing/tablet-en.webp" data-lang-src="tablet" alt="" width="400" height="640"></div><figcaption data-t="capTap">Each student taps</figcaption></figure>
+  <figure class="f-wall"><div class="pic"><img src="/landing/wall-en.webp" data-lang-src="wall" alt="" width="960" height="540"></div><figcaption data-t="capWall">What the class sees</figcaption></figure>
+</a>
+
+<div class="cols">
+<section class="build" aria-labelledby="build-h">
+  <h2 id="build-h" data-t="build">Build a quiz</h2>
+  <ol class="steps">
+    <li><p class="do" data-t="step1">Choose any good AI.</p>
+      <p class="detail" data-t="step1detail">Claude Opus wrote the example quiz, 3 Nov 2026.</p></li>
+    <li><p class="do"><span data-t="step2">Ask it to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
+      <div class="example">
+        <p class="eg" data-t="forExample">For example, with photos of two pages:</p>
+        <blockquote class="bubble" id="bubble">Hi! Can you make me a quiz for <u>classyquiz.pages.dev</u> from these two pages, with exercises <u>like no. 1, 3 and 4</u>? <u>For my 5th grade class</u>, <u>about 10 questions</u>, <u>in English</u>.</blockquote>
+        <p class="labels" id="labels">this site · which exercises · your class · how many · which language</p>
+      </div>
+      <p class="second" data-t="second">A second message reshapes the quiz.</p></li>
   </ol>
+</section>
 
-  <h2>Run a quiz</h2>
+<section class="run" aria-labelledby="run-h">
+  <h2 id="run-h" data-t="run">Run a quiz</h2>
+  <div id="resume"></div>
   <div class="runbox" id="runbox">
-    <button type="button" class="open" id="open">Upload the quiz your AI made&nbsp;(.zip)</button>
-    <p>or drop it here</p>
+    <button type="button" class="open" id="open" data-t="upload">Upload the quiz your AI made&nbsp;(.zip)</button>
+    <p data-t="drop">or drop it here</p>
     <input id="file" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
   </div>
   <div id="out" role="status"></div>
-  <div id="mine"></div>
-
-  <div class="foot">
-    <p>Some school networks block live quizzes. <a href="/check">A quick check</a>, run on the school's Wi-Fi, shows whether yours does and, if so, what to tell IT.</p>
-    <p>This site is free and shared by everyone who uses it, with room for a few dozen classes a day. An AI can set up a copy just for your classes, also free: <a href="/own-copy">how that works</a>.</p>
-  </div>
+  <p class="owncopy" id="owncopy" hidden></p>
 </section>
+</div>
+</div>
 
+<main>
 <div class="guide">
 <h1>About classyQuiz</h1>
 <p class="lede">classyQuiz is an open-source site for live classroom quizzes. The quiz runs on the classroom's big screen, the teacher can steer it from a phone or another screen, and the students answer on their own small screens. It is designed for the teacher's own AI assistant, any capable one, to make the quiz from exercise sheets, so that the teacher's time goes into the lesson.</p>

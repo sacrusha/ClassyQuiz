@@ -218,7 +218,8 @@ async function sizedSvg(blob: Blob, longSide: number): Promise<Blob> {
  * them as multipart/form-data. `leaveOut`: the teacher chose to run without
  * the pictures that couldn't go up.
  */
-export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut: boolean): Promise<UploadResult & { error?: string }> {
+/** `json: false`: the answer wasn't the site's (a school filter's page, say); `quota`: the daily allowance is spent. */
+export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut: boolean): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
   if (images.length === 0) {
     return (await api<UploadResult & { error?: string }>("/api/quiz", leaveOut ? { text, leaveOut: "missing" } : { text })).body;
   }
@@ -242,6 +243,6 @@ export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut
   const res = await fetch("/api/quiz", { method: "POST", body: form });
   // Out of the site's daily allowance, `error` says so and when it comes back.
   const r = await readApi<UploadResult>(res);
-  if (r.json === false) return { ok: false, errors: [], warnings: [], error: "The site couldn't take the quiz. Try again." };
+  if (r.json === false) return { ok: false, errors: [], warnings: [], error: "The site couldn't take the quiz. Try again.", json: false };
   return r;
 }
