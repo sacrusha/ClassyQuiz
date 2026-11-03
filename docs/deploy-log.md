@@ -48,3 +48,7 @@ Pages deployment 0f832b7c, state Worker version e54cd788, no migration. Votes be
 ## 2026-11-03 — ninth deploy, 61e8db0
 
 Pages deployment 27590770, state Worker version 2d877175, no migration. Avatars the children dress; pictures as answers. Run by the owner from the clean worktree. Production and main level at 61e8db0 at the close of the session.
+
+## 2026-11-04 — tenth deploy, 56ebf87
+
+Pages deployment 5c49186b, state Worker version 5d6d3cd5, no migration; the Pages project gains the BUDGET binding to SiteBudget. Delivery A — the guidance rewrite cut to the facts, the after-upload flow with the teacher code, the landing page with the strip, two asks and four languages, review D's fixes — plus the avatars' winners band and the steering bar (Play, Last call, the double press; review E). Run by the product-owner session from the clean worktree with the main checkout's credentials file. Untested on a real hand, clicker or phone: the bar's timings, the dashed "on its way" tap.
