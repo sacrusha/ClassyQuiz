@@ -14,8 +14,9 @@
 // is up, and only then does the teacher reveal. Taps carry the device's own
 // time, and the scores are checked against it.
 //
-// The upload's tab is the Projector and steers itself; a phone takes the
-// Remote and steers from then on (docs/user-flow.md §1). 25 students join; a
+// The upload's tab is the Projector and steers itself; a phone comes in with
+// the teacher code, is asked, steers from here, and steers from then on
+// (docs/user-flow.md §1, docs/after-upload.md §4). 25 students join; a
 // fifth of them only get through over HTTP long-polling (as on a network that
 // blocks WebSockets). During the quiz, devices drop their connection and come
 // back (sleep, Wi-Fi), answers sent just before a drop are resent, one tablet
@@ -28,15 +29,17 @@
 // answers and the teacher's fixes say. That is the constraint "survives
 // school Wi-Fi" made checkable: nothing lost, nothing counted twice.
 //
-// After the final ranking the roles are put through their cases: the phone
-// comes back as the Remote; "again" opens a new class with the same code and
-// the old class's tablets are told it has finished; the Remote leaves; a tab
-// on HTTP takes the Projector from the one that steers itself, which becomes
-// the Remote; that Remote shows the projector itself; once the next class
-// has a student, a new tab at /teacher gets no steering, except
-// (docs/second-teacher-device.md): a device holding the quiz's secret; the
-// one next device after "Allow a device to join" on the Projector; and any
-// device once nothing steers (the Projector left). The quiz is deleted.
+// After the final ranking the roles are put through their cases
+// (docs/after-upload.md §4): the phone comes back as the Remote, and a third
+// device is told both tabs are there; "again" opens a new class with the
+// same code and the old class's tablets are told it has finished; the Remote
+// leaves; a tab on HTTP answers "Show the quiz here" and the one that steered
+// itself becomes the Remote; ⇄ Swap three times, from either side; once the
+// next class has a student, the class code reaches no role, the teacher code
+// still does, and so does the uploading device's secret; with nothing there,
+// a device takes the Projector and steers. Last, wrong teacher codes: the
+// fifth from one device locks its teacher codes, the secret still gets in.
+// The quiz is deleted.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -280,8 +283,9 @@ const until = async (cond, ms, what) => {
 
 const up = await post("/api/quiz", { text: TEMPO ? QUIZ.replace("\n\n", `\nTime: ${SECONDS}\n\n`) : QUIZ });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
-const { id: instance, code, token: screenToken } = up.body;
+const { id: instance, code, token: screenToken, teacher } = up.body;
 check(/^\d{5}$/.test(code), `the upload returns the quiz's code (${code})`);
+check(/^\d{2}$/.test(teacher), `the upload returns the teacher code's two digits (${teacher})`);
 log("uploaded", instance.slice(0, 8), "code", code);
 
 // The pasting tab: the Projector, steering itself while no Remote is there.
@@ -292,18 +296,25 @@ await until(() => projector.view, 5000, "projector view");
 check(projector.view.role === "screen" && projector.view.phase === "lobby", "the upload opens a lobby on the Projector");
 check(!!projector.view.steer, "the Projector steers while no Remote is there");
 check(projector.view.code === code, "the Projector shows the quiz's code");
+check(projector.view.teacher === teacher && projector.view.steer.teacher === teacher, "the Projector's views carry the teacher code");
+{
+  const ok = await post("/api/join", { code: code + teacher });
+  check(ok.status === 200 && ok.body.instance === instance, `the teacher code opens the quiz at /api/join (${ok.status})`);
+  const bad = await post("/api/join", { code: code + (teacher === "00" ? "01" : "00") });
+  check(bad.status === 404 && bad.body.error === "teacher", `a wrong teacher code is told so (${bad.status} ${bad.body.error})`);
+}
 const skipped = await projector.send({ op: "setSkip", q: 4, value: true });
 check(skipped.ok, "the steering Projector can fix a question");
 
-// The teacher's phone: /teacher, the code, Remote.
-async function guestTakes(name, role, mode) {
-  const r = await post("/api/join", { code });
+// The teacher's phone: the teacher code in the code box, then "Steer it from here".
+async function guestTakes(name, role, mode, creds = { teacher }) {
+  const r = await post("/api/join", { code: code + teacher });
   const d = new Device(name, r.body.instance, { role: "guest" }, mode);
   let offered = null;
   d.on((m) => {
     if (m.t === "choose" && !offered) {
       offered = m;
-      void d.send({ op: "takeRole", role });
+      void d.send({ op: "takeRole", role, ...creds });
     }
     if (m.t === "role") {
       d.roleMsg ??= m;
@@ -316,12 +327,39 @@ async function guestTakes(name, role, mode) {
   await until(() => d.view, mode === "poll" ? 30_000 : 8000, `${name} holding the ${role}`);
   return { d, offered };
 }
-const phone = (await guestTakes("phone", "remote", "ws")).d;
+const firstPhone = await guestTakes("phone", "remote", "ws");
+const phone = firstPhone.d;
+check(firstPhone.offered.entry === "ask", `the phone is asked while one tab shows and steers (${firstPhone.offered.entry})`);
 check(phone.view.role === "teacher", "the phone's tab is the Remote");
-check(phone.roleMsg?.secret === up.body.secret, "a role taken before the class is in comes with the quiz's secret");
 await until(() => projector.view.steer === null && projector.view.remote === "present", 5000, "the Projector to stop steering");
 const refused = await projector.send({ op: "setVoid", q: 0, value: true });
 check(!refused.ok, "the Projector doesn't steer while the Remote is there");
+
+// A teacher device that comes in and takes a role on demand; extra: its credentials.
+async function guestTry(name, role, extra = {}) {
+  const r = await post("/api/join", { code });
+  const d = new Device(name, r.body.instance, { role: "guest" }, "ws");
+  let offered = null;
+  let roleMsg = null;
+  d.on((m) => {
+    if (m.t === "choose") offered ??= m;
+    if (m.t === "role") {
+      roleMsg ??= m;
+      d.reconnectAs({ role: m.role, token: m.token });
+    }
+  });
+  d.start();
+  await until(() => offered, 5000, `${name}'s choice`);
+  const ack = await d.send({ op: "takeRole", role, ...extra });
+  if (ack.ok) await until(() => d.view, 8000, `${name} holding the ${role}`);
+  return { d, offered, ack, roleMsg };
+}
+
+// What a device that came in now would be told, without acting on it.
+async function offeredTo(name) {
+  const r = await post(`/api/i/${instance}/poll`, { auth: { role: "guest" }, v: -1 });
+  return (r.body.messages ?? []).find((m) => m.t === "choose") ?? { entry: "none", name };
+}
 
 let remoteSteers = true;
 const tv = () => (remoteSteers ? phone.view : projector.view?.steer);
@@ -655,6 +693,9 @@ for (;;) {
     await until(() => projector.view?.steer, 120_000, "the Projector to steer again");
     remoteSteers = false;
     check(projector.view.remote === "away", `the Projector shows the Remote as away (${projector.view.remote})`);
+    // A new phone with the teacher code would take the steering without a question.
+    const offered = await offeredTo("new-phone");
+    check(offered.entry === "remote", `with the Remote gone, a new device is sent to it (${offered.entry})`);
     log(`the Projector steers again after ${((Date.now() - t0) / 1000).toFixed(0)} s`);
   }
   qi++;
@@ -716,7 +757,13 @@ phone2.tickEvery(20_000);
 await until(() => phone2.view, 5000, "the phone's view on coming back");
 check(phone2.view.role === "teacher", "a Remote coming back after being away resumes");
 await until(() => projector.view.steer === null, 5000, "the Projector to hand the steering back");
-log("the phone is back as the Remote");
+{
+  // Both tabs there: a third device pushes nobody aside.
+  const third = await guestTry("third", "remote", { teacher });
+  check(third.offered.entry === "full" && !third.ack.ok && third.ack.error === "changed", `with both tabs there, a third device takes nothing (${third.offered.entry}, ${third.ack.error})`);
+  third.d.kill();
+}
+log("the phone is back as the Remote; a third device is told both are there");
 
 // Again with another class: same code, a fresh lobby; the old class's tablets are told it has finished.
 const old = players.find((p) => !p.dead && p.d.mode === "ws" && p.d.ws) ?? players.find((p) => !p.dead && !p.d.stopped);
@@ -745,113 +792,89 @@ phone2.kill();
 await until(() => projector.view.steer, 5000, "the Projector to steer after the Remote left");
 check(projector.view.remote === "none", "no Remote after it left");
 
-// Another tab, on HTTP only, takes the Projector from the one that steers
-// itself; that one becomes the Remote (the phone pasted, the laptop takes the wall).
-const projGotRole = new Promise((res) => projector.on((m) => m.t === "role" && res(m)));
+// Another tab, on HTTP only, answers "Show the quiz here": the one that
+// steered itself becomes the Remote (the phone uploaded, the laptop takes the wall).
 projector.on((m) => m.t === "role" && projector.reconnectAs({ role: m.role, token: m.token }));
 clearInterval(projector.ticker);
+const projGotRole = new Promise((res) => projector.on((m) => m.t === "role" && res(m)));
 const { d: wall, offered } = await guestTakes("wall", "screen", "poll");
-check(offered.screen === "movable" && offered.remote === "free", `the self-steering Projector is offered as movable (${offered.screen}/${offered.remote})`);
+check(offered.entry === "ask", `the self-steering Projector's quiz asks the new tab (${offered.entry})`);
 const moved = await Promise.race([projGotRole, sleep(5000).then(() => null)]);
 check(moved?.role === "remote", "the old Projector's tab is told it is the Remote now");
 await until(() => projector.view?.role === "teacher", 5000, "the old Projector as the Remote");
 await until(() => wall.view?.role === "screen" && wall.view.steer === null, 8000, "the new Projector not steering");
-log("a tab on HTTP took the Projector; the old one is the Remote");
+log("a tab on HTTP showed the quiz; the old one is the Remote");
 
-// That Remote shows the projector itself: the HTTP Projector, waiting in a poll, is told it lost the role.
-const wallLost = new Promise((res) => wall.on((m) => m.t === "lost" && res(true)));
-const here = await projector.send({ op: "projectorHere" });
-check(here.ok, "show the projector here is acknowledged");
-check(await Promise.race([wallLost, sleep(30_000).then(() => false)]), "the Projector on HTTP hears it lost its role");
-await until(() => projector.view?.role === "screen" && projector.view.steer, 5000, "the Remote's tab as the Projector that steers itself");
-log("the Remote's tab is the Projector again; the HTTP one let go");
+// ⇄ Swap: from the Remote, back from the wall (on HTTP), and again from the Remote.
+async function swapFrom(from, to, n) {
+  const fromRole = from.view?.role === "teacher" ? "remote" : "screen";
+  const heard = new Promise((res) => to.on((m) => m.t === "role" && res(m)));
+  const ack = await from.send({ op: "swap" });
+  check(ack.ok, `swap ${n} is acknowledged`);
+  const msg = await Promise.race([heard, sleep(30_000).then(() => null)]);
+  check(msg?.role === fromRole, `swap ${n}: the other tab is told it is the ${fromRole} now (${msg?.role})`);
+  const want = fromRole === "remote" ? "screen" : "teacher";
+  await until(() => from.view?.role === want && to.view?.role === (want === "screen" ? "teacher" : "screen"), 30_000, `swap ${n} on both tabs`);
+}
+await swapFrom(projector, wall, 1);
+await swapFrom(wall, projector, 2);
+await swapFrom(projector, wall, 3);
+check(projector.view.role === "screen" && projector.view.steer === null, "after three swaps the first tab is the wall, not steering");
+await wall.send({ op: "leave" });
+wall.kill();
+await until(() => projector.view?.steer, 5000, "the wall to steer once the other tab left");
+log("swapped three times, from either side; the other tab left");
 
-// The next class joins; from now on no new tab gets the steering.
+// The next class joins: the class code reaches no role; the teacher code does.
 const newKid = await joinPlayer("next-class", "ws");
 check(newKid.run !== old.run, "a student of the new class joins it");
 await until(() => projector.view?.players?.length === 1, 5000, "the new student on the Projector");
 {
-  const r = await post("/api/join", { code });
-  const g = new Device("child", r.body.instance, { role: "guest" }, "ws");
-  let offered = null;
-  g.on((m) => m.t === "choose" && (offered ??= m));
-  g.start();
-  await until(() => offered, 5000, "the child's choice");
-  check(offered.remote === "closed" && offered.screen === "taken", `once students are in, a new tab is offered no steering (${offered.screen}/${offered.remote})`);
-  const takeRemote = await g.send({ op: "takeRole", role: "remote" });
-  const takeScreen = await g.send({ op: "takeRole", role: "screen" });
-  check(!takeRemote.ok && !takeScreen.ok, "once students are in, a new tab can't take the Remote or the self-steering Projector");
+  const child = await guestTry("child", "remote", {});
+  check(!child.ack.ok && child.ack.error === "That isn't this quiz's teacher code.", `the class code alone takes no role (${child.ack.error})`);
   check(projector.view?.role === "screen" && !!projector.view.steer, "the Projector still steers");
-  g.kill();
-}
-log("the next class is in; a new tab at /teacher gets no steering");
-
-// docs/second-teacher-device.md. A guest at /teacher that takes a role on demand.
-async function guestTry(name, role, extra = {}) {
-  const r = await post("/api/join", { code });
-  const d = new Device(name, r.body.instance, { role: "guest" }, "ws");
-  let offered = null;
-  let roleMsg = null;
-  d.on((m) => {
-    if (m.t === "choose") offered ??= m;
-    if (m.t === "role") {
-      roleMsg ??= m;
-      d.reconnectAs({ role: m.role, token: m.token });
-    }
-  });
-  d.start();
-  await until(() => offered, 5000, `${name}'s choice`);
-  const ack = await d.send({ op: "takeRole", role, ...extra });
-  if (ack.ok) await until(() => d.view, 8000, `${name} holding the ${role}`);
-  return { d, offered, ack, roleMsg };
-}
-
-// Rule 2: a device that set the quiz up comes back without asking.
-{
+  child.d.kill();
   const own = await guestTry("own-phone", "remote", { secret: up.body.secret });
-  check(own.ack.ok, "with the quiz's secret, a device takes the Remote once students are in");
+  check(own.ack.ok, "with the quiz's secret, the uploading device takes the Remote, no digits needed");
   await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the returning phone");
   await own.d.send({ op: "leave" });
   own.d.kill();
   await until(() => projector.view?.steer, 5000, "the Projector to steer after the returning phone left");
-  const wrong = await guestTry("wrong-secret", "remote", { secret: "x".repeat(up.body.secret.length) });
-  check(!wrong.ack.ok, "a wrong secret doesn't open the gate");
-  wrong.d.kill();
-}
-log("a device holding the secret took the Remote with the class in");
-
-// Rule 3: "Allow a device to join" lets the next device in, one, and no secret goes with it.
-{
-  const opened = await projector.send({ op: "allowJoin", value: true });
-  check(opened.ok, "allow a device to join is acknowledged");
-  await until(() => (projector.view?.steer?.join ?? 0) > 60_000, 5000, "the window open on the Projector");
-  const next = await guestTry("borrowed-phone", "remote");
-  check(next.offered.remote === "free", `while the window is open, the Remote is offered (${next.offered.remote})`);
-  check(next.ack.ok && !next.roleMsg?.secret, "the next device takes the Remote, without the secret");
-  await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the let-in phone");
+  const next = await guestTry("borrowed-phone", "remote", { teacher });
+  check(next.offered.entry === "ask" && next.ack.ok, `with students in, the teacher code takes the Remote (${next.offered.entry})`);
+  await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the new phone");
   await next.d.send({ op: "leave" });
   next.d.kill();
   await until(() => projector.view?.steer, 5000, "the Projector to steer again");
-  check(projector.view.steer.join === null, "the window shut once a device joined");
-  const late = await guestTry("after-window", "remote");
-  check(late.offered.remote === "closed" && !late.ack.ok, "after that, a new device is refused again");
-  late.d.kill();
-  // Closed by hand.
-  await projector.send({ op: "allowJoin", value: true });
-  await until(() => projector.view?.steer?.join !== null, 5000, "the window open again");
-  await projector.send({ op: "allowJoin", value: false });
-  await until(() => projector.view?.steer?.join === null, 5000, "the window closed by hand");
 }
-log("allow a device to join: one device in, then shut");
+log("the class code reached no role; the secret and the teacher code did");
 
-// Rule 4: nothing steers (Leave on Projector + Remote with the class in): any device takes a role.
+// Nothing there (the self-steering Projector left with the class in): a device takes the Projector and steers.
 await projector.send({ op: "leave" });
 projector.kill();
-const anyone = await guestTry("any-laptop", "screen");
-check(anyone.offered.screen === "free" && anyone.offered.remote === "free", `with nothing steering, both roles are offered (${anyone.offered.screen}/${anyone.offered.remote})`);
-check(anyone.ack.ok, "with nothing steering, a device takes the Projector");
+const anyone = await guestTry("any-laptop", "screen", { teacher });
+check(anyone.offered.entry === "screen", `with nothing there, a device is sent to the Projector (${anyone.offered.entry})`);
+check(anyone.ack.ok, "with nothing there, a device takes the Projector");
 await until(() => anyone.d.view?.steer, 5000, "the new Projector to steer itself");
-log("nothing steered; a device took the Projector and steers");
+log("nothing was there; a device took the Projector and steers");
+
+// Wrong teacher codes: the fifth within a minute locks this device's teacher codes for the quiz.
+{
+  const wrongDigits = teacher === "00" ? "01" : "00";
+  const statuses = [];
+  for (let i = 0; i < 5; i++) statuses.push((await post("/api/join", { code: code + wrongDigits })).status);
+  check(JSON.stringify(statuses) === JSON.stringify([404, 404, 404, 404, 429]), `five wrong teacher codes, the fifth locks (${statuses})`);
+  const right = await post("/api/join", { code: code + teacher });
+  check(right.status === 429 && right.body.error === "locked", `while locked, the right teacher code is refused too (${right.status})`);
+  const viaRole = await guestTry("locked-out", "remote", { teacher });
+  check(!viaRole.ack.ok && viaRole.ack.error === "Too many wrong codes for this quiz. Try again in a few minutes.", `while locked, takeRole is refused too (${viaRole.ack.error})`);
+  viaRole.d.kill();
+  const owner = await post("/api/join", { code: code + teacher, secret: up.body.secret });
+  check(owner.status === 200, `the uploading device's secret still gets in (${owner.status})`);
+  const students = await post("/api/join", { code });
+  check(students.status === 200, "the class code still opens the quiz for students");
+}
+log("wrong teacher codes: locked after five; the secret and the class code unaffected");
 
 const ended = await anyone.d.send({ op: "endInstance" });
 check(ended.ok, "ending the instance is acknowledged");
@@ -861,7 +884,6 @@ const joinAfter = await post("/api/join", { code });
 check(joinAfter.status === 404, "after the end, the code opens nothing");
 newKid.d.kill();
 anyone.d.kill();
-wall.kill();
 
 if (ALL_POLL) log(`HTTP requests by all devices: ${requests}`);
 if (failures.length) {
