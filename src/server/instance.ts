@@ -1484,7 +1484,12 @@ export class Instance extends DurableObject<Env> {
       votes: run && G.votesShown(game) ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
       reveal:
         run && phase === "reveal"
-          ? { counts: this.onScreen(run.current, game.fixes[run.current].counts), dist: this.onScreen(run.current, G.distribution(game, run.current)), void: game.fixes[run.current].void }
+          ? {
+              counts: this.onScreen(run.current, game.fixes[run.current].counts),
+              dist: this.onScreen(run.current, G.distribution(game, run.current)),
+              void: game.fixes[run.current].void,
+              winners: G.winners(game, run.current),
+            }
           : null,
       ranking: phase === "ranking" || phase === "final" ? this.ranking() : null,
       remote: this.shown("remote", exclude),
