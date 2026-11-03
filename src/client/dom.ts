@@ -53,9 +53,11 @@ export const store = {
 
 export interface SavedQuiz {
   id: string;
-  /** Lets this device delete the quiz and ask when it closes. */
+  /** Lets this device delete the quiz and ask when it closes, and come back to it without the teacher code. */
   secret: string;
   code: string;
+  /** The teacher code's two digits; absent on entries saved before teacher codes. */
+  teacher?: string;
   title: string;
   at: number;
 }
@@ -79,6 +81,19 @@ export function findQuiz(id: string): SavedQuiz | null {
   return savedQuizzes().find((x) => x.id === id) ?? null;
 }
 
+// --- the teacher code (docs/after-upload.md §4): the class code and two
+// digits, typed in the students' box, which routes by length
+
+/** "63953 47", as the teacher reads it: the class's code, then their own two digits. */
+export function teacherCode(code: string, teacher: string): string {
+  return teacher ? `${code} ${teacher}` : code;
+}
+
+/** Where a teacher device goes with the teacher code; `extra` is a query string, e.g. "?win=1". */
+export function teacherEntry(code: string, teacher: string, extra = ""): string {
+  return `/play${extra}#${code}${teacher}`;
+}
+
 // --- the role this tab holds (user flow §1). Per tab, not per device: two
 // windows of one browser may hold the Projector and the Remote. sessionStorage
 // survives a reload of the tab and goes with it when it's closed.
@@ -87,6 +102,8 @@ export interface HeldRole {
   role: "screen" | "remote";
   token: string;
   code: string;
+  /** The teacher code's two digits: a tab that loses its role comes back in with them. */
+  teacher?: string;
 }
 
 export const tabRole = {
@@ -110,6 +127,28 @@ export const tabRole = {
       sessionStorage.removeItem(`cq.role.${instance}`);
     } catch {
       /* ignore */
+    }
+  },
+};
+
+/**
+ * Which of its two lobby screens the single tab shows (docs/after-upload.md
+ * §3): the teacher's check, or the class's join screen. Per tab, so a reload
+ * stays where it was; the tab that uploaded starts on the check.
+ */
+export const tabLobby = {
+  get(instance: string): "check" | "join" {
+    try {
+      return sessionStorage.getItem(`cq.lobby.${instance}`) === "check" ? "check" : "join";
+    } catch {
+      return "join";
+    }
+  },
+  set(instance: string, screen: "check" | "join"): void {
+    try {
+      sessionStorage.setItem(`cq.lobby.${instance}`, screen);
+    } catch {
+      /* the tab shows the join screen after a reload */
     }
   },
 };

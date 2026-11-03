@@ -5,7 +5,7 @@
 //
 //   POST /api/quiz          {text, leaveOut?} upload: parse, create an instance
 //   POST /api/quiz          multipart         … with pictures: text, leaveOut?, image files
-//   POST /api/join          {code}            the quiz's code → instance id
+//   POST /api/join          {code, secret?}   the quiz's code → instance id; the teacher code (7 digits) checked too
 //   GET  /api/i/:id/img/:secret/:n            a picture of the quiz
 //   GET  /api/i/:id/ws                        WebSocket to the instance
 //   POST /api/i/:id/poll    {auth, v}         long-poll fallback
@@ -17,7 +17,7 @@
 //   POST /api/attempt       {format}          count an upload attempt by format
 //   GET  /api/stats                           upload attempts by format
 
-import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, type UploadResult } from "../../shared/protocol.ts";
+import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TEACHER_CODE, TOO_MANY_CODES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
 import { isQuotaError } from "../../shared/limits.ts";
 import type { Env } from "../../server/env.ts";
@@ -41,7 +41,7 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     const body = await readJson(request);
     if (body === null) return json({ error: "The request was too large or not readable." }, 400);
     if (parts[0] === "quiz" && parts.length === 1) return await upload(env, body);
-    if (parts[0] === "join" && parts.length === 1) return await join(env, body);
+    if (parts[0] === "join" && parts.length === 1) return await join(env, body, request.headers.get("cf-connecting-ip"));
     if (parts[0] === "attempt" && parts.length === 1) {
       await stats(env).count(isUploadFormat(body.format) ? body.format : "other");
       return json({ ok: true });
@@ -65,7 +65,7 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   const id = env.INSTANCE.newUniqueId();
   const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing");
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error } satisfies UploadResult);
-  return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, token: r.token } satisfies UploadResult);
+  return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token } satisfies UploadResult);
 }
 
 /**
@@ -79,13 +79,26 @@ async function uploadWithImages(request: Request, env: Env): Promise<Response> {
   return env.INSTANCE.get(env.INSTANCE.newUniqueId()).fetch(request);
 }
 
-async function join(env: Env, body: Record<string, unknown>): Promise<Response> {
-  const code = typeof body.code === "string" ? body.code.replace(/\D/g, "") : "";
+/**
+ * The code box: five digits are the class code; seven are the teacher code,
+ * the class code and two digits the quiz checks (docs/after-upload.md §4).
+ * The device's address goes to the quiz for its limit on wrong teacher
+ * codes, and nowhere else.
+ */
+async function join(env: Env, body: Record<string, unknown>, ip: string | null): Promise<Response> {
+  const typed = typeof body.code === "string" ? body.code.replace(/\D/g, "") : "";
+  const teacher = TEACHER_CODE.test(typed);
+  const code = teacher ? typed.slice(0, 5) : typed;
   if (!JOIN_CODE.test(code)) return json({ error: "code" }, 404);
   const instance = await env.JOIN.get(env.JOIN.idFromName(code)).resolve();
   if (!instance) return json({ error: "code" }, 404);
-  const opens = await env.INSTANCE.get(env.INSTANCE.idFromString(instance)).opens(code);
-  if (!opens) return json({ error: "code" }, 404);
+  const stub = env.INSTANCE.get(env.INSTANCE.idFromString(instance));
+  if (!(await stub.opens(code))) return json({ error: "code" }, 404);
+  if (teacher) {
+    const check = await stub.teacherCheck(typed.slice(5), ip, typeof body.secret === "string" ? body.secret : undefined);
+    if (check === "locked") return json({ error: "locked", message: TOO_MANY_CODES }, 429);
+    if (check !== "ok") return json({ error: "teacher" }, 404);
+  }
   return json({ instance });
 }
 
@@ -103,7 +116,11 @@ async function toInstance(request: Request, env: Env, id: string, action: string
     // class's instance mid-lesson.
     const body = await readCapped(request, MAX_COMMAND_BYTES);
     if (body === null) return json({ error: "too large" }, 413);
-    return env.INSTANCE.get(doId).fetch(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body }));
+    // The device's address, for the quiz's limit on wrong teacher codes; Cloudflare's, not the browser's.
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    const ip = request.headers.get("cf-connecting-ip");
+    if (ip && action === "cmd") headers["x-cq-ip"] = ip;
+    return env.INSTANCE.get(doId).fetch(new Request(request.url, { method: "POST", headers, body }));
   }
   return env.INSTANCE.get(doId).fetch(request);
 }

@@ -7,25 +7,27 @@
 // in read as a place to talk to an AI, and pasting text distracted.
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
-import { JOIN_CODE, MAX_QUIZ_BYTES } from "../shared/protocol.ts";
+import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
 import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
-import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, store, tabRole, type SavedQuiz } from "./dom.ts";
+import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, store, tabLobby, tabRole, teacherEntry, type SavedQuiz } from "./dom.ts";
 import { prepareImages, uploadQuiz } from "./images.ts";
 import { api } from "./net.ts";
 import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 
 // The QR code on the projector points here with the code after "#".
 const fromHash = location.hash.slice(1).replace(/\D/g, "");
-if (JOIN_CODE.test(fromHash)) location.replace(`/play#${fromHash}`);
+if (JOIN_CODE.test(fromHash) || TEACHER_CODE.test(fromHash)) location.replace(`/play#${fromHash}`);
 
-// --- the students' code box
+// --- the code box: the students' class code, and the teacher code, the
+// class code and two digits (docs/after-upload.md §4). It routes by length
+// and never submits by itself, so typing seven isn't cut off at five.
 
 const join = $("#join") as HTMLFormElement;
 const codeInput = $("#code") as HTMLInputElement;
 join.addEventListener("submit", (e) => {
   e.preventDefault();
   const code = codeInput.value.replace(/\D/g, "");
-  if (JOIN_CODE.test(code)) location.href = `/play#${code}`;
+  if (JOIN_CODE.test(code) || TEACHER_CODE.test(code)) location.href = `/play#${code}`;
   else {
     codeInput.focus();
     codeInput.select();
@@ -151,9 +153,10 @@ async function submit(value: string, archive: ZipEntry[] | null, leaveOut = fals
     out.innerHTML = `<p class="muted">Sending the quiz…</p>`;
     const r = await uploadQuiz(value, prepared.images, leaveOut);
     if (r.ok) {
-      saveQuiz({ id: r.id, secret: r.secret, code: r.code, title: "", at: Date.now() });
-      // This tab is the Projector that steers itself (user flow, rule 3).
-      tabRole.set(r.id, { role: "screen", token: r.token, code: r.code });
+      saveQuiz({ id: r.id, secret: r.secret, code: r.code, teacher: r.teacher, title: "", at: Date.now() });
+      // This tab is the Projector that steers itself (user flow, rule 3); it opens on the check screen.
+      tabRole.set(r.id, { role: "screen", token: r.token, code: r.code, teacher: r.teacher });
+      tabLobby.set(r.id, "check");
       location.href = `/screen?q=${r.id}`;
       return;
     }
@@ -278,7 +281,7 @@ function render(): void {
     return;
   }
   const row = (e: Entry, i: number) => `<div class="row" data-i="${i}"${i > 0 && !moreOpen ? " hidden" : ""}>
-      <a class="go" href="/teacher#${esc(e.info.code)}">Resume ${esc(e.info.title || "the quiz")} &#9654;</a>
+      <a class="go" href="${esc(e.info.teacher ? teacherEntry(e.info.code, e.info.teacher) : `/teacher#${e.info.code}`)}">Resume ${esc(e.info.title || "the quiz")} &#9654;</a>
       <span class="t">closes ${esc(closes(e.info.closes))}</span>
       <button class="del" type="button" data-del>Delete…</button>
     </div>`;
