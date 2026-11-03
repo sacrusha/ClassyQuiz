@@ -312,7 +312,7 @@ Delivery, in two steps. A — landing: the instance rendering (item 1), resume
 (5) and the after-upload flow (8); the guidance's account of a lesson is
 written once, for the flow that ships with it, so the landing's resume line and
 the teacher code are one story. Tempo text as the site works today. B — the
-Tempo button, the points-for-speed switch (6) and the "upload is start"
+Tempo bar (6), the points-for-speed switch and the "upload is start"
 lifetime (3); server-side. A is three implementers' worth and gets a review
 before the owner deploys. The landing story is in `docs/landing-story.md`.
 Where it stands at the close of 2026-11-03: A is built and reviewed on main at
@@ -324,7 +324,7 @@ migration; the Worker deploys first, as `npm run deploy` already does. After A
 is live: the free-tier sitting (`docs/free-tier-check.md`), the owner's sheet
 photographs replacing the strip's rendered frame 1, and the storyboard video
 from the real screens (landing story §5), which needs the new join screen for
-its first beat. B unchanged: the Tempo button, the points-for-speed switch, the
+its first beat. B: the Tempo bar, the points-for-speed switch, the
 lifetime; the avatars (item 9) fit B as client-side work.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
@@ -500,18 +500,53 @@ lifetime; the avatars (item 9) fit B as client-side work.
    at e93954f, tests pass; one partial-ask sample still asked before building
    after the cut.
 6. **Tempo, in the instance** — owner: `Tempo:` on the quiz's definition is the
-   wrong place; the mode, the pace and whether speed scores belong to the
-   instance, chosen in the lobby. The solution to beat before any complexity is
-   justified: an "end question in 15 seconds" button on each question — the
-   teacher's pace by default, the energy moment when the teacher chooses it,
-   and the teacher's eyes on the answered avatars replacing the AI's prediction
-   of difficulty. `Tempo:` and `Time:` leave the definition. Per-question hints
-   ("needs more time", "less") stay parked until a teacher asks for them:
-   reading load is derivable from the text and a picture, only load beyond
-   reading is the AI's alone, and if ever, relative, never seconds. Points for
-   speed survive as a lobby switch; its reference time (answers shown?) is the
-   implementer's to size. The existing countdown code is the subset the button
-   needs — good enough to forge from.
+   wrong place; the pace belongs to the instance and to the teacher's hand.
+   Settled 2026-11-03: not a mode and not a timer button but a two-button bar,
+   on the wall and on the Remote, that steps the question through its states.
+   The owner on the steps: "Show votes" hides that answering closes and says
+   nothing about why to press it; gameshow vocabulary does better — Lock in,
+   Reveal. Five states per question times twenty questions is a hundred
+   states; expectation management, not count, is the problem, but the default
+   must be short. The blank state before the question is skipped. The other
+   states exist already (the countdown mode's question-alone state, answering,
+   locked with the spread, revealed, ranking), so this is wiring.
+   The bar: two buttons, fixed size and fixed place so a hand in flow always
+   finds them — a white single-triangle button that advances one slice ("too
+   fast"), a blue double-triangle button that advances the big slice ("too
+   slow"). By state:
+   - Question (answers hidden): white shows the answers; blue shows them with
+     Last call running.
+   - Answering: white is Last call — fifteen seconds, then it locks in by
+     itself; blue is time's up — locks in now, with the spread on the wall
+     (blue is the fast-forward; without it there is no way past answering).
+   - Locked (the spread, no key): both Reveal, blue drawn with a single
+     triangle.
+   - Revealed (the key, the winners): white shows the ranking; blue goes to
+     the next question.
+   - Ranking: both go to the next question.
+   Space bar and a clicker's forward are white, the arrow key blue. Reveal
+   stays the teacher's press: the timer says "we're done answering", not "show
+   the key". Every question starts with the answers hidden; the
+   question-and-answers-together start is part of a later configuration item:
+   presets such as Quick (Reveal, Next) and Teaching (Show answers, Lock in,
+   Reveal, Next), with every skipped state reachable as a detour — optional,
+   Later.
+   `Tempo:` and `Time:` leave the quiz format and the guidance; −5/+5 go with
+   them. The points-for-speed switch stays on the join screen as item 8 placed
+   it, its reference time the implementer's. The score race seen twice in the
+   simulator's tempo mode is designed out here. Delivery B is this, the
+   lifetime (item 3) and the avatars (item 9, in progress).
+   History, the earlier conclusion this replaces: the solution to beat before
+   any complexity is justified was an "end question in 15 seconds" button on
+   each question — the teacher's pace by default, the energy moment when the
+   teacher chooses it, and the teacher's eyes on the answered avatars
+   replacing the AI's prediction of difficulty. `Tempo:` and `Time:` leave the
+   definition. Per-question hints ("needs more time", "less") stay parked
+   until a teacher asks for them: reading load is derivable from the text and
+   a picture, only load beyond reading is the AI's alone, and if ever,
+   relative, never seconds. Points for speed survive as a lobby switch; its
+   reference time (answers shown?) is the implementer's to size. The existing
+   countdown code is the subset the button needs — good enough to forge from.
 8. **After upload** — the flow from upload to Start, designed in
    `docs/after-upload.md` (draft 5 is the design). Owner's
    decomposition: opening a quiz has two uses — run through it in the real
