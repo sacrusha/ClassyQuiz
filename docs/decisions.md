@@ -1560,6 +1560,14 @@ rows, 30 on requests with every device polling.
   may be counted transiently (salted, in memory, for the window, never
   stored or logged). Class codes stay unlimited, for the reasons above: a
   wrong class code finds no instance to count in.
+  *Amended again after review D:* memory alone forgot the counts whenever
+  the instance idled (about 10 s locally), so the counts are now in the
+  instance's storage, and the quiz has its own allowance besides (ten wrong
+  endings, one more every six minutes, whatever the address). The device
+  stays a salted hash; it is stored now, with its per-quiz salt, but only
+  while it counts (the minute, or the ten-minute refusal): the alarm
+  deletes it then, and the quiz's end deletes the salt. Not logged. See
+  "After upload", its review D part.
 - **Stripping bidi characters** (review A). The only text anyone sees is
   the teacher's own quiz, on their own class's screens: avatars are
   assigned, nobody types a name. Stripping could damage legitimate
@@ -3221,7 +3229,8 @@ user-flow.md §1 and §3 describe the flow as built.
 - **Gone:** the class-in gate in `choiceState`, `allowJoin`, `joinUntil`,
   `projectorHere`, `steerHere` and the wall's "Steer from here", the secret
   sent with a role, `/teacher`'s two buttons. The bar's "Remote gone [Allow a
-  device to join]" is "Remote gone: type 63953 47 on another device".
+  device to join]" is "Remote gone: type 63953 47 on another device"
+  (after review D: "Remote gone: another device via ⋯", below).
   `/teacher` asks for the teacher code, with the class code in the box,
   except on the device that uploaded the quiz, which goes in with its secret.
 - **Wrong teacher codes:** the fifth within a minute from one device refuses
@@ -3229,7 +3238,8 @@ user-flow.md §1 and §3 describe the flow as built.
   codes for this quiz. Try again in a few minutes."), at `/api/join` (429)
   and at `takeRole` alike. Counted in the instance, which the check reaches
   anyway. An attempt without two digits (the class code alone) isn't counted:
-  it is no guess at them.
+  it is no guess at them. (After review D: stored, and with a per-quiz
+  allowance besides, below.)
 - **`/example`:** the check without codes, read in the browser from a static
   .zip in `public/examples/` (the four language runs in `.tmp/example/`, by
   the browser's language or `?lang=`), with "Download the example (.zip)" in
@@ -3251,7 +3261,8 @@ user-flow.md §1 and §3 describe the flow as built.
   memory, held for the window, never stored or logged. Per quiz only where
   there is no address (local development). Consequence: memory-only means an
   evicted (hibernated) instance forgets its counts; a script that pauses long
-  enough between bursts of five gets more tries than the numbers say. Behind
+  enough between bursts of five gets more tries than the numbers say (review
+  D measured it: about 10 s idle locally; fixed after it, below). Behind
   a school's NAT a class shares an address: a pupil's five wrong codes lock
   the teacher's second device out too, for ten minutes, on the school Wi-Fi;
   the uploading device is exempt.
@@ -3324,6 +3335,110 @@ a phone casting by Miracast; the limit against a real attacker on
 Cloudflare (it ran locally, where the address may be absent and the count
 the quiz's; which applied wasn't checked).
 
+**After review D** (`docs/reviews/2026-11-03-review-d.md`, its §1–4 and the
+own-copy wording; branch `review-d-fixes`). The coordinator's resolutions,
+on the purpose of connecting a remote: easy to go right, hard to go wrong;
+outside scripts are the real attacker; the child in the room isn't a
+technical problem, but the site must not hand the child the code itself.
+- **Wrong teacher codes, stored, with a per-quiz allowance (#1).** The
+  counts were in memory, and an idle instance forgot them: locally, a pause
+  of about 10 s between bursts reset them, so a script that knew the class
+  code swept the 100 endings in minutes.
+  - Now in the instance's storage (`guesses`), written only on a wrong
+    ending; a right code or a refusal writes nothing.
+  - Per device, as before: five within a minute refuse that device for ten
+    minutes. The device is still a salted hash of its address; the salt is
+    drawn per quiz and stored with the upload, so a device keeps its key
+    after the object idles. The hash is stored only while it counts: the
+    alarm deletes it when the minute or the refusal runs out.
+  - Per quiz, new, whatever the addresses (an IPv6 /64, a botnet): at most
+    ten wrong endings, one more allowed every six minutes. Spent, every
+    teacher code for the quiz is refused, the right one too, else the
+    answers would still tell it. A sweep of the 100 endings takes about nine
+    hours, about four and a half on average to hit, within the quiz's 48;
+    "hours, not seconds" (§4) holds now. Writes are bounded the same way.
+  - The cost of it: a script, or a class typing seven-digit codes, can keep
+    the teacher's second device out, a try at a time every six minutes. The
+    uploading device's secret (Resume) is exempt from both, as before, and
+    is the teacher's way in then.
+  - Not done: keying IPv6 by its /64 (the per-quiz allowance covers many
+    addresses); more digits.
+- **The teacher code is off the wall's bar (#2).** The bar while the Remote
+  is away said "Remote gone: type 63953 47 on another device", in front of
+  the class, at the moment the Remote was likeliest away, and a tablet that
+  typed it took the steering. Now "Remote gone: another device via ⋯"; the
+  code is on the teacher's own device, and on the wall only on demand: ⋯ →
+  A second device…, the join screen's "A second device ›" sheet, the check
+  at rest (the teacher's screen before the class sees the code), and
+  Leave's confirmation.
+- **Nobody in yet, per class (#3).** The 90 s count started with the first
+  empty lobby and never again, so after "Again with another class" the
+  wall said at once that the school network may block the site. The count
+  now ends with the first avatar and with the run's start; the next empty
+  lobby starts its own.
+- **A quiet Remote is free for the teacher code (#4).** A closed steering
+  tab counted as there for 45 s, so its owner typing the code again was
+  told "full" for about 50 s, while the wall didn't steer either.
+  - `entry()` and `takeRole` treat a Remote as held only while it is
+    present: a quiet one, 25 s without a sign, or one whose line closed and
+    hasn't come back (`closed`, set in `webSocketClose`), is taken at once
+    by the teacher code, and its old tab hears "lost" if it returns.
+  - Everything else is as before: the wall steers only once the Remote is
+    away (45 s), the bar's presence doesn't change, a swap still waits for
+    a quiet tab, and the wall's side isn't loosened (review D's open
+    question about a throttled hidden projector tab).
+  - A polling tab whose poll is held counts as heard from now, so a live
+    Remote on the HTTP fallback isn't quiet at the end of each 25 s poll.
+    A closed tab on the HTTP fallback is still taken only once quiet, within
+    25 s.
+  - "Full" says "If one of them was on this device a moment ago, try again
+    in half a minute." under its sentence, for what is left of the case.
+- **The own-copy line says only what it knows (wording note).** "and new
+  quizzes had to wait for the next day" was true of the upload cap, not of
+  the bytes cap, which clears as quizzes expire, up to 48 hours. Now "On 3
+  of the last 30 days this shared site was full and turned new quizzes
+  away." In German "voll und hat neue Quiz abgewiesen", in French "a été
+  complet … et a refusé de nouveaux quiz" (review D's "complet" for "plein"),
+  in Italian "è stato pieno … e ha rifiutato nuovi quiz".
+- **Left as they are:** #5 (Back to the quiz with the quiz's tab still
+  open asks the question; designed); the at-upload "The free site is full
+  for today." (`SITE_FULL`, `siteFull` in four languages) and
+  `own-copy.html`'s "works again the next day", which carry the same
+  next-day claim for the bytes cap; the line's `/own-copy` link; the line
+  appearing mostly after a script filled the upload cap (review D's
+  reading of `limits.ts`).
+- **Checked,** on a local stack of its own (workers `-rdf`, ports
+  8941/8942; scripts in the session scratchpad's `rdfix/`):
+  - both typechecks; 99 of 99 tests (none touch the instance);
+  - `simulate.mjs`, plain, `--all-poll` (1,427 requests) and `--tempo`:
+    all OK, with two new checks: a Remote whose tab just closed is taken at
+    once with the teacher code, the wall not steering in between; from new
+    addresses the quiz's allowance runs out within ten, then the right
+    code from another new address is refused, the secret and the class
+    code get in. The local stack passes a client's `cf-connecting-ip`
+    through; the platform sets its own;
+  - review D's probes, re-run: `evict.mjs` with 12, 25 and 45 s pauses
+    refuses the fifth wrong code each time (review D: the count started
+    again after 12 s and more); probe 4, the closed Remote tab and the code
+    typed at once: on `/teach` at +3 s (review D: +51 s); probe 3, Again:
+    no "Nobody in yet?" on the new class's lobby; probe 1: the bar in the
+    quiz reads "⋯ 127.0.0.1:8942 · 53000 Remote gone: another device via ⋯
+    Show votes", "full" carries its new line, no page errors. Probe 1's
+    tablet still takes the steering with the code, which it reads off the
+    check, not the wall;
+  - the counts across a restart of the state Worker (memory gone): four
+    wrong codes from one address and five from others, restart, then the
+    first address's fifth refused, a new address's wrong one spends the
+    quiz's tenth and is refused, the right code from a third refused, the
+    secret in;
+  - a timed walk: after the phone's tab closes, a guest is offered
+    `remote` within a second; the wall says "Remote gone" at +45 s, as
+    before.
+- **Not established:** that the alarm deletes a device's hash once its
+  count runs out (by the code, not observed); Cloudflare's own idle
+  eviction and `cf-connecting-ip` there (review D), which no longer decide
+  the limit; whether "another device via ⋯" is read as meant on a wall.
+
 ## 2026-11-03 — The landing page: the strip, two steps, resume, four languages
 
 Serves: v4 items 1, 2 and 4, the last part of delivery A. Design:
@@ -3387,10 +3502,11 @@ Serves: v4 items 1, 2 and 4, the last part of delivery A. Design:
   stored), once a day, kept 31 days; `GET /api/site` answers `{full: n}` for
   the last 30 days, today included. The page asks only on a device that has
   uploaded before, once per visit, and shows one line under Run only when n
-  > 0: "On 3 of the last 30 days this shared site was full, and new quizzes
-  had to wait for the next day. A copy for you or your school is yours
-  alone: how ›". At an upload, the full site and a spent allowance are said
-  in the chosen language with "Your own copy: how ›".
+  > 0: "On 3 of the last 30 days this shared site was full and turned new
+  quizzes away. A copy for you or your school is yours alone: how ›" (was
+  "…had to wait for the next day", changed after review D: see "After
+  upload", its review D part). At an upload, the full site and a spent
+  allowance are said in the chosen language with "Your own copy: how ›".
 - **Network help where failure shows (item 4; landing story §7):**
   - the upload: no connection, or an answer that isn't the site's (a
     filter's page), names the school network as a possible cause, with
@@ -3401,7 +3517,9 @@ Serves: v4 items 1, 2 and 4, the last part of delivery A. Design:
   - the wall's lobby, steering or not: after 90 s with the join screen up
     and nobody in, "Nobody in yet? If the tablets can't open
     classyquiz.pages.dev, the school network may block it: what to tell IT
-    ›" (a new tab, so the wall stays), gone with the first avatar;
+    ›" (a new tab, so the wall stays), gone with the first avatar; counted
+    anew for each class since review D (the run's start and the first
+    avatar end the count), so "Again with another class" waits its 90 s;
   - a device that reaches the page but not the quiz: after 15 s, at joining
     or in the offline banner, "This device can't reach the quiz. Tell your
     teacher." (a teacher device without the second sentence).

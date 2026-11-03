@@ -38,8 +38,10 @@ S5 with the redo's final zips). Where it differs from the draft below:
 - **Words at rest** above About: about 110 in English, against §2's 80.
 - **The own-copy line** is item 4's one rule, not §6's table: a device that
   has uploaded, a site full on a day of the last 30; "On 3 of the last 30
-  days this shared site was full, and new quizzes had to wait for the next
-  day. A copy for you or your school is yours alone: how ›". §6's "every
+  days this shared site was full and turned new quizzes away. A copy for
+  you or your school is yours alone: how ›" (after review D: "had to wait
+  for the next day" isn't true of the bytes cap, which clears as quizzes
+  expire). §6's "every
   class stops" isn't true of the upload cap, which is what is recorded; a
   spent request allowance isn't recorded at all, so the count understates.
   At an upload the full site and the spent allowance say so in the chosen
