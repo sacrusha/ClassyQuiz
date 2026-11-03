@@ -19,3 +19,9 @@ script_name = "classyquiz-state"
 name = "STATS"
 class_name = "UploadStats"
 script_name = "classyquiz-state"
+
+# Read only, for the landing's own-copy line: on how many days the site was full (GET /api/site).
+[[durable_objects.bindings]]
+name = "BUDGET"
+class_name = "SiteBudget"
+script_name = "classyquiz-state"
