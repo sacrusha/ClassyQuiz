@@ -3,12 +3,13 @@
 // lobby (backlog item 19), the next step, fixes, players, the ⋯ menu.
 // docs/user-flow.md §3.3–3.5.
 
-import type { ImageRef, TeacherQuestion, TeacherView, Tempo } from "../shared/protocol.ts";
-import { COUNTDOWN_MAX, COUNTDOWN_MIN, NUDGE_SECONDS, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
+import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
+import { POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import type { Line } from "./net.ts";
 import { fillPictures, picImg } from "./pictures.ts";
+import { Presses, atOf, playStep, stepState } from "./steps.ts";
 
 /** What the teacher opened or is fixing; kept across redraws. */
 export interface ManageUI {
@@ -51,8 +52,6 @@ export function patch(el: HTMLElement, html: string): void {
 function tags(q: TeacherQuestion, v: TeacherView): string {
   const right = q.answers.filter((a) => a.counts).length;
   return [
-    // With a countdown: each question's length, as the quiz gives it (or the teacher's one length).
-    v.tempo !== "pace" && q.status === "upcoming" ? `<span class="tag">${q.seconds} s</span>` : "",
     q.status === "current" ? `<span class="tag now">now</span>` : "",
     q.status === "revealed" ? `<span class="tag">done</span>` : "",
     q.skip ? `<span class="tag">skipped</span>` : "",
@@ -176,54 +175,11 @@ export function syncCrowd(root: HTMLElement, v: TeacherView): void {
 }
 
 // ---------------------------------------------------------------------------
-// The next step
-
-export interface Step {
-  act: string;
-  label: string;
-}
-
-function isLast(v: TeacherView): boolean {
-  return !v.questions.some((q, i) => i > v.current && !q.skip);
-}
-
-/** The big button: what usually comes next. */
-export function nextStep(v: TeacherView): Step | null {
-  switch (v.phase) {
-    case "lobby":
-      return { act: "begin", label: "Start quiz &#9654;" };
-    case "question":
-      // Countdown tempos: the class has read the question; Go shows the answers and starts the clock.
-      if (v.answering === "reading") return { act: "go", label: "Go &#9654;" };
-      // Spread, then key (v2 item 6): how the class answered, then the right answer.
-      if (!v.votes) return { act: "votes", label: `${ICON.bars} Show votes` };
-      return { act: "reveal", label: `${ICON.check} Show answer` };
-    case "reveal":
-    case "ranking":
-      return isLast(v) ? { act: "next", label: `${ICON.trophy} Final ranking` } : { act: "next", label: "Next &#9654;" };
-    case "final":
-      return { act: "again", label: "Again with another class" };
-    default:
-      return null;
-  }
-}
-
-/** A smaller button beside it. */
-export function sideStep(v: TeacherView): Step | null {
-  if (v.phase === "reveal" && !isLast(v)) return { act: "ranking", label: `${ICON.trophy} Ranking` };
-  return null;
-}
-
-// ---------------------------------------------------------------------------
 // Acting
 
-const STEPS = new Set(["begin", "go", "votes", "reveal", "next", "ranking", "finish", "skip-current", "again"]);
-/** After each step the buttons stay inert for a moment, so a double tap on Reveal doesn't land on the Next that replaces it. */
-export const STEP_LOCK_MS = 700;
-
 export class Steer {
-  private lockUntil = 0;
-  private lastStep = "";
+  /** Every press of the steering bar, its keys and clicker included, goes through here. */
+  readonly presses = new Presses();
   private line: () => Line | null;
   private view: () => TeacherView | null;
   readonly ui: ManageUI;
@@ -236,29 +192,17 @@ export class Steer {
     this.redraw = redraw;
   }
 
-  /** Call on every view: a new step locks the step buttons for a moment. */
-  noteStep(v: TeacherView, buttons: ParentNode): void {
-    // Go, the votes and the answer share a phase: a double tap on one mustn't land on the next.
-    const step = `${v.phase}|${v.current}|${v.answering === "reading"}|${v.votes}`;
-    if (step === this.lastStep) return;
-    this.lastStep = step;
-    this.lockUntil = Math.max(this.lockUntil, Date.now() + STEP_LOCK_MS);
-    const until = this.lockUntil;
-    window.setTimeout(() => {
-      if (this.lockUntil === until) buttons.querySelectorAll<HTMLButtonElement>("button[data-step]").forEach((b) => (b.disabled = false));
-    }, until - Date.now());
+  /** Call on every view: the moment the step on screen changes is what a press is judged against. */
+  noteStep(v: TeacherView): void {
+    this.presses.noteView(stepState(v));
   }
 
-  /** The same as a click on a button with these data attributes (for the ⋯ menu). */
+  /** The same as a click on a button with these data attributes (for the ⋯ menu and the keyboard). */
   run(act: string, data: Record<string, string> = {}): Promise<boolean> {
     const el = document.createElement("button");
     el.dataset.act = act;
     for (const [k, val] of Object.entries(data)) el.dataset[k] = val;
     return this.act(el);
-  }
-
-  locked(): boolean {
-    return Date.now() < this.lockUntil;
   }
 
   /** Handles a click on an element with data-act; returns false when the action isn't a steering one. */
@@ -268,35 +212,32 @@ export class Steer {
     const a = el.dataset.act ?? "";
     const q = Number(el.dataset.q);
     if (!v || !line) return false;
-    if (STEPS.has(a)) {
-      if (this.locked()) return true;
-      this.lockUntil = Date.now() + STEP_LOCK_MS;
-    }
-    const at = { phase: v.phase, current: v.current, reading: v.answering === "reading", votes: v.votes };
+    const at = atOf(stepState(v));
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
       if (!r.ok && r.error) toast(r.error);
       return r;
     };
     switch (a) {
+      case "play": {
+        // One slice, or the second of a double press (steps.ts, Presses).
+        const from = this.presses.play(stepState(v));
+        if (!from) return true;
+        if (from.phase === "ranking" || (from.phase === "reveal" && playStep(from)?.to.phase === "final")) this.ui.fixing = null;
+        await send({ op: "play", at: atOf(from) });
+        return true;
+      }
+      case "last-call":
       case "begin":
-      case "go":
-      case "votes":
-      case "reveal":
-      case "next":
-      case "ranking":
+        if (!this.presses.other()) return true;
+        await send({ op: a === "begin" ? "begin" : "lastCall", at });
+        return true;
       case "again":
-        if (a === "next" || a === "again") this.ui.fixing = null;
-        await send({ op: a, at });
+        this.ui.fixing = null;
+        await send({ op: "again", at });
         return true;
-      case "stop-clock":
-        await send({ op: "stopClock", at });
-        return true;
-      case "nudge":
-        await send({ op: "nudge", by: Number(el.dataset.by) });
-        return true;
-      case "tempo-sheet":
-        tempoSheet(v, (cmd) => send(cmd));
+      case "speed":
+        await send({ op: "speed", value: !v.speed });
         return true;
       case "finish":
         if (confirm("Show the final ranking now? Questions not yet shown are left out.")) await send({ op: "finish", at });
@@ -397,13 +338,6 @@ export function openMenu(items: MenuItem[]): void {
 export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuItem[] {
   const open = (act: string, data: Record<string, string> = {}) => void steer.run(act, data);
   const items: MenuItem[] = [];
-  // The clock presses the class, never the teacher: it can be stopped, and
-  // after time's up the answers can open again.
-  if (v.phase === "question" && v.clock && v.answering === "open") items.push({ label: "Stop the countdown: answers stay open", run: () => open("stop-clock") });
-  // Not once the votes are on the wall: answering again after seeing them copies the majority.
-  if (v.phase === "question" && v.answering === "closed" && !v.votes) items.push({ label: "Open the answers again, without a countdown", run: () => open("stop-clock") });
-  // An unfun tempo is changed here, from the next question on.
-  if (v.phase !== "lobby" && v.phase !== "final") items.push({ label: `Tempo: ${esc(tempoName(v))}…`, run: () => open("tempo-sheet") });
   if (v.phase === "question") {
     items.push({ label: "Skip this question", run: () => open("skip-current") });
     items.push({ label: onWall ? "Change the right answer – the class sees it" : "Change the right answer", run: () => open("fix-q", { q: String(v.current) }) });
@@ -433,95 +367,14 @@ export function addressAndCode(code: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Tempo (backlog v2 items 2, 3; shared/tempo.ts)
-
-const TEMPO_NAMES: Record<Tempo, string> = {
-  pace: "Teacher's pace",
-  countdown: "Countdown",
-  speed: "Countdown and points for speed",
-};
-
-/** The countdown lengths still to come, in a few words: "60 s", "15–40 s". */
-function lengths(v: TeacherView): string {
-  const s = v.questions.filter((q, i) => !q.skip && (v.phase === "lobby" || i >= v.current)).map((q) => q.seconds);
-  if (s.length === 0) return "";
-  const lo = Math.min(...s);
-  const hi = Math.max(...s);
-  return lo === hi ? `${lo} s` : `${lo}–${hi} s`;
-}
-
-/** The tempo in a few words: "Countdown, 60 s", or "Countdown, 15–40 s" when the quiz gives its own lengths. */
-export function tempoName(v: TeacherView): string {
-  if (v.tempo === "pace") return TEMPO_NAMES.pace;
-  const l = lengths(v);
-  return l ? `${TEMPO_NAMES[v.tempo]}, ${l}` : TEMPO_NAMES[v.tempo];
-}
+// Points for speed (backlog v4 item 6; shared/tempo.ts)
 
 /**
- * The teacher's −5/+5 during the quiz (owner's decomposition, v2 item 2): the
- * countdown running, or the next to start, and every one after it, within
- * 10..60 s. Shown only when there is a countdown to change.
+ * The lobby's switch, under Start on the join screen and in the Remote's
+ * lobby: off by default, fixed once the quiz starts.
  */
-export function nudgePair(v: TeacherView): string {
-  const s = v.countdown;
-  if (s === null) return "";
-  return `<span class="nudge" aria-label="countdown length">
-    <button class="btn" data-act="nudge" data-by="-${NUDGE_SECONDS}"${s <= COUNTDOWN_MIN ? " disabled" : ""} aria-label="shorter">&minus;${NUDGE_SECONDS}</button>
-    <span class="len">${ICON.timer}${s} s</span>
-    <button class="btn" data-act="nudge" data-by="${NUDGE_SECONDS}"${s >= COUNTDOWN_MAX ? " disabled" : ""} aria-label="longer">+${NUDGE_SECONDS}</button>
-  </span>`;
-}
-
-/** The lobby's line under Start: the tempo, tapped to change it. Off (the teacher's pace) unless a class turns it on. */
-export function tempoLine(v: TeacherView): string {
-  return `<button class="link tempo-line" data-act="tempo-sheet">Tempo: ${esc(tempoName(v))} ›</button>`;
-}
-
-/** The tempo's sheet goes when the step it was opened in has passed, or this tab no longer steers. */
-export function closeTempoSheet(): void {
-  document.querySelector(".tempo-sheet")?.parentElement?.remove();
-}
-
-/**
- * The tempo's choices in a sheet: the three tempos, the quiz's own choice
- * marked first. No lengths: the quiz's are as written (60 s without), and
- * during the quiz −5/+5 changes them (owner, v2 item 2: less clutter than a
- * length picker). During the quiz a change applies from the next question.
- * Changes are sent at once; the sheet marks them as they're made.
- */
-function tempoSheet(v: TeacherView, send: (cmd: { op: "tempo"; tempo: Tempo }) => Promise<{ ok: boolean }>): void {
-  document.querySelector(".sheet-back")?.remove();
-  const lobby = v.phase === "lobby";
-  const what: Record<Tempo, string> = {
-    pace: "You reveal when the class is ready. No clock.",
-    countdown: "The question comes first. Go shows the answers and starts the clock; when it runs out, answering closes and you reveal.",
-    speed: `As Countdown. A right answer scores ${POINTS_RIGHT}, and up to ${SPEED_BONUS} more the quicker it came.`,
-  };
-  const tempos =
-    (lobby ? "" : `<p class="hint">From the next question on.</p>`) +
-    (["pace", "countdown", "speed"] as Tempo[])
-      .map((t) => `<button class="tempo-choice${v.tempo === t ? " on" : ""}" data-tempo="${t}"><strong>${TEMPO_NAMES[t]}</strong><small>${esc(what[t])}</small></button>`)
-      .join("");
-  const l = lengths(v);
-  const how = `<p class="hint seconds"${v.tempo === "pace" ? " hidden" : ""}>${
-    v.timed && v.adjust === 0 ? `The countdown: ${l}, as the quiz says.` : `The countdown: ${l}.`
-  } During the quiz, &minus;${NUDGE_SECONDS} and +${NUDGE_SECONDS} make it shorter or longer, from ${COUNTDOWN_MIN} to ${COUNTDOWN_MAX} s.</p>`;
-  const back = document.createElement("div");
-  back.className = "sheet-back";
-  back.innerHTML = `<div class="sheet tempo-sheet">${tempos}${how}<button class="cancel" data-close>Done</button></div>`;
-  back.addEventListener("click", (e) => {
-    const target = e.target as HTMLElement;
-    if (target === back || target.closest("[data-close]")) {
-      back.remove();
-      return;
-    }
-    const t = target.closest<HTMLElement>("[data-tempo]");
-    if (t) {
-      const tempo = t.dataset.tempo as Tempo;
-      back.querySelectorAll("[data-tempo]").forEach((b) => b.classList.toggle("on", b === t));
-      back.querySelector<HTMLElement>(".seconds")!.hidden = tempo === "pace";
-      void send({ op: "tempo", tempo });
-    }
-  });
-  document.body.appendChild(back);
+export function speedSwitch(v: TeacherView): string {
+  return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>Points for speed</button>${
+    v.speed ? `<small class="speed-note">A right answer ${POINTS_RIGHT}, up to ${SPEED_BONUS} more the quicker it comes.</small>` : ""
+  }`;
 }

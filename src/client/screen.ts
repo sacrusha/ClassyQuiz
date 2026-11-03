@@ -10,7 +10,8 @@ import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, partySize, shapeSvg, syncAvatars } from "./look.ts";
-import { STEP_LOCK_MS, Steer, addressAndCode, answersBlock, live, newUI, nextStep, nudgePair, openMenu, patch, playersRow, questionList, sideStep, steerItems, syncCrowd, closeTempoSheet, tempoLine, toast, type MenuItem } from "./manage.ts";
+import { Steer, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
+import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
@@ -110,9 +111,7 @@ function render(): void {
   if (stepKey !== lastStepKey) {
     lastStepKey = stepKey;
     steer.ui.fixing = null;
-    closeTempoSheet();
   }
-  if (!v.steer) closeTempoSheet();
   const managing = !!v.steer && v.phase === "lobby";
   document.body.classList.toggle("manage", managing);
   document.body.classList.toggle("steering", !!v.steer && !managing);
@@ -222,7 +221,7 @@ function renderManagedLobby(v: ScreenView): void {
  * Check, the teacher's (docs/after-upload.md §3): the right quiz (title and
  * how many questions, which tells two versions apart), the class code small
  * ("upload is start": read aloud, the class joins without the tap), the
- * tempo, the teacher code at rest, and the questions with their fixes.
+ * teacher code at rest, and the questions with their fixes.
  * "Let the class in" is the one tap to the join screen: the class may join now.
  */
 function renderCheck(v: ScreenView): void {
@@ -235,14 +234,13 @@ function renderCheck(v: ScreenView): void {
       <p class="classcode">Class code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
     <p class="cstart"><button class="btn primary big" data-act="show-join">Let the class in &#9654;</button></p>
-    <p class="device cline">${tempoLine(t)}</p>
     <p class="device cline">${gone}${secondDevice(v)}</p>
     ${questionList(t, steer.ui)}
     <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
   </div>`;
   patch(main, html);
   fillPictures(main);
-  steer.noteStep(t, main);
+  steer.noteStep(t);
 }
 
 // --- nobody in yet (landing story §7, backlog v4 item 4): the laptop got
@@ -308,8 +306,8 @@ function renderJoin(v: ScreenView): void {
           ${nobodyYet(v) ? `<p class="nobody">${nobodyLine()}</p>` : ""}
         </div>
       </div>
-      <div class="mstart"><button class="btn primary big" data-step data-act="begin">Start quiz &#9654;</button>
-        <p class="device">${tempoLine(t)}</p>
+      <div class="mstart"><button class="btn primary big" data-act="begin">Start quiz &#9654;</button>
+        <p class="device">${speedSwitch(t)}</p>
         <p class="joinnav"><button class="link" data-act="show-check">‹ Questions</button>
           <button class="link" data-act="second-device">${t.remote === "away" ? "Remote gone: a" : "A"} second device ›</button>
           <button class="link" data-menu aria-label="more">⋯</button></p>
@@ -318,7 +316,7 @@ function renderJoin(v: ScreenView): void {
   </div>`;
   patch(main, html);
   syncCrowd(main, t);
-  steer.noteStep(t, main);
+  steer.noteStep(t);
 }
 
 let lobbyKey = "";
@@ -391,8 +389,8 @@ function renderQuestion(v: ScreenView): void {
     stage.dataset.laid = "1";
     layQuestion(stage, q);
   }
-  // Countdown tempos: the tiles are laid out with their answers from the
-  // start, so nothing moves at Go; until then only their colours and shapes show.
+  // The answers hidden: the tiles are laid out with their answers from the
+  // start, so nothing moves when they show; until then only their colours and shapes.
   document.getElementById("tiles")?.classList.toggle("veiled", reading);
   markTiles(r, v.votes ?? null);
 }
@@ -879,7 +877,7 @@ function renderRanking(v: ScreenView): void {
 }
 
 /**
- * The bottom line. Steering: ⋯, the code, and the next step. Not steering:
+ * The bottom line. Steering: ⋯, the code, Last call and Play (steps.ts). Not steering:
  * the code in a corner, full screen, and ⋯ (steer from here, leave).
  */
 function renderBar(v: ScreenView, managing: boolean): void {
@@ -888,15 +886,11 @@ function renderBar(v: ScreenView, managing: boolean): void {
   if (managing) {
     html = "";
   } else if (v.steer) {
-    const next = nextStep(v.steer);
-    const side = sideStep(v.steer);
     html = `<div class="steerbar">
       <button class="btn more" data-menu aria-label="more">⋯</button>
       <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
       ${v.steer.remote === "away" ? `<span class="joinchip">Remote gone</span>` : ""}
-      ${nudgePair(v.steer)}
-      ${side ? `<button class="btn" data-step data-act="${side.act}">${side.label}</button>` : ""}
-      ${next ? `<button class="btn primary" data-step data-act="${next.act}">${next.label}</button>` : ""}
+      ${steeringButtons(v.steer)}
     </div>`;
   } else {
     html = `<div class="corner">
@@ -916,10 +910,9 @@ function renderBar(v: ScreenView, managing: boolean): void {
     lastBar = html;
     sbar.innerHTML = html;
   }
-  if (v.steer) {
-    steer.noteStep(v.steer, sbar);
-    if (steer.locked()) sbar.querySelectorAll<HTMLButtonElement>("button[data-step]").forEach((b) => (b.disabled = true));
-  }
+  // What a press is judged against: when the step on this screen changed.
+  if (v.steer) steer.noteStep(v.steer);
+  else wallPresses.noteView(screenState(v));
 }
 
 // ---------------------------------------------------------------------------
@@ -1020,10 +1013,10 @@ for (const area of [main, sbar]) {
   });
 }
 
-// Clicker and keyboard: the one key moves the quiz on. Like the buttons,
-// it stays inert for a moment after a press: a clicker pressed twice (or a
-// bouncing key) would otherwise take two steps once the first one's view is
-// back, e.g. Go and straight on to the reveal before anyone could answer.
+// Clicker and keyboard: the one key is Play (backlog v4 item 6), judged
+// like a press of the button: a bounce or a key landing on a screen that
+// just moved does nothing, a deliberate double press steps twice
+// (steps.ts, Presses).
 //
 // A stray key must not move the quiz (review C): a teacher leaning on the
 // laptop, a shortcut. So no key starts the quiz from the lobby: Start is the
@@ -1032,9 +1025,24 @@ for (const area of [main, sbar]) {
 // While a Remote steers, the teacher is on the phone and the laptop's big
 // keys (Space, Enter, N) are the likeliest strays; only a clicker's keys
 // (PageDown, and the arrows some clickers send) move on from here.
-const ADVANCE = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
+const PLAY_KEYS = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
 const CLICKER = new Set(["PageDown", "ArrowRight", "ArrowDown"]);
-let lastAdvance = 0;
+/** The clicker's presses while a Remote steers; while this wall steers, the Steer's own. */
+const wallPresses = new Presses();
+
+/** Where the question is, from the wall's own view. */
+function screenState(v: ScreenView): StepState {
+  const q = v.phase === "question" ? v.question : null;
+  return {
+    phase: v.phase,
+    current: v.current,
+    answering: q ? q.answering : null,
+    votes: !!v.votes,
+    lastCall: !!q?.clock && q.answering === "open",
+    last: !!v.question && v.question.n >= v.question.total,
+  };
+}
+
 document.addEventListener("keydown", (e) => {
   const tag = (e.target as HTMLElement).tagName;
   if (tag === "INPUT" || tag === "TEXTAREA") return;
@@ -1049,15 +1057,15 @@ document.addEventListener("keydown", (e) => {
   }
   // Space or Enter on a focused button is that button's click.
   if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
-  if (!ADVANCE.has(e.key) || e.repeat || !line || !view) return;
+  if (!PLAY_KEYS.has(e.key) || e.repeat || !line || !view) return;
   if (view.phase === "lobby" || view.phase === "idle" || (!view.steer && !CLICKER.has(e.key))) return;
   e.preventDefault();
-  if (Date.now() - lastAdvance < STEP_LOCK_MS) return;
-  lastAdvance = Date.now();
-  void line.send({
-    op: "advance",
-    at: { phase: view.phase, current: view.current, reading: view.phase === "question" && view.question?.answering === "reading", votes: view.phase === "question" && !!view.votes },
-  });
+  if (view.steer) {
+    void steer.run("play");
+    return;
+  }
+  const from = wallPresses.play(screenState(view));
+  if (from) void line.send({ op: "play", at: atOf(from) });
 });
 
 /** The question's picture over the whole screen, or back. */

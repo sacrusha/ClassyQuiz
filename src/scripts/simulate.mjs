@@ -1,18 +1,24 @@
 // A class on bad Wi-Fi, with the teacher's two roles, against a running site
 // (local dev or deployed):
 //
-//   node scripts/simulate.mjs [base-url] [players] [--all-poll] [--tempo]
+//   node scripts/simulate.mjs [base-url] [players] [--all-poll] [--speed]
 //
 // --all-poll: every student over long-polling, and the number of HTTP
 // requests reported (the Free plan's budget on a network without
 // WebSockets).
-// --tempo: the class plays with a 10 s countdown ("Time: 10") and points for
-// speed; on the first question the teacher presses +5 and -5 while the class
-// reads, and the length must come back to 10 s. Each
-// question is read first; the teacher presses Go (twice: a doubled Go must
-// not reveal); answering closes when everyone present has answered or time
-// is up, and only then does the teacher reveal. Taps carry the device's own
-// time, and the scores are checked against it.
+// --speed: points for speed, switched on in the lobby (backlog v4 item 6);
+// taps carry the device's own time, and the scores are checked against it.
+// (--tempo, the old name, means the same.)
+//
+// Every question opens with its answers hidden and is stepped through the
+// steering bar's states (backlog v4 item 6): Play (Show answers, Lock in,
+// Reveal, Ranking, Next) and Last call, which locks in after fifteen seconds
+// or once everyone there has answered. Each press is also sent twice from
+// the same state (a resend: one step), and twice as a deliberate double
+// press (the second from where the first leads: two steps). One question is
+// played as a page from before the bar would (Go, then Reveal straight from
+// answering). A tap made offline counts if it arrives while its question is
+// still on screen, and not once the class has left its reveal.
 //
 // The upload's tab is the Projector and steers itself; a phone comes in with
 // the teacher code, is asked, steers from here, and steers from then on
@@ -25,9 +31,10 @@
 // changes a key after the reveal, voids one question and skips another. The
 // phone dies silently too, and the Projector takes the steering back.
 //
-// At the end every student's score must equal what their acknowledged
-// answers and the teacher's fixes say. That is the constraint "survives
-// school Wi-Fi" made checkable: nothing lost, nothing counted twice.
+// At the end, once every device is quiet, every student's score must equal
+// what the server's acknowledgements told their tablet is stored, and the
+// teacher's fixes. That is the constraint "survives school Wi-Fi" made
+// checkable: nothing lost, nothing counted twice.
 //
 // After the final ranking the roles are put through their cases
 // (docs/after-upload.md §4): the phone comes back as the Remote, and a third
@@ -45,14 +52,15 @@
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
-const TEMPO = process.argv.includes("--tempo");
+const SPEED = process.argv.includes("--speed") || process.argv.includes("--tempo");
 // --no-dress: the class doesn't dress in the lobby (to measure what dressing costs).
 const DRESS = !process.argv.includes("--no-dress");
-const SECONDS = 10;
 // shared/tempo.ts
+const LAST_CALL_MS = 15_000;
 const POINTS_RIGHT = 10;
 const SPEED_BONUS = 5;
-const speedBonus = (ms, clockMs) => Math.round(SPEED_BONUS * Math.max(0, Math.min(1, 1 - ms / clockMs)));
+const SPEED_REFERENCE_MS = 20_000;
+const speedBonus = (ms) => Math.round(SPEED_BONUS * Math.max(0, Math.min(1, 1 - ms / SPEED_REFERENCE_MS)));
 const BASE = (args[0] ?? "http://127.0.0.1:8788").replace(/\/$/, "");
 const N = Number(args[1] ?? 25);
 let requests = 0;
@@ -218,7 +226,8 @@ class Device {
     return new Promise((resolve) => {
       this.pending.set(id, { cmd, resolve });
       if (this.mode === "ws") {
-        if (this.ws && this.ws.readyState === 1 && this.online) this.ws.send(JSON.stringify({ t: "cmd", id, cmd }));
+        // A dead device sends nothing; its socket just stays open on the server's side.
+        if (this.ws && this.ws.readyState === 1 && this.online && !this.frozen) this.ws.send(JSON.stringify({ t: "cmd", id, cmd }));
       } else void this.flushHttp();
     });
   }
@@ -286,7 +295,7 @@ const until = async (cond, ms, what) => {
   }
 };
 
-const up = await post("/api/quiz", { text: TEMPO ? QUIZ.replace("\n\n", `\nTime: ${SECONDS}\n\n`) : QUIZ });
+const up = await post("/api/quiz", { text: QUIZ });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
 const { id: instance, code, token: screenToken, teacher } = up.body;
 check(/^\d{5}$/.test(code), `the upload returns the quiz's code (${code})`);
@@ -376,7 +385,7 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
   const r = await post("/api/join", { code });
   if (!r.body.instance) throw new Error("join failed " + JSON.stringify(r.body));
   const d = new Device(name, r.body.instance, { role: "guest" }, mode);
-  const p = { name, d, id: null, acked, view: null, joining: false, shown: {} };
+  const p = { name, d, id: null, acked, taps: {}, view: null, joining: false, shown: {} };
   let refresh = null;
   d.on((m) => {
     if (m.t === "choose" && !p.joining) {
@@ -415,12 +424,38 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
   return p;
 }
 
+/**
+ * What the server's acknowledgement of a tap says is stored for question q
+ * now (shared/protocol.ts, AnswerAck): the tablet's knowledge of its
+ * answer is a copy of the server's record, never its own guess. The time
+ * for speed is the device's own, of the tap that record is; a repeat of the
+ * same answer keeps the first tap's time, as on the server.
+ */
+function learn(p, q, a) {
+  const r = a.result?.q === q ? a.result.record : undefined;
+  if (!r) return;
+  const prev = p.acked[q];
+  if (prev && prev.seq >= r.seq) return;
+  const ms = prev?.choice === r.choice ? prev.ms : p.taps[q]?.get(r.seq)?.ms;
+  p.acked[q] = { choice: r.choice, seq: r.seq, ms };
+}
+
+/** A tap, like client/play.ts: on the view the device shows, with the device's own time. */
+function tap(p, q, choice, i) {
+  const seq = Date.now() * 10 + i;
+  const ms = p.shown[q] !== undefined ? Date.now() - p.shown[q] : undefined;
+  (p.taps[q] ??= new Map()).set(seq, { choice, ms });
+  return p.d.send({ op: "answer", q, choice, seq, v: p.view.v, ms }).then((a) => (learn(p, q, a), a));
+}
+
 const answering = new Set();
 function maybeAnswer(p) {
   const v = p.view;
   if (!v || v.phase !== "question" || !v.question || p.dead) return;
-  // Countdown: nothing to tap while the class reads; the open view comes with Go.
+  // Nothing to tap while the answers are hidden.
   if (v.question.answering !== "open") return;
+  // A child who leaves a question alone: Last call has to run out.
+  if (p.leaves === v.question.q) return;
   const key = `${p.name}:${v.question.q}`;
   if (answering.has(key)) return;
   answering.add(key);
@@ -440,19 +475,10 @@ function maybeAnswer(p) {
       // server would keep the first tap, and its time, anyway).
       if (choice === last) continue;
       last = choice;
-      const seq = Date.now() * 10 + i;
-      const ms = p.shown[q] !== undefined ? Date.now() - p.shown[q] : undefined;
       // Some answers are sent just before the device drops: the line must resend them.
       const dropAfter = p.d.mode === "ws" && Math.random() < 0.15;
-      const sent = p.d.send({ op: "answer", q, choice, seq, v: shown.v, ms });
+      void tap(p, q, choice, i);
       if (dropAfter) void p.d.drop(rnd(300, 2500));
-      sent.then((a) => {
-        if (a.ok) {
-          const prev = p.acked[q];
-          // The same answer again keeps its first tap's time, as on the server.
-          if (!prev || prev.seq < seq) p.acked[q] = prev?.choice === choice ? { ...prev, seq } : { choice, seq, ms };
-        }
-      });
       await sleep(rnd(200, 600));
     }
   })();
@@ -461,6 +487,8 @@ function maybeAnswer(p) {
 for (let i = 0; i < N; i++) {
   players.push(await joinPlayer(`s${i}`, ALL_POLL || i % 5 === 4 ? "poll" : "ws"));
 }
+// One child leaves question 2 alone, so its Last call runs its fifteen seconds.
+players[3].leaves = 1;
 // A stray avatar (a double tab), removed by the teacher.
 const ghost = await joinPlayer("ghost", "ws");
 await until(() => tv().run.players.length === N + 1, 5000, "all players in the Remote's view");
@@ -558,15 +586,34 @@ void (async () => {
   }
 })();
 
-const at = () => ({ phase: tv().phase, current: tv().current, reading: tv().answering === "reading", votes: tv().votes });
+const at = () => ({ phase: tv().phase, current: tv().current, reading: tv().answering === "reading", votes: tv().votes, lastCall: !!tv().clock && tv().answering === "open" });
+/** The state Play leads to from s (client/steps.ts): the `at` of a double press's second slice. */
+const afterPlay = (s) => {
+  if (s.phase === "question" && s.reading) return { ...s, reading: false, votes: false, lastCall: false };
+  if (s.phase === "question" && !s.votes) return { ...s, reading: false, votes: true, lastCall: false };
+  if (s.phase === "question") return { ...s, phase: "reveal", reading: false, votes: false, lastCall: false };
+  if (s.phase === "reveal") return { ...s, phase: "ranking" };
+  throw new Error(`no double press from ${s.phase}`);
+};
+/** A press sent twice from the same state (a resend, a doubled tap the page let through): one step. */
+const twice = async (cmd) => {
+  const a = at();
+  const [r1, r2] = await Promise.all([steerer().send({ ...cmd, at: a }), steerer().send({ ...cmd, at: a })]);
+  check(r1.ok && r2.ok && (r1.result === "stale") !== (r2.result === "stale"), `${cmd.op} sent twice from ${a.phase}: one taken, one stale (${r1.result ?? "taken"}, ${r2.result ?? "taken"})`);
+};
+/** A deliberate double press of Play: two commands, the second from where the first leads. */
+const double = async () => {
+  const a = at();
+  const [r1, r2] = await Promise.all([steerer().send({ op: "play", at: a }), steerer().send({ op: "play", at: afterPlay(a) })]);
+  check(r1.ok && r2.ok && r1.result !== "stale" && r2.result !== "stale", `a double press from ${a.phase}: two slices (${r1.result ?? "taken"}, ${r2.result ?? "taken"})`);
+};
 const active = () => players.filter((p) => !p.dead).length;
+const readyToTap = (x) => !x.dead && x.d.online && x.d.mode === "ws" && x.view?.phase === "question" && x.view.question?.answering === "open";
 let qi = 0;
-if (TEMPO) {
-  const t = await steerer().send({ op: "tempo", tempo: "speed" });
-  check(t.ok, "the tempo is set in the lobby");
-  await until(() => tv().tempo === "speed", 5000, "the tempo in the teacher's view");
-  check(tv().questions.every((q) => q.seconds === SECONDS), "the quiz's Time: line gives every question its length");
-  check(tv().countdown === null, "no -5/+5 in the lobby");
+if (SPEED) {
+  const t = await steerer().send({ op: "speed", value: true });
+  check(t.ok, "points for speed are switched on in the lobby");
+  await until(() => tv().speed === true, 5000, "the switch in the teacher's view");
 }
 await steerer().send({ op: "begin", at: at() });
 {
@@ -575,66 +622,80 @@ await steerer().send({ op: "begin", at: at() });
   const now = looks.get(p.id) ?? { b: 0, h: 0 };
   const late = await p.d.send({ op: "dress", b: (now.b + 1) % 6, h: now.h });
   check(!late.ok, "dressing is refused once the quiz has started");
+  const sw = await steerer().send({ op: "speed", value: !SPEED });
+  check(!sw.ok, "points for speed can't change once the quiz has started");
 }
 let closedByAll = 0;
 let closedByTime = 0;
 let deadPlayer = null;
 let revival = null;
 let lateTap = null;
+let settledTap = null;
+/** Answering until everyone there has answered, or 12 s (some devices are asleep), then stragglers. */
+const waitForAnswers = async () => {
+  const t = Date.now();
+  while (tv().run.answered < active() && Date.now() - t < 12000) await sleep(100);
+  await sleep(800); // stragglers changing their mind
+};
+/** Last call runs: until it locks in, by everyone there having answered or by its fifteen seconds. */
+const waitForLock = async (current) => {
+  const t = Date.now();
+  check(!!tv().clock && tv().answering === "open", `question ${current + 1}: Last call runs (${tv().answering}, ${JSON.stringify(tv().clock)})`);
+  await until(() => tv().answering === "closed", LAST_CALL_MS + 5000, `Last call to lock in question ${current + 1}`);
+  const took = Date.now() - t;
+  if (took < LAST_CALL_MS - 300) closedByAll++;
+  else closedByTime++;
+  check(took < LAST_CALL_MS + 3000, `Last call locks in on time (${took} ms)`);
+  check(tv().votes && tv().phase === "question", `question ${current + 1}: locked in, the spread up, the key not yet`);
+};
 for (;;) {
   await until(() => tv().phase === "question", 5000, "question");
   const current = tv().current;
-  if (TEMPO) {
-    check(tv().answering === "reading", `question ${current + 1} opens for reading (${tv().answering})`);
-    await sleep(rnd(300, 1200)); // the teacher reads it out
-    if (current === 0) {
-      check(tv().countdown === SECONDS, `the pair shows this question's ${SECONDS} s (${tv().countdown})`);
-      await steerer().send({ op: "nudge", by: 5 });
-      await until(() => tv().countdown === SECONDS + 5, 5000, "+5 while reading");
-      await steerer().send({ op: "nudge", by: -5 });
-      await until(() => tv().countdown === SECONDS, 5000, "-5 back again");
-    }
-    const readAt = { ...at() };
-    // A double tap on Go (or a retry) must not reveal.
-    await Promise.all([steerer().send({ op: "go", at: readAt }), steerer().send({ op: "go", at: readAt })]);
-    await until(() => tv().answering !== "reading", 5000, "Go");
-    await sleep(300);
-    check(tv().phase === "question", `a doubled Go doesn't reveal question ${current + 1} (${tv().phase})`);
-  }
-  // Wait until the class has answered (or 12 s: some devices are asleep).
-  // With the countdown: until answering closes, by everyone present having
-  // answered or by time's up.
-  const t = Date.now();
-  if (TEMPO && current === 2) {
-    // The late tap below needs the answers open: the teacher reveals early, with the clock still running.
+  // Every question opens with its answers hidden (backlog v4 item 6).
+  check(tv().answering === "reading", `question ${current + 1} opens with its answers hidden (${tv().answering})`);
+  await sleep(rnd(300, 900)); // the teacher reads it out
+  check(players.every((p) => p.dead || !p.d.online || p.view?.question?.q !== current || p.view.question.answers.length === 0), `question ${current + 1}: no tablet has the answers while they are hidden`);
+  if (current === 0) {
+    // Play: Show answers; then Last call from answering.
+    await twice({ op: "play" });
+    await until(() => tv().answering === "open", 5000, "the answers");
+    check(!tv().clock, "Show answers starts no clock");
+    await waitForAnswers();
+    await twice({ op: "lastCall" });
+    await waitForLock(current);
+  } else if (current === 1) {
+    // Last call straight from the hidden answers: they show, and the fifteen seconds run.
+    await twice({ op: "lastCall" });
+    await until(() => tv().answering !== "reading", 5000, "the answers with Last call");
+    await waitForLock(current);
+  } else if (current === 2) {
+    await twice({ op: "play" });
+    await until(() => tv().answering === "open", 5000, "the answers");
     await sleep(400);
-    check(tv().answering === "open", `question 3 still open 0.4 s after Go (${tv().answering})`);
-  } else if (TEMPO) {
-    await until(() => tv().answering === "closed", (SECONDS + 5) * 1000, `answering to close on question ${current + 1}`);
-    const took = Date.now() - t;
-    if (took < SECONDS * 1000 - 300) closedByAll++;
-    else closedByTime++;
-    check(took < SECONDS * 1000 + 3000, `time's up comes on time (${took} ms after Go for a ${SECONDS} s countdown)`);
-  } else {
-    while (tv().run.answered < active() && Date.now() - t < 12000) await sleep(100);
-    await sleep(800); // stragglers changing their mind
-  }
-  if (current === 2) {
-    // Item 15: a tablet taps while offline, the teacher reveals, then the tap
-    // arrives. The tablet showed the question as open, so the tap counts.
-    // A tablet on WebSockets if there is one (with --all-poll only a revived one may be).
-    const ready = (x) => !x.dead && x.d.online && x.view?.phase === "question" && (!TEMPO || x.view.question?.answering === "open");
-    const p = players.find((x) => x.d.mode === "ws" && ready(x)) ?? players.find(ready);
+    // Item 15: a tablet taps while offline, the teacher locks in and reveals,
+    // then the tap arrives while the reveal is still up. The tablet showed
+    // the question as open, so the tap counts.
+    const p = players.find(readyToTap) ?? players.find((x) => !x.dead && x.view?.question?.answering === "open");
     void p.d.drop(3000);
-    const choice = 0;
-    const seq = Date.now() * 10 + 9;
-    const ms = p.shown[current] !== undefined ? Date.now() - p.shown[current] : undefined;
-    lateTap = p.d.send({ op: "answer", q: current, choice, seq, v: p.view.v, ms }).then((a) => {
-      check(a.ok, `${p.name}: a tap made before the reveal and delivered after it counts`);
-      const prev = p.acked[current];
-      if (a.ok && (!prev || prev.seq < seq)) p.acked[current] = prev?.choice === choice ? { ...prev, seq } : { choice, seq, ms };
-    });
-    log(`${p.name} taps while offline; the reveal goes out before the tap arrives`);
+    lateTap = tap(p, current, 0, 9).then((a) => check(a.ok, `${p.name}: a tap made before the lock-in and delivered during the reveal counts`));
+    log(`${p.name} taps while offline; the lock-in and the reveal go out before the tap arrives`);
+  } else if (current === 3) {
+    // A page from before the bar: Go shows the answers, Reveal comes straight from answering.
+    const go = await steerer().send({ op: "go", at: at() });
+    check(go.ok && go.result !== "stale", "a page from before the bar: Go shows the answers");
+    await until(() => tv().answering === "open", 5000, "the answers after Go");
+    await waitForAnswers();
+    // Settled: a tablet taps offline, and the class has left the reveal before it arrives.
+    const p = players.find(readyToTap);
+    if (p) {
+      void p.d.drop(4000);
+      settledTap = tap(p, current, 1, 8).then((a) => check(!a.ok, `${p.name}: a tap arriving after the class left the question's reveal doesn't count (${a.ok})`));
+      log(`${p.name} taps offline; the class leaves the reveal before it arrives`);
+    }
+  } else {
+    await twice({ op: "play" });
+    await until(() => tv().answering === "open", 5000, "the answers");
+    await waitForAnswers();
   }
   log(`question ${current + 1}: ${tv().run.answered}/${tv().run.players.length} answered, revealing (${remoteSteers ? "Remote" : "Projector"})`);
   // The wall's "who has answered" (v2 item 7): exactly the answers counted, of no more than the class.
@@ -643,23 +704,28 @@ for (;;) {
     check(w.answeredBy.length === w.answered && w.answered <= w.of && w.of <= w.players.length, `question ${current + 1}: the wall shows ${w.answeredBy.length} avatars for ${w.answered} answers of ${w.of} (${w.players.length} players)`);
   }
   if (current === 3) {
-    // A Remote page from before the votes step reveals straight from the question.
     await steerer().send({ op: "reveal", at: { phase: "question", current } });
-    await until(() => tv().phase === "reveal", 5000, "reveal without the votes");
+    await until(() => tv().phase === "reveal", 5000, "reveal straight from answering");
+  } else if (current === 5) {
+    // A deliberate double press of Play from answering: Lock in, then Reveal.
+    await double();
+    await until(() => tv().phase === "reveal", 5000, "the double press's reveal");
   } else {
-    // Spread, then key (v2 item 6); a double tap on either (or a retry) must not skip anything.
-    const v0 = at();
-    await Promise.all([steerer().send({ op: "votes", at: v0 }), steerer().send({ op: "votes", at: v0 })]);
-    await until(() => tv().votes, 5000, "the votes");
+    if (tv().answering === "open") {
+      // Lock in by Play (doubled: one step).
+      await twice({ op: "play" });
+      await until(() => tv().votes, 5000, "the lock-in");
+    }
     await sleep(300);
-    check(tv().phase === "question" && tv().answering === "closed", `a doubled press on the votes doesn't show question ${current + 1}'s key (${tv().phase}, ${tv().answering})`);
-    await until(() => projector.view?.votes, 5000, "the votes on the wall");
-    check(!projector.view.reveal && projector.view.votes.reduce((a, b) => a + b, 0) <= projector.view.answered, `question ${current + 1}: the wall shows the votes without the key`);
-    const v1 = at();
-    const a1 = steerer().send({ op: "reveal", at: v1 });
-    const a2 = steerer().send({ op: "reveal", at: v1 });
-    await Promise.all([a1, a2]);
+    check(tv().phase === "question" && tv().answering === "closed", `locked in, question ${current + 1}'s key not shown (${tv().phase}, ${tv().answering})`);
+    await until(() => projector.view?.votes, 5000, "the spread on the wall");
+    check(!projector.view.reveal && projector.view.votes.reduce((a, b) => a + b, 0) <= projector.view.answered, `question ${current + 1}: the wall shows the spread without the key`);
+    await twice({ op: "play" });
     await until(() => tv().phase === "reveal", 5000, "reveal");
+  }
+  if (current === 2) {
+    await lateTap;
+    lateTap = null;
   }
   if (current === 0) {
     // The key was wrong: "cat" counts instead of "bee". The teacher's view
@@ -700,8 +766,15 @@ for (;;) {
     check(same, `question ${current + 1}: the wall's winners are those right (${got().length} of ${want().length})`);
     log(`question ${current + 1}: ${got().length} winners jump on the wall`);
   }
+  if (current === 0) {
+    // A deliberate double press of Play from the reveal: the ranking, then the next question.
+    await double();
+    await until(() => tv().phase === "question" && tv().current === 1, 5000, "the double press's next question");
+    qi++;
+    continue;
+  }
   if (qi === 1) {
-    await steerer().send({ op: "ranking", at: at() });
+    await twice({ op: "play" });
     await until(() => tv().phase === "ranking", 5000, "ranking");
     // The phone's battery dies, silently: after about 45 s the Projector
     // steers again by itself (user flow, rule 6).
@@ -717,10 +790,19 @@ for (;;) {
     log(`the Projector steers again after ${((Date.now() - t0) / 1000).toFixed(0)} s`);
   }
   qi++;
-  const before = { ...at() };
-  await steerer().send({ op: "next", at: before });
-  await steerer().send({ op: "next", at: before }); // a retried Next is ignored
+  if (tv().last) {
+    // The last question's reveal: Play goes to the final ranking.
+    check(tv().phase === "reveal", "the last question's reveal");
+    await twice({ op: "play" });
+  } else if (tv().phase === "reveal") {
+    // From the reveal, Next is the second slice; the old Next command still works.
+    await twice({ op: "next" });
+  } else await twice({ op: "play" });
   await until(() => tv().phase !== "reveal" && tv().phase !== "ranking", 5000, "next");
+  if (current === 3) {
+    await settledTap;
+    settledTap = null;
+  }
   if (revival && tv().phase === "question" && tv().current === 2) {
     // The teacher waits for the student to be back before going on.
     await revival;
@@ -729,10 +811,16 @@ for (;;) {
   if (tv().phase === "final") break;
 }
 chaos = false;
-await lateTap;
+// The quiz is over and its questions settled: nothing can change a score
+// now. Before comparing, every device is quiet: the drops the chaos started
+// have ended and every command has its answer, so what each tablet last
+// heard of its answers is what the server stores (decisions.md, "The
+// steering bar").
+await until(() => players.every((p) => p.dead || (p.d.online && p.d.pending.size === 0)), 15_000, "every device to be quiet").catch(() => {});
 await sleep(500);
+check(players.every((p) => p.dead || p.d.pending.size === 0), `every device quiet before the scores are compared (${players.filter((p) => !p.dead && p.d.pending.size > 0).map((p) => p.name)})`);
 
-// Expected scores from acknowledged answers and the final fixes.
+// Expected scores from the stored answers as each tablet last heard of them, and the final fixes.
 const fin = tv();
 const fixes = fin.questions.map((q) => ({ counts: q.answers.map((a) => a.counts), void: q.void, skip: q.skip, status: q.status }));
 const scored = fixes.map((f, i) => (f.status === "revealed" && !f.void && !f.skip ? i : -1)).filter((i) => i >= 0);
@@ -740,7 +828,7 @@ check(JSON.stringify(scored) === JSON.stringify([0, 1, 2, 5]), `scored questions
 const byId = new Map(fin.run.players.map((p) => [p.id, p]));
 check(fin.run.players.length === N, `players in the final view: ${fin.run.players.length}, expected ${N}`);
 let total = 0;
-const pts = (a) => (TEMPO ? POINTS_RIGHT + speedBonus(a.ms, SECONDS * 1000) : 1);
+const pts = (a) => (SPEED ? POINTS_RIGHT + speedBonus(a.ms) : 1);
 for (const p of players) {
   const expected = scored.filter((q) => p.acked[q] && fixes[q].counts[p.acked[q].choice]).reduce((sum, q) => sum + pts(p.acked[q]), 0);
   const got = byId.get(p.id)?.score;
@@ -753,16 +841,11 @@ for (const p of players) {
 }
 for (const e of fin.run.ranking.top) check(e.avatar && [...byId.values()].some((p) => p.avatar.a === e.avatar.a && p.avatar.c === e.avatar.c && sameLook(p.avatar, e.avatar)), "the ranking shows the avatars dressed");
 log(`final: ${players.length} students, ${total} points in total, ranking top: ${fin.run.ranking.top.map((e) => `${e.place}.${e.score}`).join(" ")}`);
-if (TEMPO) {
-  log(`answering closed: ${closedByAll} times by everyone present having answered, ${closedByTime} times by time's up`);
-  check(fin.run.ranking.speed === true, "the ranking knows the scores include speed");
-}
+log(`Last call locked in ${closedByAll} times by everyone present having answered, ${closedByTime} times by its fifteen seconds`);
+check(fin.run.ranking.speed === SPEED, `the ranking knows whether the scores include speed (${fin.run.ranking.speed})`);
 
-// Students still connected see their own result. A drop the chaos started
-// just before the end lasts up to 5 s; wait it out rather than count a
-// device that is still asleep as one that missed the view.
-await until(() => players.every((p) => p.dead || p.d.online), 6000, "the last drops to end").catch(() => {});
-await sleep(1500);
+// Students still connected see their own result (the drops have ended, above).
+await sleep(1000);
 const withView = players.filter((p) => !p.dead && p.view && p.view.phase === "final");
 check(withView.length >= players.length - 3, `final view reached ${withView.length}/${players.length} devices`);
 
