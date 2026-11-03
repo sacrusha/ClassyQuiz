@@ -9,6 +9,6 @@ export interface Env {
   INSTANCE: DurableObjectNamespace<Instance>;
   JOIN: DurableObjectNamespace<JoinCode>;
   STATS: DurableObjectNamespace<UploadStats>;
-  /** The state Worker only: the instances book their uploads; the site's functions don't bind it. */
+  /** The instances book their uploads; the site's functions read its full days (GET /api/site). */
   BUDGET: DurableObjectNamespace<SiteBudget>;
 }
