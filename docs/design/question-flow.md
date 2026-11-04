@@ -44,7 +44,7 @@ Two buttons, the same size and in the same place in every state, on the Remote a
 - **answers**: what the class tapped;
 - **solution**: the key, one tile or several (German teachers say *Lösung*).
 
-The quiz format and its messages keep "answers" for the choices: that vocabulary is the AI's (`quiz-format.md`), and the format's warnings on the check still use it (see Not known).
+The guidance, the `/layout` page and the format's errors and warnings use the same words, because the check shows those messages to the teacher and "Copy the message for your AI" hands them to the AI: one vocabulary for both readers. In the code, `answers` stays the name of a question's choices.
 
 - **Play ▶** steps one slice and is labelled with a noun for what the class sees next: Choices, Answers, Solution, Ranking, Question 4 (its number among the questions shown, as on the wall's "4 / 12"); Final ranking after the last reveal. The ▶ is the verb. The owner on labels: "Reveal" and "Ranking" name a thing the class sees; "Next question" and "Straight to answering" name a motion, which is why a fast-forward button had no labels that worked. Solution is that thing for the reveal, and the number makes the next question a thing too, with information in it. A noun alone can read as where the teacher is rather than where Play goes; a stepper naming the question's states is the intended remedy (Not known).
 - **Nouns, not verbs**, because the labels must fit the wall's bar and translate: the bar's Play has room for about 13–15 characters, and a noun needs no verb form, gender or word order (*Lösung zeigen*, *Afficher la solution* would not fit; "Next: …" adds a gender in French and German). One label set serves every width, so the wall and the Remote say the same words, also after ⇄ Swap.
@@ -116,7 +116,6 @@ The wall's top bar shows only the avatars that have answered, popping in as answ
 - Whether teachers find Countdown and use it, and whether fifteen seconds is right.
 - Whether "Answers" reads as the step that closes answering; "Votes" was the alternative, set aside because it suggests majority voting.
 - The stepper: a row naming the question's states (Question · Choices · Answers · Solution · Ranking) with the current one marked, so the noun on Play reads as the next step. Its room on the wall's bar, which also carries the address and code, is unmeasured; on the wall it may fit only as dots. The Remote has a line of where the question stands above the choices meanwhile.
-- The format's warnings on the check say "answer" for a choice ("has the answer … twice"); they are written for the AI too, so changing them is a question for the format's vocabulary.
 - Whether a deliberate double press is found at all, and whether 80/450/400 ms suit a real clicker and a real hand (only headless timing so far).
 - An accidental Countdown can't be cancelled (the earlier bar had "Stop the countdown"); a press blocked by the settle window gives no feedback.
 - Whether the dashed "on its way" outline is noticed, or needed, on school Wi-Fi.

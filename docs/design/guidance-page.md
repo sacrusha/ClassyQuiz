@@ -74,6 +74,17 @@ class reads from the back of the room, answers are shown spread before key,
 answer pictures lie on tiles in four colours, and text outside the quiz is
 ignored or an error.
 
+The lesson is described as far as it shapes a quiz: the check with the
+solutions folded away, the teacher code for a second device, each question
+first read with its choices hidden, then the choices, the class's answers
+without the solution, the solution, the ranking, and no clock but the
+teacher's optional countdown. How the steering works (its buttons, a
+clicker, a double press, which device takes which job, what happens when a
+phone goes quiet) shapes no quiz, is `user-flow.md`'s, and on the page only
+goes stale. The page uses the teacher screens' words, choices, answers and
+solution (`question-flow.md`, "The steering bar"), as the format's messages
+do.
+
 ### Describes the site as it runs
 
 The guidance describes the site as deployed, so what it says is checked
