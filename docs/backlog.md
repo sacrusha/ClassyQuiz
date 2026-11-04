@@ -205,10 +205,11 @@ bar, all in the open list.
    counts only days the upload cap refused).
 5. The guidance, the owner's rewrite merged — built, `design/guidance-page.md`.
 6. Tempo in the instance, in the teacher's hand: a bar of two buttons (Play,
-   Last call) stepping the question through its states — built and live,
+   Countdown) stepping the question through its states — built and live,
    `design/question-flow.md`. The owner on labels: "Reveal" and "Ranking" name
    a thing the class sees; "Next question" and "Straight to answering" name a
-   motion. Follow-ups are in the open list.
+   motion. The teacher screens' words (choices, answers, solution; nouns on
+   Play) — built, undeployed, same file. Follow-ups are in the open list.
 8. The flow from upload to Start: a private check screen, a teacher code, roles
    in plain words — built, `design/teacher-devices.md`.
 9. Avatars: celebration, the lion's mane, tools — student feedback:
@@ -270,6 +271,14 @@ The quiz is already made; it can be more than one activity.
 - **Results export** — a teacher who wants to look again.
 - **Localization**, one sub-item per language — teachers who don't read
   English, classes that should see the few labels there are in their own.
+  The bar's labels are nouns so they translate without grammar and fit the
+  wall's ~13–15 characters (`design/question-flow.md`, "The steering bar").
+  Known pitfalls: the words for choices and answers must stay apart (German
+  "Antwortmöglichkeiten" contains "Antwort"; "Auswahl" or "Optionen" don't);
+  "Schlussrangliste" and "Classement final" are at the limit; Countdown
+  needs a French word ("Décompte", or "Top chrono") and Italian may keep
+  "Countdown"; "⏱ 15 s" where no short word exists, the number from
+  `LAST_CALL_MS`. A native-speaking teacher confirms each language.
 - **Formula rendering** — fractions, powers, equations on maths sheets; until
   then an image carries them.
 - **Pictures for a teacher whose AI can't make a zip** — free tiers and some
@@ -303,7 +312,7 @@ uncertainty, it is pointed to, not restated.
 With the owner:
 - The quiz's background in the lobby and at the rankings: built that way as
   an implementer's call, not yet seen by the owner (`design/pictures.md`).
-- The implementer's two choices on the bar: Last call locks in early once
+- The implementer's two choices on the bar: Countdown closes answering early once
   everyone present has answered; points for speed run over a fixed 20 s from
   the answers appearing (`design/question-flow.md`).
 - v2 item 1's open point (what makes a picture work on the wall): the
@@ -344,8 +353,14 @@ With the owner:
   it).
 
 Review E's follow-ups on the bar (`design/question-flow.md`):
-- An accidental Last call can't be cancelled; the old bar had "Stop the
+- An accidental Countdown can't be cancelled; the old bar had "Stop the
   countdown".
+- The stepper under Play (the question's states, the current one marked), so
+  the noun on Play reads as the next step; its room on the wall's bar is
+  unmeasured.
+- Whether "Answers" reads as the step that closes answering ("Votes" set
+  aside: it suggests majority voting); and the format's warnings on the
+  check, which say "answer" for a choice in the AI's vocabulary.
 - A press blocked by the settle window gives no feedback; the 80/450/400 ms
   timings need a real hand, clicker and phone.
 - The capacity sentence ("a few dozen classes a day", landing and /own-copy)
@@ -368,7 +383,8 @@ Needs a real classroom or real devices, nobody has run it:
 - The deploy worktree is at 56ebf87; the credentials stay in the main
   checkout's `secrets/`. Main is ahead and undeployed: the landing's strip as
   a card to the worked example, Build's wording, Run first when stacked, the
-  labels under their words on phones, and `/example` (v4 items 10–13), plus
+  labels under their words on phones, and `/example` (v4 items 10–13), the
+  teacher screens' words (v1 item 6), plus
   the guidance's enlarge sentences (v4 item 11). The worked example's
   stand-ins (photos, mock conversation) would go live with it; the
   conversation says it is a mock-up.
@@ -376,7 +392,9 @@ Needs a real classroom or real devices, nobody has run it:
   punctuation in the labelled ask across widths, full-page shots),
   `landing-stacked-order.mjs` (where Build and Run start on upright screens),
   `example-launch.mjs` ("Start the example quiz" to the check, on a running
-  stack). They read a site at 127.0.0.1:8931 or 8788; read before running.
+  stack), `labels-walk.mjs` (the bar's labels and small lines through every
+  step on walls of 1366, 600 and 360 px and a 360 px Remote: text cut or
+  not, height, shots). They read a site at 127.0.0.1:8931 or 8788; read before running.
 - Process, the owner's words, for whoever orchestrates next: delegate on
   purpose and situation, not steps; no spec changes to an agent in flight —
   settle the item first, then brief a fresh one; no runs whose outcome is

@@ -36,17 +36,27 @@ The final ranking can be called from any point (the bell rings at question 9). A
 
 ### The steering bar
 
-Two buttons, the same size and in the same place in every state, on the Remote and on the wall's steering bar, so a hand in flow always finds them (`client/steps.ts`, `steeringButtons`):
+Two buttons, the same size and in the same place in every state, on the Remote and on the wall's steering bar, so a hand in flow always finds them (`client/steps.ts`, `steeringButtons`).
 
-- **Play ▶** steps one slice and is labelled with where it goes: Show answers, Lock in, Reveal, Ranking, Next; Final ranking after the last reveal. The lobby has Start quiz, the final ranking "Again with another class". The owner on labels: "Reveal" and "Ranking" name a thing the class sees; "Next question" and "Straight to answering" name a motion, which is why a fast-forward button had no labels that worked.
-- **Last call**, in Question and Answering: from Question it shows the answers too; then `LAST_CALL_MS` (15 s, `shared/tempo.ts`) later answering locks in by itself, with the spread on the wall, or sooner once everyone present has answered. Once per question. While it runs the button is greyed; where it does not apply it stays in place, invisible, so Play never moves. Lock in during Last call ends it.
-- **Reveal stays the teacher's press.** Last call says "we're done answering", never "show the key". The server's step at the deadline is the Durable Object alarm (`scheduleAlarm` takes the earliest of the lifetime alarms and the deadline).
-- "Everyone present" means the devices that are there plus any that answered and left; a tablet away 45 s (`FRESH_MS`, `server/instance.ts`) stops holding it open. The teacher tabs' ticks check it too (`closeIfAllIn`), so the last missing tablet going away does not leave Last call running while the wall already reads "all in".
+**The words.** A teacher must be able to say before a press what will change on the wall and on the tablets. Labels named one by one after the states fail it: commands, nouns and motions side by side leave a teacher unsure whether a button says where they are or where it goes, and a word for two things ("answers" for the tiles, the key and what the class tapped) makes "show the answers" and "reveal" both read as showing the key. One vocabulary holds on every teacher screen:
+
+- **choices**: the tiles a question offers;
+- **answers**: what the class tapped;
+- **solution**: the key, one tile or several (German teachers say *Lösung*).
+
+The quiz format and its messages keep "answers" for the choices: that vocabulary is the AI's (`quiz-format.md`), and the format's warnings on the check still use it (see Not known).
+
+- **Play ▶** steps one slice and is labelled with a noun for what the class sees next: Choices, Answers, Solution, Ranking, Question 4 (its number among the questions shown, as on the wall's "4 / 12"); Final ranking after the last reveal. The ▶ is the verb. The owner on labels: "Reveal" and "Ranking" name a thing the class sees; "Next question" and "Straight to answering" name a motion, which is why a fast-forward button had no labels that worked. Solution is that thing for the reveal, and the number makes the next question a thing too, with information in it. A noun alone can read as where the teacher is rather than where Play goes; a stepper naming the question's states is the intended remedy (Not known).
+- **Nouns, not verbs**, because the labels must fit the wall's bar and translate: the bar's Play has room for about 13–15 characters, and a noun needs no verb form, gender or word order (*Lösung zeigen*, *Afficher la solution* would not fit; "Next: …" adds a gender in French and German). One label set serves every width, so the wall and the Remote say the same words, also after ⇄ Swap.
+- **A small line under the label** where the step has a consequence the noun doesn't name: "closes answering" under Answers, "15 s, then closes" under Countdown, the seconds from `LAST_CALL_MS`. The buttons keep one height whether or not it is there.
+- **Countdown** (`lastCall` in the code), in Question and Answering: from Question it shows the choices too; then `LAST_CALL_MS` (15 s, `shared/tempo.ts`) later answering closes by itself, with the answers on the wall, or sooner once everyone present has answered. Once per question. While it runs the button is greyed, and the bar drains with no digits (`client/clock.ts`); where it does not apply it stays in place, invisible, so Play never moves. Answers during Countdown ends it. An idiom such as "last call" is unknown to many German-speaking teachers; "Countdown" is a loanword in German and Italian, and French needs its own word ("Décompte", or "Top chrono") or "⏱ 15 s" where the word is long (backlog, Localization).
+- **The solution stays the teacher's press.** Countdown says "we're done answering", never "show the key". The server's step at the deadline is the Durable Object alarm (`scheduleAlarm` takes the earliest of the lifetime alarms and the deadline).
+- "Everyone present" means the devices that are there plus any that answered and left; a tablet away 45 s (`FRESH_MS`, `server/instance.ts`) stops holding it open. The teacher tabs' ticks check it too (`closeIfAllIn`), so the last missing tablet going away does not leave Countdown running while the wall already reads "all in".
 - There is no fast-forward button. A deliberate double press of Play is the fast-forward (below).
 
 Sizes, labels at narrow widths and the wall's layout are `user-flow.md` §3.4–3.5.
 
-**Keys.** Space, Enter, →, ↓, PageDown and N are Play. There is no key for Last call: a clicker has forward only, and a stray key must not start a clock. No key starts the quiz: Start is one deliberate press on the steering screen while the class is still joining. A key held with Ctrl, Alt or Windows/Cmd does nothing (F, full screen, and Z, picture zoom, otherwise). While a Remote steers, only a clicker's keys (PageDown, →, ↓) move on from the wall: the teacher is on the phone, and Space, Enter and N are the keys a lean on the laptop hits. While the wall steers itself all Play keys work, and a single stray Space then still reveals: that keyboard is the teacher's steering.
+**Keys.** Space, Enter, →, ↓, PageDown and N are Play. There is no key for Countdown: a clicker has forward only, and a stray key must not start a clock. No key starts the quiz: Start is one deliberate press on the steering screen while the class is still joining. A key held with Ctrl, Alt or Windows/Cmd does nothing (F, full screen, and Z, picture zoom, otherwise). While a Remote steers, only a clicker's keys (PageDown, →, ↓) move on from the wall: the teacher is on the phone, and Space, Enter and N are the keys a lean on the laptop hits. While the wall steers itself all Play keys work, and a single stray Space then still reveals: that keyboard is the teacher's steering.
 
 ### Presses
 
@@ -54,9 +64,9 @@ A press in flow does what the teacher meant; a bounce, or a press landing on a s
 
 - **A bounce**: a press within `BOUNCE_MS` (80 ms) of the last is the same press. Switch bounce and a clicker repeating its code are far below that; double-clicks run about 150–300 ms.
 - **A double**: a second press within `DOUBLE_MS` (450 ms) is one gesture and steps once more, sent with the state the first press leads to, so the server takes it only after the first. One double is two slices; a third press does nothing. 450 ms is a little under the usual double-click setting.
-- **Never across a question's start**: a double whose first press shows the answers, or brings up the next question, steps once. A second slice there (Lock in with nobody answered, or answers before anyone read the question) is never wanted.
-- **A press on a screen that just moved** (within `SETTLE_MS`, 400 ms, of the view arriving, not of the press) does nothing, also when the screen moved by itself (Last call locking in): the press was aimed at what was there before. On a slow line the screen moves late, which is when it misleads.
-- Last call and Start follow the bounce and settle rules; a Play right after Last call does nothing. The buttons are never disabled after a step: a disabled button would swallow a double's second press.
+- **Never across a question's start**: a double whose first press shows the answers, or brings up the next question, steps once. A second slice there (closing answering with nobody answered, or answers before anyone read the question) is never wanted.
+- **A press on a screen that just moved** (within `SETTLE_MS`, 400 ms, of the view arriving, not of the press) does nothing, also when the screen moved by itself (Countdown closing answering): the press was aimed at what was there before. On a slow line the screen moves late, which is when it misleads.
+- Countdown and Start follow the bounce and settle rules; a Play right after Countdown does nothing. The buttons are never disabled after a step: a disabled button would swallow a double's second press.
 
 Independently of timing, every step command names the state it was pressed in (`At`), so a resend or a stale press is ignored by the server whatever its timing. Accepted: hardware that bounces slower than 80 ms reveals instead of locking in.
 
@@ -76,7 +86,7 @@ Points are computed from the stored answers under the current fixes and never st
 
 - **Without points for speed**, a right answer scores 1 ("right out of so many").
 - **With them**, `POINTS_RIGHT` (10) plus `speedBonus`: up to `SPEED_BONUS` (5) whole points, by the share of `SPEED_REFERENCE_MS` (20 s) left when the tap was made (`shared/tempo.ts`, one place for a self-hoster to tilt). The ratio is Kahoot's: two fast right answers weigh as much as three slow ones; a smaller bonus makes speed a tie-breaker, a larger one a race. A tap after 20 s scores 10 and no bonus. Whole points keep ties possible, and ties share a place.
-- The reference is fixed because the teacher's pace has no length of its own, and Last call starts whenever the teacher presses it: a bonus by its share would reward the class the teacher hurried. It runs from the answers appearing, not from the question: the reading happens while they are hidden, so a slow reader who listened to the teacher starts level.
+- The reference is fixed because the teacher's pace has no length of its own, and Countdown starts whenever the teacher presses it: a bonus by its share would reward the class the teacher hurried. It runs from the answers appearing, not from the question: the reading happens while they are hidden, so a slow reader who listened to the teacher starts level.
 - **The switch** is on the join screen under Start and in the Remote's lobby (the check has none), off by default, fixed at Start (`setSpeed` refuses after it) and carried over to "Again with another class". It can't change mid-quiz, so earlier questions are never rescaled. It says "A right answer 10, up to 5 more the quicker it comes." (`client/manage.ts`).
 - **Whose time it is**: the device measures from the answers appearing on its own screen to the tap, so a slow line or a reconnect costs no speed (on school Wi-Fi the podium would otherwise go to the best line). Views carry `sinceMs` so a reloaded tablet still measures from the answers' appearing. The server caps the device's figure at its own count (which includes both trips) and never goes below zero; a page that sends none gets the server's count. This trusts the client, which fits "a normal user, not a malicious one". The last tap counts, with its own time: a change of mind costs speed.
 - A key changed afterwards moves the points with their speed. Only revealed questions that are neither void nor skipped score.
@@ -90,7 +100,7 @@ A student can change their answer until answering closes; the last tap counts (`
 - **The record settles when the class leaves the question's reveal** (the ranking, the next question, the final ranking). Until then a tap on an older view counts, including during the reveal, and the spread grows by one. After it, nothing changes what the question scored except the teacher's fixes, so a podium that was shown does not change. Nothing counts while the class is reading, for a skipped question, or for one not revealed before an early final ranking.
 - **One fact, the stored record.** Each answer's acknowledgement carries the record as it stands after the tap, whatever happened to this tap (`AnswerAck`); the tablet's view carries the same (`mine`). A resend of what is stored is confirmed also after the reveal. This replaced a design with two facts (a tap's acknowledgement and the stored record), under which a lost acknowledgement left a tablet and the server disagreeing about a score.
 - **On the tablet**: a tapped button is marked at once with a dashed, pulsing outline (on its way); it turns solid when the tablet's view has the answer stored; a refused tap falls back to what the view stores. A tap still on its way when the class moves on is shown as on its way, never as accepted, and does not count. Only the marks change in place, so a tap landing as a view arrives is not swallowed by a redraw.
-- Last call's bar is one CSS animation started from the `leftMs` the view carries (`client/clock.ts`), so a device that arrives mid-countdown picks up where it is. A device runs it from when the view arrived, so its end is at or after the server's, never before.
+- Countdown's bar is one CSS animation started from the `leftMs` the view carries (`client/clock.ts`), so a device that arrives mid-countdown picks up where it is. A device runs it from when the view arrived, so its end is at or after the server's, never before.
 - Accepted risk: a tablet that is offline still shows the question, so a child could copy the key from the projector and tap. A device that sends no version (an old cached page) gets the strict rule.
 
 ### Who has answered
@@ -103,12 +113,15 @@ The wall's top bar shows only the avatars that have answered, popping in as answ
 
 ## Not known
 
-- Whether teachers find Last call and use it, and whether fifteen seconds is right.
+- Whether teachers find Countdown and use it, and whether fifteen seconds is right.
+- Whether "Answers" reads as the step that closes answering; "Votes" was the alternative, set aside because it suggests majority voting.
+- The stepper: a row naming the question's states (Question · Choices · Answers · Solution · Ranking) with the current one marked, so the noun on Play reads as the next step. Its room on the wall's bar, which also carries the address and code, is unmeasured; on the wall it may fit only as dots. The Remote has a line of where the question stands above the choices meanwhile.
+- The format's warnings on the check say "answer" for a choice ("has the answer … twice"); they are written for the AI too, so changing them is a question for the format's vocabulary.
 - Whether a deliberate double press is found at all, and whether 80/450/400 ms suit a real clicker and a real hand (only headless timing so far).
-- An accidental Last call can't be cancelled (the earlier bar had "Stop the countdown"); a press blocked by the settle window gives no feedback.
+- An accidental Countdown can't be cancelled (the earlier bar had "Stop the countdown"); a press blocked by the settle window gives no feedback.
 - Whether the dashed "on its way" outline is noticed, or needed, on school Wi-Fi.
 - Whether 20 s as the speed reference suits questions much longer than that (every slow right answer scores 10).
 - Whether a hint on the Remote, when most of the class chose an answer not marked right, is wanted: the counts sit beside the key already.
 - A 320 px wall still clips the ranking.
-- Runs by itself (backlog Later): a quiz that carries on while the teacher's hands are elsewhere, for classes that read for themselves, would need a cadence with nobody pressing, a close rule per question (everyone present has answered, or some seconds after the last answer, with a cap) and a way back: any press makes it manual. It is an option, never the default; it would share the clock machinery with Last call.
+- Runs by itself (backlog Later): a quiz that carries on while the teacher's hands are elsewhere, for classes that read for themselves, would need a cadence with nobody pressing, a close rule per question (everyone present has answered, or some seconds after the last answer, with a cap) and a way back: any press makes it manual. It is an option, never the default; it would share the clock machinery with Countdown.
 - Per-question time hints ("needs more time") stay parked until a teacher asks; a length per question was rejected because every addition to the format is something an AI must write reliably.

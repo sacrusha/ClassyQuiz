@@ -10,8 +10,8 @@
 // device's own time, and the scores are checked against it.
 //
 // Every question opens with its answers hidden and is stepped through the
-// steering bar's states: Play (Show answers, Lock in, Reveal, Ranking, Next)
-// and Last call, which locks in after fifteen seconds or once everyone there
+// steering bar's states: Play (Choices, Answers, Solution, Ranking, Question n)
+// and Countdown (lastCall), which locks in after fifteen seconds or once everyone there
 // has answered. Each press is also sent twice from the same state (a resend:
 // one step), and twice as a deliberate double press (the second from where
 // the first leads: two steps). A tap made offline counts if it arrives while

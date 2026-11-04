@@ -400,7 +400,7 @@ function enter(c: Choice): void {
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
     <div class="entry-roles">
       <button class="btn role" data-role="screen">Show the quiz here<small>the class watches this screen</small></button>
-      <button class="btn role" data-role="remote">Steer it from here<small>Start, next, the answers</small></button>
+      <button class="btn role" data-role="remote">Steer it from here<small>Start, next, the solution</small></button>
     </div>
   </div>`;
   main.querySelectorAll<HTMLButtonElement>("button[data-role]").forEach((b) =>
