@@ -283,6 +283,16 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .howto .hdr { display: flex; align-items: center; gap: .4em; margin-top: .6em; padding-bottom: .5em; border-bottom: 1px solid var(--rule); }
 .howto .logo { flex: 1; display: flex; align-items: center; }
 .howto .logo img { height: 1.6em; width: auto; display: block; }
+/* The lockup is 1.6em = 6.72cqi of the drawing: from 48 px (a drawing 715 px
+   wide) the colour master instead of the 32-grid file (docs/brand/guidelines.md,
+   minimum sizes). The master carries its clear space; its height and margins
+   put its fox where the 32-grid fox is (y 1..31 of 32). Lazy, so the file
+   that isn't shown isn't fetched. */
+.howto .logo .master { display: none; }
+@container (min-width: 715px) {
+  .howto .logo .s32 { display: none; }
+  .howto .logo .master { display: block; height: 1.92em; margin: -.16em -.165em -.16em -.16em; }
+}
 .howto .box { font: 700 1.1em var(--font-brand); font-variant-numeric: tabular-nums; letter-spacing: .15em; padding: .1em .5em; border: .15em solid var(--accent); border-radius: .4em; animation: beckon 1.6s ease-in-out infinite; }
 .howto .go { background: var(--control); color: var(--control-ink); border-radius: .4em; padding: .2em .55em; }
 .howto .page i { display: block; height: .55em; margin-top: .55em; border-radius: .3em; background: var(--rule); width: 80%; }
@@ -453,14 +463,16 @@ body.teach { padding-bottom: 96px; }
   .lobby { grid-template-rows: minmax(0, 1fr); }
   .lobby .join { container-type: size; }
   .lobby .addr { font-size: min(7cqh, calc(150cqi / var(--chars, 20))); line-height: 1.2; white-space: nowrap; }
-  .lobby .bigcode { font-size: min(24cqh, 27cqi); }
+  /* At most 83 % of the column: projectors crop the picture's edges, and the
+     column's outer edge is the screen's. */
+  .lobby .bigcode { font-size: min(24cqh, 23cqi); }
   .lobby .qr, .mfold .lobby .qr { width: min(45cqh, 70cqi); height: min(45cqh, 70cqi); }
   .mfold { height: 100vh; height: 100dvh; }
   @media (max-width: 700px) {
     body.screen .lobby { grid-template-rows: none; }
     body.screen .lobby .join { container-type: inline-size; }
     body.screen .lobby .addr { font-size: min(1.3em, calc(150cqi / var(--chars, 20))); }
-    body.screen .lobby .bigcode { font-size: min(4.2em, 27cqi); }
+    body.screen .lobby .bigcode { font-size: min(4.2em, 23cqi); }
     body.screen .lobby .qr, .mfold .lobby .qr { width: 38vw; height: 38vw; }
     .mfold { height: auto; }
   }

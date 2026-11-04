@@ -284,7 +284,7 @@ function nobodyYet(v: ScreenView): boolean {
 function howTo(code: string): string {
   return `<div class="howto" aria-hidden="true"><div class="scr">
     <div class="url">${esc(siteAddress())}</div>
-    <div class="hdr"><span class="logo"><img src="/brand/classyquiz-horizontal-32.svg" alt="" width="134" height="32"></span><span class="box">${esc(code)}</span><span class="go">&#9654;</span></div>
+    <div class="hdr"><span class="logo"><img class="s32" src="/brand/classyquiz-horizontal-32.svg" alt="" width="134" height="32" loading="lazy"><img class="master" src="/brand/classyquiz-horizontal-colour.svg" alt="" width="935" height="256" loading="lazy"></span><span class="box">${esc(code)}</span><span class="go">&#9654;</span></div>
     <div class="page"><i></i><i></i><i></i></div>
   </div></div>`;
 }
