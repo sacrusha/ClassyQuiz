@@ -872,7 +872,7 @@ function renderRanking(v: ScreenView): void {
       <div class="classres">
         <div class="pct">${pct}%</div>
         <div class="muted">${ICON.check} ${r.right} / ${r.given}</div>
-        <div class="bars">${r.perQuestion.map((p) => `<span style="height:${p.given ? (100 * p.right) / p.given : 0}%"></span>`).join("")}</div>
+        <div class="bars">${r.perQuestion.map((p) => `<span><i style="height:${p.given ? (100 * p.right) / p.given : 0}%"></i></span>`).join("")}</div>
       </div>
     </div>`;
   patch(main, html);
