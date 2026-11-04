@@ -144,6 +144,10 @@ the repo; read a script before running it. Directories there:
   since designed out (`docs/design/question-flow.md`, "When a tap counts").
 - `picture-answers/`: the generated test zip and its generator.
 - `samples/`: the owner's number-line zip.
+- `example/conversation/`: the worked example's conversation as HTML and
+  `render.mjs`, which renders it to the light and dark pictures in
+  `public/examples/`; `fake_photos.py`, the stand-in photographs
+  (`docs/design/example-page.md`). `example/sheet/` makes the sheet.
 - `avatars-prototype/`, `avatars-pass/`.
 - Other working folders from past sessions: `ExampleSheets`, `ai-tests`,
   `dryrun`, `example`, `fnb3`, `fnbuild`, `guidance-runs`, `mock`, `review-d`,

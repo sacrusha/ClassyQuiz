@@ -218,27 +218,19 @@ bar, all in the open list.
    call; whether four seconds is long enough for a child to find themselves;
    the weak spot is a short question beside its picture, where ten winners come
    out small because the key stays visible.
-10. **The worked example, behind one link** — the example hides behind the
-    strip's click, which nobody finds. Owner's variant: one separate page,
-    linked by one line after Build's step 2 and from "the example quiz" in
-    step 1, never from About. It offers the example sheets (as files and as
-    photographs, so a teacher can compare on their own AI), the conversation,
-    the quiz as a download, and a shortcut that runs it.
-    - The conversation is images, not text: an AI fetching the page
-      shouldn't read it as page text, and the layout is ours. A cropped
-      preview links to the image alone; browser back returns. Date, tier and
-      "ask written for this demonstration, reply as produced" are in the
-      image.
-    - Turn 2 is the owner's ask, written for the demonstration; the reply is
-      a real run.
-    - The shortcut fetches the static .zip and hands it to the existing
-      upload, landing on the check screen (`/example` becomes that). It
-      counts as an upload; on the free plan a check-only visit costs one
-      booking and the zip's bytes, rows come with Start. To verify: whether
-      the check screen holds a socket or poll, and the zip's size.
-    - Blocked on the owner's daylight photographs and the turn-2 ask. Can
-      ship first: "the example quiz" in step 1 as a link to `/example`, and
-      the strip not looking clickable until the video exists.
+10. **The worked example, behind one link** — built, `design/example-page.md`:
+    `/example`, "The example, step by step" from the strip, in English. Open:
+    - The owner's real run, made on another machine and account from the
+      page's downloads, and his daylight photographs; both replace stand-ins
+      (the conversation is a mock-up and says so). The run's `.zip` replaces
+      `number-line-quiz.zip`. For the turns after the first, the owner's
+      purpose: each shows a feature while it steers a real improvement. The
+      mock's second turn is from a Sonnet run of 2026-11-04 (owner's
+      screenshot, `.tmp/sonnetBuild04Nov.md`): questions that invert the
+      sheet's no. 1, the number given and the picture to pick. A turn asking
+      for a preview is a candidate the owner may add in the real run.
+    - Whether the check screen holds a socket or poll while a visitor only
+      looks at the example: each "Start the example quiz" is a real upload.
 11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not
     recorded, so no tier claim)
     - "Make me a quiz for classyquiz.pages.dev" was read as a publish target
@@ -252,6 +244,20 @@ bar, all in the open list.
       tell the AI to draw each answer picture with a ground of its own, white
       unless there's a reason, because a mark can vanish on a random tile
       colour. Rides with the next delivery.
+    - Told the teacher "students can press Z or click a picture to enlarge
+      it" of answer pictures. Only the question's picture enlarges, by the
+      teacher (`design/pictures.md`, "Enlarging"). The guidance's "the teacher
+      can enlarge a picture" and "a smaller picture is enlarged on the wall"
+      allowed the reading; they now name the question's picture and say
+      "scaled up". Z, click and students aren't on the page.
+12. **The worked example in the landing's other three languages.** The page,
+    its conversation picture and its `.zip` are English; the four `.zip`s of
+    the earlier runs exist, and the landing passes `?lang=`.
+13. **The example's upload as a special case**, e.g. not booked against the
+    free site's caps, or kept ready instead of uploaded per click. Only with a
+    test set that runs the same `.zip` through the special path and the normal
+    upload and fails when they differ, so the example can't drift from what a
+    teacher's upload does. Today it is a normal upload, counted as one.
 
 ## Later — Paper and memory
 
