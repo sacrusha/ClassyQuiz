@@ -54,7 +54,7 @@
   .f-sheet .p2 { right: 0; top: 0; transform: rotate(4deg); }
   .f-sheet .p1 { left: 0; bottom: 0; transform: rotate(-3deg); }
   .f-ask .pic { height: calc(var(--h) * .8); aspect-ratio: .62; }
-  .f-ask svg, .f-zip svg { width: 100%; height: 100%; display: block; }
+  .f-ask .pic > svg, .f-zip .pic > svg { width: 100%; height: 100%; display: block; }
   .f-zip .pic { height: calc(var(--h) * .66); aspect-ratio: 160 / 110; }
   .f-zip figcaption { max-width: 11.5em; }
   .f-tablet .pic { height: var(--h); aspect-ratio: .66; background: var(--frame); border-radius: 12px; padding: 6px; box-sizing: border-box; }
@@ -144,7 +144,7 @@
 </head>
 <body class="follows-dark">
 <header class="top"><div class="bar wide">
-  <p class="logo"><span class="brand"><span class="lockup"><!--#brand classyquiz-horizontal-32-inline.svg--></span><span class="symbol"><!--#brand classyquiz-symbol-32-inline.svg--></span></span></p>
+  <p class="logo"><span class="brand"><span class="lockup"><!--#brand-use classyquiz-horizontal-32-inline.svg--></span><span class="symbol"><!--#brand-use classyquiz-symbol-32-inline.svg--></span></span></p>
   <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code" data-t="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join" data-t-aria="join">&#9654;</button></form>
 </div></header>
 
@@ -171,8 +171,13 @@
   <figure class="f-zip"><div class="pic"><svg viewBox="0 0 160 110" aria-hidden="true">
     <rect x="12" y="2" width="136" height="96" rx="7" fill="var(--frame)"/>
     <rect x="18" y="8" width="124" height="84" rx="2" fill="var(--bg)"/>
-    <g transform="translate(23 11.5) scale(.34)" style="color: var(--fg)"><!--#brand classyquiz-horizontal-32-inline.svg--></g>
-    <path d="M18 25h124" stroke="var(--rule)"/>
+    <!-- the 16-grid fox and the header lockup's name (identity.md, the strip) -->
+    <clipPath id="mini-name"><rect x="26" y="0" width="110" height="40"/></clipPath>
+    <g class="mini" style="color: var(--fg)">
+      <g transform="translate(23 9.02) scale(.4823)" clip-path="url(#mini-name)"><!--#brand-use classyquiz-horizontal-32-inline.svg--></g>
+      <g transform="translate(21.67 9.5) scale(.904)"><!--#brand-use classyquiz-symbol-16-inline.svg--></g>
+    </g>
+    <path d="M18 26.5h124" stroke="var(--rule)"/>
     <rect x="34" y="32" width="92" height="52" rx="7" fill="none" stroke="#b9b3a5" stroke-width="1.5" stroke-dasharray="4 3"/>
     <path d="M71 37h12l6 6v20H71z" fill="#f2c94c"/><path d="M83 37v6h6" fill="#d9ad2b"/>
     <g fill="#8a6d12"><rect x="76" y="39" width="2.5" height="2.5"/><rect x="78.5" y="41.5" width="2.5" height="2.5"/><rect x="76" y="44" width="2.5" height="2.5"/><rect x="78.5" y="46.5" width="2.5" height="2.5"/><rect x="75.5" y="50" width="6.5" height="6.5" rx="1.2"/></g>
@@ -339,6 +344,7 @@ Image: l-shape.png
 </div>
 
 </main>
+<!--#brand-defs-->
 <script src="/js/home.js" defer></script>
 </body>
 </html>

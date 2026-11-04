@@ -54,20 +54,43 @@ await mkdir(dist, { recursive: true });
 await cp(join(root, "public"), dist, { recursive: true });
 await writeFile(join(dist, "_headers"), headers);
 
-// The mark and the name are written into a page inline, where the page says
-// <!--#brand file.svg-->, so the hat and the name take the page's ink
-// (currentColor), dark mode included; an <img> can't. One file in
-// public/brand/ feeds every page that shows it (docs/design/identity.md).
+// The mark and the name are written into a page inline, so the hat and the
+// name take the page's ink (currentColor), dark mode included; an <img>
+// can't. One file in public/brand/ feeds every page that shows it
+// (docs/design/identity.md).
+//   <!--#brand file.svg-->      the file, where the marker is.
+//   <!--#brand-use file.svg-->  a small <svg> that <use>s the file, whose
+//                               drawing is written once where the page says
+//                               <!--#brand-defs-->. The root page puts that
+//                               after the guidance, so AIs reading the page
+//                               reach the guidance before any path data.
 for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
   const page = join(dist, name);
   const html = await readFile(page, "utf8");
-  const marks = [...html.matchAll(/<!--#brand ([\w.-]+\.svg)-->/g)];
+  const marks = [...html.matchAll(/<!--#brand(-use)? ([\w.-]+\.svg)-->/g)];
   if (!marks.length) continue;
-  let out = html;
-  for (const [marker, file] of marks) {
+  const brand = async (file) => {
     const svg = (await readFile(join(dist, "brand", file), "utf8")).trim();
-    if (!svg.startsWith("<svg")) throw new Error(`${name}: brand/${file} is not an SVG`);
-    out = out.replace(marker, () => svg);
+    const m = svg.match(/^<svg([^>]*)>([\s\S]*)<\/svg>$/);
+    const attr = (a) => m?.[1].match(new RegExp(`\\s${a}="([^"]+)"`))?.[1];
+    if (!m || !attr("viewBox") || !attr("width") || !attr("height")) throw new Error(`${name}: brand/${file} is not an SVG with a viewBox, width and height`);
+    return { svg, body: m[2], viewBox: attr("viewBox"), width: attr("width"), height: attr("height"), label: attr("aria-label") ?? "classyQuiz" };
+  };
+  let out = html;
+  const used = new Map();
+  for (const [marker, use, file] of marks) {
+    const b = await brand(file);
+    const id = `brand-${file.replace(/\.svg$/, "")}`;
+    if (use) used.set(id, b);
+    const text = use
+      ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${b.viewBox}" width="${b.width}" height="${b.height}" role="img" aria-label="${b.label}"><use href="#${id}"/></svg>`
+      : b.svg;
+    out = out.replace(marker, () => text);
+  }
+  if (used.size) {
+    if (!out.includes("<!--#brand-defs-->")) throw new Error(`${name}: <!--#brand-use--> without <!--#brand-defs-->`);
+    const defs = [...used].map(([id, b]) => `<symbol id="${id}" viewBox="${b.viewBox}">${b.body}</symbol>`).join("");
+    out = out.replace("<!--#brand-defs-->", () => `<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">${defs}</svg>`);
   }
   await writeFile(page, out);
 }
