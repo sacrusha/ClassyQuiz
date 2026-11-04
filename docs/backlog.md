@@ -150,7 +150,7 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 
 Built and live (tenth deploy, 56ebf87): items 2, 5, 6, 8, 9 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list.
+bar, all in the open list. Item 14 is built, not deployed.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -260,6 +260,21 @@ bar, all in the open list.
     test set that runs the same `.zip` through the special path and the normal
     upload and fails when they differ, so the example can't drift from what a
     teacher's upload does. Today it is a normal upload, counted as one.
+14. **One product, made on purpose** — the teacher deciding whether to rely
+    on the site in front of a class meets the same name, mark, paper, ink and
+    type on every page; the teacher's controls never read as an answer.
+    Built: the top-hat fox and favicon everywhere, the shared header, one
+    stylesheet for the look, Rubik for the site's own words, ink controls,
+    the ranking's bars on tracks, the README's title and picture,
+    `design/identity.md`. Open, the owner's words: a one-line descriptor by
+    the logo, what classyQuiz is, as a statement (the first such sentence is
+    in the English guidance under the page's largest heading); and the next
+    step for "This file is not a readable .zip archive.", which lacks one
+    where its neighbours have it. Open, beyond the identity: the logo kit's
+    web manifest and theme colours, which make the site installable as an
+    app (its icons are in the kit); a keyline on the raster icons for a dark
+    tab strip, needed only by browsers that don't take the SVG icon; the
+    kit's link-preview card, which no page names yet.
 
 ## Later — Paper and memory
 
@@ -311,6 +326,10 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- The identity (v4 item 14) as built, not yet seen by the owner: the
+  implementer's calls are ink controls and a rust accent instead of blue,
+  Rubik for the site's own words only, the mark-only header on an upright
+  phone, and where the mark appears (`design/identity.md`).
 - The quiz's background in the lobby and at the rankings: built that way as
   an implementer's call, not yet seen by the owner (`design/pictures.md`).
 - The implementer's two choices on the bar: Countdown closes answering early once

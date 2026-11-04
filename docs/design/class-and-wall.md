@@ -52,8 +52,10 @@ audience sees and why.
   the box still submits to `/play?c=...`.
 - First users who typed the address didn't find that box. Until the first
   avatar, the wall shows where it is: a wordless picture of a tablet's top,
-  the address in the browser's field and the site's header with the class's
-  code in its box, ringed. Wordless, so it matches the landing page in any
+  the address in the browser's field and the site's header (the mark and the
+  name) with the class's code in its box, ringed. The address under the QR
+  code has the mark before it, so the fox on the wall is the fox in the
+  header the tablets open (`identity.md`). Wordless, so it matches the landing page in any
   language and at any width; after the first avatar the class shows each
   other.
   The code is necessary, the QR a convenience. On the wall they share the

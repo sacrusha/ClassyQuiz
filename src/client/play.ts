@@ -15,7 +15,7 @@
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
-import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, statusDot, store, tabRole } from "./dom.ts";
+import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
@@ -329,7 +329,7 @@ function showNoQuiz(): void {
 function showTeacherForm(note: string): void {
   document.body.classList.add("follows-dark");
   document.title = "classyQuiz · teacher";
-  main.innerHTML = `<div class="center teacher-entry">
+  main.innerHTML = `${siteHead()}<div class="center teacher-entry">
     <h1>Show or steer a quiz from here</h1>
     ${note ? `<p class="muted">${esc(note)}</p>` : ""}
     <p class="muted">The teacher code:</p>
@@ -396,7 +396,7 @@ function enter(c: Choice): void {
     });
     return;
   }
-  main.innerHTML = `<div class="center choice">
+  main.innerHTML = `${siteHead()}<div class="center choice">
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
     <div class="entry-roles">
       <button class="btn role" data-role="screen">Show the quiz here<small>the class watches this screen</small></button>

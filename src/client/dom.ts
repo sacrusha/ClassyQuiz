@@ -2,6 +2,7 @@
 // windows, managed school browsers); every access here is guarded.
 
 import type { LineStatus } from "./net.ts";
+import LOCKUP from "../public/brand/classyquiz-horizontal-32-inline.svg";
 
 export function $(sel: string, root: ParentNode = document): HTMLElement {
   const el = root.querySelector(sel);
@@ -180,6 +181,14 @@ export function keepAwake(): void {
   document.addEventListener("visibilitychange", () => void request());
   document.addEventListener("pointerdown", () => void request(), { passive: true });
   document.addEventListener("keydown", () => void request());
+}
+
+/**
+ * The small header of a teacher's page (site.css, .site-head): the mark and
+ * the name, back to the root page. The static pages write the same markup.
+ */
+export function siteHead(): string {
+  return `<header class="site-head"><div class="in"><a class="brand" href="/">${LOCKUP}</a></div></header>`;
 }
 
 export function siteAddress(): string {
