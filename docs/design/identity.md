@@ -58,7 +58,8 @@ App screens are set at 1.45 line height, pages read top to bottom (the root,
   rules from the same warm grey.
 - **Controls are ink** (`--control`): Play on the steering bar and the
   Remote, Start, Let the class in, Upload, the code box's ▶, the on state of
-  a switch, a picked shape in the students' lobby, the countdown's bar. Ink has no hue, so it can't be taken for red, blue, yellow or
+  a switch, a picked shape in the students' lobby, the countdown's bar, and
+  the actions written as underlined words (Change the solution, Swap). Ink has no hue, so it can't be taken for red, blue, yellow or
   green, on a good screen or a washed-out projector; it is also the mark's
   hat. In dark mode the ink is light.
 - **The accent is rust** (`--accent` `#a8471a`, light `#f0a065` in dark
