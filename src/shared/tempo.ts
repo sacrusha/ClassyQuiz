@@ -1,4 +1,4 @@
-// The teacher's pace (backlog v4 item 6; docs/decisions.md, "The steering
+// The teacher's pace (backlog v4 item 6; docs/design/question-flow.md, "The steering
 // bar"). Every question steps through the same states, each by the
 // teacher's press: the question with its answers hidden, answering, locked
 // with the spread on the wall, revealed, the ranking. Last call is the one

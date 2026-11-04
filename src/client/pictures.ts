@@ -1,4 +1,4 @@
-// The quiz's pictures in the browser (decisions.md, "Pictures on the screens").
+// The quiz's pictures in the browser (docs/design/pictures.md, "Loading").
 // The server sends them with no-store, so a shared school laptop keeps
 // nothing once the page is closed; that also means an <img> that is drawn
 // again fetches again. So each picture is fetched once per page, into a blob

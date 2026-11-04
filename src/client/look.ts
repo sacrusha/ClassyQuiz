@@ -1,8 +1,8 @@
 // The pictures of the game: avatars and answer marks. Drawn as SVG here, not
 // emoji, so a child's fox looks the same on an Android tablet as on the
-// school laptop's projector (docs/decisions.md, "Avatars"). An avatar is an
+// school laptop's projector (docs/design/class-and-wall.md, "Dressing the avatar"). An avatar is an
 // animal on a colour, assigned, and the look its child gave it in the lobby:
-// a background shape and a hat (docs/avatars.md).
+// a background shape and a hat (docs/design/class-and-wall.md).
 
 import type { Avatar } from "../shared/protocol.ts";
 import { BACKGROUND_COUNT, HAT_COUNT } from "../shared/looks.ts";
@@ -92,7 +92,7 @@ const ring = (n: number, cx: number, cy: number, d: number, r: number, attrs = "
 /**
  * In the order of shared/looks.ts; 0 is the disc. No triangle, square or
  * rhombus: those are the answer marks, and avatars pop up above the answer
- * tiles while the class answers (docs/avatars.md §6).
+ * tiles while the class answers (docs/design/class-and-wall.md, "Dressing the avatar").
  */
 const BACKGROUNDS: ((c: string) => string)[] = [
   (c) => `<circle cx="50" cy="50" r="49" fill="${c}"/>`,

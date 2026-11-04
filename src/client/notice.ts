@@ -1,5 +1,5 @@
 // Full-screen notices over any page that holds a line to its quiz
-// (docs/decisions.md, "Hardening"): asleep after a long while without a
+// (docs/design/connections.md, "Devices left on", "The allowance spent"): asleep after a long while without a
 // change, a tap wakes it; and the site's daily allowance spent, said as such
 // rather than as a lost connection. Styled inline: they sit over whatever the
 // page draws, whichever stylesheet it has.

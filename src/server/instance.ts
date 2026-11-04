@@ -1,5 +1,5 @@
-// One uploaded quiz and its classes (docs/decisions.md, "Lifetime of a quiz
-// instance"; docs/user-flow.md for the roles). Holds the game state and the
+// One uploaded quiz and its classes (docs/design/hosting-and-limits.md, "What lives, and
+// for how long"; docs/user-flow.md for the roles). Holds the game state and the
 // quiz's code, talks to every tab of the class over WebSockets (hibernating,
 // so an idle instance costs nothing) or long-polling, and deletes everything
 // when the instance ends.
@@ -51,7 +51,7 @@ const FRESH_MS = 45_000;
  */
 const QUIET_MS = 25_000;
 /**
- * Wrong teacher codes (docs/after-upload.md §4), counted two ways, both in
+ * Wrong teacher codes (docs/design/teacher-devices.md, "Wrong teacher codes"), counted two ways, both in
  * the instance's storage: a count in memory went with an idle instance, so a
  * script that paused got its tries back (review D #1).
  * - Per device: GUESS_MAX wrong endings within GUESS_WINDOW_MS refuse that
@@ -121,8 +121,8 @@ interface Meta {
   /** The token of the tab holding each role. */
   roles?: Record<RoleName, string | null>;
   /**
-   * The teacher code's two digits after the class code (docs/after-upload.md
-   * §4). Drawn at upload; given on first load to a quiz from before them.
+   * The teacher code's two digits after the class code (docs/design/teacher-devices.md,
+   * "One entry: the teacher code"). Drawn at upload; given on first load to a quiz from before them.
    */
   teacher?: string;
   lastActivity: number;
@@ -170,7 +170,7 @@ export class Instance extends DurableObject<Env> {
   /**
    * Children who dressed their animal and wait for it to be stored: the
    * class's looks are written at most every LOOK_WRITE_MS, one write for
-   * everyone who changed in between (docs/avatars.md §7). Any write of the
+   * everyone who changed in between (docs/design/class-and-wall.md, "Dressing the avatar"). Any write of the
    * run settles them.
    */
   private looksWaiting: { resolve: () => void; reject: (e: unknown) => void }[] = [];
@@ -786,7 +786,7 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * What a teacher device coming in with the teacher code does
-   * (docs/after-upload.md §4): the question when one tab shows and steers;
+   * (docs/design/teacher-devices.md, "A second device: one question, only when needed"): the question when one tab shows and steers;
    * the role whose tab is gone; "screen", to do both, when nothing is there;
    * nothing when both tabs are there. The class code never reaches a role,
    * so this holds before and after the first student alike.
@@ -915,7 +915,7 @@ export class Instance extends DurableObject<Env> {
         const run = game.run;
         if (!run || run.phase === "final") return { direct: [ack(false, "This quiz has finished."), this.chooseMessage()] };
         // Joining after the start may be a student whose device lost its
-        // player; they can pick their avatar back (decisions.md).
+        // player; they can pick their avatar back (docs/design/class-and-wall.md, "Coming back").
         if (cmd.op === "newPlayer") {
           // A join resent after its answer was lost gets the same player.
           const earlier = typeof id === "string" && run.joins && Object.hasOwn(run.joins, id) ? G.playerById(run, run.joins[id]) : null;
@@ -972,8 +972,8 @@ export class Instance extends DurableObject<Env> {
         }
         // The acknowledgement carries what is stored for this question now,
         // in screen order: the one fact the tablet shows as accepted and the
-        // one that scores, whatever this tap's fate (decisions.md, "The
-        // steering bar"). Its own view says the same.
+        // one that scores, whatever this tap's fate (docs/design/question-flow.md,
+        // "When a tap counts"). Its own view says the same.
         return { direct: [ack(outcome !== "refused", undefined, { q: cmd.q, record: this.recordOnScreen(cmd.q, session.player) } satisfies AnswerAck)] };
       }
 
@@ -1010,7 +1010,7 @@ export class Instance extends DurableObject<Env> {
         }
       }
       if (cmd.op === "swap") {
-        // ⇄ Swap (docs/after-upload.md §4): the wall becomes the steering tab
+        // ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): the wall becomes the steering tab
         // and the steering tab the wall, at once, from either; the same tap
         // undoes it. Both get new tokens, as a role handed over always does.
         const other: RoleName = session.role === "screen" ? "remote" : "screen";
@@ -1109,7 +1109,7 @@ export class Instance extends DurableObject<Env> {
     } catch (e) {
       if (e instanceof G.GameError) return { direct: [ack(false, e.message)] };
       // The account's daily allowance is spent: the tab says so rather than
-      // looking offline (decisions.md, hardening). What's in memory may be
+      // looking offline (docs/design/hosting-and-limits.md, "When the allowance runs out anyway"). What's in memory may be
       // ahead of storage now; reload it, so nothing shows that isn't stored.
       if (isQuotaError(e)) {
         await this.load().catch(() => {});
@@ -1305,7 +1305,7 @@ export class Instance extends DurableObject<Env> {
     await this.scheduleAlarm();
   }
 
-  /** Everything goes: quiz, classes, players, answers, pictures (decisions.md). */
+  /** Everything goes: quiz, classes, players, answers, pictures (docs/design/hosting-and-limits.md, "What lives, and for how long"). */
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
     await this.budget().release(this.ctx.id.toString()).catch(() => {});

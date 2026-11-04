@@ -81,7 +81,7 @@ export function findQuiz(id: string): SavedQuiz | null {
   return savedQuizzes().find((x) => x.id === id) ?? null;
 }
 
-// --- the teacher code (docs/after-upload.md §4): the class code and two
+// --- the teacher code (docs/design/teacher-devices.md, "One entry: the teacher code"): the class code and two
 // digits, typed in the students' box, which routes by length
 
 /** "63953 47", as the teacher reads it: the class's code, then their own two digits. */
@@ -132,8 +132,8 @@ export const tabRole = {
 };
 
 /**
- * Which of its two lobby screens the single tab shows (docs/after-upload.md
- * §3): the teacher's check, or the class's join screen. Per tab, so a reload
+ * Which of its two lobby screens the single tab shows (docs/design/teacher-devices.md,
+ * "The single tab: check, then join"): the teacher's check, or the class's join screen. Per tab, so a reload
  * stays where it was; the tab that uploaded starts on the check.
  */
 export const tabLobby = {

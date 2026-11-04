@@ -1,4 +1,4 @@
-// The device's line to its quiz instance (docs/decisions.md, "Transport").
+// The device's line to its quiz instance (docs/design/connections.md, "Transport: WebSocket first, long-polling when the network breaks it").
 //
 // - WebSocket first. A ping every 20 s keeps proxies from dropping an idle
 //   socket; a missing pong means the line is dead and we reconnect.
@@ -14,7 +14,7 @@
 //   line closes, the screen may turn off, and a tap wakes it. A tablet left
 //   on after the lesson doesn't keep its line, or its polling, all day.
 // - When the site's daily allowance is spent, the page says so and asks
-//   again once a minute (decisions.md, "Hardening").
+//   again once a minute (docs/design/connections.md, "The allowance spent").
 
 import type { Auth, ClientMessage, Command, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
