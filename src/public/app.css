@@ -445,6 +445,33 @@ body.teach { padding-bottom: 96px; }
   .mstart .twoscreens, .teach .twoscreens, .check .twoscreens, .sheet .twoscreens { display: none; } /* no second monitor on a phone */
 }
 
+/* The lobby's join column (both lobbies of the wall). The class's part is one
+   screen (docs/design/teacher-devices.md, "The single tab: check, then join"):
+   the lobby gets the height the title and Start leave, and QR, address and
+   code are sized from the join column's own box. The page's font scales with
+   the width, so em sizes alone overflow a wide, short window (a laptop with
+   its browser bars), push Start below the fold and break the address. The
+   avatars hide the rows that don't fit. --chars is the address's length, set
+   where it is written; a bold character is about 0.6em wide. One column
+   takes its natural height instead. Without container queries (older
+   Safari on a school laptop) the em sizes above stay. */
+@supports (container-type: size) {
+  .lobby { grid-template-rows: minmax(0, 1fr); }
+  .lobby .join { container-type: size; }
+  .lobby .addr { font-size: min(7cqh, calc(150cqi / var(--chars, 20))); line-height: 1.2; white-space: nowrap; }
+  .lobby .bigcode { font-size: min(24cqh, 27cqi); }
+  .lobby .qr, .mfold .lobby .qr { width: min(45cqh, 70cqi); height: min(45cqh, 70cqi); }
+  .mfold { height: 100vh; height: 100dvh; }
+  @media (max-width: 700px) {
+    body.screen .lobby { grid-template-rows: none; }
+    body.screen .lobby .join { container-type: inline-size; }
+    body.screen .lobby .addr { font-size: min(1.3em, calc(150cqi / var(--chars, 20))); }
+    body.screen .lobby .bigcode { font-size: min(4.2em, 27cqi); }
+    body.screen .lobby .qr, .mfold .lobby .qr { width: 38vw; height: 38vw; }
+    .mfold { height: auto; }
+  }
+}
+
 /* Last call's bar (client/clock.ts): drains, no digits; the last fifth turns warm. */
 .clockbar { flex: none; height: 12px; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, var(--fg) 12%, transparent); }
 .clockbar > span { display: block; height: 100%; background: var(--accent); transform-origin: left center; animation-name: drain; animation-timing-function: linear; animation-fill-mode: forwards; }
@@ -499,6 +526,8 @@ body.teach { padding-bottom: 96px; }
 .speed-switch[aria-checked="true"] .knob { background: var(--accent); }
 .speed-switch[aria-checked="true"] .knob::after { transform: translateX(18px); }
 .speed-note { display: block; color: var(--muted); }
+/* Its room is kept while off, so the switch doesn't move the screen. */
+.speed-switch[aria-checked="false"] + .speed-note { visibility: hidden; }
 
 /* Pictures as answers (docs/design/pictures.md; client/screen.ts,
    layPictureAnswers). The picture sits on the tile's colour, which shows where
