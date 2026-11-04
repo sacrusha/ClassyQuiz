@@ -14,7 +14,7 @@
 // The example asks are each language's version of the same ask; the marked
 // parts carry the labels. The second ask has nothing decided: the teacher's
 // open request; that the AI then asks what it needs is the guidance's
-// "Building with the teacher". The site's address in both is replaced by the
+// "Build with the teacher". The site's address in both is replaced by the
 // one the browser opened.
 
 import type { SiteFull } from "../shared/limits.ts";
