@@ -1,5 +1,5 @@
-// Pictures that came with an uploaded quiz (docs/decisions.md, "Pictures in
-// the archive"). The teacher's browser has already redrawn each one as PNG or
+// Pictures that came with an uploaded quiz (docs/design/pictures.md,
+// "At upload"). The teacher's browser has already redrawn each one as PNG or
 // JPEG, which drops photo metadata and shrinks it; the server takes nothing
 // else, and reads the size it needs for the layout from the file itself.
 

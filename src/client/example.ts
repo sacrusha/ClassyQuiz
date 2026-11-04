@@ -1,5 +1,5 @@
-// /example: the check screen without codes (docs/after-upload.md §8; landing
-// story §3.3). The example quiz's title and questions as the teacher's check
+// /example: the check screen without codes (docs/design/root-page.md,
+// "The strip"). The example quiz's title and questions as the teacher's check
 // shows them after an upload, answers folded, read in the visitor's browser
 // from the example's static .zip. No upload, no lobby, no code, and nothing
 // booked against the site's budget. In place of "Let the class in",

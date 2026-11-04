@@ -6,8 +6,8 @@
 // Device clocks aren't synchronised, so a device runs the countdown from
 // when the view reached it: `leftMs` is what was left when the server made
 // the view. It ends a moment after the server's, never before, and a tap the
-// device still showed as open counts (decisions.md, "A tap that looked in
-// time counts").
+// device still showed as open counts (docs/design/question-flow.md,
+// "When a tap counts").
 
 import type { ClockView } from "../shared/protocol.ts";
 

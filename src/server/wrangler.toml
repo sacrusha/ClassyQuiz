@@ -35,11 +35,11 @@ new_sqlite_classes = ["UploadStats"]
 tag = "v3"
 deleted_classes = ["Pairing"]
 
-# The site's share of the free plan: uploads a day, bytes stored (decisions.md, hardening).
+# The site's share of the free plan: uploads a day, bytes stored (docs/design/hosting-and-limits.md, "Protecting the day's allowance").
 [[migrations]]
 tag = "v4"
 new_sqlite_classes = ["SiteBudget"]
 
-# No request logs: they would hold IP addresses (decisions.md, lifetime).
+# No request logs: they would hold IP addresses (docs/design/hosting-and-limits.md, "What lives, and for how long").
 [observability]
 enabled = false

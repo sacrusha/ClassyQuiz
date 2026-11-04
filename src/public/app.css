@@ -244,7 +244,7 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .verdict.wrong { background: var(--bad); }
 .verdict.none, .verdict.void { background: #8a8f98; }
 /* The lobby: the child's animal and the pictures to dress it (backlog v2
-   item 5, docs/avatars.md). Beside each other on a tablet held sideways,
+   item 5, docs/design/class-and-wall.md). Beside each other on a tablet held sideways,
    one above the other when upright. No words. */
 .play .dress { flex: 1; display: grid; gap: 16px; align-items: center; justify-items: center; grid-template: "hero picker" 1fr "look picker" auto / auto 1fr; }
 .dress .hero { grid-area: hero; width: min(44vw, 58vh); height: min(44vw, 58vh); }
@@ -287,7 +287,7 @@ body.screen.steering main { height: calc(100vh - 64px); height: calc(100dvh - 64
 .steerbar .codeline { color: var(--muted); }
 .steerbar .btn { min-height: 46px; padding: .3em 1.2em; }
 .steerbar .btn.more { width: 52px; padding: 0; font-size: 1.3em; }
-/* "Remote gone" and "Allow a device to join" (docs/second-teacher-device.md). */
+/* "Remote gone" and "Allow a device to join" (docs/design/teacher-devices.md, "When a device is gone"). */
 .steerbar .joinchip { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--muted); }
 .steerbar .joinchip .btn { min-height: 40px; padding: .2em .8em; }
 .drag-hint {
@@ -319,7 +319,7 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .joinnav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 28px; margin: 4px 0 0; font-size: 16px; }
 .joinnav .link { color: var(--muted); }
 
-/* The single tab's check (docs/after-upload.md §3): the teacher's page, at a
+/* The single tab's check (docs/design/teacher-devices.md, "The single tab: check, then join"): the teacher's page, at a
    reading size rather than the wall's; private until the teacher shares it. */
 .check { max-width: 50rem; margin: 0 auto; padding: 20px 16px 64px; font-size: 18px; }
 .has-backdrop .check { background: var(--bg); }
@@ -444,7 +444,7 @@ body.teach { padding-bottom: 96px; }
 .codeform { display: flex; gap: 8px; width: min(100%, 340px); }
 .codeform .code-input { flex: 1; min-width: 0; }
 .codeform .btn { width: 64px; font-size: 1.3rem; }
-/* A teacher device's one question (docs/after-upload.md §4): what it will do, in plain words. */
+/* A teacher device's one question (docs/design/teacher-devices.md, "A second device: one question, only when needed"): what it will do, in plain words. */
 .entry-roles { display: grid; grid-template-columns: 1fr; gap: 12px; width: min(100%, 420px); }
 .btn.role { flex-direction: column; gap: 4px; min-height: 120px; font-size: 1.35rem; }
 .btn.role:not(:disabled) { border-color: var(--accent); }

@@ -4,7 +4,7 @@
 // "How quizzes are built"), because that is where AIs and teachers read it.
 // This module implements it; keep the two in step.
 //
-// Design (docs/decisions.md): the correct answer is marked on its own line;
+// Design (docs/design/quiz-format.md): the correct answer is marked on its own line;
 // the parser forgives what AIs typically add or vary and rejects only what it
 // cannot read unambiguously; error messages name the question and are written
 // so a teacher can paste them back to the AI.
@@ -573,7 +573,7 @@ export function parseQuiz(input: string): ParseResult {
   });
 
   // Where the key sits in the text isn't checked: the site shuffles the
-  // answers (decisions.md, "Answers shuffled at upload").
+  // answers (docs/design/quiz-format.md, "Answers are shuffled; `Order: fixed` keeps an order").
   if (quizKeepOrder) for (const q of questions) q.keepOrder = true;
 
   if (title === null || title === "") warn(`The quiz has no title.`);

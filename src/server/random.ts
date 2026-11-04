@@ -8,7 +8,7 @@ export function randomToken(bytes = 24): string {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-/** Digits only, any of them 0: the teacher code's two after the class code (docs/after-upload.md §4). */
+/** Digits only, any of them 0: the teacher code's two after the class code (docs/design/teacher-devices.md, "One entry: the teacher code"). */
 export function randomDigits(digits: number): string {
   const b = crypto.getRandomValues(new Uint32Array(digits));
   return Array.from(b, (x) => String(x % 10)).join("");

@@ -1,4 +1,4 @@
-// Pictures at upload (docs/decisions.md, "Pictures in the archive"): the
+// Pictures at upload (docs/design/pictures.md, "At upload"): the
 // quiz's Image: lines are matched with the files in the .zip, each picture is
 // redrawn on a canvas, and the quiz goes up with them.
 //

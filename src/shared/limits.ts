@@ -1,5 +1,5 @@
 // The free plan's shape, and what the site says when it runs out
-// (docs/decisions.md, "Hardening"). Cloudflare's daily limits are
+// (docs/design/hosting-and-limits.md, "Protecting the day's allowance"). Cloudflare's daily limits are
 // account-wide: one class that spends them spends them for every class on the
 // site. A self-hoster raises any of these.
 
@@ -33,7 +33,7 @@ export const SLEEP_AFTER_MS = 45 * 60_000;
  * The self-hosting nudge (backlog items 14, 16). The start page and
  * public/own-copy.html say the site has "room for a few dozen classes a
  * day": the account's daily allowance covers about 30 classes when every
- * device polls and about 75 on stored rows (decisions.md, "Hardening"),
+ * device polls and about 75 on stored rows (docs/design/hosting-and-limits.md, Situation),
  * below MAX_UPLOADS_PER_DAY. Raise these and that sentence no longer holds.
  */
 const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages.dev/own-copy says how.";
@@ -77,7 +77,7 @@ export function quotaMessage(now = new Date()): string {
 /**
  * An error from the platform saying a free-plan limit is spent. The wording
  * isn't documented; this is a best reading, to check after a deploy
- * (decisions.md). Broad enough for "…free tier…", "…daily limit…", "quota".
+ * (docs/design/hosting-and-limits.md, "When the allowance runs out anyway"). Broad enough for "…free tier…", "…daily limit…", "quota".
  */
 export function isQuotaError(e: unknown): boolean {
   const m = e instanceof Error ? e.message : typeof e === "string" ? e : "";

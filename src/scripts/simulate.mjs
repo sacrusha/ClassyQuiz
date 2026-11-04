@@ -22,7 +22,7 @@
 //
 // The upload's tab is the Projector and steers itself; a phone comes in with
 // the teacher code, is asked, steers from here, and steers from then on
-// (docs/user-flow.md §1, docs/after-upload.md §4). 25 students join; a
+// (docs/user-flow.md §1, docs/design/teacher-devices.md). 25 students join; a
 // fifth of them only get through over HTTP long-polling (as on a network that
 // blocks WebSockets). During the quiz, devices drop their connection and come
 // back (sleep, Wi-Fi), answers sent just before a drop are resent, one tablet
@@ -37,7 +37,7 @@
 // checkable: nothing lost, nothing counted twice.
 //
 // After the final ranking the roles are put through their cases
-// (docs/after-upload.md §4): the phone comes back as the Remote, and a third
+// (docs/design/teacher-devices.md): the phone comes back as the Remote, and a third
 // device is told both tabs are there; "again" opens a new class with the
 // same code and the old class's tablets are told it has finished; the Remote
 // leaves; a tab on HTTP answers "Show the quiz here" and the one that steered
@@ -496,7 +496,7 @@ await phone.send({ op: "remove", player: ghost.id });
 ghost.d.kill();
 log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} over long-polling), ghost removed`);
 
-// Dressing in the lobby (backlog v2 item 5, docs/avatars.md). Like
+// Dressing in the lobby (backlog v2 item 5, docs/design/class-and-wall.md). Like
 // client/play.ts: one `dress` in flight per device, the latest pick sent
 // next, so a burst of taps sends the first and the last. Every student
 // picks a few looks; the server stores the class's looks once a second.
@@ -814,8 +814,8 @@ chaos = false;
 // The quiz is over and its questions settled: nothing can change a score
 // now. Before comparing, every device is quiet: the drops the chaos started
 // have ended and every command has its answer, so what each tablet last
-// heard of its answers is what the server stores (decisions.md, "The
-// steering bar").
+// heard of its answers is what the server stores (docs/design/question-flow.md,
+// "When a tap counts").
 await until(() => players.every((p) => p.dead || (p.d.online && p.d.pending.size === 0)), 15_000, "every device to be quiet").catch(() => {});
 await sleep(500);
 check(players.every((p) => p.dead || p.d.pending.size === 0), `every device quiet before the scores are compared (${players.filter((p) => !p.dead && p.d.pending.size > 0).map((p) => p.name)})`);
