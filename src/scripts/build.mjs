@@ -95,6 +95,28 @@ for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
   await writeFile(page, out);
 }
 
+// site.css (the shared look) arrives with what a page already loads, so a
+// device opening a page at lesson start waits for one stylesheet at most: in
+// front of app.css for the app pages, written into the page for those with
+// their own <style> (the root page among them). A page links /site.css
+// first in public/, which also works opened straight from there.
+{
+  const site = await readFile(join(dist, "site.css"), "utf8");
+  await writeFile(join(dist, "app.css"), `${site}\n${await readFile(join(dist, "app.css"), "utf8")}`);
+  const inline = site.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\n\s*\n+/g, "\n").trim();
+  const link = '<link rel="stylesheet" href="/site.css">\n';
+  for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
+    const page = join(dist, name);
+    const html = await readFile(page, "utf8");
+    if (!html.includes(link)) throw new Error(`${name}: doesn't link /site.css`);
+    const out = html.includes('<link rel="stylesheet" href="/app.css">')
+      ? html.replace(link, "")
+      : html.replace(link, () => `<style>\n${inline}\n</style>\n`);
+    await writeFile(page, out);
+  }
+  await rm(join(dist, "site.css"));
+}
+
 // The site's address in the guidance page: the demo's in the source; a copy
 // under another name (wrangler.toml's `name`, or SITE_ADDRESS when the
 // address is something else) names its own, so the teacher's AI is sent to
@@ -119,9 +141,6 @@ const options = {
   format: "iife",
   // School-issued tablets and laptops are not always up to date.
   target: "es2020",
-  // The mark, imported from public/brand/ as text for the pages' scripts to
-  // write inline (client/brand.d.ts).
-  loader: { ".svg": "text" },
   minify: !watch,
   sourcemap: watch ? "inline" : false,
   logLevel: "info",

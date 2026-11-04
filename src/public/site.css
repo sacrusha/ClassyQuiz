@@ -89,6 +89,6 @@ h1, h2, h3 { font-family: var(--font-brand); font-weight: 700; }
    reaches from it. The lockup is drawn for exactly 32 px, phones included;
    its hat and name take the ink. */
 .brand { display: inline-flex; align-items: center; color: var(--fg); text-decoration: none; }
-.brand svg { display: block; height: 32px; width: auto; flex: none; }
+.brand svg, .brand img { display: block; height: 32px; width: auto; flex: none; }
 .site-head { border-bottom: 1px solid var(--rule); }
 .site-head .in { max-width: var(--page-w, 42rem); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; min-height: 58px; }
