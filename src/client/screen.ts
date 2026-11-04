@@ -273,6 +273,22 @@ function nobodyYet(v: ScreenView): boolean {
   return false;
 }
 
+/**
+ * Where the code goes (docs/design/class-and-wall.md, "Getting in"): first
+ * users typing the address didn't find the code box in the landing page's
+ * header. A wordless picture of a tablet's top: the address in the browser's
+ * field, the site's header with this class's code in its box. Wordless, so
+ * it matches the landing page in any language and at any width. Shown until
+ * the first avatar; after that the class shows each other.
+ */
+function howTo(code: string): string {
+  return `<div class="howto" aria-hidden="true"><div class="scr">
+    <div class="url">${esc(siteAddress())}</div>
+    <div class="hdr"><span class="logo">classyQuiz</span><span class="box">${esc(code)}</span><span class="go">&#9654;</span></div>
+    <div class="page"><i></i><i></i><i></i></div>
+  </div></div>`;
+}
+
 function nobodyLine(): string {
   const host = esc(siteAddress());
   return `Nobody in yet? If the tablets can't open ${host}, the school network may block it: <a href="/check#it" target="_blank" rel="noopener">what to tell IT ›</a>`;
@@ -297,6 +313,7 @@ function renderJoin(v: ScreenView): void {
         </div>
         <div class="crowdcol">
           <div class="count">${ICON.person}${live("joined", n)}</div>
+          ${n === 0 ? howTo(v.code) : ""}
           <div class="avatars" data-crowd></div>
           ${nobodyYet(v) ? `<p class="nobody">${nobodyLine()}</p>` : ""}
         </div>
@@ -330,12 +347,14 @@ function renderLobby(v: ScreenView): void {
         </div>
         <div style="display:flex;flex-direction:column;min-height:0">
           <div class="count">${ICON.person}<span id="count">0</span></div>
+          <div id="howto">${howTo(v.code)}</div>
           <div class="crowd" id="crowd"></div>
           <p class="nobody" id="nobody" hidden>${nobodyLine()}</p>
         </div>
       </div>`;
   }
   $("#nobody").hidden = !nobodyYet(v);
+  $("#howto").hidden = v.players.length > 0;
   // Newcomers pop in once; a changed look wiggles (the child dressing it).
   syncAvatars($("#crowd"), v.players, () => ({ tag: "div", className: "av" }));
   $("#count").textContent = String(v.players.length);

@@ -47,8 +47,15 @@ audience sees and why.
 ### Getting in
 
 - The projector shows the address, the join code and a QR code for
-  `/play#<code>`. Typing the address leads to the landing page, whose top is a
-  big number box. Without JavaScript the box still submits to `/play?c=...`.
+  `/play#<code>`. Typing the address leads to the landing page, the teachers'
+  page, with the code box in its header (`root-page.md`). Without JavaScript
+  the box still submits to `/play?c=...`.
+- First users who typed the address didn't find that box. Until the first
+  avatar, the wall shows where it is: a wordless picture of a tablet's top,
+  the address in the browser's field and the site's header with the class's
+  code in its box, ringed. Wordless, so it matches the landing page in any
+  language and at any width; after the first avatar the class shows each
+  other.
   The code is necessary, the QR a convenience. On the wall they share the
   room the lobby leaves under the title and above Start, each on one line,
   sized from that room rather than from the window (`.lobby` in `app.css`).
