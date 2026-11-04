@@ -276,6 +276,14 @@ bar, all in the open list.
     `docs/brand/web/touch-icon.svg`); a keyline on the raster icons for a dark
     tab strip, needed only by browsers that don't take the SVG icon; the
     kit's link-preview card, which no page names yet.
+    Open, from the teacher-view review and not acted on: the root's English
+    guidance starts on a different left edge from the teacher block (desktop),
+    so it reads as a second page joined on, unless that is meant; the final
+    ranking differs from an intermediate one only by a small trophy (layout,
+    not the celebration); the empty join screen's right half stays blank
+    until children join; on a real washed-out projector the pale states
+    (hidden answers, faded tiles at the reveal) may let pale red and pale
+    yellow run together — unchecked.
 
 ## Later — Paper and memory
 
