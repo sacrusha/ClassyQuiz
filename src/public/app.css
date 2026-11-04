@@ -172,7 +172,9 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .classres { text-align: center; }
 .classres .pct { font-family: var(--font-brand); font-size: min(6em, 17vw); font-weight: 700; line-height: 1; } /* within a phone-sized wall too: wider, the page zooms out and the steering bar leaves the screen */
 .classres .bars { display: flex; align-items: flex-end; gap: 4px; height: 16vh; justify-content: center; margin-top: 2vh; }
-.classres .bars span { width: 2.2vh; background: var(--good); border-radius: 4px 4px 0 0; min-height: 3px; }
+/* One bar per question, its share right; each on a track of the full height, so a short one reads as a low share, not as a speck. */
+.classres .bars span { width: 2.2vh; height: 100%; display: flex; align-items: flex-end; background: color-mix(in srgb, var(--fg) 9%, transparent); border-radius: 4px 4px 0 0; overflow: hidden; }
+.classres .bars i { display: block; width: 100%; background: var(--good); }
 
 /* dvh: on a tablet the browser's toolbar is not part of the screen. */
 body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
