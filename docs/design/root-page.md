@@ -14,7 +14,10 @@ one, nothing else on the site matters, however good the guidance below it is
 - **Run**: take the `.zip` the teacher's AI made, and give the teacher who comes
   back mid-lesson the way back to their quiz.
 - **Be found by students**: a code box in the header, since the teacher tells
-  the class the address and the class needs one box.
+  the class the address and the class needs one box. Unobtrusive on the
+  teachers' page, and easily found by whoever knows to look at the top and
+  what the box looks like; the wall shows both until the first student is in
+  (`class-and-wall.md`, "Getting in").
 
 Two further jobs appear only when they apply, at the place where they apply:
 help for a school network that blocks the site, and the offer of an own copy to

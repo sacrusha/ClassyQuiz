@@ -259,7 +259,10 @@ A question opened (or all of them, with Show all answers / Hide answers):
   that count."), with Void, Skip it and Done.
 - **The site's warnings** (the same answer twice, text too long to read well,
   ignored text, no title) sit above the list, one muted line each.
-- **Avatars** can be tapped to remove a double.
+- **Avatars** can be tapped to remove a double. Until the first one, their
+  place shows where the code goes: a wordless tablet top, the address in the
+  browser's field and the code in the landing header's box (design:
+  `class-and-wall.md`, "Getting in").
 - **Start reads "Start quiz ▶"** on every screen that steers. The mode is
   named where there is a choice: on the second device's question.
 - **Points for speed**, a switch under Start on the join screen, off by default; on, it says "A right answer 10, up to 5 more the

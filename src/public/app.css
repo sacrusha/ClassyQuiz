@@ -298,6 +298,23 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .crowdcol { display: flex; flex-direction: column; gap: 1vh; min-height: 0; }
 .crowdcol .avatars { gap: 1.2vh; overflow: hidden; }
 .crowdcol .avatars > * { width: var(--av); height: var(--av); }
+/* Where the code goes (client/screen.ts, howTo): the top of a tablet,
+   drawn to look like the landing page's header, its code box ringed. Sized
+   by its own width, which the window's height caps so it fits above Start. */
+.howto { flex: none; width: 100%; max-width: min(26em, 60vh); margin-top: 2vh; container-type: inline-size; }
+.howto .scr { font-size: 1em; font-size: 4.2cqi; background: var(--card); border: .45em solid #2b2b29; border-bottom: 0; border-radius: .9em .9em 0 0; padding: .5em .7em .2em; }
+.howto .url { background: var(--bg); border: 1px solid var(--rule); border-radius: 1em; padding: .15em .8em; color: var(--muted); font-size: .85em; text-align: center; white-space: nowrap; overflow: hidden; }
+.howto .hdr { display: flex; align-items: center; gap: .4em; margin-top: .6em; padding-bottom: .5em; border-bottom: 1px solid var(--rule); }
+.howto .logo { flex: 1; font-weight: 800; }
+.howto .box { font: 700 1.1em ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .15em; padding: .1em .5em; border: .15em solid var(--accent); border-radius: .4em; animation: beckon 1.6s ease-in-out infinite; }
+.howto .go { background: var(--accent); color: var(--accent-ink); border-radius: .4em; padding: .2em .55em; }
+.howto .page i { display: block; height: .55em; margin-top: .55em; border-radius: .3em; background: var(--rule); width: 80%; }
+.howto .page i:nth-child(2) { width: 55%; }
+.howto .page i:nth-child(3) { width: 68%; }
+@keyframes beckon {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 .45em color-mix(in srgb, var(--accent) 0%, transparent); }
+}
 /* Nobody in after a while (client/screen.ts, nobodyYet): one muted line under the avatars. */
 .nobody { margin: 0; color: var(--muted); font-size: max(15px, 2.2vh); max-width: 40em; }
 .nobody a { color: inherit; }
