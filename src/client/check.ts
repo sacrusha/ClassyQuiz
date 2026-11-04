@@ -1,6 +1,6 @@
 // Does this network let the quiz through? Run on the school laptop and one
-// tablet before relying on the site (backlog constraint "survives school
-// Wi-Fi"). Tests what the quiz uses: the site's API over HTTP, and a live
+// tablet before relying on the site (docs/design/root-page.md, "Network
+// help, where failure shows"). Tests what the quiz uses: the site's API over HTTP, and a live
 // WebSocket. Without WebSockets the quiz still runs, over HTTP.
 
 import { $, esc } from "./dom.ts";
@@ -68,7 +68,6 @@ function ws(): Promise<boolean> {
   });
 }
 
-/** What a teacher can forward to IT, with this site's address in it. */
 function forIt(now: string): string {
   const host = location.host;
   const text = `Please allow ${host} on the school network. It is a site for classroom quizzes: students answer on their own devices. It needs HTTPS and WebSocket connections to ${host}. ${now}`;

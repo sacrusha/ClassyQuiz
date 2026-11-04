@@ -1,4 +1,4 @@
-// The quiz among several text files in an archive (review C).
+// The quiz among several text files in an archive (docs/design/quiz-format.md, "Which text file in the zip").
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

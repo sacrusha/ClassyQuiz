@@ -15,7 +15,7 @@ export interface Answer {
   /** Picking this answer counts as right. Any number of a question's answers may count, at least one. */
   correct: boolean;
   /**
-   * A picture as the answer ("+ Image: b.png", v3 item 1): a file name as
+   * A picture as the answer ("+ Image: b.png"): a file name as
    * written, matched by `imageKey`. Absent for a text answer; "" for a
    * picture answer whose file was left out (it shows its colour and shape alone).
    */
@@ -110,9 +110,6 @@ const MAX_ANSWERS = 4;
 const LONG_ANSWER = 80;
 const LONG_QUESTION = 300;
 
-// ---------------------------------------------------------------------------
-// Normalising and line classification
-
 // Removed everywhere: zero-width space, word joiner, BOM. ZWNJ/ZWJ
 // (U+200C/U+200D) are kept: they carry meaning in Persian, Indic scripts and
 // emoji.
@@ -149,7 +146,6 @@ function classify(raw: string): Classified {
   let m = s.match(/^(?:[-*+]\s+)?\[([\sxX✓✔])\]\s+(.*)$/);
   if (m) return { kind: "answer", correct: /\S/.test(m[1]), text: m[2].trim(), indent };
 
-  // "+" (also fullwidth) marks the correct answer.
   m = s.match(/^[+＋]\s+(.*)$/);
   if (m) return { kind: "answer", correct: true, text: m[1].trim(), indent };
 
@@ -177,9 +173,6 @@ function classify(raw: string): Classified {
 
   return { kind: "text", text: stripWrappingEmphasis(unheaded), indent };
 }
-
-// ---------------------------------------------------------------------------
-// Pictures
 
 /** File types a picture can come as; whether the browser can read it is the upload's concern. */
 const PICTURE_FILE = /^(.*?\.(?:png|jpe?g|gif|webp|svg|bmp|avif|heic|heif))(?=$|[\s`"'”’>»),;:])/i;
@@ -230,9 +223,6 @@ function answerPicture(text: string): string | { problem: (label: string) => str
   return name;
 }
 
-// ---------------------------------------------------------------------------
-// Picking the quiz out of a pasted chat answer
-
 const FENCE = /^\s*(`{3,}|~{3,})/;
 
 function isQuizLike(lines: string[]): boolean {
@@ -271,21 +261,16 @@ function selectBody(all: string[]): string[] {
   return quizBlocks.length > 0 ? quizBlocks.flat() : all;
 }
 
-// ---------------------------------------------------------------------------
-// Parsing
-
 interface Block {
   textLines: string[];
   answers: Answer[];
   /** A "Note:" line came after the answers: an indented line after it doesn't continue the last answer. */
   noted: boolean;
-  /** The question number written in front of the text, when there was one. */
   number: number | null;
   /** Indentation of the last answer line, to recognise its continuation. */
   answerIndent: number;
   image: string;
   background: string;
-  /** An "Order:" line asked for the text's order. */
   keepOrder: boolean;
   /** Problems with the block's Image:/Background: lines, worded once the question's number is known. */
   pictureProblems: ((label: string) => string)[];
@@ -320,7 +305,7 @@ export function parseQuiz(input: string): ParseResult {
   let current: Block | null = null;
 
   // Blocks that have answers so far, kept as a count: recounting on every
-  // line made parsing quadratic in the number of questions.
+  // line would be quadratic in the number of questions.
   let answered = 0;
 
   const startBlock = (text: string) => {
@@ -358,14 +343,14 @@ export function parseQuiz(input: string): ParseResult {
             );
           } else warn(`A second title line was ignored: "${excerpt(c.value)}".`);
         } else if (c.key === "note") {
-          // The quiz carries no messages from the AI to the teacher (backlog
-          // item 1); one an AI still writes is dropped, not a failed paste.
+          // The quiz carries no messages from the AI to the teacher
+          // (docs/design/quiz-format.md, "The quiz carries no notes"); one an
+          // AI still writes is dropped, not a failed paste.
           if (block !== null) block.noted = true;
         } else if (c.key === "tempo" || c.key === "time") {
-          // The pace is the teacher's, steered in the room (backlog v4 item
-          // 6); the format no longer has "Tempo:" or "Time:". A quiz an AI
-          // wrote from an older guidance still carries them: dropped, like a
-          // note, rather than read as question text.
+          // "Tempo:" and "Time:" are not format lines (the pace is the
+          // teacher's), but an AI may still write them: dropped like a note
+          // rather than read as question text.
           if (block !== null && block.answers.length > 0) block.noted = true;
         } else if (c.key === "order") {
           // "Order: fixed" keeps the answers as written; the site shuffles
@@ -379,7 +364,6 @@ export function parseQuiz(input: string): ParseResult {
             if (block.answers.length > 0) block.noted = true;
           }
         } else {
-          // Image: (the question's picture) or Background: (behind it).
           const kind = c.key;
           const line = excerpt(raw.trim());
           const name = pictureName(c.value);
@@ -523,7 +507,7 @@ export function parseQuiz(input: string): ParseResult {
     if (q.answers.length > MAX_ANSWERS) err(`${label} has ${q.answers.length} answers; a question has at most ${MAX_ANSWERS}.`);
     if (!q.answers.some((a) => a.correct))
       err(`${label} has no answer marked correct. The correct answer's line starts with "+", the others with "-".`);
-    // Pictures as answers (v3 item 1): "+ Image: b.png". Read here, after
+    // Pictures as answers: "+ Image: b.png". Read here, after
     // the answer letters are gone, so "A) Image: b.png" is a picture too.
     for (const a of q.answers) {
       const pic = answerPicture(a.text);

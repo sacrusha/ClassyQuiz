@@ -1,4 +1,4 @@
-// Pictures as answers (v3 item 1): how a question's answer tiles are
+// Pictures as answers: how a question's answer tiles are
 // arranged, on the wall and on a student's device. Square pictures go two
 // by two, wide strips (number lines) one under the other, tall ones side by
 // side: whichever arrangement shows the smallest of the pictures largest.

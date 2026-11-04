@@ -1,8 +1,6 @@
-// The pictures of the game: avatars and answer marks. Drawn as SVG here, not
-// emoji, so a child's fox looks the same on an Android tablet as on the
-// school laptop's projector (docs/design/class-and-wall.md, "Dressing the avatar"). An avatar is an
-// animal on a colour, assigned, and the look its child gave it in the lobby:
-// a background shape and a hat (docs/design/class-and-wall.md).
+// Avatars and answer marks, drawn as SVG, not emoji, so a child's fox looks the
+// same on an Android tablet as on the school laptop's projector
+// (docs/design/class-and-wall.md, "Dressing the avatar").
 
 import type { Avatar } from "../shared/protocol.ts";
 import { BACKGROUND_COUNT, HAT_COUNT } from "../shared/looks.ts";
@@ -44,7 +42,7 @@ const ANIMALS: (() => string)[] = [
   () =>
     `<path d="M24 34 L28 16 L40 30Z M76 34 L72 16 L60 30Z" fill="#8c6b4f"/><ellipse cx="50" cy="56" rx="28" ry="29" fill="#8c6b4f"/><ellipse cx="50" cy="64" rx="17" ry="18" fill="#d9bf9c"/>` +
     `<circle cx="38" cy="48" r="11" fill="#fff"/><circle cx="62" cy="48" r="11" fill="#fff"/>${EYE(38, 48, 6)}${EYE(62, 48, 6)}<path d="M45 57 L55 57 L50 66Z" fill="#f29a1d"/>`,
-  // frog: the eyes at the sides and the head a dome, so a hat sits on top as on the others (owner)
+  // frog: the eyes at the sides and the head a dome, so a hat sits on top as on the others
   () =>
     `<ellipse cx="50" cy="59" rx="32" ry="26" fill="#4caf50"/>` +
     `<path d="M33 66 Q50 79 67 66" stroke="#1b1b1f" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="30" cy="63" r="3.5" fill="#f2a7b5" opacity=".7"/><circle cx="70" cy="63" r="3.5" fill="#f2a7b5" opacity=".7"/>` +
@@ -58,8 +56,7 @@ const ANIMALS: (() => string)[] = [
   () =>
     `<circle cx="26" cy="32" r="15" fill="#a7a9ad"/><circle cx="74" cy="32" r="15" fill="#a7a9ad"/><circle cx="26" cy="32" r="9" fill="#f2a7b5"/><circle cx="74" cy="32" r="9" fill="#f2a7b5"/>` +
     `<ellipse cx="50" cy="58" rx="24" ry="25" fill="#a7a9ad"/>${EYES(54, 9)}<circle cx="50" cy="66" r="3.6" fill="#e8798e"/>${WHISKERS(66)}`,
-  // lion: the mane within 33 of the centre (it was 40, past every other head), so a
-  // shape reads behind it as behind the others (the owner: a lion on a star)
+  // lion: the mane stays within 33 of the centre, so a background shape reads behind it as behind the other heads
   () =>
     `<circle cx="50" cy="54" r="29" fill="#b5651d"/><g fill="#9a5418">${[0, 45, 90, 135, 180, 225, 270, 315].map((d) => `<circle cx="${50 + 25 * Math.cos((d * Math.PI) / 180)}" cy="${54 + 25 * Math.sin((d * Math.PI) / 180)}" r="7.5"/>`).join("")}</g>` +
     `<circle cx="50" cy="55" r="24" fill="#e3a63a"/><ellipse cx="50" cy="64" rx="10" ry="7" fill="#f3d08b"/>${EYES(51, 9)}<path d="M45 60 H55 L50 65Z" fill="#5a3311"/>${SMILE(68, 4)}`,
@@ -73,9 +70,6 @@ const ANIMALS: (() => string)[] = [
     `<ellipse cx="50" cy="56" rx="28" ry="30" fill="#23262e"/><path d="M50 40 Q30 40 30 60 Q32 80 50 82 Q68 80 70 60 Q70 40 50 40Z" fill="#fafafa"/>` +
     `${EYES(54, 9)}<path d="M44 61 L56 61 L50 69Z" fill="#f29a1d"/><circle cx="36" cy="64" r="3.4" fill="#f2a7b5" opacity=".8"/><circle cx="64" cy="64" r="3.4" fill="#f2a7b5" opacity=".8"/>`,
 ];
-
-// ---------------------------------------------------------------------------
-// The look (backlog v2 item 5): backgrounds in the child's colour, and hats.
 
 const star = (cx: number, cy: number, outer: number, inner: number) =>
   Array.from({ length: 10 }, (_, i) => {
@@ -181,7 +175,7 @@ const HATS: { name: string; svg: string; height: number; box: string }[] = [
 /**
  * Where a hat sits on each animal (order of ANIMAL_NAMES): the brim's centre
  * x and y, its width, and how much hats grow beyond it. A hat never reaches
- * past the top of the picture. Smaller on the penguin (owner).
+ * past the top of the picture. Smaller on the penguin.
  */
 const SEATS: [number, number, number, number][] = [
   [50, 35, 30, 1.3], // cat
@@ -300,7 +294,7 @@ export const JUMP = 0.5;
  * three tenths of the stage; in two or three rows on a narrow one, where
  * one row would leave them tiny. More than ten get smaller, down to two
  * thirds of ten's size, then overlap in their rows: twenty blur together,
- * which the owner accepts (backlog v4 item 9). The band is as high as ten's,
+ * and that is accepted. The band is as high as ten's,
  * so it covers the same whatever the count.
  */
 export function partySize(n: number, w: number, h: number, room = Infinity): PartyLayout {
@@ -336,8 +330,7 @@ export function partySize(n: number, w: number, h: number, room = Infinity): Par
 /** For the test that the drawings match shared/looks.ts. */
 export const LOOK_DRAWINGS = { backgrounds: BACKGROUNDS.length, hats: HATS.length, seats: SEATS.length, animals: ANIMALS.length };
 
-// ---------------------------------------------------------------------------
-// Answers: colour plus shape, so colour-blind students can tell them apart.
+// Answer marks: colour plus shape, so colour-blind students can tell them apart.
 // The colours are in app.css (.a0 to .a3).
 
 const SHAPES = [

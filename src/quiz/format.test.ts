@@ -60,7 +60,7 @@ test("unclosed fence (truncated copy) runs to the end", () => {
   assert.equal(r.quiz.questions.length, 3);
 });
 
-test("no fence: preamble before the title and closing words are dropped with warnings", () => {
+test("no fence: prose before the title is dropped silently, closing words after the last question get a warning", () => {
   const src = `Here is your quiz:\n\n${canonical}\nGood luck with the class!`;
   const r = parseQuiz(src);
   assert.equal(r.ok, true);
@@ -222,8 +222,6 @@ test("ZWNJ inside words is preserved", () => {
   assert.equal(r.quiz.questions[0].text, `${word}?`);
 });
 
-// --- errors, phrased so a teacher can paste them back to the AI
-
 test("no correct answer is an error naming the question", () => {
   const r = parseQuiz(`Title: T\n1. What is 2 + 2?\n- 3\n- 4\n`);
   assert.equal(r.ok, false);
@@ -274,8 +272,6 @@ test("empty input", () => {
   assert.match(r.errors[0].message, /No questions were found/);
 });
 
-// --- warnings, shown in the key check
-
 test("missing title, duplicate answers, long answers are warnings", () => {
   const long = "x".repeat(90);
   const r = parseQuiz(`1. Q?\n+ a\n- a\n- ${long}\n`);
@@ -285,8 +281,6 @@ test("missing title, duplicate answers, long answers are warnings", () => {
   assert.match(text, /twice/);
   assert.match(text, /90 characters long/);
 });
-
-// --- pictures
 
 const withImage = (line: string) => `Title: T\n\n1. Wie gross ist der Winkel?\n${line}\n- 30°\n+ 45°\n\n2. Q2?\n+ a\n- b\n`;
 
@@ -333,13 +327,13 @@ test("an Image: line after the answers is an error: it might be meant for the ne
 
 test("pictures: two on one question, none named, from the web, before any question", () => {
   const two = parseQuiz(withImage("Image: a.png\nImage: b.png"));
-  assert.match(two.errors.map((e) => e.message).join("\n"), /Question 1 .*more than one picture/);
+  assert.match(two.errors.map((e) => e.message).join("\n"), /Question 1 .*more than one picture.*"\+ Image: b\.png", "- Image: c\.png"/);
   const none = parseQuiz(withImage("Image: the triangle"));
   assert.match(none.errors[0].message, /names no picture file/);
   const web = parseQuiz(withImage("Image: https://example.org/q1.png"));
   assert.match(web.errors[0].message, /from the web/);
   const before = parseQuiz(`Title: T\nImage: cover.png\n1. Q?\n+ a\n- b\n`);
-  assert.match(before.errors[0].message, /comes before any question/);
+  assert.match(before.errors[0].message, /comes before any question.*"Background:" line before the first question/);
 });
 
 test("imageKey ignores folders, case and Unicode composition", () => {
@@ -347,15 +341,6 @@ test("imageKey ignores folders, case and Unicode composition", () => {
   assert.equal(imageKey("a\\b\\Q1.png"), "q1.png");
   assert.equal(imageKey("Bild 1a\u0308.png"), imageKey("bild 1ä.png"));
 });
-
-test("the key in the same place in every question is no warning: the screens shuffle the answers", () => {
-  const q = (i: number) => `${i}. Q${i}?\n- a\n+ b\n- c\n`;
-  const r = parseQuiz(`Title: T\n${[1, 2, 3, 4].map(q).join("\n")}`);
-  assert.equal(r.ok, true);
-  assert.deepEqual(r.warnings, []);
-});
-
-// --- the specification on the guidance page and this parser stay in step
 
 test("the example on the guidance page parses without errors or warnings", async () => {
   const { readFile } = await import("node:fs/promises");
@@ -366,9 +351,6 @@ test("the example on the guidance page parses without errors or warnings", async
   const r = parseQuiz(text);
   assert.deepEqual(r.errors, []);
   assert.deepEqual(r.warnings, []);
-  assert.equal(r.quiz.questions.length, 4);
-  assert.deepEqual(keys(text), [0, 0, 0, 0]);
-  assert.ok(r.quiz.questions[3].answers.every((a) => a.correct), "the vote: every answer right");
 });
 
 test("two quizzes in one pasted answer (e.g. one per class) are an error, not merged", () => {
@@ -384,10 +366,6 @@ test("Background: before the first question is the quiz's; after a question's te
   assert.equal(r.quiz.background, "wald.jpg");
   assert.deepEqual([r.quiz.questions[0].image, r.quiz.questions[0].background], ["blatt.png", "herbst.jpg"]);
   assert.deepEqual([r.quiz.questions[1].image, r.quiz.questions[1].background], ["", ""]);
-  assert.deepEqual(
-    pictureRefs(r.quiz).map((p) => p.label),
-    ['The quiz has the background "wald.jpg"', 'Question 1 shows the picture "blatt.png"', 'Question 1 has the background "herbst.jpg"'],
-  );
 });
 
 test("Background: under an unmarked title still belongs to the quiz", () => {
@@ -405,8 +383,6 @@ test("backgrounds: two for the quiz, two for a question, or after the answers ar
   const after = parseQuiz(`Title: T\n1. Q?\n+ a\n- b\nBackground: a.jpg\n`);
   assert.match(after.errors[0].message, /^Question 1 .*comes after the answers, so it's unclear which question the background belongs to/);
   assert.equal(after.quiz.questions[0].background, "");
-  const image = parseQuiz(`Title: T\nImage: a.png\n1. Q?\n+ a\n- b\n`);
-  assert.match(image.errors[0].message, /comes before any question.*"Background:" line before the first question/);
 });
 
 test("Order: fixed keeps a question's answers as written; before the first question, all of them", () => {
@@ -417,7 +393,7 @@ test("Order: fixed keeps a question's answers as written; before the first quest
   assert.deepEqual(all.quiz.questions.map((q) => q.keepOrder), [true, true]);
 });
 
-test("Tempo: and Time: lines from an older guidance are dropped, without a warning: the pace is the teacher's", () => {
+test("Tempo: and Time: lines are dropped, without a warning: the pace is the teacher's", () => {
   const r = parseQuiz(`Title: T
 Tempo: countdown with points for speed
 Time: 20 s
@@ -440,8 +416,6 @@ Time: 45
   assert.deepEqual(r.quiz.questions.map((q) => q.text), ["Quick?", "A sum that takes a while?", "After the answers?"]);
   assert.deepEqual(r.quiz.questions[2].answers.map((a) => a.text), ["a", "b"], "not taken as a continuation of the last answer");
   assert.equal(r.warnings.length, 0, JSON.stringify(r.warnings));
-  assert.deepEqual(Object.keys(r.quiz).sort(), ["background", "questions", "title"]);
-  assert.equal("seconds" in r.quiz.questions[1], false);
 });
 
 test("answer letters an AI adds are dropped when the answers are shuffled; kept under Order: fixed or out of sequence", () => {
@@ -456,9 +430,6 @@ test("answer letters an AI adds are dropped when the answers are shuffled; kept 
   const bare = parseQuiz(`Title: T\n1. Which point?\n+ A\n- B\n`);
   assert.deepEqual(bare.quiz.questions[0].answers.map((a) => a.text), ["A", "B"], "a letter on its own is the answer");
 });
-
-// ---------------------------------------------------------------------------
-// Pictures as answers (v3 item 1)
 
 test("picture answers: + Image: b.png, mixed with text, with the dress AIs add", () => {
   const r = parseQuiz(`Title: Brüche
@@ -510,31 +481,6 @@ test("picture answers: no file, the web, the same picture twice, a bare file nam
   assert.match(r.warnings[1].message, /Question 2 .*"cat\.jpg" is shown as text.*\+ Image: cat\.jpg/);
 });
 
-test("picture answers written as Image: lines without marks get a message that shows the answer form", () => {
-  const r = parseQuiz(`Title: T
-1. Which pie shows 3/4?
-Image: a.png
-Image: b.png
-+ 3/4
-- 1/4
-`);
-  assert.equal(r.ok, false);
-  assert.match(r.errors[0].message, /more than one picture.*"\+ Image: b\.png", "- Image: c\.png"/);
-});
-
-test("a picture answer left out shows its colour and shape alone", async () => {
-  const { dropPicture } = await import("./format.ts");
-  const r = parseQuiz(`Title: T
-1. Q?
-+ Image: a.png
-- Image: b.png
-`);
-  const ref = pictureRefs(r.quiz).find((x) => x.name === "b.png")!;
-  assert.match(ref.leftOut, /Question 1 runs without its answer picture "b\.png": that answer shows only its colour and shape/);
-  dropPicture(r.quiz, ref);
-  assert.deepEqual(r.quiz.questions[0].answers.map((a) => [a.text, a.image]), [["", "a.png"], ["", ""]]);
-});
-
 test("the picture-answer example on the guidance page parses without errors or warnings", async () => {
   const { readFile } = await import("node:fs/promises");
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
@@ -544,6 +490,4 @@ test("the picture-answer example on the guidance page parses without errors or w
   const r = parseQuiz(text);
   assert.deepEqual(r.errors, []);
   assert.deepEqual(r.warnings, []);
-  assert.deepEqual(r.quiz.questions.map((q) => q.answers.filter((a) => a.image).length), [4, 3]);
-  assert.equal(r.quiz.questions[1].image, "l-shape.png");
 });

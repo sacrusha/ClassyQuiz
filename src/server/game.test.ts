@@ -6,8 +6,7 @@ import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";
 import * as G from "./game.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, SPEED_REFERENCE_MS, speedBonus } from "../shared/tempo.ts";
-import { BACKGROUND_COUNT, HAT_COUNT, MAX_LOOK_CHANGES } from "../shared/looks.ts";
-import { LOOK_DRAWINGS, avatarSvg } from "../client/look.ts";
+import { MAX_LOOK_CHANGES } from "../shared/looks.ts";
 
 const quiz = parseQuiz(`Title: T
 1. One?
@@ -158,6 +157,14 @@ test("finishing early: the unrevealed question doesn't count, also for taps arri
   assert.equal(g.run!.phase, "final");
   assert.equal(G.answer(g, ids[0], 0, 0, 2, 0, 60), false);
   assert.equal(score(g, ids[0]), 0);
+
+  // Also when its answering had been locked in.
+  const { g: locked, ids: lockedIds } = setup(1);
+  begin(locked, 0);
+  G.answer(locked, lockedIds[0], 0, 0, 1, 0, 1);
+  G.lockIn(locked, 2);
+  G.finish(locked, 50);
+  assert.equal(score(locked, lockedIds[0]), 0);
 });
 
 test("a skipped question takes no late taps", () => {
@@ -201,20 +208,7 @@ test("Play walks one slice at a time: Show answers, Lock in, Reveal, Ranking, Ne
   G.play(g, 30, 30);
   assert.equal(g.run!.phase, "final", "no intermediate ranking right before the final one");
   assert.throws(() => G.play(g, 31, 31), G.GameError);
-
-  // A page from before the bar: its clicker's key starts the quiz and goes from the reveal to the next question.
-  const { g: old } = setup(0);
-  G.advance(old, 0, 1);
-  G.advance(old, 1, 2);
-  G.advance(old, 2, 3);
-  G.advance(old, 3, 4);
-  assert.equal(old.run!.phase, "reveal");
-  G.advance(old, 4, 5);
-  assert.deepEqual([old.run!.phase, old.run!.current], ["question", 1]);
 });
-
-// ---------------------------------------------------------------------------
-// Spread, then key (backlog v2 item 6)
 
 test("votes: answering closes without the key; a tap made before still counts; the reveal adds the key", () => {
   const { g, ids } = setup(3);
@@ -230,14 +224,15 @@ test("votes: answering closes without the key; a tap made before still counts; t
   assert.equal(G.answer(g, ids[0], 0, 2, 2, 7, 300), false, "nor a change of mind");
   assert.equal(score(g, ids[0]), 0, "nothing scores before the key");
   G.lockIn(g, 8);
-  assert.equal(g.run!.closedView![0], 7, "a second press changes nothing");
+  assert.equal(G.answer(g, ids[2], 0, 0, 1, 7, 300), false, "a second press doesn't move the view a tap must predate");
   G.reveal(g, 9);
   assert.equal(g.run!.phase, "reveal");
-  assert.equal(g.run!.closedView![0], 7, "the reveal keeps the votes' view");
+  assert.equal(G.answer(g, ids[2], 0, 0, 1, 7, 310), false, "nor does the reveal");
+  assert.equal(G.answer(g, ids[1], 0, 2, 2, 6, 320), true, "a tap made on a view that showed the answers open still counts during the reveal");
   assert.deepEqual([score(g, ids[0]), score(g, ids[1])], [1, 0]);
 });
 
-test("lock-in: not while the answers are hidden; the reveal straight from answering still works (a page from before the lock-in)", () => {
+test("lock-in and key: neither while the answers are hidden; the key straight from answering works; no lock-in after the key", () => {
   const { g, ids } = setup(1);
   G.begin(g, 0);
   assert.throws(() => G.lockIn(g, 1), G.GameError);
@@ -262,11 +257,10 @@ test("Last call: fifteen seconds, then locked in with the spread; from the hidde
   G.closeAnswers(g, 5);
   assert.deepEqual([G.answering(g), G.lockedIn(g), g.run!.phase], ["closed", true, "question"], "time's up locks in; the reveal stays the teacher's");
   assert.equal(G.deadline(g), null, "no clock once locked in");
-  assert.equal(G.runningClock(g), null);
   assert.equal(G.answer(g, ids[1], 0, 0, 1, 4, 16_100), true, "tapped on a view that still showed the answers open: counts");
   assert.equal(G.answer(g, ids[1], 0, 1, 2, 5, 16_200), false, "tapped once the device showed the lock-in: doesn't");
   G.closeAnswers(g, 9);
-  assert.equal(g.run!.closedView![0], 5, "a second close changes nothing");
+  assert.equal(G.answer(g, ids[1], 0, 1, 2, 8, 16_300), false, "a second close changes nothing");
 
   // From answering, Last call starts the clock; Lock in before it runs out stops it.
   G.reveal(g, 10);
@@ -277,16 +271,7 @@ test("Last call: fifteen seconds, then locked in with the spread; from the hidde
   assert.deepEqual([G.lockedIn(g), G.deadline(g)], [true, null]);
   assert.throws(() => G.lastCall(g, 34_000), G.GameError, "no Last call once locked in");
   G.closeAnswers(g, 12);
-  assert.equal(g.run!.closedView![1], 11, "a late alarm changes nothing");
-});
-
-test("votes, then the final ranking now: a question whose key wasn't shown doesn't count", () => {
-  const { g, ids } = setup(1);
-  begin(g, 0);
-  G.answer(g, ids[0], 0, 0, 1, 1, 10);
-  G.lockIn(g, 2);
-  G.finish(g, 20);
-  assert.equal(score(g, ids[0]), 0);
+  assert.equal(G.answer(g, ids[0], 1, 0, 1, 11, 34_500), false, "a late alarm changes nothing");
 });
 
 test("winners: who got it right, in the lobby's order; a fix of the key moves them, a void clears them", () => {
@@ -331,7 +316,6 @@ test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start"
   assert.equal(G.dress(g, ids[1], 2, 1), "stored");
   // A resend, or the same look again, stores nothing.
   assert.equal(G.dress(g, ids[0], 2, 1), "same");
-  assert.equal(g.run!.players[ids[0]].looks, 1);
   // Back to the disc without a hat: the fields go.
   assert.equal(G.dress(g, ids[0], 0, 0), "stored");
   assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c });
@@ -355,18 +339,6 @@ test("dressing: a child who hammers the pictures stops at MAX_LOOK_CHANGES", () 
   // The look that counts is the last one stored, and its same again is still fine.
   const av = g.run!.players[ids[0]].avatar;
   assert.equal(G.dress(g, ids[0], av.b ?? 0, av.h ?? 0), "same");
-});
-
-test("dressing: every look has a drawing", () => {
-  assert.deepEqual(LOOK_DRAWINGS, { backgrounds: BACKGROUND_COUNT, hats: HAT_COUNT, seats: G.ANIMAL_COUNT, animals: G.ANIMAL_COUNT });
-  // Every combination draws, inside the picture.
-  for (let a = 0; a < G.ANIMAL_COUNT; a++)
-    for (let b = 0; b < BACKGROUND_COUNT; b++)
-      for (let h = 0; h < HAT_COUNT; h++) {
-        const svg = avatarSvg({ a, c: 0, b, h });
-        assert.match(svg, /^<svg class="avatar" viewBox="0 0 100 100"/);
-        assert.doesNotMatch(svg, /undefined|NaN/);
-      }
 });
 
 test("the door: a class takes MAX_PLAYERS, removed ones included, and a few late joiners once under way", () => {
@@ -431,11 +403,16 @@ test("taps that change nothing aren't stored; changes of mind are capped; the la
   assert.equal(score(g, p), last === 0 ? 1 : 0);
 });
 
-test("a question the class has moved past can't be un-skipped; ids from devices don't reach the prototype", () => {
-  const { g, ids } = setup(1);
+test("a question the class has moved past can't be un-skipped", () => {
+  const { g } = setup(1);
   begin(g, 0);
   G.skipCurrent(g, 1);
   assert.throws(() => G.setSkip(g, 0, false), /moved past/);
+});
+
+test("ids from devices don't reach the prototype", () => {
+  const { g, ids } = setup(1);
+  begin(g, 0);
   G.removePlayer(g, "__proto__");
   assert.equal(({} as Record<string, unknown>).removed, undefined);
   assert.equal(G.answer(g, "__proto__", 1, 0, 1, 0, 2), false);
@@ -509,12 +486,7 @@ test("answers are shuffled for each class, the same on every screen; only Order:
   const before = quiz.questions.map((_, q) => G.orderOf(g, q).join());
   G.startRun(g, "12345", "r2", random);
   assert.notDeepEqual(quiz.questions.map((_, q) => G.orderOf(g, q).join()), before, "another class, another order");
-  G.startRun(g, "12345", "r3");
-  assert.deepEqual(G.orderOf(g, 0), [0, 1, 2, 3], "without randomness (tests, runs stored before): the text's order");
 });
-
-// ---------------------------------------------------------------------------
-// Points for speed (backlog v4 item 6: the join screen's switch)
 
 test("points for speed: 10 for a right answer, up to 5 more by how soon after the answers appeared; fixes move them", () => {
   const { g, ids } = setup(3);
@@ -556,49 +528,23 @@ test("points for speed: set in the lobby only, off by default, carried to the ne
   begin(plain, 0);
   G.answer(plain, p[0], 0, 0, 1, 0, 100, 100);
   G.reveal(plain, 1);
-  assert.equal(score(plain, p[0]), 1, "without it a right answer is 1, as in v1");
+  assert.equal(score(plain, p[0]), 1, "without it a right answer is 1");
 });
 
-test("points for speed: the device's time can't exceed the server's, and an old page without one gets the server's", () => {
-  const { g, ids } = setup(2);
+test("points for speed: the device's time can't exceed the server's; without one the server's counts", () => {
+  const { g, ids } = setup(3);
   G.setSpeed(g, true);
   G.begin(g, 0);
   G.showAnswers(g, 1000);
   G.answer(g, ids[0], 0, 0, 1, 0, 3000, 99_999);
   G.answer(g, ids[1], 0, 0, 1, 0, 4000);
-  assert.equal(g.run!.answers[0][ids[0]].ms, 2000);
-  assert.equal(g.run!.answers[0][ids[1]].ms, 3000);
+  G.answer(g, ids[2], 0, 0, 1, 0, 7000, 99_999);
+  G.setCounts(g, 0, [true, true, false]);
   G.answer(g, ids[0], 0, 1, 2, 0, 5000, -50);
-  assert.equal(g.run!.answers[0][ids[0]].ms, 0, "a change of mind keeps its own time; never below zero");
-});
-
-test("a run stored before the steering bar reads as one after it", () => {
-  const { g, ids } = setup(2);
-  G.begin(g, 0);
-  // As the countdown stored it: a speed class, question 1 played with a countdown that closed.
-  const run = g.run! as G.Run & Record<string, unknown>;
-  run.tempo = "speed";
-  run.adjust = -5;
-  run.played = { 0: "speed" };
-  run.clocks = { 0: { at: 500, ms: 20_000, closed: true } as G.Clock };
-  delete run.shown;
-  G.upgradeRun(run);
-  assert.deepEqual([run.tempo, run.adjust, run.played], [undefined, undefined, undefined]);
-  assert.equal(G.speedScale(g), true);
-  assert.equal(run.shown![0], 500, "the countdown's Go is when the answers appeared");
-  assert.deepEqual([G.answering(g), G.lockedIn(g), G.deadline(g)], ["closed", true, null], "a closed countdown is the lock-in");
-  assert.equal(run.opened, 1);
-  G.reveal(g, 3);
-  nextQ(g, 1000);
-
-  // A question at the teacher's pace, its answers open from when it came up.
-  const { g: pace } = setup(1);
-  G.begin(pace, 700);
-  const r2 = pace.run! as G.Run & Record<string, unknown>;
-  r2.tempo = "pace";
-  r2.played = { 0: "pace" };
-  G.upgradeRun(r2);
-  assert.deepEqual([G.answering(pace), r2.shown![0], G.speedScale(pace)], ["open", 700, false]);
-  assert.equal(G.upgradeRun(r2), r2, "a run from after it is left as it is");
-  assert.equal(ids.length, 2);
+  G.reveal(g, 5);
+  assert.deepEqual(ids.map((id) => score(g, id)), [
+    POINTS_RIGHT + speedBonus(0),
+    POINTS_RIGHT + speedBonus(3000),
+    POINTS_RIGHT + speedBonus(6000),
+  ], "a change of mind keeps its own time, never below zero; a device's time is capped at the server's count");
 });

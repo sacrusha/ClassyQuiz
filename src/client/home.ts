@@ -1,14 +1,7 @@
-// The root page's top (docs/design/root-page.md): the code box for
-// students and the language in the header; the strip, which until the video
-// exists links the example's questions (/example); Build a quiz in two steps
-// with the labelled example ask and the open one (nothing decided yet); Run a quiz: the resume card for the latest
-// open quiz this device started, the box for the .zip, and, under a
-// condition, the own-copy line. The guidance for AIs below reads without this
-// script, in English; this script puts the block above it in the visitor's
-// language (client/landing-text.ts).
-//
-// Run a quiz takes a .zip and nothing else (backlog item 2): a box to type
-// in read as a place to talk to an AI, and pasting text distracted.
+// The root page's top (docs/design/root-page.md): code box, language, example
+// ask, Run a quiz. The guidance for AIs below reads without this script, in
+// English; this script puts the block above it in the visitor's language
+// (client/landing-text.ts).
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
@@ -32,7 +25,7 @@ const DEMO = "classyquiz.pages.dev";
 let lang: Lang = chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
 let t: Text = TEXT[lang];
 
-// --- the code box: the students' class code, and the teacher code, the
+// The code box: the students' class code, and the teacher code, the
 // class code and two digits (docs/design/teacher-devices.md, "One entry: the teacher code"). It routes by length
 // and never submits by itself, so typing seven isn't cut off at five.
 
@@ -52,7 +45,7 @@ codeInput.addEventListener("input", () => {
   if (code !== codeInput.value) codeInput.value = code;
 });
 
-// --- the language switch, top right (docs/design/root-page.md, "Languages"): "EN ▾" over a
+// The language switch, top right (docs/design/root-page.md, "Languages"): "EN ▾" over a
 // native select, which lists the four by their own names. Made here, not in
 // the HTML, so an AI's fetcher doesn't read four language names.
 
@@ -70,7 +63,7 @@ select.addEventListener("change", () => {
   apply(next);
 });
 
-// --- Build a quiz: copy the address. The button is made here, not in the
+// Build a quiz: copy the address. The button is made here, not in the
 // HTML: an AI's fetcher converting the page to text would otherwise read the
 // address as "classyquiz.pages.devCopy".
 
@@ -134,8 +127,6 @@ function apply(l: Lang): void {
   renderOwnCopy();
 }
 
-// --- Run a quiz
-
 const runbox = $("#runbox");
 const out = $("#out");
 const file = $("#file") as HTMLInputElement;
@@ -147,7 +138,6 @@ function countAttempt(format: UploadFormat): void {
 }
 
 const problem = (err: string, more = "") => `<div class="problem"><p class="err">${esc(err)}</p>${more}</div>`;
-/** What the box takes, said when something else arrives. */
 const zipOnly = () => `<p>${esc(t.zipOnly)}</p>`;
 /** Where failure shows, the help (docs/design/root-page.md, "Network help, where failure shows"): the network may be the cause; what to tell IT is on /check. */
 const networkHelp = () => problem(t.offline, `<p><a href="/check#it">${esc(t.whatToTellIt)}</a></p>`);
@@ -171,9 +161,8 @@ runbox.addEventListener("drop", (e) => {
   else if ((e.dataTransfer?.getData("text/plain") ?? "").trim()) notText();
 });
 
-// Nothing on the page invites pasting (item 2: pasting distracted). A file
-// copied in the file manager and pasted still opens; pasted text is told
-// where the quiz goes, and counted, so whether people still try is a fact.
+// Nothing invites pasting. A file pasted from the file manager still opens;
+// pasted text is told the site takes a .zip, and counted.
 document.addEventListener("paste", (e) => {
   if (e.target === codeInput) return;
   const files = [...(e.clipboardData?.files ?? [])];
@@ -209,7 +198,7 @@ async function fromFiles(files: File[]): Promise<void> {
 }
 
 /** leaveOut: the teacher chose to run the quiz without the pictures that can't go up. */
-async function submit(value: string, archive: ZipEntry[] | null, leaveOut = false): Promise<void> {
+async function submit(value: string, archive: ZipEntry[], leaveOut = false): Promise<void> {
   if (sending) return;
   if (new Blob([value]).size > MAX_QUIZ_BYTES) {
     out.innerHTML = problem(t.tooLong(Math.round(MAX_QUIZ_BYTES / 1000)));
@@ -275,12 +264,8 @@ function showProblems(errors: Problem[], pictures: boolean, without: () => void)
   if (pictures) $("#without").addEventListener("click", without);
 }
 
-// --- coming back (backlog v4 item 2). Who resumes: the device that started
-// the quiz, during that lesson. What it needs: the way back, and certainty
-// it's the right quiz. So: the latest quiz this device started, while it
-// hasn't reached its final ranking; its title, where it stands, its code,
-// and the way back from another device, the teacher code in the code box.
-// Not shown: when it closes, delete, older quizzes.
+// Coming back (docs/design/root-page.md, "Coming back: the resume card"): the
+// latest quiz this device started, while it hasn't reached its final ranking.
 
 /** Uploads asked about per visit at most, when the newer ones are gone; each is a request against the site's daily allowance. */
 const ASK_AT_MOST = 3;
@@ -323,10 +308,8 @@ function renderResume(): void {
   </div>`;
 }
 
-// --- the own copy (backlog v4 item 4, the product owner's defaults): one
-// line under Run, only on a device that has uploaded before, and only once
-// the site has been full on a day of the last 30, stating that fact. The
-// site's state is one request per visit, and only from such a device.
+// The own copy (docs/design/root-page.md, "The own copy"). The site's state is
+// asked once per visit, and only from a device that has uploaded.
 
 let fullDays = 0;
 

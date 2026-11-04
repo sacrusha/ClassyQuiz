@@ -53,11 +53,6 @@ export function listZip(buf: ArrayBuffer): ZipEntry[] {
   return entries;
 }
 
-/** The quiz text in an archive: its one .md/.txt file (ignoring system clutter). */
-export async function quizTextFromZip(buf: ArrayBuffer): Promise<string> {
-  return quizTextFromEntries(listZip(buf));
-}
-
 /**
  * The quiz text among an archive's entries (ignoring system clutter). With
  * several .md/.txt files (a README, the AI's notes beside the quiz), the

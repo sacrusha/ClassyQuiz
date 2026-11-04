@@ -30,7 +30,6 @@ new_sqlite_classes = ["Instance", "JoinCode", "Pairing"]
 tag = "v2"
 new_sqlite_classes = ["UploadStats"]
 
-# Pairing codes went with one code per quiz (docs/user-flow.md).
 [[migrations]]
 tag = "v3"
 deleted_classes = ["Pairing"]

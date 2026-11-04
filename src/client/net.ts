@@ -1,20 +1,11 @@
 // The device's line to its quiz instance (docs/design/connections.md, "Transport: WebSocket first, long-polling when the network breaks it").
 //
-// - WebSocket first. A ping every 20 s keeps proxies from dropping an idle
-//   socket; a missing pong means the line is dead and we reconnect.
-// - If WebSockets don't carry messages on this network (some school filters
-//   block the upgrade, others accept it and then drop the frames), long-
-//   polling over plain HTTP takes over for the rest of the page's life. Same
-//   messages, same views.
-// - Waking from sleep, coming back online, or the tab becoming visible
-//   reconnects at once instead of waiting out a backoff.
+// - A socket counts as working only once a message has arrived: some school
+//   filters block the upgrade, others accept it and then drop the frames.
+//   Then long-polling over plain HTTP takes over for the rest of the page's
+//   life. Same messages, same views.
 // - Commands are kept until the server acknowledges them and are resent after
 //   a reconnect; the server ignores repeats (shared/protocol.ts).
-// - A tab whose view hasn't changed for SLEEP_AFTER_MS goes to sleep: the
-//   line closes, the screen may turn off, and a tap wakes it. A tablet left
-//   on after the lesson doesn't keep its line, or its polling, all day.
-// - When the site's daily allowance is spent, the page says so and asks
-//   again once a minute (docs/design/connections.md, "The allowance spent").
 
 import type { Auth, ClientMessage, Command, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
@@ -100,7 +91,7 @@ export class Line {
     }, 60_000);
   }
 
-  /** Closes the line until a tap; the page underneath stays as it was. */
+  /** Closes the line until a tap; the page underneath stays as it was. A tablet left on after the lesson doesn't keep its line, or its polling, all day. */
   private sleep(): void {
     this.asleep = true;
     clearTimeout(this.retryTimer);
@@ -271,7 +262,6 @@ export class Line {
     this.setStatus("offline");
     if (!worked) this.wsFailures++;
     if (this.wsFailures >= 3) {
-      // WebSockets don't get through on this network; plain HTTP it is.
       this.mode = "poll";
       this.connect();
       return;

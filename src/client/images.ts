@@ -6,15 +6,7 @@
 // besides the picture (camera, time, GPS: "nothing identified"); it shrinks a
 // phone photo to what a projector shows (a class's devices load it over school
 // Wi-Fi); and it leaves the server only PNG and JPEG to take, so no SVG, with
-// the scripts it may hold, is ever served. A question's or an answer's
-// picture keeps its transparency as PNG. The screens show a question's
-// picture on white, so a transparent line drawing doesn't vanish on a dark
-// page; an answer's picture sits on its tile's colour, which shows through
-// wherever it is transparent (the creator's choice). Backgrounds are
-// flattened onto white, and so is a transparent picture too large as PNG.
-//
-// Kept apart from the upload page so whichever page takes the quiz can call
-// prepareImages() and uploadQuiz().
+// the scripts it may hold, is ever served.
 
 import { imageKey, parseQuiz, pictureRefs, type PictureRef, type Problem } from "../quiz/format.ts";
 import {
@@ -35,15 +27,15 @@ export interface PreparedImage {
   /** The name as the quiz writes it; the server matches it the same way. */
   name: string;
   blob: Blob;
-  /** An answer picture's small copy, for the students' devices (v3 item 1). */
+  /** An answer picture's small copy, for the students' devices. */
   small?: Blob;
 }
 
 export interface PreparedImages {
   images: PreparedImage[];
   /**
-   * Pictures the quiz names that can't go up: not in the archive, no
-   * archive at all, or not readable by this browser. Each is worded for the
+   * Pictures the quiz names that can't go up: not in the archive, or not
+   * readable by this browser. Each is worded for the
    * teacher to paste to the AI; the teacher may also run without them.
    */
   problems: Problem[];
@@ -70,11 +62,10 @@ function isClutter(name: string): boolean {
 }
 
 /**
- * The pictures the quiz text names (Image: and Background:), found in the archive (null: the quiz was
- * pasted) and redrawn. A quiz whose text has errors gets nothing here; the
+ * The pictures the quiz text names (Image: and Background:), found in the archive and redrawn. A quiz whose text has errors gets nothing here; the
  * server reports those.
  */
-export async function prepareImages(text: string, archive: ZipEntry[] | null, progress?: (done: number, of: number) => void): Promise<PreparedImages> {
+export async function prepareImages(text: string, archive: ZipEntry[], progress?: (done: number, of: number) => void): Promise<PreparedImages> {
   const parsed = parseQuiz(text);
   // The first mention of each file names it in messages; the server matches every mention by the same key.
   const wanted = new Map<string, PictureRef>();
@@ -93,7 +84,7 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
   if (wanted.size === 0) return { images, problems };
 
   const inArchive = new Map<string, ZipEntry[]>();
-  for (const e of archive ?? []) {
+  for (const e of archive) {
     if (isClutter(e.name)) continue;
     const key = imageKey(e.name);
     inArchive.set(key, [...(inArchive.get(key) ?? []), e]);
@@ -108,9 +99,7 @@ export async function prepareImages(text: string, archive: ZipEntry[] | null, pr
     // Only a background is flattened: a question's or an answer's picture keeps its transparency.
     const keepAlpha = used.has("image") || used.has("answer");
     const entries = inArchive.get(key) ?? [];
-    if (archive === null) {
-      problems.push({ message: `${label}. Pictures come as files in a .zip, together with the quiz text; a pasted quiz can't carry them.` });
-    } else if (entries.length === 0) {
+    if (entries.length === 0) {
       const has = archivePictures.length > 0 ? ` The pictures in the .zip are: ${archivePictures.join(", ")}.` : " The .zip holds no pictures.";
       problems.push({ message: `${label}, which isn't in the .zip.${has}` });
     } else if (entries.length > 1) {
@@ -153,9 +142,7 @@ async function redraw(blob: Blob, ext: string, longSide: number, keepAlpha: bool
     if (!g) throw new Error("no canvas");
     g.imageSmoothingQuality = "high";
     g.drawImage(img, 0, 0, canvas.width, canvas.height);
-    // A question's picture keeps its transparency (answers as pictures, v3,
-    // need it; the screens put every picture on white). A background, and a
-    // transparent picture too large as PNG, are flattened onto white for JPEG.
+    // A transparent picture too large as PNG is flattened onto white for JPEG.
     if (keepAlpha && hasTransparency(g, canvas.width, canvas.height)) {
       const png = await encode(canvas, "image/png");
       if (png.size <= maxBytes) return png;
@@ -214,11 +201,11 @@ async function sizedSvg(blob: Blob, longSide: number): Promise<Blob> {
 }
 
 /**
- * Sends the quiz. Without pictures it goes as JSON, as it always did; with
- * them as multipart/form-data. `leaveOut`: the teacher chose to run without
- * the pictures that couldn't go up.
+ * Sends the quiz: as JSON without pictures, as multipart/form-data with them.
+ * `leaveOut`: the teacher chose to run without the pictures that couldn't go
+ * up. `json: false`: the answer wasn't the site's (a school filter's page,
+ * say); `quota`: the daily allowance is spent.
  */
-/** `json: false`: the answer wasn't the site's (a school filter's page, say); `quota`: the daily allowance is spent. */
 export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut: boolean): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
   if (images.length === 0) {
     return (await api<UploadResult & { error?: string }>("/api/quiz", leaveOut ? { text, leaveOut: "missing" } : { text })).body;

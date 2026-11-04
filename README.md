@@ -2,7 +2,7 @@ Quizzes for classes. A website to run classroom quizzes, with AI integration to 
 
 To run, either use the demo setup at https://classyquiz.pages.dev, or ask an AI to set up your own server. 
 
-For creating quizzes, ask AI to "Help me create a Quiz for https://classyquiz.pages.dev, use the website's guidance. Exercises attached."
+For creating quizzes, ask AI to "Read https://classyquiz.pages.dev. Help me create a classyQuiz from the attached exercises."
 
 ## Your own instance
 

@@ -1,9 +1,6 @@
 // Local development: the state Worker and the site, as on Cloudflare, with
-// the client rebuilt on change. Open http://localhost:8788.
-//
-// The site's functions find the state Worker's Durable Objects through
-// wrangler's local dev registry, the way they find them by script name
-// when deployed.
+// the client rebuilt on change. Open http://localhost:8788. DEVELOPING.md,
+// "Running locally".
 
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";

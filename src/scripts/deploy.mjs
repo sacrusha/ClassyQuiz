@@ -1,6 +1,5 @@
-// Deploys the site to Cloudflare (Free plan is enough):
-//   1. the state Worker with the Durable Objects (server/wrangler.toml),
-//   2. the Pages project with the pages and /api functions (wrangler.toml).
+// Deploys the site to Cloudflare (the Free plan is enough): the state Worker,
+// then the Pages project.
 //
 // Run as `npm run deploy` in src/; it reads ../secrets/cloudflare.env
 // (see secrets/README.md). Touches only the Worker and Pages project named in
