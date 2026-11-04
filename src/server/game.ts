@@ -15,7 +15,7 @@
 // 15); after it, nothing changes what the question scored except the
 // teacher's fixes. What a tablet shows as its accepted answer is this
 // record, read from its view or from the acknowledgement that carries it
-// (decisions.md, "The steering bar").
+// (docs/design/question-flow.md, "When a tap counts").
 
 import type { Quiz } from "../quiz/format.ts";
 import { CLASS_FULL, CLASS_STARTED, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
@@ -274,7 +274,7 @@ export { DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
  * the first minutes, and a teacher who started before handing the tablets
  * out waits at the first question for the class. Once the second question
  * is up and the minutes are over, the quiz is under way and the door
- * narrows to MAX_LATE_JOINERS (decisions.md, "Hardening", amended).
+ * narrows to MAX_LATE_JOINERS (docs/design/class-and-wall.md, "The door").
  */
 export function doorOpen(run: Run, now: number): boolean {
   if (run.phase === "lobby") return true;
@@ -295,7 +295,7 @@ export function addPlayer(g: Game, id: string, token: string, now: number, rando
 }
 
 /**
- * A child dresses their animal (backlog v2 item 5, docs/avatars.md): the
+ * A child dresses their animal (backlog v2 item 5, docs/design/class-and-wall.md): the
  * background shape and the hat, set as a whole so a resend changes nothing.
  * Only in the lobby; the look is fixed at Start, so the wall's avatars stay
  * as the children last saw them. "same": nothing to store. "refused": not

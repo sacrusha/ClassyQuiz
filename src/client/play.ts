@@ -1,5 +1,5 @@
 // A tab that came with a code from the code box, which routes by length
-// (docs/user-flow.md §1, docs/after-upload.md §4):
+// (docs/user-flow.md §1, docs/design/teacher-devices.md):
 //
 //   /play#63953      the class code: a student's device, straight to an
 //                    avatar, then colours. Built for young readers on shared
@@ -63,7 +63,7 @@ let tickTimer: number | undefined;
 let offlineTimer: number | undefined;
 let unreachedTimer: number | undefined;
 
-// A device that reaches the page but not the quiz (landing story §7): after a
+// A device that reaches the page but not the quiz (docs/design/root-page.md, "Network help, where failure shows"): after a
 // while, plain words for the student, who tells the teacher; the teacher's
 // side is the wall's "Nobody in yet?" line. A teacher device is told only
 // what is wrong. Gone once the line is back.
@@ -80,7 +80,7 @@ banner.append(bannerWords);
  * The last tap, until the server's view shows it stored (or the server
  * refused it). Until then the button shows it on its way, never as
  * accepted: what the tablet shows as accepted is the server's record, the
- * one that scores (decisions.md, "The steering bar"). It counts if it
+ * one that scores (docs/design/question-flow.md, "When a tap counts"). It counts if it
  * arrives while the question is still on screen.
  */
 let waiting: { q: number; choice: number } | null = null;
@@ -101,7 +101,7 @@ let shown: { q: number; at: number } | null = null;
 /** Last call ran out on this device: the buttons stop taking taps until the server says otherwise. */
 let outTimer: number | undefined;
 /**
- * Dressing the animal in the lobby (backlog v2 item 5, docs/avatars.md):
+ * Dressing the animal in the lobby (backlog v2 item 5, docs/design/class-and-wall.md):
  * the look the child picked, shown at once, until the server's view shows
  * it back; the latest pick wins. One `dress` is in flight at a time, so a
  * burst of taps sends the first and then the last.
@@ -381,7 +381,7 @@ function ownSecret(): string | undefined {
 let entered = false;
 
 /**
- * What a teacher device does on arriving (docs/after-upload.md §4): the
+ * What a teacher device does on arriving (docs/design/teacher-devices.md, "A second device: one question, only when needed"): the
  * question when one tab shows and steers; the role whose tab is gone,
  * without asking; or the note that both are there, which pushes nobody
  * aside. Nothing the device senses decides it.
@@ -569,7 +569,7 @@ function render(): void {
   if (v.removed) {
     // The teacher removed this avatar: the device keeps its token, so it
     // comes back as removed rather than as a new player in the same class
-    // (decisions.md, "Hardening": Remove means something).
+    // (docs/design/class-and-wall.md, "The door": Remove is sticky).
     main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div></div>`;
     return;
   }

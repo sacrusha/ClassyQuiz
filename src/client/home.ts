@@ -1,4 +1,4 @@
-// The root page's top (docs/landing-story.md, draft 4): the code box for
+// The root page's top (docs/design/root-page.md): the code box for
 // students and the language in the header; the strip, which until the video
 // exists links the example's questions (/example); Build a quiz in two steps
 // with the labelled example ask and the open one (nothing decided yet); Run a quiz: the resume card for the latest
@@ -33,7 +33,7 @@ let lang: Lang = chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? 
 let t: Text = TEXT[lang];
 
 // --- the code box: the students' class code, and the teacher code, the
-// class code and two digits (docs/after-upload.md §4). It routes by length
+// class code and two digits (docs/design/teacher-devices.md, "One entry: the teacher code"). It routes by length
 // and never submits by itself, so typing seven isn't cut off at five.
 
 const join = $("#join") as HTMLFormElement;
@@ -52,7 +52,7 @@ codeInput.addEventListener("input", () => {
   if (code !== codeInput.value) codeInput.value = code;
 });
 
-// --- the language switch, top right (landing story §4): "EN ▾" over a
+// --- the language switch, top right (docs/design/root-page.md, "Languages"): "EN ▾" over a
 // native select, which lists the four by their own names. Made here, not in
 // the HTML, so an AI's fetcher doesn't read four language names.
 
@@ -149,7 +149,7 @@ function countAttempt(format: UploadFormat): void {
 const problem = (err: string, more = "") => `<div class="problem"><p class="err">${esc(err)}</p>${more}</div>`;
 /** What the box takes, said when something else arrives. */
 const zipOnly = () => `<p>${esc(t.zipOnly)}</p>`;
-/** Where failure shows, the help (landing story §7): the network may be the cause; what to tell IT is on /check. */
+/** Where failure shows, the help (docs/design/root-page.md, "Network help, where failure shows"): the network may be the cause; what to tell IT is on /check. */
 const networkHelp = () => problem(t.offline, `<p><a href="/check#it">${esc(t.whatToTellIt)}</a></p>`);
 
 $("#open").addEventListener("click", () => file.click());

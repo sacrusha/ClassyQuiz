@@ -51,10 +51,10 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     return json({ error: "not found" }, 404);
   } catch (e) {
     // The account's daily allowance is spent (a best reading of an
-    // undocumented error, decisions.md): the page says so and when it comes
+    // undocumented error, docs/design/hosting-and-limits.md, "When the allowance runs out anyway"): the page says so and when it comes
     // back, instead of looking like a network problem.
     if (isQuotaError(e)) return json(parts[0] === "quiz" ? { ok: false, errors: [], warnings: [], error: "quota" } : { error: "quota" }, 503);
-    // No request content in logs (decisions.md); the message only.
+    // No request content in logs (docs/design/hosting-and-limits.md, "What lives, and for how long"); the message only.
     console.error("api error", parts[0], e instanceof Error ? e.message : "unknown");
     return json({ error: "Something went wrong on the server. Try again." }, 500);
   }
@@ -83,7 +83,7 @@ async function uploadWithImages(request: Request, env: Env): Promise<Response> {
 
 /**
  * The code box: five digits are the class code; seven are the teacher code,
- * the class code and two digits the quiz checks (docs/after-upload.md §4).
+ * the class code and two digits the quiz checks (docs/design/teacher-devices.md, "One entry: the teacher code").
  * The device's address goes to the quiz for its limit on wrong teacher
  * codes, and nowhere else.
  */

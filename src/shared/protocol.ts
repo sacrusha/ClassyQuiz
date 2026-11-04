@@ -1,6 +1,6 @@
 // What travels between the browser and the quiz instance. The same messages go
 // over a WebSocket or, when a school network breaks WebSockets, over plain
-// HTTP long-polling (docs/decisions.md, "Transport").
+// HTTP long-polling (docs/design/connections.md, "Transport: WebSocket first, long-polling when the network breaks it").
 //
 // The server sends each tab a complete view of what it should show, never a
 // diff, so a tab that slept or lost its connection just draws the newest
@@ -13,7 +13,7 @@
 // Projector ("screen", the wall) or the Remote (the steering tab). Each role
 // is held by one tab at a time, named by a token the tab keeps for its
 // lifetime (sessionStorage). A teacher role takes the teacher code, the class
-// code plus two digits (docs/after-upload.md §4), or the quiz's secret.
+// code plus two digits (docs/design/teacher-devices.md, "One entry: the teacher code"), or the quiz's secret.
 
 import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
@@ -118,7 +118,7 @@ export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string;
  * The result of a tap's acknowledgement: what is stored for this player
  * and question now, the choice in the order on screen; null for nothing.
  * Whether this tap was taken or not, the tablet shows this as its accepted
- * answer, the same record that scores (decisions.md, "The steering bar").
+ * answer, the same record that scores (docs/design/question-flow.md, "When a tap counts").
  */
 export interface AnswerAck {
   q: number;
@@ -127,7 +127,7 @@ export interface AnswerAck {
 
 /**
  * What a teacher device that comes in with the teacher code does
- * (docs/after-upload.md §4):
+ * (docs/design/teacher-devices.md, "A second device: one question, only when needed"):
  * - ask: one tab does both (the wall steers itself): "Show the quiz here, or
  *   steer it from here?";
  * - screen / remote: that role is free, or its tab is gone: it takes it
@@ -260,7 +260,7 @@ export interface ScreenView {
   v: number;
   title: string;
   code: string;
-  /** The teacher code's two digits after the class code: a second device types both (docs/after-upload.md §4). */
+  /** The teacher code's two digits after the class code: a second device types both (docs/design/teacher-devices.md, "One entry: the teacher code"). */
   teacher: string;
   /** The quiz's background (a question's own is in `question`). */
   background: ImageRef | null;
@@ -392,7 +392,7 @@ export function viewKey(view: View): string {
 }
 
 export const JOIN_CODE = /^\d{5}$/;
-/** The teacher code: the class code and two digits, typed in the same box (docs/after-upload.md §4). */
+/** The teacher code: the class code and two digits, typed in the same box (docs/design/teacher-devices.md, "One entry: the teacher code"). */
 export const TEACHER_CODE = /^\d{7}$/;
 /** Said to a device whose teacher code's last two digits are wrong. */
 export const WRONG_TEACHER_CODE = "That isn't this quiz's teacher code.";
@@ -400,7 +400,7 @@ export const WRONG_TEACHER_CODE = "That isn't this quiz's teacher code.";
 export const TOO_MANY_CODES = "Too many wrong codes for this quiz. Try again in a few minutes.";
 export const MAX_QUIZ_BYTES = 200_000;
 
-// Pictures (decisions.md, "Pictures in the archive"). The browser redraws each
+// Pictures (docs/design/pictures.md, "At upload"). The browser redraws each
 // one at upload to at most IMAGE_LONG_SIDE (BACKGROUND_LONG_SIDE) pixels; the server checks the rest.
 // A Durable Object value holds at most 2 MB.
 export const IMAGE_LONG_SIDE = 1600;

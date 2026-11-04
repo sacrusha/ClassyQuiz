@@ -1,7 +1,7 @@
 // The Projector: what the class sees (docs/user-flow.md §3.3, §3.4). No key
 // before the reveal. While no Remote is there it steers itself: in the lobby
 // it is the single tab's two screens, the teacher's check and then, one tap
-// on, the class's join screen (docs/after-upload.md §3); during the quiz a
+// on, the class's join screen (docs/design/teacher-devices.md, "The single tab: check, then join"); during the quiz a
 // slim bar carries the next step. A clicker or the keyboard moves the quiz on
 // at any time; the quiz's code stays in a corner throughout.
 
@@ -191,7 +191,7 @@ function comeBack(): string {
 
 /**
  * The teacher code at rest, in one sentence naming both needs
- * (docs/after-upload.md §3); it doesn't guess which device this is. "Open a second
+ * (docs/design/teacher-devices.md, "The single tab: check, then join"); it doesn't guess which device this is. "Open a second
  * screen in a new window" (the owner's words) opens a window that asks the same question as any other
  * device; it is always there, so a laptop that gains its second screen after
  * the check finds it where it was (hidden on a phone).
@@ -218,7 +218,7 @@ function renderManagedLobby(v: ScreenView): void {
 }
 
 /**
- * Check, the teacher's (docs/after-upload.md §3): the right quiz (title and
+ * Check, the teacher's (docs/design/teacher-devices.md, "The single tab: check, then join"): the right quiz (title and
  * how many questions, which tells two versions apart), the class code small
  * ("upload is start": read aloud, the class joins without the tap), the
  * teacher code at rest, and the questions with their fixes.
@@ -243,7 +243,7 @@ function renderCheck(v: ScreenView): void {
   steer.noteStep(t);
 }
 
-// --- nobody in yet (landing story §7, backlog v4 item 4): the laptop got
+// --- nobody in yet (docs/design/root-page.md, "Network help, where failure shows"; backlog v4 item 4): the laptop got
 // through, the tablets may not (a student network with a stricter filter).
 // After NOBODY_MS with the class's join screen up and nobody in, one muted
 // line under the avatars; gone with the first avatar. It shows on a mirrored
@@ -354,8 +354,8 @@ function renderQuestion(v: ScreenView): void {
   const r = v.reveal;
   // The question is laid out once: while answers come in only the count
   // changes, and the reveal only marks the tiles, so neither text nor
-  // picture moves or flickers (decisions.md, "Projector tiles: the reveal
-  // doesn't move the text"). The fit depends on the room the bar leaves and
+  // picture moves or flickers (docs/design/class-and-wall.md,
+  // "Tiles do not move at the reveal"). The fit depends on the room the bar leaves and
   // on the window's size, so both are part of the key.
   const key = JSON.stringify([q.q, q.text, q.answers, q.pics, q.image, !!v.steer, innerWidth, innerHeight]);
   if (key !== questionKey || !main.querySelector("#stage")) {
@@ -966,7 +966,7 @@ function showNote(html: string): void {
   document.body.appendChild(back);
 }
 
-/** ⇄ Swap (docs/after-upload.md §4): no confirmation, the same tap on either device undoes it. */
+/** ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): no confirmation, the same tap on either device undoes it. */
 async function swap(): Promise<void> {
   const r = await line?.send({ op: "swap" });
   if (r && !r.ok && r.error) toast(r.error);
