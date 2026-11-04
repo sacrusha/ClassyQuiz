@@ -359,8 +359,7 @@ Review E's follow-ups on the bar (`design/question-flow.md`):
   the noun on Play reads as the next step; its room on the wall's bar is
   unmeasured.
 - Whether "Answers" reads as the step that closes answering ("Votes" set
-  aside: it suggests majority voting); and the format's warnings on the
-  check, which say "answer" for a choice in the AI's vocabulary.
+  aside: it suggests majority voting).
 - A press blocked by the settle window gives no feedback; the 80/450/400 ms
   timings need a real hand, clicker and phone.
 - The capacity sentence ("a few dozen classes a day", landing and /own-copy)
