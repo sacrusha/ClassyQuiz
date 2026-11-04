@@ -6,19 +6,16 @@
 // --all-poll: every student over long-polling, and the number of HTTP
 // requests reported (the Free plan's budget on a network without
 // WebSockets).
-// --speed: points for speed, switched on in the lobby (backlog v4 item 6);
-// taps carry the device's own time, and the scores are checked against it.
-// (--tempo, the old name, means the same.)
+// --speed: points for speed, switched on in the lobby; taps carry the
+// device's own time, and the scores are checked against it.
 //
 // Every question opens with its answers hidden and is stepped through the
-// steering bar's states (backlog v4 item 6): Play (Show answers, Lock in,
-// Reveal, Ranking, Next) and Last call, which locks in after fifteen seconds
-// or once everyone there has answered. Each press is also sent twice from
-// the same state (a resend: one step), and twice as a deliberate double
-// press (the second from where the first leads: two steps). One question is
-// played as a page from before the bar would (Go, then Reveal straight from
-// answering). A tap made offline counts if it arrives while its question is
-// still on screen, and not once the class has left its reveal.
+// steering bar's states: Play (Show answers, Lock in, Reveal, Ranking, Next)
+// and Last call, which locks in after fifteen seconds or once everyone there
+// has answered. Each press is also sent twice from the same state (a resend:
+// one step), and twice as a deliberate double press (the second from where
+// the first leads: two steps). A tap made offline counts if it arrives while
+// its question is still on screen, and not once the class has left its reveal.
 //
 // The upload's tab is the Projector and steers itself; a phone comes in with
 // the teacher code, is asked, steers from here, and steers from then on
@@ -52,7 +49,7 @@
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
-const SPEED = process.argv.includes("--speed") || process.argv.includes("--tempo");
+const SPEED = process.argv.includes("--speed");
 // --no-dress: the class doesn't dress in the lobby (to measure what dressing costs).
 const DRESS = !process.argv.includes("--no-dress");
 // shared/tempo.ts
@@ -496,7 +493,7 @@ await phone.send({ op: "remove", player: ghost.id });
 ghost.d.kill();
 log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} over long-polling), ghost removed`);
 
-// Dressing in the lobby (backlog v2 item 5, docs/design/class-and-wall.md). Like
+// Dressing in the lobby (docs/design/class-and-wall.md). Like
 // client/play.ts: one `dress` in flight per device, the latest pick sent
 // next, so a burst of taps sends the first and the last. Every student
 // picks a few looks; the server stores the class's looks once a second.
@@ -651,7 +648,6 @@ const waitForLock = async (current) => {
 for (;;) {
   await until(() => tv().phase === "question", 5000, "question");
   const current = tv().current;
-  // Every question opens with its answers hidden (backlog v4 item 6).
   check(tv().answering === "reading", `question ${current + 1} opens with its answers hidden (${tv().answering})`);
   await sleep(rnd(300, 900)); // the teacher reads it out
   check(players.every((p) => p.dead || !p.d.online || p.view?.question?.q !== current || p.view.question.answers.length === 0), `question ${current + 1}: no tablet has the answers while they are hidden`);
@@ -672,7 +668,7 @@ for (;;) {
     await twice({ op: "play" });
     await until(() => tv().answering === "open", 5000, "the answers");
     await sleep(400);
-    // Item 15: a tablet taps while offline, the teacher locks in and reveals,
+    // A tablet taps while offline, the teacher locks in and reveals,
     // then the tap arrives while the reveal is still up. The tablet showed
     // the question as open, so the tap counts.
     const p = players.find(readyToTap) ?? players.find((x) => !x.dead && x.view?.question?.answering === "open");
@@ -680,10 +676,8 @@ for (;;) {
     lateTap = tap(p, current, 0, 9).then((a) => check(a.ok, `${p.name}: a tap made before the lock-in and delivered during the reveal counts`));
     log(`${p.name} taps while offline; the lock-in and the reveal go out before the tap arrives`);
   } else if (current === 3) {
-    // A page from before the bar: Go shows the answers, Reveal comes straight from answering.
-    const go = await steerer().send({ op: "go", at: at() });
-    check(go.ok && go.result !== "stale", "a page from before the bar: Go shows the answers");
-    await until(() => tv().answering === "open", 5000, "the answers after Go");
+    await twice({ op: "play" });
+    await until(() => tv().answering === "open", 5000, "the answers");
     await waitForAnswers();
     // Settled: a tablet taps offline, and the class has left the reveal before it arrives.
     const p = players.find(readyToTap);
@@ -698,15 +692,12 @@ for (;;) {
     await waitForAnswers();
   }
   log(`question ${current + 1}: ${tv().run.answered}/${tv().run.players.length} answered, revealing (${remoteSteers ? "Remote" : "Projector"})`);
-  // The wall's "who has answered" (v2 item 7): exactly the answers counted, of no more than the class.
+  // The wall's "who has answered": exactly the answers counted, of no more than the class.
   {
     const w = projector.view;
     check(w.answeredBy.length === w.answered && w.answered <= w.of && w.of <= w.players.length, `question ${current + 1}: the wall shows ${w.answeredBy.length} avatars for ${w.answered} answers of ${w.of} (${w.players.length} players)`);
   }
-  if (current === 3) {
-    await steerer().send({ op: "reveal", at: { phase: "question", current } });
-    await until(() => tv().phase === "reveal", 5000, "reveal straight from answering");
-  } else if (current === 5) {
+  if (current === 5) {
     // A deliberate double press of Play from answering: Lock in, then Reveal.
     await double();
     await until(() => tv().phase === "reveal", 5000, "the double press's reveal");
@@ -753,7 +744,7 @@ for (;;) {
     })();
   }
   if (current === 3) await steerer().send({ op: "setVoid", q: 3, value: true });
-  // The winners jump on the wall (v4 item 9): exactly those whose answer counts
+  // The winners jump on the wall: exactly those whose answer counts
   // under the key as it now stands, the fix above included; nobody on a void.
   {
     const want = () => {
@@ -790,14 +781,12 @@ for (;;) {
     log(`the Projector steers again after ${((Date.now() - t0) / 1000).toFixed(0)} s`);
   }
   qi++;
-  if (tv().last) {
-    // The last question's reveal: Play goes to the final ranking.
-    check(tv().phase === "reveal", "the last question's reveal");
+  if (tv().last) check(tv().phase === "reveal", "the last question's reveal: Play goes to the final ranking");
+  else if (tv().phase === "reveal") {
     await twice({ op: "play" });
-  } else if (tv().phase === "reveal") {
-    // From the reveal, Next is the second slice; the old Next command still works.
-    await twice({ op: "next" });
-  } else await twice({ op: "play" });
+    await until(() => tv().phase === "ranking", 5000, "ranking");
+  }
+  await twice({ op: "play" });
   await until(() => tv().phase !== "reveal" && tv().phase !== "ranking", 5000, "next");
   if (current === 3) {
     await settledTap;
@@ -945,8 +934,8 @@ await until(() => projector.view?.players?.length === 1, 5000, "the new student 
   check(next.offered.entry === "ask" && next.ack.ok, `with students in, the teacher code takes the Remote (${next.offered.entry})`);
   await until(() => !projector.view?.steer, 5000, "the Projector to stop steering for the new phone");
   // Its tab is closed by accident and the teacher types the code again at
-  // once: the closed Remote is quiet, and taken, not "full" until it is away
-  // (review D #4). The wall doesn't steer in between.
+  // once: the closed Remote is quiet, and taken, not "full" until it is away.
+  // The wall doesn't steer in between.
   next.d.kill();
   await sleep(500);
   const retyped = await guestTry("retyped-phone", "remote", { teacher });
@@ -984,7 +973,7 @@ log("nothing was there; a device took the Projector and steers");
   check(students.status === 200, "the class code still opens the quiz for students");
   // A sweep from ever new addresses (an IPv6 /64, a botnet): the quiz's own
   // allowance, at most ten wrong endings and one more every six minutes,
-  // refuses it whatever the address (review D #1).
+  // refuses it whatever the address.
   const fresh = (n) => `198.51.100.${n}`;
   let spent = 0;
   let refused = null;

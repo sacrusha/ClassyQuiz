@@ -127,7 +127,7 @@ async function toInstance(request: Request, env: Env, id: string, action: string
   return env.INSTANCE.get(doId).fetch(request);
 }
 
-/** A command, a poll, or the pasting device's info/end call. */
+/** Largest body the Function forwards to an instance (a command, a poll, info or end), whatever its Content-Length says. */
 const MAX_COMMAND_BYTES = 20_000;
 
 /** The body as text, or null past `max` bytes, whatever the request says its length is. */

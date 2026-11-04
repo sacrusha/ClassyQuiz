@@ -1,9 +1,6 @@
 // /example: the check screen without codes (docs/design/root-page.md,
-// "The strip"). The example quiz's title and questions as the teacher's check
-// shows them after an upload, answers folded, read in the visitor's browser
-// from the example's static .zip. No upload, no lobby, no code, and nothing
-// booked against the site's budget. In place of "Let the class in",
-// the .zip to download.
+// "The strip"), read in the visitor's browser from the example's static .zip.
+// No upload and nothing booked against the site's budget.
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { imageKey, parseQuiz } from "../quiz/format.ts";
@@ -42,8 +39,6 @@ async function start(): Promise<void> {
     const text = await quizTextFromEntries(entries);
     const parsed = parseQuiz(text);
     const pictures = await prepareImages(text, entries);
-    // Each picture as a blob URL under a key of its own, which the check's
-    // <img data-pic> elements are filled from (client/pictures.ts).
     const refs = new Map<string, ImageRef>();
     for (const p of pictures.images) {
       const src = `example:${imageKey(p.name)}`;

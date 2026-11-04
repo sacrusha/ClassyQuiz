@@ -23,7 +23,6 @@
   code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
   a { color: var(--accent); }
 
-  /* The header: the logo, the students' code box, the language (top right). */
   header.top { border-bottom: 1px solid var(--rule); }
   .wide { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
   header.top .bar { display: flex; align-items: center; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
@@ -60,7 +59,6 @@
   .f-wall .pic { height: var(--h); aspect-ratio: 16 / 9; background: var(--frame); padding: 4px; box-sizing: border-box; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
   .f-wall img { width: 100%; height: 100%; }
 
-  /* Build and Run, side by side where there is room. */
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; }
   .cols h2 { border: 0; padding: 0; margin: 1.6rem 0 .6rem; font-size: 1.35rem; }
   .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
@@ -96,7 +94,6 @@
   .problem button { border: 2px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; margin: 4px 6px 0 0; }
   .problem button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 
-  /* Coming back (backlog v4 item 2): the latest open quiz this device started. */
   .resume { border: 2px solid var(--accent); border-radius: 16px; padding: 12px 16px; margin: 0 0 14px; }
   .resume .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; }
   .resume .title { font-weight: 700; overflow-wrap: anywhere; flex: 1 1 12em; }
@@ -113,7 +110,7 @@
   @media (max-width: 860px) {
     .cols { grid-template-columns: minmax(0, 1fr); }
   }
-  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip is one row that scrolls sideways, the sheet first, the next frame peeking in. Its height is capped by the viewport's height as well as its width, so a phone held sideways still shows Build and Run below it (backlog v4 item 1). */
+  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip is one row that scrolls sideways, the sheet first, the next frame peeking in. Its height is capped by the viewport's height as well as its width, so a phone held sideways still shows Build and Run below it. */
   @media (max-width: 720px) {
     .strip { --h: min(60vw, 240px, 38vh); justify-content: start; overflow-x: auto; scroll-snap-type: x proximity; margin: 16px -16px 0; padding: 0 16px 8px; column-gap: 12px; scrollbar-width: thin; }
     .strip .pic { scroll-snap-align: start; scroll-margin-left: 16px; }

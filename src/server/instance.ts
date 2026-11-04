@@ -51,21 +51,13 @@ const FRESH_MS = 45_000;
  */
 const QUIET_MS = 25_000;
 /**
- * Wrong teacher codes (docs/design/teacher-devices.md, "Wrong teacher codes"), counted two ways, both in
- * the instance's storage: a count in memory went with an idle instance, so a
- * script that paused got its tries back (review D #1).
- * - Per device: GUESS_MAX wrong endings within GUESS_WINDOW_MS refuse that
- *   device's teacher codes for this quiz for GUESS_LOCK_MS. The device is
- *   told apart by its address, kept only as a hash salted per quiz, and only
- *   while it counts: the alarm clears it. Without an address (local
- *   development) the device is the quiz.
- * - Per quiz, whatever addresses: at most QUIZ_GUESSES wrong endings, one
- *   more allowed every QUIZ_GUESS_EVERY_MS. Used up, every teacher code for
- *   the quiz is refused, the right one too (else the answers would tell it),
- *   until the next is allowed. A sweep of the 100 endings takes about nine
- *   hours, half of it on average to hit; a teacher whose class used them up
- *   waits at most six minutes.
- * The uploading device's secret is exempt from both.
+ * Wrong teacher codes, counted in the instance's storage (a count in memory
+ * would reset when the instance idles). Per device: GUESS_MAX wrong endings
+ * within GUESS_WINDOW_MS refuse that device's teacher codes for GUESS_LOCK_MS.
+ * Per quiz: at most QUIZ_GUESSES, one more allowed every QUIZ_GUESS_EVERY_MS;
+ * used up, every teacher code is refused, the right one too. The uploading
+ * device's secret is exempt. Why, and what a device is:
+ * docs/design/teacher-devices.md, "Wrong teacher codes".
  */
 const GUESS_MAX = 5;
 const GUESS_WINDOW_MS = 60_000;
@@ -83,14 +75,11 @@ const CODE_SLACK_MS = 12 * 3600_000;
 interface QuizRecord {
   quiz: Quiz;
   warnings: Problem[];
-  /**
-   * The quiz's pictures by `imageKey`; each file is stored under `img:<n>`.
-   * Absent on quizzes uploaded before pictures existed.
-   */
-  images?: Record<string, StoredImage>;
+  /** The quiz's pictures by `imageKey`; each file is stored under `img:<n>`. */
+  images: Record<string, StoredImage>;
   /** Part of every picture's address, so the instance id alone doesn't open them. */
-  imageSecret?: string;
-  /** The answer pictures' small copies for the students' devices, stored as `pack:<p>` (v3 item 1). */
+  imageSecret: string;
+  /** The answer pictures' small copies for the students' devices, stored as `pack:<p>`; absent without picture answers. */
   packs?: number;
   /**
    * Part of the packs' address. Not the imageSecret: the students' devices
@@ -114,17 +103,17 @@ interface Guesses {
 interface Meta {
   /** Kept by the device that pasted the quiz: it may delete it from the root page. */
   secret: string;
-  /** The quiz's code, for its whole life. Absent on instances made before codes were per quiz. */
-  code?: string;
+  /** The quiz's code, for its whole life. */
+  code: string;
   /** Until when the code is claimed in its JoinCode object. */
-  codeUntil?: number;
+  codeUntil: number;
   /** The token of the tab holding each role. */
-  roles?: Record<RoleName, string | null>;
+  roles: Record<RoleName, string | null>;
   /**
    * The teacher code's two digits after the class code (docs/design/teacher-devices.md,
-   * "One entry: the teacher code"). Drawn at upload; given on first load to a quiz from before them.
+   * "One entry: the teacher code"). Drawn at upload.
    */
-  teacher?: string;
+  teacher: string;
   lastActivity: number;
   v: number;
 }
@@ -182,7 +171,8 @@ export class Instance extends DurableObject<Env> {
    * "<role>:<token>" → when that teacher tab's line closed (webSocketClose),
    * the same time as its lastPoll then: until it is heard from again, the
    * role is quiet rather than present (a closed tab, a phone locked), so the
-   * teacher code takes it at once instead of "full" for 45 s (review D #4).
+   * teacher code takes it at once rather than answering "full" until it is
+   * away (FRESH_MS).
    */
   private closed = new Map<string, number>();
 
@@ -206,26 +196,16 @@ export class Instance extends DurableObject<Env> {
     ]);
     if (guesses) this.guesses = guesses;
     if (meta && record && fixes) {
-      // A quiz from before teacher codes gets its digits now, kept at once:
-      // its teacher's screens show them from their next view on.
-      if (meta.code && meta.roles && !meta.teacher) {
-        meta.teacher = randomDigits(2);
-        await storage.put("meta", meta);
-      }
       this.meta = meta;
       this.quizRecord = record;
-      // A run stored before the steering bar reads as one after it (backlog v4 item 6).
-      this.game = { quiz: record.quiz, fixes, run: run ? G.upgradeRun(run) : null };
+      this.game = { quiz: record.quiz, fixes, run: run ?? null };
     }
   }
 
-  /** The instance holds a quiz made with per-quiz codes and roles; older ones are left to expire. */
+  /** The instance holds a quiz: not yet uploaded to, or already ended, it doesn't. */
   private live(): boolean {
-    return !!(this.meta && this.game && this.meta.code && this.meta.roles);
+    return !!(this.meta && this.game);
   }
-
-  // -------------------------------------------------------------------------
-  // RPC from the API functions
 
   /**
    * Parses the uploaded text here rather than in the API function: a Durable
@@ -347,8 +327,8 @@ export class Instance extends DurableObject<Env> {
         headers: { "content-type": "application/octet-stream", "cache-control": "no-store", "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; sandbox" },
       });
     }
-    const info = record?.images && Object.values(record.images).find((i) => String(i.n) === n);
-    if (!record?.imageSecret || secret !== record.imageSecret || !info) return new Response("not found", { status: 404 });
+    const info = record && Object.values(record.images).find((i) => String(i.n) === n);
+    if (!record || secret !== record.imageSecret || !info) return new Response("not found", { status: 404 });
     const bytes = await this.ctx.storage.get<Uint8Array>(`img:${info.n}`);
     if (!bytes) return new Response("not found", { status: 404 });
     return new Response(bytes, {
@@ -365,8 +345,8 @@ export class Instance extends DurableObject<Env> {
   /** Where a question's picture is fetched, and its size, for the views. */
   private imageRef(name: string): ImageRef | null {
     const record = this.quizRecord;
-    const info = name ? record?.images?.[imageKey(name)] : undefined;
-    if (!info || !record?.imageSecret) return null;
+    const info = name ? record?.images[imageKey(name)] : undefined;
+    if (!info || !record) return null;
     return { src: `/api/i/${this.ctx.id.toString()}/img/${record.imageSecret}/${info.n}`, w: info.w, h: info.h };
   }
 
@@ -392,7 +372,7 @@ export class Instance extends DurableObject<Env> {
     return this.onScreen(
       q,
       answers.map((a) => {
-        const s = a.image ? record?.images?.[imageKey(a.image)]?.small : undefined;
+        const s = a.image ? record?.images[imageKey(a.image)]?.small : undefined;
         return s ? { p: s.p, o: s.o, l: s.l, type: s.type, w: s.w, h: s.h } : null;
       }),
     );
@@ -492,9 +472,6 @@ export class Instance extends DurableObject<Env> {
     return d.until > now || g.left < 1 ? "locked" : "wrong";
   }
 
-  // -------------------------------------------------------------------------
-  // HTTP: WebSocket upgrade, the long-polling fallback, the pasting device's calls
-
   async fetch(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const parts = url.pathname.split("/");
@@ -531,9 +508,9 @@ export class Instance extends DurableObject<Env> {
       const replies = await this.command(session, body.cmd.id, body.cmd.cmd);
       // A guest that became a player: its view comes with the welcome, as
       // over a WebSocket. Its poll may still be held as a guest's, which a
-      // new player doesn't change: the tablet showed a spinner for up to
-      // POLL_HOLD_MS (found with the lobby's dressing; the page also asks
-      // again as the player, client/net.ts `repoll`).
+      // new player doesn't change: the tablet would stay on a spinner for up
+      // to POLL_HOLD_MS (the page also asks again as the player, client/net.ts
+      // `repoll`).
       const next = replies.session;
       if (next?.role === "player") {
         const view = this.viewFor(next) as PlayerView | null;
@@ -590,7 +567,7 @@ export class Instance extends DurableObject<Env> {
     const meta = this.meta!;
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
-    return json({ title: game.quiz.title, code: meta.code!, teacher: meta.teacher ?? "", stands, closes: meta.lastActivity + INSTANCE_IDLE_MS } satisfies QuizInfo);
+    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, closes: meta.lastActivity + INSTANCE_IDLE_MS } satisfies QuizInfo);
   }
 
   private notePoll(session: Session): void {
@@ -609,9 +586,8 @@ export class Instance extends DurableObject<Env> {
     });
   }
 
-  // -------------------------------------------------------------------------
-  // WebSocket handlers (the object may have hibernated in between)
-
+  // The object may have hibernated between handlers: the session is read back
+  // from the socket's attachment.
   async webSocketMessage(ws: WebSocket, raw: string | ArrayBuffer): Promise<void> {
     if (typeof raw !== "string" || raw.length > 10_000) return;
     let msg: ClientMessage;
@@ -680,22 +656,15 @@ export class Instance extends DurableObject<Env> {
     await this.webSocketClose(ws);
   }
 
-  // -------------------------------------------------------------------------
-  // Who is this tab?
-
   private authenticate(auth: Auth, out: ServerMessage[]): Session {
     if (!this.meta || !this.game) {
       out.push({ t: "gone", reason: "This quiz has ended." });
       return { role: null };
     }
-    if (!this.live()) {
-      out.push({ t: "gone", reason: "This quiz was made with an earlier version of the site. Paste it again." });
-      return { role: null };
-    }
     const meta = this.meta;
     const game = this.game;
     if (auth.role === "screen" || auth.role === "remote") {
-      const held = meta.roles![auth.role];
+      const held = meta.roles[auth.role];
       if (typeof auth.token === "string" && held && safeEqual(auth.token, held)) return { role: auth.role, token: held, since: Date.now() };
       // The role went to another tab while this one was away, or between its polls.
       const moved = typeof auth.token === "string" ? this.moved.get(`${auth.role}:${auth.token}`) : undefined;
@@ -726,9 +695,6 @@ export class Instance extends DurableObject<Env> {
     return { role: "guest" };
   }
 
-  // -------------------------------------------------------------------------
-  // Roles (user flow §1)
-
   /**
    * Whether the tab holding a role is there, quiet (soon away), or away;
    * "none" when nobody holds it. Quiet: not heard from for QUIET_MS, or its
@@ -736,7 +702,7 @@ export class Instance extends DurableObject<Env> {
    * tab whose poll is held is heard from now.
    */
   private presence(role: RoleName, exclude?: WebSocket): "none" | "present" | "quiet" | "away" {
-    const token = this.meta?.roles?.[role];
+    const token = this.meta?.roles[role];
     if (!token) return "none";
     const key = `${role}:${token}`;
     const now = Date.now();
@@ -777,8 +743,8 @@ export class Instance extends DurableObject<Env> {
   /**
    * A Remote the teacher code may not take: its tab is present. A quiet one
    * (a closed tab, a phone locked, nothing heard for QUIET_MS) is taken at
-   * once, rather than "full" until it is away (review D #4); the wall still
-   * waits FRESH_MS before it steers.
+   * once, rather than "full" until it is away; the wall still waits FRESH_MS
+   * before it steers.
    */
   private remoteHeld(): boolean {
     return this.presence("remote") === "present";
@@ -795,7 +761,7 @@ export class Instance extends DurableObject<Env> {
     const s = this.there("screen");
     const r = this.remoteHeld();
     if (s && r) return "full";
-    if (s) return this.meta!.roles!.remote ? "remote" : "ask";
+    if (s) return this.meta!.roles.remote ? "remote" : "ask";
     return "screen";
   }
 
@@ -828,7 +794,7 @@ export class Instance extends DurableObject<Env> {
 
   /** A role handed to a tab that is about to connect with it counts as there from now. */
   private hand(role: RoleName, token: string): void {
-    this.meta!.roles![role] = token;
+    this.meta!.roles[role] = token;
     this.lastPoll.set(`${role}:${token}`, Date.now());
   }
 
@@ -839,7 +805,7 @@ export class Instance extends DurableObject<Env> {
    * the wall, which stops steering. Null when the entry has changed.
    */
   private takeRole(role: RoleName): string | null {
-    const roles = this.meta!.roles!;
+    const roles = this.meta!.roles;
     const entry = this.entry();
     if (entry === "full" || (entry !== "ask" && entry !== role)) return null;
     const token = randomToken();
@@ -865,9 +831,6 @@ export class Instance extends DurableObject<Env> {
     return token;
   }
 
-  // -------------------------------------------------------------------------
-  // Commands
-
   private async command(
     session: Session,
     id: string,
@@ -876,8 +839,8 @@ export class Instance extends DurableObject<Env> {
   ): Promise<{ direct: ServerMessage[]; session?: Session }> {
     const game = this.game;
     const meta = this.meta;
-    if (!game || !meta || !this.live() || session.role === null) return { direct: [{ t: "gone", reason: "This quiz has ended." }] };
-    const roles = meta.roles!;
+    if (!game || !meta || session.role === null) return { direct: [{ t: "gone", reason: "This quiz has ended." }] };
+    const roles = meta.roles;
     const ack = (ok: boolean, error?: string, result?: unknown): ServerMessage => ({ t: "ack", id, ok, error, result });
     const now = Date.now();
     const at = (c: { at: { phase: string; current: number; reading?: boolean; votes?: boolean; lastCall?: boolean } }) => {
@@ -893,7 +856,6 @@ export class Instance extends DurableObject<Env> {
     };
 
     try {
-      // --- a guest: play, pick an avatar back, or take a role
       if (session.role === "guest") {
         if (cmd.op === "tick") return { direct: [ack(true), this.chooseMessage()] };
         if (cmd.op === "takeRole") {
@@ -942,7 +904,6 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token, run: run.id }], session: { role: "player", player: p.id } };
       }
 
-      // --- a student
       if (session.role === "player") {
         if (cmd.op === "tick") return { direct: [ack(true)] };
         if (cmd.op === "dress") {
@@ -977,11 +938,10 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(outcome !== "refused", undefined, { q: cmd.q, record: this.recordOnScreen(cmd.q, session.player) } satisfies AnswerAck)] };
       }
 
-      // --- a teacher role: still the tab holding it?
       if (roles[session.role] !== session.token) return { direct: [ack(false), { t: "lost", role: session.role }] };
       if (cmd.op === "tick") {
-        // A device gone away (FRESH_MS) may have been the last one the
-        // countdown waited for; the wall's count already says everyone is in.
+        // A device gone away (FRESH_MS) may have been the last one Last call
+        // waited for; the wall's count already says everyone is in.
         await this.closeIfAllIn();
         const view = this.viewFor(session);
         return { direct: view ? [ack(true), { t: "state", view }] : [ack(true)] };
@@ -993,11 +953,10 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(true)], session: { role: null } };
       }
       if (session.role === "screen") {
-        if (cmd.op === "advance" || cmd.op === "play") {
+        if (cmd.op === "play") {
           // The clicker in the room works whoever steers.
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
-          if (cmd.op === "play") G.play(game, now, this.nextView());
-          else G.advance(game, now, this.nextView());
+          G.play(game, now, this.nextView());
           await this.afterTeacherChange(["run"]);
           return { direct: [ack(true)] };
         }
@@ -1027,7 +986,6 @@ export class Instance extends DurableObject<Env> {
       }
       if (session.role === "screen" && !this.steering()) return { direct: [ack(false, "The remote steers the quiz.")] };
 
-      // --- steering
       let changed: ("run" | "fixes" | "meta")[] = [];
       switch (cmd.op) {
         case "again": {
@@ -1042,23 +1000,12 @@ export class Instance extends DurableObject<Env> {
         case "begin":
         case "play":
         case "lastCall":
-        case "go":
-        case "votes":
-        case "reveal":
-        case "next":
-        case "ranking":
         case "finish":
         case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           if (cmd.op === "begin") G.begin(game, now);
           else if (cmd.op === "play") G.play(game, now, this.nextView());
           else if (cmd.op === "lastCall") G.lastCall(game, now);
-          // "go" and "votes": a page from before the steering bar.
-          else if (cmd.op === "go") G.showAnswers(game, now);
-          else if (cmd.op === "votes") G.lockIn(game, this.nextView());
-          else if (cmd.op === "reveal") G.reveal(game, this.nextView());
-          else if (cmd.op === "next") G.next(game, now);
-          else if (cmd.op === "ranking") G.showRanking(game);
           else if (cmd.op === "finish") G.finish(game, now);
           else {
             G.skipCurrent(game, now);
@@ -1122,7 +1069,7 @@ export class Instance extends DurableObject<Env> {
   /** A fresh lobby with the same code; the tablets of the class before are told it has finished. */
   private newClass(): void {
     const game = this.game!;
-    G.startRun(game, this.meta!.code!, randomToken(9), Math.random);
+    G.startRun(game, this.meta!.code, randomToken(9), Math.random);
     this.sentToPoller.clear();
     for (const [k] of this.lastPoll) if (!k.includes(":")) this.lastPoll.delete(k);
     for (const ws of this.ctx.getWebSockets()) {
@@ -1197,9 +1144,6 @@ export class Instance extends DurableObject<Env> {
     this.broadcast();
   }
 
-  // -------------------------------------------------------------------------
-  // The code
-
   private async claimCode(until: number): Promise<string> {
     const id = this.ctx.id.toString();
     for (let i = 0; i < 20; i++) {
@@ -1214,7 +1158,7 @@ export class Instance extends DurableObject<Env> {
   private async refreshCode(): Promise<void> {
     const meta = this.meta!;
     const end = meta.lastActivity + INSTANCE_IDLE_MS;
-    if (!meta.code || (meta.codeUntil ?? 0) > end + CODE_SLACK_MS / 2) return;
+    if (meta.codeUntil > end + CODE_SLACK_MS / 2) return;
     const until = end + CODE_SLACK_MS;
     const stub = this.env.JOIN.get(this.env.JOIN.idFromName(meta.code));
     if (await stub.claim(this.ctx.id.toString(), until)) meta.codeUntil = until;
@@ -1223,14 +1167,10 @@ export class Instance extends DurableObject<Env> {
   }
 
   private async releaseCode(): Promise<void> {
-    const code = this.meta?.code;
-    if (!code) return;
-    const stub = this.env.JOIN.get(this.env.JOIN.idFromName(code));
+    if (!this.meta) return;
+    const stub = this.env.JOIN.get(this.env.JOIN.idFromName(this.meta.code));
     await stub.release(this.ctx.id.toString());
   }
-
-  // -------------------------------------------------------------------------
-  // Lifetime
 
   private async scheduleAlarm(): Promise<void> {
     const meta = this.meta;
@@ -1240,7 +1180,7 @@ export class Instance extends DurableObject<Env> {
     if (ended != null) at = Math.min(at, ended + RUN_KEEP_MS);
     const idle = this.classIdleFrom();
     if (idle != null) at = Math.min(at, idle + CLASS_IDLE_MS);
-    // A running countdown: time's up is the server's step, as the reveal is the teacher's.
+    // A running Last call: locking in at its end is the server's step (the alarm); the reveal stays the teacher's.
     const deadline = this.game ? G.deadline(this.game) : null;
     if (deadline != null) at = Math.min(at, deadline);
     // A device's wrong teacher codes are forgotten once they no longer count.
@@ -1272,7 +1212,7 @@ export class Instance extends DurableObject<Env> {
       return;
     }
     const now = Date.now();
-    if (now >= meta.lastActivity + INSTANCE_IDLE_MS || !this.live()) {
+    if (now >= meta.lastActivity + INSTANCE_IDLE_MS) {
       await this.endInstance();
       return;
     }
@@ -1324,9 +1264,6 @@ export class Instance extends DurableObject<Env> {
     await this.ctx.storage.deleteAll();
   }
 
-  // -------------------------------------------------------------------------
-  // Views
-
   /** Players whose device was heard from recently: an open socket that still pings, or a recent poll. */
   private connectedPlayers(exclude?: WebSocket): Set<string> {
     const ids = new Set<string>();
@@ -1350,7 +1287,7 @@ export class Instance extends DurableObject<Env> {
       title: this.game?.quiz.title ?? "",
       phase: run ? run.phase : "idle",
       avatars: away.map((p) => ({ id: p.id, avatar: p.avatar })),
-      entry: this.meta?.roles ? this.entry() : "full",
+      entry: this.meta ? this.entry() : "full",
     };
   }
 
@@ -1386,7 +1323,7 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * Answering closes early when every device that is there has answered,
-   * also when the last one the countdown waited for went away rather than
+   * also when the last one Last call waited for went away rather than
    * answered (checked on the teacher tabs' ticks). True when it closed.
    */
   private async closeIfAllIn(): Promise<boolean> {
@@ -1457,15 +1394,15 @@ export class Instance extends DurableObject<Env> {
     const pics = showQ ? this.answerPics(run!.current) : undefined;
     // Who answered, and of how many: the devices that are there, or that
     // answered and went away since. A dead tablet stops holding the count
-    // below full once it is away (v2 item 7).
+    // below full once it is away.
     const inIds = showQ ? this.answeredIds() : new Set<string>();
     const connected = this.connectedPlayers(exclude);
     return {
       role: "screen",
       v: meta.v,
       title: game.quiz.title,
-      code: meta.code!,
-      teacher: meta.teacher ?? "",
+      code: meta.code,
+      teacher: meta.teacher,
       background: this.imageRef(game.quiz.background),
       pictures: [...pictures],
       zoom: !!image && G.zoomed(game),
@@ -1519,8 +1456,8 @@ export class Instance extends DurableObject<Env> {
       v: meta.v,
       id: this.ctx.id.toString(),
       title: game.quiz.title,
-      code: meta.code!,
-      teacher: meta.teacher ?? "",
+      code: meta.code,
+      teacher: meta.teacher,
       background: this.imageRef(game.quiz.background),
       warnings: this.quizRecord?.warnings ?? [],
       questions: game.quiz.questions.map((q, i) => {
@@ -1576,7 +1513,6 @@ export class Instance extends DurableObject<Env> {
     const now = Date.now();
     const clock = this.clockView();
     const shownAt = run && run.phase === "question" ? run.shown?.[run.current] : undefined;
-    // The bonus is shown when the class plays with points for speed.
     const speed = G.speedScale(game);
     const ans = G.answering(game) ?? "open";
     const votes = G.lockedIn(game);
