@@ -2,7 +2,6 @@
 // windows, managed school browsers); every access here is guarded.
 
 import type { LineStatus } from "./net.ts";
-import LOCKUP from "../public/brand/classyquiz-horizontal-32-inline.svg";
 
 export function $(sel: string, root: ParentNode = document): HTMLElement {
   const el = root.querySelector(sel);
@@ -185,10 +184,13 @@ export function keepAwake(): void {
 
 /**
  * The small header of a teacher's page (site.css, .site-head): the mark and
- * the name, back to the root page. The static pages write the same markup.
+ * the name, back to the root page, as the static pages write it. Here the
+ * lockup is a picture, not inline: this script is also the students', and
+ * every tablet would carry the drawing for screens only a teacher sees.
+ * The picture follows the device's dark mode, as these screens do.
  */
 export function siteHead(): string {
-  return `<header class="site-head"><div class="in"><a class="brand" href="/">${LOCKUP}</a></div></header>`;
+  return `<header class="site-head"><div class="in"><a class="brand" href="/"><picture><source media="(prefers-color-scheme: dark)" srcset="/brand/classyquiz-horizontal-32-dark.svg"><img src="/brand/classyquiz-horizontal-32.svg" alt="classyQuiz" width="134" height="32"></picture></a></div></header>`;
 }
 
 export function siteAddress(): string {
