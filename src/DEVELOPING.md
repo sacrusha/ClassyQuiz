@@ -22,10 +22,14 @@ All commands run in `src/` unless said otherwise.
   by esbuild to ES2020 because school devices are not always current.
 - `public/`: pages and stylesheet; `scripts/`: build, dev, deploy, simulate.
 - `public/brand/`: the mark, copies of `docs/brand/svg/` (the masters, their
-  rules and the scripts that draw them). A page writes `<!--#brand file.svg-->` where
-  the mark goes inline and `build.mjs` writes the file in; a script imports
-  the file as text (`client/brand.d.ts`). Opened straight from `public/`, a
-  page shows no mark. Which file goes where: `docs/design/identity.md`.
+  rules and the scripts that draw them). A page writes `<!--#brand file.svg-->`
+  where the mark goes inline, or `<!--#brand-use file.svg-->` with the
+  drawing once at `<!--#brand-defs-->`, and `build.mjs` writes it in. Opened
+  straight from `public/`, a page shows no mark. Which file goes where:
+  `docs/design/identity.md`.
+- `public/site.css`: the shared look. Every page links it first; in `dist/`
+  it is the front of `app.css`, or written into a page without `app.css`
+  (`build.mjs`), so there is no `dist/site.css`.
 
 The site is two Cloudflare deployables. The state Worker (`classyquiz-state`)
 holds the Durable Objects (`Instance`, `JoinCode`, `UploadStats`, `SiteBudget`).
