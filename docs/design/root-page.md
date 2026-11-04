@@ -139,7 +139,12 @@ carries the fact that the AI asks back.
 
 ### Languages
 
-The block above About is in German, English, French and Italian. About and the
+The block above About is in German, English, French and Italian. The owner's
+purpose: to tell the visitor in passing that mixing languages in the
+instructions works, together with the example ask and the German example
+sheets. Why these four, in his reading: he can review three, may have access
+to someone who can review the fourth, and they are the likelier to see
+immediate use. About and the
 rest of the site stay English: the AI reads English, and the lobby, wall, Remote
 and tablets wait for the backlog's Localization. The static HTML is English. The
 visitor's choice is made with a switch top right, kept on the device
