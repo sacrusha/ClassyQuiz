@@ -794,8 +794,6 @@ placement beyond the named layouts.
 
 ## Housekeeping and process, for the next session
 
-- The merged worktrees under `.worktrees/` (guidance, after-upload, landing,
-  review-d-fixes, owner-five, winners-jump, tempo-bar) can be removed.
 - The deploy worktree is at 56ebf87; the credentials stay in the main
   checkout's `secrets/`.
 - This session's scratchpad tooling and shots are copied to
