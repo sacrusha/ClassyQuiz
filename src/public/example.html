@@ -5,17 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The example, step by step · classyQuiz</title>
 <meta name="description" content="How the example quiz was made, step by step: the exercise sheets, the conversation with the AI, the quiz it handed over, and a way to run it.">
+<link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/app.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 12 L90 84 H10Z' fill='%23d93b3b'/%3E%3C/svg%3E">
 <style>
   /* The worked example (docs/design/example-page.md): the steps of the landing's strip, each with what a teacher needs to repeat it. */
-  .ex { max-width: 42rem; margin: 0 auto; padding: 12px 16px 64px; }
-  .ex h1 { font-size: 1.7rem; line-height: 1.2; margin: .6rem 0 .3rem; }
+  .ex { max-width: 42rem; margin: 0 auto; padding: 12px 16px 64px; line-height: var(--leading-prose); }
+  .ex h1 { font-size: var(--h1); line-height: 1.2; margin: .6rem 0 .3rem; }
   .ex .lede { color: var(--muted); margin: 0 0 1.4rem; }
   .ex ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
   .ex .steps > li { position: relative; padding: 0 0 0 2.4rem; margin: 0 0 2rem; counter-increment: step; }
   .ex .steps > li::before { content: counter(step); position: absolute; left: 0; top: .1em; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .95rem; line-height: 1.7rem; text-align: center; }
-  .ex h2 { font-size: 1.25rem; margin: 0 0 .35rem; }
+  .ex h2 { font-size: var(--h2); margin: 0 0 .35rem; }
   .ex p { margin: .35rem 0; }
   .ex .note { color: var(--muted); font-size: .95rem; }
   .ex .pics { display: flex; gap: 10px; margin: .6rem 0; }
@@ -32,8 +33,8 @@
 </style>
 </head>
 <body class="follows-dark">
+<header class="site-head"><div class="in"><a class="brand" href="/">classyQuiz</a></div></header>
 <div class="ex">
-<p><a href="/">&#8249; classyQuiz</a></p>
 <h1>The example, step by step</h1>
 <p class="lede">How the example quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.</p>
 

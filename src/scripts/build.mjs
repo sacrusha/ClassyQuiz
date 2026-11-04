@@ -16,7 +16,8 @@ const watch = process.argv.includes("--watch");
 const pages = ["home", "teach", "screen", "play", "check", "example"];
 
 // Security headers for every page; scripts are revalidated so a deploy shows
-// up on the next load.
+// up on the next load. A font is kept a year: its file name carries the
+// font's version, so a new font is a new name.
 //
 // The Content-Security-Policy is a second layer behind escaping: quiz text is
 // the teacher's AI's, shown on every screen of the class, and a slip in any
@@ -44,6 +45,8 @@ const headers = `/*
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 /js/*
   Cache-Control: no-cache
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
 `;
 
 await rm(dist, { recursive: true, force: true });

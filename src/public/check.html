@@ -5,19 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>classyQuiz · network check</title>
+<link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/app.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 12 L90 84 H10Z' fill='%23d93b3b'/%3E%3C/svg%3E">
 <style>.it { border-left: 3px solid var(--rule); padding: 4px 12px; user-select: all; } #it { margin-top: 2.5rem; border-top: 1px solid var(--rule); padding-top: .5rem; }</style>
 </head>
 <body class="follows-dark">
+<header class="site-head" style="--page-w: 40rem"><div class="in"><a class="brand" href="/">classyQuiz</a></div></header>
 <main class="wrap">
-<h1 style="font-size:1.4rem;margin:.5rem 0">Does the quiz get through this network?</h1>
+<h1 style="font-size:var(--h1);line-height:1.2;margin:1rem 0 .5rem">Does the quiz get through this network?</h1>
 <p class="muted">Open this page on the school computer and on one student device, on the network the class will use. It takes a few seconds.</p>
 <ul id="results" style="list-style:none;padding:0;display:grid;gap:10px"></ul>
 <div id="verdict"></div>
 <p><button class="btn" id="again" type="button">Check again</button> <a class="btn" href="/">Back</a></p>
 <section id="it">
-<h2 style="font-size:1.15rem">If the site doesn't open at school at all</h2>
+<h2 style="font-size:var(--h2)">If the site doesn't open at school at all</h2>
 <p>Some school networks block sites they don't know. Then nothing of the site opens there, this page included, and the check above can't run: read this at home or on a phone's mobile data. The school's IT can allow the site. What to send them:</p>
 <p class="it">Please allow <span data-host>classyquiz.pages.dev</span> on the school network. It is a site for classroom quizzes: students answer on their own devices. It needs HTTPS and WebSocket connections to <span data-host>classyquiz.pages.dev</span>.</p>
 </section>
