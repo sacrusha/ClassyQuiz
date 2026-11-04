@@ -99,7 +99,7 @@ Purpose and reasons: docs/design/root-page.md.
 │ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
 │   → [wall] [tablets, fanned]                                         │
 │ Your exercise sheets · Your AI · The .zip, uploaded here ·           │
-│ What the class sees · Each student taps     See the example quiz ›   │
+│ What the class sees · Each student taps  The example, step by step › │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
@@ -124,9 +124,9 @@ Purpose and reasons: docs/design/root-page.md.
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
 - **The strip** follows the workflow: the sheet, the ask, the .zip going up
-  to the site, the wall, tablets fanned out. A card with a border and the label "See the
-  example quiz ›"; it links `/example` in the chosen language until the video
-  exists; no ▶. Below 720 px wide its frames are one row that scrolls
+  to the site, the wall, tablets fanned out. A card with a border and the label "The
+  example, step by step ›"; it links `/example` (the worked example) until the
+  video exists; no ▶. Below 720 px wide its frames are one row that scrolls
   sideways.
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
 - **Build's step 2** has two example asks: the labelled one with photos, and

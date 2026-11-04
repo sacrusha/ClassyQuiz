@@ -145,7 +145,7 @@
 </div></header>
 
 <div class="landing wide" id="landing">
-<a class="strip" id="strip" href="/example" aria-label="From an exercise sheet to the class: see the example quiz" data-t-aria="strip"><div class="frames">
+<a class="strip" id="strip" href="/example" aria-label="From an exercise sheet to the class: the example, step by step" data-t-aria="strip"><div class="frames">
   <figure class="f-sheet"><div class="pic"><img class="p2" src="/landing/sheet-2.webp" alt="" width="440" height="622"><img class="p1" src="/landing/sheet-1.webp" alt="" width="440" height="622"></div><figcaption data-t="capSheet">Your exercise sheets</figcaption></figure>
   <span class="arrow" aria-hidden="true">&rarr;</span>
   <figure class="f-ask"><div class="pic"><svg viewBox="0 0 124 200" aria-hidden="true">
@@ -179,7 +179,7 @@
   <span class="arrow" aria-hidden="true">&rarr;</span>
   <figure class="f-wall"><div class="pic"><img src="/landing/wall-en.webp" data-lang-src="wall" alt="" width="960" height="540"></div><figcaption data-t="capWall">What the class sees</figcaption></figure>
   <figure class="f-tablet"><div class="pic"><img src="/landing/tablet-en.webp" data-lang-src="tablet" alt="" width="400" height="640"></div><figcaption data-t="capTap">Each student taps</figcaption></figure>
-</div><span class="see" data-t="see">See the example quiz &rsaquo;</span></a>
+</div><span class="see" data-t="see">The example, step by step &rsaquo;</span></a>
 
 <div class="cols">
 <section class="build" aria-labelledby="build-h">
@@ -300,10 +300,10 @@ Order: fixed
   <li><strong><code>Background: forest.jpg</code></strong> is a picture behind the question, for atmosphere or context rather than content. Before the first question it lies behind every question; after a question's text, behind that question only, in place of the quiz's.</li>
 </ul>
 
-<p>Pictures are files in the <code>.zip</code> beside the quiz text, and one file can serve several questions. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. At upload, the teacher's browser scales every picture down and drops everything it carries besides the image, such as a photo's location. Limits, all checked at upload: up to 120 pictures, answer pictures included, and 16 MB for the whole <code>.zip</code>. Each picture is scaled to at most 1600 pixels on its longer side, a background to 1920 and a picture used only as an answer to 1200; a smaller picture is enlarged on the wall. The projector's layout for a question, as HTML and CSS, is at <a href="/layout">/layout</a> on this site, for trying a picture in it or showing the teacher a question as the class will see it.</p>
+<p>Pictures are files in the <code>.zip</code> beside the quiz text, and one file can serve several questions. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. At upload, the teacher's browser scales every picture down and drops everything it carries besides the image, such as a photo's location. Limits, all checked at upload: up to 120 pictures, answer pictures included, and 16 MB for the whole <code>.zip</code>. Each picture is scaled to at most 1600 pixels on its longer side, a background to 1920 and a picture used only as an answer to 1200; a smaller picture is scaled up to its place on the wall. The projector's layout for a question, as HTML and CSS, is at <a href="/layout">/layout</a> on this site, for trying a picture in it or showing the teacher a question as the class will see it.</p>
 
 <h3>Pictures on the wall</h3>
-<p>A question's picture is read from the back of a classroom, eight or ten metres away, and gets the room the question and the answer tiles leave: at most about three fifths of the screen's height, less when the question is long. A wide figure, such as a number line, goes between the question and the tiles at full width, only as tall as its shape allows. A square or upright figure, or a landscape one up to about 3:2, goes on the left at about half the screen's width, with the question and answers on the right. The site picks whichever shows the picture larger. The teacher can enlarge a picture to fill the screen for a moment. A transparent picture is shown on white.</p>
+<p>A question's picture is read from the back of a classroom, eight or ten metres away, and gets the room the question and the answer tiles leave: at most about three fifths of the screen's height, less when the question is long. A wide figure, such as a number line, goes between the question and the tiles at full width, only as tall as its shape allows. A square or upright figure, or a landscape one up to about 3:2, goes on the left at about half the screen's width, with the question and answers on the right. The site picks whichever shows the picture larger. The teacher can enlarge the question's picture to fill the screen for a moment. A transparent picture is shown on white.</p>
 
 <h3>Pictures as answers</h3>
 <p>The marks work as they do for text, pictures and text can be mixed in one question, and the question can have its own <code>Image:</code> line:</p>

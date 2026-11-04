@@ -99,11 +99,12 @@ classyQuiz isn't obvious", and that students tap after the big screen.
   second ask wanted pictures to tap, which a first-time teacher wouldn't ask for.
 - The sheet frame is the rendered pages of a sheet derived from the owner's
   (his photographs can't be published), standing in until his photographs replace them.
-- Until the video exists, the strip is one link to `/example` in the chosen
-  language, with no play mark. Teachers in the owner's testing read the strip
-  as the example but didn't see that it opens: it is a card with a border and
-  a label in the page's link style, "See the example quiz ›", which names what
-  opens without promising what `/example` shows. The pictures are WebP in `src/public/landing/`;
+- Until the video exists, the strip is one link to `/example`, the worked
+  example (`design/example-page.md`), with no play mark. Teachers in the
+  owner's testing read the strip as the example but didn't see that it opens:
+  it is a card with a border and a label in the page's link style, "The
+  example, step by step ›", named for what a teacher looks for (a walkthrough),
+  not for what the page is to us ("how it was made"). The pictures are WebP in `src/public/landing/`;
   the wall and tablet exist in all four languages.
 - Layout: a grid of two rows so the pictures stand on one line whatever their
   captions' lengths, sized by `--h` to fit the width. Below 720 px wide the
@@ -354,10 +355,6 @@ the teacher's concern.
   cheer at the answer, the ranking as closure. Whether the tool's output fits the
   site's content-security policy (its own scripts only) is the one technical check;
   whether the video's last frame links `/example` is open.
-- The worked example behind one link is planned (backlog v4 item 10). Today
-  `/example` shows the example quiz on the check screen without codes, read in
-  the visitor's browser from a static `.zip` in the chosen language, with the
-  `.zip` to download; nothing is booked against the site's budget.
 - Whether one own copy per school, set up once by a colleague or IT, should be said
   on `/own-copy`: many teachers have neither an AI that runs programs nor a
   computer where they may install.
