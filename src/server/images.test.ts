@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { imageInfo, matchImages } from "./images.ts";
 import { parseQuiz } from "../quiz/format.ts";
-import { MAX_IMAGE_BYTES } from "../shared/protocol.ts";
+import { MAX_IMAGE_BYTES, MAX_SMALL_BYTES, PACK_BYTES } from "../shared/protocol.ts";
 
 function pngHeader(w: number, h: number): Uint8Array {
   const b = new Uint8Array(33);
@@ -109,26 +109,31 @@ Image: q.png
 - Image: a.png
 `).quiz;
   const names = ["q", "a", "b", "c", "d", "e", "f"];
-  const small = (extra: number) => {
-    const b = new Uint8Array(33 + extra);
+  /** A small copy of its own bytes (told apart by `fill`), `extra` bytes beyond a PNG header. */
+  const small = (extra: number, fill: number) => {
+    const b = new Uint8Array(33 + extra).fill(fill);
     b.set(pngHeader(320, 320));
     return b;
   };
+  // f's small copy is over the cap and is dropped.
+  const smalls = names.map((n, i) => ({ name: `${n}.png`, bytes: small(n === "f" ? MAX_SMALL_BYTES + 100_000 : 290_000, i + 1) }));
   const r = matchImages(
     q,
     names.map((n) => ({ name: `${n}.png`, bytes: pngHeader(600, 600) })),
     false,
-    [...names.map((n) => ({ name: `${n}.png`, bytes: small(290_000) })), { name: "stray.png", bytes: pngHeader(4, 4) }, { name: "toobig.png", bytes: small(400_000) }],
+    [...smalls, { name: "stray.png", bytes: pngHeader(4, 4) }],
   );
   assert.ok(r.ok);
-  // Seven files, each stored once; five small copies of 290 KB fill a pack, the sixth starts the next.
-  assert.equal(Object.keys(r.files).filter((k) => k.startsWith("img:")).length, 7);
-  assert.equal(r.packs, 2);
-  assert.deepEqual(r.index["a.png"].small, { type: "image/png", w: 320, h: 320, p: 0, o: 0, l: 290_033 });
-  assert.deepEqual(r.index["q.png"].small, { type: "image/png", w: 320, h: 320, p: 0, o: 3 * 290_033, l: 290_033 });
-  assert.deepEqual(r.index["f.png"].small, { type: "image/png", w: 320, h: 320, p: 1, o: 290_033, l: 290_033 });
-  assert.equal(r.files["pack:0"].byteLength, 5 * 290_033);
-  assert.equal(r.files["pack:1"].byteLength, 2 * 290_033);
+  assert.equal(Object.keys(r.files).filter((k) => k.startsWith("img:")).length, 7, "seven files, each stored once");
+  assert.equal(r.index["f.png"].small, undefined, "a small copy over the cap is dropped");
+  assert.equal(r.packs, 2, "six copies of 290 KB don't fit one pack");
+  for (let p = 0; p < r.packs; p++) assert.ok(r.files[`pack:${p}`].byteLength <= PACK_BYTES, `pack ${p} within the size cap`);
+  for (const { name, bytes } of smalls) {
+    const s = r.index[name].small;
+    if (name === "f.png") continue;
+    assert.ok(s, `${name} has its small copy`);
+    assert.deepEqual(r.files[`pack:${s.p}`].slice(s.o, s.o + s.l), bytes, `${name}'s small copy is cut back out of its pack`);
+  }
   assert.deepEqual(r.warnings, []);
 });
 

@@ -1,4 +1,4 @@
-// Upload attempts by format (backlog v1 item 2): one tiny Durable Object for
+// Upload attempts by format: one tiny Durable Object for
 // the whole site, holding per format a count and the first and last day it
 // was seen. No content, no identity, no time of day.
 

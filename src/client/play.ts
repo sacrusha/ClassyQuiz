@@ -2,18 +2,15 @@
 // (docs/user-flow.md §1, docs/design/teacher-devices.md):
 //
 //   /play#63953      the class code: a student's device, straight to an
-//                    avatar, then colours. Built for young readers on shared
-//                    tablets: pictures, colours, shapes and numbers. The
-//                    class code never reaches a teacher role.
+//                    avatar, then colours. It never reaches a teacher role.
 //   /play#6395347    the teacher code, the class code and two digits: a
 //                    teacher device. When one tab shows and steers, it asks
 //                    "Show the quiz here, or steer it from here?"; otherwise
 //                    it takes the role that is free.
 //   /play?win=1#…    the same from "open a second screen in a new window": a window opened by
 //                    a teacher tab, whose copy of that tab's role isn't its own.
-//   /teacher#63953   the old way in, kept for old links: it asks for the
-//                    teacher code, except on the device that uploaded the
-//                    quiz, which comes in with the quiz's secret.
+//   /teacher#63953   asks for the teacher code, except on the device that
+//                    uploaded the quiz, which comes in with the quiz's secret.
 
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
@@ -68,10 +65,8 @@ let unreachedTimer: number | undefined;
 // side is the wall's "Nobody in yet?" line. A teacher device is told only
 // what is wrong. Gone once the line is back.
 
-/** How long without the quiz before the words show. */
 const UNREACHED_MS = 15_000;
 const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell your teacher.");
-/** The offline banner's words, after UNREACHED_MS. */
 const bannerWords = document.createElement("span");
 bannerWords.hidden = true;
 bannerWords.textContent = unreachedText();
@@ -98,10 +93,10 @@ let refused: { reason: string; phase: string } | null = null;
  * on this device, so a slow line costs no speed.
  */
 let shown: { q: number; at: number } | null = null;
-/** Last call ran out on this device: the buttons stop taking taps until the server says otherwise. */
+/** Closes the buttons when Last call runs out on this device. */
 let outTimer: number | undefined;
 /**
- * Dressing the animal in the lobby (backlog v2 item 5, docs/design/class-and-wall.md):
+ * Dressing the animal in the lobby (docs/design/class-and-wall.md):
  * the look the child picked, shown at once, until the server's view shows
  * it back; the latest pick wins. One `dress` is in flight at a time, so a
  * burst of taps sends the first and then the last.
@@ -147,7 +142,6 @@ async function start(): Promise<void> {
         continue;
       }
     } catch {
-      /* offline: try again */
       const words = document.getElementById("unreached");
       if (words && Date.now() - joinFrom >= UNREACHED_MS) {
         words.textContent = unreachedText();
@@ -165,7 +159,6 @@ async function start(): Promise<void> {
     } else {
       const held = tabRole.get(instance);
       if (held) {
-        // This tab holds a role in this quiz: back to it.
         location.replace(rolePage(instance, held.role));
         return;
       }
@@ -268,7 +261,6 @@ function onMessage(m: ServerMessage): void {
     // The server's word on the last tap: stored, so no longer on its way.
     const stored = view.reveal ? view.reveal.mine : q?.mine;
     if (waiting && q && waiting.q === q.q && stored === waiting.choice) waiting = null;
-    // Answer pictures: fetched as soon as a view names them, in the lobby.
     wantPacks(view.packs, packsArrived);
     // A picture answer's time for speed runs from when its pictures are here.
     if (q && q.answering !== "reading" && q.sinceMs !== null && shown?.q !== q.q && picturesHere(q.pics)) shown = { q: q.q, at: performance.now() - q.sinceMs };
@@ -289,9 +281,6 @@ function onMessage(m: ServerMessage): void {
       <p class="muted">${esc(m.reason)}</p><a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a></div>`;
   }
 }
-
-// ---------------------------------------------------------------------------
-// Before a player or a role
 
 function showWaiting(): void {
   main.innerHTML = `<div class="center"><div class="dot" data-status="connecting" style="width:28px;height:28px"></div><p class="muted" id="unreached" hidden></p></div>`;
@@ -471,9 +460,6 @@ function claim(id: string): void {
   });
 }
 
-// ---------------------------------------------------------------------------
-// The student's device
-
 /**
  * A pack of answer pictures arrived: the pictures on screen get their
  * source in place (no redraw, which could swallow a tap), and the time for
@@ -530,7 +516,6 @@ function arrangePictureButtons(box: HTMLElement, pics: (PackPic | null)[]): void
   });
 }
 
-/** The answer this device chose, as its picture, under the verdict. */
 function chosenPicture(i: number): string {
   const p = view?.question?.pics?.[i];
   return p ? `<div class="row" style="justify-content:center"><div class="verdict-pic a${i}">${packImg(p)}</div></div>` : "";
@@ -591,7 +576,7 @@ function render(): void {
   }
   clearTimeout(outTimer);
   if (v.phase === "question" && v.question && v.question.answering === "reading") {
-    // The class reads the question on the board; the answers come with Go.
+    // The class reads the question on the board; the answers come when the teacher shows them.
     main.innerHTML = `${top}<div class="center"><div class="big reading">${ICON.eye}</div></div>`;
     return;
   }
@@ -665,7 +650,6 @@ function render(): void {
     const cls = r.void ? "void" : r.mine === null ? "none" : r.counts[r.mine] ? "right" : "wrong";
     const icon = r.void ? ICON.void : r.mine === null ? "–" : r.counts[r.mine] ? ICON.check : ICON.cross;
     const mine = r.mine !== null ? `<div class="row verdict-shape" style="justify-content:center"><span class="a${r.mine}" style="color:var(--ans)">${shapeSvg(r.mine)}</span></div>${chosenPicture(r.mine)}` : "";
-    // Points for speed: what this answer brought, the quicker the more.
     const gained = r.points ? `<div class="big gained">+${r.points}</div>` : "";
     main.innerHTML = `${top}<div class="center"><div class="verdict ${cls}">${icon}</div>${gained}${mine}</div>`;
     return;
@@ -680,7 +664,6 @@ function render(): void {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Dressing the animal, in the lobby: a background shape and a hat, the same
 // menu for everyone, no words. Built once and patched in place: a view
 // arriving (a classmate joining changes "of") must not replace a picture

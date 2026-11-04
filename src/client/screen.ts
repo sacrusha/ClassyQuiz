@@ -1,9 +1,9 @@
-// The Projector: what the class sees (docs/user-flow.md §3.3, §3.4). No key
-// before the reveal. While no Remote is there it steers itself: in the lobby
-// it is the single tab's two screens, the teacher's check and then, one tap
-// on, the class's join screen (docs/design/teacher-devices.md, "The single tab: check, then join"); during the quiz a
-// slim bar carries the next step. A clicker or the keyboard moves the quiz on
-// at any time; the quiz's code stays in a corner throughout.
+// The Projector: what the class sees (docs/user-flow.md §3.3, §3.4). While no
+// Remote is there it steers itself: in the lobby it is the single tab's two
+// screens, the teacher's check and then, one tap on, the class's join screen
+// (docs/design/teacher-devices.md, "The single tab: check, then join"); during
+// the quiz the steering bar. A clicker or the keyboard moves the quiz on
+// during the quiz; the quiz's code stays in a corner throughout.
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
@@ -97,9 +97,6 @@ function onMessage(m: ServerMessage): void {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Drawing
-
 let lastStepKey = "";
 function render(): void {
   const v = view;
@@ -171,8 +168,8 @@ function renderFix(v: ScreenView): void {
 function qrSvg(code: string): string {
   const qr = qrcode(0, "M");
   // Straight to the student page: the root page would load the whole
-  // guidance first, on the step the owner calls the slowest (item 4). The
-  // root still forwards "/#code" for anyone who types it.
+  // guidance first, and joining must be fast. The root still forwards
+  // "/#code" for anyone who types it.
   qr.addData(`${location.origin}/play#${code}`);
   qr.make();
   return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
@@ -192,7 +189,7 @@ function comeBack(): string {
 /**
  * The teacher code at rest, in one sentence naming both needs
  * (docs/design/teacher-devices.md, "The single tab: check, then join"); it doesn't guess which device this is. "Open a second
- * screen in a new window" (the owner's words) opens a window that asks the same question as any other
+ * screen in a new window" opens a window that asks the same question as any other
  * device; it is always there, so a laptop that gains its second screen after
  * the check finds it where it was (hidden on a phone).
  */
@@ -210,7 +207,6 @@ function setLobby(screen: "check" | "join", draw = true): void {
   render();
 }
 
-/** The lobby while this screen steers: the check, or the join screen. */
 function renderManagedLobby(v: ScreenView): void {
   lobbyKey = "";
   if (lobbyScreen === "check") renderCheck(v);
@@ -218,11 +214,10 @@ function renderManagedLobby(v: ScreenView): void {
 }
 
 /**
- * Check, the teacher's (docs/design/teacher-devices.md, "The single tab: check, then join"): the right quiz (title and
- * how many questions, which tells two versions apart), the class code small
- * ("upload is start": read aloud, the class joins without the tap), the
- * teacher code at rest, and the questions with their fixes.
- * "Let the class in" is the one tap to the join screen: the class may join now.
+ * The check: the teacher's page to confirm it is the right quiz before the
+ * class joins (docs/design/teacher-devices.md, "The single tab: check, then
+ * join"). The class code is small because it may be read aloud, and the class
+ * joins without the tap. "Let the class in" is the one tap to the join screen.
  */
 function renderCheck(v: ScreenView): void {
   const t = v.steer!;
@@ -243,7 +238,7 @@ function renderCheck(v: ScreenView): void {
   steer.noteStep(t);
 }
 
-// --- nobody in yet (docs/design/root-page.md, "Network help, where failure shows"; backlog v4 item 4): the laptop got
+// Nobody in yet (docs/design/root-page.md, "Network help, where failure shows"): the laptop got
 // through, the tablets may not (a student network with a stricter filter).
 // After NOBODY_MS with the class's join screen up and nobody in, one muted
 // line under the avatars; gone with the first avatar. It shows on a mirrored
@@ -255,7 +250,7 @@ const NOBODY_MS = 90_000;
  * When this tab first let the class in to an empty lobby; the wait
  * counts from there, across ‹ Questions and back. Each class starts its own:
  * the count goes with the first avatar and with the run's start, so "Again
- * with another class" waits its 90 s too (review D #3).
+ * with another class" waits its 90 s too.
  */
 let joinSince: { code: string; at: number } | null = null;
 let nobodyTimer: number | undefined;
@@ -284,9 +279,9 @@ function nobodyLine(): string {
 }
 
 /**
- * Join, the class's: today's fold, the code large, the avatars arriving, and
- * Start. The class's screen ends at the fold; "‹ Questions" goes back to the
- * check, "A second device ›" shows the teacher code in a sheet.
+ * The class's join screen: QR, code, avatars and Start. The part the class
+ * sees ends at the fold; "‹ Questions" goes back to the check, "A second
+ * device ›" shows the teacher code in a sheet.
  */
 function renderJoin(v: ScreenView): void {
   const t = v.steer!;
@@ -363,27 +358,25 @@ function renderQuestion(v: ScreenView): void {
     barKey = "";
     delete main.dataset.skeleton;
     // The bar has a fixed height (app.css, #qbar), so the avatars landing in
-    // it, the count appearing at Go and the reveal move nothing below.
+    // it, the count appearing when the answers are shown and the reveal move nothing below.
     main.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="strip" id="strip"></span><span id="qicons"></span>
       <span class="qcount" id="qcount">${ICON.person} <span id="answered"></span></span></div><div class="stage" id="stage"></div>`;
   }
   // The bar first: the layout measures the room it leaves.
   const reading = q.answering === "reading";
-  const timeUp = !r && !v.votes && q.answering === "closed";
-  const bk = JSON.stringify([q.n, q.total, !!r?.void, timeUp]);
+  const bk = JSON.stringify([q.n, q.total, !!r?.void]);
   if (bk !== barKey) {
     barKey = bk;
     $("#qpos").textContent = `${q.n} / ${q.total}`;
-    $("#qicons").innerHTML = `${r && r.void ? `<span class="voided">${ICON.void}</span>` : ""}${timeUp ? `<span class="timeup">${ICON.timer}</span>` : ""}`;
+    $("#qicons").innerHTML = r && r.void ? `<span class="voided">${ICON.void}</span>` : "";
   }
-  // Nobody can answer while the class reads the question.
   $("#qcount").hidden = reading;
   // "Of" counts the devices that are there (or answered and went away), so a
-  // dead tablet doesn't hold it below full; an older server sends no `of`.
-  const of = typeof v.of === "number" ? v.of : v.players.length;
+  // dead tablet doesn't hold it below full.
+  const of = v.of;
   $("#answered").textContent = `${v.answered} / ${of}`;
   $("#qcount").classList.toggle("all", of > 0 && v.answered >= of);
-  renderStrip(q.q, reading ? [] : (v.answeredBy ?? []), of);
+  renderStrip(q.q, reading ? [] : v.answeredBy, of);
   const stage = $("#stage");
   if (!stage.dataset.laid) {
     stage.dataset.laid = "1";
@@ -396,7 +389,7 @@ function renderQuestion(v: ScreenView): void {
 }
 
 /**
- * Who has answered (v2 item 7): each avatar pops into the bar as its answer
+ * Who has answered: each avatar pops into the bar as its answer
  * lands, in the order they arrive. Only those who answered: nobody is shown
  * as missing (the count says how many, the Remote who). The mark says the
  * answer arrived, never which one, and a change of mind changes nothing.
@@ -446,16 +439,11 @@ function stripSize(n: number, w: number, h: number): number {
   return 8;
 }
 
-// ---------------------------------------------------------------------------
-// The winners jump (backlog v4 item 9, the class's own wish): after every
-// reveal, the avatars of everyone whose answer counts jump for a few
-// seconds, in a band over the top of the stage, where the question was read.
-// The tiles with the key stay in view. Up to ten are as large as the band
-// allows and apart (in two rows on a narrow wall); more get smaller, then
-// overlap and blur together, which the owner accepts (client/look.ts,
-// partySize). In the lobby's order, so the first isn't the fastest. Once
-// per key: a view that comes again (a tick, a reconnect) doesn't restart
-// it; a fix of the key does, for its new winners.
+// The winners jump: after every reveal, the avatars of those whose answer
+// counts jump for a few seconds in a band over the top of the stage; the tiles
+// with the key stay in view (look.ts, partySize). In the lobby's order, so
+// the first isn't the fastest. Once per key: a view that comes again (a tick,
+// a reconnect) doesn't restart it; a fix of the key does, for its new winners.
 
 /** How long they jump, before the band goes (ms); app.css times the jumps. */
 const PARTY_MS = 4200;
@@ -471,13 +459,13 @@ function renderParty(v: ScreenView): void {
   const r = v.phase === "reveal" ? v.reveal : null;
   if (!r) partyKey = "";
   const byId = new Map(v.players.map((p) => [p.id, p.avatar]));
-  const winners = (r && !r.void ? (r.winners ?? []) : []).flatMap((id) => (byId.has(id) ? [{ id, avatar: byId.get(id)! }] : []));
+  const winners = (r && !r.void ? r.winners : []).flatMap((id) => (byId.has(id) ? [{ id, avatar: byId.get(id)! }] : []));
   const stage = document.getElementById("stage");
   if (!r || !stage || v.zoom || winners.length === 0) {
     endParty();
     return;
   }
-  const key = `${v.current}|${r.winners!.join()}`;
+  const key = `${v.current}|${r.winners.join()}`;
   if (key === partyKey) return;
   partyKey = key;
   endParty();
@@ -517,7 +505,7 @@ function renderParty(v: ScreenView): void {
 }
 
 /**
- * The countdown along the top edge of the wall, over everything: it takes
+ * Last call's bar along the top edge of the wall, over everything: it takes
  * no room from the question, its picture or the tiles. Drawn again only when
  * it starts, stops or runs out; in between, CSS drains it.
  */
@@ -543,7 +531,7 @@ function renderClock(v: ScreenView): void {
 }
 
 /**
- * The votes, then the reveal, on the tiles (v2 item 6). The votes: how many
+ * The votes, then the reveal, on the tiles. The votes: how many
  * picked each, with a bar, and no answer marked or faded. The reveal adds a
  * tick on the ones that count and fades the others; the bars stay. The mark
  * and count have their place at the right of every tile from the start, so
@@ -565,7 +553,7 @@ function markTiles(r: ScreenView["reveal"], votes: number[] | null): void {
     }
     const width = `${(100 * dist[i]) / max}%`;
     if (!fill) {
-      // Grows from nothing at the votes (or at the reveal, from a page that skipped them).
+      // Grows from nothing when the spread first shows.
       const f = document.createElement("span");
       f.className = "fill";
       f.style.width = "0";
@@ -655,16 +643,11 @@ function layQuestion(stage: HTMLElement, q: NonNullable<ScreenView["question"]>)
 }
 
 /**
- * Pictures as answers (v3 item 1). Each tile shows the picture on the
- * answer's colour, which shows wherever the picture is transparent (the
- * creator's choice: a white ground is drawn into the picture), its shape
- * beside or above the picture, and the room for the votes' count and the
- * tick reserved from the start, so the votes and the reveal move nothing. The tiles are arranged
- * by the pictures' shape (client/answergrid.ts). A question's own picture
- * goes above the tiles: beside the question's text when that leaves it
- * larger, else between text and tiles; the room is shared so that the
- * question's picture and the smallest answer picture come out about alike.
- * A text answer among them ("none of these") takes a picture's place.
+ * Pictures as answers (docs/design/pictures.md): tiles arranged by the
+ * pictures' shape (answergrid.ts), the question's own picture beside its text
+ * or between text and tiles, the room shared so that it and the smallest
+ * answer picture come out about alike. A text answer among them takes a
+ * picture's place.
  */
 function layPictureAnswers(stage: HTMLElement, q: NonNullable<ScreenView["question"]>, pics: (ImageRef | null)[]): void {
   const aspects = pics.map((p) => (p ? p.w / p.h : null));
@@ -915,9 +898,6 @@ function renderBar(v: ScreenView, managing: boolean): void {
   else wallPresses.noteView(screenState(v));
 }
 
-// ---------------------------------------------------------------------------
-// Acting
-
 function menu(v: ScreenView): void {
   const items: MenuItem[] = v.steer ? steerItems(v.steer, steer, true) : [];
   if (v.question?.image && (v.phase === "question" || v.phase === "reveal")) {
@@ -948,7 +928,6 @@ function showPlayers(): void {
   document.body.appendChild(back);
 }
 
-/** A short text in a sheet, for the teacher to read and close. */
 function showNote(html: string): void {
   document.querySelector(".sheet-back")?.remove();
   const back = document.createElement("div");
@@ -1013,24 +992,19 @@ for (const area of [main, sbar]) {
   });
 }
 
-// Clicker and keyboard: the one key is Play (backlog v4 item 6), judged
-// like a press of the button: a bounce or a key landing on a screen that
-// just moved does nothing, a deliberate double press steps twice
-// (steps.ts, Presses).
-//
-// A stray key must not move the quiz (review C): a teacher leaning on the
-// laptop, a shortcut. So no key starts the quiz from the lobby: Start is the
-// lobby's button, pressed once while the class is still joining. A key
-// held with Ctrl, Alt or the Windows/Cmd key is a shortcut, not a step.
-// While a Remote steers, the teacher is on the phone and the laptop's big
-// keys (Space, Enter, N) are the likeliest strays; only a clicker's keys
-// (PageDown, and the arrows some clickers send) move on from here.
+// Clicker and keyboard: Space, Enter, →, ↓, PageDown and N are Play, judged
+// like a press of the button (steps.ts, Presses). No key starts the quiz from
+// the lobby: a stray key must not move it (a teacher leaning on the laptop),
+// and Start is pressed once while the class is still joining. A key with
+// Ctrl, Alt or Cmd is a shortcut, not a step. While a Remote steers, the
+// teacher is on the phone and the laptop's big keys (Space, Enter, N) are the
+// likeliest strays; only a clicker's keys (PageDown, →, ↓) move on from here
+// (docs/design/question-flow.md, "The steering bar", Keys).
 const PLAY_KEYS = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
 const CLICKER = new Set(["PageDown", "ArrowRight", "ArrowDown"]);
 /** The clicker's presses while a Remote steers; while this wall steers, the Steer's own. */
 const wallPresses = new Presses();
 
-/** Where the question is, from the wall's own view. */
 function screenState(v: ScreenView): StepState {
   const q = v.phase === "question" ? v.question : null;
   return {
@@ -1068,7 +1042,6 @@ document.addEventListener("keydown", (e) => {
   if (from) void line.send({ op: "play", at: atOf(from) });
 });
 
-/** The question's picture over the whole screen, or back. */
 function toggleZoom(): void {
   const v = view;
   if (!v || !line || !v.question?.image || (v.phase !== "question" && v.phase !== "reveal")) return;

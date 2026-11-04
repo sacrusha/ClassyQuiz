@@ -244,8 +244,8 @@ bar, all in the open list.
     - "Make me a quiz for classyquiz.pages.dev" was read as a publish target
       and set aside; the model fetched the page only when told to read it.
       The examples now begin `Read <address>.` and say "a classyQuiz" (commit
-      ddededf, on main, not deployed; production is at 56ebf87). To test is in
-      the open list.
+      ddededf, on main, not deployed; production is at 56ebf87); the README's
+      example says the same.
     - Transparent answer pictures: a blueish-green marker vanished on the blue
       tile. The guidance already says tiles are shuffled across four colours
       (`src/public/index.html`, "Pictures as answers"); what remains is to
@@ -297,9 +297,6 @@ uncertainty, it is pointed to, not restated.
 With the owner:
 - The quiz's background in the lobby and at the rankings: built that way as
   an implementer's call, not yet seen by the owner (`design/pictures.md`).
-- The README's example prompt still says "…for <address>", the form the
-  Sonnet test read as a publish target; change now, or after the `Read
-  <address>.` test below.
 - The implementer's two choices on the bar: Last call locks in early once
   everyone present has answered; points for speed run over a fixed 20 s from
   the answers appearing (`design/question-flow.md`).
@@ -318,9 +315,6 @@ With the owner:
   then.
 - Verify the guidance with other AIs (ChatGPT, Gemini, Copilot); ChatGPT
   currently breaks with two attachments, maybe temporarily (`design/guidance-page.md`).
-- The `Read <address>.` test (v4 item 11): the same sheet against "for it" /
-  "with it", "Have a look at" and "Please create a classyQuiz.pages.dev from
-  these sheets. …"; observable: the page fetched before the first build.
 - Deploy commit ddededf (landing examples open with "Read <address>").
 - The daylight photographs of the sheet, the turn-2 ask (v4 item 10), the
   storyboard video brief from the real screens (its first beat needs a screen
@@ -349,7 +343,6 @@ Review E's follow-ups on the bar (`design/question-flow.md`):
 - The capacity sentence ("a few dozen classes a day", landing and /own-copy)
   is not re-derived now that a question has four or five steps.
 - A 320 px wall still clips the ranking.
-- Stale "Go" / "countdown" / "Show votes" words in code comments.
 
 Needs a real classroom or real devices, nobody has run it:
 - Android tablets and phones: the file picker with a zip downloaded from a chat

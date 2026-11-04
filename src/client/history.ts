@@ -1,5 +1,5 @@
-// This device's history with the site, for the own-copy line (backlog v4
-// item 4; docs/design/root-page.md, "The own copy"): the days it uploaded a quiz, kept on the device
+// This device's history with the site, for the own-copy line
+// (docs/design/root-page.md, "The own copy"): the days it uploaded a quiz, kept on the device
 // and never sent. Dates only: no titles, no codes. cq.quizzes can't serve,
 // it keeps 20 entries and forgets finished quizzes.
 
@@ -14,7 +14,6 @@ function today(now = new Date()): string {
   return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
 }
 
-/** The days this device uploaded, newest first. */
 export function uploadDays(): string[] {
   const v = store.get<unknown>(KEY);
   return Array.isArray(v) ? v.filter((d): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) : [];

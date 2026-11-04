@@ -1,6 +1,5 @@
-// Small helpers shared by the pages: building DOM, browser storage that may
-// be missing (private windows, managed school browsers), and keeping the
-// screen awake.
+// Helpers shared by the pages. Browser storage may be missing (private
+// windows, managed school browsers); every access here is guarded.
 
 import type { LineStatus } from "./net.ts";
 
@@ -43,27 +42,23 @@ export const store = {
   remove(key: string): void {
     try {
       localStorage.removeItem(key);
-    } catch {
-      /* ignore */
-    }
+    } catch {}
   },
 };
-
-// --- the quizzes pasted on this device (root page: resume, delete)
 
 export interface SavedQuiz {
   id: string;
   /** Lets this device delete the quiz and ask when it closes, and come back to it without the teacher code. */
   secret: string;
   code: string;
-  /** The teacher code's two digits; absent on entries saved before teacher codes. */
+  /** The teacher code's two digits. */
   teacher?: string;
   title: string;
   at: number;
 }
 
 export function savedQuizzes(): SavedQuiz[] {
-  // Entries from before codes were per quiz have no code; they can't be resumed.
+  // An entry without a code can't be resumed.
   return (store.get<SavedQuiz[]>("cq.quizzes") ?? []).filter((q) => typeof q.code === "string");
 }
 
@@ -81,8 +76,8 @@ export function findQuiz(id: string): SavedQuiz | null {
   return savedQuizzes().find((x) => x.id === id) ?? null;
 }
 
-// --- the teacher code (docs/design/teacher-devices.md, "One entry: the teacher code"): the class code and two
-// digits, typed in the students' box, which routes by length
+// The teacher code (docs/design/teacher-devices.md, "One entry: the teacher code"): the class code and two
+// digits, typed in the students' box, which routes by length.
 
 /** "63953 47", as the teacher reads it: the class's code, then their own two digits. */
 export function teacherCode(code: string, teacher: string): string {
@@ -94,7 +89,7 @@ export function teacherEntry(code: string, teacher: string, extra = ""): string 
   return `/play${extra}#${code}${teacher}`;
 }
 
-// --- the role this tab holds (user flow §1). Per tab, not per device: two
+// The role this tab holds (user flow §1). Per tab, not per device: two
 // windows of one browser may hold the Projector and the Remote. sessionStorage
 // survives a reload of the tab and goes with it when it's closed.
 
@@ -125,9 +120,7 @@ export const tabRole = {
   remove(instance: string): void {
     try {
       sessionStorage.removeItem(`cq.role.${instance}`);
-    } catch {
-      /* ignore */
-    }
+    } catch {}
   },
 };
 
@@ -153,13 +146,9 @@ export const tabLobby = {
   },
 };
 
-/** Where a tab holding a role shows it. */
 export function rolePage(instance: string, role: "screen" | "remote"): string {
   return `/${role === "screen" ? "screen" : "teach"}?q=${instance}`;
 }
-
-// --- keeping the screen on (projector during a long explanation, a tablet
-// waiting for the next question)
 
 let lock: WakeLockSentinel | null = null;
 /** Asleep (net.ts): the screen may turn off; a device left on doesn't keep its line open all day. */
@@ -190,7 +179,6 @@ export function keepAwake(): void {
   document.addEventListener("keydown", () => void request());
 }
 
-/** The address a person types, without "https://". */
 export function siteAddress(): string {
   return location.host;
 }

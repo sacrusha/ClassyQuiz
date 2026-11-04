@@ -1,6 +1,6 @@
 // Upload attempts are counted by format, with content and identity excluded,
 // so whether anyone tries another format is a fact to look up rather than a
-// guess (backlog v1 item 2). The format is one word from this closed list;
+// guess. The format is one word from this closed list;
 // the server stores nothing else.
 
 export const UPLOAD_FORMATS = [

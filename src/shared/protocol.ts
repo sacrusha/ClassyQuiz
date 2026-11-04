@@ -42,11 +42,10 @@ export interface At {
   /**
    * The class was reading the question, its answers hidden. Showing them,
    * Last call, the lock-in and the reveal share a phase, so a press sent
-   * twice must not take two steps. Absent: not compared (the picture's zoom;
-   * older pages).
+   * twice must not take two steps. Absent: not compared (the picture's zoom).
    */
   reading?: boolean;
-  /** Answering was locked in, the spread on the wall and the key not yet (v2 item 6). Absent: not compared. */
+  /** Answering was locked in, the spread on the wall and the key not yet. Absent: not compared. */
   votes?: boolean;
   /** Last call was running. Absent: not compared. */
   lastCall?: boolean;
@@ -56,22 +55,15 @@ export type Command =
   // steering: the Remote, or the Projector while no Remote is there
   | { op: "begin"; at: At }
   /**
-   * Play, the steering bar's step (backlog v4 item 6): one slice on from
-   * `at`. Show answers, Lock in, Reveal, Ranking, Next; the final ranking
-   * after the last question's reveal.
+   * Play, the steering bar's step: one slice on from `at`. Show answers,
+   * Lock in, Reveal, Ranking, Next; the final ranking after the last
+   * question's reveal.
    */
   | { op: "play"; at: At }
-  /** Last call: the answers shown if they weren't, and fifteen seconds, then answering locks in by itself. */
+  /** Last call: the answers shown if they weren't, and LAST_CALL_MS later answering locks in by itself. */
   | { op: "lastCall"; at: At }
   /** Points for speed on or off, in the lobby (the join screen's switch). */
   | { op: "speed"; value: boolean }
-  // A page from before the steering bar: Go shows the answers, the votes lock in.
-  | { op: "go"; at: At }
-  | { op: "votes"; at: At }
-  /** The key: from the lock-in, or straight from answering (a page from before the lock-in). */
-  | { op: "reveal"; at: At }
-  | { op: "next"; at: At }
-  | { op: "ranking"; at: At }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
   /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
@@ -85,9 +77,6 @@ export type Command =
   | { op: "zoom"; value: boolean; at: At }
   | { op: "remove"; player: string }
   | { op: "endInstance" }
-  // the Projector: the clicker or keyboard's next usual step, at any time
-  // (a page from before the steering bar; now "play", also from the wall)
-  | { op: "advance"; at: At }
   /** Projector or Remote, while both tabs are there: the wall becomes the steering tab and the steering tab the wall. */
   | { op: "swap" }
   /** Projector or Remote: give the role up. */
@@ -208,7 +197,7 @@ export interface QuestionView {
   text: string;
   /** In the order on screen; "" for a picture answer. */
   answers: string[];
-  /** Pictures as answers (v3 item 1), in the order on screen, null for a text answer; absent when the question has none. */
+  /** Pictures as answers, in the order on screen, null for a text answer; absent when the question has none. */
   pics?: (ImageRef | null)[];
   image: ImageRef | null;
   /** Behind the question: its own background, else the quiz's. */
@@ -235,10 +224,9 @@ export interface RevealView {
   void: boolean;
   /**
    * The players whose answer counts, in the lobby's order: they jump on the
-   * wall (backlog v4 item 9). Follows a fix of the key; empty for a void
-   * question. Absent from a server from before.
+   * wall. Follows a fix of the key; empty for a void question.
    */
-  winners?: string[];
+  winners: string[];
 }
 
 export interface RankingView {
@@ -274,14 +262,14 @@ export interface ScreenView {
   answered: number;
   /**
    * Who has answered the open question, in the order the answers arrived:
-   * each avatar pops in on the wall as its answer lands (v2 item 7). Only
-   * those who answered; nobody is shown as missing.
+   * each avatar pops in on the wall as its answer lands. Only those who
+   * answered; nobody is shown as missing.
    */
   answeredBy: { id: string; avatar: Avatar }[];
   /** "answered of n": the players whose device is there, or who have answered; away devices don't count. */
   of: number;
   question: QuestionView | null;
-  /** The votes on the wall, in screen order, before the key (v2 item 6); null otherwise. */
+  /** The votes on the wall, in screen order, before the key; null otherwise. */
   votes: number[] | null;
   reveal: RevealView | null;
   ranking: RankingView | null;
@@ -298,7 +286,7 @@ export interface TeacherQuestion {
   pictureHidden: boolean;
   /** What the class sees behind it: its own background, else the quiz's. */
   background: ImageRef | null;
-  /** image: a picture answer's (v3 item 1); null for one whose file was left out. */
+  /** image: a picture answer's; null for one whose file was left out. */
   answers: { text: string; counts: boolean; marked: boolean; image?: ImageRef | null }[];
   void: boolean;
   skip: boolean;
@@ -351,8 +339,8 @@ export interface PlayerView {
   removed: boolean;
   me: { avatar: Avatar; score: number; place: number; of: number } | null;
   /**
-   * The answer pictures' small copies, in packs (v3 item 1): fetched once,
-   * as soon as a view names them, so they are on the device before Go.
+   * The answer pictures' small copies, in packs: fetched once, as soon as a
+   * view names them, so they are on the device before the answers are shown.
    * Absent when the quiz has no picture answers.
    */
   packs?: string[];
@@ -407,7 +395,7 @@ export const IMAGE_LONG_SIDE = 1600;
 /** A background fills the projector, 1920 pixels wide at most. */
 export const BACKGROUND_LONG_SIDE = 1920;
 export const MAX_IMAGE_BYTES = 1_500_000;
-/** Pictures per quiz, answers' included (v3 item 1: 15 questions with four picture answers are 60). */
+/** Pictures per quiz, answers' included: 15 questions with four picture answers are 60. */
 export const MAX_IMAGES = 120;
 /**
  * A picture only used as an answer: a tile on the wall is at most half the
@@ -415,8 +403,8 @@ export const MAX_IMAGES = 120;
  */
 export const ANSWER_LONG_SIDE = 1200;
 /**
- * An answer picture's second copy, for the students' devices (v3 item 1):
- * small, since every tablet of the class loads all of them in the lobby.
+ * An answer picture's second copy, for the students' devices: small, since
+ * every tablet of the class loads all of them in the lobby.
  */
 export const SMALL_LONG_SIDE = 640;
 export const MAX_SMALL_BYTES = 300_000;
@@ -443,8 +431,8 @@ export interface QuizInfo {
   /** The teacher code's two digits: Resume goes in with them, and another device types them. */
   teacher: string;
   /**
-   * Where the quiz stands, for the resume line (v4 item 2): the class's
-   * phase ("lobby": waiting for the class; "final": finished), and the
+   * Where the quiz stands, for the resume line (docs/design/root-page.md,
+   * "Coming back: the resume card"): the class's phase ("lobby": waiting for the class; "final": finished), and the
    * question on screen as n of total among those not skipped (n 0 before
    * the first).
    */

@@ -2,24 +2,20 @@
 // "Languages"): everything above About. The static HTML is English, so an AI's fetcher
 // reads English; home.ts swaps these in. About and below stay English: they
 // are for the AI. The lobby, the wall, the Remote and the tablets stay
-// English too (backlog Later, "Localization").
+// English too.
 //
-// How the page addresses teachers (backlog v4 item 1, the owner's rule):
-// commands only for what must be done (choosing an AI, asking it), advice as
+// How the page addresses teachers: commands only for what must be done (choosing an AI, asking it), advice as
 // advice, and no claim that isn't true. That is the page's voice to its
 // reader; the example ask is the teacher's own sentence to their AI, where an
 // imperative is fine (docs/design/guidance-page.md, "Information in place of
 // rules"). Step 1's detail names what is
 // verified and says nothing about free tiers.
 //
-// The example asks began as each language's real first ask from the example's
-// redo (.tmp/example/v2-*/teacher-1.txt); since 2026-11-04 they open with
-// "Read <address>." and call the quiz a classyQuiz (backlog v4 item 11), so
-// the runs' asks no longer match them word for word. The marked parts carry
-// the labels. The second ask is the other end,
-// nothing decided yet: the owner's, translated; that the AI then asks what it
-// needs is the guidance's "Building with the teacher". The site's address in
-// both is replaced by the one the browser opened.
+// The example asks are each language's version of the same ask; the marked
+// parts carry the labels. The second ask has nothing decided: the teacher's
+// open request; that the AI then asks what it needs is the guidance's
+// "Building with the teacher". The site's address in both is replaced by the
+// one the browser opened.
 
 import type { SiteFull } from "../shared/limits.ts";
 
@@ -61,7 +57,6 @@ export interface Text {
   run: string;
   upload: string;
   drop: string;
-  // Run's messages
   zipOnly: string;
   notText: string;
   notFile: (what: "several" | "this" | string) => string;
@@ -84,14 +79,12 @@ export interface Text {
   /** The upload's request failed: the network names itself as a possible cause (docs/design/root-page.md, "Network help, where failure shows"). */
   offline: string;
   whatToTellIt: string;
-  // the resume card (backlog v4 item 2)
   notStarted: string;
   question: (n: number, total: number) => string;
   back: string;
   classCode: string;
   otherDevice: (code: string) => string;
   untitled: string;
-  // the own-copy line (backlog v4 item 4)
   ownCopy: (n: number) => string;
   how: string;
 }

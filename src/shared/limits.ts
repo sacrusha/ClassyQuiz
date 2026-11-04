@@ -6,8 +6,8 @@
 /**
  * Players in one class, removed ones included: the run is one stored value,
  * rewritten with every answer, and the projector draws every avatar. The
- * owner's design target is a class of about 25; a larger group is what an
- * own copy of the site is for.
+ * design target is a class of about 25; a larger group is what an own copy
+ * of the site is for.
  */
 export const MAX_PLAYERS = 60;
 /**
@@ -20,7 +20,13 @@ export const DOOR_OPEN_MS = 5 * 60_000;
 export const MAX_LATE_JOINERS = 5;
 /** Changes of mind per student and question; the last accepted tap counts. */
 export const MAX_ANSWER_CHANGES = 10;
-/** Uploads a day, across the site. */
+/**
+ * Uploads a day, across the site. The "room for a few dozen classes a day" on
+ * the start page and in public/own-copy.html holds only while the caps here
+ * (this one, MAX_PLAYERS, MAX_ANSWER_CHANGES) stay as they are: the arithmetic
+ * is in docs/design/hosting-and-limits.md, Situation. A self-hoster who
+ * changes them makes that sentence untrue.
+ */
 export const MAX_UPLOADS_PER_DAY = 300;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
@@ -29,13 +35,7 @@ export const CLASS_IDLE_MS = 3 * 3600_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
 export const SLEEP_AFTER_MS = 45 * 60_000;
 
-/**
- * The self-hosting nudge (backlog items 14, 16). The start page and
- * public/own-copy.html say the site has "room for a few dozen classes a
- * day": the account's daily allowance covers about 30 classes when every
- * device polls and about 75 on stored rows (docs/design/hosting-and-limits.md, Situation),
- * below MAX_UPLOADS_PER_DAY. Raise these and that sentence no longer holds.
- */
+/** The self-hosting nudge, appended to every refusal. */
 const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages.dev/own-copy says how.";
 
 /** Why a device can't join a class (server/game.ts); shown on it, in words its teacher can act on. */
@@ -59,7 +59,7 @@ export function quotaResetAt(now = new Date()): string | null {
   }
 }
 
-/** The site-wide caps refuse an upload (owner's voice, from the self-hosting nudge). */
+/** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
   if (full === "bytes") {
     return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (two days after their last use). ${OWN_COPY}`;
@@ -76,8 +76,8 @@ export function quotaMessage(now = new Date()): string {
 
 /**
  * An error from the platform saying a free-plan limit is spent. The wording
- * isn't documented; this is a best reading, to check after a deploy
- * (docs/design/hosting-and-limits.md, "When the allowance runs out anyway"). Broad enough for "…free tier…", "…daily limit…", "quota".
+ * is undocumented, so the match is broad (docs/design/hosting-and-limits.md,
+ * "Not known").
  */
 export function isQuotaError(e: unknown): boolean {
   const m = e instanceof Error ? e.message : typeof e === "string" ? e : "";

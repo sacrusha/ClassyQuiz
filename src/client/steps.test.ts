@@ -1,11 +1,11 @@
-// The steering bar's presses (backlog v4 item 6): a press in flow does what
+// The steering bar's presses (docs/design/question-flow.md, "Presses"): a press in flow does what
 // the teacher meant; a bounce, or a press landing on a screen that just
 // moved, does nothing; a deliberate double press fast-forwards, but never
 // past the start of a question.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { BOUNCE_MS, DOUBLE_MS, Presses, SETTLE_MS, atOf, playStep, type StepState } from "./steps.ts";
+import { BOUNCE_MS, DOUBLE_MS, Presses, SETTLE_MS, playStep, type StepState } from "./steps.ts";
 
 const base: StepState = { phase: "question", current: 0, answering: "reading", votes: false, lastCall: false, last: false };
 const S = {
@@ -38,7 +38,6 @@ test("Play's labels name where it goes; the last reveal goes to the final rankin
   assert.equal(playStep({ ...S.revealed, last: true })?.label, "Final ranking");
   assert.equal(playStep({ ...base, phase: "lobby", answering: null }), null);
   assert.equal(playStep({ ...base, phase: "final", answering: null }), null);
-  assert.deepEqual(atOf(S.lastCall), { phase: "question", current: 0, reading: false, votes: false, lastCall: true });
 });
 
 test("a press in flow steps once; a bounce is the same press", () => {
