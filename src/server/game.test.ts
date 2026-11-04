@@ -79,7 +79,7 @@ test("changing the key after the reveal moves the points; a second right answer 
   assert.deepEqual([...G.scores(g).values()], [0, 1, 0]);
   G.setCounts(g, 0, [true, true, false]);
   assert.deepEqual([...G.scores(g).values()], [1, 1, 0]);
-  assert.throws(() => G.setCounts(g, 0, [false, false, false]), /void/);
+  assert.throws(() => G.setCounts(g, 0, [false, false, false]), /don't count the question/);
 });
 
 test("voiding a question takes its points away from everyone; un-voiding brings them back", () => {
@@ -105,7 +105,7 @@ test("skipping: the open question goes unscored, a future one is never shown, a 
   assert.deepEqual(G.progress(g), { n: 1, total: 1 });
   G.showAnswers(g, 5);
   G.reveal(g, 10);
-  assert.throws(() => G.setSkip(g, 1, true), /void it instead/);
+  assert.throws(() => G.setSkip(g, 1, true), /can only be not counted/);
   nextQ(g, 10);
   assert.equal(g.run!.phase, "final", "question 3 was skipped, so the quiz ends");
   assert.equal(score(g, ids[0]), 0);

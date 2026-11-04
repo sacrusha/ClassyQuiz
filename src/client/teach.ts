@@ -168,7 +168,7 @@ function current(v: TeacherView): string {
   return `<section class="card current">
     <div class="qt">${lines(q.text)}</div>
     ${pic}
-    ${q.void ? `<p class="hint">Void: counts for nobody.</p>` : ""}
+    ${q.void ? `<p class="hint">This question doesn't count.</p>` : ""}
     ${stepLine(v)}
     ${answersBlock(q, v.current, steer.ui, run.dist)}
     <p class="answered"><strong>${live("answered", run.answered)}</strong> of ${live("present", present)} answered${away ? ` · ${live("away", away)} away` : ""}</p>
@@ -176,12 +176,12 @@ function current(v: TeacherView): string {
   </section>`;
 }
 
-/** Where the question is, above the answers (Last call drains in its slot: see renderClock). */
+/** Where the question is, above the choices (Countdown drains in its slot: see renderClock). */
 function stepLine(v: TeacherView): string {
   if (v.phase !== "question") return "";
-  if (v.answering === "reading") return `<p class="hint">The answers are hidden: the class reads the question.</p>`;
-  if (v.votes) return `<p class="hint">Locked in. The spread is on the wall, without the right answer.</p>`;
-  return v.clock ? `<p class="hint lastcall-line">${ICON.timer} Last call</p><div class="clockslot"></div>` : "";
+  if (v.answering === "reading") return `<p class="hint">The choices are hidden: the class reads the question.</p>`;
+  if (v.votes) return `<p class="hint">Answering closed. The wall shows how the class answered, not yet the solution.</p>`;
+  return v.clock ? `<p class="hint lastcall-line">${ICON.timer} Countdown</p><div class="clockslot"></div>` : "";
 }
 
 /** Last call in its slot, drawn again only when it starts: CSS drains it. */
@@ -219,7 +219,7 @@ function menu(v: TeacherView): void {
   // ⇄ Swap is offered while the wall is there: a wrong choice on the second device's question is undone by the same tap on either.
   if (v.screen === "present") items.push({ label: "&#8644; Swap: show the quiz here, steer from the other device", run: () => void swap() });
   else items.push({ label: "A second device…", run: () => toast(`On ${siteAddress()}, type ${teacherCode(v.code, v.teacher)}.`, 8000) });
-  items.push({ label: "Stop being the remote", run: () => void leave() });
+  items.push({ label: "Stop steering from here", run: () => void leave() });
   items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }

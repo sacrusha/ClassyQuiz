@@ -81,7 +81,7 @@ tablets, and a quiz made in the break.
 | Break | **Laptop:** opens `classyquiz.pages.dev` and uploads the AI's .zip there (or drops it). The check: the right quiz, a spot fix (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
-| Quiz | Start on whichever tab steers; Play: Show answers → Lock in → Reveal → Ranking → Next, and Last call when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
+| Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
 | End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
 
 ## 3. Screens
@@ -209,7 +209,7 @@ uploading device), when one tab shows and steers:
 │   the class watches this     │
 │   screen                     │
 │ [ Steer it from here ]       │
-│   Start, next, the answers   │
+│   Start, next, the solution  │
 └──────────────────────────────┘
 ```
 
@@ -238,7 +238,7 @@ doesn't know whether it is shared.
 │  A second device, to steer from or to show the quiz on:    │
 │  on classyquiz.pages.dev, type 63953 47. Or open a second  │
 │  screen in a new window with a click.                      │
-│   12 questions                         [Show all answers]  │
+│   12 questions                       [Show the solutions]  │
 │    1  Was sind 10% von 250?                             ›  │
 │    2  Eine Jacke kostet 80 Franken …                    ›  │
 │   …                                               ⋯ More   │
@@ -257,12 +257,12 @@ doesn't know whether it is shared.
 └────────────────────────────────────────────────────────────┘
 ```
 
-A question opened (or all of them, with Show all answers / Hide answers):
+A question opened (or all of them, with Show the solutions / Hide the solutions):
 
 ```
 │    2  Eine Jacke kostet 80 Franken …                    ⌄  │
 │       ▲ 55 Franken  ◆ 20 Franken  ● 75 Franken  ✓■ 60 Fr.  │
-│       Change the right answer                              │
+│       Change the solution                                  │
 ```
 
 - **The tab that uploaded opens on the check;** "Let the class in ▶"
@@ -279,8 +279,10 @@ A question opened (or all of them, with Show all answers / Hide answers):
   question as any other device.
 - **Answers start folded,** so a shared check shows no key until the
   teacher presses a button that says it shows the answers.
-- **"Change the right answer"** makes the answers tappable ("Tap the answers
-  that count."), with Void, Skip it and Done.
+- **"Change the solution"** makes the choices tappable ("Tap every right
+  choice."), with Don't count this question (Count it again), Skip it (Show
+  it after all), Hide the picture where there is one, and Done. A question
+  that doesn't count is tagged "not counted" in the list.
 - **The site's warnings** (the same answer twice, text too long to read well,
   ignored text, no title) sit above the list, one muted line each.
 - **Avatars** can be tapped to remove a double. Until the first one, their
@@ -291,7 +293,7 @@ A question opened (or all of them, with Show all answers / Hide answers):
   named where there is a choice: on the second device's question.
 - **Points for speed**, a switch under Start on the join screen, off by default; on, it says "A right answer 10, up to 5 more the
   quicker it comes." Fixed once the quiz starts; see §3.7.
-- **⋯:** Players · A second device… · Leave · Delete the quiz…
+- **⋯:** Players · A second device… · Stop showing the quiz here · Delete the quiz…
 
 The Remote's lobby is the check in one column: the class code large, the
 count and avatars, the points-for-speed switch, the teacher code's sentence, "Projector ✓ ·
@@ -299,7 +301,7 @@ count and avatars, the points-for-speed switch, the teacher code's sentence, "Pr
 the bottom. Without a wall it says how to bring one: "On the projector
 computer: on classyquiz.pages.dev, type 63953 47." A Projector that doesn't
 steer shows only the class's part (address, code, QR and avatars), with
-⇄ Swap faint in its corner beside Full screen and ⋯.
+"⇄ Swap screens" faint in its corner beside Full screen and ⋯.
 
 ### 3.4 Projector during the quiz
 
@@ -307,17 +309,24 @@ The v1 screens (question, reveal, ranking, final), with the code in a corner
 throughout. While it steers, the bottom line is the bar:
 
 ```
-│ ⋯   classyquiz.pages.dev · 63953          [⏱ Last call] [▶ Lock in    ] │
+│ ⋯   classyquiz.pages.dev · 63953   [⏱ Countdown        ] [▶ Answers        ] │
+│                                    [ 15 s, then closes ] [ closes answering] │
 ```
 
 - **The steering bar:** two buttons of fixed size in a fixed place, on the wall's bar and
-  on the Remote alike. **Play ▶** steps one slice and is labelled with
-  where it goes: Show answers, Lock in, Reveal, Ranking, Next (Final
-  ranking after the last question's reveal). **Last call** is there while
-  the question is up and not locked in: from the hidden answers it shows
-  them too, and fifteen seconds later answering locks in by itself, or
-  sooner once everyone there has answered; while it runs it is greyed.
-  Where it doesn't apply its place stays empty, so Play never moves.
+  on the Remote alike, in the teacher's vocabulary: *choices* (the tiles),
+  *answers* (what the class tapped), *solution* (the key)
+  (docs/design/question-flow.md, "The steering bar"). **Play ▶** steps one
+  slice and is labelled with a noun for what the class sees next: Choices,
+  Answers (small: "closes answering"), Solution, Ranking, Question 4 (Final
+  ranking after the last question's reveal). **Countdown** (small: "15 s,
+  then closes") is there while the question is up and answering not closed:
+  from the hidden choices it shows them too, and fifteen seconds later
+  answering closes by itself, or sooner once everyone there has answered;
+  while it runs it is greyed. Where it doesn't apply its place stays empty,
+  so Play never moves. The same words on every width: on the Remote a
+  label may take two lines; on a phone-sized wall Countdown's word is a
+  little smaller.
 - **Presses:** a bounce, or a press landing within 0.4 s of the screen
   moving, does nothing; a second press within 0.45 s of the first is a
   double and steps once more, from where the first leads, except across
@@ -330,9 +339,10 @@ throughout. While it steers, the bottom line is the bar:
   while a Remote steers only a clicker's keys (PageDown, →, ↓) move on
   from the Projector. On a phone-sized wall the code gives way to the two
   buttons.
-- **⋯ while steering:** Skip this question · Change the right answer · Final
-  ranking now · Players · A second device… · Leave · Delete the quiz…
-- **⋯ while a Remote steers:** ⇄ Swap · Leave.
+- **⋯ while steering:** Skip this question · Change the solution · End the
+  quiz: final ranking · Players · A second device… · Stop showing the quiz
+  here · Delete the quiz…
+- **⋯ while a Remote steers:** ⇄ Swap · Stop showing the quiz here.
 - **Notices on the wall:** "Remote connected", and "Remote gone – steering
   here". While a Remote that was there is away, the bar keeps "Remote gone" (on a phone-sized wall it gives way), and ⋯ → A
   second device… has the code: on demand, not in front of the class.
@@ -344,14 +354,14 @@ throughout. While it steers, the bottom line is the bar:
 
 | State | Wall | Tablets | Steering tab |
 |---|---|---|---|
-| Question | the question and picture; tiles coloured, without text | the eye | **Show answers ▶**, Last call |
-| Answering | the answers; in the bar at the top, the avatar of each student whose answer has arrived pops in, and "answered / of"; during Last call a bar drains along the top edge | buttons (and the same bar) | the counts with the key; **Lock in ▶**, Last call |
-| Locked in | each tile's count and a bar; no tick, nothing faded | buttons locked, the chosen one marked, 👁 | "Locked in. The spread is on the wall, without the right answer"; **Reveal ▶** |
-| Revealed | the tick, the other tiles faded; the avatars of those right jump for about four seconds in a band over the question | ✓ or ✗, "+13" with points for speed | **Ranking ▶** (Final ranking after the last question) |
-| Ranking | places and stars | place and stars | **Next ▶** |
+| Question | the question and picture; tiles coloured, without text | the eye | "The choices are hidden: the class reads the question."; **▶ Choices**, Countdown |
+| Answering | the choices; in the bar at the top, the avatar of each student whose answer has arrived pops in, and "answered / of"; during Countdown a bar drains along the top edge | buttons (and the same bar) | the counts with the solution; **▶ Answers**, Countdown |
+| Locked in | each tile's count and a bar; no tick, nothing faded | buttons locked, the chosen one marked, 👁 | "Answering closed. The wall shows how the class answered, not yet the solution."; **▶ Solution** |
+| Revealed | the tick, the other tiles faded; the avatars of those right jump for about four seconds in a band over the question | ✓ or ✗, "+13" with points for speed | **▶ Ranking** (Final ranking after the last question) |
+| Ranking | places and stars | place and stars | **▶ Question 3** |
 
-- **Lock in closes answering**, by Play, by Last call running out, or by
-  everyone there answering during Last call. A tap made before the tablet
+- **Answering closes** by Play (▶ Answers), by Countdown running out, or by
+  everyone there answering during Countdown. A tap made before the tablet
   showed it closed still counts when it arrives, and the spread grows by
   one, as long as the question is still on screen: once the class has left
   its reveal (the ranking, the next question), its answers are settled.
@@ -388,15 +398,15 @@ throughout. While it steers, the bottom line is the bar:
 │   ◆ 20 Franken            1  │
 │   ● 75 Franken            2  │
 │ ✓ ■ 60 Franken           12  │
-│ Change the right answer      │
+│ Change the solution          │
 │ 18 of 22 answered · 1 away   │
 │ Waiting for 🐸 🐻 🐷 🐧        │
 ├──────────────────────────────┤
-│ [⋯] [⏱ Last call] [▶ Lock in]│
+│ [⋯] [⏱ Countdown] [▶ Answers]│
 └──────────────────────────────┘
 ```
 
-- **The buttons:** the steering bar, as on the wall (§3.4): Last call and
+- **The buttons:** the steering bar, as on the wall (§3.4): Countdown and
   Play, the same size and place throughout the quiz; Start quiz in the
   lobby, "Again with another class" at the end, which opens a new lobby with
   the same code and keeps the corrections.
@@ -405,9 +415,9 @@ throughout. While it steers, the bottom line is the bar:
   projector window here".
 - **Waiting for** shows the avatars of the students who are there and
   haven't answered, once at most six are left, until the lock-in.
-- **⋯:** Skip this question · Change the right answer · Final ranking now ·
-  All questions · Players · ⇄ Swap (while the wall is there) · Stop being
-  the remote · Delete the quiz…
+- **⋯:** Skip this question · Change the solution · End the quiz: final
+  ranking · All questions · Players · ⇄ Swap (while the wall is there) ·
+  Stop steering from here · Delete the quiz…
 
 ### 3.6 Student
 
@@ -425,7 +435,7 @@ previous class and opened again for the next one joins it like any other.
 
 The pace is the teacher's: the quiz carries none (the format has no
 `Tempo:` or `Time:`). The
-only clock is Last call, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
+only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
 
 - **Points for speed:** the join screen's switch, off by default, fixed at
   Start, carried over to "Again with another class". On, a right answer
