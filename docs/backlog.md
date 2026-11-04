@@ -295,6 +295,11 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- The quiz's background in the lobby and at the rankings: built that way as
+  an implementer's call, not yet seen by the owner (`design/pictures.md`).
+- The README's example prompt still says "…for <address>", the form the
+  Sonnet test read as a publish target; change now, or after the `Read
+  <address>.` test below.
 - The implementer's two choices on the bar: Last call locks in early once
   everyone present has answered; points for speed run over a fixed 20 s from
   the answers appearing (`design/question-flow.md`).
