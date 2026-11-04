@@ -5,23 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>classyQuiz — a question on screen</title>
 <meta name="description" content="How the classyQuiz projector lays out a question and how a student's device shows the choices: the markup and the stylesheet rules, with the sizes the script sets as comments.">
+<link rel="stylesheet" href="/site.css">
 <style>
-  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; }
-  }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  /* The colours and typefaces are site.css's. */
+  body { line-height: var(--leading-prose); }
   main { max-width: 60rem; margin: 0 auto; padding: 2rem 16px 4rem; }
-  h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
-  h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
+  h1 { font-size: var(--h1); margin: 0 0 .25rem; }
+  h2 { font-size: var(--h2); margin: 2rem 0 .5rem; }
   p { margin: .5rem 0; }
   .lede { color: var(--muted); }
   pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .85rem; line-height: 1.45; }
-  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
-  a { color: var(--accent); }
+  code { font-family: var(--font-mono); }
 </style>
 </head>
-<body>
+<body class="follows-dark">
 <main>
 <h1>A question on screen</h1>
 <p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, with or without its picture, and how a student's device shows its choices: the markup, and the rules from the site's stylesheet. What the stylesheet doesn't carry is in comments: the type sizes and the picture's size and place, which a script sets from the length of the text and the picture's shape, and what the reveal adds.</p>
@@ -150,7 +147,7 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
 .tiles.veiled .tile { opacity: .55; }
 #clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
 .clockbar.wall { height: max(10px, 1.7vh); overflow: hidden; background: rgba(29, 29, 27, .12); }
-.clockbar > span { display: block; height: 100%; background: #2a5db0; transform-origin: left center; } /* drains to scaleX(0) over Countdown, turning orange in its last fifth */
+.clockbar > span { display: block; height: 100%; background: #1d1d1b; transform-origin: left center; } /* drains to scaleX(0) over Countdown, turning orange in its last fifth */
 
 /* A question&#x27;s picture: always on white, so a transparent drawing reads on any background. */
 .stage.fig .qtext { min-height: 0; flex: none; }

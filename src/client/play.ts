@@ -287,8 +287,8 @@ function showWaiting(): void {
 }
 
 /** The code box again, as on the root page: five digits for a student, seven for a teacher; it routes by length. */
-function codeForm(value = ""): string {
-  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="12345" aria-label="Quiz code" value="${esc(value)}"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
+function codeForm(value = "", placeholder = "12345"): string {
+  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="${placeholder}" aria-label="Quiz code" value="${esc(value)}"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
 }
 
 function wireCodeForm(): void {
@@ -333,7 +333,7 @@ function showTeacherForm(note: string): void {
     <h1>Show or steer a quiz from here</h1>
     ${note ? `<p class="muted">${esc(note)}</p>` : ""}
     <p class="muted">The teacher code:</p>
-    ${codeForm(JOIN_CODE.test(code) ? code : "")}
+    ${codeForm(JOIN_CODE.test(code) ? code : "", "12345 67")}
     <p class="muted">It is the class code and two more digits, as the quiz's own screen shows it.</p>
   </div>`;
   wireCodeForm();

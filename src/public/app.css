@@ -1,46 +1,14 @@
 /* classyQuiz app pages: projector, student, remote, the teacher's entrance,
-   network check. The root page (index.html) has its own small inline style. */
-
-:root {
-  --bg: #fbf8f2;
-  --fg: #1d1d1b;
-  --muted: #5d5c57;
-  --card: #ffffff;
-  --rule: #e2ddd2;
-  --accent: #2a5db0;
-  --accent-ink: #fff;
-  --bad: #c62828;
-  --good: #1f8a4c;
-  --radius: 14px;
-  color-scheme: light;
-}
-/* Teacher-side pages follow the device's dark mode; the projector and the
-   students' screens stay light (projectors wash out dark backgrounds). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.follows-dark {
-    --bg: #171716;
-    --fg: #ecebe6;
-    --muted: #a9a8a1;
-    --card: #222220;
-    --rule: #3a3935;
-    --accent: #8fb3f0;
-    --accent-ink: #10213f;
-    color-scheme: dark;
-  }
-}
+   network check, the worked example. The colours, typefaces and base styles
+   are site.css's, linked before this. */
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; height: 100%; }
-body {
-  margin: 0;
-  min-height: 100%;
-  background: var(--bg);
-  color: var(--fg);
-  font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
+html { height: 100%; }
+body { min-height: 100%; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
-a { color: var(--accent); }
+/* The quiz's own words, set in the reading face (site.css sets headings in the site's). */
+.qtext, .ctitle, .qtitle, .teach header h1 { font-family: var(--font-text); }
 .icon { width: 1.2em; height: 1.2em; vertical-align: -0.2em; }
 .avatar { display: block; width: 100%; height: 100%; }
 .shape { width: 1em; height: 1em; display: inline-block; flex: none; }
@@ -54,7 +22,7 @@ a { color: var(--accent); }
   border: 2px solid var(--rule); background: var(--card); color: var(--fg);
   font-weight: 600; text-decoration: none; touch-action: manipulation;
 }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary { background: var(--control); border-color: var(--control); color: var(--control-ink); }
 .btn.danger { color: var(--bad); border-color: currentColor; background: transparent; }
 .btn.big { min-height: 64px; font-size: 1.25rem; width: 100%; }
 .btn:disabled { opacity: .5; cursor: default; }
@@ -67,7 +35,7 @@ a { color: var(--accent); }
 
 .card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; margin: 12px 0; }
 .code-input {
-  font-size: 2rem; letter-spacing: .25em; text-align: center; width: 100%;
+  font: 700 2rem var(--font-brand); font-variant-numeric: tabular-nums; letter-spacing: .25em; text-align: center; width: 100%;
   padding: .3em; border-radius: 12px; border: 2px solid var(--rule); background: var(--card);
 }
 
@@ -89,13 +57,13 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 .screen .corner .codeline { font-size: 20px; color: var(--muted); margin-right: 6px; }
 .screen .corner button, .screen .corner .dot { opacity: .6; }
 .screen .corner button { font-size: 14px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--rule); background: var(--card); }
-.codeline strong { color: var(--fg); letter-spacing: .05em; }
+.codeline strong { color: var(--fg); font-family: var(--font-brand); letter-spacing: .05em; font-variant-numeric: tabular-nums; }
 .screen .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
 
 .lobby { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 3vw; min-height: 0; }
 .lobby .join { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.5vh; text-align: center; }
 .lobby .addr { font-size: 2em; font-weight: 700; word-break: break-all; }
-.lobby .bigcode { font-size: 6.5em; font-weight: 800; letter-spacing: .08em; line-height: 1; font-variant-numeric: tabular-nums; }
+.lobby .bigcode { font-family: var(--font-brand); font-size: 6.5em; font-weight: 700; letter-spacing: .08em; line-height: 1; font-variant-numeric: tabular-nums; }
 .lobby .qr { width: min(34vh, 28vw); height: min(34vh, 28vw); background: #fff; padding: 1.2vh; border-radius: 12px; }
 .lobby .qr svg { width: 100%; height: 100%; display: block; }
 .lobby .crowd { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 1.2vh; overflow: hidden; }
@@ -106,7 +74,7 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
    avatar on the edge of a row is cut mid-wiggle.
    The negative margins keep the avatars where they were. */
 .lobby .crowd, .crowdcol .avatars { --av: 9vh; --pulse: calc(var(--av) * .15); padding: var(--pulse); margin: calc(1vh - var(--pulse)) calc(-1 * var(--pulse)) calc(-1 * var(--pulse)); }
-.lobby .count { font-size: 2em; font-weight: 800; display: flex; align-items: center; gap: .3em; }
+.lobby .count { font-family: var(--font-brand); font-size: 2em; font-weight: 700; display: flex; align-items: center; gap: .3em; }
 @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
 
 .qtext { font-weight: 700; text-align: center; line-height: 1.2; margin: 0; overflow-wrap: anywhere; display: flex; align-items: center; justify-content: center; flex: 0 1 auto; min-height: 18vh; }
@@ -200,9 +168,9 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .podium .entry { display: flex; flex-direction: column; align-items: center; gap: .6vh; font-weight: 800; }
 .podium .entry .av { width: 13vh; height: 13vh; }
 .podium .entry.p1 .av { width: 19vh; height: 19vh; }
-.podium .place { font-size: 1.4em; }
+.podium .place { font-family: var(--font-brand); font-size: 1.4em; }
 .classres { text-align: center; }
-.classres .pct { font-size: min(6em, 17vw); font-weight: 800; line-height: 1; } /* within a phone-sized wall too: wider, the page zooms out and the steering bar leaves the screen */
+.classres .pct { font-family: var(--font-brand); font-size: min(6em, 17vw); font-weight: 700; line-height: 1; } /* within a phone-sized wall too: wider, the page zooms out and the steering bar leaves the screen */
 .classres .bars { display: flex; align-items: flex-end; gap: 4px; height: 16vh; justify-content: center; margin-top: 2vh; }
 .classres .bars span { width: 2.2vh; background: var(--good); border-radius: 4px 4px 0 0; min-height: 3px; }
 
@@ -245,7 +213,7 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .dress .prow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .dress .pick { width: 60px; height: 60px; border-radius: 14px; border: 3px solid var(--rule); background: var(--card); padding: 6px; touch-action: manipulation; }
 .dress .pick svg { width: 100%; height: 100%; display: block; }
-.dress .pick.on { border-color: var(--accent); background: #e9f0fc; }
+.dress .pick.on { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
 .dress.spent .pick { opacity: .45; }
 .dress .look { grid-area: look; color: var(--muted); }
 .dress .look .icon { width: 44px; height: 44px; }
@@ -285,7 +253,7 @@ body.screen.steering main { height: calc(100vh - 64px); height: calc(100dvh - 64
 .steerbar .joinchip .btn { min-height: 40px; padding: .2em .8em; }
 .drag-hint {
   position: fixed; left: 0; right: 0; top: 0; z-index: 25; padding: 14px 20px;
-  background: var(--accent); color: var(--accent-ink); font-size: 22px; font-weight: 700; text-align: center;
+  background: var(--control); color: var(--control-ink); font-size: 22px; font-weight: 700; text-align: center;
 }
 
 /* The lobby while the Projector steers itself (§3.3): the class's part fills
@@ -305,9 +273,10 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .howto .scr { font-size: 1em; font-size: 4.2cqi; background: var(--card); border: .45em solid #2b2b29; border-bottom: 0; border-radius: .9em .9em 0 0; padding: .5em .7em .2em; }
 .howto .url { background: var(--bg); border: 1px solid var(--rule); border-radius: 1em; padding: .15em .8em; color: var(--muted); font-size: .85em; text-align: center; white-space: nowrap; overflow: hidden; }
 .howto .hdr { display: flex; align-items: center; gap: .4em; margin-top: .6em; padding-bottom: .5em; border-bottom: 1px solid var(--rule); }
-.howto .logo { flex: 1; font-weight: 800; }
-.howto .box { font: 700 1.1em ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .15em; padding: .1em .5em; border: .15em solid var(--accent); border-radius: .4em; animation: beckon 1.6s ease-in-out infinite; }
-.howto .go { background: var(--accent); color: var(--accent-ink); border-radius: .4em; padding: .2em .55em; }
+.howto .logo { flex: 1; display: flex; align-items: center; gap: .35em; font: 700 1em/1 var(--font-brand); letter-spacing: -.012em; }
+.howto .logo img { width: 1.5em; height: 1.5em; display: block; }
+.howto .box { font: 700 1.1em var(--font-brand); font-variant-numeric: tabular-nums; letter-spacing: .15em; padding: .1em .5em; border: .15em solid var(--accent); border-radius: .4em; animation: beckon 1.6s ease-in-out infinite; }
+.howto .go { background: var(--control); color: var(--control-ink); border-radius: .4em; padding: .2em .55em; }
 .howto .page i { display: block; height: .55em; margin-top: .55em; border-radius: .3em; background: var(--rule); width: 80%; }
 .howto .page i:nth-child(2) { width: 55%; }
 .howto .page i:nth-child(3) { width: 68%; }
@@ -337,7 +306,7 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .ctitle { font-size: 1.5em; line-height: 1.2; margin: 0; overflow-wrap: anywhere; }
 .ctitle .cnum { color: var(--muted); font-size: .72em; font-weight: 600; white-space: nowrap; }
 .classcode { margin: 0; color: var(--muted); white-space: nowrap; }
-.classcode strong { color: var(--fg); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.classcode strong { color: var(--fg); font-family: var(--font-brand); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 .classcode .joinedn { display: inline-flex; align-items: center; gap: .15em; margin-left: .5em; color: var(--fg); font-weight: 700; }
 .cstart { text-align: right; margin: 14px 0 10px; }
 .cstart .btn.big { width: auto; padding: 0 1.4em; }
@@ -355,7 +324,7 @@ button.link { background: none; border: 0; padding: 0; color: var(--accent); tex
 .qhead .qt { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
 .qhead .chev { color: var(--muted); font-weight: 700; width: 1em; text-align: center; }
 .tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; border-radius: 6px; padding: 1px 6px; background: var(--rule); color: var(--fg); white-space: nowrap; align-self: center; }
-.tag.now { background: var(--accent); color: var(--accent-ink); }
+.tag.now { background: var(--control); color: var(--control-ink); }
 .answers { padding: 0 0 12px 1.9em; }
 .answers .row { margin-top: 6px; }
 .ans { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
@@ -410,7 +379,7 @@ body.teach { padding-bottom: 96px; }
 .teach header .wrap { display: flex; align-items: center; gap: 12px; padding-top: 10px; padding-bottom: 10px; }
 .teach header h1 { font-size: 1.05rem; margin: 0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topbar #pos { color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
-.topbar .code { font-weight: 800; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.topbar .code { font-family: var(--font-brand); font-weight: 700; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 .teach .actions { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); border-top: 1px solid var(--rule); z-index: 5; }
 .teach .actions .wrap { display: flex; gap: 10px; padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
 .teach .actions .btn { flex: 1; }
@@ -423,7 +392,7 @@ body.teach { padding-bottom: 96px; }
 .teach .actions .btn.bar-last span, .teach .actions .btn.bar-play span { white-space: normal; line-height: 1.15; text-overflow: clip; }
 .joinbox { text-align: center; padding: 8px 0 4px; }
 .joinbox .addr { color: var(--muted); font-weight: 600; }
-.joinbox .codebig { font-size: 2.8rem; font-weight: 800; letter-spacing: .1em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.joinbox .codebig { font-family: var(--font-brand); font-size: 2.8rem; font-weight: 700; letter-spacing: .1em; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .joinbox .joined { color: var(--muted); margin-bottom: 8px; }
 .joinbox .avatars { justify-content: center; }
 .teach .device { margin: 10px 0; font-size: .95rem; }
@@ -433,7 +402,7 @@ body.teach { padding-bottom: 96px; }
 .current .answered strong { color: var(--fg); }
 .current .waiting { color: var(--muted); margin: 6px 0 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .current .waiting .avatars > span { width: 32px; height: 32px; }
-.teach .stat { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.teach .stat { font-family: var(--font-brand); font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .avatars > .ranked { width: auto; height: auto; border-radius: 0; display: flex; flex-direction: column; align-items: center; }
 .ranked .avatar { width: 44px; height: 44px; }
 .ranked small { font-weight: 700; }
@@ -446,7 +415,7 @@ body.teach { padding-bottom: 96px; }
 /* A teacher device's one question (docs/design/teacher-devices.md, "A second device: one question, only when needed"): what it will do, in plain words. */
 .entry-roles { display: grid; grid-template-columns: 1fr; gap: 12px; width: min(100%, 420px); }
 .btn.role { flex-direction: column; gap: 4px; min-height: 120px; font-size: 1.35rem; }
-.btn.role:not(:disabled) { border-color: var(--accent); }
+.btn.role:not(:disabled) { border-color: var(--control); }
 .btn.role small { font-size: .8rem; font-weight: 500; color: var(--muted); }
 .qhead .chev { transition: transform .15s; }
 .q.open .chev { transform: rotate(90deg); }
@@ -491,18 +460,18 @@ body.teach { padding-bottom: 96px; }
 
 /* Last call's bar (client/clock.ts): drains, no digits; the last fifth turns warm. */
 .clockbar { flex: none; height: 12px; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, var(--fg) 12%, transparent); }
-.clockbar > span { display: block; height: 100%; background: var(--accent); transform-origin: left center; animation-name: drain; animation-timing-function: linear; animation-fill-mode: forwards; }
+.clockbar > span { display: block; height: 100%; background: var(--control); transform-origin: left center; animation-name: drain; animation-timing-function: linear; animation-fill-mode: forwards; }
 .clockbar.out > span { animation: none; transform: scaleX(0); }
 @keyframes drain {
-  0% { transform: scaleX(1); background: var(--accent); }
-  80% { background: var(--accent); }
+  0% { transform: scaleX(1); background: var(--control); }
+  80% { background: var(--control); }
   100% { transform: scaleX(0); background: #d9480f; }
 }
 /* On the wall: along the top edge, over everything (an enlarged picture too). */
 #clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
 .clockbar.wall { height: max(10px, 1.7vh); border-radius: 0; }
 .timeup { display: inline-flex; color: #d9480f; }
-.timeup.look { color: var(--accent); }
+.timeup.look { color: var(--control); }
 .clockslot { margin: 6px 0 10px; }
 /* The steering bar's two buttons (client/steps.ts): fixed widths, so a
    label that changes never moves them; Last call kept in its place, hidden,
@@ -546,8 +515,8 @@ body.teach { padding-bottom: 96px; }
 .speed-switch .knob { position: relative; width: 42px; height: 24px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 22%, transparent); transition: background .15s; flex: none; }
 .speed-switch .knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
 .speed-switch[aria-checked="true"] { color: var(--fg); }
-.speed-switch[aria-checked="true"] .knob { background: var(--accent); }
-.speed-switch[aria-checked="true"] .knob::after { transform: translateX(18px); }
+.speed-switch[aria-checked="true"] .knob { background: var(--control); }
+.speed-switch[aria-checked="true"] .knob::after { transform: translateX(18px); background: var(--control-ink); }
 .speed-note { display: block; color: var(--muted); }
 /* Its room is kept while off, so the switch doesn't move the screen. */
 .speed-switch[aria-checked="false"] + .speed-note { visibility: hidden; }
