@@ -148,9 +148,9 @@ Pattern, for every item below: any claim about what an AI can do carries the
 tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 (`design/guidance-page.md`).
 
-Built and live (tenth deploy, 56ebf87): items 2, 5, 6, 8, 9 and most of 1, 4. Left:
+Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list. Item 14 is built, not deployed.
+bar, all in the open list.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -238,7 +238,7 @@ bar, all in the open list. Item 14 is built, not deployed.
     - "Make me a quiz for classyquiz.pages.dev" was read as a publish target
       and set aside; the model fetched the page only when told to read it.
       The examples now begin `Read <address>.` and say "a classyQuiz" (commit
-      ddededf, on main, not deployed; production is at 56ebf87); the README's
+      ddededf); the README's
       example says the same.
     - Transparent answer pictures: a blueish-green marker vanished on the blue
       tile. The guidance already says tiles are shuffled across four colours
@@ -327,7 +327,8 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
-- The identity (v4 item 14) as built, not yet seen by the owner: the
+- The identity (v4 item 14) as built, seen by the owner in a local test
+  ("looks good", 2026-11-04): the
   implementer's calls are ink controls and a rust accent, no blue,
   which takes `class-and-wall.md`'s rule for the who-answered bar (never an
   answer's colour) to every control and every colour of the site's own;
@@ -359,9 +360,6 @@ With the owner:
   then.
 - Verify the guidance with other AIs (ChatGPT, Gemini, Copilot); ChatGPT
   currently breaks with two attachments, maybe temporarily (`design/guidance-page.md`).
-- Deploy main: the landing examples opening with "Read <address>"
-  (ddededf), and the prune of comments, tests and compatibility code
-  (591f65c).
 - The daylight photographs of the sheet, the turn-2 ask (v4 item 10), the
   storyboard video brief from the real screens (its first beat needs a screen
   of the new join screen), the read of the translations (v4 item 1), the
@@ -408,7 +406,7 @@ Needs a real classroom or real devices, nobody has run it:
 
 ## Housekeeping and process, for the next session
 
-- The deploy worktree is at 3089468, which is live; the credentials stay in
+- The deploy worktree is at 9f50079, which is live; the credentials stay in
   the main checkout's `secrets/`, passed to `scripts/deploy.mjs` with
   `node --env-file=<main checkout>/secrets/cloudflare.env`. The worked
   example's stand-ins (photos, mock conversation) are live; the conversation
