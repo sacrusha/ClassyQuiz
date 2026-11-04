@@ -251,10 +251,9 @@ doesn't raise it on a first visit.
   update from GitHub). The token goes where the AI says, not into the chat. The
   page makes no time promise.
 - The capacity sentence ("room for a few dozen classes a day", on `/own-copy`)
-  rests on the daily request allowance: about 30 classes when every device polls,
-  about 75 on stored rows, under the 300-uploads cap (`shared/limits.ts`, the
-  comment at `OWN_COPY`). It is per day because the limits reset daily and "full
-  for today" is what a teacher meets.
+  is per day because the limits reset daily and "full for today" is what a
+  teacher meets; what it rests on is in `design/hosting-and-limits.md`,
+  Situation.
 - An own copy's pages carry its own address: the build replaces the demo's in
   `index.html` and `check.html` (`SITE_ADDRESS`, else the project name in
   `wrangler.toml`), for AIs that read the page without its script.
@@ -306,8 +305,6 @@ the teacher's concern.
 - Whether a spent request allowance can be recorded: the own-copy line counts only
   days the upload cap refused, so it understates a site that runs out of requests
   first.
-- Whether the capacity sentence still holds now that a question takes four or five
-  steps; it was derived before.
 - The German, French and Italian wording, by a native reader (Italian, by anyone).
 - How a fetcher's text conversion reads the labelled ask.
 - The video: about 60 s, wordless so one storyboard serves four languages with the

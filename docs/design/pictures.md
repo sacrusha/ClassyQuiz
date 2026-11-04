@@ -42,10 +42,10 @@ The first target is a teacher whose AI can make a zip. The owner:
 - A school laptop is shared: nothing may stay on it once the page is
   closed.
 - Nothing is kept beyond its use and nothing identifies anyone
-  (Constraints). The Free plan's limits bind every request and stored byte:
-  a Function has 10 ms CPU; a Durable Object value holds 2 MB; 5 GB of
-  Durable Object storage per account and 100,000 rows written a day. A quiz
-  with 15 pictures is a few MB and a handful of rows.
+  (Constraints). The Free plan's limits bind every request and stored byte
+  (`hosting-and-limits.md`); for pictures it matters that a Function has 10 ms
+  CPU and a Durable Object value holds 2 MB. A quiz with 15 pictures is a few
+  MB and a handful of rows.
 - The author of the quiz is the teacher's AI. It writes picture lines as it
   writes anything, and it can't see the wall. The guidance page
   (`src/public/index.html`, "How quizzes are built", "Pictures on the wall",

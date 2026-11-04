@@ -108,7 +108,6 @@ The wall's top bar shows only the avatars that have answered, popping in as answ
 - An accidental Last call can't be cancelled (the earlier bar had "Stop the countdown"); a press blocked by the settle window gives no feedback.
 - Whether the dashed "on its way" outline is noticed, or needed, on school Wi-Fi.
 - Whether 20 s as the speed reference suits questions much longer than that (every slow right answer scores 10).
-- Whether the capacity sentence ("a few dozen classes a day") holds now that a question has four or five steps.
 - Whether a hint on the Remote, when most of the class chose an answer not marked right, is wanted: the counts sit beside the key already.
 - A 320 px wall still clips the ranking.
 - Runs by itself (backlog Later): a quiz that carries on while the teacher's hands are elsewhere, for classes that read for themselves, would need a cadence with nobody pressing, a close rule per question (everyone present has answered, or some seconds after the last answer, with a cap) and a way back: any press makes it manual. It is an option, never the default; it would share the clock machinery with Last call.

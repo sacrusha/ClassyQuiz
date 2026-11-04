@@ -20,11 +20,9 @@ docs/design/; this file says what the screens show.
      "63953 47" on the teacher's screens. It leads to `/play#6395347`, which
      asks one question only when the one tab there shows and steers (rule
      5). The uploading device's Resume goes in the same way, with the quiz's
-     secret besides. Wrong teacher codes are limited: the fifth within a
-     minute from one device refuses that device's teacher codes for this
-     quiz for 10 minutes, and the quiz takes at most ten wrong ones, one
-     more every six minutes, from whatever devices; the uploading device is
-     exempt from both.
+     secret besides. Wrong teacher codes are limited per device and per quiz,
+     the uploading device exempt (docs/design/teacher-devices.md, "Wrong
+     teacher codes").
    - `/teacher` stays for old links: it asks for the teacher code.
 3. **Two teacher roles, one tab each.**
    - The **Projector** is what the class sees.
