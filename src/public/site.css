@@ -42,7 +42,7 @@
   /* App screens are set tight; pages read top to bottom get more air. */
   --leading: 1.45;
   --leading-prose: 1.55;
-  --h1: 1.75rem;
+  --h1: clamp(1.45rem, 1.1rem + 1.6vw, 1.75rem); /* smaller on a phone */
   --h2: 1.3rem;
   --h3: 1.05rem;
   color-scheme: light;
