@@ -184,8 +184,8 @@ them, and the README points self-hosters there.
   are in `pictures.md`.
 - **Content-Security-Policy** on every page (`src/scripts/build.mjs`, emitted
   as `_headers`): scripts only from the site's own files, no plugins, no
-  `<base>`, forms to the site, no framing; pictures also as `data:` (the
-  favicons) and `blob:` (the projector fetches pictures into object URLs).
+  `<base>`, forms to the site, no framing; pictures also as `blob:` (the
+  projector fetches pictures into object URLs).
   Styles stay open because the pages set many inline; WebSocket addresses stay
   open (`ws: wss:`) because matching them by `'self'` is uneven on the older
   browsers school devices run. It is the second layer behind escaping: quiz
