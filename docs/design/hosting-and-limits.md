@@ -239,3 +239,6 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 - German, French and Italian wording of the two caps' messages, by a native
   reader; the caps' wording has not been seen in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.
+- Whether the class cost above, and so the capacity sentence, still holds now
+  that a question steps through four or five states, each a view to every
+  device; it was derived when a question had three.
