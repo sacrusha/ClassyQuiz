@@ -131,15 +131,20 @@
     .strip .arrow { display: none; }
   }
   @media (max-width: 600px) {
-    header.top .brand { font-size: 1.05rem; }
     .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
+  }
+  /* A phone held upright: the code box and the language need the row, so the fox stands alone, still named for a screen reader (its aria-label). */
+  header.top .symbol { display: none; }
+  @media (max-width: 440px) {
+    header.top .lockup { display: none; }
+    header.top .symbol { display: block; }
   }
 </style>
 </head>
 <body class="follows-dark">
 <header class="top"><div class="bar wide">
-  <p class="logo"><span class="brand">classyQuiz</span></p>
+  <p class="logo"><span class="brand"><span class="lockup"><!--#brand classyquiz-horizontal-32-inline.svg--></span><span class="symbol"><!--#brand classyquiz-symbol-32-inline.svg--></span></span></p>
   <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code" data-t="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join" data-t-aria="join">&#9654;</button></form>
 </div></header>
 
@@ -166,7 +171,7 @@
   <figure class="f-zip"><div class="pic"><svg viewBox="0 0 160 110" aria-hidden="true">
     <rect x="12" y="2" width="136" height="96" rx="7" fill="var(--frame)"/>
     <rect x="18" y="8" width="124" height="84" rx="2" fill="var(--bg)"/>
-    <text x="25" y="20" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="var(--fg)">classyQuiz</text>
+    <g transform="translate(23 11.5) scale(.34)" style="color: var(--fg)"><!--#brand classyquiz-horizontal-32-inline.svg--></g>
     <path d="M18 25h124" stroke="var(--rule)"/>
     <rect x="34" y="32" width="92" height="52" rx="7" fill="none" stroke="#b9b3a5" stroke-width="1.5" stroke-dasharray="4 3"/>
     <path d="M71 37h12l6 6v20H71z" fill="#f2c94c"/><path d="M83 37v6h6" fill="#d9ad2b"/>

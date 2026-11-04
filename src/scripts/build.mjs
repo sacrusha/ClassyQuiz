@@ -6,7 +6,7 @@
 //   node scripts/build.mjs --watch   rebuild on change (local development)
 
 import { build, context } from "esbuild";
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -54,6 +54,24 @@ await mkdir(dist, { recursive: true });
 await cp(join(root, "public"), dist, { recursive: true });
 await writeFile(join(dist, "_headers"), headers);
 
+// The mark and the name are written into a page inline, where the page says
+// <!--#brand file.svg-->, so the hat and the name take the page's ink
+// (currentColor), dark mode included; an <img> can't. One file in
+// public/brand/ feeds every page that shows it (docs/design/identity.md).
+for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
+  const page = join(dist, name);
+  const html = await readFile(page, "utf8");
+  const marks = [...html.matchAll(/<!--#brand ([\w.-]+\.svg)-->/g)];
+  if (!marks.length) continue;
+  let out = html;
+  for (const [marker, file] of marks) {
+    const svg = (await readFile(join(dist, "brand", file), "utf8")).trim();
+    if (!svg.startsWith("<svg")) throw new Error(`${name}: brand/${file} is not an SVG`);
+    out = out.replace(marker, () => svg);
+  }
+  await writeFile(page, out);
+}
+
 // The site's address in the guidance page: the demo's in the source; a copy
 // under another name (wrangler.toml's `name`, or SITE_ADDRESS when the
 // address is something else) names its own, so the teacher's AI is sent to
@@ -78,6 +96,9 @@ const options = {
   format: "iife",
   // School-issued tablets and laptops are not always up to date.
   target: "es2020",
+  // The mark, imported from public/brand/ as text for the pages' scripts to
+  // write inline (client/brand.d.ts).
+  loader: { ".svg": "text" },
   minify: !watch,
   sourcemap: watch ? "inline" : false,
   logLevel: "info",
