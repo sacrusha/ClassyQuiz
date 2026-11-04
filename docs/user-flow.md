@@ -1,31 +1,8 @@
 # classyQuiz — User flow
 
-The teacher's and the class's path through a lesson: backlog v1 items 16–19,
-and the parts of items 1, 2, 3, 4 and 10 they touch. This document is the
-handover for implementing them. §8 says what is already in the working tree.
-
-**Revised 2026-11-03 for the after-upload flow** (docs/after-upload.md, draft 5;
-backlog v4 item 8): §1 rules 2 and 4–7, §2, §3.2–3.5, §4 and §5 describe it.
-The teacher code replaces `/teacher` and its role choice; the gate "no new
-steering once students are in" and "Allow a device to join" are gone.
-
-**Revision 3, 2026-11-02.** This revision folds in the owner's answers to the
-second design:
-- **Roles redefined (item 18).** Children must not take the Remote by
-  accident. Both teacher screens are set up before the class gets the code.
-  Only three cases need handling:
-  - a tab that loses its connection comes back in the same role;
-  - when the phone is gone, the projector takes over the steering;
-  - when the projector is gone, the teacher reads the questions off the phone.
-
-  The first draft's "any tab with the code picks a free role" is dropped.
-- **Code per quiz,** confirmed.
-- **Build a quiz:** the first draft's English sentence to copy contradicted
-  "write in your quiz's language". Now only the address is copied.
-- **Paste or .zip, no single text files (item 2).** The Run box must not read
-  as a place to talk to an AI.
-- **The quiz carries no notes (item 1).** The AI talks to the teacher in its
-  chat, before the quiz is handed over.
+The teacher's and the class's path through a lesson, screen by screen, with the
+words on them. The purpose of each part and the reasons for its shape are in
+docs/design/; this file says what the screens show.
 
 ## 1. The model
 
@@ -103,7 +80,7 @@ tablets, and a quiz made in the break.
 | When | Teacher | Class |
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
-| Break | **Laptop:** opens `classyquiz.pages.dev` and opens the AI's .zip there (or drops it). The check: the right quiz, a spot fix (§3.3). | — |
+| Break | **Laptop:** opens `classyquiz.pages.dev` and uploads the AI's .zip there (or drops it). The check: the right quiz, a spot fix (§3.3). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Show answers → Lock in → Reveal → Ranking → Next, and Last call when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
@@ -113,12 +90,9 @@ tablets, and a quiz made in the break.
 
 `[ ]` is a button, `[_]` an input, `›` expands, `⋯` a menu.
 
-### 3.1 Root page (v4 items 1, 2, 4)
+### 3.1 Root page
 
-The design is docs/landing-story.md (draft 4); built 2026-11-03, decisions.md,
-"The landing page: the strip, two steps, resume, four languages". Earlier
-versions: "The landing page by attention budget", "The landing page, third
-look".
+Purpose and reasons: docs/design/root-page.md.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -173,26 +147,26 @@ look".
   AI" (which asks for a corrected .zip, in English), plus "Continue without
   these pictures" when it's pictures.
 - **On success:** straight to the check, in this tab as the Projector.
-- **Coming back (v4 item 2):** the latest quiz this device started, while it
+- **Coming back:** the latest quiz this device started, while it
   hasn't reached its final ranking: its title, where it stands, Back to the
   quiz (`/play#` + the teacher code), the class code, and "On another device:
   type 63953 47 in the code box". No closing time, no Delete, no older
   quizzes.
-- **The own copy (v4 item 4):** one line under Run, only on a device that has
+- **The own copy:** one line under Run, only on a device that has
   uploaded before (`cq.days`, dates only) and only when the site refused an
   upload on a day of the last 30 (`GET /api/site`).
 - **The network check** is no longer on the root page: the upload error,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby (counted
   anew for each class, so "Again with another class" waits its 90 s too),
   and a device that can't reach the quiz carry the help where the failure
-  shows (landing story §7).
+  shows (docs/design/root-page.md).
 
 ### 3.2 The two entrances after a code
 
 Students (`/play#63953`) get no screen of their own:
 - in the lobby, straight to their avatar, with two rows of pictures below
   it to dress it until Start: six background shapes in its colour and
-  eight hats (docs/avatars.md);
+  eight hats (docs/design/class-and-wall.md);
 - once running, "Which one are you?" with the absent players' avatars and
   **+**, when there are any; a tablet whose avatar another device took
   back while it was away gets the same choice when it returns;
@@ -227,7 +201,7 @@ this quiz's teacher code."; after five from the device, or the quiz's ten,
 `/teacher#63953`, the old way in, shows the same box with the class code in
 it.
 
-### 3.3 The lobby: the check, then the join screen (item 19; docs/after-upload.md §3)
+### 3.3 The lobby: the check, then the join screen
 
 The single tab, which shows and steers, has two screens. **The check is the
 teacher's** (the questions, the fixes, the teacher code); **the
@@ -285,13 +259,12 @@ A question opened (or all of them, with Show all answers / Hide answers):
   teacher presses a button that says it shows the answers.
 - **"Change the right answer"** makes the answers tappable ("Tap the answers
   that count."), with Void, Skip it and Done.
-- **The site's warnings** (the same answer twice, the right answer always in
-  one place) sit above the list, one muted line each.
+- **The site's warnings** (the same answer twice, text too long to read well,
+  ignored text, no title) sit above the list, one muted line each.
 - **Avatars** can be tapped to remove a double.
 - **Start reads "Start quiz ▶"** on every screen that steers. The mode is
   named where there is a choice: on the second device's question.
-- **Points for speed**, a switch under Start on the join screen (backlog v4
-  item 6), off by default; on, it says "A right answer 10, up to 5 more the
+- **Points for speed**, a switch under Start on the join screen, off by default; on, it says "A right answer 10, up to 5 more the
   quicker it comes." Fixed once the quiz starts; see §3.7.
 - **⋯:** Players · A second device… · Leave · Delete the quiz…
 
@@ -312,8 +285,7 @@ throughout. While it steers, the bottom line is the bar:
 │ ⋯   classyquiz.pages.dev · 63953          [⏱ Last call] [▶ Lock in    ] │
 ```
 
-- **The steering bar** (backlog v4 item 6; decisions.md, "The steering
-  bar"): two buttons of fixed size in a fixed place, on the wall's bar and
+- **The steering bar:** two buttons of fixed size in a fixed place, on the wall's bar and
   on the Remote alike. **Play ▶** steps one slice and is labelled with
   where it goes: Show answers, Lock in, Reveal, Ranking, Next (Final
   ranking after the last question's reveal). **Last call** is there while
@@ -335,9 +307,7 @@ throughout. While it steers, the bottom line is the bar:
   buttons.
 - **⋯ while steering:** Skip this question · Change the right answer · Final
   ranking now · Players · A second device… · Leave · Delete the quiz…
-- **⋯ while a Remote steers:** ⇄ Swap · Leave. (Swap replaces "Steer from
-  here", which left the phone stranded; the wall steers by itself 45 s after
-  the Remote is gone.)
+- **⋯ while a Remote steers:** ⇄ Swap · Leave.
 - **Notices on the wall:** "Remote connected", and "Remote gone – steering
   here". While a Remote that was there is away, the bar keeps "Remote gone" (on a phone-sized wall it gives way), and ⋯ → A
   second device… has the code: on demand, not in front of the class.
@@ -345,9 +315,7 @@ throughout. While it steers, the bottom line is the bar:
   here" says "Drag this window to the projector screen, then press F for
   full screen" until it is full screen.
 
-**A question, its states** (backlog v2 items 6 and 7, v4 item 6;
-decisions.md, "Spread, then key; who has answered, on the wall", "The
-steering bar"). Every question comes up with its answers hidden:
+**A question, its states.** Every question comes up with its answers hidden:
 
 | State | Wall | Tablets | Steering tab |
 |---|---|---|---|
@@ -375,7 +343,7 @@ steering bar"). Every question comes up with its answers hidden:
 - **Nothing moves** on the wall between the question, the votes and the
   answer: the bar has a fixed height, and the tiles keep room for the count
   and tick from the start.
-- **Pictures as answers** (v3 item 1): each picture sits on its tile's
+- **Pictures as answers:** each picture sits on its tile's
   colour, which shows where the picture is transparent, with its shape
   beside or above it.
   The tiles are arranged by the pictures' shape (two by two, four in a
@@ -419,7 +387,7 @@ steering bar"). Every question comes up with its answers hidden:
 ### 3.6 Student
 
 The student screens are as in v1, with the lobby's pictures to dress the
-animal (docs/avatars.md §3): avatar and 👁 in the lobby, colour
+animal (docs/design/class-and-wall.md): avatar and 👁 in the lobby, colour
 buttons, locked with 👁 at the lock-in, ✓ or ✗ with the answer, place and
 stars at the ranking. Picture answers show their pictures on the buttons,
 from a small copy fetched once in the lobby, and the chosen picture under
@@ -428,11 +396,11 @@ still showing the previous class is told "This quiz has finished"; it
 doesn't slip into the next class's lobby. A tablet switched off after the
 previous class and opened again for the next one joins it like any other.
 
-### 3.7 Pace and points for speed (v4 item 6)
+### 3.7 Pace and points for speed
 
-The pace is the teacher's: the quiz carries none (`Tempo:` and `Time:`
-left the format; a quiz that still has them uploads without them). The
-only clock is Last call, fifteen seconds.
+The pace is the teacher's: the quiz carries none (the format has no
+`Tempo:` or `Time:`). The
+only clock is Last call, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
 
 - **Points for speed:** the join screen's switch, off by default, fixed at
   Start, carried over to "Again with another class". On, a right answer
@@ -452,9 +420,9 @@ only clock is Last call, fifteen seconds.
 - **Everything on the phone, then the laptop.** The phone uploads; on the
   laptop at the projector, the teacher code, Show the quiz here. The phone
   steers, on its check.
-- **Evening before.** Open the .zip at home, then Resume on the same device
-  next day. On another device, type the teacher code, or open it again.
-- **Two quizzes** (6a, 6b): two .zip files, two codes, two Resume lines.
+- **Evening before.** Upload the .zip at home, then Resume on the same device
+  next day. On another device, type the teacher code, or upload it again.
+- **Two quizzes:** two .zip files, two codes, two Resume lines.
 
 ## 5. When something goes wrong
 
@@ -471,66 +439,11 @@ only clock is Last call, fifteen seconds.
 | A wrong answer to the second device's question | The wall steers where the phone should, or the other way round | ⇄ Swap, on either device |
 | Projector dies | The Remote says "Projector gone" and how to bring it back | Read off the Remote. Optionally another computer: the teacher code (the free Projector, after 45 s), or the projector window on a two-screen laptop |
 | Wrong code | Students: the code, ✗, the box. Teacher: "That isn't this quiz's teacher code." | Type it again; after five wrong teacher codes in a minute, that device waits 10 minutes; after ten for the quiz, any device waits up to six minutes. The device that uploaded gets in with Resume regardless |
-| Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Open the .zip again |
+| Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Upload the .zip again |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |
 
-## 6. Decisions to record in decisions.md once built
-
-These entries are superseded, in part or whole:
-- Continuity (the teacher link);
-- Pairing devices;
-- Key check on a screen that may be projected;
-- Flow of a run (a new code per class);
-- Joining and rejoining (a code per run, "8 hours" projector resume);
-- Single mirrored laptop (now the starting point).
-
-New entries:
-- one code per quiz and its renewal (`CODE_SLACK_MS`);
-- roles per tab with sessionStorage tokens;
-- the two entrances;
-- presence: 25 s "quiet", 45 s "away";
-- a Projector that steers itself while no Remote is there;
-- "movable", the self-steering Projector taken over by another tab;
-- legacy instances refused with "paste it again";
-- the zip-only upload and the not-a-quiz message;
-- deploy note: state Worker migration `v3` deletes the `Pairing` class.
-
-## 7. Not established
+## 6. Not established
 
 - Whether "Projector" and "Remote" are the words a teacher reaches for.
-- Whether 45 s is right for a phone in a pocket. It is the tablets' away
-  detection.
-- Whether AIs explain the run well enough for Build step 3. This needs a
-  fetch test of the new guidance. The test should also check that the
-  page's new top doesn't trip injection guards.
-- "Free Claude works" is the owner's statement; it is untested here.
-- `navigator.clipboard.readText()` behaviour on the school's Android tablets
-  and Edge. The long-press box is the fallback.
 - Whether children find the code box in the header. The first lesson will
   show.
-
-## 8. As built (2026-11-03)
-
-On top of main at 8959cc4 (the pictures merge). Built and run: both
-typechecks, 64 tests, the simulator in both modes, and headless Edge
-through the real pages. What was built, the differences from this design,
-and the evidence are in decisions.md, "One code per quiz, two teacher roles
-per tab", including the product owner's gate: once the class has a
-student, no new tab gets the steering, which narrows §1 rules 5–7.
-
-| Area | State |
-|---|---|
-| Notes removal (item 1) | Done: format, tests, guidance, protocol, views; decisions.md "The quiz carries no notes" |
-| Server (`instance.ts`, `directory.ts`, API, migration `v3`) | Done and run. Fixed while running it: a role handed over counts as present at once; a tab whose role moved while it was between polls is told so; a closed teacher socket fades over 45 s instead of at once; an HTTP command from a tab whose role moved gets the message, not a 404 |
-| `client/net.ts` | A tab without a view (role or avatar choice) on HTTP no longer polls three times a second |
-| Root page | Run in the browser. The Build copy is a draft for the owner to judge on the live site: only the address is copied; "in your own words" and "write in the language the quiz should be in" replace the English sentence |
-| Projector, Remote, `/teacher`, students | Styled in `public/app.css` and run; the obsolete pairing, notes and key-check rules removed. Changes to §3.3/§3.4 listed in decisions.md |
-| `scripts/simulate.mjs` | Rewritten for the roles (see decisions.md) |
-| Pictures on the screens | Done: the projector puts the picture between question and tiles or beside them, enlarges it (Z, a click, the Remote), and shows backgrounds; thumbnails in the question list (§3.3), the picture on the Remote's current question (§3.5), "Hide the picture" among the fixes. decisions.md, "Pictures on the screens" |
-| Answer order | Done: answers shuffled per class at upload and for "Again", the same on every screen including the lobby list (§3.3) and the Remote (§3.5); `Order: fixed` keeps a question as written. decisions.md, "Answers shuffled at upload" |
-| Spread, then key; who has answered (v2 items 6, 7) | Done: Show votes, then Show answer, on every steering tab and the clicker; avatars popping into the wall's bar as answers arrive; "of" without away devices; the Remote's "Waiting for". §3.4, §3.5, §3.7; decisions.md, "Spread, then key; who has answered, on the wall" |
-| Avatars the children dress (v2 item 5) | Done: a shape and a hat in the lobby, live on the wall and the Remote with a wiggle, fixed at Start; the lobbies' avatar rows kept in place. docs/avatars.md; decisions.md, "Avatars the children dress" |
-| After upload (v4 item 8) | Done: the check, then the join screen; the teacher code in the students' box; the one question; ⇄ Swap; `/example`. §1 rules 2, 4–7, §3.2–3.5; decisions.md, "After upload: the check, the teacher code, one question, Swap" |
-| Landing page (v4 items 1, 2, 4) | Done: the strip, Build in two steps with the labelled ask, Run with the resume card, the own-copy line, four languages; the network help at the upload, the wall's lobby, the tablet and `/check#it`. §3.1; decisions.md, "The landing page: the strip, two steps, resume, four languages" |
-| Pictures as answers (v3 item 1) | Done: `+ Image: b.png` answer lines; picture tiles on the wall (§3.4), pictures on the students' buttons from one pack per device (§3.6), thumbnails with the key in the question list and on the Remote (§3.3, §3.5). decisions.md, "Pictures as answers" |
-| The steering bar (v4 item 6) | Done: every question starts with its answers hidden; Play ▶ labelled with where it goes and Last call, fixed in size and place on the wall and the Remote; a double press steps twice except across a question's start; `Tempo:`, `Time:`, the tempo sheet and −5/+5 gone; points for speed a switch on the join screen; a question's answers settle when the class leaves its reveal, and a tablet shows an answer as accepted only once the server has it. §3.3–3.7; decisions.md, "The steering bar" |
