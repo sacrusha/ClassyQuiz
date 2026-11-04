@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>classyQuiz — a question on screen</title>
-<meta name="description" content="How the classyQuiz projector lays out a question and how a student's device shows the answers: the markup and the stylesheet rules, with the sizes the script sets as comments.">
+<meta name="description" content="How the classyQuiz projector lays out a question and how a student's device shows the choices: the markup and the stylesheet rules, with the sizes the script sets as comments.">
 <style>
   :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
   @media (prefers-color-scheme: dark) {
@@ -24,7 +24,7 @@
 <body>
 <main>
 <h1>A question on screen</h1>
-<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, with or without its picture, and how a student's device shows its answers: the markup, and the rules from the site's stylesheet. What the stylesheet doesn't carry is in comments: the type sizes and the picture's size and place, which a script sets from the length of the text and the picture's shape, and what the reveal adds.</p>
+<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, with or without its picture, and how a student's device shows its choices: the markup, and the rules from the site's stylesheet. What the stylesheet doesn't carry is in comments: the type sizes and the picture's size and place, which a script sets from the length of the text and the picture's shape, and what the reveal adds.</p>
 
 <h2>Markup</h2>
 <pre><code>&lt;!-- The projector, one question. Always the light theme: projectors wash out dark backgrounds. --&gt;
@@ -42,15 +42,15 @@
 &lt;/main&gt;&lt;/body&gt;
 &lt;!-- The bar has a fixed height (1.9em). While the class answers, the avatar of each student whose answer has
      arrived pops into .strip, sized so the whole class fits, in one row or more.
-     At the lock-in: every tile&#x27;s .side becomes &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it), and each tile gets
+     When answering closes: every tile&#x27;s .side becomes &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it), and each tile gets
      &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;, growing from 0.
-     At the reveal, the answer: a tile that doesn&#x27;t count gets the class &quot;dim&quot;, and a tile that counts gets
+     At the solution: a tile that doesn&#x27;t count gets the class &quot;dim&quot;, and a tile that counts gets
      &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; before its count. The tiles are marked in place: nothing else is redrawn, so
      neither text nor picture moves. --&gt;
 
-&lt;!-- Every question first comes up with its answers hidden, while the teacher reads it out: the same layout, the
-     tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their answers so
-     nothing moves when the teacher shows them. During Last call a bar drains along the top edge of the screen
+&lt;!-- Every question first comes up with its choices hidden, while the teacher reads it out: the same layout, the
+     tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their choices so
+     nothing moves when the teacher shows them. During Countdown a bar drains along the top edge of the screen
      for fifteen seconds, over everything and outside the layout:
      &lt;div id=&quot;clock&quot;&gt;&lt;div class=&quot;clockbar wall&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;. --&gt;
 
@@ -67,10 +67,10 @@
   &lt;/div&gt;
 &lt;!-- Which one, and the figure's size in px, the script works out from the picture's shape and the room the
      question leaves (sizes for a 1366×768 screen above). It lays out &quot;between&quot;: the question first, at most
-     30% of the height; the tiles keep at least 13.5% of the height per row for answers up to 12 characters,
+     30% of the height; the tiles keep at least 13.5% of the height per row for choices up to 12 characters,
      16% up to 30, 20% beyond; the picture gets the rest, at most 62% of the height, never wider than the screen.
      It then takes &quot;beside&quot; if that shows the picture at least 1.3 times larger, with the picture at 58% (else 50%)
-     of the width, and only if the question stays at 1.5em or more and no answer drops below 1.3em in the
+     of the width, and only if the question stays at 1.5em or more and no choice drops below 1.3em in the
      narrower column. So wide figures such as number lines go between, square and upright ones and photos
      beside, and a long question keeps its picture between. A picture smaller than its box is enlarged.
 
@@ -81,27 +81,27 @@
        &lt;div id=&quot;backdrop&quot;&gt;&lt;img …&gt;&lt;/div&gt;
      The question and the bar then sit on white cards. --&gt;
 
-&lt;!-- Pictures as answers (&quot;+ Image: pie-3.png&quot;): each picture sits on its tile&#x27;s colour, which shows wherever
+&lt;!-- Pictures as choices (&quot;+ Image: pie-3.png&quot;): each picture sits on its tile&#x27;s colour, which shows wherever
      the picture is transparent; a picture with a ground of its own (white or any other) shows as drawn. The shape
-     and the room for the votes&#x27; count and tick sit beside the picture (&quot;row&quot;) or above it (&quot;col&quot;). A text
-     answer among them (&quot;none of these&quot;) takes a picture&#x27;s place. --&gt;
+     and the room for the answers&#x27; count and tick sit beside the picture (&quot;row&quot;) or above it (&quot;col&quot;). A text
+     choice among them (&quot;none of these&quot;) takes a picture&#x27;s place. --&gt;
   &lt;div class=&quot;stage picans&quot;&gt;
     &lt;h2 class=&quot;qtext&quot;&gt;Which picture shows three quarters?&lt;/h2&gt;
     &lt;div class=&quot;tiles pics&quot; style=&quot;grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(1, minmax(0, 1fr)); height: (the room below the question, in px)&quot;&gt;
       &lt;div class=&quot;tile pic a0 col&quot;&gt;&lt;svg class=&quot;shape&quot; …&gt;&lt;/svg&gt;&lt;div class=&quot;apic&quot;&gt;&lt;img src=&quot;…&quot; alt=&quot;&quot;&gt;&lt;/div&gt;&lt;span class=&quot;side&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-      … one tile per answer; for a text answer &lt;div class=&quot;apic text&quot;&gt;&lt;span class=&quot;txt&quot;&gt;None of these&lt;/span&gt;&lt;/div&gt; …
+      … one tile per choice; for a text choice &lt;div class=&quot;apic text&quot;&gt;&lt;span class=&quot;txt&quot;&gt;None of these&lt;/span&gt;&lt;/div&gt; …
     &lt;/div&gt;
   &lt;/div&gt;
-&lt;!-- The script arranges the tiles by the pictures&#x27; shape: one, two or four columns (three for three answers),
+&lt;!-- The script arranges the tiles by the pictures&#x27; shape: one, two or four columns (three for three choices),
      each tile &quot;row&quot; or &quot;col&quot;, whichever shows the smallest picture largest; two by two when that is within 85%
      of the best. Square pictures come out two by two or four in a row, wide strips two by two or one under the
      other, upright ones side by side. With the question&#x27;s own picture (an Image: line), that picture goes into
      a band beside the question&#x27;s text, &lt;div class=&quot;qband&quot;&gt;&lt;div class=&quot;figure&quot;&gt;…&lt;/div&gt;&lt;h2 class=&quot;qtext&quot;&gt;…&lt;/h2&gt;&lt;/div&gt;,
-     or between text and tiles at the full width, the room split so that it and the smallest answer picture come
-     out about alike. The votes and the reveal fill .side and add .fill and .dim as for text tiles. --&gt;
+     or between text and tiles at the full width, the room split so that it and the smallest picture choice come
+     out about alike. The class's answers and the solution fill .side and add .fill and .dim as for text tiles. --&gt;
 
-&lt;!-- A student&#x27;s phone or tablet: the answers as buttons, without the question&#x27;s picture; the question is on
-     the projector. Picture answers show their pictures, in a smaller copy, on the buttons:
+&lt;!-- A student&#x27;s phone or tablet: the choices as buttons, without the question&#x27;s picture; the question is on
+     the projector. Picture choices show their pictures, in a smaller copy, on the buttons:
      &lt;button class=&quot;ansbtn pic a0 col&quot;&gt;&lt;svg class=&quot;shape&quot; …&gt;&lt;/svg&gt;&lt;span class=&quot;apic&quot;&gt;&lt;img …&gt;&lt;/span&gt;&lt;/button&gt;,
      arranged by the pictures&#x27; shape like the projector&#x27;s tiles, though not always the same way. --&gt;
 &lt;body class=&quot;play&quot;&gt;&lt;main&gt;
@@ -112,14 +112,14 @@
     &lt;button class=&quot;ansbtn a3&quot;&gt;&lt;svg class=&quot;shape&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;74&quot; height=&quot;74&quot; rx=&quot;4&quot;/&gt;&lt;/svg&gt;&lt;span&gt;60 francs&lt;/span&gt;&lt;/button&gt;
   &lt;/div&gt;
 &lt;/main&gt;&lt;/body&gt;
-&lt;!-- .a0 to .a3 are places on screen, not places in the quiz text: the site shuffles each question&#x27;s answers at
+&lt;!-- .a0 to .a3 are places on screen, not places in the quiz text: the site shuffles each question&#x27;s choices at
      upload (and again for another class), the same on the projector, every tablet and the teacher&#x27;s screens.
      A question with the line &quot;Order: fixed&quot; keeps the text&#x27;s order. --&gt;</code></pre>
 
 <h2>Stylesheet</h2>
 <pre><code>:root { --bg: #fbf8f2; --fg: #1d1d1b; --muted: #5d5c57; --good: #1f8a4c; --bad: #c62828; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.45 system-ui, -apple-system, &quot;Segoe UI&quot;, Roboto, sans-serif; }
-.a0 { --ans: #d93b3b; --ans-ink: #fff; }      /* 1st answer: red triangle   */
+.a0 { --ans: #d93b3b; --ans-ink: #fff; }      /* 1st choice: red triangle   */
 .a1 { --ans: #2f6fd6; --ans-ink: #fff; }      /* 2nd: blue diamond          */
 .a2 { --ans: #e8b100; --ans-ink: #1b1b1f; }   /* 3rd: yellow circle         */
 .a3 { --ans: #1f9d55; --ans-ink: #fff; }      /* 4th: green square          */
@@ -136,7 +136,7 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
    up to 160 2.4em, longer 1.9em; then reduced in 0.15em steps until the question fits in 34vh, down to 1.1em.
    With a picture: 3em, 2.5em, 2.1em, 1.8em, fitting in 30% of the stage&#x27;s height (42% beside). */
 .tiles { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vh; min-height: 0; }
-/* .tiles font-size is set by script from the longest answer: up to 12 characters 2.6em, up to 30 2em,
+/* .tiles font-size is set by script from the longest choice: up to 12 characters 2.6em, up to 30 2em,
    up to 60 1.55em, longer 1.25em; then reduced in 0.1em steps until no tile overflows, down to 1em;
    if it still overflows, words are broken. A number written in groups (&quot;73 000&quot;) stays on one line. */
 .tile { background: var(--ans); color: var(--ans-ink); border-radius: 18px; display: flex; align-items: center; gap: .6em; padding: 1.2vh 1.6vw; font-weight: 700; position: relative; overflow: hidden; min-height: 0; }
@@ -150,7 +150,7 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
 .tiles.veiled .tile { opacity: .55; }
 #clock { position: fixed; top: 0; left: 0; right: 0; z-index: 6; pointer-events: none; }
 .clockbar.wall { height: max(10px, 1.7vh); overflow: hidden; background: rgba(29, 29, 27, .12); }
-.clockbar > span { display: block; height: 100%; background: #2a5db0; transform-origin: left center; } /* drains to scaleX(0) over Last call, turning orange in its last fifth */
+.clockbar > span { display: block; height: 100%; background: #2a5db0; transform-origin: left center; } /* drains to scaleX(0) over Countdown, turning orange in its last fifth */
 
 /* A question&#x27;s picture: always on white, so a transparent drawing reads on any background. */
 .stage.fig .qtext { min-height: 0; flex: none; }
@@ -175,7 +175,7 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .ansbtn { background: var(--ans); color: var(--ans-ink); border: 0; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px; font-size: clamp(1.3rem, 4.5vmin, 2.6rem); font-weight: 700; min-height: 90px; overflow-wrap: anywhere; }
 .ansbtn .shape { width: clamp(52px, 12vmin, 140px); height: clamp(52px, 12vmin, 140px); }
 
-/* Pictures as answers, projector */
+/* Pictures as choices, projector */
 .stage.picans .qtext { min-height: 0; flex: none; }
 .qband { flex: none; display: flex; align-items: center; gap: 2.5vw; min-height: 0; }
 .stage.picans .qband .qtext { flex: 1 1 0; min-width: 0; height: 100%; }
@@ -186,7 +186,7 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .tile.pic .apic { grid-area: card; align-self: stretch; display: flex; align-items: center; justify-content: center; overflow: hidden; } /* no ground of its own: the tile's colour */
 .tile.pic .apic img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
-/* Pictures as answers, student */
+/* Pictures as choices, student */
 .ansbtn.pic { display: grid; gap: 6px; padding: 8px; }
 .ansbtn.pic .apic { overflow: hidden; } /* on the button's colour */</code></pre>
 </main>

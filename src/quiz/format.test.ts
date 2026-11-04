@@ -188,7 +188,7 @@ Explanation: two and two make four.
   const r = parseQuiz(src);
   assert.equal(r.ok, false);
   assert.equal(r.quiz.questions[1].text, "What is 3 + 3?");
-  assert.ok(r.errors.some((e) => /Explanation: two and two/.test(e.message) && /no answer lines/.test(e.message)));
+  assert.ok(r.errors.some((e) => /Explanation: two and two/.test(e.message) && /no choice lines/.test(e.message)));
 });
 
 test("CRLF, BOM, non-breaking spaces and zero-width characters are normalised", () => {
@@ -226,7 +226,7 @@ test("no correct answer is an error naming the question", () => {
   const r = parseQuiz(`Title: T\n1. What is 2 + 2?\n- 3\n- 4\n`);
   assert.equal(r.ok, false);
   assert.equal(r.errors.length, 1);
-  assert.match(r.errors[0].message, /Question 1 \("What is 2 \+ 2\?"\) has no answer marked correct/);
+  assert.match(r.errors[0].message, /Question 1 \("What is 2 \+ 2\?"\) has no choice marked right/);
 });
 
 test("more than one answer may count, up to all of them", () => {
@@ -239,14 +239,14 @@ test("more than one answer may count, up to all of them", () => {
 });
 
 test("too many and too few answers are errors", () => {
-  assert.match(parseQuiz(`Title: T\n1. Q?\n+ a\n- b\n- c\n- d\n- e\n`).errors[0].message, /5 answers; a question has at most 4/);
-  assert.match(parseQuiz(`Title: T\n1. Q?\n+ a\n`).errors[0].message, /only 1 answer/);
+  assert.match(parseQuiz(`Title: T\n1. Q?\n+ a\n- b\n- c\n- d\n- e\n`).errors[0].message, /5 choices; a question has at most 4/);
+  assert.match(parseQuiz(`Title: T\n1. Q?\n+ a\n`).errors[0].message, /only 1 choice/);
 });
 
 test("asterisk bullets are ambiguous and reported", () => {
   const r = parseQuiz(`Title: T\n1. Q?\n* a\n* b\n`);
   assert.equal(r.ok, false);
-  assert.ok(r.errors.some((e) => /doesn't say whether the answer is right or wrong/.test(e.message)));
+  assert.ok(r.errors.some((e) => /doesn't say whether the choice is right or wrong/.test(e.message)));
 });
 
 test("lettered answers with an index key (Aiken style) are rejected with guidance", () => {
@@ -320,7 +320,7 @@ test("an Image: line among the answers belongs to that question", () => {
 test("an Image: line after the answers is an error: it might be meant for the next question", () => {
   const r = parseQuiz(`Title: T\n1. Q1?\n+ a\n- b\nImage: q2.png\n2. Q2?\n+ a\n- b\n`);
   assert.equal(r.ok, false);
-  assert.match(r.errors[0].message, /^Question 1 .*comes after the answers.*before the answers/);
+  assert.match(r.errors[0].message, /^Question 1 .*comes after the choices.*before the choices/);
   assert.equal(r.quiz.questions[0].image, "");
   assert.equal(r.quiz.questions[1].image, "");
 });
@@ -381,7 +381,7 @@ test("backgrounds: two for the quiz, two for a question, or after the answers ar
   const twoQ = parseQuiz(`Title: T\n1. Q?\nBackground: a.jpg\nBackground: b.jpg\n+ a\n- b\n`);
   assert.match(twoQ.errors[0].message, /^Question 1 .*more than one background/);
   const after = parseQuiz(`Title: T\n1. Q?\n+ a\n- b\nBackground: a.jpg\n`);
-  assert.match(after.errors[0].message, /^Question 1 .*comes after the answers, so it's unclear which question the background belongs to/);
+  assert.match(after.errors[0].message, /^Question 1 .*comes after the choices, so it's unclear which question the background belongs to/);
   assert.equal(after.quiz.questions[0].background, "");
 });
 
@@ -477,7 +477,7 @@ test("picture answers: no file, the web, the same picture twice, a bare file nam
   assert.match(r.errors[0].message, /Question 1 .*names no picture file/);
   assert.match(r.errors[1].message, /points to the web/);
   assert.equal(r.warnings.length, 2);
-  assert.match(r.warnings[0].message, /"a\.png" as two answers/i);
+  assert.match(r.warnings[0].message, /"a\.png" as two choices/i);
   assert.match(r.warnings[1].message, /Question 2 .*"cat\.jpg" is shown as text.*\+ Image: cat\.jpg/);
 });
 

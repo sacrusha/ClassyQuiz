@@ -76,8 +76,8 @@ export function pictureRefs(quiz: Quiz): PictureRef[] {
         kind: "answer",
         question: i,
         answer: j,
-        label: `Question ${i + 1} has the picture "${a.image}" as an answer`,
-        leftOut: `Question ${i + 1} runs without its answer picture "${a.image}": that answer shows only its colour and shape.`,
+        label: `Question ${i + 1} has the picture "${a.image}" as a choice`,
+        leftOut: `Question ${i + 1} runs without its picture choice "${a.image}": that choice shows only its colour and shape.`,
       });
     });
   });
@@ -217,9 +217,9 @@ function answerPicture(text: string): string | { problem: (label: string) => str
   else return null;
   const line = excerpt(text, 40);
   if (/[a-z]:\/\//i.test(value))
-    return { problem: (label) => `${label}: the answer "${line}" points to the web. The site doesn't load pictures from the web; a picture comes as a file in the .zip, together with the quiz text.` };
+    return { problem: (label) => `${label}: the choice "${line}" points to the web. The site doesn't load pictures from the web; a picture comes as a file in the .zip, together with the quiz text.` };
   const name = pictureName(value);
-  if (name === null) return { problem: (label) => `${label}: the answer "${line}" names no picture file. It names the file in the .zip, e.g. "+ Image: b.png".` };
+  if (name === null) return { problem: (label) => `${label}: the choice "${line}" names no picture file. It names the file in the .zip, e.g. "+ Image: b.png".` };
   return name;
 }
 
@@ -378,7 +378,7 @@ export function parseQuiz(input: string): ParseResult {
             // Before the first question: a background for the whole quiz.
             if (kind === "image") {
               err(
-                `The line "${line}" comes before any question. A question's picture goes after the question text, before the answers; ` +
+                `The line "${line}" comes before any question. A question's picture goes after the question text, before the choices; ` +
                   `a picture behind every question is a "Background:" line before the first question.`,
               );
             } else if (problem) err(problem("The quiz's background"));
@@ -391,7 +391,7 @@ export function parseQuiz(input: string): ParseResult {
             block.pictureProblems.push((label) =>
               kind === "image"
                 ? `${label} has more than one picture. A question shows one; combine them into one picture file. ` +
-                  `Pictures as answers are answer lines, each with its mark: "+ Image: b.png", "- Image: c.png".`
+                  `Pictures as choices are choice lines, each with its mark: "+ Image: b.png", "- Image: c.png".`
                 : `${label} has more than one background.`,
             );
           } else {
@@ -402,7 +402,7 @@ export function parseQuiz(input: string): ParseResult {
         break;
       case "answer":
         if (block === null) {
-          err(`The answer line "${excerpt(raw.trim())}" comes before any question.`);
+          err(`The choice line "${excerpt(raw.trim())}" comes before any question.`);
           break;
         }
         if (block.answers.length === 0) answered++;
@@ -412,8 +412,8 @@ export function parseQuiz(input: string): ParseResult {
         break;
       case "ambiguous":
         err(
-          `The line "${excerpt(raw.trim())}" starts with "${c.marker}", which doesn't say whether the answer is right or wrong. ` +
-            `The correct answer's line starts with "+", the others with "-".`,
+          `The line "${excerpt(raw.trim())}" starts with "${c.marker}", which doesn't say whether the choice is right or wrong. ` +
+            `A right choice's line starts with "+", the others with "-".`,
         );
         break;
       case "text": {
@@ -468,7 +468,7 @@ export function parseQuiz(input: string): ParseResult {
       if (b.keepOrder) quizKeepOrder = true;
       if (b.image) {
         err(
-          `The picture "${b.image}" comes before any question. A question's picture goes after the question text, before the answers; ` +
+          `The picture "${b.image}" comes before any question. A question's picture goes after the question text, before the choices; ` +
             `a picture behind every question is a "Background:" line before the first question.`,
         );
       }
@@ -482,14 +482,14 @@ export function parseQuiz(input: string): ParseResult {
     } else if (firstAnswered === -1) {
       // No question anywhere; reported once below.
     } else {
-      err(`The text "${excerpt(text)}" has no answer lines. Each question is followed by its answers, one per line, starting with "+" (correct) or "-" (wrong).`);
+      err(`The text "${excerpt(text)}" has no choice lines. Each question is followed by its choices, one per line, starting with "+" (right) or "-" (wrong).`);
     }
   });
 
   if (questions.length === 0) {
     err(
-      `No questions were found. A quiz has a "Title:" line, then questions, each followed by ${MIN_ANSWERS} to ${MAX_ANSWERS} answer lines; ` +
-        `the correct answer's line starts with "+", the others with "-".`,
+      `No questions were found. A quiz has a "Title:" line, then questions, each followed by ${MIN_ANSWERS} to ${MAX_ANSWERS} choice lines; ` +
+        `a right choice's line starts with "+", the others with "-".`,
     );
   }
 
@@ -502,18 +502,18 @@ export function parseQuiz(input: string): ParseResult {
   questions.forEach((q, i) => {
     const num = i + 1;
     const label = q.text ? `Question ${num} ("${excerpt(q.text)}")` : `Question ${num}`;
-    if (q.text === "") err(`${label} has answers but no question text.`);
-    if (q.answers.length < MIN_ANSWERS) err(`${label} has only ${q.answers.length} answer; a question has ${MIN_ANSWERS} to ${MAX_ANSWERS}.`);
-    if (q.answers.length > MAX_ANSWERS) err(`${label} has ${q.answers.length} answers; a question has at most ${MAX_ANSWERS}.`);
+    if (q.text === "") err(`${label} has choices but no question text.`);
+    if (q.answers.length < MIN_ANSWERS) err(`${label} has only ${q.answers.length} choice; a question has ${MIN_ANSWERS} to ${MAX_ANSWERS}.`);
+    if (q.answers.length > MAX_ANSWERS) err(`${label} has ${q.answers.length} choices; a question has at most ${MAX_ANSWERS}.`);
     if (!q.answers.some((a) => a.correct))
-      err(`${label} has no answer marked correct. The correct answer's line starts with "+", the others with "-".`);
+      err(`${label} has no choice marked right. A right choice's line starts with "+", the others with "-".`);
     // Pictures as answers: "+ Image: b.png". Read here, after
     // the answer letters are gone, so "A) Image: b.png" is a picture too.
     for (const a of q.answers) {
       const pic = answerPicture(a.text);
       if (pic === null) {
         if (BARE_PICTURE.test(a.text))
-          warn(`${label}: the answer "${excerpt(a.text, 40)}" is shown as text. A picture as an answer is written "+ Image: ${a.text}" (or "- Image: …").`);
+          warn(`${label}: the choice "${excerpt(a.text, 40)}" is shown as text. A picture as a choice is written "+ Image: ${a.text}" (or "- Image: …").`);
         continue;
       }
       a.text = "";
@@ -528,15 +528,15 @@ export function parseQuiz(input: string): ParseResult {
       if (a.image !== undefined) {
         if (a.image === "") continue;
         const key = `\u0000${imageKey(a.image)}`;
-        if (seen.has(key)) warn(`${label} has the picture "${excerpt(a.image, 40)}" as two answers.`);
+        if (seen.has(key)) warn(`${label} has the picture "${excerpt(a.image, 40)}" as two choices.`);
         seen.add(key);
         continue;
       }
       const key = a.text.toLowerCase();
-      if (a.text === "") err(`${label} has an empty answer line.`);
-      else if (seen.has(key)) warn(`${label} has the answer "${excerpt(a.text, 40)}" twice.`);
+      if (a.text === "") err(`${label} has an empty choice line.`);
+      else if (seen.has(key)) warn(`${label} has the choice "${excerpt(a.text, 40)}" twice.`);
       else if (a.text.length > LONG_ANSWER)
-        warn(`${label}: the answer "${excerpt(a.text, 40)}" is ${a.text.length} characters long, which is hard to read on an answer button.`);
+        warn(`${label}: the choice "${excerpt(a.text, 40)}" is ${a.text.length} characters long, which is hard to read on a button.`);
       seen.add(key);
     }
     if (q.text.length > LONG_QUESTION)
@@ -548,9 +548,9 @@ export function parseQuiz(input: string): ParseResult {
     // figure with the wrong question.
     for (const { kind, line } of b.afterAnswers) {
       err(
-        `${label}: the line "${line}" comes after the answers, so it's unclear which question the ${kind === "image" ? "picture" : "background"} belongs to. ` +
-          `Its line goes after the question text, before the answers.` +
-          (kind === "image" ? ` A picture as an answer is an answer line with its mark: "+ Image: b.png", "- Image: c.png".` : ""),
+        `${label}: the line "${line}" comes after the choices, so it's unclear which question the ${kind === "image" ? "picture" : "background"} belongs to. ` +
+          `Its line goes after the question text, before the choices.` +
+          (kind === "image" ? ` A picture as a choice is a choice line with its mark: "+ Image: b.png", "- Image: c.png".` : ""),
       );
       q[kind] = "";
     }
