@@ -60,3 +60,7 @@ Pages deployment d895b857, state Worker version 5238c33c, no migration (the Work
 ## 2026-11-04 — twelfth deploy, 9f50079
 
 Pages deployment 84080180, state Worker version 51faab5b, no migration (no change under `src/server/` since 3089468). The identity (v4 item 14): the top-hat fox and favicon set on every page, the shared header, one stylesheet for the look, Rubik for the site's own words, ink controls and rust links, the ranking's bars on tracks, a number kept with its word, readable placeholders, the join code kept off the wall's edges, the logo kit in `docs/brand/`. Tested locally by the owner before the deploy. Run by the product-owner session from the clean worktree with the main checkout's credentials file. Checked live: the root page with the drawings after the guidance (43.1 KB), `/favicon.ico` as an icon rather than the root's fallback, the favicon SVG, the header lockup, the Rubik font, `app.css`, the students' `js/play.js` at 40.7 KB, `/api/site`.
+
+## 2026-11-04 — thirteenth deploy, c0d7480
+
+Pages deployment f4182d88, state Worker version 78228a8d, no migration (no change under `src/server/`). The About guidance: "Build with the teacher" rewritten (phases, the first reply in a few lines, presentation through the layout page), the published format narrowed to `quiz.txt` in UTF-8, FAQ-kind information gathered in the first two sections, layout arithmetic and resolution figures dropped. Run by the personal-assistant session from the main checkout. Checked live: the root page (42.8 KB) carries "Build with the teacher" and `quiz.txt`.
