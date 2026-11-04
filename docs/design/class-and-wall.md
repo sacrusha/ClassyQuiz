@@ -49,6 +49,9 @@ audience sees and why.
 - The projector shows the address, the join code and a QR code for
   `/play#<code>`. Typing the address leads to the landing page, whose top is a
   big number box. Without JavaScript the box still submits to `/play?c=...`.
+  The code is necessary, the QR a convenience. On the wall they share the
+  room the lobby leaves under the title and above Start, each on one line,
+  sized from that room rather than from the window (`.lobby` in `app.css`).
 - A class code is 5 digits (`functions/api/[[path]].ts`). Fewer would make a
   mistyped code likelier to land in another class's quiz; more is slower for
   young children, who scan the code or type it. What bounds a guess instead is
