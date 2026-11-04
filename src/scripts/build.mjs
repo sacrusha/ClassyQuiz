@@ -22,15 +22,15 @@ const pages = ["home", "teach", "screen", "play", "check", "example"];
 // The Content-Security-Policy is a second layer behind escaping: quiz text is
 // the teacher's AI's, shown on every screen of the class, and a slip in any
 // page that builds HTML from it must not run as script. Scripts only from the
-// site's own files; pictures also as data: (the favicons) and blob: (the
-// projector fetches the quiz's pictures into object URLs). Styles stay open
-// (the pages set many inline), and so do WebSocket addresses: matching
-// wss: by 'self' is uneven on the older browsers school devices run.
+// site's own files; pictures also as blob: (the projector fetches the quiz's
+// pictures into object URLs). Styles stay open (the pages set many inline),
+// and so do WebSocket addresses: matching wss: by 'self' is uneven on the
+// older browsers school devices run.
 const csp = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' blob:",
   "connect-src 'self' ws: wss:",
   "object-src 'none'",
   "base-uri 'none'",
