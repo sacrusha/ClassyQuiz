@@ -29,7 +29,7 @@ The format's specification is the "How quizzes are built" section of the guidanc
 
 Any number of a question's answers may be right, from one to all, and a student who picks any of them scores. The owner's frame, in his words: "There is fun to be had with questions where all answers are correct." A question with none marked right is an error. That is how lost marks (a copy from a rendered bubble) fail loudly instead of the parser guessing a key.
 
-A question has two to four answers (`MIN_ANSWERS`, `MAX_ANSWERS` in `format.ts`).
+A question has two to four answers (`MIN_ANSWERS`, `MAX_ANSWERS` in `format.ts`). The guidance and the format's messages call them choices, as the teacher's screens do (`question-flow.md`, "The steering bar"); this file keeps the code's word.
 
 Rejected formats, kept as one line each so nobody tries them again:
 - Aiken (lettered answers plus "ANSWER: B"): an index key, which hides errors.

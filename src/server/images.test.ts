@@ -144,11 +144,11 @@ test("answer pictures: a missing small copy is no error; different proportions g
   assert.equal(r.packs, 0);
   assert.equal(r.index["a.png"].small, undefined);
   assert.equal(r.warnings.length, 1);
-  assert.match(r.warnings[0].message, /^Question 1's answer pictures have different proportions \(from 1:1 to 4:1\)/);
+  assert.match(r.warnings[0].message, /^Question 1's picture choices have different proportions \(from 1:1 to 4:1\)/);
 
   const left = parseQuiz(`Title: T\n1. Which?\n+ Image: a.png\n- Image: b.png\n`).quiz;
   const l = matchImages(left, [{ name: "a.png", bytes: pngHeader(600, 600) }], true);
   assert.ok(l.ok);
-  assert.deepEqual(l.warnings.map((w) => w.message), ['Question 1 runs without its answer picture "b.png": that answer shows only its colour and shape.']);
+  assert.deepEqual(l.warnings.map((w) => w.message), ['Question 1 runs without its picture choice "b.png": that choice shows only its colour and shape.']);
   assert.equal(left.questions[0].answers[1].image, "");
 });

@@ -139,7 +139,7 @@ function proportions(quiz: Quiz, index: Record<string, StoredImage>): Problem[] 
     const ratio = (a: number) => (a >= 1 ? `${a.toFixed(1).replace(/\.0$/, "")}:1` : `1:${(1 / a).toFixed(1).replace(/\.0$/, "")}`);
     out.push({
       message:
-        `Question ${i + 1}'s answer pictures have different proportions (from ${ratio(lo)} to ${ratio(hi)}). ` +
+        `Question ${i + 1}'s picture choices have different proportions (from ${ratio(lo)} to ${ratio(hi)}). ` +
         `The class may pick by a picture's shape or crop rather than by what it shows. Drawn alike, on canvases of the same size, they differ only in what the question asks about.`,
     });
   });
