@@ -20,6 +20,11 @@ like "ask at most one question" fails both. Also, imperative text in a
 fetched page trips AI prompt-injection guards, while reference material gets
 read.
 
+*Amended 2026-11-04 (owner):* a rule read as a rule. Its purposes: no
+tripping injection guards, and no ordering the reader about for things nobody
+must do. A well-marked example trips no guard, and the teacher's own sentence
+to their AI (the ask in Build) isn't the page's voice: "Read …" is fine there.
+
 Consequence for testing: we check behaviour across situations (a full brief,
 no brief, a handwritten note among the scans, contradictory material), not
 only whether the output parses.

@@ -378,7 +378,9 @@ Later, unplaced, unchanged. With the owner, after this deploy: the list under
    phone variants such as clickable or scrollable are allowed. DE·EN·FR·IT
    translates the block above About; About is for the AI and stays English;
    the switch sits top right, like on 99% of pages. "Try the example" opening
-   as host is likely overwhelming — they just want to see the questions. The
+   as host is likely overwhelming — they just want to see the questions
+   (said against the pre-redesign lobby; the check screen before the lobby,
+   item 8, relieves it — see item 10). The
    classroom interaction still needs visualizing: the job of a South-Park-ish
    2D video, from the owner's storyboard project (agents working on purpose
    and situation, after-action reports distilled into Grundsätze), fed the
@@ -391,6 +393,9 @@ Later, unplaced, unchanged. With the owner, after this deploy: the list under
    "Use a"; then detail: a link beats naming tiers, a dated test statement
    beats both. A personal frame is possible: "I typically use paid Opus;
    expect paid Gemini or ChatGPT to work just fine."
+   The rule's purpose (owner, 2026-11-04): the page doesn't order its reader
+   about for things nobody must do. It doesn't cover the teacher's own
+   sentence to their AI, where "Read …" is fine.
    Landing story draft 2 is in `docs/landing-story.md`. Still with the owner:
    the video brief (§5); the own-copy thresholds and the network help at
    failure points are resolved by item 4. Owner on the example quiz, which
@@ -642,6 +647,47 @@ Later, unplaced, unchanged. With the owner, after this deploy: the list under
    question beside its picture, where ten winners come out small because the
    key stays visible. Whether four seconds is long enough for a child to find
    themselves is for the owner; tools are still the owner's open call.
+10. **The worked example, behind one link** — the example hides behind the
+    strip's click, which nobody finds. Owner's variant, 2026-11-04: one
+    separate page, linked by one line after Build's step 2 and from "the
+    example quiz" in step 1, never from About. It offers the example sheets
+    (as files and as photographs, so a teacher can compare on their own AI),
+    the conversation, the quiz as a download, and a shortcut that runs it.
+    - The conversation is images, not text: an AI fetching the page
+      shouldn't read it as page text, and the layout is ours. A cropped
+      preview links to the image alone; browser back returns. Date, tier and
+      "ask written for this demonstration, reply as produced" are in the
+      image.
+    - Turn 2 is the owner's ask, written for the demonstration; the reply is
+      a real run.
+    - The shortcut fetches the static .zip and hands it to the existing
+      upload, landing on the check screen (`/example` becomes that). It
+      counts as an upload; on the free plan a check-only visit costs one
+      booking and the zip's bytes, rows come with Start. To verify: whether
+      the check screen holds a socket or poll, and the zip's size.
+    - Blocked on the owner's daylight photographs and the turn-2 ask. Can
+      ship first: "the example quiz" in step 1 as a link to `/example`, and
+      the strip not looking clickable until the video exists.
+    - Supersedes landing story draft 4's dropping of the conversation page
+      (overload on the root; one linked line avoids it).
+11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not
+    recorded, so no tier claim)
+    - "Make me a quiz for classyquiz.pages.dev" was read as a publish
+      target and set aside; the model fetched the page only when told to
+      read it, then delivered. The examples now begin `Read <address>.` and
+      say "a classyQuiz", so a failed fetch can't pass as a generic quiz.
+      Step 2 and the address chip are unchanged. To test: the same sheet,
+      this form against "for it"/"with it", "Have a look at" and the owner's
+      own ("Please create a classyQuiz.pages.dev from these sheets. …");
+      observable: the page fetched before the first build. Waits for the
+      landing and guidance to settle (fetch cache). The runs' asks no longer
+      match the bubbles word for word.
+    - Transparent answer pictures: a blueish-green marker vanished on the
+      blue tile. The guidance says the colour shows through, not that tiles
+      are shuffled across four colours. One line in "Pictures as answers",
+      e.g. "Draw each answer picture with a ground of its own, white unless
+      there's a reason; a transparent one lands on a random tile colour, and
+      a mark can vanish on it." Rides with the next delivery.
 
 ## Later — Paper and memory
 

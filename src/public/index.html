@@ -113,9 +113,9 @@
   @media (max-width: 860px) {
     .cols { grid-template-columns: minmax(0, 1fr); }
   }
-  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip is one row that scrolls sideways, the sheet first at about 60 % of the width. */
+  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip is one row that scrolls sideways, the sheet first, the next frame peeking in. Its height is capped by the viewport's height as well as its width, so a phone held sideways still shows Build and Run below it (backlog v4 item 1). */
   @media (max-width: 720px) {
-    .strip { --h: min(72vw, 300px); justify-content: start; overflow-x: auto; scroll-snap-type: x proximity; margin: 16px -16px 0; padding: 0 16px 8px; column-gap: 12px; scrollbar-width: thin; }
+    .strip { --h: min(60vw, 240px, 38vh); justify-content: start; overflow-x: auto; scroll-snap-type: x proximity; margin: 16px -16px 0; padding: 0 16px 8px; column-gap: 12px; scrollbar-width: thin; }
     .strip .pic { scroll-snap-align: start; scroll-margin-left: 16px; }
     .f-sheet .pic, .f-ask .pic { height: var(--h); }
     .f-zip .pic { height: calc(var(--h) * .62); }
@@ -184,12 +184,12 @@
     <li><p class="do"><span data-t="step2">Ask it to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
       <div class="example">
         <p class="eg" data-t="forExample">For example, with photos of two pages:</p>
-        <blockquote class="bubble" id="bubble">Hi! Can you make me a quiz for <u>classyquiz.pages.dev</u> from these two pages, with exercises <u>like no. 1, 3 and 4</u>? <u>For my 5th grade class</u>, <u>about 10 questions</u>, <u>in English</u>.</blockquote>
+        <blockquote class="bubble" id="bubble">Read <u>classyquiz.pages.dev</u>. Can you make me a classyQuiz from these two pages, with exercises <u>like no. 1, 3 and 4</u>? <u>For my 5th grade class</u>, <u>about 10 questions</u>, <u>in English</u>.</blockquote>
         <p class="labels" id="labels">this site · which exercises · your class · how many · which language</p>
       </div>
       <div class="example">
         <p class="eg" data-t="orOpen">Or, with nothing decided yet:</p>
-        <blockquote class="bubble" id="bubble2">I need a quiz for classyquiz.pages.dev. Help?</blockquote>
+        <blockquote class="bubble" id="bubble2">Read classyquiz.pages.dev. I need a classyQuiz. Help?</blockquote>
         <p class="then" data-t="asksBack">It then asks what it needs.</p>
       </div></li>
   </ol>
