@@ -6,13 +6,17 @@
 //
 // How the page addresses teachers (backlog v4 item 1, the owner's rule):
 // commands only for what must be done (choosing an AI, asking it), advice as
-// advice, and no claim that isn't true. Step 1's detail names what is
+// advice, and no claim that isn't true. That is the page's voice to its
+// reader; the example ask is the teacher's own sentence to their AI, where an
+// imperative is fine (decisions.md, "Guidance page is information, not
+// instruction", amended 2026-11-04). Step 1's detail names what is
 // verified and says nothing about free tiers.
 //
-// The example asks are each language's real first ask from the example's
-// redo (.tmp/example/v2-*/teacher-1.txt), verbatim but for the French
-// greeting (the run's "Bonjour", here "Salut", the owner's, to match its
-// "tu"); the marked parts carry the labels. The second ask is the other end,
+// The example asks began as each language's real first ask from the example's
+// redo (.tmp/example/v2-*/teacher-1.txt); since 2026-11-04 they open with
+// "Read <address>." and call the quiz a classyQuiz (backlog v4 item 11), so
+// the runs' asks no longer match them word for word. The marked parts carry
+// the labels. The second ask is the other end,
 // nothing decided yet: the owner's, translated; that the AI then asks what it
 // needs is the guidance's "Building with the teacher". The site's address in
 // both is replaced by the one the browser opened.
@@ -108,9 +112,9 @@ const en: Text = {
   step2: "Ask it to build you a quiz for",
   forExample: "For example, with photos of two pages:",
   ask: [
-    { s: "Hi! Can you make me a quiz for " },
+    { s: "Read " },
     { s: "classyquiz.pages.dev", l: 0 },
-    { s: " from these two pages, with exercises " },
+    { s: ". Can you make me a classyQuiz from these two pages, with exercises " },
     { s: "like no. 1, 3 and 4", l: 1 },
     { s: "? " },
     { s: "For my 5th grade class", l: 2 },
@@ -122,7 +126,7 @@ const en: Text = {
   ],
   labels: ["this site", "which exercises", "your class", "how many", "which language"],
   orOpen: "Or, with nothing decided yet:",
-  ask2: "I need a quiz for classyquiz.pages.dev. Help?",
+  ask2: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
   asksBack: "It then asks what it needs.",
   copy: "Copy",
   copied: "Copied",
@@ -177,9 +181,9 @@ const de: Text = {
   step2: "Bitte sie um ein Quiz für",
   forExample: "Zum Beispiel, mit Fotos von zwei Seiten:",
   ask: [
-    { s: "Hallo! Kannst du mir aus diesen zwei Seiten ein Quiz für " },
+    { s: "Lies " },
     { s: "classyquiz.pages.dev", l: 0 },
-    { s: " machen, mit ähnlichen Aufgaben " },
+    { s: ". Kannst du mir aus diesen zwei Seiten ein classyQuiz machen, mit ähnlichen Aufgaben " },
     { s: "wie Nr. 1, 3 und 4", l: 1 },
     { s: "? " },
     { s: "Für meine 5. Klasse", l: 2 },
@@ -191,7 +195,7 @@ const de: Text = {
   ],
   labels: ["diese Seite", "welche Aufgaben", "deine Klasse", "wie viele", "welche Sprache"],
   orOpen: "Oder, wenn noch nichts feststeht:",
-  ask2: "Ich brauche ein Quiz für classyquiz.pages.dev. Hilfst du mir?",
+  ask2: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
   asksBack: "Dann fragt sie, was sie braucht.",
   copy: "Kopieren",
   copied: "Kopiert",
@@ -246,9 +250,9 @@ const fr: Text = {
   step2: "Demandez-lui un quiz pour",
   forExample: "Par exemple, avec les photos de deux pages :",
   ask: [
-    { s: "Salut ! Tu peux me faire un quiz pour " },
+    { s: "Lis " },
     { s: "classyquiz.pages.dev", l: 0 },
-    { s: " à partir de ces deux pages, avec des exercices " },
+    { s: ". Tu peux me faire un classyQuiz à partir de ces deux pages, avec des exercices " },
     { s: "comme les n° 1, 3 et 4", l: 1 },
     { s: " ? " },
     { s: "Pour ma classe de CM2", l: 2 },
@@ -260,7 +264,7 @@ const fr: Text = {
   ],
   labels: ["ce site", "quels exercices", "votre classe", "combien", "quelle langue"],
   orOpen: "Ou, sans rien avoir décidé :",
-  ask2: "J'ai besoin d'un quiz pour classyquiz.pages.dev. Tu m'aides ?",
+  ask2: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   asksBack: "Elle vous demande alors ce qu'il lui faut.",
   copy: "Copier",
   copied: "Copié",
@@ -315,9 +319,9 @@ const it: Text = {
   step2: "Chiedile un quiz per",
   forExample: "Per esempio, con le foto di due pagine:",
   ask: [
-    { s: "Ciao! Mi puoi fare un quiz per " },
+    { s: "Leggi " },
     { s: "classyquiz.pages.dev", l: 0 },
-    { s: " da queste due pagine, con esercizi " },
+    { s: ". Mi puoi fare un classyQuiz da queste due pagine, con esercizi " },
     { s: "come i n. 1, 3 e 4", l: 1 },
     { s: "? " },
     { s: "Per la mia quinta elementare", l: 2 },
@@ -329,7 +333,7 @@ const it: Text = {
   ],
   labels: ["questo sito", "quali esercizi", "la tua classe", "quante", "quale lingua"],
   orOpen: "Oppure, senza aver ancora deciso nulla:",
-  ask2: "Mi serve un quiz per classyquiz.pages.dev. Mi aiuti?",
+  ask2: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
   asksBack: "Allora ti chiede ciò che le serve.",
   copy: "Copia",
   copied: "Copiato",
@@ -370,7 +374,7 @@ const it: Text = {
 
 export const TEXT: Record<Lang, Text> = { de, en, fr, it };
 
-/** The example asks as plain text, for checking them against the runs' asks. */
+/** The example asks as plain text, for checking the labelled parts and the address. */
 export function askText(t: Text): string {
   return t.ask.map((p) => p.s).join("");
 }
