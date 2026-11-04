@@ -15,7 +15,7 @@
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
-import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, statusDot, store, tabRole } from "./dom.ts";
+import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
@@ -287,8 +287,8 @@ function showWaiting(): void {
 }
 
 /** The code box again, as on the root page: five digits for a student, seven for a teacher; it routes by length. */
-function codeForm(value = ""): string {
-  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="12345" aria-label="Quiz code" value="${esc(value)}"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
+function codeForm(value = "", placeholder = "12345"): string {
+  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="${placeholder}" aria-label="Quiz code" value="${esc(value)}"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
 }
 
 function wireCodeForm(): void {
@@ -329,11 +329,11 @@ function showNoQuiz(): void {
 function showTeacherForm(note: string): void {
   document.body.classList.add("follows-dark");
   document.title = "classyQuiz · teacher";
-  main.innerHTML = `<div class="center teacher-entry">
+  main.innerHTML = `${siteHead()}<div class="center teacher-entry">
     <h1>Show or steer a quiz from here</h1>
     ${note ? `<p class="muted">${esc(note)}</p>` : ""}
     <p class="muted">The teacher code:</p>
-    ${codeForm(JOIN_CODE.test(code) ? code : "")}
+    ${codeForm(JOIN_CODE.test(code) ? code : "", "12345 67")}
     <p class="muted">It is the class code and two more digits, as the quiz's own screen shows it.</p>
   </div>`;
   wireCodeForm();
@@ -383,7 +383,7 @@ function enter(c: Choice): void {
     return;
   }
   if (entry === "full") {
-    main.innerHTML = `<div class="center choice">
+    main.innerHTML = `${siteHead()}<div class="center choice">
       <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
       <p class="muted">This quiz already has a screen for the class and one that steers.</p>
       <p class="muted">If one of them was on this device a moment ago, try again in half a minute.</p>
@@ -396,7 +396,7 @@ function enter(c: Choice): void {
     });
     return;
   }
-  main.innerHTML = `<div class="center choice">
+  main.innerHTML = `${siteHead()}<div class="center choice">
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
     <div class="entry-roles">
       <button class="btn role" data-role="screen">Show the quiz here<small>the class watches this screen</small></button>

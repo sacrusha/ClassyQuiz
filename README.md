@@ -1,4 +1,8 @@
+<h1><picture><source media="(prefers-color-scheme: dark)" srcset="src/public/brand/classyquiz-horizontal-colour-dark.svg"><img src="src/public/brand/classyquiz-horizontal-colour.svg" alt="classyQuiz" height="72"></picture></h1>
+
 Quizzes for classes. A website to run classroom quizzes, with AI integration to generate the quizzes from scanned exercises, scribbles, or typed instructions, or assist the creator in generating them themselves.
+
+![A question on the class's projector: the four answers, how many chose each, the right one marked, and the class's avatars across the top](src/public/landing/wall-en.webp)
 
 To run, either use the demo setup at https://classyquiz.pages.dev, or ask an AI to set up your own server. 
 

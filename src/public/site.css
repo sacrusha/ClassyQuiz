@@ -1,0 +1,99 @@
+/* classyQuiz's look, shared by every page: the colours, the two typefaces and
+   the site's header (docs/design/identity.md). Each page links this first;
+   app.css (the app pages) and a page's own <style> build on these tokens and
+   don't define their own. */
+
+/* Rubik Bold 1.100, OFL (fonts/OFL.txt), subset to Latin: the wordmark's
+   lettering. Only the site's own words use it (the name, codes, headings,
+   the wall's numbers); a quiz's own text stays in the reading face. */
+@font-face {
+  font-family: "Rubik";
+  src: url("/fonts/rubik-bold-1.100.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Paper and ink. */
+  --bg: #fbf8f2;
+  --fg: #1d1d1b;
+  --muted: #5d5c57;
+  /* A placeholder: 4.6:1 on the paper and 4.9:1 on a card, so it reads, and
+     paler than typed ink (15.9:1), so a box with only a placeholder doesn't
+     read as filled. */
+  --placeholder: #72716b;
+  --card: #ffffff;
+  --rule: #e2ddd2;
+  --code-bg: #f1eee6;
+  --frame: #2b2b29; /* drawn devices: the strip's, the join screen's tablet */
+  /* The teacher's controls are ink, so none of them reads as one of the four
+     answer colours (red, blue, yellow, green: .a0–.a3 in app.css). */
+  --control: #1d1d1b;
+  --control-ink: #fbf8f2;
+  /* The fox's orange, darkened for text: links, labels, highlights. Never a
+     control's fill. */
+  --accent: #a8471a;
+  --accent-ink: #ffffff;
+  --bubble: #f4ebe1; /* the example asks on the landing */
+  --bad: #c62828;
+  --good: #1f8a4c;
+  --radius: 14px;
+
+  --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-brand: "Rubik", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  /* App screens are set tight; pages read top to bottom get more air. */
+  --leading: 1.45;
+  --leading-prose: 1.55;
+  --h1: clamp(1.45rem, 1.1rem + 1.6vw, 1.75rem); /* smaller on a phone */
+  --h2: 1.3rem;
+  --h3: 1.05rem;
+  color-scheme: light;
+}
+
+/* Teacher-side pages follow the device's dark mode (class follows-dark on
+   body); the projector and the students' screens stay light: projectors wash
+   out dark backgrounds. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.follows-dark {
+    --bg: #171716;
+    --fg: #ecebe6;
+    --muted: #a9a8a1;
+    --placeholder: #8c8b85; /* 5.3:1 on the paper, 4.7:1 on a card; typed 15:1 */
+    --card: #222220;
+    --rule: #3a3935;
+    --code-bg: #22211f;
+    --frame: #000000;
+    --control: #ecebe6;
+    --control-ink: #171716;
+    --accent: #f0a065;
+    --accent-ink: #171716;
+    --bubble: #2a231e;
+    --bad: #ff8a80;
+    color-scheme: dark;
+  }
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 17px/var(--leading) var(--font-text);
+}
+a { color: var(--accent); }
+h1, h2, h3 { font-family: var(--font-brand); font-weight: 700; }
+::placeholder { color: var(--placeholder); opacity: 1; }
+
+/* A code a person reads or types: the class code, the teacher code. */
+.digits { font-family: var(--font-brand); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .05em; white-space: nowrap; }
+
+/* The mark and the name, inline (public/brand/, written in by the build):
+   the root page's header and the small header of the pages a teacher
+   reaches from it. The lockup is drawn for exactly 32 px, phones included;
+   its hat and name take the ink. */
+.brand { display: inline-flex; align-items: center; color: var(--fg); text-decoration: none; }
+.brand svg, .brand img { display: block; height: 32px; width: auto; flex: none; }
+.site-head { border-bottom: 1px solid var(--rule); }
+.site-head .in { max-width: var(--page-w, 42rem); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; min-height: 58px; }

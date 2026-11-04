@@ -11,7 +11,9 @@ constraints and versions: docs/backlog.md.
 - docs/ — for people and agents working on the project: backlog.md (the
   product's situation, versions, what is open), design/ (one file per part of
   the site: its purpose, the situation it meets, how the site meets it, what
-  isn't known), user-flow.md (the screens and their words), and working notes.
+  isn't known), user-flow.md (the screens and their words), brand/ (the
+  mark: its guidelines, SVG masters and the scripts that draw them), and
+  working notes.
   src/DEVELOPING.md is for whoever changes the code.
 - src/ — the site, in whatever layout its toolchain expects.
 - secrets/ — local deploy credentials, git-ignored except its README.

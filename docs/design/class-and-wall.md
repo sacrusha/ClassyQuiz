@@ -52,8 +52,10 @@ audience sees and why.
   the box still submits to `/play?c=...`.
 - First users who typed the address didn't find that box. Until the first
   avatar, the wall shows where it is: a wordless picture of a tablet's top,
-  the address in the browser's field and the site's header with the class's
-  code in its box, ringed. Wordless, so it matches the landing page in any
+  the address in the browser's field and the site's header (the mark and the
+  name) with the class's code in its box, ringed. The address under the QR
+  code has the mark before it, so the fox on the wall is the fox in the
+  header the tablets open (`identity.md`). Wordless, so it matches the landing page in any
   language and at any width; after the first avatar the class shows each
   other.
   The code is necessary, the QR a convenience. On the wall they share the
@@ -144,7 +146,8 @@ quiz under way.
   answer tiles, who has answered. Reveal: answers that do not count dimmed,
   each with its count. Ranking: places 1 to 3 (at most ten avatars; ties share
   a place) and the class's result as a percentage with one bar per question
-  (`ranking()` in `server/instance.ts`). This is the closure for the whole
+  (`ranking()` in `server/instance.ts`), each on a track of the full height,
+  so a low share reads as low, not as a speck. This is the closure for the whole
   class, whoever could not follow the questions.
 - **Teacher.** Live answer counts, the players (faded when away) and the fixes;
   the rest is in `teacher-devices.md` and `question-flow.md`.
@@ -166,6 +169,9 @@ costing the teaching moment its steadiness.
   questions are shown, even when written with ordinary spaces
   (`client/dom.ts`). A false match only prevents a line break. The parser keeps
   non-breaking spaces.
+- A number stays with a short word after it ("50 Franken", "3 cm", up to ten
+  letters): broken after the number, a tile's first line is the number alone
+  and reads as the whole answer. The tile then fits a little smaller.
 
 ### Who has answered
 
