@@ -98,7 +98,7 @@ Purpose and reasons: docs/design/root-page.md.
 ├──────────────────────────────────────────────────────────────────────┤
 │ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
 │   → [wall] [tablets, fanned]                                         │
-│ Your exercise sheet · Your AI · The .zip, uploaded here ·            │
+│ Your exercise sheets · Your AI · The .zip, uploaded here ·           │
 │ What the class sees · Each student taps     See the example quiz ›   │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
