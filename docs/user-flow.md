@@ -162,6 +162,27 @@ Purpose and reasons: docs/design/root-page.md.
   and a device that can't reach the quiz carry the help where the failure
   shows (docs/design/root-page.md).
 
+#### The example, step by step (`/example`)
+
+English, from the strip. Purpose and reasons: docs/design/example-page.md.
+
+```
+‹ classyQuiz
+The example, step by step
+How the example quiz was made, from the exercise sheets to the class, with
+everything to try the same on your own AI.
+1 The exercise sheets     [photo p.1] [photo p.2]
+                          [Photo, page 1 (.jpg)] [Photo, page 2 (.jpg)] [The sheets (.pdf)]
+2 The conversation        [top of the conversation picture]  Read the whole conversation ›
+3 The quiz                [number-line-quiz.zip]
+4 Run it                  [ Start the example quiz ]
+                          It runs on this site like any quiz, on the projector
+                          and on your students' devices.
+```
+
+"Start the example quiz" uploads the example as Run does and lands on the
+check (§3.3).
+
 ### 3.2 The two entrances after a code
 
 Students (`/play#63953`) get no screen of their own:
