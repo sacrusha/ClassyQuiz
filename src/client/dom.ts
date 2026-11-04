@@ -14,12 +14,15 @@ export function esc(s: string): string {
 }
 
 /**
- * Text with its line breaks kept (questions may run over several lines), and
- * a number written in digit groups ("1 000 000") kept on one line.
+ * Text with its line breaks kept (questions may run over several lines), a
+ * number written in digit groups ("1 000 000") kept on one line, and a number
+ * kept with a short word after it ("50 Franken", "3 cm"): split, the number
+ * stands alone on a tile's first line and looks like the whole answer.
  */
 export function lines(s: string): string {
   return esc(s)
     .replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u00A0")
+    .replace(/(\d) (?=\p{L}{1,10}(?!\p{L}))/gu, "$1\u00A0")
     .replace(/\n/g, "<br>");
 }
 
