@@ -21,7 +21,8 @@ All commands run in `src/` unless said otherwise.
 - `client/`: the page scripts, plain DOM without a framework, bundled per page
   by esbuild to ES2020 because school devices are not always current.
 - `public/`: pages and stylesheet; `scripts/`: build, dev, deploy, simulate.
-- `public/brand/`: the mark. A page writes `<!--#brand file.svg-->` where
+- `public/brand/`: the mark, copies of `docs/brand/svg/` (the masters, their
+  rules and the scripts that draw them). A page writes `<!--#brand file.svg-->` where
   the mark goes inline and `build.mjs` writes the file in; a script imports
   the file as text (`client/brand.d.ts`). Opened straight from `public/`, a
   page shows no mark. Which file goes where: `docs/design/identity.md`.
@@ -144,11 +145,8 @@ the repo; read a script before running it. Directories there:
 - `stacks/<name>/`: per-implementer scripts for starting and stopping a second
   local stack (`after-upload`, `fixc`, `flow`, `hard`, `identity`, `landing`,
   `lp`, `lp3`, `owner5`, `pics`, `stack`, `tempo-bar`, `v3`, `winners`).
-- `identity/kit/`: the logo kit. `guidelines.md` is its entry point (the
-  drawings, clear space, minimum sizes, colours, which file on which
-  ground); `svg/`, `png/` and `web/` hold every version, `work/` the Python
-  that builds them (`python -I work/build_kit.py`). `src/public/brand/` and
-  the icons at the site's root are copies of its files.
+- `identity/kit/`: the logo kit as it was made, with the boards and renders
+  that `docs/brand/` leaves out; their mock-ups carry placeholder content.
 - `sim-diag/`: the instrumented simulation used to chase a score mismatch,
   since designed out (`docs/design/question-flow.md`, "When a tap counts").
 - `picture-answers/`: the generated test zip and its generator.
