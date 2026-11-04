@@ -366,7 +366,17 @@ Needs a real classroom or real devices, nobody has run it:
 ## Housekeeping and process, for the next session
 
 - The deploy worktree is at 56ebf87; the credentials stay in the main
-  checkout's `secrets/`.
+  checkout's `secrets/`. Main is ahead and undeployed: the landing's strip as
+  a card to the worked example, Build's wording, Run first when stacked, the
+  labels under their words on phones, and `/example` (v4 items 10–13), plus
+  the guidance's enlarge sentences (v4 item 11). The worked example's
+  stand-ins (photos, mock conversation) would go live with it; the
+  conversation says it is a mock-up.
+- Probes kept in `.tmp/shots-tool/`: `landing-ask-sweep.mjs` (stray
+  punctuation in the labelled ask across widths, full-page shots),
+  `landing-stacked-order.mjs` (where Build and Run start on upright screens),
+  `example-launch.mjs` ("Start the example quiz" to the check, on a running
+  stack). They read a site at 127.0.0.1:8931 or 8788; read before running.
 - Process, the owner's words, for whoever orchestrates next: delegate on
   purpose and situation, not steps; no spec changes to an agent in flight —
   settle the item first, then brief a fresh one; no runs whose outcome is
