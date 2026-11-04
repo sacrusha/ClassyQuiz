@@ -1,10 +1,10 @@
-// How a child dresses their animal in the lobby (backlog v2 item 5,
-// docs/design/class-and-wall.md): a background shape and a hat, from one menu that is the
+// How a child dresses their animal in the lobby
+// (docs/design/class-and-wall.md, "Dressing the avatar"): a background shape and a hat, from one menu that is the
 // same for everybody. The animal and its colour stay assigned and tell the
 // children apart; the look is the child's own and is never scarce.
 // The drawings are in client/look.ts, in this order.
 
-/** Background shapes: 0 is today's disc, the default. */
+/** Background shapes: 0 is the plain disc, the default. */
 export const BACKGROUND_COUNT = 6;
 /** Hats: 0 is none, the default. */
 export const HAT_COUNT = 9;

@@ -28,7 +28,7 @@ from that, and this file is about them:
   the whole class is on the HTTP long-poll fallback for 15 minutes. That is
   some 75 classes a day on rows and 30 with every device polling. The
   landing page's "room for a few dozen classes a day" rests on this
-  (`shared/limits.ts`, comment above `OWN_COPY`).
+  (`shared/limits.ts`, comment on `MAX_UPLOADS_PER_DAY`).
 - **No edge to defend with.** A `pages.dev` address has no zone, so no WAF and
   no rate-limiting rule: every request reaches the Function and counts,
   rejected or not. A determined script can spend the day's requests and

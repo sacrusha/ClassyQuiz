@@ -31,8 +31,8 @@ const ASPECT_SPREAD = 1.5;
  * than once (by two questions, or as a picture and a background) is stored
  * once. With `leaveOutMissing` (the teacher chose to run without them), a
  * picture that didn't come is taken off the quiz with a warning.
- * `smalls`: the answer pictures' small copies for the students' devices (v3
- * item 1), by the same names; they go into packs of at most PACK_BYTES. An
+ * `smalls`: the answer pictures' small copies for the students' devices, by
+ * the same names; they go into packs of at most PACK_BYTES. An
  * answer picture without one shows on the devices as its colour and shape.
  * Returns the index for the quiz record and the files to store as `img:<n>`
  * and `pack:<p>`.

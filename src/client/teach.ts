@@ -70,8 +70,6 @@ function onMessage(m: ServerMessage): void {
   }
 }
 
-// ---------------------------------------------------------------------------
-
 function render(): void {
   const v = view;
   if (!v) return;
@@ -94,7 +92,6 @@ function render(): void {
   fillPictures(main);
   renderClock(v);
 
-  // The steering bar: Last call and Play, the same size and in the same place throughout (steps.ts).
   const buttons = `<div class="wrap steerbtns">
     <button class="btn more" data-menu aria-label="more">⋯</button>
     ${steeringButtons(v)}
@@ -111,11 +108,7 @@ function teacherDigits(): string {
   return view?.teacher || held?.teacher || "";
 }
 
-/**
- * The steering tab's lobby is the check (docs/design/teacher-devices.md, "The single tab: check, then join"): the class
- * code, count and avatars, points for speed, the teacher code at rest, ⇄ Swap while
- * the wall is there, and the questions; Start in the bar below.
- */
+/** The steering tab's lobby is the check (docs/design/teacher-devices.md, "The single tab: check, then join"). */
 function lobby(v: TeacherView): string {
   const n = v.run?.players.length ?? 0;
   const projector =
@@ -156,7 +149,7 @@ function current(v: TeacherView): string {
   const counted = run.players.filter((p) => p.connected || p.answered);
   const present = counted.length;
   const away = run.players.length - present;
-  // The last few the class waits for: the teacher's to see, not the wall's (v2 item 7).
+  // The last few the class waits for: the teacher's to see, not the wall's.
   const waiting = v.phase === "question" && v.answering === "open" ? counted.filter((p) => !p.answered) : [];
   const waitLine =
     waiting.length > 0 && waiting.length <= 6 && run.answered > 0
@@ -183,11 +176,7 @@ function current(v: TeacherView): string {
   </section>`;
 }
 
-/**
- * Where the question is, above the answers (backlog v4 item 6): its answers
- * hidden while the class reads, Last call draining in its slot (see
- * renderClock), or locked in with the spread on the wall.
- */
+/** Where the question is, above the answers (Last call drains in its slot: see renderClock). */
 function stepLine(v: TeacherView): string {
   if (v.phase !== "question") return "";
   if (v.answering === "reading") return `<p class="hint">The answers are hidden: the class reads the question.</p>`;
@@ -227,7 +216,7 @@ function menu(v: TeacherView): void {
     items.push({ label: showAll ? "Hide the questions" : "All questions", run: () => ((showAll = !showAll), render()) });
     items.push({ label: "Players", run: () => ((showPlayers = true), render()) });
   }
-  // ⇄ Swap while the wall is there: a wrong answer to the second device's question, undone from either.
+  // ⇄ Swap is offered while the wall is there: a wrong choice on the second device's question is undone by the same tap on either.
   if (v.screen === "present") items.push({ label: "&#8644; Swap: show the quiz here, steer from the other device", run: () => void swap() });
   else items.push({ label: "A second device…", run: () => toast(`On ${siteAddress()}, type ${teacherCode(v.code, v.teacher)}.`, 8000) });
   items.push({ label: "Stop being the remote", run: () => void leave() });

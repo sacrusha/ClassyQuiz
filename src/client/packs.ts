@@ -1,8 +1,8 @@
-// The answer pictures on a student's device (v3 item 1). The server keeps
+// The answer pictures on a student's device. The server keeps
 // their small copies in a few packs; the device fetches each pack once, as
-// soon as a view names it (in the lobby, so the pictures are here before
-// Go), and cuts each picture out of it by offset into a blob URL. One
-// request per pack and device instead of one per picture: a class of 25
+// soon as a view names it (in the lobby, so the pictures are here before the
+// first question), and cuts each picture out of it by offset into a blob URL.
+// One request per pack and device instead of one per picture: a class of 25
 // tablets would otherwise spend thousands of the free plan's requests on a
 // quiz with picture answers. Nothing is kept beyond the page.
 

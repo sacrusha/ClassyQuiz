@@ -1,7 +1,5 @@
 // What the steering tab shows and does, shared by the Remote (teach.ts) and
-// the Projector while it steers itself (screen.ts): the question list of the
-// lobby (backlog item 19), the next step, fixes, players, the ⋯ menu.
-// docs/user-flow.md §3.3–3.5.
+// the Projector while it steers itself (screen.ts). docs/user-flow.md §3.3–3.5.
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
@@ -46,9 +44,6 @@ export function patch(el: HTMLElement, html: string): void {
   el.innerHTML = html;
 }
 
-// ---------------------------------------------------------------------------
-// The questions (lobby, and "All questions" during the run)
-
 function tags(q: TeacherQuestion, v: TeacherView): string {
   const right = q.answers.filter((a) => a.counts).length;
   return [
@@ -68,7 +63,7 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
   const rows = q.answers
     .map((a, j) => {
       const tap = fixing ? ` fixable" data-act="toggle-count" data-q="${i}" data-i="${j}` : "";
-      // A picture answer (v3 item 1) shows its picture: the text says nothing
+      // A picture answer shows its picture: the text says nothing
       // about it, so this is where the teacher checks the key. While fixing,
       // a tap on the row toggles the answer, so the picture isn't a button then.
       const body =
@@ -136,7 +131,6 @@ export function questionList(v: TeacherView, ui: ManageUI, readOnly = false): st
   </section>`;
 }
 
-/** A picture over the whole page of this device; a tap closes it. */
 export function lightbox(src: string, w: number, h: number): void {
   document.querySelector(".lightbox")?.remove();
   const back = document.createElement("div");
@@ -173,9 +167,6 @@ export function syncCrowd(root: HTMLElement, v: TeacherView): void {
     attrs: { "data-act": "remove", "data-player": p.id, "aria-label": "remove" },
   }));
 }
-
-// ---------------------------------------------------------------------------
-// Acting
 
 export class Steer {
   /** Every press of the steering bar, its keys and clicker included, goes through here. */
@@ -303,16 +294,12 @@ export class Steer {
   }
 }
 
-// ---------------------------------------------------------------------------
-// The ⋯ menu and short notices
-
 export interface MenuItem {
   label: string;
   run: () => void;
   danger?: boolean;
 }
 
-/** A sheet of choices over the page; a tap outside closes it. */
 export function openMenu(items: MenuItem[]): void {
   document.querySelector(".sheet-back")?.remove();
   const back = document.createElement("div");
@@ -365,9 +352,6 @@ export function toast(msg: string, ms = 4000): void {
 export function addressAndCode(code: string): string {
   return `<span class="addr">${esc(siteAddress())} · </span><strong>${esc(code)}</strong>`;
 }
-
-// ---------------------------------------------------------------------------
-// Points for speed (backlog v4 item 6; shared/tempo.ts)
 
 /**
  * The lobby's switch, under Start on the join screen and in the Remote's

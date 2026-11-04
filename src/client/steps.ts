@@ -1,21 +1,15 @@
-// The steering bar (backlog v4 item 6; docs/design/question-flow.md, "The steering
-// bar"): two buttons, the same size and in the same place whatever the
-// state, so a hand in flow finds them. Play ▶ steps one slice and is
-// labelled with where it goes: Show answers, Lock in, Reveal, Ranking,
-// Next. Last call is its own button while the question is up and not yet
-// locked in. The lobby has Start instead, the final ranking "Again".
+// The steering bar's buttons and the rules for presses
+// (docs/design/question-flow.md, "The steering bar" and "Presses").
 
 import type { Answering, At, TeacherView } from "../shared/protocol.ts";
 import { ICON } from "./look.ts";
 
-/** Where the open question is, as far as the bar needs to know. */
 export interface StepState {
   phase: TeacherView["phase"];
   current: number;
   answering: Answering | null;
   /** Locked in, the spread on the wall. */
   votes: boolean;
-  /** Last call running. */
   lastCall: boolean;
   /** No question after this one: its reveal leads to the final ranking. */
   last: boolean;
@@ -66,32 +60,14 @@ export function steeringButtons(v: TeacherView): string {
     <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}<span>${play ? play.label : ""}</span></button>`;
 }
 
-/**
- * Presses of the bar, by mouse, finger, keyboard or clicker: a teacher's
- * press in flow does what they meant; a bounce, or a press landing on a
- * screen that has just moved, does nothing; a deliberate double press
- * fast-forwards (docs/design/question-flow.md, "Presses").
- *
- * - A press within BOUNCE_MS of the last one is the same press: a bouncing
- *   key or a clicker sending twice. Nobody presses twice that fast.
- * - A second press within DOUBLE_MS of the first is a double: one gesture,
- *   made before the screen moved for the first. It steps one more slice,
- *   from where the first press leads (the server takes it only from there).
- *   Not past the start of a question: a double whose first press showed the
- *   answers, or brought up the next question, steps once; a second slice
- *   there (Lock in with nobody answered, or the answers before anyone read
- *   the question) is never wanted. One double is two slices; a third press
- *   in it does nothing.
- * - Otherwise a press within SETTLE_MS of the screen moving does nothing:
- *   aimed at what was there before (the screen moved for the press before,
- *   or by itself: Last call locking in), or a hand that hasn't seen the new
- *   state. Counted from the view arriving, not from the press: on a slow
- *   line the screen moves late, and that is when it misleads.
- */
+/** Presses closer than this are one press (a bouncing key, a clicker sending its code twice). */
 export const BOUNCE_MS = 80;
+/** A second press within this is a deliberate double: one more slice, never past a question's start. */
 export const DOUBLE_MS = 450;
+/** A press this soon after the screen moved was aimed at the previous screen; counted from the view arriving, not from the press. */
 export const SETTLE_MS = 400;
 
+// docs/design/question-flow.md, "Presses".
 export class Presses {
   private stepKey = "";
   private movedAt = 0;
@@ -102,7 +78,6 @@ export class Presses {
     this.now = now;
   }
 
-  /** Every view: when the step on screen changes, the moment is noted. */
   noteView(s: StepState): void {
     const key = `${s.phase}|${s.current}|${s.answering}|${s.votes}|${s.lastCall}`;
     if (key === this.stepKey) return;

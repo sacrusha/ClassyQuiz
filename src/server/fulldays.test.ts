@@ -1,4 +1,4 @@
-// The own-copy line's count of full days (backlog v4 item 4).
+// The own-copy line's count of full days.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

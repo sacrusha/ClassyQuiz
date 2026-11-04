@@ -4,12 +4,12 @@
 // doesn't come back at midnight: filled, every write on the account fails,
 // answers in running classes included, until quizzes expire.
 //
-// Per quiz it holds its id, its size and until when it may live; per day a
-// count. Nothing about the quiz or who made it.
+// Holds nothing about a quiz or who made it: an id, a size and an expiry per
+// quiz, a count per day.
 //
 // It also keeps the days (UTC, as the count) on which it refused an upload,
 // for 31 days: the landing's own-copy line says on how many of the last 30
-// the site was full (backlog v4 item 4). Only these refusals are known here;
+// the site was full. Only these refusals are known here;
 // a day the platform's request allowance ran out is not recorded, since the
 // site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
 
@@ -60,7 +60,7 @@ export class SiteBudget extends DurableObject<Env> {
     return countFull([...(await this.ctx.storage.list({ prefix: "f:" })).keys()], Date.now());
   }
 
-  /** The quiz lives on: its booking with it. */
+  /** Moves a booking's end later when the quiz's end moves (a booking never shrinks). */
   async renew(instance: string, until: number): Promise<void> {
     const key = `i:${instance}`;
     const b = await this.ctx.storage.get<Booking>(key);

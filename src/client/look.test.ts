@@ -1,10 +1,12 @@
-// The winners' band on the wall (backlog v4 item 9): ten large and apart,
-// more blurring together, never wider than the stage nor taller than the
-// question's part of it.
+// The avatar drawings cover every look the menu offers. The winners' band on
+// the wall: ten large and apart, more blurring together, never wider than the
+// stage nor taller than the question's part of it.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { JUMP, partySize } from "./look.ts";
+import { ANIMAL_COUNT } from "../server/game.ts";
+import { BACKGROUND_COUNT, HAT_COUNT } from "../shared/looks.ts";
+import { JUMP, LOOK_DRAWINGS, avatarSvg, partySize } from "./look.ts";
 
 test("the winners' band: up to ten apart, more overlap, all inside the stage", () => {
   // The stage of a 1366x768 wall, of one steering itself, of a 1024x768 one, and of a phone steering itself.
@@ -31,4 +33,11 @@ test("the winners' band: up to ten apart, more overlap, all inside the stage", (
   // Ten in one row on the 1366 wall, about a seventh of its height; in two rows on a phone.
   assert.deepEqual([partySize(10, 1298, 600).rows, partySize(10, 342, 560).rows], [1, 2]);
   assert.ok(partySize(10, 1298, 600).s >= 100 && partySize(10, 342, 560).s >= 60, "ten large enough to tell apart");
+});
+
+test("dressing: every look the menu offers has a drawing", () => {
+  assert.deepEqual(LOOK_DRAWINGS, { backgrounds: BACKGROUND_COUNT, hats: HAT_COUNT, seats: ANIMAL_COUNT, animals: ANIMAL_COUNT });
+  for (let a = 0; a < ANIMAL_COUNT; a++)
+    for (let b = 0; b < BACKGROUND_COUNT; b++)
+      for (let h = 0; h < HAT_COUNT; h++) assert.doesNotMatch(avatarSvg({ a, c: 0, b, h }), /undefined|NaN/, `animal ${a}, background ${b}, hat ${h}`);
 });
