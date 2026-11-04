@@ -416,9 +416,9 @@ body.teach { padding-bottom: 96px; }
 .teach .actions .btn { flex: 1; }
 .teach .actions .btn.primary { flex: 2; }
 .teach .actions .btn.more { flex: 0 0 56px; padding: 0; font-size: 1.3rem; }
-/* The steering bar (client/steps.ts): Last call and Play keep their size and place whatever they say. */
-.teach .actions .btn.bar-last { flex: 0 0 34%; min-width: 0; min-height: 64px; padding: .3em .5em; gap: .35em; }
-.teach .actions .btn.bar-play { flex: 1 1 0; min-width: 0; min-height: 64px; padding: .3em .5em; gap: .35em; font-size: 1.15rem; }
+/* The steering bar (client/steps.ts): Countdown and Play keep their size and place whatever they say. */
+.teach .actions .btn.bar-last { flex: 0 0 38%; min-width: 0; height: 68px; padding: .3em .4em; gap: .3em; font-size: .95rem; }
+.teach .actions .btn.bar-play { flex: 1 1 0; min-width: 0; height: 68px; padding: .3em .5em; gap: .35em; font-size: 1.15rem; }
 /* A narrow phone: a label takes two lines rather than being cut. */
 .teach .actions .btn.bar-last span, .teach .actions .btn.bar-play span { white-space: normal; line-height: 1.15; text-overflow: clip; }
 .joinbox { text-align: center; padding: 8px 0 4px; }
@@ -510,8 +510,13 @@ body.teach { padding-bottom: 96px; }
 .btn.bar-last, .btn.bar-play { white-space: nowrap; overflow: hidden; }
 .btn.bar-last span, .btn.bar-play span { overflow: hidden; text-overflow: ellipsis; }
 .btn.bar-last.running { opacity: .5; }
+/* A label and, where the step has a consequence it doesn't name, a small line under it. */
+.btn.bar-last .lbl, .btn.bar-play .lbl { display: flex; flex-direction: column; min-width: 0; line-height: 1.1; text-align: center; overflow: visible; }
+.btn.bar-last .lbl small, .btn.bar-play .lbl small { display: block; font-size: .62em; font-weight: 500; line-height: 1.3; opacity: .85; overflow: hidden; text-overflow: ellipsis; }
 .steerbar .btn.bar-last { flex: none; width: 8.4em; padding: .3em .5em; }
 .steerbar .btn.bar-play { flex: none; width: 10.2em; padding: .3em .5em; }
+/* One height whether or not a small line is under the label, so nothing moves. */
+.steerbar .btn.bar-last, .steerbar .btn.bar-play { height: 50px; min-height: 0; }
 .lastcall-line { display: flex; align-items: center; gap: 6px; font-weight: 700; margin: .4em 0 0; }
 /* A phone as the steering Projector: ⋯ and the two buttons; the code gives way. */
 @media (max-width: 600px) {
@@ -519,6 +524,7 @@ body.teach { padding-bottom: 96px; }
   .steerbar .btn.more { width: 40px; }
   .steerbar .btn.bar-last { width: 7.6em; padding: .3em .3em; gap: .3em; }
   .steerbar .btn.bar-play { width: 9.2em; padding: .3em .3em; gap: .3em; }
+  .steerbar .btn.bar-last .lbl > span { font-size: .9em; }
   .steerbar .joinchip { display: none; } /* in ⋯ on a phone */
   /* The code, not the address cut to "classyquiz.pa…" or the code cut to a
      lone digit. */

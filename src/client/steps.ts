@@ -2,6 +2,7 @@
 // (docs/design/question-flow.md, "The steering bar" and "Presses").
 
 import type { Answering, At, TeacherView } from "../shared/protocol.ts";
+import { LAST_CALL_MS } from "../shared/tempo.ts";
 import { ICON } from "./look.ts";
 
 export interface StepState {
@@ -13,10 +14,12 @@ export interface StepState {
   lastCall: boolean;
   /** No question after this one: its reveal leads to the final ranking. */
   last: boolean;
+  /** The current question's number among those shown (1-based; 0 before the first). */
+  n: number;
 }
 
 export function stepState(v: TeacherView): StepState {
-  return { phase: v.phase, current: v.current, answering: v.answering, votes: v.votes, lastCall: !!v.clock && v.answering === "open", last: v.last };
+  return { phase: v.phase, current: v.current, answering: v.answering, votes: v.votes, lastCall: !!v.clock && v.answering === "open", last: v.last, n: v.run?.n ?? 0 };
 }
 
 /** The state a step command names: the server takes it only from there, so a press sent twice takes one step. */
@@ -26,20 +29,27 @@ export function atOf(s: StepState): At {
 
 const PLAY = "&#9654;";
 
-/** Where Play goes from s: its label, and the state it leads to; null where there is no Play (lobby, final). */
-export function playStep(s: StepState): { label: string; to: StepState } | null {
+/**
+ * Where Play goes from s: its label, a small line where the step has a
+ * consequence the label doesn't name, and the state it leads to; null where
+ * there is no Play (lobby, final). Labels are nouns for what the class sees
+ * next, in the bar's vocabulary: choices (the tiles), answers (what the class
+ * tapped), solution (the key) (docs/design/question-flow.md, "The steering bar").
+ */
+export function playStep(s: StepState): { label: string; note?: string; to: StepState } | null {
   const at = (to: Partial<StepState>): StepState => ({ ...s, answering: null, votes: false, lastCall: false, ...to });
-  if (s.phase === "question" && s.answering === "reading") return { label: "Show answers", to: at({ answering: "open" }) };
-  if (s.phase === "question" && s.answering === "open") return { label: "Lock in", to: at({ answering: "closed", votes: true }) };
-  if (s.phase === "question") return { label: "Reveal", to: at({ phase: "reveal" }) };
+  if (s.phase === "question" && s.answering === "reading") return { label: "Choices", to: at({ answering: "open" }) };
+  if (s.phase === "question" && s.answering === "open") return { label: "Answers", note: "closes answering", to: at({ answering: "closed", votes: true }) };
+  if (s.phase === "question") return { label: "Solution", to: at({ phase: "reveal" }) };
   if (s.phase === "reveal" && s.last) return { label: "Final ranking", to: at({ phase: "final" }) };
   if (s.phase === "reveal") return { label: "Ranking", to: at({ phase: "ranking" }) };
   // The next question's index isn't needed: a double press never goes past a question's start (Presses).
-  if (s.phase === "ranking") return { label: "Next", to: at({ phase: "question", current: -1, answering: "reading" }) };
+  // Its number is: skipped questions aren't counted, as on the wall's "4 / 12".
+  if (s.phase === "ranking") return { label: `Question ${s.n + 1}`, to: at({ phase: "question", current: -1, answering: "reading", n: s.n + 1 }) };
   return null;
 }
 
-/** Last call is there while the question is up and not locked in; once running it waits, greyed. */
+/** Countdown (`lastCall`) is there while the question is up and not locked in; once running it waits, greyed. */
 function lastCallState(s: StepState): "on" | "running" | "off" {
   if (s.phase !== "question" || s.answering === null || s.answering === "closed") return "off";
   return s.lastCall ? "running" : "on";
@@ -47,7 +57,7 @@ function lastCallState(s: StepState): "on" | "running" | "off" {
 
 /**
  * The two buttons, for the Remote's bottom bar and the wall's steering bar:
- * Last call, then Play. Both always drawn, so neither moves: Last call is
+ * Countdown, then Play. Both always drawn, so neither moves: Countdown is
  * kept invisible where it doesn't apply.
  */
 export function steeringButtons(v: TeacherView): string {
@@ -56,8 +66,9 @@ export function steeringButtons(v: TeacherView): string {
   if (v.phase === "final") return `<button class="btn primary bar-play" data-act="again">Again with another class</button>`;
   const lc = lastCallState(s);
   const play = playStep(s);
-  return `<button class="btn bar-last${lc === "running" ? " running" : ""}" data-act="last-call"${lc === "off" ? ' style="visibility:hidden" tabindex="-1" aria-hidden="true"' : ""}${lc === "running" ? " disabled" : ""}>${ICON.timer}<span>Last call</span></button>
-    <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}<span>${play ? play.label : ""}</span></button>`;
+  const label = (text: string, note?: string) => `<span class="lbl"><span>${text}</span>${note ? `<small>${note}</small>` : ""}</span>`;
+  return `<button class="btn bar-last${lc === "running" ? " running" : ""}" data-act="last-call"${lc === "off" ? ' style="visibility:hidden" tabindex="-1" aria-hidden="true"' : ""}${lc === "running" ? " disabled" : ""}>${ICON.timer}${label("Countdown", `${Math.round(LAST_CALL_MS / 1000)} s, then closes`)}</button>
+    <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}${label(play ? play.label : "", play?.note)}</button>`;
 }
 
 /** Presses closer than this are one press (a bouncing key, a clicker sending its code twice). */
