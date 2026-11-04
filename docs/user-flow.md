@@ -228,8 +228,9 @@ by itself later. A wrong teacher code shows the box again with "That isn't
 this quiz's teacher code."; after five from the device, or the quiz's ten,
 "Too many wrong codes for this quiz. Try again in a few minutes."
 `/teacher#63953`, the old way in, shows the same box with the class code in
-it. The box's placeholder is a teacher code, "12345 67"; this screen and the
-question above have the site's small header.
+it. The box's placeholder is a teacher code, "12345 67". This screen, the
+question above and the note that both are there have the site's small
+header.
 
 ### 3.3 The lobby: the check, then the join screen
 

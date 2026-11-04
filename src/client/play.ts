@@ -383,7 +383,7 @@ function enter(c: Choice): void {
     return;
   }
   if (entry === "full") {
-    main.innerHTML = `<div class="center choice">
+    main.innerHTML = `${siteHead()}<div class="center choice">
       <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
       <p class="muted">This quiz already has a screen for the class and one that steers.</p>
       <p class="muted">If one of them was on this device a moment ago, try again in half a minute.</p>
