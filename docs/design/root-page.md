@@ -153,7 +153,7 @@ browser opened, so an own copy shows its own. Two examples:
   the numbers to them ("like no. 1, 3 and 4 from these two sheets").
 - With nothing decided yet: "Read <address>. I need a classyQuiz. Help?", then
   the sentence that the AI asks for what it still needs, with two examples, before
-  it builds the quiz (the guidance's "Building with the teacher": what is open,
+  it builds the quiz (the guidance's "Build with the teacher": what is open,
   put so the teacher can answer in a line, and the quiz after the answer). The
   examples and "before" tell a first-timer what the next turn looks like and
   that no quiz built on guesses comes first. It is the owner's ask, translated.

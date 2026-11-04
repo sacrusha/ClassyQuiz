@@ -68,11 +68,14 @@ The page says only what the reading model can't already know. The section was
 cut from 4311 words to about 2266 on that standard. What stays is the site's
 facts. What went is advice a capable model derives from them or already has:
 how to design wrong answers, short questions, when a fixed order fits, how
-long a countdown a kind of task needs, cropping and legibility of pictures,
+long a countdown a kind of task needs, cropping of pictures,
 notes to the teacher outside the quiz text. The facts those rested on stay: the
 class reads from the back of the room, answers are shown spread before key,
-answer pictures lie on tiles in four colours, and text outside the quiz is
-ignored or an error.
+and answer pictures lie on tiles in four colours. How the parser treats a file
+that doesn't follow the format (stray text, files beside the quiz) is left off:
+a file that doesn't follow the format doesn't work, and the published format
+is narrower than the real one on purpose (`quiz.txt`, UTF-8), so that the
+format can migrate later (`quiz-format.md`).
 
 The lesson is described as far as it shapes a quiz: the check with the
 solutions folded away, the teacher code for a second device, each question
@@ -100,16 +103,24 @@ The root URL serves the guidance as static HTML that reads without
 JavaScript; the landing's language switch (`design/root-page.md`) is a script
 over an English block, so a fetcher reads English. The guidance runs from
 "About classyQuiz" through the manual (`#site`), what informs the shape of the
-quizzes (`#quizzes`), how quizzes are built (`#format`) and building with the
-teacher (`#with-a-teacher`).
+quizzes (`#quizzes`), how quizzes are built (`#format`) and "Build with the
+teacher" (`#with-a-teacher`). The first two sections carry the FAQ-kind
+information (how a lesson runs, privacy, hosting, what the site reports at
+upload), which doubles as context for building; the format section carries
+what building needs.
 
-The "build with the teacher" stance is the owner's: the teacher knows what
-they need and is there to say it, and an AI that guesses what a sentence would
-have settled reads as not having understood. The page names what a teacher who
-frontloads gives (exercises, number of questions, the sheet's numbers or new
-ones, language) and says the quiz follows the answer; otherwise the first
-reply is a few lines of what is clear and what is open, put so the teacher can
-answer in a line.
+The "Build with the teacher" stance is the owner's: the teacher knows what
+they need and is there to say it, so the AI doesn't guess; building takes
+minutes, long enough for the teacher's attention to drift, so asking early
+beats delivering something half right. The page gives three phases (establish
+what gets built, build, present and refine). The first reply is a few lines of
+what is clear and what is open, put so the teacher can answer in a line; a
+teacher who frontloads everything probably wants the build at once, and one
+who wants the gaps filled says so. "Presentation" is deliberately abstract:
+each AI shows the teacher the questions, or a question type, with whatever
+tools it has, using the layout page (`/layout`) where it can, for approval or
+correction during the conversation, not as a gate. On controversial subjects
+the teacher leads.
 
 ### Claims about what an AI can do
 
