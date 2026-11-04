@@ -97,23 +97,24 @@ Purpose and reasons: docs/design/root-page.md.
 │ classyQuiz                         Code [_ _ _ _ _]  ▶      EN ▾     │
 ├──────────────────────────────────────────────────────────────────────┤
 │ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
-│   → [wall] [tablet]                                                  │
+│   → [wall] [tablets, fanned]                                         │
 │ Your exercise sheet · Your AI · The .zip, uploaded here ·            │
-│ What the class sees · Each student taps                              │
+│ What the class sees · Each student taps     See the example quiz ›   │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
 │   Claude Opus wrote the example  │ │ [Back to the quiz ▶] Class code  ││ quiz this device
 │   quiz, 3 Nov 2026.              │ │ On another device: type 63953 47 ││ started, until its
-│ 2 Ask it to build you a quiz for │ └──────────────────────────────────┘│ final ranking
-│   classyquiz.pages.dev [Copy]    │ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
+│ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
+│   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
 │   For example, with photos of    │ │ [ Upload the quiz your AI      │ │
-│   two pages:                     │ │   made (.zip) ] or drop it here│ │
+│   two sheets:                    │ │   made (.zip) ] or drop it here│ │
 │  ( Hi! Can you make me a quiz … )│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
 │   Or, with nothing decided yet:  │                                   │ uploaded before, the
 │  ( I need a quiz for classyquiz… )│                                  │ site full lately
-│   It then asks what it needs.    │                                   │
+│   The AI then asks you for what  │
+│   it still needs, before the quiz│                                   │
 ├──────────────────────────────────┴───────────────────────────────────┤
 │ About classyQuiz … (English, for AIs)                                 │
 ```
@@ -123,9 +124,11 @@ Purpose and reasons: docs/design/root-page.md.
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
 - **The strip** follows the workflow: the sheet, the ask, the .zip going up
-  to the site, the wall, a tablet. It links `/example` in the chosen language
-  until the video exists; no ▶. Below 720 px wide it is one row that scrolls
+  to the site, the wall, tablets fanned out. A card with a border and the label "See the
+  example quiz ›"; it links `/example` in the chosen language until the video
+  exists; no ▶. Below 720 px wide its frames are one row that scrolls
   sideways.
+- **Below 860 px wide** Build and Run stand one above the other, Run first.
 - **Build's step 2** has two example asks: the labelled one with photos, and
   the open one ("I need a quiz for classyquiz.pages.dev. Help?"), after which
   the AI asks what it needs.

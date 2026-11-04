@@ -93,20 +93,39 @@ classyQuiz isn't obvious", and that students tap after the big screen.
 
 - The class frames are the largest; they are the payoff. The wall frame shows
   the teaching moment: the votes split between the right answer and a typical
-  error. The tablet shows the plain colour buttons, since the example runs'
+  error. Two more tablets fan out behind the front one, drawn with only their
+  colour buttons: every student has a device, all showing the same buttons. The
+  tablet shows the plain colour buttons, since the example runs'
   second ask wanted pictures to tap, which a first-time teacher wouldn't ask for.
 - The sheet frame is the rendered pages of a sheet derived from the owner's
   (his photographs can't be published), standing in until his photographs replace them.
 - Until the video exists, the strip is one link to `/example` in the chosen
-  language, with no play mark. The pictures are WebP in `src/public/landing/`;
+  language, with no play mark. Teachers in the owner's testing read the strip
+  as the example but didn't see that it opens: it is a card with a border and
+  a label in the page's link style, "See the example quiz ›", which names what
+  opens without promising what `/example` shows. The pictures are WebP in `src/public/landing/`;
   the wall and tablet exist in all four languages.
 - Layout: a grid of two rows so the pictures stand on one line whatever their
-  captions' lengths, sized by `--h` to fit the width. Below 720 px wide it is a
-  single row that scrolls sideways, the sheet first and the next frame peeking
-  in, and its height is capped by the viewport's height as well as its width, so
+  captions' lengths, sized by `--h` to fit the width. Below 720 px wide the
+  frames are a single row that scrolls sideways inside the card, the label
+  staying in view below, the sheet first and the next frame peeking in, and its height is capped by the viewport's height as well as its width, so
   a phone held sideways still shows Build and Run.
 - The story must work on a desktop and on horizontal tablets as well as on
   vertical phones; on a phone the sheet may lose readability.
+
+### Run first when stacked
+
+Below 860 px wide Build and Run stand one above the other, and there Run comes
+first. Build is about 650 px tall on a phone, so with Build first the upload box
+sat a full screen down on every phone, past a natural place to stop reading: the
+teacher with a `.zip` on the phone that took the photos, and the one coming back
+mid-lesson, whose way back is in Run, had to scroll for it. Run is short (the
+heading and the upload box), so Build's heading still shows below it on phones
+from 360×640 up. A first-timer meets the upload before the how-to; the strip
+above has told the story and the button says "the quiz your AI made". A running
+quiz's card makes Run taller and can push Build off a small screen; that
+teacher came for Run. The order is visual only: the HTML, side by side on wider
+screens, and the order for keyboards and screen readers keep Build first.
 
 ### Build: two steps
 
@@ -116,16 +135,27 @@ page without the tier and date of the test (the pattern in backlog v4, owned by 
 nothing says "the free version works" or gives a duration. A free account was
 never tried end to end.
 
-Step 2 is the ask. The address shown in the bubbles and in Copy is the one the
+Step 2 is the ask. It and the line after the open ask say "the AI" where a
+pronoun would do: in the owner's testing Build had too many "it"s to follow.
+The address shown in the bubbles and in Copy is the one the
 browser opened, so an own copy shows its own. Two examples:
 
-- With photos of two pages: a chat bubble with five parts underlined and
+- With photos of two sheets: a chat bubble with five parts underlined and
   labelled under their words: this site, which exercises, your class, how many,
   which language. The labels are advice on how to ask, given without ordering
-  anything. On a phone the labels follow the bubble as one line.
+  anything. The labels stay under their words on a phone too: in the owner's
+  testing the labels set out as one line after the bubble read as broken. From
+  320 px up no label overlaps another or leaves the bubble, in the four
+  languages. Its words
+  were read wrongly in the owner's testing: "pages" as the site's pages, and
+  "no. 1, 3 and 4" as frames of the strip. So the ask says "sheets" and ties
+  the numbers to them ("like no. 1, 3 and 4 from these two sheets").
 - With nothing decided yet: "Read <address>. I need a classyQuiz. Help?", then
-  the sentence that the AI asks what it needs (the guidance's "Building with the
-  teacher"). It is the owner's ask, translated.
+  the sentence that the AI asks for what it still needs, with two examples, before
+  it builds the quiz (the guidance's "Building with the teacher": what is open,
+  put so the teacher can answer in a line, and the quiz after the answer). The
+  examples and "before" tell a first-timer what the next turn looks like and
+  that no quiz built on guesses comes first. It is the owner's ask, translated.
 
 Both examples open with "Read <address>." and call the quiz "a classyQuiz". A
 Sonnet-class model told only "make me a quiz for <address>" read the address as
@@ -303,7 +333,8 @@ the teacher's concern.
 - Whether teachers read the strip in five seconds. The check proposed: show the
   strip to two or three teachers for five seconds, then ask what the class does
   and what they would type to their AI. If they can't say, the strip fails; the
-  fallback is one poster frame of the class at the wall.
+  fallback is one poster frame of the class at the wall. The owner's testing so
+  far: read as the example; not seen to open, before the card and its label.
 - Whether free Claude and other free tiers hand over a `.zip`; Step 1 says nothing
   about tiers until that is tested.
 - Whether an Android tablet's file picker shows a `.zip` downloaded from a chat app
