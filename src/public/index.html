@@ -83,13 +83,14 @@
   .bubble u { text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
   /* Each label under its words, out of the text's flow, so a label wider than its words doesn't spread them. */
   .bubble .part { position: relative; display: inline-block; white-space: nowrap; }
+  .bubble .glue { white-space: nowrap; }
   .bubble .lab { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: -.35em; font-size: .68rem; line-height: 1; color: var(--accent); font-weight: 600; white-space: nowrap; pointer-events: none; user-select: none; }
   .bubble.inplace { line-height: 2.3; padding-bottom: 12px; }
   .labels { color: var(--accent); font-size: .85rem; font-weight: 600; margin: .3rem 0 0; }
   .labels .nb { white-space: nowrap; }
   .bubble.inplace + .labels { display: none; }
   .example + .example { margin-top: .9rem; }
-  .example .then { margin: .35rem 0 0; }
+  .example .then { margin: .35rem 0 0; color: var(--muted); font-size: .95rem; }
 
   .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 22px 16px; text-align: center; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
@@ -145,7 +146,7 @@
 
 <div class="landing wide" id="landing">
 <a class="strip" id="strip" href="/example" aria-label="From an exercise sheet to the class: see the example quiz" data-t-aria="strip"><div class="frames">
-  <figure class="f-sheet"><div class="pic"><img class="p2" src="/landing/sheet-2.webp" alt="" width="440" height="622"><img class="p1" src="/landing/sheet-1.webp" alt="" width="440" height="622"></div><figcaption data-t="capSheet">Your exercise sheet</figcaption></figure>
+  <figure class="f-sheet"><div class="pic"><img class="p2" src="/landing/sheet-2.webp" alt="" width="440" height="622"><img class="p1" src="/landing/sheet-1.webp" alt="" width="440" height="622"></div><figcaption data-t="capSheet">Your exercise sheets</figcaption></figure>
   <span class="arrow" aria-hidden="true">&rarr;</span>
   <figure class="f-ask"><div class="pic"><svg viewBox="0 0 124 200" aria-hidden="true">
     <rect x="2" y="2" width="120" height="196" rx="16" fill="var(--frame)"/>
@@ -185,7 +186,7 @@
   <h2 id="build-h" data-t="build">Build a quiz</h2>
   <ol class="steps">
     <li><p class="do" data-t="step1">Choose any good AI.</p>
-      <p class="detail" data-t="step1detail">Claude Opus wrote the example quiz, 3 Nov 2026.</p></li>
+      <p class="detail" data-t="step1detail">Claude Opus wrote the example quiz, 3&nbsp;Nov&nbsp;2026.</p></li>
     <li><p class="do"><span data-t="step2">Ask the AI to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
       <div class="example">
         <p class="eg" data-t="forExample">For example, with photos of two sheets:</p>

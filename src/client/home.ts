@@ -88,12 +88,23 @@ if (addr && navigator.clipboard?.writeText) {
 /** The example asks: the first with each labelled part's label under it (on a phone the CSS hides those and shows the labels as one line), the open one plain. */
 function renderAsk(): void {
   const bubble = $("#bubble");
-  bubble.innerHTML = t.ask
-    .map((p) => {
-      const s = esc(p.s.replaceAll(DEMO, host));
-      return p.l === undefined ? s : `<span class="part"><u>${s}</u><span class="lab">${esc(t.labels[p.l])}</span></span>`;
-    })
-    .join("");
+  // Punctuation right after a labelled part is glued to it: a browser may break a line
+  // after an inline-block, which would start the next line with "," or ".".
+  let html = "";
+  let glued = 0;
+  t.ask.forEach((p, i) => {
+    const s = p.s.replaceAll(DEMO, host).slice(glued);
+    glued = 0;
+    if (p.l === undefined) {
+      html += esc(s);
+      return;
+    }
+    const next = t.ask[i + 1];
+    const punct = next && next.l === undefined ? (/^[,.;:?!]+/.exec(next.s)?.[0] ?? "") : "";
+    glued = punct.length;
+    html += `<span class="glue"><span class="part"><u>${esc(s)}</u><span class="lab">${esc(t.labels[p.l])}</span></span>${esc(punct)}</span>`;
+  });
+  bubble.innerHTML = html;
   bubble.classList.add("inplace");
   bubble.lang = lang;
   $("#labels").innerHTML = t.labels.map((l) => `<span class="nb">${esc(l)}</span>`).join(" · ");
