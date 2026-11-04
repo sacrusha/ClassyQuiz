@@ -1,4 +1,4 @@
-// The steering bar (backlog v4 item 6; docs/decisions.md, "The steering
+// The steering bar (backlog v4 item 6; docs/design/question-flow.md, "The steering
 // bar"): two buttons, the same size and in the same place whatever the
 // state, so a hand in flow finds them. Play ▶ steps one slice and is
 // labelled with where it goes: Show answers, Lock in, Reveal, Ranking,
@@ -70,7 +70,7 @@ export function steeringButtons(v: TeacherView): string {
  * Presses of the bar, by mouse, finger, keyboard or clicker: a teacher's
  * press in flow does what they meant; a bounce, or a press landing on a
  * screen that has just moved, does nothing; a deliberate double press
- * fast-forwards (decisions.md, "The steering bar").
+ * fast-forwards (docs/design/question-flow.md, "Presses").
  *
  * - A press within BOUNCE_MS of the last one is the same press: a bouncing
  *   key or a clicker sending twice. Nobody presses twice that fast.

@@ -1,5 +1,5 @@
 // This device's history with the site, for the own-copy line (backlog v4
-// item 4; landing story §6): the days it uploaded a quiz, kept on the device
+// item 4; docs/design/root-page.md, "The own copy"): the days it uploaded a quiz, kept on the device
 // and never sent. Dates only: no titles, no codes. cq.quizzes can't serve,
 // it keeps 20 entries and forgets finished quizzes.
 

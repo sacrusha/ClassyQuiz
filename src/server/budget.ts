@@ -1,4 +1,4 @@
-// The site's share of the free plan (docs/decisions.md, "Hardening"): one
+// The site's share of the free plan (docs/design/hosting-and-limits.md, "Protecting the day's allowance"): one
 // tiny Durable Object for the whole site that books every upload against two
 // caps, uploads a day and bytes stored at once. Storage is the one limit that
 // doesn't come back at midnight: filled, every write on the account fails,
@@ -11,7 +11,7 @@
 // for 31 days: the landing's own-copy line says on how many of the last 30
 // the site was full (backlog v4 item 4). Only these refusals are known here;
 // a day the platform's request allowance ran out is not recorded, since the
-// site can't write once it is spent (decisions.md, "The landing page").
+// site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
 
 import { DurableObject } from "cloudflare:workers";
 import { MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, type SiteFull } from "../shared/limits.ts";

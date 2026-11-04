@@ -112,7 +112,7 @@ function teacherDigits(): string {
 }
 
 /**
- * The steering tab's lobby is the check (docs/after-upload.md §3): the class
+ * The steering tab's lobby is the check (docs/design/teacher-devices.md, "The single tab: check, then join"): the class
  * code, count and avatars, points for speed, the teacher code at rest, ⇄ Swap while
  * the wall is there, and the questions; Start in the bar below.
  */
@@ -235,7 +235,7 @@ function menu(v: TeacherView): void {
   openMenu(items);
 }
 
-/** ⇄ Swap (docs/after-upload.md §4): no confirmation, the same tap on either device undoes it. */
+/** ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): no confirmation, the same tap on either device undoes it. */
 async function swap(): Promise<void> {
   const r = await line?.send({ op: "swap" });
   if (r && !r.ok && r.error) toast(r.error);

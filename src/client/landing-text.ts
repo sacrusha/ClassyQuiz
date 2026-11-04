@@ -1,5 +1,5 @@
-// The landing block's words in the four languages it speaks (landing story
-// §4): everything above About. The static HTML is English, so an AI's fetcher
+// The landing block's words in the four languages it speaks (docs/design/root-page.md,
+// "Languages"): everything above About. The static HTML is English, so an AI's fetcher
 // reads English; home.ts swaps these in. About and below stay English: they
 // are for the AI. The lobby, the wall, the Remote and the tablets stay
 // English too (backlog Later, "Localization").
@@ -8,8 +8,8 @@
 // commands only for what must be done (choosing an AI, asking it), advice as
 // advice, and no claim that isn't true. That is the page's voice to its
 // reader; the example ask is the teacher's own sentence to their AI, where an
-// imperative is fine (decisions.md, "Guidance page is information, not
-// instruction", amended 2026-11-04). Step 1's detail names what is
+// imperative is fine (docs/design/guidance-page.md, "Information in place of
+// rules"). Step 1's detail names what is
 // verified and says nothing about free tiers.
 //
 // The example asks began as each language's real first ask from the example's
@@ -81,7 +81,7 @@ export interface Text {
   /** at: the time the allowance comes back, in Swiss time; null when the browser has no time zones (then 00:00 UTC). */
   quota: (at: string | null) => string;
   ownCopyLink: string;
-  /** The upload's request failed: the network names itself as a possible cause (landing story §7). */
+  /** The upload's request failed: the network names itself as a possible cause (docs/design/root-page.md, "Network help, where failure shows"). */
   offline: string;
   whatToTellIt: string;
   // the resume card (backlog v4 item 2)
