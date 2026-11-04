@@ -209,7 +209,8 @@ bar, all in the open list.
    `design/question-flow.md`. The owner on labels: "Reveal" and "Ranking" name
    a thing the class sees; "Next question" and "Straight to answering" name a
    motion. The teacher screens' words (choices, answers, solution; nouns on
-   Play) — built, undeployed, same file. Follow-ups are in the open list.
+   Play), also in the guidance and the format's messages — built and live,
+   same file. Follow-ups are in the open list.
 8. The flow from upload to Start: a private check screen, a teacher code, roles
    in plain words — built, `design/teacher-devices.md`.
 9. Avatars: celebration, the lion's mane, tools — student feedback:
@@ -379,14 +380,11 @@ Needs a real classroom or real devices, nobody has run it:
 
 ## Housekeeping and process, for the next session
 
-- The deploy worktree is at 56ebf87; the credentials stay in the main
-  checkout's `secrets/`. Main is ahead and undeployed: the landing's strip as
-  a card to the worked example, Build's wording, Run first when stacked, the
-  labels under their words on phones, and `/example` (v4 items 10–13), the
-  teacher screens' words (v1 item 6), plus
-  the guidance's enlarge sentences (v4 item 11). The worked example's
-  stand-ins (photos, mock conversation) would go live with it; the
-  conversation says it is a mock-up.
+- The deploy worktree is at 3089468, which is live; the credentials stay in
+  the main checkout's `secrets/`, passed to `scripts/deploy.mjs` with
+  `node --env-file=<main checkout>/secrets/cloudflare.env`. The worked
+  example's stand-ins (photos, mock conversation) are live; the conversation
+  says it is a mock-up.
 - Probes kept in `.tmp/shots-tool/`: `landing-ask-sweep.mjs` (stray
   punctuation in the labelled ask across widths, full-page shots),
   `landing-stacked-order.mjs` (where Build and Run start on upright screens),
