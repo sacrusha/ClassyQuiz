@@ -342,6 +342,36 @@ function renderOwnCopy(): void {
   line.innerHTML = fullDays ? `${esc(t.ownCopy(fullDays))} <a href="/own-copy">${esc(t.how)}</a>` : "";
 }
 
+/** The example's quizzes, as /example's "Start the example quiz" names them (docs/design/example-page.md). */
+const EXAMPLE_ZIPS: Record<string, string> = {
+  de: "zahlenstrahl-quiz.zip",
+  en: "number-line-quiz.zip",
+  fr: "droite-graduee.zip",
+  it: "quiz-retta-numerica.zip",
+};
+
+/** The example goes up as a dropped .zip does, through fromFiles: one path, so it can't drift from a teacher's upload. */
+async function runExample(name: string): Promise<void> {
+  out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
+  runbox.scrollIntoView({ block: "center" });
+  let zip: Blob;
+  try {
+    const res = await fetch(`/examples/${name}`);
+    if (!res.ok) throw new Error(String(res.status));
+    zip = await res.blob();
+  } catch {
+    out.innerHTML = networkHelp();
+    return;
+  }
+  await fromFiles([new File([zip], name, { type: "application/zip" })]);
+}
+
 apply(lang);
 void findOpen();
 void findFull();
+const example = EXAMPLE_ZIPS[new URLSearchParams(location.search).get("example") ?? ""];
+if (example) {
+  // A reload or Back must not upload it again.
+  history.replaceState(null, "", "/");
+  void runExample(example);
+}

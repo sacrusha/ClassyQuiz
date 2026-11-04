@@ -114,10 +114,8 @@ Start reads the same on every screen that steers: the mode is named where
 there is a choice, on the second device, since a single tab has no other mode
 to tell it from. Labels: `user-flow.md §3.3`.
 
-`/example` is the check without codes, for a visitor to see what an uploaded
-quiz looks like; it reads a static .zip in the browser, offers its download in
-place of the tap to the join screen, and has no fixes. How the landing links
-it: `root-page.md`.
+The worked example's "Start the example quiz" (`example-page.md`) is an
+upload like any, so it opens this same check, with codes and fixes.
 
 ### A second device: one question, only when needed
 

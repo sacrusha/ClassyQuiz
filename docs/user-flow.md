@@ -99,7 +99,7 @@ Purpose and reasons: docs/design/root-page.md.
 │ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
 │   → [wall] [tablets, fanned]                                         │
 │ Your exercise sheets · Your AI · The .zip, uploaded here ·           │
-│ What the class sees · Each student taps     See the example quiz ›   │
+│ What the class sees · Each student taps  The example, step by step › │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
@@ -124,9 +124,9 @@ Purpose and reasons: docs/design/root-page.md.
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
 - **The strip** follows the workflow: the sheet, the ask, the .zip going up
-  to the site, the wall, tablets fanned out. A card with a border and the label "See the
-  example quiz ›"; it links `/example` in the chosen language until the video
-  exists; no ▶. Below 720 px wide its frames are one row that scrolls
+  to the site, the wall, tablets fanned out. A card with a border and the label "The
+  example, step by step ›"; it links `/example` (the worked example) until the
+  video exists; no ▶. Below 720 px wide its frames are one row that scrolls
   sideways.
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
 - **Build's step 2** has two example asks: the labelled one with photos, and
@@ -161,6 +161,27 @@ Purpose and reasons: docs/design/root-page.md.
   anew for each class, so "Again with another class" waits its 90 s too),
   and a device that can't reach the quiz carry the help where the failure
   shows (docs/design/root-page.md).
+
+#### The example, step by step (`/example`)
+
+English, from the strip. Purpose and reasons: docs/design/example-page.md.
+
+```
+‹ classyQuiz
+The example, step by step
+How the example quiz was made, from the exercise sheets to the class, with
+everything to try the same on your own AI.
+1 The exercise sheets     [photo p.1] [photo p.2]
+                          [Photo, page 1 (.jpg)] [Photo, page 2 (.jpg)] [The sheets (.pdf)]
+2 The conversation        [top of the conversation picture]  Read the whole conversation ›
+3 The quiz                [number-line-quiz.zip]
+4 Run it                  [ Start the example quiz ]
+                          It runs on this site like any quiz, on the projector
+                          and on your students' devices.
+```
+
+"Start the example quiz" uploads the example as Run does and lands on the
+check (§3.3).
 
 ### 3.2 The two entrances after a code
 

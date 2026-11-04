@@ -57,8 +57,8 @@ function tags(q: TeacherQuestion, v: TeacherView): string {
   ].join("");
 }
 
-/** A question's answers with the right ones marked; tappable while it is being fixed. readOnly: no fixes (/example). */
-export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: number[] | null = null, readOnly = false): string {
+/** A question's answers with the right ones marked; tappable while it is being fixed. */
+export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: number[] | null = null): string {
   const fixing = ui.fixing === i;
   const rows = q.answers
     .map((a, j) => {
@@ -78,9 +78,7 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
       </div>`;
     })
     .join("");
-  const fix = readOnly
-    ? ""
-    : fixing
+  const fix = fixing
     ? `<p class="hint">Tap the answers that count.</p>
        <div class="row">
          <button class="btn" data-act="void" data-q="${i}">${ICON.void} ${q.void ? "Count it again" : "Void: counts for nobody"}</button>
@@ -109,7 +107,7 @@ function questionPictures(q: TeacherQuestion, quizBackground: ImageRef | null): 
   return parts.length ? `<div class="qpics">${parts.join("")}</div>` : "";
 }
 
-export function questionList(v: TeacherView, ui: ManageUI, readOnly = false): string {
+export function questionList(v: TeacherView, ui: ManageUI): string {
   const items = v.questions
     .map((q, i) => {
       const open = ui.all || ui.open.has(i) || ui.fixing === i;
@@ -118,7 +116,7 @@ export function questionList(v: TeacherView, ui: ManageUI, readOnly = false): st
           <span class="num">${i + 1}</span><span class="qt">${lines(q.text)}</span>${tags(q, v)}<span class="chev">›</span>
         </button>
         ${questionPictures(q, v.background)}
-        ${open ? answersBlock(q, i, ui, null, readOnly) : ""}
+        ${open ? answersBlock(q, i, ui) : ""}
       </li>`;
     })
     .join("");
