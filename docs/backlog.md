@@ -222,15 +222,16 @@ bar, all in the open list.
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
     `/example`, "The example, step by step" from the strip, in English. Open:
-    - The owner's real run, made on another machine and account from the
-      page's downloads, and his daylight photographs; both replace stand-ins
-      (the conversation is a mock-up and says so). The run's `.zip` replaces
-      `number-line-quiz.zip`. For the turns after the first, the owner's
-      purpose: each shows a feature while it steers a real improvement. The
-      mock's second turn is from a Sonnet run of 2026-11-04 (owner's
-      screenshot, `.tmp/sonnetBuild04Nov.md`): questions that invert the
-      sheet's no. 1, the number given and the picture to pick. A turn asking
-      for a preview is a candidate the owner may add in the real run.
+    - The conversation and `.zip` are a real free Claude Sonnet run of
+      2026-11-04, reviewed by the owner (two turns; the second inverts the
+      sheet's no. 1, the number given and the picture to pick). Open: his
+      daylight photographs replace the stand-in ones, and a run of his own may
+      replace this one; whether the quiz's growth past the asked ten and the
+      AI's unrequested screen mock-up are worth leaving in the picture.
+    - The conversation picture is one light screenshot, shown to light and dark
+      devices alike. Proper light and dark variants, chosen by the device's
+      mode as the mock-up's were (`<picture>`, and the links to the whole
+      picture), want the run reproduced or re-rendered in both themes.
     - Whether the check screen holds a socket or poll while a visitor only
       looks at the example: each "Start the example quiz" is a real upload.
 11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not

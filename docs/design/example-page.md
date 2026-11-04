@@ -33,11 +33,9 @@ strip.
    sheets as a PDF, so a teacher can try the photographs or the clean file on
    their own AI.
 2. **The conversation**, as a picture, not text: an AI reading the page doesn't
-   read it, and the layout is ours. A light and a dark rendering, chosen by the
-   device's mode (`<picture>`; `client/example.ts` points the links at the dark
-   one). The preview shows its top; the link opens the whole picture. The
-   picture carries its own line: model, plan, date, and "asks written for this
-   demonstration, replies as produced".
+   read it, and the layout is the AI app's own (a screenshot of a free Claude
+   Sonnet session of 4 Nov 2026, light only). The preview shows its top; the
+   link opens the whole picture. The line above it names model, plan and date.
 3. **The quiz**: the `.zip` the AI handed over.
 4. **Run it**: "Start the example quiz" opens `/?example=en`; the landing fetches
    the static `.zip` and sends it through the same function as a dropped file
@@ -46,18 +44,15 @@ strip.
    teacher lands on the check screen.
 
 The files are in `src/public/examples/` (not `example/`, which would collide
-with the page's address). The conversation is rendered from HTML by
-`.tmp/example/conversation/render.mjs` (owner's machine, not in the repo);
-`fake_photos.py` there made the stand-in photographs.
+with the page's address). The stand-in photographs were made by
+`.tmp/example/conversation/fake_photos.py` (owner's machine, not in the repo).
 
 ## Not known
 
-- The real conversation and photographs: today the photographs are made from
-  the rendered sheet, and the conversation is a mock-up that says so in its
-  first line. Its first ask is the landing's; its first reply is cut from an
-  earlier English run, its second turn from a Sonnet run (backlog v4 item 10);
-  the `.zip` offered ("Big numbers on the number line") is from yet another
-  earlier run and matches neither reply.
+- The photographs are made from the rendered sheet; the owner's own can't be
+  published. The conversation and the `.zip` ("Big numbers on the number line",
+  13 questions) are one real run, reviewed by the owner; the zip is that run's
+  second turn. The owner may still replace them with a run of his own.
 - Whether a teacher on a phone reads the conversation: the preview is the
   picture scaled to the screen; the whole picture opens at full size.
 - The page in the landing's other three languages (backlog).

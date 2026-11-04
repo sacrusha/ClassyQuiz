@@ -345,7 +345,7 @@ function renderOwnCopy(): void {
 /** The example's quizzes, as /example's "Start the example quiz" names them (docs/design/example-page.md). */
 const EXAMPLE_ZIPS: Record<string, string> = {
   de: "zahlenstrahl-quiz.zip",
-  en: "number-line-quiz.zip",
+  en: "big-numbers-quiz.zip",
   fr: "droite-graduee.zip",
   it: "quiz-retta-numerica.zip",
 };
