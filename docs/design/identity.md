@@ -104,9 +104,10 @@ Rubik Bold as outlines, the headings' lettering. None of the four answer
 colours is in it.
 
 The drawings and the rules for using them (clear space, minimum sizes, which
-file on which ground, the don'ts) are the logo kit's `guidelines.md`, kept
-with its build scripts outside the repository (`src/DEVELOPING.md`, "Tooling
-kept on disk"). The site uses these of its files, in `src/public/brand/`:
+file on which ground, the don'ts) are `docs/brand/guidelines.md`, with every
+version in `docs/brand/svg/` and the Python that draws them in
+`docs/brand/build/`. The site uses copies of these files, in
+`src/public/brand/`:
 
 - **The header lockup, inline** (`classyquiz-horizontal-32-inline.svg`): the
   fox and the name drawn for exactly 32 px tall, the hat and the name in
