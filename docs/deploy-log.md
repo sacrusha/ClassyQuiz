@@ -64,3 +64,7 @@ Pages deployment 84080180, state Worker version 51faab5b, no migration (no chang
 ## 2026-11-04 — thirteenth deploy, c0d7480
 
 Pages deployment f4182d88, state Worker version 78228a8d, no migration (no change under `src/server/`). The About guidance: "Build with the teacher" rewritten (phases, the first reply in a few lines, presentation through the layout page), the published format narrowed to `quiz.txt` in UTF-8, FAQ-kind information gathered in the first two sections, layout arithmetic and resolution figures dropped. Run by the personal-assistant session from the main checkout. Checked live: the root page (42.8 KB) carries "Build with the teacher" and `quiz.txt`.
+
+## 2026-11-04 — fourteenth deploy, 7d41265
+
+Pages deployment 254580c4, state Worker not changed in `src/server/` (no migration). `/example` shows the owner's real free Claude Sonnet run (one light screenshot) and offers `big-numbers-quiz.zip`, which is also the English example behind "Start the example quiz"; the mock conversation, its light and dark renders and `number-line-quiz.zip` are gone, as is `client/example.ts`. Before the deploy: `npm run check`, `npm test` (97 pass), and the zip's `quiz.txt` through the site's parser (13 questions, no errors or warnings, every picture present). Run by the personal-assistant session from the main checkout. Checked live: `/example`, the picture, the zip byte-identical to the source, `home.js` naming the new zip, the old zip no longer served. The example upload itself was not run live (it books an upload).
