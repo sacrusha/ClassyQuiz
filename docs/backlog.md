@@ -315,7 +315,9 @@ With the owner:
   then.
 - Verify the guidance with other AIs (ChatGPT, Gemini, Copilot); ChatGPT
   currently breaks with two attachments, maybe temporarily (`design/guidance-page.md`).
-- Deploy commit ddededf (landing examples open with "Read <address>").
+- Deploy main: the landing examples opening with "Read <address>"
+  (ddededf), and the prune of comments, tests and compatibility code
+  (591f65c).
 - The daylight photographs of the sheet, the turn-2 ask (v4 item 10), the
   storyboard video brief from the real screens (its first beat needs a screen
   of the new join screen), the read of the translations (v4 item 1), the
