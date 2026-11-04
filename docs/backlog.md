@@ -295,9 +295,6 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
-- Standing authorization for implementers' branches and merges to main, the
-  owner's rule: commit in meaningful, likely working units, no churn commits,
-  and squash what slips.
 - The implementer's two choices on the bar: Last call locks in early once
   everyone present has answered; points for speed run over a fixed 20 s from
   the answers appearing (`design/question-flow.md`).
@@ -368,4 +365,5 @@ Needs a real classroom or real devices, nobody has run it:
   purpose and situation, not steps; no spec changes to an agent in flight —
   settle the item first, then brief a fresh one; no runs whose outcome is
   already known; a backlog edit rides with the delivery it belongs to. Commit in
-  meaningful, likely working units, no churn commits, and squash what slips.
+  meaningful, likely working units, no churn commits, and squash what slips;
+  branches opened can be merged back.
