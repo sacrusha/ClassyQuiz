@@ -358,7 +358,5 @@ export function addressAndCode(code: string): string {
  * lobby: off by default, fixed once the quiz starts.
  */
 export function speedSwitch(v: TeacherView): string {
-  return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>Points for speed</button>${
-    v.speed ? `<small class="speed-note">A right answer ${POINTS_RIGHT}, up to ${SPEED_BONUS} more the quicker it comes.</small>` : ""
-  }`;
+  return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>Points for speed</button><small class="speed-note">A right answer ${POINTS_RIGHT}, up to ${SPEED_BONUS} more the quicker it comes.</small>`;
 }

@@ -292,7 +292,7 @@ function renderJoin(v: ScreenView): void {
       <div class="lobby">
         <div class="join">
           <div class="qr">${qrSvg(v.code)}</div>
-          <div class="addr">${esc(siteAddress())}</div>
+          <div class="addr" style="--chars:${siteAddress().length}">${esc(siteAddress())}</div>
           <div class="bigcode">${esc(v.code)}</div>
         </div>
         <div class="crowdcol">
@@ -325,7 +325,7 @@ function renderLobby(v: ScreenView): void {
       <div class="lobby">
         <div class="join">
           <div class="qr">${qrSvg(v.code)}</div>
-          <div class="addr">${esc(siteAddress())}</div>
+          <div class="addr" style="--chars:${siteAddress().length}">${esc(siteAddress())}</div>
           <div class="bigcode">${esc(v.code)}</div>
         </div>
         <div style="display:flex;flex-direction:column;min-height:0">
