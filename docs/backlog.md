@@ -242,7 +242,7 @@ bar, all in the open list.
       example says the same.
     - Transparent answer pictures: a blueish-green marker vanished on the blue
       tile. The guidance already says tiles are shuffled across four colours
-      (`src/public/index.html`, "Pictures as answers"); what remains is to
+      (`src/public/index.html`, "Pictures as choices"); what remains is to
       tell the AI to draw each answer picture with a ground of its own, white
       unless there's a reason, because a mark can vanish on a random tile
       colour. Rides with the next delivery.
@@ -309,6 +309,11 @@ The quiz is already made; it can be more than one activity.
 - **Pictures for a teacher whose AI can't make a zip** — free tiers and some
   AIs may not crop figures and bundle them; e.g. attach and crop the photo in
   the lobby, or an AI-drawn figure inline in the pasted text.
+- **Scripts and right-to-left text** — the guidance says "any language", but
+  whether CJK, Arabic or Hebrew render correctly (font coverage on the
+  projector and the students' buttons, RTL layout of question, tiles and
+  ranking) is untested. Check before the guidance implies it; a native-reading
+  teacher confirms.
 - **Sound** — some classes want it; off by default, a mute on the projector.
 - **Runs by itself** — not core purpose, but value: the quiz carries on while
   the teacher's hands are elsewhere — a student who needs them, the next thing

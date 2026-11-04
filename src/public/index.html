@@ -233,11 +233,11 @@
 
 <p>The teacher's AI assistant, usually given just this address by a teacher with material in hand and a lesson coming up, writes the quiz as plain text and packs it with its pictures into a <code>.zip</code>; the teacher uploads it here (assistants can't), and the class plays it.</p>
 
-<p>Screens: the <strong>projector</strong> shows the question and its choices; each <strong>student</strong> answers on their own phone or tablet by tapping a colour, without the question; the teacher steers (the choices, the class's answers, the solution, the ranking, the next question, fixing a question that turns out wrong) from a <strong>remote</strong>, usually their phone, or, with no second device, from the projector itself.</p>
+<p>Screens: the <strong>projector</strong> shows the question and its choices; each <strong>student</strong> answers on their own phone or tablet by tapping a colour, without the question; the teacher steers (the choices, the class's answers, the solution, the ranking, the next question, fixing a question that turns out wrong) from a <strong>remote</strong>, usually their phone, or, with no second device, from the projector itself. The teacher can enlarge a question's picture to fill the screen for a moment.</p>
 
-<p>No accounts. Students join with the five-digit code or the QR code as random avatars, an animal on a colour that they dress with a shape and a hat in the lobby, never by name. Only the code reaches a quiz, and nothing in it is shared. A quiz is kept until the teacher ends it or two days after its last use; a class's answers and scores are deleted an hour after its final ranking, and a class unsteered for three hours ends. The teacher's lasting copy is the <code>.zip</code>. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device, projector, remote and students', opens that copy's own address.</p>
+<p>No accounts. Students join with the five-digit code or the QR code as random avatars, an animal on a colour that they dress with a shape and a hat in the lobby, never by name. Only the code reaches a quiz, and nothing in it is shared. A quiz is kept until the teacher ends it or two days after its last use; a class's answers and scores are deleted an hour after its final ranking, and a class unsteered for three hours ends. The teacher's lasting copy is the <code>.zip</code>. The teacher's browser strips picture metadata before upload. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device, projector, remote and students', opens that copy's own address.</p>
 
-<p>A lesson: the teacher uploads the <code>.zip</code> on this page, usually on the laptop at the projector, or on the phone that photographed the sheet. First comes the teacher's check: the questions with their solutions folded away, and the teacher code, the class code plus two digits, which brings in a second teacher device to steer or to show the quiz. <strong>Let the class in</strong> turns the screen into the class's: the code and QR code (students scan it, or type the code into the box at the top of this page), the joined avatars, <strong>Start quiz</strong>, and a switch for points for speed. Every question comes up with its choices hidden while the teacher reads it out; then, each at the teacher's press, come the choices, the class's answers on the projector without the solution, the solution, and the ranking.</p>
+<p>A lesson: the teacher uploads the <code>.zip</code> on this page, usually on the laptop at the projector, or on the phone that photographed the sheet. First comes the teacher's check: the questions with their solutions folded away, and the teacher code, the class code plus two digits, which brings in a second teacher device to steer or to show the quiz. <strong>Let the class in</strong> turns the screen into the class's: the code and QR code (students scan it, or type the code into the box at the top of this page), the joined avatars, <strong>Start quiz</strong>, and a switch for points for speed. Every question comes up with its choices hidden while the teacher reads it out; then, each at the teacher's press, come the choices, the class's answers on the projector without the solution, the solution, and the ranking. What the site can't read in an upload (a question with no choice marked right, five choices, a stray bullet point) is listed with its question, in words the teacher can paste back into the chat; some things only get a warning, such as no title, the same choice twice or a very long choice. A picture the quiz names that is missing or can't be opened is listed the same way, and the teacher can run the quiz without it. A solution that turns out wrong in class, the teacher fixes there.</p>
 
 <p>The pace is the teacher's, in the room: there is no clock but a fifteen-second countdown the teacher can start to close answering, and nothing in the quiz sets one. With points for speed, a right answer scores 10 and up to 5 more the sooner it came after the choices appeared; without, a right answer is one point.</p>
 
@@ -261,7 +261,7 @@
 
 <h2 id="format">How quizzes are built</h2>
 
-<p>A quiz is a <code>.zip</code> file holding one text file with the quiz, and the pictures it uses, if any. The text, for a quiz made from a sheet on percentages:</p>
+<p>A quiz is packaged as one <code>.zip</code> file containing a single text file, <code>quiz.txt</code> (UTF-8), and up to 120 auxiliary files. The text, for a quiz made from a sheet on percentages:</p>
 
 <pre><code>Title: Percentages, week 31
 
@@ -285,12 +285,13 @@ Image: jacket.png
 
 4. Which quiz should we play next week?
 Order: fixed
+Image: timetable.png
 + Crafts
 + Maths
 + KPop Demon Hunters
 + English</code></pre>
 
-<p>The site shows text as written, without Markdown or other formatting, so mathematical notation is written in ordinary characters: <code>x²</code>, <code>½</code>, <code>√2</code>, <code>3 × 4</code>, <code>a ≤ b</code>. Line endings don't matter.</p>
+<p>The site shows text as written, without Markdown or other formatting, so mathematical notation is written in ordinary characters: <code>x²</code>, <code>½</code>, <code>√2</code>, <code>3 × 4</code>, <code>a ≤ b</code>.</p>
 
 <h3>The parts</h3>
 <ul>
@@ -306,13 +307,13 @@ Order: fixed
   <li><strong><code>Image: q3.png</code></strong> shows one picture with the question, named by its file in the <code>.zip</code>, on the projector only (see Pictures on the wall).</li>
   <li><strong>Pictures as choices.</strong> A choice line can name a picture instead of text, with its mark: <code>+ Image: pie-3.png</code>. These show on the projector and on the students' buttons (see Pictures as choices).</li>
   <li><strong><code>Order: fixed</code></strong> keeps the question's choices in the order written; before the first question, every question's.</li>
-  <li><strong><code>Background: forest.jpg</code></strong> is a picture behind the question, for atmosphere or context rather than content. Before the first question it lies behind every question; after a question's text, behind that question only, in place of the quiz's.</li>
+  <li><strong><code>Background: forest.jpg</code></strong> is a picture behind the question, for atmosphere or context rather than content. It covers the projector's screen under a light veil, cropped to fill it, with the text on white cards, so a busy or dark picture stays readable; students' devices don't show it. Before the first question it lies behind every question; after a question's text, behind that question only, in place of the quiz's.</li>
 </ul>
 
-<p>Pictures are files in the <code>.zip</code> beside the quiz text, and one file can serve several questions. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. At upload, the teacher's browser scales every picture down and drops everything it carries besides the image, such as a photo's location. Limits, all checked at upload: up to 120 pictures, picture choices included, and 16 MB for the whole <code>.zip</code>. Each picture is scaled to at most 1600 pixels on its longer side, a background to 1920 and a picture used only as a choice to 1200; a smaller picture is scaled up to its place on the wall. The projector's layout for a question, as HTML and CSS, is at <a href="/layout">/layout</a> on this site, for trying a picture in it or showing the teacher a question as the class will see it.</p>
+<p>Pictures are files in the <code>.zip</code> beside the quiz text, and one file can serve several questions. Names are matched without regard to folders or upper and lower case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. Limits, all checked at upload: up to 120 pictures, picture choices included, and 16 MB for the whole <code>.zip</code>. Each picture is scaled to at most 1600 pixels on its longer side, a background to 1920 and a picture used only as a choice to 1200; a smaller picture is scaled up to its place on the wall.</p>
 
 <h3>Pictures on the wall</h3>
-<p>A question's picture is read from the back of a classroom, eight or ten metres away, and gets the room the question and the tiles leave: at most about three fifths of the screen's height, less when the question is long. A wide figure, such as a number line, goes between the question and the tiles at full width, only as tall as its shape allows. A square or upright figure, or a landscape one up to about 3:2, goes on the left at about half the screen's width, with the question and choices on the right. The site picks whichever shows the picture larger. The teacher can enlarge the question's picture to fill the screen for a moment. A transparent picture is shown on white.</p>
+<p>A question's picture gets the room the question and the choices leave, at most about three fifths of the screen's height, less when the question is long. A wide figure, such as a number line, runs full width between the question and the choices; a squarer or upright one sits beside them. The site picks whichever shows the picture larger. A transparent picture is shown on white.</p>
 
 <h3>Pictures as choices</h3>
 <p>The marks work as they do for text, pictures and text can be mixed in one question, and the question can have its own <code>Image:</code> line:</p>
@@ -326,21 +327,31 @@ Order: fixed
 
 2. Which shape is the mirror image of this one?
 Image: l-shape.png
+Order: fixed
 - Image: l-turned.png
 + Image: l-mirrored.png
 - Image: l-same.png
 - None of these</code></pre>
-<p>Up to four picture choices share the room below the question, each about a quarter of what a question's picture gets, in whichever arrangement shows them largest. On a laptop's 1366 by 768 projector, four square picture choices come out about 300 pixels across, 280 when the question has its own picture, and four number lines six times wider than tall about 620 by 100. Each picture choice sits on its tile's colour, red, blue, yellow or green, shuffled with the choices, on the projector and on the students' buttons alike: where the picture is transparent the colour shows through, and a picture with a ground of its own shows as drawn. The site warns when a question's picture choices have different proportions.</p>
+<p>Up to four picture choices share the room below the question. A choice's background is red, blue, yellow or green, shuffled with the choices: consider legibility when a picture is transparent. The site warns when a question's picture choices have different proportions.</p>
 
-<h3>From the chat to the class</h3>
-<p>The site takes a quiz as one <code>.zip</code> file and nothing else: no pasted text, no single text file. In it are the quiz text as one <code>.txt</code> or <code>.md</code> file and the picture files. Two quizzes are two <code>.zip</code> files. An assistant that can't create files has no way to hand a quiz to this site. Text before the title or after the last question is ignored; text between questions that isn't a question, a choice or one of the lines above is an error.</p>
-<p>After the upload the site shows the teacher the questions, with their solutions a tap away. What can't be read (a question with no choice marked right, five choices, a stray bullet point) is listed with its question, in words the teacher can paste back into the chat. Some things only get a warning, such as no title, the same choice twice or a very long choice. A picture the quiz names that is missing or can't be opened is listed the same way, and the teacher can run the quiz without it. A solution that turns out wrong in class, the teacher fixes there.</p>
 
-<h2 id="with-a-teacher">Building with the teacher</h2>
+<h2 id="with-a-teacher">Build with the teacher</h2>
 
-<p>The teacher knows what they need and is there to say it; a quiz built on guesses they could have answered in a sentence reads as not having understood them. A teacher whose first message settles it (which exercises, how many questions, the sheet's numbers or new ones, the language) wants the quiz. Otherwise the first answer is a few lines, before the quiz: what the message and the material make clear, and what is still open, put so the teacher can answer in a line. The quiz follows the answer. A teacher who wants the gaps filled without asking says so.</p>
+<p>The teacher knows what they need, so don't guess. Building a quiz takes a few minutes, long enough for the teacher's attention to drift elsewhere. Better to ask for details early, while they are there and ready to answer, than to lose them and deliver something half right.</p>
 
-<p>The layout page can show the teacher a kind of question for approval before the rest is made the same way. By default the class needs good questions, not the sheet's exercises taken over one to one; a teacher who needs that says so.</p>
+<ol>
+  <li><strong>Establish what gets built:</strong> topic, for whom, language, size. Take what the prompt, attachments and environment already say, and ask about the gaps in a few lines before building: what you've taken from them, and what is still open, phrased so one line can answer. A teacher who wants the gaps filled without asking says so.</li>
+  <li><strong>Build.</strong></li>
+  <li><strong>Present, and refine</strong> on the teacher's feedback.</li>
+</ol>
+
+<p>Your tools and creativity may let you use the <a href="/layout">layout page</a>, the projector's layout for a question as HTML and CSS, to present previews. The whole quiz needn't be presented unless asked, but a question type may warrant a visual presentation, to be approved or corrected during the conversation.</p>
+
+<p>A teacher who puts all the details into the first prompt probably knows the process and wants step 2 straight away. Such a teacher may need nothing but the <code>.zip</code>: ask up front whether they also want a presentation, and build the <code>.zip</code> while they answer.</p>
+
+<p>For the questions themselves, the default is good questions for the class: easy to understand, with clear right and wrong answers, and pictures that work. A teacher who needs the sheet's exercises taken over one to one says so.</p>
+
+<p>On controversial questions, especially in politics and history, let the teacher lead and stay passive. Controversial here means not what is mainstream or not, but that sound arguments pull in very different directions.</p>
 </div>
 
 </main>
