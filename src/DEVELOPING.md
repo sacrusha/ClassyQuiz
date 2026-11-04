@@ -21,6 +21,15 @@ All commands run in `src/` unless said otherwise.
 - `client/`: the page scripts, plain DOM without a framework, bundled per page
   by esbuild to ES2020 because school devices are not always current.
 - `public/`: pages and stylesheet; `scripts/`: build, dev, deploy, simulate.
+- `public/brand/`: the mark, copies of `docs/brand/svg/` (the masters, their
+  rules and the scripts that draw them). A page writes `<!--#brand file.svg-->`
+  where the mark goes inline, or `<!--#brand-use file.svg-->` with the
+  drawing once at `<!--#brand-defs-->`, and `build.mjs` writes it in. Opened
+  straight from `public/`, a page shows no mark. Which file goes where:
+  `docs/design/identity.md`.
+- `public/site.css`: the shared look. Every page links it first; in `dist/`
+  it is the front of `app.css`, or written into a page without `app.css`
+  (`build.mjs`), so there is no `dist/site.css`.
 
 The site is two Cloudflare deployables. The state Worker (`classyquiz-state`)
 holds the Durable Objects (`Instance`, `JoinCode`, `UploadStats`, `SiteBudget`).
@@ -138,8 +147,10 @@ the repo; read a script before running it. Directories there:
   evaluating in a tab whose window has another tab in front; call
   `bringToFront()` first.
 - `stacks/<name>/`: per-implementer scripts for starting and stopping a second
-  local stack (`after-upload`, `fixc`, `flow`, `hard`, `landing`, `lp`, `lp3`,
-  `owner5`, `pics`, `stack`, `tempo-bar`, `v3`, `winners`).
+  local stack (`after-upload`, `fixc`, `flow`, `hard`, `identity`, `landing`,
+  `lp`, `lp3`, `owner5`, `pics`, `stack`, `tempo-bar`, `v3`, `winners`).
+- `identity/kit/`: the logo kit as it was made, with the boards and renders
+  that `docs/brand/` leaves out; their mock-ups carry placeholder content.
 - `sim-diag/`: the instrumented simulation used to chase a score mismatch,
   since designed out (`docs/design/question-flow.md`, "When a tap counts").
 - `picture-answers/`: the generated test zip and its generator.

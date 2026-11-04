@@ -128,7 +128,7 @@ function lobby(v: TeacherView): string {
 
 /** The teacher code at rest, in the sentence the wall's check uses. */
 function secondDevice(v: TeacherView): string {
-  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.`;
+  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.`;
 }
 
 /**
@@ -139,7 +139,7 @@ function secondDevice(v: TeacherView): string {
  */
 function projectorLine(v: TeacherView): string {
   const gone = v.phase === "lobby" ? "" : "Projector gone. ";
-  return `<p class="device">${gone}On the projector computer: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open the projector window</button> here.</span></p>`;
+  return `<p class="device">${gone}On the projector computer: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open the projector window</button> here.</span></p>`;
 }
 
 function current(v: TeacherView): string {

@@ -194,7 +194,7 @@ function comeBack(): string {
  * the check finds it where it was (hidden on a phone).
  */
 function secondDevice(v: ScreenView): string {
-  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong>${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open a second screen in a new window</button> with a click.</span>`;
+  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open a second screen in a new window</button> with a click.</span>`;
 }
 
 /** The single tab's lobby screen; the class never sees the check unless the teacher shares it. */
@@ -284,9 +284,21 @@ function nobodyYet(v: ScreenView): boolean {
 function howTo(code: string): string {
   return `<div class="howto" aria-hidden="true"><div class="scr">
     <div class="url">${esc(siteAddress())}</div>
-    <div class="hdr"><span class="logo">classyQuiz</span><span class="box">${esc(code)}</span><span class="go">&#9654;</span></div>
+    <div class="hdr"><span class="logo"><img class="s32" src="/brand/classyquiz-horizontal-32.svg" alt="" width="134" height="32" loading="lazy"><img class="master" src="/brand/classyquiz-horizontal-colour.svg" alt="" width="935" height="256" loading="lazy"></span><span class="box">${esc(code)}</span><span class="go">&#9654;</span></div>
     <div class="page"><i></i><i></i><i></i></div>
   </div></div>`;
+}
+
+/**
+ * The address the class types, the mark before it: the fox the tablets then
+ * find in the landing page's header (docs/design/identity.md). The wall stays
+ * light, so the light-ground files: the full drawing from 48 px, which beside
+ * a pages.dev address the mark reaches on a 1920 x 1080 wall (the join
+ * column's height caps it), the drawing for 24 to 47 px below that. --chars
+ * is the address's length plus the mark's room (app.css, the join column).
+ */
+function joinAddress(): string {
+  return `<div class="addr" style="--chars:${siteAddress().length + 3}"><picture><source media="(min-width: 1600px) and (min-height: 960px)" srcset="/brand/classyquiz-symbol-colour.svg"><img class="mark" src="/brand/classyquiz-symbol-32.svg" alt="" width="32" height="32"></picture>${esc(siteAddress())}</div>`;
 }
 
 function nobodyLine(): string {
@@ -308,7 +320,7 @@ function renderJoin(v: ScreenView): void {
       <div class="lobby">
         <div class="join">
           <div class="qr">${qrSvg(v.code)}</div>
-          <div class="addr" style="--chars:${siteAddress().length}">${esc(siteAddress())}</div>
+          ${joinAddress()}
           <div class="bigcode">${esc(v.code)}</div>
         </div>
         <div class="crowdcol">
@@ -342,7 +354,7 @@ function renderLobby(v: ScreenView): void {
       <div class="lobby">
         <div class="join">
           <div class="qr">${qrSvg(v.code)}</div>
-          <div class="addr" style="--chars:${siteAddress().length}">${esc(siteAddress())}</div>
+          ${joinAddress()}
           <div class="bigcode">${esc(v.code)}</div>
         </div>
         <div style="display:flex;flex-direction:column;min-height:0">
@@ -872,7 +884,7 @@ function renderRanking(v: ScreenView): void {
       <div class="classres">
         <div class="pct">${pct}%</div>
         <div class="muted">${ICON.check} ${r.right} / ${r.given}</div>
-        <div class="bars">${r.perQuestion.map((p) => `<span style="height:${p.given ? (100 * p.right) / p.given : 0}%"></span>`).join("")}</div>
+        <div class="bars">${r.perQuestion.map((p) => `<span><i style="height:${p.given ? (100 * p.right) / p.given : 0}%"></i></span>`).join("")}</div>
       </div>
     </div>`;
   patch(main, html);

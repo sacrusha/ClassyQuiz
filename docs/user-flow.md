@@ -94,7 +94,7 @@ Purpose and reasons: docs/design/root-page.md.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ classyQuiz                         Code [_ _ _ _ _]  ▶      EN ▾     │
+│ [fox] classyQuiz                   Code [_ _ _ _ _]  ▶      EN ▾     │
 ├──────────────────────────────────────────────────────────────────────┤
 │ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
 │   → [wall] [tablets, fanned]                                         │
@@ -119,6 +119,10 @@ Purpose and reasons: docs/design/root-page.md.
 │ About classyQuiz … (English, for AIs)                                 │
 ```
 
+- **The header**: the mark and the name, the code box, the language. On a
+  phone held upright the mark stands alone, the name kept for screen
+  readers. Where the mark and the name appear across the site, and why:
+  docs/design/identity.md.
 - **The block above About** speaks DE, EN, FR or IT: the device's choice
   (`cq.lang`), else the browser's language, else English. The static HTML is
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
@@ -167,7 +171,8 @@ Purpose and reasons: docs/design/root-page.md.
 English, from the strip. Purpose and reasons: docs/design/example-page.md.
 
 ```
-‹ classyQuiz
+[fox] classyQuiz                         (the site's small header, to the root)
+─────────────────────────────────────────
 The example, step by step
 How the example quiz was made, from the exercise sheets to the class, with
 everything to try the same on your own AI.
@@ -181,7 +186,7 @@ everything to try the same on your own AI.
 ```
 
 "Start the example quiz" uploads the example as Run does and lands on the
-check (§3.3).
+check (§3.3). `/own-copy` and `/check` have the same small header.
 
 ### 3.2 The two entrances after a code
 
@@ -204,6 +209,8 @@ uploading device), when one tab shows and steers:
 
 ```
 ┌──────────────────────────────┐
+│ [fox] classyQuiz             │
+├──────────────────────────────┤
 │ Prozente                     │
 │ [ Show the quiz here ]       │
 │   the class watches this     │
@@ -221,7 +228,9 @@ by itself later. A wrong teacher code shows the box again with "That isn't
 this quiz's teacher code."; after five from the device, or the quiz's ten,
 "Too many wrong codes for this quiz. Try again in a few minutes."
 `/teacher#63953`, the old way in, shows the same box with the class code in
-it.
+it. The box's placeholder is a teacher code, "12345 67". This screen, the
+question above and the note that both are there have the site's small
+header.
 
 ### 3.3 The lobby: the check, then the join screen
 
@@ -286,9 +295,12 @@ A question opened (or all of them, with Show the solutions / Hide the solutions)
 - **The site's warnings** (the same answer twice, text too long to read well,
   ignored text, no title) sit above the list, one muted line each.
 - **Avatars** can be tapped to remove a double. Until the first one, their
-  place shows where the code goes: a wordless tablet top, the address in the
-  browser's field and the code in the landing header's box (design:
-  `class-and-wall.md`, "Getting in").
+  place shows where the code goes: a wordless tablet top, fading out at its
+  foot, the address in the browser's field and the code in the landing
+  header's box beside the mark and the name (design: `class-and-wall.md`,
+  "Getting in").
+- **The address** has the mark before it, the fox the tablets then find in
+  the landing's header.
 - **Start reads "Start quiz ▶"** on every screen that steers. The mode is
   named where there is a choice: on the second device's question.
 - **Points for speed**, a switch under Start on the join screen, off by default; on, it says "A right answer 10, up to 5 more the

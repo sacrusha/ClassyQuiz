@@ -14,12 +14,15 @@ export function esc(s: string): string {
 }
 
 /**
- * Text with its line breaks kept (questions may run over several lines), and
- * a number written in digit groups ("1 000 000") kept on one line.
+ * Text with its line breaks kept (questions may run over several lines), a
+ * number written in digit groups ("1 000 000") kept on one line, and a number
+ * kept with a short word after it ("50 Franken", "3 cm"): split, the number
+ * stands alone on a tile's first line and looks like the whole answer.
  */
 export function lines(s: string): string {
   return esc(s)
     .replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u00A0")
+    .replace(/(\d) (?=\p{L}{1,10}(?!\p{L}))/gu, "$1\u00A0")
     .replace(/\n/g, "<br>");
 }
 
@@ -177,6 +180,17 @@ export function keepAwake(): void {
   document.addEventListener("visibilitychange", () => void request());
   document.addEventListener("pointerdown", () => void request(), { passive: true });
   document.addEventListener("keydown", () => void request());
+}
+
+/**
+ * The small header of a teacher's page (site.css, .site-head): the mark and
+ * the name, back to the root page, as the static pages write it. Here the
+ * lockup is a picture, not inline: this script is also the students', and
+ * every tablet would carry the drawing for screens only a teacher sees.
+ * The picture follows the device's dark mode, as these screens do.
+ */
+export function siteHead(): string {
+  return `<header class="site-head"><div class="in"><a class="brand" href="/"><picture><source media="(prefers-color-scheme: dark)" srcset="/brand/classyquiz-horizontal-32-dark.svg"><img src="/brand/classyquiz-horizontal-32.svg" alt="classyQuiz" width="134" height="32"></picture></a></div></header>`;
 }
 
 export function siteAddress(): string {

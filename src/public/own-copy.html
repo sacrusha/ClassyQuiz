@@ -5,28 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Your own classyQuiz</title>
 <meta name="description" content="How a teacher gets their own copy of classyQuiz on a free Cloudflare account, with an AI assistant doing the setup.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 12 L90 84 H10Z' fill='%23d93b3b'/%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/site.css">
 <style>
-  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; }
-  }
-  html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 42rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
-  h1 { font-size: 1.8rem; margin: .5rem 0 .5rem; }
-  h2 { font-size: 1.2rem; margin: 2rem 0 .4rem; }
+  /* The colours and typefaces are site.css's. */
+  body { line-height: var(--leading-prose); }
+  main { max-width: 42rem; margin: 0 auto; padding: 1rem 16px 4rem; }
+  h1 { font-size: var(--h1); margin: .5rem 0 .5rem; }
+  h2 { font-size: var(--h2); margin: 2rem 0 .4rem; }
   p, ul, ol { margin: .5rem 0; }
   li { margin: .3rem 0; }
   .lede { color: var(--muted); }
   .prompt { background: var(--code-bg); border-radius: 8px; padding: .75rem 1rem; }
-  a { color: var(--accent); }
-  .back { font-size: .95rem; }
 </style>
 </head>
-<body>
+<body class="follows-dark">
+<header class="site-head"><div class="in"><a class="brand" href="/"><!--#brand classyquiz-horizontal-32-inline.svg--></a></div></header>
 <main>
-<p class="back"><a href="/">&#8592; classyQuiz</a></p>
 <h1>Your own classyQuiz</h1>
 <p class="lede">This site is free and shared by everyone who uses it, with room for a few dozen classes a day. When that is used up, it says so and takes new quizzes again once the day turns or older quizzes have expired. Your own copy is the same site at an address of your own, on a free account of your own, and what it allows a day is yours alone.</p>
 

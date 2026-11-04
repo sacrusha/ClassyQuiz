@@ -5,32 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>classyQuiz</title>
 <meta name="description" content="Live classroom quizzes made from a teacher's exercise sheets by the teacher's own AI assistant. This page describes the site, the quizzes, their text format, and how they are made with a teacher.">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/site.css">
 <style>
-  :root { --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #dedbd2; --code-bg: #f1eee6; --accent: #2a5db0; --bubble: #e8eefa; --frame: #2b2b29; --err: #c62828; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #161615; --fg: #ecebe6; --muted: #a9a8a1; --rule: #34332f; --code-bg: #22211f; --accent: #8fb3f0; --bubble: #1f2a3d; --frame: #000; --err: #ff8a80; }
-  }
-  html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  /* The colours and typefaces are site.css's. */
+  body { line-height: var(--leading-prose); }
   main { max-width: 42rem; margin: 0 auto; padding: 0 16px 4rem; }
-  h1 { font-size: 2rem; margin: 0 0 .25rem; }
-  h2 { font-size: 1.3rem; margin: 2.5rem 0 .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
-  h3 { font-size: 1.05rem; margin: 1.5rem 0 .25rem; }
+  h1 { font-size: var(--h1); margin: 0 0 .25rem; }
+  h2 { font-size: var(--h2); margin: 2.5rem 0 .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  h3 { font-size: var(--h3); margin: 1.5rem 0 .25rem; }
   p, ul, ol { margin: .5rem 0; }
   li { margin: .2rem 0; }
   .lede { color: var(--muted); margin-bottom: 1.5rem; }
   pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .9rem; line-height: 1.45; }
-  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
-  a { color: var(--accent); }
+  code { font-family: var(--font-mono); }
 
   header.top { border-bottom: 1px solid var(--rule); }
   .wide { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
   header.top .bar { display: flex; align-items: center; gap: 10px; padding-top: 10px; padding-bottom: 10px; }
-  header.top .logo { font-weight: 800; font-size: 1.2rem; flex: 1; margin: 0; min-width: 0; }
+  header.top .logo { flex: 1; margin: 0; min-width: 0; }
   .join { display: flex; align-items: center; gap: 6px; }
   .join label { color: var(--muted); font-size: .95rem; }
-  .join input { width: 8.2em; min-width: 0; font: 700 1.25rem ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: .15em; text-align: center; padding: 6px; border: 2px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--fg); }
-  .join button { height: 42px; width: 46px; border: 0; border-radius: 10px; background: var(--accent); color: var(--bg); font-size: 1.1rem; cursor: pointer; }
+  .join input { width: 8.2em; min-width: 0; font: 700 1.25rem var(--font-brand); font-variant-numeric: tabular-nums; letter-spacing: .15em; text-align: center; padding: 6px; border: 2px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--fg); }
+  .join button { height: 42px; width: 46px; border: 0; border-radius: 10px; background: var(--control); color: var(--control-ink); font-size: 1.1rem; cursor: pointer; }
   .lang { position: relative; display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; font-weight: 600; font-size: .95rem; color: var(--muted); white-space: nowrap; }
   .lang select { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; font-size: 16px; }
   .lang:focus-within { outline: 2px solid var(--accent); }
@@ -55,13 +54,13 @@
   .f-sheet .p2 { right: 0; top: 0; transform: rotate(4deg); }
   .f-sheet .p1 { left: 0; bottom: 0; transform: rotate(-3deg); }
   .f-ask .pic { height: calc(var(--h) * .8); aspect-ratio: .62; }
-  .f-ask svg, .f-zip svg { width: 100%; height: 100%; display: block; }
+  .f-ask .pic > svg, .f-zip .pic > svg { width: 100%; height: 100%; display: block; }
   .f-zip .pic { height: calc(var(--h) * .66); aspect-ratio: 160 / 110; }
   .f-zip figcaption { max-width: 11.5em; }
   .f-tablet .pic { height: var(--h); aspect-ratio: .66; background: var(--frame); border-radius: 12px; padding: 6px; box-sizing: border-box; }
   .f-tablet img { width: 100%; height: 100%; border-radius: 4px; }
   /* Two more tablets fanned out behind the front one: every student has one, showing the same buttons. Drawn, not pictured, so the four languages need no more images. */
-  .f-tablet .pic::before, .f-tablet .pic::after { content: ""; position: absolute; inset: 0; z-index: -1; box-sizing: border-box; border: 6px solid var(--frame); border-top-width: 14px; border-radius: 12px; transform-origin: 50% 100%; background: conic-gradient(#2f6fd6 0 25%, #22a052 0 50%, #e5b20d 0 75%, #d9453b 0); }
+  .f-tablet .pic::before, .f-tablet .pic::after { content: ""; position: absolute; inset: 0; z-index: -1; box-sizing: border-box; border: 6px solid var(--frame); border-top-width: 14px; border-radius: 12px; transform-origin: 50% 100%; background: conic-gradient(#2f6fd6 0 25%, #1f9d55 0 50%, #e8b100 0 75%, #d93b3b 0); }
   .f-tablet .pic::before { transform: rotate(6deg); opacity: .75; }
   .f-tablet .pic::after { transform: rotate(12deg); opacity: .45; }
   .f-wall .pic { height: var(--h); aspect-ratio: 16 / 9; background: var(--frame); padding: 4px; box-sizing: border-box; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
@@ -71,7 +70,7 @@
   .cols h2 { border: 0; padding: 0; margin: 1.6rem 0 .6rem; font-size: 1.35rem; }
   .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
   .steps > li { position: relative; padding-left: 2rem; margin: 0 0 .9rem; counter-increment: step; }
-  .steps > li::before { content: counter(step); position: absolute; left: 0; top: .05em; width: 1.45rem; height: 1.45rem; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; font-size: .85rem; line-height: 1.45rem; text-align: center; }
+  .steps > li::before { content: counter(step); position: absolute; left: 0; top: .05em; width: 1.45rem; height: 1.45rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .85rem; line-height: 1.45rem; text-align: center; }
   .steps p { margin: 0; }
   .steps .do { font-weight: 600; }
   .steps .detail { color: var(--muted); font-size: .95rem; margin: .15rem 0 0; }
@@ -94,23 +93,23 @@
 
   .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 22px 16px; text-align: center; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
-  .runbox .open { text-wrap: balance; border: 0; background: var(--accent); color: var(--bg); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
+  .runbox .open { text-wrap: balance; border: 0; background: var(--control); color: var(--control-ink); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
   .runbox p { color: var(--muted); margin: .6rem 0 0; }
   #out:empty, #resume:empty { display: none; }
   .muted { color: var(--muted); }
   .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0; }
-  .problem .err { color: var(--err); font-weight: 600; }
+  .problem .err { color: var(--bad); font-weight: 600; }
   .problem button { border: 2px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; margin: 4px 6px 0 0; }
-  .problem button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .problem button.primary { background: var(--control); border-color: var(--control); color: var(--control-ink); }
 
   .resume { border: 2px solid var(--accent); border-radius: 16px; padding: 12px 16px; margin: 0 0 14px; }
   .resume .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; }
   .resume .title { font-weight: 700; overflow-wrap: anywhere; flex: 1 1 12em; }
   .resume .stands { color: var(--muted); font-size: .95rem; white-space: nowrap; }
   .resume .go { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: .5rem 0 0; }
-  .resume .back { display: inline-block; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 18px; }
+  .resume .back { display: inline-block; background: var(--control); color: var(--control-ink); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 18px; }
   .resume .code { color: var(--muted); font-size: .95rem; }
-  .resume b { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
+  .resume b { font-family: var(--font-brand); font-variant-numeric: tabular-nums; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
   .resume .other { color: var(--muted); font-size: .95rem; margin: .5rem 0 0; }
   .owncopy { color: var(--muted); font-size: .95rem; margin: 14px 0 0; }
 
@@ -132,15 +131,20 @@
     .strip .arrow { display: none; }
   }
   @media (max-width: 600px) {
-    header.top .logo { font-size: 1.05rem; }
     .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
   }
+  /* A phone held upright: the code box and the language need the row, so the fox stands alone, still named for a screen reader (its aria-label). */
+  header.top .symbol { display: none; }
+  @media (max-width: 440px) {
+    header.top .lockup { display: none; }
+    header.top .symbol { display: block; }
+  }
 </style>
 </head>
-<body>
+<body class="follows-dark">
 <header class="top"><div class="bar wide">
-  <p class="logo">classyQuiz</p>
+  <p class="logo"><span class="brand"><span class="lockup"><!--#brand-use classyquiz-horizontal-32-inline.svg--></span><span class="symbol"><!--#brand-use classyquiz-symbol-32-inline.svg--></span></span></p>
   <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code" data-t="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join" data-t-aria="join">&#9654;</button></form>
 </div></header>
 
@@ -167,13 +171,18 @@
   <figure class="f-zip"><div class="pic"><svg viewBox="0 0 160 110" aria-hidden="true">
     <rect x="12" y="2" width="136" height="96" rx="7" fill="var(--frame)"/>
     <rect x="18" y="8" width="124" height="84" rx="2" fill="var(--bg)"/>
-    <text x="25" y="20" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="var(--fg)">classyQuiz</text>
-    <path d="M18 25h124" stroke="var(--rule)"/>
+    <!-- the 16-grid fox and the header lockup's name (identity.md, the strip) -->
+    <clipPath id="mini-name"><rect x="26" y="0" width="110" height="40"/></clipPath>
+    <g class="mini" style="color: var(--fg)">
+      <g transform="translate(23 9.02) scale(.4823)" clip-path="url(#mini-name)"><!--#brand-use classyquiz-horizontal-32-inline.svg--></g>
+      <g transform="translate(21.67 9.5) scale(.904)"><!--#brand-use classyquiz-symbol-16-inline.svg--></g>
+    </g>
+    <path d="M18 26.5h124" stroke="var(--rule)"/>
     <rect x="34" y="32" width="92" height="52" rx="7" fill="none" stroke="#b9b3a5" stroke-width="1.5" stroke-dasharray="4 3"/>
     <path d="M71 37h12l6 6v20H71z" fill="#f2c94c"/><path d="M83 37v6h6" fill="#d9ad2b"/>
     <g fill="#8a6d12"><rect x="76" y="39" width="2.5" height="2.5"/><rect x="78.5" y="41.5" width="2.5" height="2.5"/><rect x="76" y="44" width="2.5" height="2.5"/><rect x="78.5" y="46.5" width="2.5" height="2.5"/><rect x="75.5" y="50" width="6.5" height="6.5" rx="1.2"/></g>
     <g stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M57 39v14m-4.5-4.5 4.5 4.5 4.5-4.5"/><path d="M103 39v14m-4.5-4.5 4.5 4.5 4.5-4.5"/></g>
-    <rect x="50" y="69" width="60" height="9" rx="4.5" fill="var(--accent)"/>
+    <rect x="50" y="69" width="60" height="9" rx="4.5" fill="var(--control)"/>
     <path d="M2 99h156v3a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5z" fill="var(--frame)"/><rect x="66" y="99" width="28" height="2.5" rx="1.2" fill="#555"/>
   </svg></div><figcaption data-t="capZip">The .zip, uploaded here</figcaption></figure>
   <span class="arrow" aria-hidden="true">&rarr;</span>
@@ -335,6 +344,7 @@ Image: l-shape.png
 </div>
 
 </main>
+<!--#brand-defs-->
 <script src="/js/home.js" defer></script>
 </body>
 </html>
