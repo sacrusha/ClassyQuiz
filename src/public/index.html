@@ -36,14 +36,18 @@
   .lang:focus-within { outline: 2px solid var(--accent); }
 
   /* The strip: the example from the sheet to the class in five frames, in the workflow's order; until the video exists, a link to /example.
-     A grid of two rows, the pictures standing on one line and the captions under them, however many lines a caption takes.
-     --h, the class frames' height, is what lets the row fit the width: the frames add up to about 4.6 of it, gaps and arrows about 240px. */
-  .strip { --h: clamp(96px, calc((min(100vw, 1120px) - 240px) / 4.6), 232px); display: grid; grid-auto-flow: column; grid-template-rows: auto auto; justify-content: center; align-items: end; column-gap: 14px; margin: 22px 0 6px; color: inherit; text-decoration: none; }
+     A card with a border and a label in the page's link style, so it reads as something to open (root-page.md, "The strip").
+     The frames are a grid of two rows, the pictures standing on one line and the captions under them, however many lines a caption takes.
+     --h, the class frames' height, is what lets the row fit the width: the frames add up to about 4.6 of it, gaps, arrows and the card's padding about 270px. */
+  .strip { display: block; margin: 18px 0 6px; padding: 14px 14px 10px; border: 1px solid var(--rule); border-radius: 14px; color: inherit; text-decoration: none; }
+  .strip:hover, .strip:focus-visible { border-color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .strip .frames { --h: clamp(96px, calc((min(100vw, 1120px) - 270px) / 4.6), 224px); display: grid; grid-auto-flow: column; grid-template-rows: auto auto; justify-content: center; align-items: end; column-gap: 14px; }
   .strip figure { display: contents; }
   .strip .pic { grid-row: 1; justify-self: center; }
   .strip figcaption { grid-row: 2; align-self: start; justify-self: center; margin-top: 8px; font-size: .9rem; line-height: 1.3; color: var(--muted); text-align: center; max-width: 9.5em; }
-  .strip:hover figcaption, .strip:focus-visible figcaption { color: var(--fg); }
   .strip .arrow { grid-row: 1; align-self: center; color: var(--muted); font-size: 1.4rem; }
+  .strip .see { display: block; margin-top: 6px; text-align: right; color: var(--accent); font-weight: 600; }
+  .strip:hover .see, .strip:focus-visible .see { text-decoration: underline; }
   .strip .pic { position: relative; }
   .strip img { display: block; }
   .f-sheet .pic { height: calc(var(--h) * .8); aspect-ratio: .86; }
@@ -56,6 +60,10 @@
   .f-zip figcaption { max-width: 11.5em; }
   .f-tablet .pic { height: var(--h); aspect-ratio: .66; background: var(--frame); border-radius: 12px; padding: 6px; box-sizing: border-box; }
   .f-tablet img { width: 100%; height: 100%; border-radius: 4px; }
+  /* Two more tablets fanned out behind the front one: every student has one, showing the same buttons. Drawn, not pictured, so the four languages need no more images. */
+  .f-tablet .pic::before, .f-tablet .pic::after { content: ""; position: absolute; inset: 0; z-index: -1; box-sizing: border-box; border: 6px solid var(--frame); border-top-width: 14px; border-radius: 12px; transform-origin: 50% 100%; background: conic-gradient(#2f6fd6 0 25%, #22a052 0 50%, #e5b20d 0 75%, #d9453b 0); }
+  .f-tablet .pic::before { transform: rotate(6deg); opacity: .75; }
+  .f-tablet .pic::after { transform: rotate(12deg); opacity: .45; }
   .f-wall .pic { height: var(--h); aspect-ratio: 16 / 9; background: var(--frame); padding: 4px; box-sizing: border-box; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
   .f-wall img { width: 100%; height: 100%; }
 
@@ -107,13 +115,17 @@
 
   .guide { margin-top: 3.5rem; padding-top: .5rem; border-top: 1px solid var(--rule); }
 
+  /* Stacked, Run comes first: it is short, so Build's heading still shows below it, and the teacher with a .zip or coming back mid-lesson doesn't scroll past Build (root-page.md, "Run first when stacked"). Visual order only; the HTML keeps Build first. */
   @media (max-width: 860px) {
     .cols { grid-template-columns: minmax(0, 1fr); }
+    .cols .run { order: -1; }
   }
-  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip is one row that scrolls sideways, the sheet first, the next frame peeking in. Its height is capped by the viewport's height as well as its width, so a phone held sideways still shows Build and Run below it. */
+  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip's frames are one row that scrolls sideways inside the card, the label staying in view below, the sheet first, the next frame peeking in. Its height is capped by the viewport's height as well as its width, so a phone held sideways still shows Build and Run below it. */
   @media (max-width: 720px) {
-    .strip { --h: min(60vw, 240px, 38vh); justify-content: start; overflow-x: auto; scroll-snap-type: x proximity; margin: 16px -16px 0; padding: 0 16px 8px; column-gap: 12px; scrollbar-width: thin; }
-    .strip .pic { scroll-snap-align: start; scroll-margin-left: 16px; }
+    .strip { margin-top: 14px; padding: 10px 0 8px; }
+    .strip .frames { --h: min(50vw, 230px, 34vh); justify-content: start; overflow-x: auto; scroll-snap-type: x proximity; padding: 0 12px 8px; column-gap: 12px; scrollbar-width: thin; }
+    .strip .pic { scroll-snap-align: start; scroll-margin-left: 12px; }
+    .strip .see { margin: 2px 12px 0; }
     .f-sheet .pic, .f-ask .pic { height: var(--h); }
     .f-zip .pic { height: calc(var(--h) * .62); }
     .strip .arrow { display: none; }
@@ -122,10 +134,6 @@
     header.top .logo { font-size: 1.05rem; }
     .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
-    .bubble .part { display: inline; white-space: normal; }
-    .bubble .lab { display: none; }
-    .bubble.inplace { line-height: 1.5; padding-bottom: 10px; }
-    .bubble.inplace + .labels { display: block; }
   }
 </style>
 </head>
@@ -136,7 +144,7 @@
 </div></header>
 
 <div class="landing wide" id="landing">
-<a class="strip" id="strip" href="/example" aria-label="The example quiz, from an exercise sheet to the class: see its questions" data-t-aria="strip">
+<a class="strip" id="strip" href="/example" aria-label="From an exercise sheet to the class: see the example quiz" data-t-aria="strip"><div class="frames">
   <figure class="f-sheet"><div class="pic"><img class="p2" src="/landing/sheet-2.webp" alt="" width="440" height="622"><img class="p1" src="/landing/sheet-1.webp" alt="" width="440" height="622"></div><figcaption data-t="capSheet">Your exercise sheet</figcaption></figure>
   <span class="arrow" aria-hidden="true">&rarr;</span>
   <figure class="f-ask"><div class="pic"><svg viewBox="0 0 124 200" aria-hidden="true">
@@ -170,7 +178,7 @@
   <span class="arrow" aria-hidden="true">&rarr;</span>
   <figure class="f-wall"><div class="pic"><img src="/landing/wall-en.webp" data-lang-src="wall" alt="" width="960" height="540"></div><figcaption data-t="capWall">What the class sees</figcaption></figure>
   <figure class="f-tablet"><div class="pic"><img src="/landing/tablet-en.webp" data-lang-src="tablet" alt="" width="400" height="640"></div><figcaption data-t="capTap">Each student taps</figcaption></figure>
-</a>
+</div><span class="see" data-t="see">See the example quiz &rsaquo;</span></a>
 
 <div class="cols">
 <section class="build" aria-labelledby="build-h">
@@ -178,16 +186,16 @@
   <ol class="steps">
     <li><p class="do" data-t="step1">Choose any good AI.</p>
       <p class="detail" data-t="step1detail">Claude Opus wrote the example quiz, 3 Nov 2026.</p></li>
-    <li><p class="do"><span data-t="step2">Ask it to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
+    <li><p class="do"><span data-t="step2">Ask the AI to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
       <div class="example">
-        <p class="eg" data-t="forExample">For example, with photos of two pages:</p>
-        <blockquote class="bubble" id="bubble">Read <u>classyquiz.pages.dev</u>. Can you make me a classyQuiz from these two pages, with exercises <u>like no. 1, 3 and 4</u>? <u>For my 5th grade class</u>, <u>about 10 questions</u>, <u>in English</u>.</blockquote>
+        <p class="eg" data-t="forExample">For example, with photos of two sheets:</p>
+        <blockquote class="bubble" id="bubble">Read <u>classyquiz.pages.dev</u>. Can you make me a classyQuiz with exercises <u>like no. 1, 3 and 4</u> from these two sheets? <u>For my 5th grade class</u>, <u>about 10 questions</u>, <u>in English</u>.</blockquote>
         <p class="labels" id="labels">this site · which exercises · your class · how many · which language</p>
       </div>
       <div class="example">
         <p class="eg" data-t="orOpen">Or, with nothing decided yet:</p>
         <blockquote class="bubble" id="bubble2">Read classyquiz.pages.dev. I need a classyQuiz. Help?</blockquote>
-        <p class="then" data-t="asksBack">It then asks what it needs.</p>
+        <p class="then" data-t="asksBack">The AI then asks you for what it still needs, such as your sheets and your class, before it builds the quiz.</p>
       </div></li>
   </ol>
 </section>
