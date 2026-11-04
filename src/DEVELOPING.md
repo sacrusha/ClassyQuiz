@@ -36,7 +36,12 @@ The state Worker has observability off and no public address.
   runs `.ts` directly, and `tsc` only checks. Node 22.18 or newer; 24 is
   recommended.
 - Tests use Node's built-in runner: `npm test` (the parser, game logic, and
-  some client logic).
+  some client logic). A test pins a promise the design docs make, not an
+  implementation detail, the language or the runtime: anything else breaks on
+  harmless changes and reads as cover it doesn't give. A feature that
+  shouldn't exist is removed, not tested for staying off.
+- A comment says what the code can't: a reason, a trap, an invariant, a
+  pointer to a design doc. Where a decision came from is git's.
 - `npm run check` runs both tsconfigs (`tsconfig.json` for client, shared and
   quiz; `tsconfig.server.json` for the rest).
 - Dev dependencies (`wrangler`, `esbuild`, `typescript`,
