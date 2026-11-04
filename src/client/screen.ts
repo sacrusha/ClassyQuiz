@@ -128,7 +128,7 @@ function render(): void {
 }
 
 /**
- * "Change the right answer" from ⋯ during the quiz: the question's answers in
+ * "Change the solution" from ⋯ during the quiz: the question's answers in
  * a sheet over the wall, tappable. On a mirrored laptop the class sees it;
  * the menu item says so.
  */
@@ -879,7 +879,7 @@ function renderRanking(v: ScreenView): void {
 }
 
 /**
- * The bottom line. Steering: ⋯, the code, Last call and Play (steps.ts). Not steering:
+ * The bottom line. Steering: ⋯, the code, Countdown and Play (steps.ts). Not steering:
  * the code in a corner, full screen, and ⋯ (steer from here, leave).
  */
 function renderBar(v: ScreenView, managing: boolean): void {
@@ -898,7 +898,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = `<div class="corner">
       ${v.phase === "lobby" ? "" : `<span class="codeline">${addressAndCode(v.code)}</span>`}
       <span class="grow"></span><span class="dot" id="dot"></span>
-      ${v.phase === "lobby" && v.remote === "present" ? `<button data-act="swap" type="button">&#8644; Swap</button>` : ""}
+      ${v.phase === "lobby" && v.remote === "present" ? `<button data-act="swap" type="button">&#8644; Swap screens</button>` : ""}
       ${full ? "" : `<button data-full type="button">Full screen (F)</button>`}
       <button data-menu type="button" aria-label="more">⋯</button>
     </div>`;
@@ -926,7 +926,7 @@ function menu(v: ScreenView): void {
   // ⇄ Swap while both tabs are there: this wall steers, the steering tab shows the quiz.
   if (!v.steer && v.remote === "present") items.push({ label: "&#8644; Swap: steer here, show the quiz on the other device", run: () => void swap() });
   if (v.steer) items.push({ label: "A second device…", run: () => showNote(secondDevice(v)) });
-  items.push({ label: "Leave: stop showing the quiz here", run: () => void leave() });
+  items.push({ label: "Stop showing the quiz here", run: () => void leave() });
   if (v.steer) items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }
@@ -1033,6 +1033,7 @@ function screenState(v: ScreenView): StepState {
     votes: !!v.votes,
     lastCall: !!q?.clock && q.answering === "open",
     last: !!v.question && v.question.n >= v.question.total,
+    n: v.question?.n ?? 0,
   };
 }
 

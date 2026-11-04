@@ -323,7 +323,7 @@ export function answering(g: Game): Answering | null {
 /** The open question's answers appear: answering opens, and the time for speed starts. */
 export function showAnswers(g: Game, now: number): void {
   const run = needRun(g);
-  if (answering(g) !== "reading") throw new GameError("The answers are already shown.");
+  if (answering(g) !== "reading") throw new GameError("The choices are already shown.");
   (run.shown ??= {})[run.current] = now;
 }
 
@@ -336,8 +336,8 @@ export function lastCall(g: Game, now: number): void {
   const run = needRun(g);
   const a = answering(g);
   if (a === "reading") showAnswers(g, now);
-  else if (a !== "open") throw new GameError("Answering is already locked in.");
-  if (run.clocks?.[run.current]) throw new GameError("Last call is already running.");
+  else if (a !== "open") throw new GameError("Answering is already closed.");
+  if (run.clocks?.[run.current]) throw new GameError("The countdown is already running.");
   (run.clocks ??= {})[run.current] = { at: now, ms: LAST_CALL_MS };
 }
 
@@ -351,7 +351,7 @@ export function lastCall(g: Game, now: number): void {
 export function lockIn(g: Game, view: number): void {
   const run = needRun(g);
   if (run.phase !== "question") throw new GameError("There is no open question.");
-  if (answering(g) === "reading") throw new GameError("The answers aren't shown yet.");
+  if (answering(g) === "reading") throw new GameError("The choices aren't shown yet.");
   if (lockedIn(g)) return;
   (run.closedView ??= {})[run.current] ??= view;
   run.votes = run.current;
@@ -369,7 +369,7 @@ export function lockedIn(g: Game): boolean {
 export function reveal(g: Game, view: number): void {
   const run = needRun(g);
   if (run.phase !== "question") throw new GameError("There is no open question to reveal.");
-  if (answering(g) === "reading") throw new GameError("The answers aren't shown yet.");
+  if (answering(g) === "reading") throw new GameError("The choices aren't shown yet.");
   if (!run.revealed.includes(run.current)) run.revealed.push(run.current);
   // The lock-in may have closed answering earlier; that view is the one that counts.
   (run.closedView ??= {})[run.current] ??= view;
@@ -416,7 +416,7 @@ export function lastQuestion(g: Game): boolean {
 /** Reveal or ranking → next question (or the final ranking after the last one). */
 export function next(g: Game, now: number): void {
   const run = needRun(g);
-  if (run.phase !== "reveal" && run.phase !== "ranking") throw new GameError("Reveal the answer first.");
+  if (run.phase !== "reveal" && run.phase !== "ranking") throw new GameError("Show the solution first.");
   open(g, run, nextShown(g, run.current), now);
 }
 
@@ -519,7 +519,7 @@ export function setCounts(g: Game, q: number, counts: boolean[]): void {
   if (!fix) throw new GameError("No such question.");
   if (counts.length !== fix.counts.length || !counts.every((c) => typeof c === "boolean"))
     throw new GameError("The answers don't match the question.");
-  if (!counts.some(Boolean)) throw new GameError("At least one answer has to count. To count none, void the question.");
+  if (!counts.some(Boolean)) throw new GameError("At least one choice has to be right. For none, don't count the question.");
   fix.counts = counts.slice();
 }
 
@@ -535,7 +535,7 @@ export function setSkip(g: Game, q: number, skip: boolean): void {
   if (!fix) throw new GameError("No such question.");
   const run = g.run;
   if (run && (run.revealed.includes(q) || (run.current === q && run.phase === "question")) && skip)
-    throw new GameError("The class has already seen this question; void it instead.");
+    throw new GameError("The class has already seen this question; it can only be not counted.");
   // The run only moves forward: a question behind the current one would
   // count in "n / total" but never come up.
   if (run && run.phase !== "lobby" && q <= run.current && !skip)

@@ -50,14 +50,14 @@ function tags(q: TeacherQuestion, v: TeacherView): string {
     q.status === "current" ? `<span class="tag now">now</span>` : "",
     q.status === "revealed" ? `<span class="tag">done</span>` : "",
     q.skip ? `<span class="tag">skipped</span>` : "",
-    q.void ? `<span class="tag">void</span>` : "",
+    q.void ? `<span class="tag">not counted</span>` : "",
     q.image && q.pictureHidden ? `<span class="tag">picture hidden</span>` : "",
     right > 1 ? `<span class="tag">${right} right</span>` : "",
     q.answers.some((a) => a.counts !== a.marked) ? `<span class="tag">changed</span>` : "",
   ].join("");
 }
 
-/** A question's answers with the right ones marked; tappable while it is being fixed. */
+/** A question's choices with the solution marked; tappable while it is being fixed. */
 export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: number[] | null = null): string {
   const fixing = ui.fixing === i;
   const rows = q.answers
@@ -79,14 +79,14 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
     })
     .join("");
   const fix = fixing
-    ? `<p class="hint">Tap the answers that count.</p>
+    ? `<p class="hint">Tap every right choice.</p>
        <div class="row">
-         <button class="btn" data-act="void" data-q="${i}">${ICON.void} ${q.void ? "Count it again" : "Void: counts for nobody"}</button>
+         <button class="btn" data-act="void" data-q="${i}">${ICON.void} ${q.void ? "Count it again" : "Don't count this question"}</button>
          ${q.status === "upcoming" || q.status === "skipped" ? `<button class="btn" data-act="skip" data-q="${i}">${q.skip ? "Show it after all" : "Skip it"}</button>` : ""}
          ${q.image ? `<button class="btn" data-act="hide-pic" data-q="${i}">${q.pictureHidden ? "Show the picture again" : "Hide the picture"}</button>` : ""}
          <button class="btn primary" data-act="fix-done">Done</button>
        </div>`
-    : `<button class="link" data-act="fix-q" data-q="${i}">Change the right answer</button>`;
+    : `<button class="link" data-act="fix-q" data-q="${i}">Change the solution</button>`;
   return `<div class="answers">${rows}${fix}</div>`;
 }
 
@@ -122,7 +122,7 @@ export function questionList(v: TeacherView, ui: ManageUI): string {
     .join("");
   return `<section class="qlist">
     <div class="qlist-head"><strong>${v.questions.length} questions</strong>
-      <button class="btn" data-act="toggle-all">${ui.all ? "Hide answers" : "Show all answers"}</button></div>
+      <button class="btn" data-act="toggle-all">${ui.all ? "Hide the solutions" : "Show the solutions"}</button></div>
     ${v.background ? `<div class="qbg">${thumb(v.background, "bg", "background")}<span class="hint">behind every question</span></div>` : ""}
     ${v.warnings.map((w) => `<p class="warning">${esc(w.message)}</p>`).join("")}
     <ol>${items}</ol>
@@ -257,7 +257,7 @@ export class Steer {
         const i = Number(el.dataset.i);
         const counts = v.questions[q].answers.map((x, j) => (j === i ? !x.counts : x.counts));
         if (!counts.some(Boolean)) {
-          toast("At least one answer has to count. To count none, void the question.");
+          toast("At least one choice has to be right. For none, don't count the question.");
           return true;
         }
         await send({ op: "setCounts", q, counts });
@@ -318,17 +318,17 @@ export function openMenu(items: MenuItem[]): void {
 /**
  * The steering items of the ⋯ menu for the phase; the page adds its own.
  * onWall: the menu is on the Projector, where fixing an open question shows
- * the answer to the class.
+ * the solution to the class.
  */
 export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuItem[] {
   const open = (act: string, data: Record<string, string> = {}) => void steer.run(act, data);
   const items: MenuItem[] = [];
   if (v.phase === "question") {
     items.push({ label: "Skip this question", run: () => open("skip-current") });
-    items.push({ label: onWall ? "Change the right answer – the class sees it" : "Change the right answer", run: () => open("fix-q", { q: String(v.current) }) });
+    items.push({ label: onWall ? "Change the solution – the class sees it" : "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
   }
-  if (v.phase === "reveal") items.push({ label: "Change the right answer", run: () => open("fix-q", { q: String(v.current) }) });
-  if (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") items.push({ label: `${ICON.trophy} Final ranking now`, run: () => open("finish") });
+  if (v.phase === "reveal") items.push({ label: "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
+  if (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") items.push({ label: `${ICON.trophy} End the quiz: final ranking`, run: () => open("finish") });
   return items;
 }
 
