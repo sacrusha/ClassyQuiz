@@ -150,7 +150,8 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 
 Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list; item 15 built, not deployed.
+bar, all in the open list; item 15 built, not deployed; item 16 in part,
+not deployed.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -308,6 +309,18 @@ bar, all in the open list; item 15 built, not deployed.
     Start, one stored quiz per device, the low cap instead of overbooking,
     students only once let in; the numbers are the implementer's, to confirm.
     `design/hosting-and-limits.md`, "Running classes finish".
+
+16. **Quiz-building sessions more interactive**, on the models that make use
+    of what the site provides (Opus 5.5 does: the chess run,
+    `design/guidance-page.md`) — the teacher sees the draft, pictures
+    included, beside the conversation, says what needs work, and sees the
+    correction. Built: the guidance page's two presentation kinds, high
+    density (a layout in a short notation, and `/preview.py`, which draws it
+    from the zip as one picture) and high fidelity (`/layout`). Not deployed.
+    Open: an element that previews a zip on the device and edits it in local
+    state, before the lobby and on any page that can hold it, handing back
+    the zip; checking the look on an average projector, on an improved
+    version of the preview after upload (v1 item 12).
 
 ## Later — Paper and memory
 
