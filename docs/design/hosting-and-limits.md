@@ -256,8 +256,8 @@ leaves about 5% of the day unused, which is accepted.
 
 - A quiz books the most rows it can write today, so nothing is overbooked
   and no margin is guessed. That needs a small worst case: changes of mind
-  are capped low (`MAX_ANSWER_CHANGES`, today 10; a mis-tap and one rethink
-  need 2), so a student's answers to a question write at most
+  are capped at 2, three successive answers (`MAX_ANSWER_CHANGES`, today 10;
+  the owner: adequate; a mis-tap and one rethink), so a student's answers to a question write at most
   2 × (1 + changes) rows. The booking is made when the lobby opens, not at
   upload: a teacher who uploads only to look the quiz over (for tomorrow, say)
   never opens it, and such an upload costs only its upload and bytes. The
