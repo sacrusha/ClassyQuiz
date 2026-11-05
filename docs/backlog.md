@@ -303,7 +303,7 @@ bar, all in the open list; item 15 partly built, not deployed.
     peak are in `GET /api/site` for the owner. The check warns while fewer
     than three classes fit and keeps the refusal on screen, both with "More
     quizzes: a site of your own or your school's ›" (the owner: "Your own
-    copy" too ambiguous); the landing's line counts nearly full days too. Not
+    copy" too ambiguous); the landing's line counts busy days too (half the day's rows booked at once). Not
     deployed. Owner: booking slots and releasing them, the shrink at
     Start, one stored quiz per device, the low cap instead of overbooking,
     students only once let in; the numbers are the implementer's, to confirm.

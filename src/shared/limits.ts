@@ -43,12 +43,13 @@ export const DAY_ROWS_FOR_CLASSES = 80_000;
 /**
  * The check warns that the site is nearly full when fewer classes than this
  * still fit today (this one included), with the way to more quizzes; a day
- * whose bookings reached NEARLY_FULL of DAY_ROWS_FOR_CLASSES counts on the
- * landing's line beside the full days (docs/design/hosting-and-limits.md,
+ * whose bookings reached NEARLY_FULL of DAY_ROWS_FOR_CLASSES counts as busy
+ * on the landing's line beside the full days (docs/design/hosting-and-limits.md,
  * "Running classes finish").
  */
 export const ROOM_WARN = 3;
-export const NEARLY_FULL = 0.8;
+/** The owner: lower than 80%, half for now. */
+export const NEARLY_FULL = 0.5;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */

@@ -161,7 +161,7 @@ Purpose and reasons: docs/design/root-page.md.
   quizzes.
 - **The own copy:** one line under Run, only on a device that has
   uploaded before (`cq.days`, dates only) and only when the site was full
-  or nearly full on a day of the last 30 (`GET /api/site`).
+  or busy on a day of the last 30 (`GET /api/site`).
 - **On the check, before the class is let in,** on a day the free site is
   nearly full: "The free site is nearly full today: room for about 2 more
   classes." (one more class: "room for one more class"); when no class fits

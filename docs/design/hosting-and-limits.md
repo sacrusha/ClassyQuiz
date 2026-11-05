@@ -279,7 +279,8 @@ device. The numbers and the rest are the implementer's, to confirm.
   where a toast would be gone before a teacher who looked away saw it. The
   count is from the upload or the last tap, not live; three classes is
   roughly the last third of the day. Days whose bookings reached
-  `NEARLY_FULL` (80%) count on the landing's line beside the full days
+  `NEARLY_FULL` (half, the owner's: lower than 80%) count as busy on the
+  landing's line beside the full days
   (`root-page.md`, "The own copy").
 - **At Start the booking shrinks** to what was written plus the most the rest
   can write: the class that came plus the latecomers the door lets in
