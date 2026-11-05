@@ -327,6 +327,95 @@ export function partySize(n: number, w: number, h: number, room = Infinity): Par
   return { s, step: Math.min(s + gap, (w - s) / (perRow - 1)), rows, perRow, rise: RISE * s, band };
 }
 
+/** The final ranking (client/final.ts): the podium's height in the first place's avatar size: room for its jump, the avatar, the points, the highest step. */
+const PODIUM = 2.5;
+/** The crowd stands this much of its own size over the steps' foot. */
+const OVERLAP = 0.25;
+/** The podium's avatars are at least this much larger than the crowd's. */
+const LEAD = 1.5;
+/** A crowd row stands this much of an avatar above the one in front of it, and its avatars this far apart: they overlap, as a crowd does. */
+const CROWD_RISE = 0.6;
+const CROWD_STEP = 0.78;
+
+/** Rows of n avatars of size s across w: as few as fit, each at most this many. */
+function crowdRows(n: number, w: number, s: number): { rows: number; perRow: number } {
+  const perRow = Math.max(1, Math.floor(Math.max(0, w - s) / (CROWD_STEP * s)) + 1);
+  return { rows: n ? Math.ceil(n / perRow) : 0, perRow };
+}
+
+/** The crowd's height: the back rows rise behind the front one. */
+export function crowdHeight(n: number, w: number, s: number): number {
+  const { rows } = crowdRows(n, w, s);
+  return rows ? s + (rows - 1) * CROWD_RISE * s : 0;
+}
+
+/**
+ * Sizes for a stage w by h with n in the crowd: the crowd's avatar s as
+ * large as its rows allow while the first place stays LEAD times larger;
+ * the podium (first place's avatar a) takes the height the crowd leaves,
+ * within a third of the width per step. A small class stands large, a
+ * class of 60 in rows of small ones that still read as avatars.
+ */
+export function finalSize(n: number, w: number, h: number): { a: number; s: number } {
+  const widest = (0.85 * w) / 3;
+  const crowdH = (s: number) => (n ? crowdHeight(n, w, s) - OVERLAP * s : 0);
+  const top = Math.floor(Math.min(h / 5, w / 8));
+  for (let s = top; s >= 16; s--) {
+    const a = Math.min((h - crowdH(s)) / PODIUM, widest);
+    if (a >= LEAD * s) return { a: Math.floor(a), s };
+  }
+  return { a: Math.max(24, Math.floor(Math.min((h - crowdH(16)) / PODIUM, widest))), s: 16 };
+}
+
+/** A number in [0, 1) from a string and a salt: the same avatar stands in the same place on every view. */
+function wobble(id: string, salt: number): number {
+  let h = 2166136261 ^ salt;
+  for (const ch of id) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return ((h >>> 0) % 10007) / 10007;
+}
+
+export interface CrowdPlace {
+  x: number;
+  y: number;
+  size: number;
+  /** Front rows over back ones. */
+  z: number;
+}
+
+/**
+ * The crowd in front of the podium, like a crowd rather than a grid
+ * (owner: "a South Park crowd"): rows that overlap, the back ones higher
+ * and a little smaller, each row shifted against the next, every avatar
+ * a little off its place and size. Neighbours in the lobby's order go to
+ * different rows, so the order doesn't read along a row. Places are from
+ * the crowd box's top left, within w across and crowdHeight down.
+ */
+export function crowdPlaces(ids: string[], w: number, s: number): CrowdPlace[] {
+  const n = ids.length;
+  const { rows } = crowdRows(n, w, s);
+  if (!rows) return [];
+  const inRow: number[][] = Array.from({ length: rows }, () => []);
+  ids.forEach((_, i) => inRow[i % rows].push(i));
+  const out: CrowdPlace[] = new Array(n);
+  inRow.forEach((members, r) => {
+    // r 0 is the front row, at the bottom.
+    const depth = rows > 1 ? r / (rows - 1) : 0;
+    const size = s * (1 - 0.12 * depth);
+    const k = members.length;
+    const span = w - size;
+    const step = k > 1 ? span / k : 0;
+    const shift = r % 2 ? 0.25 : -0.25;
+    members.forEach((i, j) => {
+      const id = ids[i];
+      const own = size * (0.94 + 0.1 * wobble(id, 1));
+      const x = k > 1 ? (j + 0.5 + shift) * step + (wobble(id, 2) - 0.5) * 0.35 * step : span / 2;
+      const y = (rows - 1 - r) * CROWD_RISE * s + (s - own) + (wobble(id, 3) - 0.5) * 0.12 * s;
+      out[i] = { x: Math.max(0, Math.min(w - own, x)), y: Math.max(0, y), size: own, z: rows - r };
+    });
+  });
+  return out;
+}
+
 /** For the test that the drawings match shared/looks.ts. */
 export const LOOK_DRAWINGS = { backgrounds: BACKGROUNDS.length, hats: HATS.length, seats: SEATS.length, animals: ANIMALS.length };
 

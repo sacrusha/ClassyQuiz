@@ -180,13 +180,13 @@ bar, all in the open list.
    the right quiz — built, `design/root-page.md`.
 3. **Upload is start** — owner: "uploaded the evening before" is not real;
    the parallel class's quiz is its own quiz, started by its own upload. A
-   quiz is one class's lesson. This revises the instance with several runs: "Again with another class" (its one hidden
-   value, carrying in-run key fixes, belongs to the Later item "corrected quiz
-   download"), "closes" on the landing, and Delete there duplicating End at the
-   ranking. Small to medium, mostly removal — the `again` command, the lobby
-   reopened an hour after the ranking, "closes" and Delete-by-title on the
-   landing, tempo carry-over between runs; game logic, scoring and the
-   connection code untouched. The lifetime is decided and built: everything
+   quiz is one class's lesson; the site is a runner, not a store of quizzes.
+   Built: one class per upload, the final ranking as its own screen (podium,
+   the class in front unordered, all jumping, the class's result kept for a
+   photograph), and Exit alone in the middle of its bar, without a
+   confirmation, sending every screen to the root page (`design/class-and-wall.md`,
+   "The final ranking"; `design/question-flow.md`, "The steering bar").
+   Ending early is ⋯ → End the quiz: final ranking, then Exit. The lifetime is decided and built: everything
    goes 3 hours after the teacher's last use, or when the teacher ends it
    (owner: the purpose of keeping is rejoining a quiz in progress; one
    duration everywhere is sensible and easy to communicate). Lost until
@@ -278,9 +278,7 @@ bar, all in the open list.
     kit's link-preview card, which no page names yet.
     Open, from the teacher-view review and not acted on: the root's English
     guidance starts on a different left edge from the teacher block (desktop),
-    so it reads as a second page joined on, unless that is meant; the final
-    ranking differs from an intermediate one only by a small trophy (layout,
-    not the celebration); the empty join screen's right half stays blank
+    so it reads as a second page joined on, unless that is meant; the empty join screen's right half stays blank
     until children join; on a real washed-out projector the pale states
     (hidden answers, faded tiles at the reveal) may let pale red and pale
     yellow run together — unchecked.

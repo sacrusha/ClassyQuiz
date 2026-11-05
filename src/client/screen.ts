@@ -13,6 +13,7 @@ import { ICON, avatarSvg, partySize, shapeSvg, syncAvatars } from "./look.ts";
 import { Steer, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
+import { finalHtml, fitFinal } from "./final.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
 
@@ -91,6 +92,10 @@ function onMessage(m: ServerMessage): void {
   } else if (m.t === "gone") {
     line?.stop();
     tabRole.remove(instance);
+    if (m.home) {
+      location.replace("/");
+      return;
+    }
     document.body.className = "screen";
     sbar.innerHTML = "";
     main.innerHTML = `<div class="center"><p style="font-size:1.6em">${esc(m.reason)}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
@@ -113,12 +118,17 @@ function render(): void {
   document.body.classList.toggle("manage", managing);
   document.body.classList.toggle("steering", !!v.steer && !managing);
   if (v.phase !== "question" && v.phase !== "reveal") questionKey = "";
-  // The lobby's wait for the first avatar is per class (nobodyYet).
+  // The lobby's wait for the first avatar ends with the start (nobodyYet).
   if (v.phase !== "lobby") forgetJoinWait();
   if (managing) renderManagedLobby(v);
   else if (v.phase === "lobby") renderLobby(v);
   else if ((v.phase === "question" || v.phase === "reveal") && v.question) renderQuestion(v);
-  else if (v.phase === "ranking" || v.phase === "final") renderRanking(v);
+  else if (v.phase === "ranking") renderRanking(v);
+  else if (v.phase === "final") {
+    lobbyKey = "";
+    patch(main, finalHtml(v));
+    fitFinal(main);
+  }
   renderBar(v, managing);
   renderClock(v);
   renderFix(v);
@@ -248,9 +258,8 @@ function renderCheck(v: ScreenView): void {
 const NOBODY_MS = 90_000;
 /**
  * When this tab first let the class in to an empty lobby; the wait
- * counts from there, across ‹ Questions and back. Each class starts its own:
- * the count goes with the first avatar and with the run's start, so "Again
- * with another class" waits its 90 s too.
+ * counts from there, across ‹ Questions and back. It goes with the first
+ * avatar and with the quiz's start.
  */
 let joinSince: { code: string; at: number } | null = null;
 let nobodyTimer: number | undefined;
@@ -868,9 +877,8 @@ function renderRanking(v: ScreenView): void {
   const r = v.ranking;
   if (!r) return;
   const pct = r.given > 0 ? Math.round((100 * r.right) / r.given) : 0;
-  const final = v.phase === "final";
   const html = `
-    <div class="bar"><span class="grow">${esc(v.title)}</span>${final ? `<span>${ICON.trophy}</span>` : ""}</div>
+    <div class="bar"><span class="grow">${esc(v.title)}</span></div>
     <div class="ranking">
       <div class="podium">
         ${r.top
@@ -904,7 +912,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
   } else if (v.steer) {
     html = `<div class="steerbar">
       <button class="btn more" data-menu aria-label="more">⋯</button>
-      <span class="grow codeline">${addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
+      <span class="grow codeline">${v.phase === "final" ? "" : addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
       ${v.steer.remote === "away" ? `<span class="joinchip">Remote gone</span>` : ""}
       ${steeringButtons(v.steer)}
     </div>`;
@@ -941,7 +949,7 @@ function menu(v: ScreenView): void {
   if (!v.steer && v.remote === "present") items.push({ label: "&#8644; Swap: steer here, show the quiz on the other device", run: () => void swap() });
   if (v.steer) items.push({ label: "A second device…", run: () => showNote(secondDevice(v)) });
   items.push({ label: "Stop showing the quiz here", run: () => void leave() });
-  if (v.steer) items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
+  if (v.steer && v.phase !== "final") items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }
 

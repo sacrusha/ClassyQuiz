@@ -124,28 +124,21 @@ As built:
 
 - The instance ends 3 hours after its last activity (`INSTANCE_IDLE_MS`,
   `server/instance.ts`; activity is the upload, a teacher's step, a role
-  taken), or when the teacher ends it. Everything in it is then deleted: quiz,
-  runs, players, answers, pictures, the join code's claim and the site's
+  taken), or when the teacher ends it (Exit at the final ranking, or Delete).
+  Everything in it is then deleted: quiz, its one class, players, answers, pictures, the join code's claim and the site's
   booking. Students joining or reconnecting don't count, so a projector or
   tablets left on don't keep a quiz alive.
-- A run's players, answers and scores are deleted 3 hours after its final
-  ranking (`RUN_KEEP_MS`), and a class nobody steers for 3 hours ends
-  (`CLASS_IDLE_MS`, from the teacher's last step or the last student
-  joining). Both are covered by the instance's 3 hours: the final ranking is a teacher step, and the class's idle clock
-  never starts before the teacher's. They stay as constants until "Upload is
-  start" removes the runs.
-- Corrections made during a run (a key change, a voided question) apply to the
+- A quiz is one class's lesson (backlog v4 item 3, "Upload is start"): the
+  upload starts its one class, and a parallel class gets its own upload. The
+  final ranking stays until the teacher's Exit or the 3 hours.
+- Corrections made during the quiz (a key change, a voided question) apply to the
   instance's quiz and are lost when it ends; the teacher's copy still has the
   wrong key. The Later item "corrected quiz download" is what closes that.
 - Logs keep no quiz content and no IP addresses: the state Worker has
   `observability` off, and Pages Functions' logs are not stored (only streamed
   while someone tails them). Error logs carry the message only.
 
-The durations are single constants in code.
-
-Pending: backlog v4 item 3 ("Upload is start") makes a quiz one class's
-lesson, so the instance with several runs, "another class with this quiz"
-(the `again` command) and the lobby reopening after the ranking go.
+The duration is a single constant in code.
 
 ### Protecting the day's allowance
 

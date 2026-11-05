@@ -88,9 +88,6 @@ skips a question or counts twice, because each kind of command is idempotent:
 - Answers carry a sequence number; a late older one changes nothing. An
   answer given just before the phone slept is therefore not lost.
 - Fixes set a value rather than toggle one.
-- Starting a class ("Again with another class") names the state it was
-  given in and acts only from the final ranking, so a resend cannot wipe a
-  class that has started joining.
 - A join remembers its command id, so a resent join gets the same player, not
   a second avatar (`run.joins` in `server/instance.ts`; the newest
   `JOINS_KEPT` are kept).
