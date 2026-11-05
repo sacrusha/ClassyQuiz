@@ -246,15 +246,21 @@ quizzes and bytes, not what a class writes, so on such a day they never
 trigger and every running class meets "used up today's allowance". How many
 devices poll, and so whether requests run out first instead, is not known.
 
-The design (the owner's: quizzes book slots and release them when done; the
-rest the implementer's, to confirm):
+The design (the owner's: quizzes book slots and release them when done, the
+shrink at Start, one stored quiz per device, a low cap on changes of mind
+instead of overbooking; the rest the implementer's, to confirm). First to
+build: the booking, the cap, the shrink at Start and the release; the rest
+can follow.
 
-- A quiz books the rows it may write today, against the day's allowance less a
-  margin for what bookings don't cover (joins, steps, the site's own
-  objects) and for estimates that run short. At upload the class is not
-  known, so the booking is for the most it can be: `MAX_PLAYERS`, the quiz's
-  questions, about 2 rows per answer. A quiz the day can no longer carry is
-  refused at upload, with the refusal's message.
+- A quiz books the most rows it can write today, so nothing is overbooked
+  and no margin is guessed. That needs a small worst case: changes of mind
+  are capped low (`MAX_ANSWER_CHANGES`, today 10; a mis-tap and one rethink
+  need 2), so a student's answers to a question write at most
+  2 × (1 + changes) rows. At upload the class is not known, so the booking is
+  for `MAX_PLAYERS` and the quiz's questions. A quiz the day can no longer
+  carry is refused at upload, with the refusal's message. A small reserve
+  stays unbooked for what bookings don't cover (joins, steps, the site's own
+  objects).
 - At Start the booking shrinks to the avatars in the lobby plus the latecomers
   the door still lets in (`MAX_LATE_JOINERS`).
 - At the final ranking the booking is released: nothing more is written, and
