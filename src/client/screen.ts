@@ -645,7 +645,7 @@ function layQuestion(stage: HTMLElement, q: NonNullable<ScreenView["question"]>)
     // The tiles keep room for their answers: a row of short numbers needs less than a row of sentences.
     const rows = n > 2 ? 2 : 1;
     const tilesMin = rows * H * (longest <= 12 ? 0.135 : longest <= 30 ? 0.16 : 0.2);
-    const h = Math.max(40, Math.min(W / aspect, H - qh - tilesMin - 2 * gap, H * 0.62));
+    const h = Math.max(40, Math.min(W / aspect, H - qh - tilesMin - (q.text ? 2 : 1) * gap, H * 0.62));
     const fig = $("#figure");
     fig.style.width = `${Math.floor(h * aspect)}px`;
     fig.style.height = `${Math.floor(h)}px`;
@@ -694,6 +694,8 @@ function layPictureAnswers(stage: HTMLElement, q: NonNullable<ScreenView["questi
   const W = stage.clientWidth;
   const H = stage.clientHeight;
   const gap = parseFloat(getComputedStyle(stage).rowGap) || 0;
+  // No question text: its heading is hidden (app.css, .qtext:empty) and takes no gap.
+  const textGap = q.text ? gap : 0;
 
   // What a tile takes around its card, in either orientation: fixed by the tiles' font, not by their size.
   stage.className = "stage picans";
@@ -714,7 +716,7 @@ function layPictureAnswers(stage: HTMLElement, q: NonNullable<ScreenView["questi
   if (!img) {
     stage.innerHTML = qHtml;
     fitText($("#qtext"), questionSize(q.text.length, true), H * 0.26);
-    const tilesH = H - $("#qtext").offsetHeight - gap;
+    const tilesH = H - $("#qtext").offsetHeight - textGap;
     best = { html: qHtml, tilesH, fit: () => fitText($("#qtext"), questionSize(q.text.length, true), H * 0.26), score: 0 };
   } else {
     const aspect = img.w / img.h;
@@ -726,7 +728,7 @@ function layPictureAnswers(stage: HTMLElement, q: NonNullable<ScreenView["questi
     const qh = $("#qtext").offsetHeight;
     for (const share of [0.22, 0.3, 0.38, 0.46]) {
       const fh = Math.min(W / aspect, H * share);
-      const tilesH = H - qh - fh - 2 * gap;
+      const tilesH = H - qh - fh - gap - textGap;
       const score = Math.min(fh * fh * aspect, grid(tilesH).score);
       if (!best || score > best.score)
         best = { html: qHtml + figure(fh * aspect, fh), tilesH, fit: () => fitText($("#qtext"), questionSize(q.text.length, true), H * 0.22), score };
