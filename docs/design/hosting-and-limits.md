@@ -77,6 +77,19 @@ Function on Free has 10 ms of CPU, which a long text could exceed. Nothing is
 stored when the quiz has errors. Storage is SQLite-backed Durable Objects, the
 only kind on Free.
 
+### What a fetcher meets besides the pages
+
+An AI's fetch tool may read `/robots.txt` before the page and keep its
+verdict, possibly per host as written, so `classyQuiz.pages.dev` and
+`classyquiz.pages.dev` can hold different verdicts. Pages serves `index.html`
+with a 200 for any path without a file unless the site has a `404.html`, which
+gave robots parsers the start page's HTML. So the site has a real
+`robots.txt` that allows everything, and a `404.html`: an unknown path gets a
+404 and the list of real addresses, never the start page under a wrong name.
+No page depends on the fallback; codes travel in the hash or query. Paths are
+case-sensitive on Cloudflare (not under local `wrangler pages dev` on
+Windows), and every address the site shows is lower case.
+
 ### A copy's own address
 
 A self-hoster's copy is built under another name. The build
@@ -227,7 +240,11 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 ## Not known
 
 - Whether the AIs' user-triggered fetchers read a page on `pages.dev`, and
-  whether the target schools' filters let `*.pages.dev` through.
+  whether the target schools' filters let `*.pages.dev` through. ChatGPT
+  failed to read the site depending on how the address was capitalised, and
+  Claude and Gemini had access failures that may be the same thing. A robots
+  verdict cached per host spelling is the working explanation, not a
+  confirmed one; cached verdicts expire on the fetcher's schedule.
 - The wording of the platform's error when an allowance is spent, and what
   Cloudflare returns once Pages Functions pass their requests (the Workers
   docs say error 1027; status and Pages behaviour aren't documented).

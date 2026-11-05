@@ -1,0 +1,5 @@
+# Every page may be fetched, by people and by AI assistants: the start page is
+# the manual a teacher's AI reads to make a quiz. A real file, so that no
+# robots parser gets the start page's HTML in its place.
+User-agent: *
+Allow: /
