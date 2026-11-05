@@ -180,6 +180,59 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .classres .bars span { width: 2.2vh; height: 100%; display: flex; align-items: flex-end; background: color-mix(in srgb, var(--fg) 9%, transparent); border-radius: 4px 4px 0 0; overflow: hidden; }
 .classres .bars i { display: block; width: 100%; background: var(--good); }
 
+/* The final ranking (client/final.ts): places 1 to 3 on a podium, everyone
+   else in front of it, all jumping, the class's result beside. Ties share a
+   step and shrink to fit it. */
+.final { flex: 1; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 3vw; min-height: 0; padding-bottom: 1vh; }
+.final .classres { align-self: center; }
+/* Sized by client/final.ts (finalSize) from its own box: --a the first
+   place's avatar, --av the crowd's; the podium takes what the crowd leaves. */
+.finalstage { --a: 18vh; --av: 8vh; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-height: 0; min-width: 0; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; width: min(100%, calc(4.2 * var(--a))); }
+.step { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.step .avs { display: flex; justify-content: center; width: 100%; padding: 0 4%; }
+.step .avs .cheer { flex: 0 1 calc(.75 * var(--a)); min-width: 0; aspect-ratio: 1; }
+.step.s1 .avs .cheer { flex-basis: var(--a); }
+.step .score { font-weight: 800; font-size: clamp(14px, calc(.16 * var(--a)), 1.6em); margin: .2em 0 .3em; white-space: nowrap; }
+.step .block { width: 100%; display: flex; justify-content: center; align-items: flex-start; padding-top: calc(.05 * var(--a)); background: color-mix(in srgb, var(--fg) 9%, var(--bg)); border-radius: 10px 10px 0 0; font-family: var(--font-brand); font-weight: 700; font-size: clamp(16px, calc(.2 * var(--a)), 3em); line-height: 1; color: var(--muted); }
+.step.s1 .block { height: calc(.9 * var(--a)); background: color-mix(in srgb, var(--accent) 22%, var(--bg)); color: var(--fg); }
+.step.s2 .block { height: calc(.6 * var(--a)); }
+.step.s3 .block { height: calc(.42 * var(--a)); }
+.step.empty .block { opacity: .5; }
+/* In front of the podium, over the foot of the steps behind them; each
+   avatar placed by client/final.ts (crowdPlaces), a crowd, not a grid. */
+.crowdfront { position: relative; z-index: 1; margin-top: calc(-.25 * var(--av)); width: 100%; flex: none; }
+.crowdfront .cheer { position: absolute; width: var(--av); height: var(--av); }
+.cheer { display: block; transform-origin: 50% 100%; animation: cheer 1.6s ease-in-out infinite; }
+.cheer svg { width: 100%; height: 100%; display: block; }
+/* One jump (as @keyframes jump), then a rest; each avatar out of step with its neighbours. */
+@keyframes cheer {
+  0%, 40%, 100% { transform: none; }
+  6% { transform: scale(1.1, .86); }
+  13% { transform: translateY(-32%) scale(.94, 1.08); }
+  20% { transform: translateY(-48%); }
+  28% { transform: translateY(-25%) scale(.97, 1.04); }
+  35% { transform: scale(1.08, .9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cheer { animation: none; }
+}
+.has-backdrop .final .classres { background: rgba(255, 255, 255, .9); border-radius: 18px; box-shadow: 0 1px 6px rgba(0, 0, 0, .12); padding: 2vh 2vw; }
+/* A phone-sized wall: the class's result under the stage, smaller. */
+@media (max-width: 700px) {
+  .final { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 1.5vh; }
+  .final .classres .pct { font-size: 3.2em; }
+  .final .classres .bars { height: 8vh; margin-top: 1vh; }
+}
+
+/* Exit, at the final ranking: alone in the middle of the bar, where nothing else ever is. */
+.steerbar .btn.bar-exit { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 12em; height: 50px; min-height: 0; padding: .3em .6em; }
+/* On the Remote: between ⋯ and a spacer as wide, so it is centred too. */
+.teach .actions .btn.bar-exit { flex: 0 1 14em; height: 68px; margin: 0 auto; padding: .3em .6em; }
+.teach .actions .wrap.ending::after { content: ""; flex: 0 0 56px; }
+.btn.bar-exit .lbl { display: flex; flex-direction: column; line-height: 1.1; text-align: center; }
+.btn.bar-exit .lbl small { font-size: .62em; font-weight: 500; line-height: 1.3; opacity: .85; }
+
 /* dvh: on a tablet the browser's toolbar is not part of the screen. */
 body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 .play main { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; padding: 12px; gap: 12px; }

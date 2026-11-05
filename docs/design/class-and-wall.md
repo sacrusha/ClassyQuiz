@@ -93,13 +93,10 @@ audience sees and why.
   a poller alike. A tablet whose battery dies does not close its socket, so
   counting only open sockets kept its avatar "connected" and its child could
   not pick it back.
-- The same tablets for the next class. A tablet switched off after one class
-  holds that class's player token. A page opened anew with an earlier class's
-  token is a newcomer and joins at once (the player's auth carries `fresh`,
-  `shared/protocol.ts`). A page still showing the earlier class (left on at its
-  final ranking, offline when "Again" came) is told "This quiz has finished",
-  so a leftover screen does not slip into the next lobby. Without this the next
-  class met a refusal on most tablets.
+- The same tablets for the next class. The next class's quiz is its own
+  upload with its own code, so a tablet comes to it as a newcomer: the player
+  token it holds belongs to the earlier quiz, and the student page drops a
+  token of another quiz (`client/play.ts`).
 
 ### The door
 
@@ -148,7 +145,8 @@ quiz under way.
   a place) and the class's result as a percentage with one bar per question
   (`ranking()` in `server/instance.ts`), each on a track of the full height,
   so a low share reads as low, not as a speck. This is the closure for the whole
-  class, whoever could not follow the questions.
+  class, whoever could not follow the questions. The final ranking has its own
+  screen (below).
 - **Teacher.** Live answer counts, the players (faded when away) and the fixes;
   the rest is in `teacher-devices.md` and `question-flow.md`.
 - **Screens stay on.** The projector, teacher and student pages request a
@@ -294,6 +292,38 @@ question, jumping; ten easily told apart, crowding accepted beyond.
   winners jump after every reveal, also when most of the class got it right,
   and that they are then hard to make out is accepted. Nothing else shows it.
 
+### The final ranking
+
+The end of the lesson's quiz, and its closure: it should feel like a
+celebration of the class, not like the intermediate ranking with a trophy
+added, and some teachers want to photograph it. So it has its own screen
+(`client/final.ts`):
+
+- Places 1 to 3 on a podium, the first step highest; ties share a step and
+  shrink to fit it (the same top as the intermediate ranking: at most ten
+  avatars), each step with its points.
+- Everyone else stands in front of the podium as a crowd, not a grid (owner:
+  "a South Park crowd"; `crowdPlaces` in `client/look.ts`): overlapping
+  rows, the back ones higher and a little smaller, each row shifted against
+  the next, every avatar a little off its place and size, the same on every
+  view. Unordered, because below the podium a rank would expose the last
+  places (owner); neighbours in the lobby's order go to different rows.
+- The sizes follow the room and the class (`finalSize` in `client/look.ts`,
+  measured on every view and resize): the crowd as large as its rows allow
+  while the first place stays half again as large, the podium in the height
+  the crowd leaves. A small class gets a large podium and large avatars in
+  front; 60 still fit in rows of smaller ones, with a smaller podium.
+- All of them jump, one jump and a rest each, out of step with their
+  neighbours (`@keyframes cheer`, after the winners' jump); still for
+  reduced motion.
+- The class's result, percentage and bars, stays beside it, smaller: it is
+  part of the photograph (owner).
+- It stays until the teacher's Exit (`question-flow.md`, "The steering bar"),
+  which sends every screen to the root page. A teacher whose tab closed before
+  Exit gets it back with the resume card or the teacher code
+  (`root-page.md`, "Coming back"). The tablets show their place, stars and
+  a trophy until then.
+
 ## Not known
 
 - Whether children dress at all, and whether teachers wait for it; whether the
@@ -304,6 +334,12 @@ question, jumping; ten easily told apart, crowding accepted beyond.
   projector's colours treat the band's veil.
 - Whether 47 to 56 px is enough for ten winners beside a picture, or the band
   should go elsewhere there.
+- The final ranking on a real projector and in a photograph: whether a class
+  jumping without end is festive or restless, whether a child
+  in the back rows still finds their avatar half behind another, and whether it is seen on screens under 500 px
+  wide (checked at 600 px and wider only); whether a class of 40 to 60 should
+  also stand under the class's result, where the width is unused, so its
+  avatars and the podium stay larger.
 - Whether the students' buttons need the answer text, or heads stay down (the
   owner has not said whether the colour-coded setup he saw had text on the
   devices).

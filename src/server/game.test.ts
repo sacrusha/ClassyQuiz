@@ -462,7 +462,7 @@ Image: c.png
   assert.equal(G.zoomed(g), true);
 });
 
-test("answers are shuffled for each class, the same on every screen; only Order: fixed keeps them", () => {
+test("answers are shuffled at upload, the same on every screen; only Order: fixed keeps them", () => {
   const random = (() => {
     let r = 7;
     return () => ((r = (r * 9301 + 49297) % 233280) / 233280);
@@ -482,10 +482,6 @@ test("answers are shuffled for each class, the same on every screen; only Order:
     ["0,1,2,3", "0,1,2,3", "0,1,2,3"],
     "letters A, B, C without the line are shuffled like any answers",
   );
-  G.startRun(g, "12345", "r1", random);
-  const before = quiz.questions.map((_, q) => G.orderOf(g, q).join());
-  G.startRun(g, "12345", "r2", random);
-  assert.notDeepEqual(quiz.questions.map((_, q) => G.orderOf(g, q).join()), before, "another class, another order");
 });
 
 test("points for speed: 10 for a right answer, up to 5 more by how soon after the answers appeared; fixes move them", () => {
@@ -509,7 +505,7 @@ test("points for speed: 10 for a right answer, up to 5 more by how soon after th
   assert.equal(G.standings(g)[0].place, 1);
 });
 
-test("points for speed: set in the lobby only, off by default, carried to the next class", () => {
+test("points for speed: set in the lobby only, off by default", () => {
   const { g, ids } = setup(1);
   assert.equal(G.speedScale(g), false);
   G.setSpeed(g, true);
@@ -520,9 +516,6 @@ test("points for speed: set in the lobby only, off by default, carried to the ne
   G.answer(g, ids[0], 0, 0, 1, 0, 100, 100);
   G.reveal(g, 1);
   assert.equal(score(g, ids[0]), 15);
-  G.finish(g, 200);
-  G.startRun(g, "12345", "r2");
-  assert.equal(G.speedScale(g), true, "Again with another class keeps it");
 
   const { g: plain, ids: p } = setup(1);
   begin(plain, 0);

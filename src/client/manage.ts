@@ -221,9 +221,10 @@ export class Steer {
         if (!this.presses.other()) return true;
         await send({ op: a === "begin" ? "begin" : "lastCall", at });
         return true;
-      case "again":
-        this.ui.fixing = null;
-        await send({ op: "again", at });
+      case "exit":
+        // No question: Exit is alone in the middle of the bar, away from where Play was.
+        if (!this.presses.other()) return true;
+        await send({ op: "endInstance" });
         return true;
       case "speed":
         await send({ op: "speed", value: !v.speed });

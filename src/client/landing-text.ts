@@ -83,6 +83,7 @@ export interface Text {
   whatToTellIt: string;
   notStarted: string;
   question: (n: number, total: number) => string;
+  finalRanking: string;
   back: string;
   classCode: string;
   otherDevice: (code: string) => string;
@@ -153,6 +154,7 @@ const en: Text = {
   whatToTellIt: "What to tell IT ›",
   notStarted: "before the first question",
   question: (n, t) => `question ${n} of ${t}`,
+  finalRanking: "final ranking",
   back: "Back to the quiz ▶",
   classCode: "Class code",
   otherDevice: (c) => `On another device: type <b>${c}</b> in the code box.`,
@@ -223,6 +225,7 @@ const de: Text = {
   whatToTellIt: "Was du der Schul-IT sagen kannst ›",
   notStarted: "vor der ersten Frage",
   question: (n, t) => `Frage ${n} von ${t}`,
+  finalRanking: "Schlussrangliste",
   back: "Zurück zum Quiz ▶",
   classCode: "Klassencode",
   otherDevice: (c) => `Auf einem anderen Gerät: <b>${c}</b> ins Code-Feld tippen.`,
@@ -293,6 +296,7 @@ const fr: Text = {
   whatToTellIt: "Ce qu'il faut dire au service informatique ›",
   notStarted: "avant la première question",
   question: (n, t) => `question ${n} sur ${t}`,
+  finalRanking: "classement final",
   back: "Retour au quiz ▶",
   classCode: "Code de la classe",
   otherDevice: (c) => `Sur un autre appareil : tapez <b>${c}</b> dans la case du code.`,
@@ -363,6 +367,7 @@ const it: Text = {
   whatToTellIt: "Cosa dire al servizio informatico ›",
   notStarted: "prima della prima domanda",
   question: (n, t) => `domanda ${n} di ${t}`,
+  finalRanking: "classifica finale",
   back: "Torna al quiz ▶",
   classCode: "Codice della classe",
   otherDevice: (c) => `Su un altro dispositivo: digita <b>${c}</b> nella casella del codice.`,

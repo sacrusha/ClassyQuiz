@@ -51,7 +51,7 @@ export const store = {
 
 export interface SavedQuiz {
   id: string;
-  /** Lets this device delete the quiz and ask when it closes, and come back to it without the teacher code. */
+  /** Lets this device ask where the quiz stands (the resume card) and come back to it without the teacher code. */
   secret: string;
   code: string;
   /** The teacher code's two digits. */
