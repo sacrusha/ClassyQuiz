@@ -191,10 +191,12 @@ copied for the AI stay English. Register: German "du", French "vous", Italian
 ### Run: the `.zip` and nothing else
 
 Run is one element: a dashed box with one button and "or drop it here". The
-button opens the file chooser (`accept` names `application/zip` and
-`application/x-zip-compressed`, which Windows reports, so a picker that filters by
-type doesn't grey it out); a `.zip` can also be dropped on the box, or pasted
-from the file manager with Ctrl+V.
+button opens the file chooser; a `.zip` can also be dropped on the box, or pasted
+from the file manager with Ctrl+V. The input has no `accept`: older mobile
+browsers that can't map a `.zip` filter to a picker open the photo picker
+instead, and desktop pickers that filter by type can grey out a zip whose
+reported type differs (Windows reports `application/x-zip-compressed`). The
+file's name is checked after choosing, and anything else gets the message below.
 
 - Why only a `.zip`: the owner's, after seeing the text version. The box read as a
   place to talk to an AI, and the clipboard button and "the block your AI made"
