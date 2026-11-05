@@ -16,11 +16,10 @@ v4 item 10).
   they look for behind it is a walkthrough, not the result alone.
 - An AI told the site's name may follow the strip's link. A teacher's chat with
   an AI, read as page text, could pass for instructions to it.
-- The example's material is the sheet derived from the owner's (his own
-  photographs can't be published) and a conversation with an AI. The owner
-  makes the real conversation on another machine and account, using this page's
-  downloads as the teacher's material; until then both the photographs and the
-  conversation stand in.
+- The example's material is the sheet derived from the owner's, the owner's
+  phone photographs of it printed, and a conversation with an AI. The
+  conversation (4 Nov 2026) was run on earlier stand-in photographs made from
+  the rendered sheet; the photographs on the page are of 5 Nov 2026.
 - An upload costs the shared free site one booking and the quiz's bytes
   (`hosting-and-limits.md`).
 
@@ -44,13 +43,14 @@ strip.
    teacher lands on the check screen.
 
 The files are in `src/public/examples/` (not `example/`, which would collide
-with the page's address). The stand-in photographs were made by
-`.tmp/example/conversation/fake_photos.py` (owner's machine, not in the repo).
+with the page's address). The photographs are the owner's
+originals (`.tmp/ExampleSheets/`, owner's machine, not in the repo) cut to the
+paper at top and bottom, the wood beside it left, 1200 px wide, without the
+camera's metadata.
 
 ## Not known
 
-- The photographs are made from the rendered sheet; the owner's own can't be
-  published. The conversation and the `.zip` ("Big numbers on the number line",
+- The conversation and the `.zip` ("Big numbers on the number line",
   13 questions) are one real run, reviewed by the owner; the zip is that run's
   second turn. The owner may still replace them with a run of his own.
 - Whether a teacher on a phone reads the conversation: the preview is the

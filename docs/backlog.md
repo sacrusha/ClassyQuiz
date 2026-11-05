@@ -223,9 +223,9 @@ bar, all in the open list.
     `/example`, "The example, step by step" from the strip, in English. Open:
     - The conversation and `.zip` are a real free Claude Sonnet run of
       2026-11-04, reviewed by the owner (two turns; the second inverts the
-      sheet's no. 1, the number given and the picture to pick). Open: his
-      daylight photographs replace the stand-in ones, and a run of his own may
-      replace this one; whether the quiz's growth past the asked ten and the
+      sheet's no. 1, the number given and the picture to pick). The photographs
+      are his own since 2026-11-05; the run was made on the stand-ins before
+      them. Open: a run of his own may replace this one; whether the quiz's growth past the asked ten and the
       AI's unrequested screen mock-up are worth leaving in the picture.
     - The conversation picture is one light screenshot, shown to light and dark
       devices alike. Proper light and dark variants, chosen by the device's
