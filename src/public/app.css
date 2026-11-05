@@ -383,6 +383,7 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .classcode .joinedn { display: inline-flex; align-items: center; gap: .15em; margin-left: .5em; color: var(--fg); font-weight: 700; }
 .cstart { text-align: right; margin: 14px 0 10px; }
 .cstart .btn.big { width: auto; padding: 0 1.4em; }
+.roomnote { border-left: 3px solid var(--rule); padding: 4px 12px; margin: 14px 0 0; }
 .check .cline { text-align: left; font-size: 16px; margin: 6px 0; }
 
 button.link { background: none; border: 0; padding: 0; color: var(--control); text-decoration: underline; font: inherit; cursor: pointer; }

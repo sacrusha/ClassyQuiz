@@ -21,7 +21,7 @@
 // site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
 
 import { DurableObject } from "cloudflare:workers";
-import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, type SiteFull } from "../shared/limits.ts";
+import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type SiteFull } from "../shared/limits.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
 
@@ -47,7 +47,7 @@ interface Booking {
 
 export class SiteBudget extends DurableObject<Env> {
   /** Books a new quiz; says which cap is reached when the site is full (today's uploads, or bytes stored). */
-  async reserve(instance: string, bytes: number, until: number): Promise<true | SiteFull> {
+  async reserve(instance: string, bytes: number, until: number): Promise<{ rows: number } | SiteFull> {
     const now = Date.now();
     const day = `d:${dayOf(now)}`;
     const days = await this.ctx.storage.list<number>({ prefix: "d:" });
@@ -63,7 +63,8 @@ export class SiteBudget extends DurableObject<Env> {
     if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
     if (live + bytes > MAX_LIVE_BYTES) return await this.full(now, "bytes");
     await this.ctx.storage.put({ [day]: today + 1, [`i:${instance}`]: { bytes, until } satisfies Booking });
-    return true;
+    // The day's rows booked, so the check can say when the site is nearly full.
+    return { rows: await this.rowsToday() };
   }
 
   /**
@@ -71,11 +72,11 @@ export class SiteBudget extends DurableObject<Env> {
    * classes booked today leave no room; today counts as a full day. A quiz
    * that booked already is not booked again.
    */
-  async bookRows(instance: string, rows: number, until: number): Promise<true | "rows"> {
+  async bookRows(instance: string, rows: number, until: number): Promise<{ rows: number } | "rows"> {
     const now = Date.now();
     const key = `i:${instance}`;
     const b = (await this.ctx.storage.get<Booking>(key)) ?? { bytes: 0, until };
-    if (b.rows !== undefined) return true;
+    if (b.rows !== undefined) return { rows: await this.rowsToday() };
     const day = dayOf(now);
     const ledger = await this.ctx.storage.list<number>({ prefix: "r:" });
     const booked = ledger.get(`r:${day}`) ?? 0;
@@ -88,7 +89,7 @@ export class SiteBudget extends DurableObject<Env> {
     const h = await this.history(day);
     const record: RowsDay = { ...h, classes: h.classes + 1, peak: Math.max(h.peak, booked + rows) };
     await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking, [`h:${day}`]: record });
-    return true;
+    return { rows: booked + rows };
   }
 
   /** A day's record, old ones pruned on the way. */
@@ -147,8 +148,13 @@ export class SiteBudget extends DurableObject<Env> {
   }
 
   /** On how many of the last 30 days (today included) an upload was refused. */
+  /** Full days, and days whose bookings came near the limit, of the last 30. */
   async fullDays(): Promise<number> {
-    return countFull([...(await this.ctx.storage.list({ prefix: "f:" })).keys()], Date.now());
+    const full = [...(await this.ctx.storage.list({ prefix: "f:" })).keys()];
+    const near = [...(await this.ctx.storage.list<RowsDay>({ prefix: "h:" })).values()]
+      .filter((h) => h.peak >= NEARLY_FULL * DAY_ROWS_FOR_CLASSES)
+      .map((h) => `f:${h.day}`);
+    return countFull([...new Set([...full, ...near])], Date.now());
   }
 
   /** Moves a booking's end later when the quiz's end moves (a booking never shrinks). */

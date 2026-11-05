@@ -40,13 +40,22 @@ export const MAX_UPLOADS_PER_DAY = 300;
  * small objects and what a booking doesn't cover. Back at 00:00 UTC.
  */
 export const DAY_ROWS_FOR_CLASSES = 80_000;
+/**
+ * The check warns that the site is nearly full when fewer classes than this
+ * still fit today (this one included), with the way to more quizzes; a day
+ * whose bookings reached NEARLY_FULL of DAY_ROWS_FOR_CLASSES counts on the
+ * landing's line beside the full days (docs/design/hosting-and-limits.md,
+ * "Running classes finish").
+ */
+export const ROOM_WARN = 3;
+export const NEARLY_FULL = 0.8;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
 export const SLEEP_AFTER_MS = 45 * 60_000;
 
 /** The self-hosting nudge, appended to every refusal. */
-const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages.dev/own-copy says how.";
+const OWN_COPY = "For more quizzes, a site of your own or your school's: classyquiz.pages.dev/own-copy says how.";
 
 /** Why a device can't join a class (server/game.ts); shown on it, in words its teacher can act on. */
 export const CLASS_FULL = "This class is full. Ask your teacher.";

@@ -29,7 +29,7 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { classesFullMessage, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
+import { DAY_ROWS_FOR_CLASSES, classesFullMessage, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
@@ -128,6 +128,8 @@ interface Meta {
    * it wrote since. settled: given back at the final ranking.
    */
   rows?: { written: number; settled?: true };
+  /** The day's rows booked across the site, as last heard (at upload, at letting in): the check's warning. */
+  dayRows?: number;
 }
 
 type Session =
@@ -249,7 +251,7 @@ export class Instance extends DurableObject<Env> {
     // The site's share of the free plan: uploads today, bytes stored at once.
     const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
     const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil);
-    if (booked !== true) return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
+    if (typeof booked === "string") return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
     const code = await this.claimCode(codeUntil);
     this.quizRecord = {
       quiz: r.quiz,
@@ -259,7 +261,7 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, teacher, lastActivity: now, v: 1 };
+    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
     // The pasting tab is about to open the Projector with it.
     this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
@@ -1090,10 +1092,36 @@ export class Instance extends DurableObject<Env> {
     const meta = this.meta!;
     const run = this.game!.run;
     if (!run?.waiting || meta.rows) return true;
-    const booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil);
-    if (booked !== true) return false;
+    let booked: { rows: number } | "rows";
+    try {
+      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil);
+    } catch (e) {
+      // The ledger can't be reached: the class goes in unbooked rather than
+      // be stopped by the site's own bookkeeping.
+      console.error("rows not booked:", e instanceof Error ? e.message : String(e));
+      return true;
+    }
+    if (booked === "rows") {
+      // Kept for the check's notice, which lasts until the teacher tries again.
+      meta.dayRows = DAY_ROWS_FOR_CLASSES;
+      await this.persist(["meta"]);
+      this.broadcastStaff();
+      return false;
+    }
+    meta.dayRows = booked.rows;
     meta.rows = { written: 0 };
     return true;
+  }
+
+  /**
+   * How many classes like this one still fit today, for the check's warning
+   * (ROOM_WARN); null when the class is let in, or the day's booking isn't
+   * known in this object's memory.
+   */
+  private room(): number | null {
+    const booked = this.meta?.dayRows;
+    if (!this.game?.run?.waiting || booked === undefined) return null;
+    return Math.max(0, Math.floor((DAY_ROWS_FOR_CLASSES - booked) / rowsAtLetIn(this.game.quiz.questions.length)));
   }
 
   /** At the start the class is there and the looks are fixed: the booking shrinks to what was written plus the most the rest can write. */
@@ -1109,7 +1137,12 @@ export class Instance extends DurableObject<Env> {
   private async settleRows(): Promise<void> {
     const rows = this.meta!.rows;
     if (!rows || rows.settled) return;
-    await this.budget().moveRows(this.ctx.id.toString(), rows.written, true).catch(() => {});
+    try {
+      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true);
+    } catch {
+      // Unsettled, the quiz's end settles it (endInstance).
+      return;
+    }
     rows.settled = true;
     await this.persist(["meta"]);
   }
@@ -1481,6 +1514,7 @@ export class Instance extends DurableObject<Env> {
       phase: run ? run.phase : "idle",
       current: run ? run.current : -1,
       waiting: !!run?.waiting,
+      room: this.room(),
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),

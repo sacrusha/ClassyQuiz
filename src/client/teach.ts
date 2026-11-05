@@ -6,7 +6,7 @@
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
-import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
+import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, roomNotice, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
 import { steeringButtons } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
@@ -119,7 +119,7 @@ function lobby(v: TeacherView): string {
     v.screen === "present"
       ? `<p class="device"><span class="ok">Projector ✓</span> · <button class="link" data-act="swap">&#8644; Swap</button></p><p class="device">${secondDevice(v)}</p>`
       : projectorLine(v);
-  const letIn = v.waiting ? `<p class="cstart"><button class="btn primary big" data-act="let-in">Let the class in &#9654;</button></p>` : "";
+  const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">Let the class in &#9654;</button></p>` : "";
   return `${letIn}<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>

@@ -10,7 +10,7 @@ import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, partySize, shapeSvg, syncAvatars } from "./look.ts";
-import { Steer, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
+import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { finalHtml, fitFinal } from "./final.ts";
@@ -240,6 +240,7 @@ function renderCheck(v: ScreenView): void {
       <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${t.questions.length} ${t.questions.length === 1 ? "question" : "questions"}</span></h1>
       <p class="classcode">Class code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
+    ${roomNotice(t)}
     <p class="cstart"><button class="btn primary big" data-act="show-join">Let the class in &#9654;</button></p>
     <p class="device cline">${gone}${secondDevice(v)}</p>
     ${questionList(t, steer.ui)}

@@ -160,8 +160,15 @@ Purpose and reasons: docs/design/root-page.md.
   type 63953 47 in the code box". No closing time, no Delete, no older
   quizzes.
 - **The own copy:** one line under Run, only on a device that has
-  uploaded before (`cq.days`, dates only) and only when the site refused an
-  upload on a day of the last 30 (`GET /api/site`).
+  uploaded before (`cq.days`, dates only) and only when the site was full
+  or nearly full on a day of the last 30 (`GET /api/site`).
+- **On the check, before the class is let in,** on a day the free site is
+  nearly full: "The free site is nearly full today: room for about 2 more
+  classes." (one more class: "room for one more class"); when no class fits
+  or letting in was refused: "The free site can't take more classes today:
+  the ones running now use what is left. It takes new ones again at 01:00
+  Swiss time." Both followed by "More quizzes: a site of your own or your
+  school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
 - **The network check** is no longer on the root page: the upload error,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure

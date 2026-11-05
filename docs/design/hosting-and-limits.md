@@ -266,14 +266,28 @@ device. The numbers and the rest are the implementer's, to confirm.
   00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
   the rest is for uploads, whose quiz and pictures are rows, the site's small
   objects and what a booking doesn't cover). A class the ledger can't carry is
-  refused at the tap, on the teacher's screen with no child in yet, with
-  `classesFullMessage` and the own-copy pointer; the day counts as full.
+  refused at the tap, on the teacher's screen with no child in yet; the day
+  counts as full. If the ledger can't be reached, the class goes in unbooked
+  rather than be stopped by the site's own bookkeeping.
+- **The teacher hears before it fails.** The upload's booking answers with
+  the day's rows booked, kept with the quiz (`Meta.dayRows`, also after a
+  refused tap), and the check (and a Remote's lobby) shows, while fewer than
+  `ROOM_WARN` (3) classes like this one fit: "nearly full today: room for
+  about n more classes", or at none "can't take more classes today … again at
+  01:00 Swiss time", both with "More quizzes: a site of your own or your
+  school's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
+  where a toast would be gone before a teacher who looked away saw it. The
+  count is from the upload or the last tap, not live; three classes is
+  roughly the last third of the day. Days whose bookings reached
+  `NEARLY_FULL` (80%) count on the landing's line beside the full days
+  (`root-page.md`, "The own copy").
 - **At Start the booking shrinks** to what was written plus the most the rest
   can write: the class that came plus the latecomers the door lets in
   (`MAX_LATE_JOINERS`), the looks fixed. A class of 25 then holds about
   3,200.
 - **At the final ranking the booking settles**: the ledger keeps what was
-  written (counted per key the instance stores) and gets the rest back. The
+  written (counted per key the instance stores) and gets the rest back; if
+  that call fails, the quiz's end settles it instead. The
   quiz itself stays its three hours for photographs and rejoining. A quiz
   that ends or expires before its final ranking settles then.
 - So the ledger limits classes at the same time, not in the day: about 8
