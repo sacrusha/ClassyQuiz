@@ -257,6 +257,8 @@ export class Instance extends DurableObject<Env> {
     this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
     G.startRun(this.game, code, randomToken(9), Math.random);
+    // Teacher devices come in any time; the class once the teacher lets it in.
+    this.game.run!.waiting = true;
     // The alarm goes first: should the write below fail halfway, the alarm
     // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
@@ -993,6 +995,10 @@ export class Instance extends DurableObject<Env> {
           changed.push("run");
           break;
         }
+        case "letIn":
+          G.letIn(game);
+          changed = ["run"];
+          break;
         case "speed":
           G.setSpeed(game, !!cmd.value);
           changed = ["run"];
@@ -1212,6 +1218,7 @@ export class Instance extends DurableObject<Env> {
       phase: run ? run.phase : "idle",
       avatars: away.map((p) => ({ id: p.id, avatar: p.avatar })),
       entry: this.meta ? this.entry() : "full",
+      ...(run?.waiting ? { waiting: true as const } : {}),
     };
   }
 
@@ -1332,6 +1339,7 @@ export class Instance extends DurableObject<Env> {
       zoom: !!image && G.zoomed(game),
       phase,
       current: run ? run.current : -1,
+      waiting: !!run?.waiting,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
       answered: this.answeredNow(),
       answeredBy: [...inIds].map((id) => ({ id, avatar: run!.players[id].avatar })),
@@ -1406,6 +1414,7 @@ export class Instance extends DurableObject<Env> {
       }),
       phase: run ? run.phase : "idle",
       current: run ? run.current : -1,
+      waiting: !!run?.waiting,
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),

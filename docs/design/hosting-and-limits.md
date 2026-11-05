@@ -254,12 +254,14 @@ and one unstarted quiz per device; counting the day's spending can follow. A cla
 (the owner's guess), so the worst-case booking of the last quiz in a day
 leaves about 5% of the day unused, which is accepted.
 
+- Before the class is let in, student devices can't join, so nothing is
+  written for them; teacher devices come in at any time. Built.
 - A quiz books the most rows it can write today, so nothing is overbooked
   and no margin is guessed. That needs a small worst case: changes of mind
-  are capped at 2, three successive answers (`MAX_ANSWER_CHANGES`; the
+  are capped at 2 (built), three successive answers (`MAX_ANSWER_CHANGES`; the
   owner: adequate; a mis-tap and one rethink), so a student's answers to a question write at most
-  2 × (1 + changes) rows. The booking is made when the lobby opens, not at
-  upload: a teacher who uploads only to look the quiz over (for tomorrow, say)
+  2 × (1 + changes) rows. The booking is made when the teacher lets the class in
+  (`teacher-devices.md`, "The single tab: check, then join"), not at upload: a teacher who uploads only to look the quiz over (for tomorrow, say)
   never opens it, and such an upload costs only its upload and bytes. The
   class is not known yet, so the booking is for `MAX_PLAYERS` and the quiz's
   questions. A quiz the day can no longer carry is refused on the check

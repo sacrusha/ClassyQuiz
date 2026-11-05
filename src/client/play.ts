@@ -14,7 +14,7 @@
 
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
-import { CLASS_FULL, CLASS_STARTED } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING } from "../shared/limits.ts";
 import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
@@ -226,6 +226,9 @@ function onMessage(m: ServerMessage): void {
       showFinished();
     } else if (refused && refused.phase === m.phase && m.avatars.length === 0) {
       showRefused(refused.reason);
+    } else if (m.waiting) {
+      // Before the teacher lets the class in: wait here; the next choice without it joins.
+      showRefused(CLASS_WAITING, false);
     } else if (m.avatars.length > 0 || displaced) {
       // A student whose tablet died picks their avatar back. A tablet whose
       // avatar went to another device offers "+" rather than joining by
@@ -432,6 +435,7 @@ function newPlayer(): void {
     if (!a.ok) {
       busy = false;
       if (choice?.phase === "final") showFinished();
+      else if (a.error === CLASS_WAITING) showRefused(CLASS_WAITING, false);
       else if (a.error === CLASS_FULL || a.error === CLASS_STARTED) {
         refused = { reason: a.error, phase: choice?.phase ?? "" };
         showRefused(a.error);
@@ -441,8 +445,12 @@ function newPlayer(): void {
 }
 
 /** Turned away by the class (MAX_PLAYERS, MAX_LATE_JOINERS): the teacher is in the room. */
-function showRefused(reason: string): void {
-  main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>
+function showRefused(reason: string, final = true): void {
+  // final: turned away; otherwise waiting to be let in, with the line's dot.
+  const mark = final
+    ? `<div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>`
+    : `<div class="dot" data-status="connecting" style="width:28px;height:28px"></div>`;
+  main.innerHTML = `<div class="center">${mark}
     <p class="muted">${esc(reason)}</p></div>`;
 }
 

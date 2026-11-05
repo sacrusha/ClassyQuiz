@@ -226,6 +226,9 @@ export class Steer {
         if (!this.presses.other()) return true;
         await send({ op: "endInstance" });
         return true;
+      case "let-in":
+        await send({ op: "letIn" });
+        return true;
       case "speed":
         await send({ op: "speed", value: !v.speed });
         return true;
