@@ -43,9 +43,9 @@ window.addEventListener("resize", () => fitFinal(document));
 
 function step(r: RankingView, place: number): string {
   const here = r.top.filter((e) => e.place === place);
-  if (here.length === 0) return `<div class="step s${place} empty"><div class="block"></div></div>`;
+  if (here.length === 0) return `<div class="place s${place} empty"><div class="block"></div></div>`;
   const score = `${ICON.star} ${here[0].score}${r.speed ? "" : ` / ${r.of}`}`;
-  return `<div class="step s${place}">
+  return `<div class="place s${place}">
     <div class="avs">${here.map((e) => cheer(e.id, e.avatar)).join("")}</div>
     <div class="score">${score}</div>
     <div class="block"><span>${place}</span></div>
@@ -62,7 +62,7 @@ export function finalHtml(v: ScreenView): string {
     <div class="bar"><span class="grow">${esc(v.title)}</span><span>${ICON.trophy}</span></div>
     <div class="final">
       <div class="finalstage">
-        <div class="steps">${step(r, 2)}${step(r, 1)}${step(r, 3)}</div>
+        <div class="podium">${step(r, 2)}${step(r, 1)}${step(r, 3)}</div>
         ${crowd.length ? `<div class="crowdfront">${crowd.map((p) => cheer(p.id, p.avatar)).join("")}</div>` : ""}
       </div>
       <div class="classres">
