@@ -26,13 +26,7 @@ export type RoleName = "screen" | "remote";
 export type Auth =
   | { role: "screen"; token: string }
   | { role: "remote"; token: string }
-  /**
-   * run: the class the token belongs to. fresh: the page was just opened
-   * and hasn't shown that class. A page still showing an earlier class is
-   * told it has finished; a page opened anew with an earlier class's token
-   * (the tablet was switched off between lessons) joins as a newcomer.
-   */
-  | { role: "player"; token: string; run?: string; fresh?: boolean }
+  | { role: "player"; token: string }
   | { role: "guest" };
 
 /** The state a flow command was given in. */
@@ -66,8 +60,6 @@ export type Command =
   | { op: "speed"; value: boolean }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
-  /** A new class with the same code, from the final ranking; `at` makes a resend harmless. */
-  | { op: "again"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
   | { op: "setVoid"; q: number; value: boolean }
   | { op: "setSkip"; q: number; value: boolean }
@@ -133,7 +125,7 @@ export type ServerMessage =
   | { t: "state"; view: View }
   | { t: "ack"; id: string; ok: boolean; error?: string; result?: unknown }
   /** A guest became a player; it keeps the token to come back. */
-  | { t: "welcome"; player: string; token: string; run: string }
+  | { t: "welcome"; player: string; token: string }
   /** This tab holds a role now (taken, handed to it when its Projector moved to another tab, or swapped). */
   | { t: "role"; role: RoleName; token: string }
   /** The role this tab held went to another tab. */
@@ -151,15 +143,15 @@ export type ServerMessage =
       /** For a teacher device with the teacher code: what taking a role would do. */
       entry: Entry;
       /**
-       * The tab came with a player token that isn't this class's player: of
-       * an earlier class, or an avatar another device took back. Without
+       * The tab came with a player token that isn't this class's player:
+       * an avatar another device took back. Without
        * it, a choice reaching a tab that is a player now is out of date (an
        * answer to a poll it made as a guest) and ignored.
        */
       stale?: boolean;
     }
-  /** The quiz is gone (ended, expired), or this tablet's class has finished. */
-  | { t: "gone"; reason: string }
+  /** The quiz is gone (ended, expired). home: the teacher ended it, and the device goes to the root page. */
+  | { t: "gone"; reason: string; home?: boolean }
   /** The account's daily allowance is spent: nothing can be stored until it comes back (shared/limits.ts). */
   | { t: "quota" };
 
@@ -230,8 +222,8 @@ export interface RevealView {
 }
 
 export interface RankingView {
-  /** The top few: places 1 to 3, at most ten avatars. */
-  top: { avatar: Avatar; score: number; place: number }[];
+  /** The top few: places 1 to 3, at most ten avatars; id as in the players. */
+  top: { id: string; avatar: Avatar; score: number; place: number }[];
   /** Per scoring question, how many of the given answers were right. */
   perQuestion: { right: number; given: number }[];
   right: number;
@@ -415,7 +407,7 @@ export const MAX_UPLOAD_BYTES = 16_000_000;
 
 /**
  * Answer to POST /api/quiz. On success: the quiz's code and the teacher
- * code's two digits, the secret this device keeps to delete it, and the
+ * code's two digits, the secret this device keeps to come back to it, and the
  * Projector token for the tab that pasted it. `missingImages`: pictures the quiz names that didn't come with it.
  * `error`: the site couldn't take it (full, or out of its daily allowance),
  * for the teacher, not a problem with the quiz to hand back to the AI.
@@ -437,6 +429,4 @@ export interface QuizInfo {
    * the first).
    */
   stands: { phase: Phase | "idle"; n: number; total: number };
-  /** When the quiz closes unless used before. */
-  closes: number;
 }

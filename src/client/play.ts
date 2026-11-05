@@ -26,8 +26,6 @@ import { packPicture, picturesHere, wantPacks } from "./packs.ts";
 interface Saved {
   instance: string;
   token: string;
-  /** The class the token belongs to. */
-  run?: string;
 }
 
 type Choice = Extract<ServerMessage, { t: "choose" }>;
@@ -166,14 +164,12 @@ async function start(): Promise<void> {
     auth = { role: "guest" };
   } else {
     const saved = store.get<Saved>(key);
-    auth = saved && saved.instance === instance ? { role: "player", token: saved.token, run: saved.run } : { role: "guest" };
+    auth = saved && saved.instance === instance ? { role: "player", token: saved.token } : { role: "guest" };
     if (saved && saved.instance !== instance) store.remove(key);
   }
   line = new Line({
     instance,
-    // A token from storage, before this page has shown its class: the
-    // server takes a token of an earlier class as a newcomer (protocol.ts).
-    auth: () => (auth.role === "player" && !view ? { ...auth, fresh: true } : auth),
+    auth: () => auth,
     onMessage,
     onStatus: (s) => {
       statusDot(dot, s);
@@ -193,8 +189,8 @@ async function start(): Promise<void> {
 
 function onMessage(m: ServerMessage): void {
   if (m.t === "welcome") {
-    auth = { role: "player", token: m.token, run: m.run };
-    store.set(key, { instance: instanceId, token: m.token, run: m.run } satisfies Saved);
+    auth = { role: "player", token: m.token };
+    store.set(key, { instance: instanceId, token: m.token } satisfies Saved);
     // Over HTTP, a poll held for the guest would hold back this player's views.
     line?.repoll();
     busy = false;
@@ -205,10 +201,9 @@ function onMessage(m: ServerMessage): void {
       // A choice for a guest reaching a player: the answer to a poll made
       // before the welcome. Joining again would make a second avatar.
       if (!m.stale) return;
-      // The token isn't this class's player: from an earlier class (the
-      // page was opened anew), or another device took the avatar back while
-      // this one was away. Choose again rather than stay on a view that no
-      // longer moves.
+      // The token isn't this class's player any more: another device took
+      // the avatar back while this one was away. Choose again rather than
+      // stay on a view that no longer moves.
       if (view !== null) displaced = true;
       auth = { role: "guest" };
       store.remove(key);
@@ -277,6 +272,10 @@ function onMessage(m: ServerMessage): void {
     store.remove(key);
     line?.stop();
     clearInterval(tickTimer);
+    if (m.home) {
+      location.replace("/");
+      return;
+    }
     main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.trophy}</div>
       <p class="muted">${esc(m.reason)}</p><a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a></div>`;
   }

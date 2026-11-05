@@ -10,8 +10,7 @@
 //   GET  /api/i/:id/ws                        WebSocket to the instance
 //   POST /api/i/:id/poll    {auth, v}         long-poll fallback
 //   POST /api/i/:id/cmd     {auth, cmd}       command over HTTP (fallback)
-//   POST /api/i/:id/info    {secret}          the pasting device: title, code, when it closes
-//   POST /api/i/:id/end     {secret}          the pasting device: delete the quiz now
+//   POST /api/i/:id/info    {secret}          the pasting device: title, code, where it stands
 //   GET  /api/ping                            network check
 //   GET  /api/echo                            network check: WebSocket echo
 //   POST /api/attempt       {format}          count an upload attempt by format
@@ -105,7 +104,7 @@ async function join(env: Env, body: Record<string, unknown>, ip: string | null):
 }
 
 async function toInstance(request: Request, env: Env, id: string, action: string): Promise<Response> {
-  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info", "end"].includes(action)) return json({ error: "not found" }, 404);
+  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info"].includes(action)) return json({ error: "not found" }, 404);
   let doId: DurableObjectId;
   try {
     doId = env.INSTANCE.idFromString(id);
@@ -127,7 +126,7 @@ async function toInstance(request: Request, env: Env, id: string, action: string
   return env.INSTANCE.get(doId).fetch(request);
 }
 
-/** Largest body the Function forwards to an instance (a command, a poll, info or end), whatever its Content-Length says. */
+/** Largest body the Function forwards to an instance (a command, a poll, info), whatever its Content-Length says. */
 const MAX_COMMAND_BYTES = 20_000;
 
 /** The body as text, or null past `max` bytes, whatever the request says its length is. */

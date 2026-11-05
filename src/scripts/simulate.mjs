@@ -35,11 +35,11 @@
 //
 // After the final ranking the roles are put through their cases
 // (docs/design/teacher-devices.md): the phone comes back as the Remote, and a third
-// device is told both tabs are there; "again" opens a new class with the
-// same code and the old class's tablets are told it has finished; the Remote
+// device is told both tabs are there; a tablet coming back still gets its
+// final place, and a newcomer is turned away; the Remote
 // leaves; a tab on HTTP answers "Show the quiz here" and the one that steered
-// itself becomes the Remote; ⇄ Swap three times, from either side; once the
-// next class has a student, the class code reaches no role, the teacher code
+// itself becomes the Remote; ⇄ Swap three times, from either side; with the
+// class in, the class code reaches no role, the teacher code
 // still does, and so does the uploading device's secret; a Remote whose tab
 // just closed is taken at once with the teacher code; with nothing there, a
 // device takes the Projector and steers. Last, wrong teacher codes: the
@@ -403,9 +403,8 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
     }
     if (m.t === "welcome") {
       p.id = m.player;
-      p.run = m.run;
       p.token = m.token;
-      d.auth = { role: "player", token: m.token, run: m.run };
+      d.auth = { role: "player", token: m.token };
       d.repoll();
     }
     if (m.t === "state" && m.view.role === "player") {
@@ -855,26 +854,21 @@ await until(() => projector.view.steer === null, 5000, "the Projector to hand th
 }
 log("the phone is back as the Remote; a third device is told both are there");
 
-// Again with another class: same code, a fresh lobby; the old class's tablets are told it has finished.
-const old = players.find((p) => !p.dead && p.d.mode === "ws" && p.d.ws) ?? players.find((p) => !p.dead && !p.d.stopped);
-const oldGone = new Promise((res) => old.d.on((m) => m.t === "gone" && res(m.reason)));
-const again = await phone2.send({ op: "again", at: { phase: "final", current: phone2.view.current } });
-check(again.ok, "again is acknowledged");
-await until(() => phone2.view.phase === "lobby" && phone2.view.run.players.length === 0, 5000, "the new class's lobby");
-check(phone2.view.code === code, "the new class keeps the code");
-const q0 = Object.fromEntries(phone2.view.questions[0].answers.map((x) => [x.text, x.counts]));
-check(q0.cat && !q0.bee, "the new class keeps the corrections");
-const reason = await Promise.race([oldGone, sleep(5000).then(() => "nothing")]);
-check(reason === "This quiz has finished.", `an old class's tablet is told the quiz has finished (${reason})`);
-// A tablet of the old class that was asleep, coming back with its token.
-const sleeper = await post(`/api/i/${instance}/poll`, { auth: { role: "player", token: "not-in-this-class", run: old.run }, v: -1 });
-check((sleeper.body.messages ?? []).some((m) => m.t === "gone"), "an old class's tablet coming back doesn't slip into the new lobby");
-// The same token on a page opened anew (the tablet was off between lessons): the next class's newcomer.
-const reopened = await post(`/api/i/${instance}/poll`, { auth: { role: "player", token: "not-in-this-class", run: old.run, fresh: true }, v: -1 });
-const reopenedMsgs = reopened.body.messages ?? [];
-check(!reopenedMsgs.some((m) => m.t === "gone") && reopenedMsgs.some((m) => m.t === "choose" && m.stale === true && m.phase === "lobby"), "an old class's token on a page opened anew is offered the new lobby");
+// One quiz, one class: at the final ranking a tablet coming back (reloaded,
+// or woken) still gets its place, and a newcomer is turned away.
+const old = players.find((p) => !p.dead && p.token);
+const reloaded = await post(`/api/i/${instance}/poll`, { auth: { role: "player", token: old.token }, v: -1 });
+const oldView = (reloaded.body.messages ?? []).find((m) => m.t === "state")?.view;
+check(oldView?.phase === "final" && oldView.me?.place >= 1, `a tablet coming back at the final ranking gets its place (${oldView?.phase}, ${oldView?.me?.place})`);
+{
+  const late = new Device("late", instance, { role: "guest" }, "ws");
+  late.start();
+  const lateAck = await late.send({ op: "newPlayer" });
+  check(!lateAck.ok && lateAck.error === "This quiz has finished.", `a newcomer at the final ranking is turned away (${lateAck.error})`);
+  late.kill();
+}
 for (const p of players) p.d.kill();
-log("again: new lobby, same code, old tablets finished");
+log("final: a tablet coming back gets its place; a newcomer is turned away");
 
 // The Remote leaves: the Projector steers again at once.
 await phone2.send({ op: "leave" });
@@ -915,10 +909,7 @@ wall.kill();
 await until(() => projector.view?.steer, 5000, "the wall to steer once the other tab left");
 log("swapped three times, from either side; the other tab left");
 
-// The next class joins: the class code reaches no role; the teacher code does.
-const newKid = await joinPlayer("next-class", "ws");
-check(newKid.run !== old.run, "a student of the new class joins it");
-await until(() => projector.view?.players?.length === 1, 5000, "the new student on the Projector");
+// With the class in: the class code reaches no role; the teacher code does.
 {
   const child = await guestTry("child", "remote", {});
   check(!child.ack.ok && child.ack.error === "That isn't this quiz's teacher code.", `the class code alone takes no role (${child.ack.error})`);
@@ -992,13 +983,15 @@ log("nothing was there; a device took the Projector and steers");
 }
 log("wrong teacher codes: locked after five; the quiz's allowance holds against new addresses; the secret and the class code unaffected");
 
+// Exit: every device is sent to the root page.
+const homeSent = new Promise((res) => anyone.d.on((m) => m.t === "gone" && res(m.home === true)));
 const ended = await anyone.d.send({ op: "endInstance" });
 check(ended.ok, "ending the instance is acknowledged");
+check(await Promise.race([homeSent, sleep(5000).then(() => false)]), "the teacher's end sends the devices to the root page");
 const after = await post(`/api/i/${instance}/poll`, { auth: anyone.d.auth, v: -1 });
 check((after.body.messages ?? []).some((m) => m.t === "gone"), "after the end, the instance is gone");
 const joinAfter = await post("/api/join", { code });
 check(joinAfter.status === 404, "after the end, the code opens nothing");
-newKid.d.kill();
 anyone.d.kill();
 
 if (ALL_POLL) log(`HTTP requests by all devices: ${requests}`);

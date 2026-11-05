@@ -6,9 +6,11 @@ docs/design/; this file says what the screens show.
 
 ## 1. The model
 
-1. **One code per quiz.** It is made at upload and lives as long as the quiz:
-   until it is deleted, or 3 h after the last teacher action. The class
-   joins with it. "Again with another class" keeps it.
+1. **One quiz, one class.** Uploading starts it: the upload is the lesson's
+   quiz, and a parallel class gets its own upload. Its code is made at
+   upload and lives as long as the quiz: until the teacher ends it (Exit at
+   the final ranking, or Delete), or 3 h after the last teacher action. The
+   class joins with it.
 2. **Two codes, one box.** The code box in the root page's header (and the
    box on `/play` after a wrong code) routes by length; it never submits by
    itself, so typing seven isn't cut off at five.
@@ -82,7 +84,7 @@ tablets, and a quiz made in the break.
 | Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
-| End | Final ranking. "Again with another class" for the parallel class, or nothing. | Their place on their tablet. |
+| End | Final ranking: the podium, the class in front of it, the class's result; a photo if wanted. Exit, and every screen goes to the root page. | Their place on their tablet, then the root page. |
 
 ## 3. Screens
 
@@ -152,8 +154,8 @@ Purpose and reasons: docs/design/root-page.md.
   AI" (which asks for a corrected .zip, in English), plus "Continue without
   these pictures" when it's pictures.
 - **On success:** straight to the check, in this tab as the Projector.
-- **Coming back:** the latest quiz this device started, while it
-  hasn't reached its final ranking: its title, where it stands, Back to the
+- **Coming back:** the latest quiz this device started, while it is on
+  the site (until Exit, final ranking included): its title, where it stands, Back to the
   quiz (`/play#` + the teacher code), the class code, and "On another device:
   type 63953 47 in the code box". No closing time, no Delete, no older
   quizzes.
@@ -161,8 +163,7 @@ Purpose and reasons: docs/design/root-page.md.
   uploaded before (`cq.days`, dates only) and only when the site refused an
   upload on a day of the last 30 (`GET /api/site`).
 - **The network check** is no longer on the root page: the upload error,
-  the wall's "Nobody in yet?" line after 90 s of an empty lobby (counted
-  anew for each class, so "Again with another class" waits its 90 s too),
+  the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
   shows (docs/design/root-page.md).
 
@@ -201,7 +202,9 @@ Students (`/play#63953`) get no screen of their own:
   the first five minutes and the whole first question. After that, five
   more, then "This quiz has started and takes no more players. Ask your
   teacher.";
-- after the final ranking, a trophy and ←;
+- at the final ranking, their place, stars and a trophy; joining then
+  gets a trophy and ←;
+- after the teacher's Exit, the root page;
 - with a wrong code, the code, ✗, and the code box again.
 
 Teacher (`/play#6395347`, the teacher code typed in the box; Resume on the
@@ -317,8 +320,8 @@ steer shows only the class's part (address, code, QR and avatars), with
 
 ### 3.4 Projector during the quiz
 
-The v1 screens (question, reveal, ranking, final), with the code in a corner
-throughout. While it steers, the bottom line is the bar:
+The v1 screens (question, reveal, ranking), with the code in a corner
+throughout, and the final ranking (below). While it steers, the bottom line is the bar:
 
 ```
 │ ⋯   classyquiz.pages.dev · 63953   [⏱ Countdown        ] [▶ Answers        ] │
@@ -339,6 +342,13 @@ throughout. While it steers, the bottom line is the bar:
   so Play never moves. The same words on every width: on the Remote a
   label may take two lines; on a phone-sized wall Countdown's word is a
   little smaller.
+- **The final ranking:** places 1 to 3 on a podium (ties share a step),
+  everyone else in front of it in the lobby's order, all of them jumping,
+  and the class's result beside it. It stays until Exit. The bar holds ⋯
+  and, in its middle, **Exit** (small: "ends the quiz for everyone"), with
+  no confirmation; where Play was there is nothing, and no key presses
+  Exit. Exit deletes the quiz and sends every screen, the tablets
+  included, to the root page.
 - **Presses:** a bounce, or a press landing within 0.4 s of the screen
   moving, does nothing; a second press within 0.45 s of the first is a
   double and steps once more, from where the first leads, except across
@@ -353,7 +363,7 @@ throughout. While it steers, the bottom line is the bar:
   buttons.
 - **⋯ while steering:** Skip this question · Change the solution · End the
   quiz: final ranking · Players · A second device… · Stop showing the quiz
-  here · Delete the quiz…
+  here · Delete the quiz… (not at the final ranking, where Exit is).
 - **⋯ while a Remote steers:** ⇄ Swap · Stop showing the quiz here.
 - **Notices on the wall:** "Remote connected", and "Remote gone – steering
   here". While a Remote that was there is away, the bar keeps "Remote gone" (on a phone-sized wall it gives way), and ⋯ → A
@@ -420,8 +430,7 @@ throughout. While it steers, the bottom line is the bar:
 
 - **The buttons:** the steering bar, as on the wall (§3.4): Countdown and
   Play, the same size and place throughout the quiz; Start quiz in the
-  lobby, "Again with another class" at the end, which opens a new lobby with
-  the same code and keeps the corrections.
+  lobby, ⋯ and Exit in the middle at the final ranking.
 - **Projector gone:** "Projector gone. On the projector computer: on
   classyquiz.pages.dev, type 63953 47." On a wide screen also "open the
   projector window here".
@@ -429,7 +438,7 @@ throughout. While it steers, the bottom line is the bar:
   haven't answered, once at most six are left, until the lock-in.
 - **⋯:** Skip this question · Change the solution · End the quiz: final
   ranking · All questions · Players · ⇄ Swap (while the wall is there) ·
-  Stop steering from here · Delete the quiz…
+  Stop steering from here · Delete the quiz… (not at the final ranking).
 
 ### 3.6 Student
 
@@ -438,10 +447,9 @@ animal (docs/design/class-and-wall.md): avatar and 👁 in the lobby, colour
 buttons, locked with 👁 at the lock-in, ✓ or ✗ with the answer, place and
 stars at the ranking. Picture answers show their pictures on the buttons,
 from a small copy fetched once in the lobby, and the chosen picture under
-the ✓ or ✗. A tablet
-still showing the previous class is told "This quiz has finished"; it
-doesn't slip into the next class's lobby. A tablet switched off after the
-previous class and opened again for the next one joins it like any other.
+the ✓ or ✗. At the final ranking, place, stars and a trophy, until the
+teacher's Exit sends the tablet to the root page. A tablet that comes to
+the next lesson's quiz comes with that quiz's own code.
 
 ### 3.7 Pace and points for speed
 
@@ -450,7 +458,7 @@ The pace is the teacher's: the quiz carries none (the format has no
 only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
 
 - **Points for speed:** the join screen's switch, off by default, fixed at
-  Start, carried over to "Again with another class". On, a right answer
+  Start. On, a right answer
   scores 10 and up to 5 more the sooner after the answers appeared it was
   tapped, by the device's own clock, over a fixed 20 s (`shared/tempo.ts`);
   the ranking shows points, not "right out of n".
@@ -467,9 +475,9 @@ only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
 - **Everything on the phone, then the laptop.** The phone uploads; on the
   laptop at the projector, the teacher code, Show the quiz here. The phone
   steers, on its check.
-- **Evening before.** Upload the .zip at home, then Resume on the same device
-  next day. On another device, type the teacher code, or upload it again.
-- **Two quizzes:** two .zip files, two codes, two Resume lines.
+- **Parallel classes:** each class its own upload of the .zip, its own
+  code and order of the answers. Two quizzes at once: two codes; the resume
+  card shows the latest, the other comes back with its teacher code.
 
 ## 5. When something goes wrong
 
@@ -479,14 +487,15 @@ only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
 | Tablet dies | — | Another tablet: code, own avatar under "Which one are you?" (it appears within a minute). Score kept |
 | The dead tablet comes back after that | "Which one are you?" with **+** | Leave it, or **+** for another student |
 | Tablets still joining after Start | They get in (first five minutes and the first question; then five more) | Nothing |
-| A tablet from the last lesson, left at its final ranking | "This quiz has finished" and ← | ←, then the code |
+| A tablet left at its final ranking | Its place until the teacher's Exit, then the root page; after 3 h unused, "This quiz has ended" and ← | ←, then the code |
 | Any teacher tab reloads, sleeps or loses Wi-Fi | The same role again | Nothing |
 | Phone dies, or goes to the AI app for long | After 45 s the wall says "Remote gone – …", shows the bar, and keeps "Remote gone" on it | Steer at the laptop. The phone is the Remote again when it's back; without its tab, or another phone: the teacher code, which takes the steering without a question |
 | The Remote's tab closed by mistake | Nothing on the wall for 45 s | The teacher code again, at once: a closed tab's Remote is taken without waiting (on the HTTP fallback, within 25 s) |
 | A wrong answer to the second device's question | The wall steers where the phone should, or the other way round | ⇄ Swap, on either device |
 | Projector dies | The Remote says "Projector gone" and how to bring it back | Read off the Remote. Optionally another computer: the teacher code (the free Projector, after 45 s), or the projector window on a two-screen laptop |
 | Wrong code | Students: the code, ✗, the box. Teacher: "That isn't this quiz's teacher code." | Type it again; after five wrong teacher codes in a minute, that device waits 10 minutes; after ten for the quiz, any device waits up to six minutes. The device that uploaded gets in with Resume regardless |
-| Quiz closed or deleted | Gone from the Run box; open screens say "This quiz has ended" | Upload the .zip again |
+| Quiz ended by the teacher (Exit, Delete) | Every open screen goes to the root page | Upload the .zip again |
+| Quiz expired (3 h unused) | Gone from the resume card; open screens say "This quiz has ended" | Upload the .zip again |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |
 
 ## 6. Not established

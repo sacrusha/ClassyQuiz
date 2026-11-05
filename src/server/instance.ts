@@ -1,4 +1,4 @@
-// One uploaded quiz and its classes (docs/design/hosting-and-limits.md, "What lives, and
+// One uploaded quiz and its class (docs/design/hosting-and-limits.md, "What lives, and
 // for how long"; docs/user-flow.md for the roles). Holds the game state and the
 // quiz's code, talks to every tab of the class over WebSockets (hibernating,
 // so an idle instance costs nothing) or long-polling, and deletes everything
@@ -29,7 +29,7 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { CLASS_IDLE_MS, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
+import { isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
 /**
@@ -41,8 +41,6 @@ import { LOOK_WRITE_MS } from "../shared/looks.ts";
  * how long").
  */
 export const INSTANCE_IDLE_MS = 3 * 3600_000;
-/** A class's players, answers and scores are deleted this long after its final ranking. */
-export const RUN_KEEP_MS = 3 * 3600_000;
 /** A long-poll is answered after this long even when nothing changed. */
 const POLL_HOLD_MS = 25_000;
 /**
@@ -73,7 +71,7 @@ const QUIZ_GUESSES = 10;
 const QUIZ_GUESS_EVERY_MS = 6 * 60_000;
 /** Devices counted at once; beyond it the oldest entries go (the quiz's allowance bounds many addresses). */
 const GUESS_KEYS = 500;
-/** Join command ids remembered per class, to answer a resent join with the same player. */
+/** Join command ids remembered, to answer a resent join with the same player. */
 const JOINS_KEPT = 300;
 /** The code is claimed for this long beyond the instance's end, and claimed again before that runs out. */
 const CODE_SLACK_MS = 12 * 3600_000;
@@ -500,7 +498,7 @@ export class Instance extends DurableObject<Env> {
     } catch {
       return json({ error: "bad request" }, 400);
     }
-    if (action === "info" || action === "end") return this.forOwner(action, body.secret);
+    if (action === "info") return this.forOwner(body.secret);
     if (!body.auth) return json({ error: "bad request" }, 400);
     const out: ServerMessage[] = [];
     const session = this.authenticate(body.auth, out);
@@ -564,17 +562,13 @@ export class Instance extends DurableObject<Env> {
     return json({ error: "not found" }, 404);
   }
 
-  /** The device that pasted the quiz: how long it stays (root page), or delete it now. */
-  private async forOwner(action: "info" | "end", secret: unknown): Promise<Response> {
+  /** The device that pasted the quiz: where it stands, for the root page's resume card. */
+  private async forOwner(secret: unknown): Promise<Response> {
     if (!this.live() || typeof secret !== "string" || !safeEqual(secret, this.meta!.secret)) return json({ error: "gone" }, 404);
-    if (action === "end") {
-      await this.endInstance();
-      return json({ ok: true });
-    }
     const meta = this.meta!;
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
-    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, closes: meta.lastActivity + INSTANCE_IDLE_MS } satisfies QuizInfo);
+    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands } satisfies QuizInfo);
   }
 
   private notePoll(session: Session): void {
@@ -685,15 +679,6 @@ export class Instance extends DurableObject<Env> {
         // still shows its final place.
         const p = Object.values(run.players).find((pl) => safeEqual(pl.token, auth.token));
         if (p) return { role: "player", player: p.id };
-        // A page still showing an earlier class doesn't slip into this one
-        // (a tablet left on at its final ranking, offline when "Again" was
-        // pressed). One opened anew with that class's token is a newcomer:
-        // the tablet was switched off between lessons, and the next class
-        // is on it now.
-        if (typeof auth.run === "string" && auth.run !== run.id && auth.fresh !== true) {
-          out.push({ t: "gone", reason: "This quiz has finished." });
-          return { role: null };
-        }
       }
     }
     // A guest is told what it can be: a player (or, once the quiz is under
@@ -889,7 +874,7 @@ export class Instance extends DurableObject<Env> {
           // A join resent after its answer was lost gets the same player.
           const earlier = typeof id === "string" && run.joins && Object.hasOwn(run.joins, id) ? G.playerById(run, run.joins[id]) : null;
           if (earlier && !earlier.removed) {
-            return { direct: [ack(true), { t: "welcome", player: earlier.id, token: earlier.token, run: run.id }], session: { role: "player", player: earlier.id } };
+            return { direct: [ack(true), { t: "welcome", player: earlier.id, token: earlier.token }], session: { role: "player", player: earlier.id } };
           }
           const p = G.addPlayer(game, randomToken(12), randomToken(), now, Math.random);
           const joins = (run.joins ??= {});
@@ -897,18 +882,14 @@ export class Instance extends DurableObject<Env> {
           const keys = Object.keys(joins);
           if (keys.length > JOINS_KEPT) delete joins[keys[0]];
           await this.persist(["run"]);
-          // The first student in: from now on this class can be left behind
-          // (CLASS_IDLE_MS); later joins only move that time, which the alarm
-          // reads when it fires.
-          if (Object.keys(run.players).length === 1) await this.scheduleAlarm();
           this.broadcast();
-          return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token, run: run.id }], session: { role: "player", player: p.id } };
+          return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token }], session: { role: "player", player: p.id } };
         }
         const p = G.playerById(run, cmd.player);
         if (!p || p.removed || !this.awayPlayers().includes(p)) return { direct: [ack(false, "That avatar is taken.")] };
         p.token = randomToken();
         await this.persist(["run"]);
-        return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token, run: run.id }], session: { role: "player", player: p.id } };
+        return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token }], session: { role: "player", player: p.id } };
       }
 
       if (session.role === "player") {
@@ -995,15 +976,6 @@ export class Instance extends DurableObject<Env> {
 
       let changed: ("run" | "fixes" | "meta")[] = [];
       switch (cmd.op) {
-        case "again": {
-          // A new class with the same code. The previous class's data goes
-          // now: its ranking has been shown. Only from the final ranking, and
-          // only once: a resend must not wipe a class that has started joining.
-          if (!at(cmd) || (game.run && game.run.phase !== "final")) return { direct: [ack(true, undefined, "stale")] };
-          this.newClass();
-          changed = ["run"];
-          break;
-        }
         case "begin":
         case "play":
         case "lastCall":
@@ -1070,27 +1042,6 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(false, "quota"), { t: "quota" }] };
       }
       throw e;
-    }
-  }
-
-  /** A fresh lobby with the same code; the tablets of the class before are told it has finished. */
-  private newClass(): void {
-    const game = this.game!;
-    G.startRun(game, this.meta!.code, randomToken(9), Math.random);
-    this.sentToPoller.clear();
-    for (const [k] of this.lastPoll) if (!k.includes(":")) this.lastPoll.delete(k);
-    for (const ws of this.ctx.getWebSockets()) {
-      const s = ws.deserializeAttachment() as Session | null;
-      if (s?.role === "player") {
-        send(ws, { t: "gone", reason: "This quiz has finished." });
-        ws.close(4000, "gone");
-      }
-    }
-    for (const w of [...this.waiters]) {
-      if (w.session.role === "player") {
-        this.waiters.delete(w);
-        w.resolve([{ t: "gone", reason: "This quiz has finished." }]);
-      }
     }
   }
 
@@ -1183,10 +1134,6 @@ export class Instance extends DurableObject<Env> {
     const meta = this.meta;
     if (!meta) return;
     let at = meta.lastActivity + INSTANCE_IDLE_MS;
-    const ended = this.game?.run?.ended;
-    if (ended != null) at = Math.min(at, ended + RUN_KEEP_MS);
-    const idle = this.classIdleFrom();
-    if (idle != null) at = Math.min(at, idle + CLASS_IDLE_MS);
     // A running Last call: locking in at its end is the server's step (the alarm); the reveal stays the teacher's.
     const deadline = this.game ? G.deadline(this.game) : null;
     if (deadline != null) at = Math.min(at, deadline);
@@ -1194,22 +1141,6 @@ export class Instance extends DurableObject<Env> {
     const guesses = this.guessesExpire();
     if (guesses != null) at = Math.min(at, guesses);
     await this.ctx.storage.setAlarm(at);
-  }
-
-  /**
-   * A class nobody steers any more: since when, or null when there is none
-   * to end (no class, already over, or an empty lobby, which may wait from
-   * the evening before). The clock runs from the teacher's last step or the
-   * last student joining, whichever is later, so a lobby filling for a
-   * lesson hours after the upload isn't cleared under the students.
-   */
-  private classIdleFrom(): number | null {
-    const run = this.game?.run;
-    const meta = this.meta;
-    if (!run || !meta || run.ended != null) return null;
-    const players = Object.values(run.players);
-    if (run.phase === "lobby" && players.length === 0) return null;
-    return Math.max(meta.lastActivity, ...players.map((p) => p.joined));
   }
 
   async alarm(): Promise<void> {
@@ -1231,38 +1162,24 @@ export class Instance extends DurableObject<Env> {
       await this.persist(["run"]);
       this.broadcast();
     }
-    const idle = this.classIdleFrom();
-    if (idle != null && now >= idle + CLASS_IDLE_MS) {
-      // Left behind: the lesson is over, but its tablets would keep their
-      // line open (and, on the HTTP fallback, keep polling) for as long as
-      // the quiz lives. A class under way ends with its final ranking; a
-      // lobby with students opens empty again.
-      if (this.game!.run!.phase === "lobby") this.newClass();
-      else G.finish(this.game!, now);
-      await this.persist(["run"]);
-      this.broadcast();
-    }
-    const run = this.game?.run;
-    if (run && run.ended != null && now >= run.ended + RUN_KEEP_MS) {
-      // The class's players and answers go; the quiz waits in a fresh lobby.
-      this.newClass();
-      await this.persist(["run"]);
-      this.broadcast();
-    }
     await this.scheduleAlarm();
   }
 
-  /** Everything goes: quiz, classes, players, answers, pictures (docs/design/hosting-and-limits.md, "What lives, and for how long"). */
+  /**
+   * Everything goes: quiz, class, players, answers, pictures (docs/design/hosting-and-limits.md, "What lives, and for how long").
+   * ackId: the teacher ended it, and every device goes to the root page (docs/user-flow.md, "End").
+   */
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
     await this.budget().release(this.ctx.id.toString()).catch(() => {});
+    const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;
       if (ackId && (s?.role === "screen" || s?.role === "remote")) send(ws, { t: "ack", id: ackId, ok: true });
-      send(ws, { t: "gone", reason: "The teacher has ended this quiz." });
+      send(ws, gone);
       ws.close(4000, "gone");
     }
-    for (const w of this.waiters) w.resolve([{ t: "gone", reason: "The teacher has ended this quiz." }]);
+    for (const w of this.waiters) w.resolve([gone]);
     this.waiters.clear();
     this.meta = null;
     this.game = null;
@@ -1310,7 +1227,7 @@ export class Instance extends DurableObject<Env> {
     if (!game.run) return null;
     const st = G.standings(game);
     return {
-      top: st.filter((s) => s.place <= 3).slice(0, 10).map(({ avatar, score, place }) => ({ avatar, score, place })),
+      top: st.filter((s) => s.place <= 3).slice(0, 10).map(({ id, avatar, score, place }) => ({ id, avatar, score, place })),
       ...G.classResult(game),
       of: G.scoringQuestions(game).length,
       players: st.length,

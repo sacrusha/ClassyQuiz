@@ -241,9 +241,9 @@ lesson, after a closed tab, a laptop that slept, an interrupted lesson, or an
 upload made on the phone with the teacher now at the laptop. It needs the way
 back, and certainty it is the right quiz.
 
-So the card shows only the latest quiz this device started that hasn't reached its
-final ranking: its title, where it stands ("before the first question", "question
-4 of 10"), "Back to the quiz" (to the play page with the teacher code), the class
+So the card shows only the latest quiz this device started that is still on the
+site: its title, where it stands ("before the first question", "question
+4 of 10", "final ranking"), "Back to the quiz" (to the play page with the teacher code), the class
 code, and the way back from another device, the teacher code typed in the code
 box. It shows no closing time, no Delete, no older quizzes. A closing time read as
 if the server held a shared, public list, which it must not; and the owner found
@@ -251,7 +251,10 @@ the first design's insistence on it pointed to "a rule that snuck in as a
 requirement".
 
 The card sits above the upload box: an open quiz on this device means a lesson in
-progress or interrupted, and coming back is likelier than uploading again.
+progress or interrupted, and coming back is likelier than uploading again. A quiz
+at its final ranking is on the site only until the teacher's Exit, so one still
+there was left without it: a closed tab, and perhaps the photograph of the
+podium not yet taken (owner).
 
 The device remembers the quizzes it started (`savedQuizzes`, in `localStorage`)
 and asks the site about the newest with its secret (`/api/i/:id/info`). If the

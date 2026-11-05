@@ -5,7 +5,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { BOUNCE_MS, DOUBLE_MS, Presses, SETTLE_MS, playStep, type StepState } from "./steps.ts";
+import type { TeacherView } from "../shared/protocol.ts";
+import { BOUNCE_MS, DOUBLE_MS, Presses, SETTLE_MS, playStep, steeringButtons, type StepState } from "./steps.ts";
 
 const base: StepState = { phase: "question", current: 0, answering: "reading", votes: false, lastCall: false, last: false, n: 1 };
 const S = {
@@ -38,6 +39,12 @@ test("Play's labels name where it goes; the last reveal goes to the final rankin
   assert.equal(playStep({ ...S.revealed, last: true })?.label, "Final ranking");
   assert.equal(playStep({ ...base, phase: "lobby", answering: null }), null);
   assert.equal(playStep({ ...base, phase: "final", answering: null }), null);
+});
+
+test("at the final ranking the bar holds Exit alone: no Play, so a press where Play was lands on nothing", () => {
+  const html = steeringButtons({ phase: "final", current: 3, answering: null, votes: false, clock: null, last: true, run: null } as unknown as TeacherView);
+  assert.match(html, /data-act="exit"/);
+  assert.doesNotMatch(html, /data-act="(play|last-call)"/);
 });
 
 test("a press in flow steps once; a bounce is the same press", () => {
