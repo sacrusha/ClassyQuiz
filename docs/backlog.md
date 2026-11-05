@@ -299,7 +299,8 @@ bar, all in the open list; item 15 partly built, not deployed.
     most rows the class can write (changes of mind capped at 2), refused on the
     teacher's screen when the day can't carry it; the booking shrinks at Start
     and settles at the final ranking; a device's next upload ends its previous
-    quiz if that one never started. Left: showing the day's spending. Owner: booking slots and releasing them, the shrink at
+    quiz if that one never started; the days' classes, rows written and
+    peak are in `GET /api/site` for the owner. Not deployed. Owner: booking slots and releasing them, the shrink at
     Start, one stored quiz per device, the low cap instead of overbooking,
     students only once let in; the numbers are the implementer's, to confirm.
     `design/hosting-and-limits.md`, "Running classes finish".

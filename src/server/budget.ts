@@ -25,6 +25,17 @@ import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, type SiteFul
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
 
+/** One day's classes, for the owner (GET /api/site): kept FULL_KEEP_DAYS days. */
+export interface RowsDay {
+  day: string;
+  /** Classes let in. */
+  classes: number;
+  /** Rows written by the classes that reached their final ranking or ended. */
+  written: number;
+  /** The most the ledger held at once: how close the day came to DAY_ROWS_FOR_CLASSES. */
+  peak: number;
+}
+
 interface Booking {
   bytes: number;
   /** The quiz renews this while it lives; a booking past it is gone, whether or not its release arrived. */
@@ -74,8 +85,24 @@ export class SiteBudget extends DurableObject<Env> {
       await this.full(now, "uploads");
       return "rows";
     }
-    await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking });
+    const h = await this.history(day);
+    const record: RowsDay = { ...h, classes: h.classes + 1, peak: Math.max(h.peak, booked + rows) };
+    await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking, [`h:${day}`]: record });
     return true;
+  }
+
+  /** A day's record, old ones pruned on the way. */
+  private async history(day: string): Promise<RowsDay> {
+    const all = await this.ctx.storage.list<RowsDay>({ prefix: "h:" });
+    const old = [...all.keys()].filter((k) => k < `h:${dayOf(Date.now() - FULL_KEEP_DAYS * DAY_MS)}`);
+    if (old.length > 0) await this.ctx.storage.delete(old.slice(0, 128));
+    return all.get(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 };
+  }
+
+  /** GET /api/site in one request: the full days, and the days' records, newest first, with what is booked or spent now. */
+  async site(): Promise<{ full: number; rows: { now: number; of: number; days: RowsDay[] } }> {
+    const all = await this.ctx.storage.list<RowsDay>({ prefix: "h:" });
+    return { full: await this.fullDays(), rows: { now: await this.rowsToday(), of: DAY_ROWS_FOR_CLASSES, days: [...all.values()].reverse() } };
   }
 
   /**
@@ -97,6 +124,10 @@ export class SiteBudget extends DurableObject<Env> {
     }
     const { rows: _r, day: _d, ...rest } = b;
     entries[key] = settle ? rest : { ...b, rows };
+    if (settle && b.day) {
+      const h = (await this.ctx.storage.get<RowsDay>(`h:${b.day}`)) ?? { day: b.day, classes: 0, written: 0, peak: 0 };
+      entries[`h:${b.day}`] = { ...h, written: h.written + rows };
+    }
     await this.ctx.storage.put(entries);
   }
 
