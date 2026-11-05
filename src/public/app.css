@@ -188,17 +188,17 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 /* Sized by client/final.ts (finalSize) from its own box: --a the first
    place's avatar, --av the crowd's; the podium takes what the crowd leaves. */
 .finalstage { --a: 18vh; --av: 8vh; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-height: 0; min-width: 0; }
-.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; width: min(100%, calc(4.2 * var(--a))); }
-.step { display: flex; flex-direction: column; align-items: center; min-width: 0; }
-.step .avs { display: flex; justify-content: center; width: 100%; padding: 0 4%; }
-.step .avs .cheer { flex: 0 1 calc(.75 * var(--a)); min-width: 0; aspect-ratio: 1; }
-.step.s1 .avs .cheer { flex-basis: var(--a); }
-.step .score { font-weight: 800; font-size: clamp(14px, calc(.16 * var(--a)), 1.6em); margin: .2em 0 .3em; white-space: nowrap; }
-.step .block { width: 100%; display: flex; justify-content: center; align-items: flex-start; padding-top: calc(.05 * var(--a)); background: color-mix(in srgb, var(--fg) 9%, var(--bg)); border-radius: 10px 10px 0 0; font-family: var(--font-brand); font-weight: 700; font-size: clamp(16px, calc(.2 * var(--a)), 3em); line-height: 1; color: var(--muted); }
-.step.s1 .block { height: calc(.9 * var(--a)); background: color-mix(in srgb, var(--accent) 22%, var(--bg)); color: var(--fg); }
-.step.s2 .block { height: calc(.6 * var(--a)); }
-.step.s3 .block { height: calc(.42 * var(--a)); }
-.step.empty .block { opacity: .5; }
+.podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; width: min(100%, calc(4.2 * var(--a))); }
+.place { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.place .avs { display: flex; justify-content: center; width: 100%; padding: 0 4%; }
+.place .avs .cheer { flex: 0 1 calc(.75 * var(--a)); min-width: 0; aspect-ratio: 1; }
+.place.s1 .avs .cheer { flex-basis: var(--a); }
+.place .score { font-weight: 800; font-size: clamp(14px, calc(.16 * var(--a)), 1.6em); margin: .2em 0 .3em; white-space: nowrap; }
+.place .block { width: 100%; display: flex; justify-content: center; align-items: flex-start; padding-top: calc(.05 * var(--a)); background: color-mix(in srgb, var(--fg) 9%, var(--bg)); border-radius: 10px 10px 0 0; font-family: var(--font-brand); font-weight: 700; font-size: clamp(16px, calc(.2 * var(--a)), 3em); line-height: 1; color: var(--muted); }
+.place.s1 .block { height: calc(.9 * var(--a)); background: color-mix(in srgb, var(--accent) 22%, var(--bg)); color: var(--fg); }
+.place.s2 .block { height: calc(.6 * var(--a)); }
+.place.s3 .block { height: calc(.42 * var(--a)); }
+.place.empty .block { opacity: .5; }
 /* In front of the podium, over the foot of the steps behind them; each
    avatar placed by client/final.ts (crowdPlaces), a crowd, not a grid. */
 .crowdfront { position: relative; z-index: 1; margin-top: calc(-.25 * var(--av)); width: 100%; flex: none; }
