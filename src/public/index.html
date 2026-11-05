@@ -335,7 +335,21 @@ Order: fixed
   <li>Presenting the quiz, and refining it on the teacher's feedback.</li>
 </ol>
 
-<p>Some AIs can use tools and creativity to present low-friction previews for a fast feedback loop. The <a href="/layout">layout page</a> has the projector's layout for a question as HTML and CSS. Presenting large quizzes whole can be overwhelming, but visualized presentations of question types are typically well received.</p>
+<p>A presentation serves the teacher's feedback, so it needs to be easy to read, not faithful to the site. Two kinds work well:</p>
+<ul>
+  <li><strong>The whole quiz, dense.</strong> The form the teacher sees again on the site after uploading: each question numbered, its choices on one line, the right ones marked, pictures by name or rendered inline. The site shuffles the choices, so their order here means nothing. In a file or document that the AI's app shows beside the conversation, a long quiz is easier to read than in the chat.
+<pre><code>Percentages, week 31 · 4 questions
+
+1. What is 10% of 250?  · background: timetable.jpg
+   ✓ 25 · 2.5 · 250 · 10
+2. A jacket costs 80 francs and is reduced by 25%. What does it cost now?  · picture: jacket.png
+   ✓ 60 francs · 55 francs · 20 francs · 75 francs
+3. Which is more?
+   ✓ 50% of 40 · 10% of 120
+4. Which quiz should we play next week?  · picture: timetable.jpg · order fixed
+   ✓ Crafts · ✓ Maths · ✓ KPop Demon Hunters · ✓ English</code></pre></li>
+  <li><strong>A question type, as the class will see it.</strong> The <a href="/layout">layout page</a> has the projector's layout for a question as HTML and CSS, for AIs that can render a preview. Visualized presentations of question types are typically well received, particularly for questions with pictures.</li>
+</ul>
 
 <p>A teacher who puts all the details into the first prompt usually knows the process and wants step 2 straight away. Such a teacher may need nothing but the <code>.zip</code>, and is best asked up front whether they also want a presentation, so they can answer while the first version is being built.</p>
 
