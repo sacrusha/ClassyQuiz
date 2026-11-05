@@ -249,16 +249,21 @@ devices poll, and so whether requests run out first instead, is not known.
 The design (the owner's: quizzes book slots and release them when done, the
 shrink at Start, one stored quiz per device, a low cap on changes of mind
 instead of overbooking; the rest the implementer's, to confirm). First to
-build: the booking, the cap, the shrink at Start and the release; the rest
-can follow.
+build: the booking at the lobby, the cap, the shrink at Start and the
+release; the rest can follow. A class realistically writes about 1,000 rows
+(the owner's guess), so the worst-case booking of the last quiz in a day
+leaves about 5% of the day unused, which is accepted.
 
 - A quiz books the most rows it can write today, so nothing is overbooked
   and no margin is guessed. That needs a small worst case: changes of mind
   are capped low (`MAX_ANSWER_CHANGES`, today 10; a mis-tap and one rethink
   need 2), so a student's answers to a question write at most
-  2 × (1 + changes) rows. At upload the class is not known, so the booking is
-  for `MAX_PLAYERS` and the quiz's questions. A quiz the day can no longer
-  carry is refused at upload, with the refusal's message. A small reserve
+  2 × (1 + changes) rows. The booking is made when the lobby opens, not at
+  upload: a teacher who uploads only to look the quiz over (for tomorrow, say)
+  never opens it, and such an upload costs only its upload and bytes. The
+  class is not known yet, so the booking is for `MAX_PLAYERS` and the quiz's
+  questions. A quiz the day can no longer carry is refused on the check
+  screen, before any child joins, with the refusal's message. A small reserve
   stays unbooked for what bookings don't cover (joins, steps, the site's own
   objects).
 - At Start the booking shrinks to the avatars in the lobby plus the latecomers
@@ -266,7 +271,8 @@ can follow.
 - At the final ranking the booking is released: nothing more is written, and
   what was written stays spent for the day. The quiz itself stays its three
   hours for photographs and rejoining.
-- A device holds one quiz that has not started. Its next upload ends the
+- Possibly later, if unstarted quizzes still crowd the day: a device holds
+  one quiz that has not started. Its next upload ends the
   previous one if that one never left the lobby, so test uploads and the
   re-upload after a fix don't each hold a full booking for three hours. A
   started quiz is never ended this way, so a quiz paused over lunch survives

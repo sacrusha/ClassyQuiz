@@ -295,10 +295,11 @@ bar, all in the open list; item 15, not built.
     the free plan ran out doesn't come back. Rows written are likely the first
     limit to run out, during lessons, while the site's caps count quizzes and
     let in four times what the rows carry. Quizzes book the most rows they can
-    write, with changes of mind capped low so that most is small; the booking
-    shrinks at Start to the class in the lobby and is released at the final
-    ranking. First to build: those four. Then: a device holds one quiz that
-    hasn't started, and the day's spending is counted. Owner: booking slots and
+    write when the lobby opens (an upload only looked over books none), with
+    changes of mind capped low so that most is small; the booking shrinks at
+    Start to the class in the lobby and is released at the final ranking.
+    First to build: those four. Then: the day's spending counted, and only if
+    still needed, one unstarted quiz per device. Owner: booking slots and
     releasing them, the shrink at Start, one stored quiz per device, the low
     cap instead of overbooking; the rest is the implementer's, to confirm.
     Open: the cap's number (2 proposed). Not built,
