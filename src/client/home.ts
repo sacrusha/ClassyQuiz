@@ -228,6 +228,13 @@ async function submit(value: string, archive: ZipEntry[], leaveOut = false): Pro
     out.innerHTML = `<p class="muted">${esc(t.sending)}</p>`;
     const r = await uploadQuiz(value, prepared.images, leaveOut);
     if (r.ok) {
+      // One quiz that hasn't started per device: the previous upload ends if
+      // it never started (docs/design/hosting-and-limits.md, "Running classes
+      // finish"). keepalive: it outlives the page's change below.
+      const previous = savedQuizzes()[0];
+      if (previous && previous.id !== r.id) {
+        void fetch(`/api/i/${previous.id}/replaced`, { method: "POST", keepalive: true, headers: { "content-type": "application/json" }, body: JSON.stringify({ secret: previous.secret }) }).catch(() => {});
+      }
       saveQuiz({ id: r.id, secret: r.secret, code: r.code, teacher: r.teacher, title: "", at: Date.now() });
       recordUploadDay();
       // This tab is the Projector that steers itself (user flow, rule 3); it opens on the check screen.

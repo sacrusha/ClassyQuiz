@@ -11,6 +11,7 @@
 //   POST /api/i/:id/poll    {auth, v}         long-poll fallback
 //   POST /api/i/:id/cmd     {auth, cmd}       command over HTTP (fallback)
 //   POST /api/i/:id/info    {secret}          the pasting device: title, code, where it stands
+//   POST /api/i/:id/replaced {secret}         the pasting device uploaded another: the quiz ends if it never started
 //   GET  /api/ping                            network check
 //   GET  /api/echo                            network check: WebSocket echo
 //   POST /api/attempt       {format}          count an upload attempt by format
@@ -104,7 +105,7 @@ async function join(env: Env, body: Record<string, unknown>, ip: string | null):
 }
 
 async function toInstance(request: Request, env: Env, id: string, action: string): Promise<Response> {
-  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info"].includes(action)) return json({ error: "not found" }, 404);
+  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info", "replaced"].includes(action)) return json({ error: "not found" }, 404);
   let doId: DurableObjectId;
   try {
     doId = env.INSTANCE.idFromString(id);

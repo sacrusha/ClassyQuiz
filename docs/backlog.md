@@ -298,9 +298,8 @@ bar, all in the open list; item 15 partly built, not deployed.
     teacher lets the class in (teacher devices any time); letting in books the
     most rows the class can write (changes of mind capped at 2), refused on the
     teacher's screen when the day can't carry it; the booking shrinks at Start
-    and settles at the final ranking. Left: one unstarted quiz per device (a
-    let-in lobby left holds about 12% of the day for three hours), and showing
-    the day's spending. Owner: booking slots and releasing them, the shrink at
+    and settles at the final ranking; a device's next upload ends its previous
+    quiz if that one never started. Left: showing the day's spending. Owner: booking slots and releasing them, the shrink at
     Start, one stored quiz per device, the low cap instead of overbooking,
     students only once let in; the numbers are the implementer's, to confirm.
     `design/hosting-and-limits.md`, "Running classes finish".
