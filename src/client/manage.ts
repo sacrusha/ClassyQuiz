@@ -204,7 +204,8 @@ export class Steer {
     const at = atOf(stepState(v));
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
-      if (!r.ok && r.error) toast(r.error);
+      // A long message (the site full for today) stays long enough to read.
+      if (!r.ok && r.error) toast(r.error, r.error.length > 80 ? 12_000 : 4000);
       return r;
     };
     switch (a) {
