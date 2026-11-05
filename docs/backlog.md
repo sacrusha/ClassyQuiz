@@ -150,7 +150,7 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 
 Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list; item 15, not built.
+bar, all in the open list; item 15 partly built, not deployed.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -294,16 +294,15 @@ bar, all in the open list; item 15, not built.
 15. **Running classes finish** — a teacher whose class stops mid-quiz because
     the free plan ran out doesn't come back. Rows written are likely the first
     limit to run out, during lessons, while the site's caps count quizzes and
-    let in four times what the rows carry. Quizzes book the most rows they can
-    write when the lobby opens (an upload only looked over books none), with
-    changes of mind capped low so that most is small; the booking shrinks at
-    Start to the class in the lobby and is released at the final ranking.
-    A device holds one quiz that hasn't started: a lobby opened and left, or a
-    test with a few devices, stays bounded. First to build: those five. Then:
-    the day's spending counted. Owner: booking slots and
-    releasing them, the shrink at Start, one stored quiz per device, the low
-    cap instead of overbooking, at 2 changes (three successive answers); the
-    rest is the implementer's, to confirm. Not built,
+    let in four times what the rows carry. Built: students join once the
+    teacher lets the class in (teacher devices any time); letting in books the
+    most rows the class can write (changes of mind capped at 2), refused on the
+    teacher's screen when the day can't carry it; the booking shrinks at Start
+    and settles at the final ranking. Left: one unstarted quiz per device (a
+    let-in lobby left holds about 12% of the day for three hours), and showing
+    the day's spending. Owner: booking slots and releasing them, the shrink at
+    Start, one stored quiz per device, the low cap instead of overbooking,
+    students only once let in; the numbers are the implementer's, to confirm.
     `design/hosting-and-limits.md`, "Running classes finish".
 
 ## Later — Paper and memory

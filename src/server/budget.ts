@@ -7,6 +7,13 @@
 // Holds nothing about a quiz or who made it: an id, a size and an expiry per
 // quiz, a count per day.
 //
+// The day's rows (docs/design/hosting-and-limits.md, "Running classes
+// finish"): a quiz books the most rows its class can write when the class is
+// let in, shrinks the booking at the start, and settles it at the final
+// ranking with what it wrote. The day's ledger holds what is booked or spent
+// today, so a class under way never meets a spent allowance its booking
+// didn't leave room for.
+//
 // It also keeps the days (UTC, as the count) on which it refused an upload,
 // for 31 days: the landing's own-copy line says on how many of the last 30
 // the site was full. Only these refusals are known here;
@@ -14,7 +21,7 @@
 // site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
 
 import { DurableObject } from "cloudflare:workers";
-import { MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, type SiteFull } from "../shared/limits.ts";
+import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, type SiteFull } from "../shared/limits.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
 
@@ -22,6 +29,9 @@ interface Booking {
   bytes: number;
   /** The quiz renews this while it lives; a booking past it is gone, whether or not its release arrived. */
   until: number;
+  /** Rows booked against `day`'s ledger, from letting the class in until it settles. */
+  rows?: number;
+  day?: string;
 }
 
 export class SiteBudget extends DurableObject<Env> {
@@ -43,6 +53,56 @@ export class SiteBudget extends DurableObject<Env> {
     if (live + bytes > MAX_LIVE_BYTES) return await this.full(now, "bytes");
     await this.ctx.storage.put({ [day]: today + 1, [`i:${instance}`]: { bytes, until } satisfies Booking });
     return true;
+  }
+
+  /**
+   * Letting a class in: books `rows` against today's ledger. "rows": the
+   * classes booked today leave no room; today counts as a full day. A quiz
+   * that booked already is not booked again.
+   */
+  async bookRows(instance: string, rows: number, until: number): Promise<true | "rows"> {
+    const now = Date.now();
+    const key = `i:${instance}`;
+    const b = (await this.ctx.storage.get<Booking>(key)) ?? { bytes: 0, until };
+    if (b.rows !== undefined) return true;
+    const day = dayOf(now);
+    const ledger = await this.ctx.storage.list<number>({ prefix: "r:" });
+    const booked = ledger.get(`r:${day}`) ?? 0;
+    const stale = [...ledger.keys()].filter((k) => k !== `r:${day}`);
+    if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
+    if (booked + rows > DAY_ROWS_FOR_CLASSES) {
+      await this.full(now, "uploads");
+      return "rows";
+    }
+    await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking });
+    return true;
+  }
+
+  /**
+   * Moves a booking to `rows` (the start: shrinks to the class that came), or
+   * settles it with `rows` written (the final ranking, the end): the ledger
+   * keeps what was written and gets the rest back. A booking from an earlier
+   * day leaves today's ledger alone.
+   */
+  async moveRows(instance: string, rows: number, settle = false): Promise<void> {
+    const key = `i:${instance}`;
+    const b = await this.ctx.storage.get<Booking>(key);
+    if (!b || b.rows === undefined) return;
+    const now = Date.now();
+    const entries: Record<string, unknown> = {};
+    if (b.day === dayOf(now)) {
+      const lk = `r:${b.day}`;
+      const booked = (await this.ctx.storage.get<number>(lk)) ?? 0;
+      entries[lk] = Math.max(0, booked + rows - b.rows);
+    }
+    const { rows: _r, day: _d, ...rest } = b;
+    entries[key] = settle ? rest : { ...b, rows };
+    await this.ctx.storage.put(entries);
+  }
+
+  /** Rows booked or spent today by the classes, of DAY_ROWS_FOR_CLASSES. */
+  async rowsToday(): Promise<number> {
+    return (await this.ctx.storage.get<number>(`r:${dayOf(Date.now())}`)) ?? 0;
   }
 
   /** An upload refused: today is a full day. Written once a day; older full days than FULL_KEEP_DAYS go. Gives back the cap, for reserve. */
@@ -67,7 +127,9 @@ export class SiteBudget extends DurableObject<Env> {
     if (b && b.until < until) await this.ctx.storage.put(key, { ...b, until });
   }
 
-  async release(instance: string): Promise<void> {
+  /** The quiz ended: its bytes come back, and its rows settle with `written` if they hadn't. */
+  async release(instance: string, written?: number): Promise<void> {
+    if (written !== undefined) await this.moveRows(instance, written, true);
     await this.ctx.storage.delete(`i:${instance}`);
   }
 }

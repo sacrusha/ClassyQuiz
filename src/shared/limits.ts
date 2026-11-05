@@ -33,6 +33,13 @@ export const MAX_ANSWER_CHANGES = 2;
  * changes them makes that sentence untrue.
  */
 export const MAX_UPLOADS_PER_DAY = 300;
+/**
+ * Rows a day the classes may book (docs/design/hosting-and-limits.md, "Running
+ * classes finish"): the Free plan writes 100,000 a day across the account;
+ * the rest is for uploads (the quiz and each picture are rows), the site's
+ * small objects and what a booking doesn't cover. Back at 00:00 UTC.
+ */
+export const DAY_ROWS_FOR_CLASSES = 80_000;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
@@ -65,6 +72,12 @@ export function quotaResetAt(now = new Date()): string | null {
 }
 
 /** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
+/** Letting a class in, refused: the day's rows are booked by the classes under way. */
+export function classesFullMessage(now = new Date()): string {
+  const at = quotaResetAt(now);
+  return `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+}
+
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
   if (full === "bytes") {
     return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use). ${OWN_COPY}`;

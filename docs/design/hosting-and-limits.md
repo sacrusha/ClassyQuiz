@@ -231,58 +231,68 @@ them, and the README points self-hosters there.
   text is the teacher's AI's and shows on every screen of the class, so a slip
   in a page that builds HTML from it must not run as script.
 
-### Running classes finish (not built)
+### Running classes finish
 
-Purpose: when the free plan runs out, it runs out on a new quiz at upload,
-where the refusal and the ways to more quizzes are, and never on a class
-under way. "Failure in front of the class ends adoption" (backlog,
+Purpose: when the free plan runs out, it runs out on a new class before it
+is let in, where the refusal and the ways to more quizzes are, and never on a
+class under way. "Failure in front of the class ends adoption" (backlog,
 Constraints).
 
 Situation: of the platform's daily limits, rows written are likely the first
 to run out on a busy day, and they run out in the middle of lessons: a class
-writes about 1,300 (Situation, "What a class costs"), so the day carries about
-75 classes, while the upload cap lets 300 quizzes in. The caps above count
-quizzes and bytes, not what a class writes, so on such a day they never
-trigger and every running class meets "used up today's allowance". How many
-devices poll, and so whether requests run out first instead, is not known.
+writes about 1,300 (Situation, "What a class costs"; about 1,000 is the
+owner's guess for a real one), so the day carries about 75 classes, while the
+upload cap lets 300 quizzes in. The upload and bytes caps count quizzes and
+bytes, not what a class writes. How many devices poll, and so whether
+requests run out first instead, is not known.
 
-The design (the owner's: quizzes book slots and release them when done, the
-shrink at Start, one stored quiz per device, a low cap on changes of mind
-instead of overbooking; the rest the implementer's, to confirm). First to
-build: the booking at the lobby, the cap, the shrink at Start, the release
-and one unstarted quiz per device; counting the day's spending can follow. A class realistically writes about 1,000 rows
-(the owner's guess), so the worst-case booking of the last quiz in a day
-leaves about 5% of the day unused, which is accepted.
+The design is the owner's: quizzes book slots and release them when done,
+the booking shrinks at Start, a low cap on changes of mind instead of
+overbooking, students only once the class is let in, one stored quiz per
+device. The numbers and the rest are the implementer's, to confirm.
 
-- Before the class is let in, student devices can't join, so nothing is
-  written for them; teacher devices come in at any time. Built.
-- A quiz books the most rows it can write today, so nothing is overbooked
-  and no margin is guessed. That needs a small worst case: changes of mind
-  are capped at 2 (built), three successive answers (`MAX_ANSWER_CHANGES`; the
-  owner: adequate; a mis-tap and one rethink), so a student's answers to a question write at most
-  2 × (1 + changes) rows. The booking is made when the teacher lets the class in
-  (`teacher-devices.md`, "The single tab: check, then join"), not at upload: a teacher who uploads only to look the quiz over (for tomorrow, say)
-  never opens it, and such an upload costs only its upload and bytes. The
-  class is not known yet, so the booking is for `MAX_PLAYERS` and the quiz's
-  questions. A quiz the day can no longer carry is refused on the check
-  screen, before any child joins, with the refusal's message. A small reserve
-  stays unbooked for what bookings don't cover (joins, steps, the site's own
-  objects).
-- At Start the booking shrinks to the avatars in the lobby plus the latecomers
-  the door still lets in (`MAX_LATE_JOINERS`).
-- At the final ranking the booking is released: nothing more is written, and
-  what was written stays spent for the day. The quiz itself stays its three
-  hours for photographs and rejoining.
-- A device holds one quiz that has not started, since a teacher may still
-  open the lobby at the end of a look-over and leave, or try the site with a
-  few devices (a test that starts shrinks to its few players anyway). Its next upload ends the
-  previous one if that one never left the lobby, so test uploads and the
-  re-upload after a fix don't each hold a full booking for three hours. A
-  started quiz is never ended this way, so a quiz paused over lunch survives
-  a new zip tried on the same laptop. The device already knows its latest
-  quiz and its secret (`root-page.md`, "Coming back").
-- The booking also counts the day's spending, so how close the site comes to
-  the platform's limit is known, not only that a day was full.
+- **Students join once the class is let in** (`teacher-devices.md`, "The
+  single tab: check, then join"); teacher devices come in at any time. So a
+  quiz uploaded only to look it over (for tomorrow, say) writes nothing for
+  a class and books nothing.
+- **Letting the class in books the most its class can write**
+  (`server/rows.ts`), so nothing is overbooked and no margin is guessed. The
+  class isn't known yet, so it is `MAX_PLAYERS`: each joins (2 rows), changes
+  look up to `MAX_LOOK_CHANGES` (2 rows each), answers each question at most
+  three times (`MAX_ANSWER_CHANGES`, 2: a mis-tap and one rethink, the owner:
+  adequate; 2 rows each), plus the teacher's steps. For 15 questions that is
+  about 9,700 rows, the looks a third of it. Start without letting in books
+  the same. `SiteBudget` keeps the day's ledger (`r:` and the day, back at
+  00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
+  the rest is for uploads, whose quiz and pictures are rows, the site's small
+  objects and what a booking doesn't cover). A class the ledger can't carry is
+  refused at the tap, on the teacher's screen with no child in yet, with
+  `classesFullMessage` and the own-copy pointer; the day counts as full.
+- **At Start the booking shrinks** to what was written plus the most the rest
+  can write: the class that came plus the latecomers the door lets in
+  (`MAX_LATE_JOINERS`), the looks fixed. A class of 25 then holds about
+  3,200.
+- **At the final ranking the booking settles**: the ledger keeps what was
+  written (counted per key the instance stores) and gets the rest back. The
+  quiz itself stays its three hours for photographs and rejoining. A quiz
+  that ends or expires before its final ranking settles then.
+- So the ledger limits classes at the same time, not in the day: about 8
+  lobbies let in at once, or about 24 started classes of 25, while finished
+  classes count only what they wrote. The last booking of a busy day leaves
+  some of the day unused, which is accepted.
+- **A let-in lobby that is left holds its booking**, about 12% of the day,
+  until the quiz expires three hours after the teacher's last step. One
+  quiz per device (not built) bounds that per device: a device's next upload
+  ends its previous quiz if that one never started, so a lobby opened at the
+  end of a look-over and left, or a test with a few devices, doesn't pile up.
+  A started quiz is never ended this way, so a quiz paused over lunch
+  survives a new zip tried on the same laptop. The device already knows its
+  latest quiz and its secret (`root-page.md`, "Coming back").
+- **The day's spending** is in the ledger (`SiteBudget.rowsToday`); shown
+  nowhere yet.
+- A booking made before midnight UTC and moved after it leaves the new
+  day's ledger alone: the rare class across the turn writes some rows the
+  new day doesn't count.
 
 Not covered: requests. Counting each in an object would itself be a request;
 a class on WebSockets spends few, and a script hammering `/api` is the case
