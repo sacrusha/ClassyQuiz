@@ -212,8 +212,9 @@ from the file manager with Ctrl+V.
 - A refused upload says which cap it hit, since the two come back differently:
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
-  request allowance has its own message. Each is followed by "Your own copy: how
-  ›" to `/own-copy`. The caps are `design/hosting-and-limits.md`.
+  request allowance has its own message. Each is followed by "More quizzes: a site
+  of your own or your school's ›" to `/own-copy`, which names what the link
+  gives (the owner: "Your own copy" was too ambiguous). The caps are `design/hosting-and-limits.md`.
 - On success the tab becomes the projector, on the check screen
   (`design/teacher-devices.md`).
 
@@ -273,9 +274,13 @@ unless the site is close to running out of quizzes and tells them". So the page
 doesn't raise it on a first visit.
 
 - One line under Run, shown only on a device that has uploaded before and only if
-  the site refused an upload on at least one of the last 30 days. It states the
-  fact: "On 3 of the last 30 days this shared site was full and turned new
-  quizzes away", then the link. The device keeps the days it uploaded (`cq.days`,
+  the site was full or nearly full on at least one of the last 30 days: it
+  refused an upload or a class, or the classes' bookings reached
+  `NEARLY_FULL` (80%) of the day's rows. It states the fact: "On 3 of the last
+  30 days this shared site was full or nearly full. For more quizzes, a site
+  of your own or your school's:", then the link. Counting the nearly full
+  days brings the way to more quizzes to the teacher who relies on the site
+  before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
 - The site records, once a day, each day on which the budget refused an upload
   (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (and the days' classes for the owner, `hosting-and-limits.md`). The page asks

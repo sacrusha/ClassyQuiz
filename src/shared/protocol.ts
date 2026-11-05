@@ -306,6 +306,12 @@ export interface TeacherView {
   current: number;
   /** In the lobby, the class not let in yet: the steering screens offer "Let the class in". */
   waiting: boolean;
+  /**
+   * Before the class is let in: how many classes like this one still fit
+   * today, as last heard; 0 when letting in was refused. null: not known, or
+   * let in. Below ROOM_WARN the check warns, with the way to more quizzes.
+   */
+  room: number | null;
   screen: Presence;
   remote: Presence;
   /** The question's picture fills the projector. */
