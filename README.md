@@ -12,9 +12,9 @@ For creating quizzes, ask AI to "Read https://classyquiz.pages.dev. Help me crea
 
 The demo runs on a free plan shared by everyone who uses it. Your own copy runs on a free Cloudflare account. For teachers, https://classyquiz.pages.dev/own-copy describes it without the technical part.
 
-With an AI assistant that can run commands on your computer, e.g. Claude Code: *"Set up my own classyQuiz from https://github.com/sacrusha/ClassyQuiz, following its README."*
+With an AI assistant that runs commands, in a cloud VM (Claude Code on the web) or on your computer: *"Set up my own classyQuiz from https://github.com/sacrusha/ClassyQuiz, following its README."*
 
-For an AI doing this for a teacher: the teacher creates the Cloudflare account and the token (step 3) and chooses the name (step 5); everything else is yours. Tell them where to click, and have them put the token into `secrets/cloudflare.env` themselves rather than into the chat.
+For an AI doing this for a teacher: the teacher creates the Cloudflare account and the token (step 3) and chooses the name (step 5); everything else is yours. Tell them where to click. The token never goes into the chat: tell them how to hand it over without it (on the teacher's own computer, `secrets/cloudflare.env`; on a cloud VM of yours, whatever way it offers). On their own computer you explain each step and they run it.
 
 By hand:
 

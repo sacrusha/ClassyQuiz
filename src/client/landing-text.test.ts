@@ -22,6 +22,9 @@ test("the language: a choice made here, else the browser's, else English", () =>
   assert.equal(chosenLang(undefined, []), "en");
 });
 
-test("every language's open ask names the site's address, for the page to replace", () => {
-  for (const { id } of LANGS) assert.ok(TEXT[id].ask2.includes("classyquiz.pages.dev"), id);
+test("every language's chess and open asks name the site's address, for the page to replace", () => {
+  for (const { id } of LANGS) {
+    assert.ok(TEXT[id].askChess.includes("classyquiz.pages.dev"), id);
+    assert.ok(TEXT[id].ask2.includes("classyquiz.pages.dev"), id);
+  }
 });
