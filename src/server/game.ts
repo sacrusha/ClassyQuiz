@@ -155,17 +155,13 @@ export function newGame(quiz: Quiz): Game {
 }
 
 /**
- * A new class: at upload, and with "Again with another class". With
- * `random`, each question's answers get a fresh order, the same on every
- * screen, unless the quiz keeps it ("Order: fixed"; nothing else does:
- * a rule the AI and the teacher can't see is one they can't rely on;
- * docs/design/quiz-format.md, "Answers are shuffled"). Points for speed carry
- * over from the class before: the parallel class most likely plays the same way.
+ * The class, at upload. With `random`, each question's answers get a
+ * fresh order, the same on every screen, unless the quiz keeps it ("Order:
+ * fixed"; nothing else does: a rule the AI and the teacher can't see is one
+ * they can't rely on; docs/design/quiz-format.md, "Answers are shuffled").
  */
 export function startRun(g: Game, code: string, id: string, random?: () => number): void {
-  const before = g.run;
   g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
-  if (before?.speed) g.run.speed = true;
   if (random) g.run.order = g.quiz.questions.map((q) => (q.keepOrder ? q.answers.map((_, i) => i) : shownOrder(q.answers.map((a) => a.text), random)));
 }
 

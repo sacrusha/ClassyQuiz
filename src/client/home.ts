@@ -292,8 +292,9 @@ async function findOpen(): Promise<void> {
         forgetQuiz(q.id);
         continue;
       }
-      // The latest quiz still on the site decides: open, or finished (then nothing).
-      if (r.body.code && r.body.stands?.phase !== "final") open = { q, info: r.body };
+      // The latest quiz still on the site: until the teacher's Exit deletes
+      // it, also at its final ranking, which the teacher may want back to photograph.
+      if (r.body.code) open = { q, info: r.body };
     } catch {
       /* offline: show nothing rather than something stale */
     }
@@ -310,7 +311,7 @@ function renderResume(): void {
   }
   const { info } = open;
   const s = info.stands;
-  const stands = s && s.n > 0 && s.phase !== "lobby" && s.phase !== "idle" ? t.question(s.n, s.total) : t.notStarted;
+  const stands = s?.phase === "final" ? t.finalRanking : s && s.n > 0 && s.phase !== "lobby" && s.phase !== "idle" ? t.question(s.n, s.total) : t.notStarted;
   const href = info.teacher ? teacherEntry(info.code, info.teacher) : `/teacher#${info.code}`;
   box.innerHTML = `<div class="resume">
     <p class="head"><span class="title">${esc(info.title || t.untitled)}</span><span class="stands">${esc(stands)}</span></p>

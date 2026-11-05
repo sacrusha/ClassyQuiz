@@ -58,12 +58,14 @@ function lastCallState(s: StepState): "on" | "running" | "off" {
 /**
  * The two buttons, for the Remote's bottom bar and the wall's steering bar:
  * Countdown, then Play. Both always drawn, so neither moves: Countdown is
- * kept invisible where it doesn't apply.
+ * kept invisible where it doesn't apply. At the final ranking only Exit, in
+ * the middle of the bar: where Play was, a press lands on nothing
+ * (docs/design/question-flow.md, "The steering bar").
  */
 export function steeringButtons(v: TeacherView): string {
   const s = stepState(v);
   if (v.phase === "lobby") return `<button class="btn primary bar-play" data-act="begin">Start quiz ${PLAY}</button>`;
-  if (v.phase === "final") return `<button class="btn primary bar-play" data-act="again">Again with another class</button>`;
+  if (v.phase === "final") return `<button class="btn bar-exit" data-act="exit"><span class="lbl"><span>Exit</span><small>ends the quiz for everyone</small></span></button>`;
   const lc = lastCallState(s);
   const play = playStep(s);
   const label = (text: string, note?: string) => `<span class="lbl"><span>${text}</span>${note ? `<small>${note}</small>` : ""}</span>`;

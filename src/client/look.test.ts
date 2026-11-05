@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ANIMAL_COUNT } from "../server/game.ts";
 import { BACKGROUND_COUNT, HAT_COUNT } from "../shared/looks.ts";
-import { JUMP, LOOK_DRAWINGS, avatarSvg, partySize } from "./look.ts";
+import { JUMP, LOOK_DRAWINGS, avatarSvg, crowdHeight, crowdPlaces, finalSize, partySize } from "./look.ts";
 
 test("the winners' band: up to ten apart, more overlap, all inside the stage", () => {
   // The stage of a 1366x768 wall, of one steering itself, of a 1024x768 one, and of a phone steering itself.
@@ -40,4 +40,22 @@ test("dressing: every look the menu offers has a drawing", () => {
   for (let a = 0; a < ANIMAL_COUNT; a++)
     for (let b = 0; b < BACKGROUND_COUNT; b++)
       for (let h = 0; h < HAT_COUNT; h++) assert.doesNotMatch(avatarSvg({ a, c: 0, b, h }), /undefined|NaN/, `animal ${a}, background ${b}, hat ${h}`);
+});
+
+test("the final ranking: the crowd fits under the podium, whose avatars stay half again as large, and stands inside its box", () => {
+  for (const [w, h] of [[900, 740], [560, 600], [1600, 1000]]) {
+    for (const n of [0, 3, 10, 25, 40, 59]) {
+      const { a, s } = finalSize(n, w, h);
+      const crowd = n ? crowdHeight(n, w, s) - 0.25 * s : 0;
+      assert.ok(crowd + 2.5 * a <= h + 1, `${n} on ${w}×${h}: crowd ${crowd} and podium ${2.5 * a} fit`);
+      if (n > 0) assert.ok(a >= 1.5 * s, `${n} on ${w}×${h}: first place ${a} against the crowd's ${s}`);
+      assert.ok(a <= (0.85 * w) / 3 + 1, "a step's avatar within its third of the width");
+      const ids = Array.from({ length: n }, (_, i) => `p${i}`);
+      const places = crowdPlaces(ids, w, s);
+      const tall = crowdHeight(n, w, s);
+      for (const p of places) assert.ok(p.x >= 0 && p.x + p.size <= w + 0.01 && p.y >= 0 && p.y + p.size <= tall + 0.07 * s, `${n} on ${w}×${h}: an avatar inside the crowd's box`);
+      assert.deepEqual(crowdPlaces(ids, w, s), places, "the same places on every view");
+    }
+  }
+  assert.ok(finalSize(5, 1600, 600).s > finalSize(50, 1600, 600).s, "where the height binds, a small class stands larger");
 });

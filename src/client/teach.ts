@@ -65,6 +65,10 @@ function onMessage(m: ServerMessage): void {
   } else if (m.t === "gone") {
     line?.stop();
     tabRole.remove(instance);
+    if (m.home) {
+      location.replace("/");
+      return;
+    }
     actions.innerHTML = "";
     main.innerHTML = `<div class="card"><p>${esc(m.reason)}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
   }
@@ -92,7 +96,7 @@ function render(): void {
   fillPictures(main);
   renderClock(v);
 
-  const buttons = `<div class="wrap steerbtns">
+  const buttons = `<div class="wrap steerbtns${v.phase === "final" ? " ending" : ""}">
     <button class="btn more" data-menu aria-label="more">⋯</button>
     ${steeringButtons(v)}
   </div>`;
@@ -220,7 +224,7 @@ function menu(v: TeacherView): void {
   if (v.screen === "present") items.push({ label: "&#8644; Swap: show the quiz here, steer from the other device", run: () => void swap() });
   else items.push({ label: "A second device…", run: () => toast(`On ${siteAddress()}, type ${teacherCode(v.code, v.teacher)}.`, 8000) });
   items.push({ label: "Stop steering from here", run: () => void leave() });
-  items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
+  if (v.phase !== "final") items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }
 

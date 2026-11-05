@@ -30,8 +30,6 @@ export const MAX_ANSWER_CHANGES = 10;
 export const MAX_UPLOADS_PER_DAY = 300;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
-/** A class ends by itself this long after the teacher's last step: the lesson is over, its devices stop costing. */
-export const CLASS_IDLE_MS = 3 * 3600_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
 export const SLEEP_AFTER_MS = 45 * 60_000;
 

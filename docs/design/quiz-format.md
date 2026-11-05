@@ -64,7 +64,7 @@ Messages name the question and the problem in plain words.
 
 ### Answers are shuffled; `Order: fixed` keeps an order
 
-The site shuffles each question's answers when a class starts: the first class at upload, a fresh order for "Again with another class". The AI can write the right answer anywhere, first included, and the class still doesn't learn a position. A parallel class can't be told "number 3 is red" in the break, because its order differs.
+The site shuffles each question's answers at upload. The AI can write the right answer anywhere, first included, and the class still doesn't learn a position. A parallel class plays its own upload, so it can't be told "number 3 is red" in the break: its order differs.
 
 Alternatives that failed, kept because their reasons still hold:
 - Guidance only (write the key first, then permute with a script): an AI that skips the last step or can't run code leaves every key first, worse than before.
