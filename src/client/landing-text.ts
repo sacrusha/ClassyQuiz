@@ -159,7 +159,7 @@ const en: Text = {
   classCode: "Class code",
   otherDevice: (c) => `On another device: type <b>${c}</b> in the code box.`,
   untitled: "Your quiz",
-  ownCopy: (n) => `On ${n === 1 ? "one" : n} of the last 30 days this shared site was full or nearly full. For more quizzes, a site of your own or your school's:`,
+  ownCopy: (n) => `On ${n === 1 ? "one" : n} of the last 30 days this shared site was full or busy. For more quizzes, a site of your own or your school's:`,
   how: "how ›",
 };
 
@@ -230,7 +230,7 @@ const de: Text = {
   classCode: "Klassencode",
   otherDevice: (c) => `Auf einem anderen Gerät: <b>${c}</b> ins Code-Feld tippen.`,
   untitled: "Dein Quiz",
-  ownCopy: (n) => `An ${n === 1 ? "einem" : n} der letzten 30 Tage war diese geteilte Seite voll oder fast voll. Für mehr Quiz eine eigene Seite oder eine der Schule:`,
+  ownCopy: (n) => `An ${n === 1 ? "einem" : n} der letzten 30 Tage war diese geteilte Seite voll oder stark ausgelastet. Für mehr Quiz eine eigene Seite oder eine der Schule:`,
   how: "wie ›",
 };
 
@@ -301,7 +301,7 @@ const fr: Text = {
   classCode: "Code de la classe",
   otherDevice: (c) => `Sur un autre appareil : tapez <b>${c}</b> dans la case du code.`,
   untitled: "Votre quiz",
-  ownCopy: (n) => `Ce site partagé a été complet ou presque ${n} ${n === 1 ? "jour" : "jours"} sur les 30 derniers. Pour plus de quiz, un site à vous ou à votre école :`,
+  ownCopy: (n) => `Ce site partagé a été complet ou très chargé ${n} ${n === 1 ? "jour" : "jours"} sur les 30 derniers. Pour plus de quiz, un site à vous ou à votre école :`,
   how: "comment ›",
 };
 
@@ -372,7 +372,7 @@ const it: Text = {
   classCode: "Codice della classe",
   otherDevice: (c) => `Su un altro dispositivo: digita <b>${c}</b> nella casella del codice.`,
   untitled: "Il tuo quiz",
-  ownCopy: (n) => `Negli ultimi 30 giorni questo sito condiviso è stato pieno o quasi pieno ${n === 1 ? "un giorno" : `${n} giorni`}. Per più quiz, un sito tuo o della tua scuola:`,
+  ownCopy: (n) => `Negli ultimi 30 giorni questo sito condiviso è stato pieno o molto carico ${n === 1 ? "un giorno" : `${n} giorni`}. Per più quiz, un sito tuo o della tua scuola:`,
   how: "come ›",
 };
 

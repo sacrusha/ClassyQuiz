@@ -274,11 +274,11 @@ unless the site is close to running out of quizzes and tells them". So the page
 doesn't raise it on a first visit.
 
 - One line under Run, shown only on a device that has uploaded before and only if
-  the site was full or nearly full on at least one of the last 30 days: it
+  the site was full or busy on at least one of the last 30 days: it
   refused an upload or a class, or the classes' bookings reached
-  `NEARLY_FULL` (80%) of the day's rows. It states the fact: "On 3 of the last
-  30 days this shared site was full or nearly full. For more quizzes, a site
-  of your own or your school's:", then the link. Counting the nearly full
+  `NEARLY_FULL` (half; the owner: lower than 80%) of the day's rows. It states the fact: "On 3 of the last
+  30 days this shared site was full or busy. For more quizzes, a site
+  of your own or your school's:", then the link. Counting the busy
   days brings the way to more quizzes to the teacher who relies on the site
   before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
