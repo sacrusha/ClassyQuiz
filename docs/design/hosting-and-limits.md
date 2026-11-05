@@ -181,7 +181,7 @@ them, and the README points self-hosters there.
   device doesn't send an answer it already shows as chosen; the server doesn't
   store a tap that changes nothing (a resend, or the same answer again; the
   newer sequence number is kept in memory, so a late older tap still loses);
-  changes of mind are capped at `MAX_ANSWER_CHANGES` (10) per student and
+  changes of mind are capped at `MAX_ANSWER_CHANGES` (2) per student and
   question, and past that the device shows the answer that counts.
 - **Players per class: `MAX_PLAYERS` (60), removed avatars included.** The run
   is one stored value rewritten with every answer and must stay under the 2 MB
@@ -256,8 +256,8 @@ leaves about 5% of the day unused, which is accepted.
 
 - A quiz books the most rows it can write today, so nothing is overbooked
   and no margin is guessed. That needs a small worst case: changes of mind
-  are capped at 2, three successive answers (`MAX_ANSWER_CHANGES`, today 10;
-  the owner: adequate; a mis-tap and one rethink), so a student's answers to a question write at most
+  are capped at 2, three successive answers (`MAX_ANSWER_CHANGES`; the
+  owner: adequate; a mis-tap and one rethink), so a student's answers to a question write at most
   2 × (1 + changes) rows. The booking is made when the lobby opens, not at
   upload: a teacher who uploads only to look the quiz over (for tomorrow, say)
   never opens it, and such an upload costs only its upload and bytes. The
