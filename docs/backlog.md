@@ -420,8 +420,14 @@ Needs a real classroom or real devices, nobody has run it:
 - The deploy worktree is at 9f50079, which is live; the credentials stay in
   the main checkout's `secrets/`, passed to `scripts/deploy.mjs` with
   `node --env-file=<main checkout>/secrets/cloudflare.env`. The worked
-  example's stand-ins (photos, mock conversation) are live; the conversation
-  says it is a mock-up.
+  example's photographs and conversation are live and real, no stand-ins.
+- `app.css` is one global namespace (about 340 top-level rules on short class
+  names), linked by every app page and `/example`; a bare rule for one screen
+  can land on another page, as the podium's `.steps` did on `/example`.
+  Deferred by the owner, the usual remedies: prefixed names (BEM-style) for new
+  screen parts, with a build warning on a page's own classes that `app.css` also
+  styles bare (allowlist for shared controls such as `.btn`), or esbuild's CSS
+  Modules screen by screen, which touches the one-stylesheet build.
 - Probes kept in `.tmp/shots-tool/`: `landing-ask-sweep.mjs` (stray
   punctuation in the labelled ask across widths, full-page shots),
   `landing-stacked-order.mjs` (where Build and Run start on upright screens),
