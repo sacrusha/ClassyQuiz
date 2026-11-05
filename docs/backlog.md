@@ -150,7 +150,7 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 
 Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list.
+bar, all in the open list; item 15, not built.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -290,6 +290,16 @@ bar, all in the open list.
     until children join; on a real washed-out projector the pale states
     (hidden answers, faded tiles at the reveal) may let pale red and pale
     yellow run together — unchecked.
+
+15. **Running classes finish** — a teacher whose class stops mid-quiz because
+    the free plan ran out doesn't come back. Rows written are likely the first
+    limit to run out, during lessons, while the site's caps count quizzes and
+    let in four times what the rows carry. Quizzes book the rows they may
+    write, shrink the booking at Start to the class in the lobby, release it
+    at the final ranking; a device holds one quiz that hasn't started. Owner:
+    booking slots and releasing them, the shrink at Start, one stored quiz per
+    device; the rest is the implementer's, to confirm. Not built,
+    `design/hosting-and-limits.md`, "Running classes finish".
 
 ## Later — Paper and memory
 

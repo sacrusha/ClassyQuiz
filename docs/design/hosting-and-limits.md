@@ -231,6 +231,48 @@ them, and the README points self-hosters there.
   text is the teacher's AI's and shows on every screen of the class, so a slip
   in a page that builds HTML from it must not run as script.
 
+### Running classes finish (not built)
+
+Purpose: when the free plan runs out, it runs out on a new quiz at upload,
+where the refusal and the ways to more quizzes are, and never on a class
+under way. "Failure in front of the class ends adoption" (backlog,
+Constraints).
+
+Situation: of the platform's daily limits, rows written are likely the first
+to run out on a busy day, and they run out in the middle of lessons: a class
+writes about 1,300 (Situation, "What a class costs"), so the day carries about
+75 classes, while the upload cap lets 300 quizzes in. The caps above count
+quizzes and bytes, not what a class writes, so on such a day they never
+trigger and every running class meets "used up today's allowance". How many
+devices poll, and so whether requests run out first instead, is not known.
+
+The design (the owner's: quizzes book slots and release them when done; the
+rest the implementer's, to confirm):
+
+- A quiz books the rows it may write today, against the day's allowance less a
+  margin for what bookings don't cover (joins, steps, the site's own
+  objects) and for estimates that run short. At upload the class is not
+  known, so the booking is for the most it can be: `MAX_PLAYERS`, the quiz's
+  questions, about 2 rows per answer. A quiz the day can no longer carry is
+  refused at upload, with the refusal's message.
+- At Start the booking shrinks to the avatars in the lobby plus the latecomers
+  the door still lets in (`MAX_LATE_JOINERS`).
+- At the final ranking the booking is released: nothing more is written, and
+  what was written stays spent for the day. The quiz itself stays its three
+  hours for photographs and rejoining.
+- A device holds one quiz that has not started. Its next upload ends the
+  previous one if that one never left the lobby, so test uploads and the
+  re-upload after a fix don't each hold a full booking for three hours. A
+  started quiz is never ended this way, so a quiz paused over lunch survives
+  a new zip tried on the same laptop. The device already knows its latest
+  quiz and its secret (`root-page.md`, "Coming back").
+- The booking also counts the day's spending, so how close the site comes to
+  the platform's limit is known, not only that a day was full.
+
+Not covered: requests. Counting each in an object would itself be a request;
+a class on WebSockets spends few, and a script hammering `/api` is the case
+for a domain with a rate-limiting rule.
+
 ### When the allowance runs out anyway
 
 Devices say so instead of showing the offline dot: `quotaMessage`, "The free
