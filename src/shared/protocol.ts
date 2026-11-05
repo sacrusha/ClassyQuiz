@@ -48,6 +48,8 @@ export interface At {
 export type Command =
   // steering: the Remote, or the Projector while no Remote is there
   | { op: "begin"; at: At }
+  /** "Let the class in": student devices can join from now on (teacher devices any time). */
+  | { op: "letIn" }
   /**
    * Play, the steering bar's step: one slice on from `at`. Show answers,
    * Lock in, Reveal, Ranking, Next; the final ranking after the last
@@ -142,6 +144,8 @@ export type ServerMessage =
       avatars: { id: string; avatar: Avatar }[];
       /** For a teacher device with the teacher code: what taking a role would do. */
       entry: Entry;
+      /** The teacher hasn't let the class in yet: a student device waits, and joins once this is gone. */
+      waiting?: true;
       /**
        * The tab came with a player token that isn't this class's player:
        * an avatar another device took back. Without
@@ -250,6 +254,8 @@ export interface ScreenView {
   zoom: boolean;
   phase: Phase | "idle";
   current: number;
+  /** In the lobby, the class not let in yet: the wall shows no code. */
+  waiting: boolean;
   players: { id: string; avatar: Avatar }[];
   answered: number;
   /**
@@ -298,6 +304,8 @@ export interface TeacherView {
   questions: TeacherQuestion[];
   phase: Phase | "idle";
   current: number;
+  /** In the lobby, the class not let in yet: the steering screens offer "Let the class in". */
+  waiting: boolean;
   screen: Presence;
   remote: Presence;
   /** The question's picture fills the projector. */

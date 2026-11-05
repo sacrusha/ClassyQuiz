@@ -541,3 +541,23 @@ test("points for speed: the device's time can't exceed the server's; without one
     POINTS_RIGHT + speedBonus(6000),
   ], "a change of mind keeps its own time, never below zero; a device's time is capped at the server's count");
 });
+
+test("the class joins once the teacher lets it in, or once the quiz starts", () => {
+  const g = G.newGame(quiz);
+  G.startRun(g, "12345", "r1");
+  g.run!.waiting = true;
+  const random = () => 0.5;
+  assert.throws(() => G.addPlayer(g, "p0", "t0", 0, random), (e: Error) => e.message === G.CLASS_WAITING, "before: the class waits");
+  G.letIn(g);
+  assert.equal(g.run!.waiting, undefined);
+  G.addPlayer(g, "p0", "t0", 0, random);
+  G.letIn(g);
+  assert.equal(Object.keys(g.run!.players).length, 1, "letting in again changes nothing");
+
+  const h = G.newGame(quiz);
+  G.startRun(h, "12345", "r2");
+  h.run!.waiting = true;
+  G.begin(h, 0);
+  assert.equal(h.run!.waiting, undefined, "Start lets the class in");
+  G.addPlayer(h, "p0", "t0", 0, random);
+});

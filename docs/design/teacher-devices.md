@@ -97,10 +97,16 @@ steering. Screens and wording: `user-flow.md §1`, `§3.2`, `§3.3`.
 The tab that uploads is the Projector and steers itself. It opens on the
 **check**, the teacher's private screen: title and number of questions (the
 count is what most often tells two versions of a quiz apart), the class code
-small (with a count once someone has joined; a teacher who reads it aloud has
-the class joining without any tap), the teacher code in one sentence naming
-both needs, and the question list with its fixes. One tap leads to the **join
-screen**, the class's: address, code, QR, avatars, Start. The class's screen
+small (with a count once someone has joined), the teacher code in one
+sentence naming both needs, and the question list with its fixes. One tap,
+"Let the class in", leads to the **join screen** and lets the class in:
+teacher devices come in at any time, student devices only from that tap (or
+Start) on, and one that arrives earlier waits and joins by itself. Letting
+the class in is the moment the quiz starts to cost the day's allowance, so a
+quiz uploaded only to look it over costs none (`hosting-and-limits.md`,
+"Running classes finish"). With a Remote, the Remote's lobby has the same
+button until it is tapped, and the wall shows the title without the code. The
+**join screen** is the class's: address, code, QR, avatars, Start. The class's screen
 ends at the fold; a quiet line goes back to the questions or opens the
 second-device sheet.
 

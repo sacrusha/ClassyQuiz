@@ -43,6 +43,8 @@ const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages
 
 /** Why a device can't join a class (server/game.ts); shown on it, in words its teacher can act on. */
 export const CLASS_FULL = "This class is full. Ask your teacher.";
+/** A student device before the teacher let the class in: it waits, and joins by itself once they do. */
+export const CLASS_WAITING = "Your teacher lets the class in in a moment.";
 export const CLASS_STARTED = "This quiz has started and takes no more players. Ask your teacher.";
 
 /**
