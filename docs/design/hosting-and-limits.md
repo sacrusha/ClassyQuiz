@@ -106,31 +106,34 @@ copy that raises its limits rarely shows them.
 
 ### What lives, and for how long
 
-The uploaded quiz lives on the server for the lifetime of its instance; the
-teacher's file, the text or file the AI produced and still has in the chat, is
-the durable copy. Storage during the lifetime is Durable Object storage, so
-the instance survives devices dying and the server going idle overnight; that
-is not "persisting" in the sense of keeping anything past the instance.
+Keeping a quiz on the server serves one purpose: a device that lost its
+connection, for whatever reason, gets back into the quiz in progress. The
+breaks a lesson resumes after are the short break and, less often, lunch,
+with the projector likely left on the quiz; Swiss midday breaks run up to
+about two hours. The next day is not one. Seeing results after an accidental
+close is not a reason to keep anything; it has other answers.
 
-The instance is the uploaded quiz plus its runs. As built:
+So the rule is one, and the same everywhere: everything is deleted three
+hours after the teacher last used the quiz, or when the teacher ends it. One
+duration is sensible and easy to say, and the page says it as such. The
+teacher's file, the text or file the AI produced and still has in the chat,
+is the durable copy. Storage during the lifetime is Durable Object storage, so
+the instance survives devices dying and the server going idle.
 
-- It ends 48 hours after its last activity (`INSTANCE_IDLE_MS`,
+As built:
+
+- The instance ends 3 hours after its last activity (`INSTANCE_IDLE_MS`,
   `server/instance.ts`; activity is the upload, a teacher's step, a role
   taken), or when the teacher ends it. Everything in it is then deleted: quiz,
   runs, players, answers, pictures, the join code's claim and the site's
-  booking.
-- A run's players, answers and scores are deleted one hour after its final
-  ranking (`RUN_KEEP_MS`), long enough for a reloaded screen to show the final
-  ranking. The quiz then waits in a fresh lobby.
-- A class nobody steers for 3 hours (`CLASS_IDLE_MS`) ends by itself, so a
-  lesson that was left behind stops costing: under way, it ends with its final
-  ranking (whose data goes an hour later); a lobby with students opens empty
-  again and the tablets are told. The clock runs from the teacher's last step
-  or the last student joining, so a lobby filling hours after an upload isn't
-  cleared. An empty lobby is not touched. The reason is cost: an unfinished
-  class kept its tablets connected for the quiz's 48 hours, and each tablet on
-  the HTTP fallback costs about 144 Function and 144 Durable Object requests
-  an hour.
+  booking. Students joining or reconnecting don't count, so a projector or
+  tablets left on don't keep a quiz alive.
+- A run's players, answers and scores are deleted 3 hours after its final
+  ranking (`RUN_KEEP_MS`), and a class nobody steers for 3 hours ends
+  (`CLASS_IDLE_MS`, from the teacher's last step or the last student
+  joining). Both are covered by the instance's 3 hours: the final ranking is a teacher step, and the class's idle clock
+  never starts before the teacher's. They stay as constants until "Upload is
+  start" removes the runs.
 - Corrections made during a run (a key change, a voided question) apply to the
   instance's quiz and are lost when it ends; the teacher's copy still has the
   wrong key. The Later item "corrected quiz download" is what closes that.
@@ -141,9 +144,8 @@ The instance is the uploaded quiz plus its runs. As built:
 The durations are single constants in code.
 
 Pending: backlog v4 item 3 ("Upload is start") makes a quiz one class's
-lesson, so the 48-hour instance with several runs, "another class with this
-quiz" (the `again` command) and the lobby reopening an hour after the ranking
-go; what the lifetime becomes then is the item's own question.
+lesson, so the instance with several runs, "another class with this quiz"
+(the `again` command) and the lobby reopening after the ranking go.
 
 ### Protecting the day's allowance
 
@@ -182,7 +184,7 @@ them, and the README points self-hosters there.
   (`siteFullMessage` in `shared/limits.ts`, English, for any reader that
   doesn't know `full`). The uploads cap says the site takes new quizzes again
   at 01:00 Swiss time (`quotaResetAt`; "00:00 UTC" without time zone data);
-  the bytes cap says it does once others have ended or expired, two days
+  the bytes cap says it does once others have ended or expired, three hours
   after their last use (`INSTANCE_IDLE_MS`). Both point to the own-copy page
   as the self-hosting nudge, and show to the teacher as a message, not as a
   problem to copy for the AI. Wording on the screen is in
@@ -252,7 +254,7 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 - Whether the numbers (300 uploads, 1 GB, 60 players, 5 late joiners,
   3 hours) fit real use; no deploy log or dashboard figures yet.
 - Whether teachers are seen with more than five latecomers, or re-uploading
-  after the 48 hours.
+  after the 3 hours.
 - German, French and Italian wording of the two caps' messages, by a native
   reader; the caps' wording has not been seen in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.

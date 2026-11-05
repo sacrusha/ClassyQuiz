@@ -190,8 +190,8 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
   `QUIZ_GUESS_EVERY_MS` 6 min): covers many addresses (an IPv6 range, a
   botnet). Used up, every teacher code for the quiz is refused, the right one
   too, since otherwise the answers would tell it. A sweep of the 100 endings
-  takes about nine hours, about half that to hit on average, inside the
-  quiz's 48-hour life.
+  takes about nine hours, about half that to hit on average; a quiz lives
+  3 hours past the teacher's last step.
 - **Not counted:** an attempt without two digits (the class code alone) is no
   guess at them; a right code; a refusal. **Exempt:** the uploading device's
   secret.
