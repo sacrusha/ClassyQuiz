@@ -45,7 +45,7 @@ export const CLASS_STARTED = "This quiz has started and takes no more players. A
 /**
  * Which site-wide cap refused an upload (server/budget.ts). They free up
  * differently: the uploads cap at 00:00 UTC, the bytes cap as quizzes end or
- * expire (two days after their last use), so each is said as it is.
+ * expire (three hours after the teacher last used them), so each is said as it is.
  */
 export type SiteFull = "uploads" | "bytes";
 
@@ -62,7 +62,7 @@ export function quotaResetAt(now = new Date()): string | null {
 /** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
   if (full === "bytes") {
-    return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (two days after their last use). ${OWN_COPY}`;
+    return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use). ${OWN_COPY}`;
   }
   const at = quotaResetAt(now);
   return `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;

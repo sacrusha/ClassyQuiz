@@ -32,10 +32,17 @@ import { randomCode, randomDigits, randomToken } from "./random.ts";
 import { CLASS_IDLE_MS, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
-/** An instance ends this long after its last activity (upload, a teacher's step, a role taken). */
-export const INSTANCE_IDLE_MS = 48 * 3600_000;
+/**
+ * An instance ends this long after its last activity (upload, a teacher's
+ * step, a role taken). Keeping it serves one purpose: a device that lost its
+ * connection gets back into the quiz. Three hours span the longest break a
+ * lesson plausibly resumes after, lunch, and the same three hours everywhere
+ * are easy to say (docs/design/hosting-and-limits.md, "What lives, and for
+ * how long").
+ */
+export const INSTANCE_IDLE_MS = 3 * 3600_000;
 /** A class's players, answers and scores are deleted this long after its final ranking. */
-export const RUN_KEEP_MS = 3600_000;
+export const RUN_KEEP_MS = 3 * 3600_000;
 /** A long-poll is answered after this long even when nothing changed. */
 const POLL_HOLD_MS = 25_000;
 /**
@@ -1227,9 +1234,9 @@ export class Instance extends DurableObject<Env> {
     const idle = this.classIdleFrom();
     if (idle != null && now >= idle + CLASS_IDLE_MS) {
       // Left behind: the lesson is over, but its tablets would keep their
-      // line open (and, on the HTTP fallback, keep polling) for the quiz's 48
-      // hours. A class under way ends with its final ranking, whose data goes
-      // an hour later; a lobby with students opens empty again.
+      // line open (and, on the HTTP fallback, keep polling) for as long as
+      // the quiz lives. A class under way ends with its final ranking; a
+      // lobby with students opens empty again.
       if (this.game!.run!.phase === "lobby") this.newClass();
       else G.finish(this.game!, now);
       await this.persist(["run"]);
