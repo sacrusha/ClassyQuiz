@@ -85,7 +85,7 @@ if (addr && navigator.clipboard?.writeText) {
   });
 }
 
-/** The example asks: the first with each labelled part's label under it (on a phone the CSS hides those and shows the labels as one line), the open one plain. */
+/** The example asks: the sheets ask with each labelled part's label under it, the chess and open asks plain, and the tabs' names. */
 function renderAsk(): void {
   const bubble = $("#bubble");
   // Punctuation right after a labelled part is glued to it: a browser may break a line
@@ -108,9 +108,72 @@ function renderAsk(): void {
   bubble.classList.add("inplace");
   bubble.lang = lang;
   $("#labels").innerHTML = t.labels.map((l) => `<span class="nb">${esc(l)}</span>`).join(" · ");
-  const openAsk = $("#bubble2");
-  openAsk.textContent = t.ask2.replaceAll(DEMO, host);
-  openAsk.lang = lang;
+  for (const [id, text] of [["#bubble3", t.askChess], ["#bubble2", t.ask2]] as const) {
+    const el = $(id);
+    el.textContent = text.replaceAll(DEMO, host);
+    el.lang = lang;
+  }
+  for (const tab of askTabs) {
+    const name = t[tab.dataset.name as "tabSheets" | "tabChess" | "tabOpen"];
+    tab.setAttribute("aria-label", name);
+    tab.title = name;
+  }
+}
+
+// The example asks as tabs, one picture each for what the teacher brings
+// (docs/design/root-page.md, "Build: two steps"). Made here: without the
+// script, and for an AI's fetcher, the three asks stand one under the other.
+
+const ASK_TABS = [
+  { panel: "ask-sheets", name: "tabSheets", icon: `<span class="sheets"><img src="/landing/sheet-2.webp" alt=""><img src="/landing/sheet-1.webp" alt=""></span>` },
+  {
+    panel: "ask-chess",
+    name: "tabChess",
+    icon: `<svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#b58863"/><path d="M0 0h2v2H0zM4 0h2v2H4zM2 2h2v2H2zM6 2h2v2H6zM0 4h2v2H0zM4 4h2v2H4zM2 6h2v2H2zM6 6h2v2H6z" fill="#f0d9b5"/><text x="4" y="6.6" text-anchor="middle" font-size="7" fill="#111">&#9822;</text></svg>`,
+  },
+  { panel: "ask-open", name: "tabOpen", icon: `<span class="q" aria-hidden="true">?</span>` },
+];
+const askTabs: HTMLButtonElement[] = [];
+{
+  const asks = $("#asks");
+  const bar = document.createElement("div");
+  bar.className = "ask-tabs";
+  bar.setAttribute("role", "tablist");
+  for (const a of ASK_TABS) {
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.id = `${a.panel}-tab`;
+    tab.dataset.name = a.name;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", a.panel);
+    tab.innerHTML = a.icon;
+    const panel = $(`#${a.panel}`);
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", tab.id);
+    tab.addEventListener("click", () => chooseAsk(askTabs.indexOf(tab)));
+    askTabs.push(tab);
+    bar.append(tab);
+  }
+  // Arrow keys move between the tabs, as in any tab list.
+  bar.addEventListener("keydown", (e) => {
+    const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    const i = (askTabs.findIndex((b) => b.getAttribute("aria-selected") === "true") + step + askTabs.length) % askTabs.length;
+    chooseAsk(i);
+    askTabs[i].focus();
+  });
+  asks.before(bar);
+  asks.classList.add("tabbed");
+  chooseAsk(0);
+}
+
+function chooseAsk(i: number): void {
+  askTabs.forEach((tab, j) => {
+    const on = i === j;
+    tab.setAttribute("aria-selected", String(on));
+    tab.tabIndex = on ? 0 : -1;
+    $(`#${ASK_TABS[j].panel}`).hidden = !on;
+  });
 }
 
 /** Everything above About in language `l`. */

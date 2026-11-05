@@ -195,22 +195,23 @@ not deployed.
    Lifetime as built: `design/hosting-and-limits.md`.
 4. The foot lines from the teacher's side — own copy for the teacher who will
    run 20–30 quizzes a month and asks "can I rely on this?", network help where
-   the failure shows — built, `design/root-page.md`. Open: "Your AI does it" and
+   the failure shows — built, `design/root-page.md`. "Your AI does it" and
    a number serve one purpose — it's not scary, you can do it — and are only
-   true if the AI a normie has can do it; the check that gates the own-copy
-   wording is free Claude, through its own sandbox, from the own-copy prompt to
-   a copy online. If yes, time it and state it dated; if not, no number
-   anywhere, and own-copy says who can: someone with an AI that runs programs,
-   or a colleague by hand from the README. The own-copy line understates (it
-   counts only days the upload cap refused). `/own-copy` offers two routes to more quizzes: setting one up
-   yourself, which a teacher can do alone, maybe with a paid AI subscription;
-   and, when that seems out of reach or there is no hurry, the school's own copy
-   (a paragraph for IT, pointing to the README for Cloudflare or for converting
-   it to the school's own server with their AI); updating a
+   true if the AI a teacher has can do it. Owner, 5 Nov 2026: a cloud VM
+   (Claude Code on the web, paid Claude) is a route anyone can take; free
+   Sonnet in a chat can walk a patient teacher through it, which takes some
+   technical affinity. `/own-copy` offers two routes to more quizzes: setting one up
+   yourself, by one of those two AIs (one prompt for both, the token kept out
+   of the chat); and the school's IT, on its own servers or a paid Cloudflare
+   account; updating a
    copy is a choice, an unchanging copy being what a teacher values before a
    lesson. The conversion is the school's, not checked here (owner: the point of
    telling them to convert is so we don't have to); `simulate.mjs` is their
    check (`design/hosting-and-limits.md`, "A copy on a school's own server").
+   Open: the page says the VM route takes "minutes" and the walk-through "a
+   while" (owner), untimed on the current README; the VM's network access
+   (`root-page.md`, "Not known"). The own-copy line
+   understates (it counts only days the upload cap refused).
 5. The guidance, the owner's rewrite merged — built, `design/guidance-page.md`.
 6. Tempo in the instance, in the teacher's hand: a bar of two buttons (Play,
    Countdown) stepping the question through its states — built and live,
@@ -410,11 +411,10 @@ With the owner:
   most of it out again. Open, or closed by that standard.
 - The free-tier sitting (`docs/free-tier-check.md`), on a borrowed free Claude
   account (the owner won't make his own, to avoid a ToS hammer): a logged-in
-  free account producing a working zip with pictures (keep the zip), and the
-  own-copy setup check (v4 item 4); it gates the own-copy wording, any number,
-  and landing step 1's wording on which AI works (not to be overly specific
-  yet: Sonnet works on a free account if the test succeeds, otherwise we
-  adapt). The agents prepare the protocol so it costs one sitting. It waits
+  free account producing a working zip with pictures (keep the zip). Landing
+  step 1's wording no longer waits on it: the owner's free-tier findings
+  settle it (`design/guidance-page.md`, "The AIs verified against"); the
+  sitting puts a dated record under them. The own copy is not part of it. It waits
   until the landing and guidance are settled: every fetch from claude.ai
   restarts the fetch cache's clock, so no fetch tests of the live root until
   then.
