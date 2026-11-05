@@ -34,4 +34,14 @@ To try it on your own computer first: `npm run dev` in `src/`, then open http://
 
 The demo's limits for a few teachers (players per class, uploads a day, storage) are constants in `src/shared/limits.ts`; raise them for your own copy. Countdown's length and the points for speed are in `src/shared/tempo.ts`.
 
+### On your school's own server
+
+A school that would rather not use an outside service can run classyQuiz on its own server. The code as published runs on Cloudflare. It is written to be convertible, so that an AI can read it and convert it to another server, and the conversion is the school's. With an AI that runs programs, such as Claude Code: *"Convert classyQuiz from https://github.com/sacrusha/ClassyQuiz to run on our own server, following its README section 'On your school's own server'."*
+
+- **What changes.** The Cloudflare-specific code is the Durable Objects in `src/server/` (`instance.ts`, `directory.ts`, `budget.ts`, `stats.ts`, exported by `worker.ts`: storage, alarms, hibernating WebSockets) and the `/api` routes in `src/functions/api/[[path]].ts`, listed at its top. The game, picture handling, the quiz format (`src/server/game.ts`, `images.ts`, `src/quiz/`, `src/shared/`) and the browser side stay as they are. The browser speaks HTTP and WebSocket to `/api`, with the messages in `src/shared/protocol.ts`.
+- **What a converted copy keeps.** A quiz is deleted when the teacher ends it or three hours after the teacher last used it (`INSTANCE_IDLE_MS`), and no request is logged with an IP address (`docs/design/hosting-and-limits.md`, "What lives, and for how long"). The limits in `src/shared/limits.ts` are the demo's; raise them. Serve it over HTTPS: without it, tablets can't keep the screen awake.
+- **The guidance the teachers' AIs read.** Before writing a quiz, a teacher's AI reads the start page's guidance, at the address the start page names (the Build step). It can't reach an address inside the school, and the live demo's guidance moves on with newer versions, whose quizzes an older copy may not read. So the start page has to name an address outside the school that serves the guidance of this copy's own version.
+- **Done** when `npm test` passes in `src/` and `node scripts/simulate.mjs <your address>` passes against the converted server: a class of 25 on bad Wi-Fi, checked for answers lost or counted twice.
+- **Updates are a choice.** A copy changes only when it is updated, so converting once and leaving it is a way to run it: the same screens every lesson. To take an update, convert again from the newer code. The Cloudflare-specific code stays in the files above, so converting again stays the same job.
+
 How it is built and why: `docs/`.
