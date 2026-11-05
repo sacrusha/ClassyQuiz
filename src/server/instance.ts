@@ -29,7 +29,8 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
+import { DAY_ROWS_FOR_CLASSES, classesFullMessage, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
+import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
 /**
@@ -121,6 +122,14 @@ interface Meta {
   teacher: string;
   lastActivity: number;
   v: number;
+  /**
+   * The day's rows this quiz booked when the class was let in
+   * (docs/design/hosting-and-limits.md, "Running classes finish"), and what
+   * it wrote since. settled: given back at the final ranking.
+   */
+  rows?: { written: number; settled?: true };
+  /** The day's rows booked across the site, as last heard (at upload, at letting in): the check's warning. */
+  dayRows?: number;
 }
 
 type Session =
@@ -242,7 +251,7 @@ export class Instance extends DurableObject<Env> {
     // The site's share of the free plan: uploads today, bytes stored at once.
     const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
     const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil);
-    if (booked !== true) return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
+    if (typeof booked === "string") return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
     const code = await this.claimCode(codeUntil);
     this.quizRecord = {
       quiz: r.quiz,
@@ -252,11 +261,13 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, teacher, lastActivity: now, v: 1 };
+    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
     // The pasting tab is about to open the Projector with it.
     this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
     G.startRun(this.game, code, randomToken(9), Math.random);
+    // Teacher devices come in any time; the class once the teacher lets it in.
+    this.game.run!.waiting = true;
     // The alarm goes first: should the write below fail halfway, the alarm
     // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
@@ -499,6 +510,7 @@ export class Instance extends DurableObject<Env> {
       return json({ error: "bad request" }, 400);
     }
     if (action === "info") return this.forOwner(body.secret);
+    if (action === "replaced") return this.replaced(body.secret);
     if (!body.auth) return json({ error: "bad request" }, 400);
     const out: ServerMessage[] = [];
     const session = this.authenticate(body.auth, out);
@@ -569,6 +581,21 @@ export class Instance extends DurableObject<Env> {
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
     return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands } satisfies QuizInfo);
+  }
+
+  /**
+   * The device that uploaded this quiz uploaded another: a device holds one
+   * quiz that hasn't started (docs/design/hosting-and-limits.md, "Running
+   * classes finish"), so this one ends if it never left the lobby, with its
+   * booking. A started quiz stays, so one paused over lunch survives a new
+   * zip tried on the same laptop.
+   */
+  private async replaced(secret: unknown): Promise<Response> {
+    if (!this.live() || typeof secret !== "string" || !safeEqual(secret, this.meta!.secret)) return json({ error: "gone" }, 404);
+    const run = this.game!.run;
+    if (run && run.phase !== "lobby") return json({ ended: false });
+    await this.endInstance();
+    return json({ ended: true });
   }
 
   private notePoll(session: Session): void {
@@ -946,6 +973,7 @@ export class Instance extends DurableObject<Env> {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           G.play(game, now, this.nextView());
           await this.afterTeacherChange(["run"]);
+          if (game.run?.phase === "final") await this.settleRows();
           return { direct: [ack(true)] };
         }
         if (cmd.op === "zoom") {
@@ -982,7 +1010,12 @@ export class Instance extends DurableObject<Env> {
         case "finish":
         case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
-          if (cmd.op === "begin") G.begin(game, now);
+          // Start without "Let the class in" lets the class in too, and books.
+          if (cmd.op === "begin" && !(await this.bookRows())) return { direct: [ack(false, classesFullMessage())] };
+          if (cmd.op === "begin") {
+            G.begin(game, now);
+            await this.shrinkRows();
+          }
           else if (cmd.op === "play") G.play(game, now, this.nextView());
           else if (cmd.op === "lastCall") G.lastCall(game, now);
           else if (cmd.op === "finish") G.finish(game, now);
@@ -993,6 +1026,11 @@ export class Instance extends DurableObject<Env> {
           changed.push("run");
           break;
         }
+        case "letIn":
+          if (!(await this.bookRows())) return { direct: [ack(false, classesFullMessage())] };
+          G.letIn(game);
+          changed = ["run"];
+          break;
         case "speed":
           G.setSpeed(game, !!cmd.value);
           changed = ["run"];
@@ -1031,6 +1069,7 @@ export class Instance extends DurableObject<Env> {
           return { direct: [ack(false, "unknown command")] };
       }
       await this.afterTeacherChange(changed);
+      if (game.run?.phase === "final") await this.settleRows();
       return { direct: [ack(true)] };
     } catch (e) {
       if (e instanceof G.GameError) return { direct: [ack(false, e.message)] };
@@ -1043,6 +1082,69 @@ export class Instance extends DurableObject<Env> {
       }
       throw e;
     }
+  }
+
+  /**
+   * Letting the class in books the most rows the class can write today; a
+   * quiz whose class waits outside books nothing. False: the day has no room.
+   */
+  private async bookRows(): Promise<boolean> {
+    const meta = this.meta!;
+    const run = this.game!.run;
+    if (!run?.waiting || meta.rows) return true;
+    let booked: { rows: number } | "rows";
+    try {
+      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil);
+    } catch (e) {
+      // The ledger can't be reached: the class goes in unbooked rather than
+      // be stopped by the site's own bookkeeping.
+      console.error("rows not booked:", e instanceof Error ? e.message : String(e));
+      return true;
+    }
+    if (booked === "rows") {
+      // Kept for the check's notice, which lasts until the teacher tries again.
+      meta.dayRows = DAY_ROWS_FOR_CLASSES;
+      await this.persist(["meta"]);
+      this.broadcastStaff();
+      return false;
+    }
+    meta.dayRows = booked.rows;
+    meta.rows = { written: 0 };
+    return true;
+  }
+
+  /**
+   * How many classes like this one still fit today, for the check's warning
+   * (ROOM_WARN); null when the class is let in, or the day's booking isn't
+   * known in this object's memory.
+   */
+  private room(): number | null {
+    const booked = this.meta?.dayRows;
+    if (!this.game?.run?.waiting || booked === undefined) return null;
+    return Math.max(0, Math.floor((DAY_ROWS_FOR_CLASSES - booked) / rowsAtLetIn(this.game.quiz.questions.length)));
+  }
+
+  /** At the start the class is there and the looks are fixed: the booking shrinks to what was written plus the most the rest can write. */
+  private async shrinkRows(): Promise<void> {
+    const rows = this.meta!.rows;
+    const run = this.game!.run;
+    if (!rows || rows.settled || !run) return;
+    const rest = rowsFromStart(G.activePlayers(run).length, this.game!.quiz.questions.length);
+    await this.budget().moveRows(this.ctx.id.toString(), rows.written + rest).catch(() => {});
+  }
+
+  /** The final ranking: nothing more is written for the class, so the booking settles with what was. */
+  private async settleRows(): Promise<void> {
+    const rows = this.meta!.rows;
+    if (!rows || rows.settled) return;
+    try {
+      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true);
+    } catch {
+      // Unsettled, the quiz's end settles it (endInstance).
+      return;
+    }
+    rows.settled = true;
+    await this.persist(["meta"]);
   }
 
   private async afterTeacherChange(changed: ("run" | "fixes" | "meta")[]): Promise<void> {
@@ -1069,6 +1171,8 @@ export class Instance extends DurableObject<Env> {
     // The run as written now carries every look changed so far; a look
     // changed while the write is under way waits for the next one.
     const covered = entries.run !== undefined ? this.looksWaiting.splice(0) : [];
+    // Each key is a row; what the class writes counts against its booking.
+    if (meta.rows && !meta.rows.settled) meta.rows.written += Object.keys(entries).length;
     try {
       await this.ctx.storage.put(entries);
     } catch (e) {
@@ -1171,7 +1275,8 @@ export class Instance extends DurableObject<Env> {
    */
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
-    await this.budget().release(this.ctx.id.toString()).catch(() => {});
+    const rows = this.meta?.rows;
+    await this.budget().release(this.ctx.id.toString(), rows && !rows.settled ? rows.written : undefined).catch(() => {});
     const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;
@@ -1212,6 +1317,7 @@ export class Instance extends DurableObject<Env> {
       phase: run ? run.phase : "idle",
       avatars: away.map((p) => ({ id: p.id, avatar: p.avatar })),
       entry: this.meta ? this.entry() : "full",
+      ...(run?.waiting ? { waiting: true as const } : {}),
     };
   }
 
@@ -1332,6 +1438,7 @@ export class Instance extends DurableObject<Env> {
       zoom: !!image && G.zoomed(game),
       phase,
       current: run ? run.current : -1,
+      waiting: !!run?.waiting,
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
       answered: this.answeredNow(),
       answeredBy: [...inIds].map((id) => ({ id, avatar: run!.players[id].avatar })),
@@ -1406,6 +1513,8 @@ export class Instance extends DurableObject<Env> {
       }),
       phase: run ? run.phase : "idle",
       current: run ? run.current : -1,
+      waiting: !!run?.waiting,
+      room: this.room(),
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),

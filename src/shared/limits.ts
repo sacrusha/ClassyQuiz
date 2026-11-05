@@ -18,8 +18,13 @@ export const MAX_PLAYERS = 60;
 export const DOOR_OPEN_MS = 5 * 60_000;
 /** New players once the quiz is under way (past DOOR_OPEN_MS and the first question): a latecomer gets in, a stream of strangers with the code doesn't. */
 export const MAX_LATE_JOINERS = 5;
-/** Changes of mind per student and question; the last accepted tap counts. */
-export const MAX_ANSWER_CHANGES = 10;
+/**
+ * Changes of mind per student and question, so three successive answers: a
+ * mis-tap and one rethink. The last accepted tap counts. Kept low so that
+ * what a class can write at most is small enough to book in full
+ * (docs/design/hosting-and-limits.md, "Running classes finish").
+ */
+export const MAX_ANSWER_CHANGES = 2;
 /**
  * Uploads a day, across the site. The "room for a few dozen classes a day" on
  * the start page and in public/own-copy.html holds only while the caps here
@@ -28,16 +33,35 @@ export const MAX_ANSWER_CHANGES = 10;
  * changes them makes that sentence untrue.
  */
 export const MAX_UPLOADS_PER_DAY = 300;
+/**
+ * Rows a day the classes may book (docs/design/hosting-and-limits.md, "Running
+ * classes finish"): the Free plan writes 100,000 a day across the account;
+ * the rest is for uploads (the quiz and each picture are rows), the site's
+ * small objects and what a booking doesn't cover. Back at 00:00 UTC.
+ */
+export const DAY_ROWS_FOR_CLASSES = 80_000;
+/**
+ * The check warns that the site is nearly full when fewer classes than this
+ * still fit today (this one included), with the way to more quizzes; a day
+ * whose bookings reached NEARLY_FULL of DAY_ROWS_FOR_CLASSES counts as busy
+ * on the landing's line beside the full days (docs/design/hosting-and-limits.md,
+ * "Running classes finish").
+ */
+export const ROOM_WARN = 3;
+/** The owner: lower than 80%, half for now. */
+export const NEARLY_FULL = 0.5;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
 export const SLEEP_AFTER_MS = 45 * 60_000;
 
 /** The self-hosting nudge, appended to every refusal. */
-const OWN_COPY = "Your AI can set up your own copy of the site: classyquiz.pages.dev/own-copy says how.";
+const OWN_COPY = "For more quizzes, a site of your own or your school's: classyquiz.pages.dev/own-copy says how.";
 
 /** Why a device can't join a class (server/game.ts); shown on it, in words its teacher can act on. */
 export const CLASS_FULL = "This class is full. Ask your teacher.";
+/** A student device before the teacher let the class in: it waits, and joins by itself once they do. */
+export const CLASS_WAITING = "Your teacher lets the class in in a moment.";
 export const CLASS_STARTED = "This quiz has started and takes no more players. Ask your teacher.";
 
 /**
@@ -58,6 +82,12 @@ export function quotaResetAt(now = new Date()): string | null {
 }
 
 /** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
+/** Letting a class in, refused: the day's rows are booked by the classes under way. */
+export function classesFullMessage(now = new Date()): string {
+  const at = quotaResetAt(now);
+  return `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+}
+
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
   if (full === "bytes") {
     return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use). ${OWN_COPY}`;

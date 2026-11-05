@@ -160,8 +160,15 @@ Purpose and reasons: docs/design/root-page.md.
   type 63953 47 in the code box". No closing time, no Delete, no older
   quizzes.
 - **The own copy:** one line under Run, only on a device that has
-  uploaded before (`cq.days`, dates only) and only when the site refused an
-  upload on a day of the last 30 (`GET /api/site`).
+  uploaded before (`cq.days`, dates only) and only when the site was full
+  or busy on a day of the last 30 (`GET /api/site`).
+- **On the check, before the class is let in,** on a day the free site is
+  nearly full: "The free site is nearly full today: room for about 2 more
+  classes." (one more class: "room for one more class"); when no class fits
+  or letting in was refused: "The free site can't take more classes today:
+  the ones running now use what is left. It takes new ones again at 01:00
+  Swiss time." Both followed by "More quizzes: a site of your own or your
+  school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
 - **The network check** is no longer on the root page: the upload error,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
@@ -192,6 +199,8 @@ check (§3.3). `/own-copy` and `/check` have the same small header.
 ### 3.2 The two entrances after a code
 
 Students (`/play#63953`) get no screen of their own:
+- before the teacher lets the class in, a wait: "Your teacher lets the
+  class in in a moment.", joining by itself at the tap;
 - in the lobby, straight to their avatar, with two rows of pictures below
   it to dress it until Start: six background shapes in its colour and
   eight hats (docs/design/class-and-wall.md);
@@ -278,13 +287,18 @@ A question opened (or all of them, with Show the solutions / Hide the solutions)
 ```
 
 - **The tab that uploaded opens on the check;** "Let the class in ▶"
-  is the one tap to the join screen, "‹ Questions" the way back. The tab
-  remembers which it shows (sessionStorage): a reload stays there. A wall
+  lets the class in and is the one tap to the join screen, "‹ Questions" the
+  way back. The tab remembers which it shows (sessionStorage): a reload
+  stays there, and before the class is let in it is the check. A wall
   that takes the steering back in the lobby (its Remote left or went away)
-  shows the join screen.
+  shows the join screen once the class is let in.
 - **The class code is on the check, small,** with the count once someone
-  has joined: a teacher who reads it aloud has the class joining without the
-  tap.
+  has joined. Teacher devices use it with the teacher code at any time;
+  student devices that arrive with it before the tap wait ("Your teacher
+  lets the class in in a moment.") and join by themselves at the tap. With
+  a Remote, the Remote's lobby has "Let the class in ▶" until it is
+  tapped, and the wall shows the quiz's title without the code until then.
+  Start also lets the class in.
 - **The teacher code sits at rest** on the check, in one sentence naming
   both needs; on the join screen it is behind "A second device ›", a sheet.
   "open a second screen in a new window" (hidden on a phone) opens a window that asks the same

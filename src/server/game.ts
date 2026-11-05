@@ -12,7 +12,7 @@
 // docs/design/question-flow.md, "When a tap counts".
 
 import type { Quiz } from "../quiz/format.ts";
-import { CLASS_FULL, CLASS_STARTED, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, speedBonus } from "../shared/tempo.ts";
 
@@ -133,6 +133,12 @@ export interface Run {
    * matches.
    */
   votes?: number;
+  /**
+   * The class waits outside: the teacher hasn't let it in yet ("Let the class
+   * in", or Start). Students can't join until then; teacher devices aren't
+   * players and come in any time. Absent: let in.
+   */
+  waiting?: true;
 }
 
 export interface Game {
@@ -214,7 +220,7 @@ export function pickAvatar(run: Run, random: () => number): Avatar {
   return pool[Math.floor(random() * pool.length)];
 }
 
-export { DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
+export { CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS };
 
 /**
  * Whether a new player comes in freely: the class is still arriving. That
@@ -234,6 +240,7 @@ export function doorOpen(run: Run, now: number): boolean {
 export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number): Player {
   const run = needRun(g);
   if (run.phase === "final") throw new GameError("This quiz has finished.");
+  if (run.waiting) throw new GameError(CLASS_WAITING);
   const all = Object.values(run.players);
   if (all.length >= MAX_PLAYERS) throw new GameError(CLASS_FULL);
   const late = !doorOpen(run, now);
@@ -305,8 +312,16 @@ function open(g: Game, run: Run, q: number, now: number): void {
 export function begin(g: Game, now: number): void {
   const run = needRun(g);
   if (run.phase !== "lobby") throw new GameError("The quiz has already started.");
+  delete run.waiting;
   run.started = now;
   open(g, run, nextShown(g, -1), now);
+}
+
+/** "Let the class in": students can join from now on. In the lobby only; again changes nothing. */
+export function letIn(g: Game): void {
+  const run = needRun(g);
+  if (run.phase !== "lobby") return;
+  delete run.waiting;
 }
 
 export function answering(g: Game): Answering | null {

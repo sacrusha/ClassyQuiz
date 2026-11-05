@@ -46,6 +46,21 @@ from that, and this file is about them:
   schools let `pages.dev` through, and whether the AIs' user-triggered
   fetchers can read a page on it, is not established. An own domain would be
   the remedy.
+- **Where an own copy can run.** On another Cloudflare account it is the same
+  site under another name. On a teacher's own laptop it needs no AI and no
+  account (the AI only writes the quiz, and the guidance can be read from a
+  public copy), but the class's tablets and the teacher's phone must reach the
+  laptop over the room's network, which school Wi-Fi often doesn't allow
+  between devices; the laptop is often school-managed and can't run a server;
+  and without HTTPS the browser gives no screen wake lock. A school's own
+  server avoids all three, since the school's IT controls its network and
+  certificates, and avoids an outside service, which at a school may need a
+  data protection review first.
+- **The code is written to be convertible.** The Cloudflare-specific part is
+  small and in known files, the logic it calls is pure and tested under Node,
+  and `scripts/simulate.mjs` checks any running copy end to end. So a school's
+  AI can convert the server to the school's own, and the project maintains
+  one server.
 - The classroom and devices designed for are in the backlog's Project
   section.
 
@@ -104,6 +119,22 @@ The refusal messages in `shared/limits.ts` (`OWN_COPY`) still name
 `classyquiz.pages.dev/own-copy`, so a copy shows the demo's address there. A
 copy that raises its limits rarely shows them.
 
+### A copy on a school's own server
+
+The README's "On your school's own server" is what a school's AI converts
+from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
+and the two checks it passes. `/own-copy` offers the route to teachers
+(`root-page.md`, "The own copy"). The conversion is the school's and is not
+checked here.
+
+A converted copy left as it is has one dependency on the live site: a
+teacher's AI reads guidance before writing a quiz, and the parser is tolerant
+only one way. A quiz from older guidance runs on a newer site
+(`quiz-format.md`); a quiz from newer guidance can fail on an older copy. And
+the AI can't reach an address inside the school. So the README requires the
+converted start page to name an outside address serving its own version's
+guidance.
+
 ### What lives, and for how long
 
 Keeping a quiz on the server serves one purpose: a device that lost its
@@ -150,7 +181,7 @@ them, and the README points self-hosters there.
   device doesn't send an answer it already shows as chosen; the server doesn't
   store a tap that changes nothing (a resend, or the same answer again; the
   newer sequence number is kept in memory, so a late older tap still loses);
-  changes of mind are capped at `MAX_ANSWER_CHANGES` (10) per student and
+  changes of mind are capped at `MAX_ANSWER_CHANGES` (2) per student and
   question, and past that the device shows the answer that counts.
 - **Players per class: `MAX_PLAYERS` (60), removed avatars included.** The run
   is one stored value rewritten with every answer and must stay under the 2 MB
@@ -199,6 +230,98 @@ them, and the README points self-hosters there.
   browsers school devices run. It is the second layer behind escaping: quiz
   text is the teacher's AI's and shows on every screen of the class, so a slip
   in a page that builds HTML from it must not run as script.
+
+### Running classes finish
+
+Purpose: when the free plan runs out, it runs out on a new class before it
+is let in, where the refusal and the ways to more quizzes are, and never on a
+class under way. "Failure in front of the class ends adoption" (backlog,
+Constraints).
+
+Situation: of the platform's daily limits, rows written are likely the first
+to run out on a busy day, and they run out in the middle of lessons: a class
+writes about 1,300 (Situation, "What a class costs"; about 1,000 is the
+owner's guess for a real one), so the day carries about 75 classes, while the
+upload cap lets 300 quizzes in. The upload and bytes caps count quizzes and
+bytes, not what a class writes. How many devices poll, and so whether
+requests run out first instead, is not known.
+
+The design is the owner's: quizzes book slots and release them when done,
+the booking shrinks at Start, a low cap on changes of mind instead of
+overbooking, students only once the class is let in, one stored quiz per
+device. The numbers and the rest are the implementer's, to confirm.
+
+- **Students join once the class is let in** (`teacher-devices.md`, "The
+  single tab: check, then join"); teacher devices come in at any time. So a
+  quiz uploaded only to look it over (for tomorrow, say) writes nothing for
+  a class and books nothing.
+- **Letting the class in books the most its class can write**
+  (`server/rows.ts`), so nothing is overbooked and no margin is guessed. The
+  class isn't known yet, so it is `MAX_PLAYERS`: each joins (2 rows), changes
+  look up to `MAX_LOOK_CHANGES` (2 rows each), answers each question at most
+  three times (`MAX_ANSWER_CHANGES`, 2: a mis-tap and one rethink, the owner:
+  adequate; 2 rows each), plus the teacher's steps. For 15 questions that is
+  about 9,700 rows, the looks a third of it. Start without letting in books
+  the same. `SiteBudget` keeps the day's ledger (`r:` and the day, back at
+  00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
+  the rest is for uploads, whose quiz and pictures are rows, the site's small
+  objects and what a booking doesn't cover). A class the ledger can't carry is
+  refused at the tap, on the teacher's screen with no child in yet; the day
+  counts as full. If the ledger can't be reached, the class goes in unbooked
+  rather than be stopped by the site's own bookkeeping.
+- **The teacher hears before it fails.** The upload's booking answers with
+  the day's rows booked, kept with the quiz (`Meta.dayRows`, also after a
+  refused tap), and the check (and a Remote's lobby) shows, while fewer than
+  `ROOM_WARN` (3) classes like this one fit: "nearly full today: room for
+  about n more classes", or at none "can't take more classes today … again at
+  01:00 Swiss time", both with "More quizzes: a site of your own or your
+  school's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
+  where a toast would be gone before a teacher who looked away saw it. The
+  count is from the upload or the last tap, not live; three classes is
+  roughly the last third of the day. Days whose bookings reached
+  `NEARLY_FULL` (half, the owner's: lower than 80%) count as busy on the
+  landing's line beside the full days
+  (`root-page.md`, "The own copy").
+- **At Start the booking shrinks** to what was written plus the most the rest
+  can write: the class that came plus the latecomers the door lets in
+  (`MAX_LATE_JOINERS`), the looks fixed. A class of 25 then holds about
+  3,200.
+- **At the final ranking the booking settles**: the ledger keeps what was
+  written (counted per key the instance stores) and gets the rest back; if
+  that call fails, the quiz's end settles it instead. The
+  quiz itself stays its three hours for photographs and rejoining. A quiz
+  that ends or expires before its final ranking settles then.
+- So the ledger limits classes at the same time, not in the day: about 8
+  lobbies let in at once, or about 24 started classes of 25, while finished
+  classes count only what they wrote. The last booking of a busy day leaves
+  some of the day unused, which is accepted.
+- **A let-in lobby that is left holds its booking**, about 12% of the day,
+  until the quiz expires three hours after the teacher's last step. One
+  quiz per device bounds that per device: a device's next upload ends its
+  previous quiz if that one never started (`POST /api/i/:id/replaced` with
+  the previous quiz's secret, sent by the root page once the new upload is
+  in; each upload replaces the one before, so only the latest needs asking), so a lobby opened at the
+  end of a look-over and left, or a test with a few devices, doesn't pile up.
+  A started quiz is never ended this way, so a quiz paused over lunch
+  survives a new zip tried on the same laptop. A let-in lobby with children
+  in it ends too, and their tablets say the quiz has ended: a new upload
+  from the device that steers is taken as the teacher moving on (the right
+  quiz after a wrong one), and a lobby whose children count as keeping it
+  would let a test with a few devices, left in the lobby, hold its booking
+  after all. The device already knows its
+  latest quiz and its secret (`root-page.md`, "Coming back").
+- **The day's spending, for the owner:** `GET /api/site` answers, beside
+  `full`, `rows`: what is booked or spent now, of `DAY_ROWS_FOR_CLASSES`, and
+  per day (kept 31 days) the classes let in, the rows written by those that
+  finished, and the ledger's peak, so how close a day came to its limit is
+  a fact to look up. Nothing about a quiz or who made it.
+- A booking made before midnight UTC and moved after it leaves the new
+  day's ledger alone: the rare class across the turn writes some rows the
+  new day doesn't count.
+
+Not covered: requests. Counting each in an object would itself be a request;
+a class on WebSockets spends few, and a script hammering `/api` is the case
+for a domain with a rate-limiting rule.
 
 ### When the allowance runs out anyway
 
@@ -251,6 +374,10 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 - German, French and Italian wording of the two caps' messages, by a native
   reader; the caps' wording has not been seen in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.
+- Whether any school converts the server, and how its AI fares with the
+  README section; and which outside address serves a converted copy's own
+  version of the guidance in a way the AIs read (the guidance page on GitHub
+  at the converted commit is the obvious candidate, unread by any AI so far).
 - Whether the class cost above, and so the capacity sentence, still holds now
   that a question steps through four or five states, each a view to every
   device; it was derived when a question had three.
