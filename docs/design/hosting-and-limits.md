@@ -249,8 +249,8 @@ devices poll, and so whether requests run out first instead, is not known.
 The design (the owner's: quizzes book slots and release them when done, the
 shrink at Start, one stored quiz per device, a low cap on changes of mind
 instead of overbooking; the rest the implementer's, to confirm). First to
-build: the booking at the lobby, the cap, the shrink at Start and the
-release; the rest can follow. A class realistically writes about 1,000 rows
+build: the booking at the lobby, the cap, the shrink at Start, the release
+and one unstarted quiz per device; counting the day's spending can follow. A class realistically writes about 1,000 rows
 (the owner's guess), so the worst-case booking of the last quiz in a day
 leaves about 5% of the day unused, which is accepted.
 
@@ -271,8 +271,9 @@ leaves about 5% of the day unused, which is accepted.
 - At the final ranking the booking is released: nothing more is written, and
   what was written stays spent for the day. The quiz itself stays its three
   hours for photographs and rejoining.
-- Possibly later, if unstarted quizzes still crowd the day: a device holds
-  one quiz that has not started. Its next upload ends the
+- A device holds one quiz that has not started, since a teacher may still
+  open the lobby at the end of a look-over and leave, or try the site with a
+  few devices (a test that starts shrinks to its few players anyway). Its next upload ends the
   previous one if that one never left the lobby, so test uploads and the
   re-upload after a fix don't each hold a full booking for three hours. A
   started quiz is never ended this way, so a quiz paused over lunch survives
