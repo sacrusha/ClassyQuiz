@@ -105,18 +105,16 @@ Purpose and reasons: docs/design/root-page.md.
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
-│   Claude Opus wrote the example  │ │ [Back to the quiz ▶] Class code  ││ quiz this device
-│   quiz, 3 Nov 2026.              │ │ On another device: type 63953 47 ││ started, until its
+│   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Class code  ││ quiz this device
+│   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
 │ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
 │   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   For example, with photos of    │ │ [ Upload the quiz your AI      │ │
-│   two sheets:                    │ │   made (.zip) ] or drop it here│ │
-│  ( Hi! Can you make me a quiz … )│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
+│   [sheets] [chess board] [?]     │ │ [ Upload the quiz your AI      │ │
+│   tabs, one ask shown:           │ │   made (.zip) ] or drop it here│ │
+│  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
-│   Or, with nothing decided yet:  │                                   │ uploaded before, the
-│  ( I need a quiz for classyquiz… )│                                  │ site full lately
-│   The AI then asks you for what  │
-│   it still needs, before the quiz│                                   │
+│                                  │                                   │ uploaded before, the
+│                                  │                                   │ site full lately
 ├──────────────────────────────────┴───────────────────────────────────┤
 │ About classyQuiz … (English, for AIs)                                 │
 ```
@@ -135,9 +133,10 @@ Purpose and reasons: docs/design/root-page.md.
   video exists; no ▶. Below 720 px wide its frames are one row that scrolls
   sideways.
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
-- **Build's step 2** has two example asks: the labelled one with photos, and
-  the open one ("I need a quiz for classyquiz.pages.dev. Help?"), after which
-  the AI asks what it needs.
+- **Build's step 2** has three example asks behind three picture tabs: the
+  labelled one with photos of sheets, a chess quiz described in words (with
+  the AI, plan and date that answered it), and the open one ("Read
+  classyquiz.pages.dev. I need a classyQuiz. Help?").
 - **Run a quiz takes a .zip and nothing else.** The button opens the file
   chooser; a .zip can also be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
