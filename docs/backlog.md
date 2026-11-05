@@ -302,8 +302,8 @@ bar, all in the open list; item 15, not built.
     test with a few devices, stays bounded. First to build: those five. Then:
     the day's spending counted. Owner: booking slots and
     releasing them, the shrink at Start, one stored quiz per device, the low
-    cap instead of overbooking; the rest is the implementer's, to confirm.
-    Open: the cap's number (2 proposed). Not built,
+    cap instead of overbooking, at 2 changes (three successive answers); the
+    rest is the implementer's, to confirm. Not built,
     `design/hosting-and-limits.md`, "Running classes finish".
 
 ## Later — Paper and memory
