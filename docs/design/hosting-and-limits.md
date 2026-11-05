@@ -319,6 +319,9 @@ device. The numbers and the rest are the implementer's, to confirm.
   day's ledger alone: the rare class across the turn writes some rows the
   new day doesn't count.
 
+A design that cuts a class's rows to about a tenth is kept ready in
+`teacher-holds-the-open-period.md`.
+
 Not covered: requests. Counting each in an object would itself be a request;
 a class on WebSockets spends few, and a script hammering `/api` is the case
 for a domain with a rate-limiting rule.
