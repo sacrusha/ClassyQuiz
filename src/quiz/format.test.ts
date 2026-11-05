@@ -148,6 +148,20 @@ test("question text that merely starts with a number keeps it", () => {
   assert.equal(r.quiz.questions[1].text, "3 apples and 2 pears: how many fruits?");
 });
 
+test("a number alone on its line: a question with no text, or text starting on the next line", () => {
+  const r = parseQuiz(`Title: T\n\n1.\nImage: a.png\n+ x\n- y\n\n2)\nWhat is 2 + 2?\n+ 4\n- 5\n`);
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(r.warnings, []);
+  assert.deepEqual(r.quiz.questions.map((q) => q.text), ["", "What is 2 + 2?"]);
+  assert.equal(r.quiz.questions[0].image, "a.png");
+});
+
+test("a number alone after the last question is reported by its number", () => {
+  const r = parseQuiz(`Title: T\n\n1. One?\n+ a\n- b\n\n2.\n`);
+  assert.equal(r.ok, true);
+  assert.equal(r.warnings[0].message, `Text after the last question was ignored: "2.".`);
+});
+
 test("unnumbered questions work", () => {
   const r = parseQuiz(`Title: T\nWhat is 2 + 2?\n- 3\n+ 4\nWhat is 3 + 3?\n+ 6\n- 5\n`);
   assert.equal(r.ok, true);
