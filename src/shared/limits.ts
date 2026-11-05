@@ -18,8 +18,13 @@ export const MAX_PLAYERS = 60;
 export const DOOR_OPEN_MS = 5 * 60_000;
 /** New players once the quiz is under way (past DOOR_OPEN_MS and the first question): a latecomer gets in, a stream of strangers with the code doesn't. */
 export const MAX_LATE_JOINERS = 5;
-/** Changes of mind per student and question; the last accepted tap counts. */
-export const MAX_ANSWER_CHANGES = 10;
+/**
+ * Changes of mind per student and question, so three successive answers: a
+ * mis-tap and one rethink. The last accepted tap counts. Kept low so that
+ * what a class can write at most is small enough to book in full
+ * (docs/design/hosting-and-limits.md, "Running classes finish").
+ */
+export const MAX_ANSWER_CHANGES = 2;
 /**
  * Uploads a day, across the site. The "room for a few dozen classes a day" on
  * the start page and in public/own-copy.html holds only while the caps here
