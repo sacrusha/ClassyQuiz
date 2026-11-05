@@ -508,6 +508,7 @@ export class Instance extends DurableObject<Env> {
       return json({ error: "bad request" }, 400);
     }
     if (action === "info") return this.forOwner(body.secret);
+    if (action === "replaced") return this.replaced(body.secret);
     if (!body.auth) return json({ error: "bad request" }, 400);
     const out: ServerMessage[] = [];
     const session = this.authenticate(body.auth, out);
@@ -578,6 +579,21 @@ export class Instance extends DurableObject<Env> {
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
     return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands } satisfies QuizInfo);
+  }
+
+  /**
+   * The device that uploaded this quiz uploaded another: a device holds one
+   * quiz that hasn't started (docs/design/hosting-and-limits.md, "Running
+   * classes finish"), so this one ends if it never left the lobby, with its
+   * booking. A started quiz stays, so one paused over lunch survives a new
+   * zip tried on the same laptop.
+   */
+  private async replaced(secret: unknown): Promise<Response> {
+    if (!this.live() || typeof secret !== "string" || !safeEqual(secret, this.meta!.secret)) return json({ error: "gone" }, 404);
+    const run = this.game!.run;
+    if (run && run.phase !== "lobby") return json({ ended: false });
+    await this.endInstance();
+    return json({ ended: true });
   }
 
   private notePoll(session: Session): void {

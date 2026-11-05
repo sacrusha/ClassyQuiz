@@ -282,8 +282,10 @@ device. The numbers and the rest are the implementer's, to confirm.
   some of the day unused, which is accepted.
 - **A let-in lobby that is left holds its booking**, about 12% of the day,
   until the quiz expires three hours after the teacher's last step. One
-  quiz per device (not built) bounds that per device: a device's next upload
-  ends its previous quiz if that one never started, so a lobby opened at the
+  quiz per device bounds that per device: a device's next upload ends its
+  previous quiz if that one never started (`POST /api/i/:id/replaced` with
+  the previous quiz's secret, sent by the root page once the new upload is
+  in; each upload replaces the one before, so only the latest needs asking), so a lobby opened at the
   end of a look-over and left, or a test with a few devices, doesn't pile up.
   A started quiz is never ended this way, so a quiz paused over lunch
   survives a new zip tried on the same laptop. The device already knows its
