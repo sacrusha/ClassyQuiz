@@ -302,7 +302,12 @@ device. The numbers and the rest are the implementer's, to confirm.
   in; each upload replaces the one before, so only the latest needs asking), so a lobby opened at the
   end of a look-over and left, or a test with a few devices, doesn't pile up.
   A started quiz is never ended this way, so a quiz paused over lunch
-  survives a new zip tried on the same laptop. The device already knows its
+  survives a new zip tried on the same laptop. A let-in lobby with children
+  in it ends too, and their tablets say the quiz has ended: a new upload
+  from the device that steers is taken as the teacher moving on (the right
+  quiz after a wrong one), and a lobby whose children count as keeping it
+  would let a test with a few devices, left in the lobby, hold its booking
+  after all. The device already knows its
   latest quiz and its secret (`root-page.md`, "Coming back").
 - **The day's spending, for the owner:** `GET /api/site` answers, beside
   `full`, `rows`: what is booked or spent now, of `DAY_ROWS_FOR_CLASSES`, and
