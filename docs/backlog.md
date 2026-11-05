@@ -318,6 +318,10 @@ The quiz is already made; it can be more than one activity.
 - **Corrected quiz downloadable after the run** — the in-class fixes shouldn't
   be lost for the next variant.
 - **Results export** — a teacher who wants to look again.
+- **Rows by holding the open period on the teacher's device** — a design kept
+  ready for when the Free plan's rows bind: about a tenth of a class's
+  rows, a changed ack, a rebuild and an offline overlay
+  (`design/teacher-holds-the-open-period.md`).
 - **Localization**, one sub-item per language — teachers who don't read
   English, classes that should see the few labels there are in their own.
   The bar's labels are nouns so they translate without grammar and fit the
