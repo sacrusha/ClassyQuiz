@@ -237,7 +237,7 @@
 
 <p>No accounts; students join with the lobby code. A quiz, with its class's answers and scores, is deleted when the teacher ends it, or three hours after the teacher last used it. The teacher's lasting copy is the <code>.zip</code>. The teacher's browser strips picture metadata before upload. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device, projector, remote and students', opens that copy's own address.</p>
 
-<p>On upload, the teacher is presented with the questions for a quick review, a button to open the lobby, and the teacher code for an optional teacher device. This view isn't to review a quiz as it's being built, but for stopping what slipped through the build process. The lobby gets the join code, a QR code as a shortcut, a display and count of joined avatars, some quick settings, and a start button. The teacher then clicks through the quiz, question after question: revealing the question, revealing the choices and opening voting, closing voting and possibly discussing the question, revealing the correct solutions, and the updated ranking. Then comes the next question.</p>
+<p>On upload, the teacher is presented with the questions for a quick review, a button to open the lobby, and the teacher code for an optional teacher device. The lobby gets the join code, a QR code as a shortcut, a display and count of joined avatars, some quick settings, and a start button. The teacher then clicks through the quiz, question after question: revealing the question, revealing the choices and opening voting, closing voting and possibly discussing the question, revealing the correct solutions, and the updated ranking. Then comes the next question.</p>
 
 <p>A quiz is the teacher's own material for their own class, and does not get shared outside the classroom by this site. It's both derivative work and teaching material. The site runs on a free plan meant for a few teachers. The code is public at <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a>; an advanced AI assistant can set up a copy on a free Cloudflare account; this site's page <a href="/own-copy">/own-copy</a> describes the process.</p>
 
@@ -337,27 +337,26 @@ Order: fixed
   <li>Presenting the quiz, and refining it on the teacher's feedback.</li>
 </ol>
 
-<p>A presentation serves the teacher's feedback, so it needs to be easy to read, not faithful to the site. Two kinds work well:</p>
+<p>Presenting the questions makes the session interactive and allows immediate feedback. Two kinds work well:</p>
 <ul>
-  <li><strong>The whole quiz, dense.</strong> The form the teacher sees again on the site after uploading: each question numbered, its choices on one line, the right ones marked, pictures by name or rendered inline. The site shuffles the choices, so their order here means nothing. In a file or document that the AI's app shows beside the conversation, a long quiz is easier to read than in the chat.
-<pre><code>Percentages, week 31 · 4 questions
-
-1. What is 10% of 250?  · background: timetable.jpg
-   ✓ 25 · 2.5 · 250 · 10
-2. A jacket costs 80 francs and is reduced by 25%. What does it cost now?  · picture: jacket.png
-   ✓ 60 francs · 55 francs · 20 francs · 75 francs
-3. Which is more?
-   ✓ 50% of 40 · 10% of 120
-4. Which quiz should we play next week?  · picture: timetable.jpg · order fixed
-   ✓ Crafts · ✓ Maths · ✓ KPop Demon Hunters · ✓ English</code></pre></li>
-  <li><strong>A question type, as the class will see it.</strong> The <a href="/layout">layout page</a> has the projector's layout for a question as HTML and CSS, for AIs that can render a preview. Visualized presentations of question types are typically well received, particularly for questions with pictures.</li>
+  <li>High density. A dedicated file to visually show the content keeps the conversation focused on the interaction. Zoomed out the teacher sees by shape what kinds of questions there are, zoomed in they review correctness. Example layout (<code>G→[…]</code> columns sized in pixels or <code>1*</code>, a share of the rest, more children than columns wrapping into rows; <code>F↓</code>, <code>F→</code> a stack down or across; <code>?</code> only when present):
+<pre><code>Sheet    F↓(Title, G→[1*|1*|1*](Card…))   3000px wide, page #fbf8f2, gap 40, cards in quiz order
+Title    "Percentages, week 31 · 4 questions"   bold
+Card     F↓(Head, Pictures?, Choices, Tags?)   white, rounded, padding 28
+Head     F→(Number, Text)              number white on #a8471a, text wrapping
+Pictures F→(Image?, Background?)       300px high, the background washed out and labelled
+Choices  G→[1*|1*](Choice…)            with a picture choice G→[1*|1*|1*|1*], 220px high
+Choice   F→(Mark, Text | Image)        right: ✓ and a thick #1f8a4c outline; wrong: a thin grey one
+Tags     "order fixed"                 small, grey</code></pre>
+  Colour can't mark the right choices: on the projector, red, blue, yellow and green are the choices' places after the shuffle, so their order on the sheet means nothing either. Optionally <code>python <a href="/preview.py">preview.py</a> quiz.zip</code> draws the sheet as <code>review.png</code> and names the characters its font can't draw.</li>
+  <li>High fidelity. The <a href="/layout">layout page</a> has the projector's layout for a question as HTML and CSS.</li>
 </ul>
 
 <p>A teacher who puts all the details into the first prompt usually knows the process and wants step 2 straight away. Such a teacher may need nothing but the <code>.zip</code>, and is best asked up front whether they also want a presentation, so they can answer while the first version is being built.</p>
 
-<p>For the questions themselves, what's valued is good questions for the class: easy to understand, with clear right and wrong answers, and pictures that work. A teacher who needs the sheet's exercises taken over one to one says so.</p>
+<p>For the questions themselves, what's valued is good questions for the class: easy to understand, with clear right and wrong answers, and pictures that work. A teacher who needs a sheet's exercises taken over one to one says so.</p>
 
-<p>On controversial questions, especially in politics and history — controversy not defined by being mainstream or not, but by the existence of genuine sound arguments pulling very different ways — it tends to work out better to let the teacher drive and be more passive.</p>
+<p>On controversial questions, especially in politics and history — controversy not defined by being mainstream or not, but by the existence of genuine sound arguments pulling very different ways — it tends to work out better to let the teacher drive.</p>
 </div>
 
 </main>

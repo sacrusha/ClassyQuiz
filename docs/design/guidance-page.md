@@ -61,6 +61,14 @@ are two: not tripping injection guards, and not ordering the reader about for
 things nobody must do. Where an instruction is the point, a plain, well-marked
 one is right.
 
+Wide terms work like an abstract interface in OOP (owner, from Telic
+Programming's "negative space"): the page names what the builder works with,
+such as a presentation, and the builder specializes it from its own
+situation, the way a subclass overrides. What doesn't apply to a builder
+drops out without being said, so qualifiers like "for AIs that can render a
+preview" add nothing, and imply the page knows the builder's means better
+than the builder does.
+
 The page leaves out what a model that can write the quiz at all gets right
 anyway: that the keywords stay English in a quiz of any language (owner: an
 AI that can't be trusted not to translate format tags can't be trusted to
@@ -83,8 +91,7 @@ is narrower than the real one on purpose (`quiz.txt`, UTF-8), so that the
 format can migrate later (`quiz-format.md`).
 
 The lesson is described as far as it shapes a quiz: the teacher's look over
-the questions at upload, which catches what slipped through the build and is
-not a review of a quiz in the making; the teacher code for a second device;
+the questions at upload; the teacher code for a second device;
 each question first read with its choices hidden, then the choices, the
 class's answers without the solution, the solution, the ranking. What the site
 reports at upload is not described: the AI's file should work the first time
@@ -127,15 +134,27 @@ frontloads everything probably wants the build at once. "Presentation" is delibe
 each AI shows the teacher the questions, or a question type, with whatever
 tools it has, for approval or correction during the conversation, not as a
 gate. Its purpose is the teacher's feedback, so the page asks for usefulness,
-not fidelity, and names two kinds. The dense one is the whole quiz in the
-form of the check (`user-flow.md` §3.3): plain text any AI can produce, read
-quickly, and seen again by the teacher after upload. It leaves out the
-choices' colours and shapes, which come from places on screen after the
-shuffle, so a preview's red would not be the projector's red. Pictures go by
-name or rendered inline, whichever the AI's way of presenting (in the chat or
-as a file) offers; a file the AI's app shows beside the conversation suits a
-long quiz better than the chat log. The faithful one is a question type on
-the projector, for AIs that can render HTML; its home is the layout page
+not fidelity, and names two kinds. The dense one is the whole quiz as one
+high-resolution picture, for judging whether the questions are the kind the
+teacher needs, the right answers right and the wrong ones wrong. The chat is
+for the conversation: a preview over several screens pushes it apart, jumps on
+every remark, and multiplies with each version, worse with pictures mixed in;
+one picture stays one item, read whole when scaled down and in detail when
+zoomed; a page the app shows beside the chat (an artifact) does the same.
+The pictures sit in the AI's sandbox, and written out by hand as base64 they
+cost the AI its output, so code puts them in: into an HTML page the code
+writes, where the app shows that page beside the chat, or into the picture
+`/preview.py` draws from the zip (Python and Pillow; SVG needs cairosvg or
+rsvg-convert), like `verify.py`. The page gives the layout in a short layout
+notation, so each AI picks the delivery its app shows well.
+A text form is left to the AI that can't draw: an AI that turns sheet photos
+into a quiz can infer one. The sheet leaves out the choices' colours and
+shapes, which come from places on screen after the shuffle, so a preview's
+red would not be the projector's red. The faithful one is the projector's
+look, for AIs that can render HTML, for a question type or the whole quiz:
+about a screen per question, which is the point where the picture is the
+question (the chess run, below). Which to use is the builder's call in its
+situation; the page gives what each costs and serves. Its home is the layout page
 (`/layout`), which stays as-built and complete, as HTML and CSS, because it is
 linked rather than inlined. On controversial subjects
 the teacher leads.
@@ -174,11 +193,28 @@ unstated) got a summary and one question before the quiz, the language, with
 defaults the teacher can change (new numbers, no timer) stated. One sample is
 not a rate.
 
+Observed once each, 5 Nov 2026, the same ask: five rated chess puzzles for
+eight-year-olds, in German, the last one a choice between two positions.
+- Claude Opus 5.5 on paid claude.ai (Opus isn't on the free tier) asked four
+  questions first, one of them whether the teacher wanted to see the quiz
+  before the zip. It sourced Lichess puzzles, checked them with Stockfish, and
+  delivered a verified zip with 900-pixel PNG boards, an artifact of all five
+  questions in the layout page's forms with the boards and a "Lösungen
+  markieren" toggle, and in the chat a table of each question's right and
+  wrong moves with caveats. That the artifact's HTML was written by code, the
+  boards embedded by it, is inferred, not seen. Chess boards need the full
+  display; five questions kept it short.
+- Free ChatGPT made up its own puzzles, quickly and poorly; several keys were
+  wrong.
+
 ## Not known
 
 - How real fetching behaves, and the effect of the claude.ai system prompt on
   a model reading the page.
 - Behaviour of other models and of free tiers on the current page.
+- Whether AI sandboxes have cairosvg or rsvg-convert, without which
+  `preview.py` shows SVG pictures as "not drawn here"; untested, as is that
+  path of the script.
 - Whether a partial ask reliably gets the short summary and question rather
   than a quiz at once; samples have gone both ways.
 - Whether the drawn number-line quizzes' pictures match their keys.
