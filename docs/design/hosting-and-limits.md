@@ -46,6 +46,21 @@ from that, and this file is about them:
   schools let `pages.dev` through, and whether the AIs' user-triggered
   fetchers can read a page on it, is not established. An own domain would be
   the remedy.
+- **Where an own copy can run.** On another Cloudflare account it is the same
+  site under another name. On a teacher's own laptop it needs no AI and no
+  account (the AI only writes the quiz, and the guidance can be read from a
+  public copy), but the class's tablets and the teacher's phone must reach the
+  laptop over the room's network, which school Wi-Fi often doesn't allow
+  between devices; the laptop is often school-managed and can't run a server;
+  and without HTTPS the browser gives no screen wake lock. A school's own
+  server avoids all three, since the school's IT controls its network and
+  certificates, and avoids an outside service, which at a school may need a
+  data protection review first.
+- **The code is written to be convertible.** The Cloudflare-specific part is
+  small and in known files, the logic it calls is pure and tested under Node,
+  and `scripts/simulate.mjs` checks any running copy end to end. So a school's
+  AI can convert the server to the school's own, and the project maintains
+  one server.
 - The classroom and devices designed for are in the backlog's Project
   section.
 
@@ -103,6 +118,22 @@ the demo's name.
 The refusal messages in `shared/limits.ts` (`OWN_COPY`) still name
 `classyquiz.pages.dev/own-copy`, so a copy shows the demo's address there. A
 copy that raises its limits rarely shows them.
+
+### A copy on a school's own server
+
+The README's "On your school's own server" is what a school's AI converts
+from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
+and the two checks it passes. `/own-copy` offers the route to teachers
+(`root-page.md`, "The own copy"). The conversion is the school's and is not
+checked here.
+
+A converted copy left as it is has one dependency on the live site: a
+teacher's AI reads guidance before writing a quiz, and the parser is tolerant
+only one way. A quiz from older guidance runs on a newer site
+(`quiz-format.md`); a quiz from newer guidance can fail on an older copy. And
+the AI can't reach an address inside the school. So the README requires the
+converted start page to name an outside address serving its own version's
+guidance.
 
 ### What lives, and for how long
 
@@ -251,6 +282,10 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 - German, French and Italian wording of the two caps' messages, by a native
   reader; the caps' wording has not been seen in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.
+- Whether any school converts the server, and how its AI fares with the
+  README section; and which outside address serves a converted copy's own
+  version of the guidance in a way the AIs read (the guidance page on GitHub
+  at the converted commit is the obvious candidate, unread by any AI so far).
 - Whether the class cost above, and so the capacity sentence, still holds now
   that a question steps through four or five states, each a view to every
   device; it was derived when a question had three.

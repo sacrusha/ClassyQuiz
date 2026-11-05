@@ -282,15 +282,29 @@ doesn't raise it on a first visit.
   once per visit, and only from such a device.
 - A refused upload says the same at the moment it happens, with the link.
 - `/own-copy` (`src/public/own-copy.html`, static, no script) is the short guide:
-  why (the shared site's allowance; an own copy's is yours alone); who does what
+  why (the shared site's allowance; an own copy's is yours alone), then two
+  routes. First the school's own copy: the teacher whose laptop can't install
+  programs, or who doesn't want to set anything up, forwards a paragraph to the
+  school's IT (copyable, as on `/check#it`), which points to the README for
+  Cloudflare or for converting it to the school's own server. A school is a
+  natural unit for an own copy, and an outside service is red tape at a school:
+  it may need a data protection review first, so the school's own server comes
+  first in the paragraph. The conversion is the school's, done with their AI,
+  so this project maintains one server and checks no conversion; the README
+  gives the AI what to change, what to keep and the tests a converted copy must
+  pass. Then setting one up yourself: who does what
   (GitHub is where the code is, no account needed; Cloudflare's free plan runs it,
   on your own account; the AI does the setup); what you need (an AI that runs
   programs on your computer, such as Claude Code, since a browser chat can explain
   but not carry out; a computer where you may install programs, which a
   school-managed laptop often isn't; an email address); a sample prompt; what you
   do yourself (the account, a token the AI says where to create and where to put,
-  a name for the site); and afterwards (name your address to the AI; ask it to
-  update from GitHub). The token goes where the AI says, not into the chat. The
+  a name for the site); and afterwards, for both routes: the address to name
+  to the AI is the one the copy's start page shows, and updating is a choice. A
+  copy changes only when its owner updates it; left as it is, it shows the same
+  screens every lesson, which a teacher before a lesson values more than what is
+  new. Updated, it gets the new and the fixed (for a self-set-up copy: ask the
+  AI to update it from GitHub). The token goes where the AI says, not into the chat. The
   page makes no time promise.
 - The capacity sentence ("room for a few dozen classes a day", on `/own-copy`)
   is per day because the limits reset daily and "full for today" is what a

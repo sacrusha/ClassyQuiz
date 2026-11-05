@@ -4,7 +4,7 @@ Project → versions as goals → items that get picked, worked and delivered. E
 item names the problem it solves for the teacher or the class. Done items are one
 line with a pointer to the design file that holds their purpose and situation
 (`design/<file>.md`); what is still to do is in full, and in the one list at the
-end. Last settled: 2026-11-04.
+end. Last settled: 2026-11-05.
 
 ## Project
 
@@ -201,7 +201,13 @@ bar, all in the open list.
    a copy online. If yes, time it and state it dated; if not, no number
    anywhere, and own-copy says who can: someone with an AI that runs programs,
    or a colleague by hand from the README. The own-copy line understates (it
-   counts only days the upload cap refused).
+   counts only days the upload cap refused). `/own-copy` offers two routes: the school's own copy (a paragraph
+   for IT, pointing to the README for Cloudflare or for converting it to the
+   school's own server with their AI) and setting one up yourself; updating a
+   copy is a choice, an unchanging copy being what a teacher values before a
+   lesson. The conversion is the school's, not checked here (owner: the point of
+   telling them to convert is so we don't have to); `simulate.mjs` is their
+   check (`design/hosting-and-limits.md`, "A copy on a school's own server").
 5. The guidance, the owner's rewrite merged — built, `design/guidance-page.md`.
 6. Tempo in the instance, in the teacher's hand: a bar of two buttons (Play,
    Countdown) stepping the question through its states — built and live,
