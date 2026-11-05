@@ -61,9 +61,9 @@ The picture lines are specified in the guidance page; the parser is
 `src/quiz/format.ts`. What they are shaped for:
 
 - `Image: q3.png` after the question text and before the answers: the
-  question's picture. `Background: forest.jpg` before the first question
-  lies behind every question; after a question's text it replaces that
-  for this question.
+  question's picture. `Background: forest.jpg` after a question's text lies
+  behind that question. The parser also takes one before the first question,
+  behind every question; the guidance doesn't publish it (`quiz-format.md`).
 - `+ Image: pie-3.png` / `- Image: pie-1.png`: an answer that is a picture,
   mark in its column. Text and picture answers mix ("none of these"), and a
   question with picture answers may have its own `Image:`.
@@ -208,8 +208,9 @@ readable, chosen by the page, not by the AI or the teacher.
   tiles at the reveal. No clicker button maps to it: the clickers' "black
   screen" key sends `B` or `.`, and a figure appearing there would surprise.
 - **Background.** Behind the whole projector, `object-fit: cover`, under a
-  light veil so the question and tiles read from the back row; the text sits
-  on white cards. A question's own background replaces the quiz's; the
+  55% wash of the page colour (`#backdrop::after` in `app.css`) so the
+  question and tiles read from the back row; the text sits on 90% white
+  cards. The page states both figures. A question's own background replaces the quiz's; the
   quiz's also shows in the lobby and at the rankings.
 - **Picture answers.** A tile is the picture on the answer's colour (no
   ground of its own, so transparent areas show the colour), the shape badge,
