@@ -125,8 +125,19 @@ with the teacher before the build, because the build takes one to three
 minutes and some teachers do something else meanwhile; a teacher who
 frontloads everything probably wants the build at once. "Presentation" is deliberately abstract:
 each AI shows the teacher the questions, or a question type, with whatever
-tools it has, using the layout page (`/layout`) where it can, for approval or
-correction during the conversation, not as a gate. On controversial subjects
+tools it has, for approval or correction during the conversation, not as a
+gate. Its purpose is the teacher's feedback, so the page asks for usefulness,
+not fidelity, and names two kinds. The dense one is the whole quiz in the
+form of the check (`user-flow.md` §3.3): plain text any AI can produce, read
+quickly, and seen again by the teacher after upload. It leaves out the
+choices' colours and shapes, which come from places on screen after the
+shuffle, so a preview's red would not be the projector's red. Pictures go by
+name or rendered inline, whichever the AI's way of presenting (in the chat or
+as a file) offers; a file the AI's app shows beside the conversation suits a
+long quiz better than the chat log. The faithful one is a question type on
+the projector, for AIs that can render HTML; its home is the layout page
+(`/layout`), which stays as-built and complete, as HTML and CSS, because it is
+linked rather than inlined. On controversial subjects
 the teacher leads.
 
 ### Claims about what an AI can do
