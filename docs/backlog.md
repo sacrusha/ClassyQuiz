@@ -201,9 +201,11 @@ bar, all in the open list.
    a copy online. If yes, time it and state it dated; if not, no number
    anywhere, and own-copy says who can: someone with an AI that runs programs,
    or a colleague by hand from the README. The own-copy line understates (it
-   counts only days the upload cap refused). `/own-copy` offers two routes: the school's own copy (a paragraph
-   for IT, pointing to the README for Cloudflare or for converting it to the
-   school's own server with their AI) and setting one up yourself; updating a
+   counts only days the upload cap refused). `/own-copy` offers two routes to more quizzes: setting one up
+   yourself, which a teacher can do alone, maybe with a paid AI subscription;
+   and, when that seems out of reach or there is no hurry, the school's own copy
+   (a paragraph for IT, pointing to the README for Cloudflare or for converting
+   it to the school's own server with their AI); updating a
    copy is a choice, an unchanging copy being what a teacher values before a
    lesson. The conversion is the school's, not checked here (owner: the point of
    telling them to convert is so we don't have to); `simulate.mjs` is their
