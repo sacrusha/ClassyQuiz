@@ -150,7 +150,7 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 
 Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list; item 15 partly built, not deployed.
+bar, all in the open list; item 15 built, not deployed.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -364,6 +364,12 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- A class refused for the day's room can't run in that lesson; only waiting
+  or an own copy are offered. Whether the refusal should also offer running
+  the quiz on the projector alone (the browser plays it; the class answers by
+  hand or with coloured cards; no student devices, no scoring), which costs
+  the free plan nothing since static pages don't count
+  (`design/hosting-and-limits.md`, "Running classes finish"). Not decided.
 - The identity (v4 item 14) as built, seen by the owner in a local test
   ("looks good", 2026-11-04): the
   implementer's calls are ink controls and a rust accent, no blue,
