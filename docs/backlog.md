@@ -4,7 +4,7 @@ Project → versions as goals → items that get picked, worked and delivered. E
 item names the problem it solves for the teacher or the class. Done items are one
 line with a pointer to the design file that holds their purpose and situation
 (`design/<file>.md`); what is still to do is in full, and in the one list at the
-end. Last settled: 2026-11-04.
+end. Last settled: 2026-11-05.
 
 ## Project
 
@@ -150,7 +150,7 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 
 Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list.
+bar, all in the open list; item 15 built, not deployed.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -201,7 +201,15 @@ bar, all in the open list.
    a copy online. If yes, time it and state it dated; if not, no number
    anywhere, and own-copy says who can: someone with an AI that runs programs,
    or a colleague by hand from the README. The own-copy line understates (it
-   counts only days the upload cap refused).
+   counts only days the upload cap refused). `/own-copy` offers two routes to more quizzes: setting one up
+   yourself, which a teacher can do alone, maybe with a paid AI subscription;
+   and, when that seems out of reach or there is no hurry, the school's own copy
+   (a paragraph for IT, pointing to the README for Cloudflare or for converting
+   it to the school's own server with their AI); updating a
+   copy is a choice, an unchanging copy being what a teacher values before a
+   lesson. The conversion is the school's, not checked here (owner: the point of
+   telling them to convert is so we don't have to); `simulate.mjs` is their
+   check (`design/hosting-and-limits.md`, "A copy on a school's own server").
 5. The guidance, the owner's rewrite merged — built, `design/guidance-page.md`.
 6. Tempo in the instance, in the teacher's hand: a bar of two buttons (Play,
    Countdown) stepping the question through its states — built and live,
@@ -283,6 +291,24 @@ bar, all in the open list.
     (hidden answers, faded tiles at the reveal) may let pale red and pale
     yellow run together — unchecked.
 
+15. **Running classes finish** — a teacher whose class stops mid-quiz because
+    the free plan ran out doesn't come back. Rows written are likely the first
+    limit to run out, during lessons, while the site's caps count quizzes and
+    let in four times what the rows carry. Built: students join once the
+    teacher lets the class in (teacher devices any time); letting in books the
+    most rows the class can write (changes of mind capped at 2), refused on the
+    teacher's screen when the day can't carry it; the booking shrinks at Start
+    and settles at the final ranking; a device's next upload ends its previous
+    quiz if that one never started; the days' classes, rows written and
+    peak are in `GET /api/site` for the owner. The check warns while fewer
+    than three classes fit and keeps the refusal on screen, both with "More
+    quizzes: a site of your own or your school's ›" (the owner: "Your own
+    copy" too ambiguous); the landing's line counts busy days too (half the day's rows booked at once). Not
+    deployed. Owner: booking slots and releasing them, the shrink at
+    Start, one stored quiz per device, the low cap instead of overbooking,
+    students only once let in; the numbers are the implementer's, to confirm.
+    `design/hosting-and-limits.md`, "Running classes finish".
+
 ## Later — Paper and memory
 
 The quiz is already made; it can be more than one activity.
@@ -338,6 +364,12 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- A class refused for the day's room can't run in that lesson; only waiting
+  or an own copy are offered. Whether the refusal should also offer running
+  the quiz on the projector alone (the browser plays it; the class answers by
+  hand or with coloured cards; no student devices, no scoring), which costs
+  the free plan nothing since static pages don't count
+  (`design/hosting-and-limits.md`, "Running classes finish"). Not decided.
 - The identity (v4 item 14) as built, seen by the owner in a local test
   ("looks good", 2026-11-04): the
   implementer's calls are ink controls and a rust accent, no blue,

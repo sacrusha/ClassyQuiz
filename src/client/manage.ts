@@ -3,6 +3,7 @@
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
+import { ROOM_WARN, quotaResetAt } from "../shared/limits.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import type { Line } from "./net.ts";
@@ -204,7 +205,8 @@ export class Steer {
     const at = atOf(stepState(v));
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
-      if (!r.ok && r.error) toast(r.error);
+      // A long message (the site full for today) stays long enough to read.
+      if (!r.ok && r.error) toast(r.error, r.error.length > 80 ? 12_000 : 4000);
       return r;
     };
     switch (a) {
@@ -225,6 +227,10 @@ export class Steer {
         // No question: Exit is alone in the middle of the bar, away from where Play was.
         if (!this.presses.other()) return true;
         await send({ op: "endInstance" });
+        return true;
+      case "let-in":
+        // Refused for the day's room: the check's notice says so and stays (roomNotice), no toast.
+        await line.send({ op: "letIn" });
         return true;
       case "speed":
         await send({ op: "speed", value: !v.speed });
@@ -348,6 +354,23 @@ export function toast(msg: string, ms = 4000): void {
 }
 
 /** "classyquiz.pages.dev · 63953"; on a phone-sized wall the address gives way to the code (app.css). */
+/**
+ * Before the class is let in, on a day the free site is nearly or quite full:
+ * what that means for this class, and the way to more quizzes
+ * (docs/design/hosting-and-limits.md, "Running classes finish"). It stays
+ * while it holds; the page opens beside the quiz.
+ */
+export function roomNotice(v: TeacherView): string {
+  const room = v.room;
+  if (room === null || room >= ROOM_WARN) return "";
+  const at = quotaResetAt();
+  const says =
+    room === 0
+      ? `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
+      : `The free site is nearly full today: room for ${room === 1 ? "one more class" : `about ${room} more classes`}.`;
+  return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">More quizzes: a site of your own or your school's ›</a></p>`;
+}
+
 export function addressAndCode(code: string): string {
   return `<span class="addr">${esc(siteAddress())} · </span><strong>${esc(code)}</strong>`;
 }

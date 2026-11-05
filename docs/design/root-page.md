@@ -212,8 +212,9 @@ from the file manager with Ctrl+V.
 - A refused upload says which cap it hit, since the two come back differently:
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
-  request allowance has its own message. Each is followed by "Your own copy: how
-  ›" to `/own-copy`. The caps are `design/hosting-and-limits.md`.
+  request allowance has its own message. Each is followed by "More quizzes: a site
+  of your own or your school's ›" to `/own-copy`, which names what the link
+  gives (the owner: "Your own copy" was too ambiguous). The caps are `design/hosting-and-limits.md`.
 - On success the tab becomes the projector, on the check screen
   (`design/teacher-devices.md`).
 
@@ -273,25 +274,43 @@ unless the site is close to running out of quizzes and tells them". So the page
 doesn't raise it on a first visit.
 
 - One line under Run, shown only on a device that has uploaded before and only if
-  the site refused an upload on at least one of the last 30 days. It states the
-  fact: "On 3 of the last 30 days this shared site was full and turned new
-  quizzes away", then the link. The device keeps the days it uploaded (`cq.days`,
+  the site was full or busy on at least one of the last 30 days: it
+  refused an upload or a class, or the classes' bookings reached
+  `NEARLY_FULL` (half; the owner: lower than 80%) of the day's rows. It states the fact: "On 3 of the last
+  30 days this shared site was full or busy. For more quizzes, a site
+  of your own or your school's:", then the link. Counting the busy
+  days brings the way to more quizzes to the teacher who relies on the site
+  before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
 - The site records, once a day, each day on which the budget refused an upload
-  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}`. The page asks
+  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (and the days' classes for the owner, `hosting-and-limits.md`). The page asks
   once per visit, and only from such a device.
 - A refused upload says the same at the moment it happens, with the link.
 - `/own-copy` (`src/public/own-copy.html`, static, no script) is the short guide:
-  why (the shared site's allowance; an own copy's is yours alone); who does what
-  (GitHub is where the code is, no account needed; Cloudflare's free plan runs it,
+  why (the shared site's allowance; an own copy's is yours alone), then two
+  routes to more quizzes. First setting one up yourself, the path a teacher can
+  take alone, maybe with a paid AI subscription (about $20 a month): who does what (GitHub is where the code is, no account needed; Cloudflare's free plan runs it,
   on your own account; the AI does the setup); what you need (an AI that runs
   programs on your computer, such as Claude Code, since a browser chat can explain
   but not carry out; a computer where you may install programs, which a
   school-managed laptop often isn't; an email address); a sample prompt; what you
   do yourself (the account, a token the AI says where to create and where to put,
-  a name for the site); and afterwards (name your address to the AI; ask it to
-  update from GitHub). The token goes where the AI says, not into the chat. The
-  page makes no time promise.
+  a name for the site; the token goes where the AI says, not into the chat).
+  Then the school's own copy, for the teacher to whom
+  that seems out of reach, or who is in no hurry: they forward a paragraph to
+  the school's IT (copyable, as on `/check#it`), which points to the README for
+  Cloudflare or for converting it to the school's own server. A school is a
+  natural unit for an own copy, and an outside service is red tape at a school:
+  it may need a data protection review first, so the school's own server comes
+  first in the paragraph. The conversion is the school's, done with their AI,
+  so this project maintains one server and checks no conversion; the README
+  gives the AI what to change, what to keep and the tests a converted copy must
+  pass. Afterwards, for both routes: the address to name
+  to the AI is the one the copy's start page shows, and updating is a choice. A
+  copy changes only when its owner updates it; left as it is, it shows the same
+  screens every lesson, which a teacher before a lesson values more than what is
+  new. Updated, it gets the new and the fixed (for a self-set-up copy: ask the
+  AI to update it from GitHub). The page makes no time promise.
 - The capacity sentence ("room for a few dozen classes a day", on `/own-copy`)
   is per day because the limits reset daily and "full for today" is what a
   teacher meets; what it rests on is in `design/hosting-and-limits.md`,

@@ -10,7 +10,7 @@ import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, partySize, shapeSvg, syncAvatars } from "./look.ts";
-import { Steer, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
+import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { finalHtml, fitFinal } from "./final.ts";
@@ -63,7 +63,7 @@ function onMessage(m: ServerMessage): void {
     preload(view.pictures);
     // A wall that takes the steering back in the lobby (its steering tab left
     // or went away) keeps showing the class's screen, not the check.
-    if (before && !before.steer && view.steer && view.phase === "lobby") setLobby("join", false);
+    if (before && !before.steer && view.steer && view.phase === "lobby" && !view.waiting) setLobby("join", false);
     if (before && before.remote !== view.remote) {
       if (view.remote === "present") toast("Remote connected");
       // On the wall: nothing here invites the class to the teacher's page.
@@ -219,15 +219,17 @@ function setLobby(screen: "check" | "join", draw = true): void {
 
 function renderManagedLobby(v: ScreenView): void {
   lobbyKey = "";
-  if (lobbyScreen === "check") renderCheck(v);
+  // Before the class is let in there is no join screen to show.
+  if (lobbyScreen === "check" || v.waiting) renderCheck(v);
   else renderJoin(v);
 }
 
 /**
  * The check: the teacher's page to confirm it is the right quiz before the
  * class joins (docs/design/teacher-devices.md, "The single tab: check, then
- * join"). The class code is small because it may be read aloud, and the class
- * joins without the tap. "Let the class in" is the one tap to the join screen.
+ * join"). The class code is small; a teacher device can use it with the
+ * teacher code, the class only once "Let the class in" is tapped: the one tap
+ * to the join screen, which lets the class in.
  */
 function renderCheck(v: ScreenView): void {
   const t = v.steer!;
@@ -238,6 +240,7 @@ function renderCheck(v: ScreenView): void {
       <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${t.questions.length} ${t.questions.length === 1 ? "question" : "questions"}</span></h1>
       <p class="classcode">Class code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
+    ${roomNotice(t)}
     <p class="cstart"><button class="btn primary big" data-act="show-join">Let the class in &#9654;</button></p>
     <p class="device cline">${gone}${secondDevice(v)}</p>
     ${questionList(t, steer.ui)}
@@ -354,6 +357,15 @@ function renderJoin(v: ScreenView): void {
 
 let lobbyKey = "";
 function renderLobby(v: ScreenView): void {
+  if (v.waiting) {
+    // The wall beside a steering tab, before the class is let in: no code yet.
+    if (lobbyKey === "waiting") return;
+    lobbyKey = "waiting";
+    delete main.dataset.skeleton;
+    main.innerHTML = `<div class="bar"><span class="grow">${esc(v.title)}</span></div>
+      <div class="center"><p class="muted">The class is let in in a moment.</p></div>`;
+    return;
+  }
   const key = `${v.code}`;
   if (lobbyKey !== key || !main.querySelector(".lobby")) {
     lobbyKey = key;
@@ -1024,7 +1036,11 @@ for (const area of [main, sbar]) {
     if (!el) return;
     const act = el.dataset.act;
     if (act === "projector-window") projectorWindow();
-    else if (act === "show-join") setLobby("join");
+    else if (act === "show-join") {
+      // The first time, the tap lets the class in; the join screen follows the view that says so.
+      if (view?.waiting) void steer.run("let-in");
+      setLobby("join");
+    }
     else if (act === "show-check") setLobby("check");
     else if (act === "second-device") {
       if (view) showNote(secondDevice(view));

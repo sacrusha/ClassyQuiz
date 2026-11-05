@@ -16,6 +16,12 @@ All commands run in `src/` unless said otherwise.
 - `server/`: game logic and the Durable Objects, and the state Worker's config
   (`server/wrangler.toml`).
 - `functions/`: the Pages functions, the `/api` routes.
+- The Cloudflare-specific code stays in the Durable Object classes and the
+  `/api` router, with the logic they call kept pure (`server/game.ts`,
+  `server/images.ts`, `quiz/`, `shared/`). A school converts the server to its
+  own with an AI, and converts again to take an update (README, "On your
+  school's own server"); code that spreads the platform further makes every
+  conversion bigger.
 - `shared/`: the protocol types and the constants that are tuned (`limits.ts`,
   `tempo.ts`).
 - `client/`: the page scripts, plain DOM without a framework, bundled per page

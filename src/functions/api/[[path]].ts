@@ -11,11 +11,13 @@
 //   POST /api/i/:id/poll    {auth, v}         long-poll fallback
 //   POST /api/i/:id/cmd     {auth, cmd}       command over HTTP (fallback)
 //   POST /api/i/:id/info    {secret}          the pasting device: title, code, where it stands
+//   POST /api/i/:id/replaced {secret}         the pasting device uploaded another: the quiz ends if it never started
 //   GET  /api/ping                            network check
 //   GET  /api/echo                            network check: WebSocket echo
 //   POST /api/attempt       {format}          count an upload attempt by format
 //   GET  /api/stats                           upload attempts by format
-//   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line)
+//   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line),
+//                                             and the days' classes: let in, rows written, the ledger's peak
 
 import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TEACHER_CODE, TOO_MANY_CODES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
@@ -34,7 +36,10 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (parts[0] === "ping") return json({ ok: true, t: Date.now() });
     if (parts[0] === "echo") return echo(request);
     if (parts[0] === "stats" && request.method === "GET") return json(await stats(env).read());
-    if (parts[0] === "site" && parts.length === 1 && request.method === "GET") return json({ full: await env.BUDGET.get(env.BUDGET.idFromName("site")).fullDays() });
+    if (parts[0] === "site" && parts.length === 1 && request.method === "GET") {
+      // full: the landing's own-copy line; rows: the days' classes, for the owner (docs/design/hosting-and-limits.md, "Running classes finish").
+      return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).site());
+    }
     if (parts[0] === "i" && parts.length === 3) return await toInstance(request, env, parts[1], parts[2]);
     if (parts[0] === "i" && parts.length === 5 && parts[2] === "img" && request.method === "GET") return await toInstance(request, env, parts[1], "img");
     if (request.method !== "POST") return json({ error: "not found" }, 404);
@@ -104,7 +109,7 @@ async function join(env: Env, body: Record<string, unknown>, ip: string | null):
 }
 
 async function toInstance(request: Request, env: Env, id: string, action: string): Promise<Response> {
-  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info"].includes(action)) return json({ error: "not found" }, 404);
+  if (!/^[0-9a-f]{64}$/.test(id) || !["ws", "poll", "cmd", "img", "info", "replaced"].includes(action)) return json({ error: "not found" }, 404);
   let doId: DurableObjectId;
   try {
     doId = env.INSTANCE.idFromString(id);

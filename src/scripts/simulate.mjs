@@ -480,6 +480,25 @@ function maybeAnswer(p) {
   })();
 }
 
+// A student device before the teacher lets the class in waits, and is told so
+// when it is let in (docs/design/teacher-devices.md, "The single tab: check, then join").
+{
+  const early = new Device("early", instance, { role: "guest" }, "ws");
+  const choices = [];
+  early.on((m) => m.t === "choose" && choices.push(m));
+  early.start();
+  await until(() => choices.length > 0, 5000, "the early device's choice");
+  check(choices.at(-1).waiting === true, "before the class is let in, a student device is told to wait");
+  const tooSoon = await early.send({ op: "newPlayer" });
+  check(!tooSoon.ok, `a student can't join before the class is let in (${tooSoon.error})`);
+  check(steerer().view.waiting === true, "the steering screen says the class waits");
+  const letIn = await steerer().send({ op: "letIn" });
+  check(letIn.ok, "the steering screen lets the class in");
+  await until(() => !choices.at(-1).waiting, 5000, "the early device hearing it is let in");
+  check(true, "a waiting student device hears that the class is let in");
+  early.kill();
+}
+
 for (let i = 0; i < N; i++) {
   players.push(await joinPlayer(`s${i}`, ALL_POLL || i % 5 === 4 ? "poll" : "ws"));
 }
