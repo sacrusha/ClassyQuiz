@@ -80,6 +80,8 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
 
 .qtext { font-weight: 700; text-align: center; line-height: 1.2; margin: 0; overflow-wrap: anywhere; display: flex; align-items: center; justify-content: center; flex: 0 1 auto; min-height: 18vh; }
+/* A question its picture carries has no text: no empty band, no blank card over a background. */
+.qtext:empty { display: none; }
 .tiles { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vh; min-height: 0; }
 .tile {
   background: var(--ans); color: var(--ans-ink); border-radius: 18px;

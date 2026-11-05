@@ -180,17 +180,16 @@ bar, all in the open list.
    the right quiz — built, `design/root-page.md`.
 3. **Upload is start** — owner: "uploaded the evening before" is not real;
    the parallel class's quiz is its own quiz, started by its own upload. A
-   quiz is one class's lesson. This revises the lifetime built on the 48 h
-   instance with several runs: "Again with another class" (its one hidden
+   quiz is one class's lesson. This revises the instance with several runs: "Again with another class" (its one hidden
    value, carrying in-run key fixes, belongs to the Later item "corrected quiz
    download"), "closes" on the landing, and Delete there duplicating End at the
    ranking. Small to medium, mostly removal — the `again` command, the lobby
    reopened an hour after the ranking, "closes" and Delete-by-title on the
    landing, tempo carry-over between runs; game logic, scoring and the
-   connection code untouched. One decision: the new lifetime must not end at
-   the final ranking (an interrupted lesson, a tablet reloaded to see its
-   place) — the ranking plus the existing one-hour keep, or idle; the 3 h
-   class-idle ceiling in `shared/limits.ts` is the number to check. Lost until
+   connection code untouched. The lifetime is decided and built: everything
+   goes 3 hours after the teacher's last use, or when the teacher ends it
+   (owner: the purpose of keeping is rejoining a quiz in progress; one
+   duration everywhere is sensible and easy to communicate). Lost until
    "corrected quiz download" ships: a key fixed in class dies with the quiz.
    Lifetime as built: `design/hosting-and-limits.md`.
 4. The foot lines from the teacher's side — own copy for the teacher who will

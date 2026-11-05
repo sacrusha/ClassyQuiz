@@ -145,7 +145,7 @@ const en: Text = {
   notTaken: "The site couldn't take the quiz. Try again.",
   siteFull: (full, at) =>
     full === "bytes"
-      ? `The free site has no room for another quiz right now. It takes one again once others have ended or expired (two days after their last use).`
+      ? `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use).`
       : `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
   quota: (at) => `The free site has used up today's allowance. It works again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
   ownCopyLink: "Your own copy: how ›",
@@ -215,7 +215,7 @@ const de: Text = {
   notTaken: "Die Seite konnte das Quiz nicht annehmen. Versuch es nochmals.",
   siteFull: (full, at) =>
     full === "bytes"
-      ? `Die Gratis-Seite hat im Moment keinen Platz für ein weiteres Quiz. Es geht wieder, wenn andere Quiz beendet oder abgelaufen sind (zwei Tage nach der letzten Benutzung).`
+      ? `Die Gratis-Seite hat im Moment keinen Platz für ein weiteres Quiz. Es geht wieder, wenn andere Quiz beendet oder abgelaufen sind (drei Stunden nach der letzten Benutzung).`
       : `Die Gratis-Seite kann heute keine Quiz mehr annehmen. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} nimmt sie wieder neue.`,
   quota: (at) => `Die Gratis-Seite hat ihr Kontingent für heute aufgebraucht. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} geht sie wieder.`,
   ownCopyLink: "Eine eigene Kopie: wie ›",
@@ -285,7 +285,7 @@ const fr: Text = {
   notTaken: "Le site n'a pas pu prendre le quiz. Réessayez.",
   siteFull: (full, at) =>
     full === "bytes"
-      ? `Le site gratuit n'a pour l'instant plus de place pour un autre quiz. Il en reprend dès que d'autres sont terminés ou expirés (deux jours après leur dernière utilisation).`
+      ? `Le site gratuit n'a pour l'instant plus de place pour un autre quiz. Il en reprend dès que d'autres sont terminés ou expirés (trois heures après leur dernière utilisation).`
       : `Le site gratuit ne peut plus prendre de quiz aujourd'hui. Il en reprend à ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
   quota: (at) => `Le site gratuit a épuisé son quota du jour. Il remarche à ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
   ownCopyLink: "Une copie à vous : comment ›",
@@ -355,7 +355,7 @@ const it: Text = {
   notTaken: "Il sito non è riuscito a prendere il quiz. Riprova.",
   siteFull: (full, at) =>
     full === "bytes"
-      ? `Il sito gratuito per ora non ha più posto per un altro quiz. Ne riprende quando altri sono terminati o scaduti (due giorni dopo l'ultimo uso).`
+      ? `Il sito gratuito per ora non ha più posto per un altro quiz. Ne riprende quando altri sono terminati o scaduti (tre ore dopo l'ultimo uso).`
       : `Il sito gratuito oggi non può prendere altri quiz. Ne riprende alle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
   quota: (at) => `Il sito gratuito ha esaurito la quota di oggi. Torna a funzionare alle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
   ownCopyLink: "Una copia tua: come ›",

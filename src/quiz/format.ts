@@ -278,9 +278,11 @@ interface Block {
   afterAnswers: { kind: "image" | "background"; line: string }[];
 }
 
-// "1. ", "1) ", "Q1: ", "Question 1: ". Stripped only when the number is the
-// one expected next, so "1.5 + 2" or a stray "3." in the text stay put.
-const NUMBERING = /^(?:Q(?:uestion)?\s*)?(\d{1,3})\s*[.):]\s+/i;
+// "1. ", "1) ", "Q1: ", "Question 1: ", or the number alone on its line (a
+// question its picture carries, or text that starts on the next line).
+// Stripped only when the number is the one expected next, so "1.5 + 2" or a
+// stray "3." in the text stay put.
+const NUMBERING = /^(?:Q(?:uestion)?\s*)?(\d{1,3})\s*[.):](?:\s+|$)/i;
 
 function excerpt(text: string, max = 60): string {
   const flat = text.replace(/\s+/g, " ").trim();
@@ -458,6 +460,8 @@ export function parseQuiz(input: string): ParseResult {
       questionBlocks.push(b);
       return;
     }
+    // A number alone on its line leaves no text: the messages show the number.
+    const shown = text ? excerpt(text) : `${b.number}.`;
     const leading = firstAnswered === -1 || i < firstAnswered;
     const trailing = i > lastAnswered;
     if (leading && !trailing) {
@@ -476,13 +480,13 @@ export function parseQuiz(input: string): ParseResult {
       const looksLikeTitle =
         i === firstAnswered - 1 && single !== "" && single.length <= LONG_ANSWER && !/[:?]$/.test(single);
       if (title === null && looksLikeTitle) title = single;
-      else warn(`Text before the first question was ignored: "${excerpt(text)}".`);
+      else warn(`Text before the first question was ignored: "${shown}".`);
     } else if (trailing && firstAnswered !== -1) {
-      warn(`Text after the last question was ignored: "${excerpt(text)}".`);
+      warn(`Text after the last question was ignored: "${shown}".`);
     } else if (firstAnswered === -1) {
       // No question anywhere; reported once below.
     } else {
-      err(`The text "${excerpt(text)}" has no choice lines. Each question is followed by its choices, one per line, starting with "+" (right) or "-" (wrong).`);
+      err(`The text "${shown}" has no choice lines. Each question is followed by its choices, one per line, starting with "+" (right) or "-" (wrong).`);
     }
   });
 
@@ -502,7 +506,6 @@ export function parseQuiz(input: string): ParseResult {
   questions.forEach((q, i) => {
     const num = i + 1;
     const label = q.text ? `Question ${num} ("${excerpt(q.text)}")` : `Question ${num}`;
-    if (q.text === "") err(`${label} has choices but no question text.`);
     if (q.answers.length < MIN_ANSWERS) err(`${label} has only ${q.answers.length} choice; a question has ${MIN_ANSWERS} to ${MAX_ANSWERS}.`);
     if (q.answers.length > MAX_ANSWERS) err(`${label} has ${q.answers.length} choices; a question has at most ${MAX_ANSWERS}.`);
     if (!q.answers.some((a) => a.correct))

@@ -7,7 +7,7 @@ docs/design/; this file says what the screens show.
 ## 1. The model
 
 1. **One code per quiz.** It is made at upload and lives as long as the quiz:
-   until it is deleted, or 48 h after the last teacher action. The class
+   until it is deleted, or 3 h after the last teacher action. The class
    joins with it. "Again with another class" keeps it.
 2. **Two codes, one box.** The code box in the root page's header (and the
    box on `/play` after a wrong code) routes by length; it never submits by

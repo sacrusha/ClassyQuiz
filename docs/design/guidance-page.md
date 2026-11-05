@@ -59,8 +59,13 @@ specification ("a quiz looks like this"), not as commands.
 Rules can't adapt and they block better solutions. The purposes behind this
 are two: not tripping injection guards, and not ordering the reader about for
 things nobody must do. Where an instruction is the point, a plain, well-marked
-one is right, as in the "Any language" paragraph (ask when the language of the
-exercises and of the request don't resolve cleanly).
+one is right.
+
+The page leaves out what a model that can write the quiz at all gets right
+anyway: that the keywords stay English in a quiz of any language (owner: an
+AI that can't be trusted not to translate format tags can't be trusted to
+write a script, ever), and that a quiz has no timer of its own (the AI copies
+the format it is shown).
 
 ### Cut to what the reading model can't know
 
@@ -77,11 +82,14 @@ a file that doesn't follow the format doesn't work, and the published format
 is narrower than the real one on purpose (`quiz.txt`, UTF-8), so that the
 format can migrate later (`quiz-format.md`).
 
-The lesson is described as far as it shapes a quiz: the check with the
-solutions folded away, the teacher code for a second device, each question
-first read with its choices hidden, then the choices, the class's answers
-without the solution, the solution, the ranking, and no clock but the
-teacher's optional countdown. How the steering works (its buttons, a
+The lesson is described as far as it shapes a quiz: the teacher's look over
+the questions at upload, which catches what slipped through the build and is
+not a review of a quiz in the making; the teacher code for a second device;
+each question first read with its choices hidden, then the choices, the
+class's answers without the solution, the solution, the ranking. What the site
+reports at upload is not described: the AI's file should work the first time
+(owner: there must be no loop; a loop that iterates is a failure, and "fix
+it" should allow the obvious fix, by keeping the format simple). How the steering works (its buttons, a
 clicker, a double press, which device takes which job, what happens when a
 phone goes quiet) shapes no quiz, is `user-flow.md`'s, and on the page only
 goes stale. The page uses the teacher screens' words, choices, answers and
@@ -92,7 +100,7 @@ do.
 
 The guidance describes the site as deployed, so what it says is checked
 against `src/` at every change. Facts that live elsewhere (the lifetime of a
-quiz and of a class's data, the picture limits, points for speed) are stated
+quiz and of a class's data, the picture limits) are stated
 on the page as the code does them, and the page changes with the code. The
 page's example quizzes are parsed by the test suite (`src/quiz/format.test.ts`),
 which keeps the specification and the parser in step.
@@ -105,18 +113,17 @@ over an English block, so a fetcher reads English. The guidance runs from
 "About classyQuiz" through the manual (`#site`), what informs the shape of the
 quizzes (`#quizzes`), how quizzes are built (`#format`) and "Build with the
 teacher" (`#with-a-teacher`). The first two sections carry the FAQ-kind
-information (how a lesson runs, privacy, hosting, what the site reports at
-upload), which doubles as context for building; the format section carries
+information (how a lesson runs, privacy, hosting), which doubles as context for building; the format section carries
 what building needs.
 
 The "Build with the teacher" stance is the owner's: the teacher knows what
 they need and is there to say it, so the AI doesn't guess; building takes
 minutes, long enough for the teacher's attention to drift, so asking early
 beats delivering something half right. The page gives three phases (establish
-what gets built, build, present and refine). The first reply is a few lines of
-what is clear and what is open, put so the teacher can answer in a line; a
-teacher who frontloads everything probably wants the build at once, and one
-who wants the gaps filled says so. "Presentation" is deliberately abstract:
+what gets built, build, present and refine) as situation: the gaps are closed
+with the teacher before the build, because the build takes one to three
+minutes and some teachers do something else meanwhile; a teacher who
+frontloads everything probably wants the build at once. "Presentation" is deliberately abstract:
 each AI shows the teacher the questions, or a question type, with whatever
 tools it has, using the layout page (`/layout`) where it can, for approval or
 correction during the conversation, not as a gate. On controversial subjects
@@ -168,5 +175,5 @@ not a rate.
   getting the page fetched before the first build; the test waits until the
   landing and guidance settle, because of the fetch cache.
 - Whether AIs give answer pictures a ground of their own often enough: the
-  page says the tile colour, shuffled, shows through a transparent picture,
+  page says the tile colour shows through a transparent picture,
   and a blueish-green mark once vanished on the blue tile (backlog v4 item 11).
