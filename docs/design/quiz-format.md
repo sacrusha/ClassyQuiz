@@ -93,8 +93,17 @@ The lines `Image:`, `Background:` and picture answers (`+ Image: pie-3.png`) are
 
 The guidance asks for one `quiz.txt` in UTF-8 beside the pictures, narrower than what the site takes so that the format can migrate later under a fixed name. The site takes more: the text is the zip's `.txt` or `.md` file, found by `quizTextFromEntries` in `src/client/unzip.ts`. An AI may put a README or its own notes beside the quiz, so with several text files the one that reads as a quiz wins: no errors first, then the most questions; a tie goes to the top level, then the shortest path. When none has a question the first is taken, so the teacher's error is about the likeliest file.
 
+### The verifier for the AI
+
+Purpose: the AI that wrote `quiz.txt` can catch a slip before the teacher has to. The file is some 100 lines and still in that AI's context, so all it needs is a hint what's wrong: the question's number and the problem, such as an image named in the text and missing from the zip. No line numbers and no detail beyond that; the checker's simplicity is its value, and a longer one is one more thing to keep in step with the format.
+
+`src/public/verify.py` (served at `/verify.py`, linked from the format section of the guidance page) takes a zip and checks what the guidance specifies: `quiz.txt` at the top level in UTF-8, a one-line title, numbered question blocks separated by blank lines, two to four choices with at least one `+`, only the published tags, and every named picture present in the zip (matched without folder or case, as `imageKey` does). It prints `ok` or one line per problem.
+
+It is deliberately stricter than the parser, which forgives what AIs vary (see above): the verifier holds the AI to the published format, the parser protects the teacher from the AI that strayed from it. It does not check picture types, sizes, zip size or text length; the upload does. It is plain Python with the standard library, because an AI with a sandbox usually has it.
+
 ## Not known
 
+- Whether AIs run the verifier: whether they have a sandbox with Python, and whether the line on the page gets them to.
 - Whether AIs now mark several answers right where they shouldn't.
 - Whether AIs use `Order: fixed` where it matters.
 - Whether teachers are confused that the class sees another order than the AI's text.
