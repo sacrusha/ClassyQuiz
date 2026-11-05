@@ -9,13 +9,14 @@
 // reader; the example ask is the teacher's own sentence to their AI, where an
 // imperative is fine (docs/design/guidance-page.md, "Information in place of
 // rules"). Step 1's detail names what is
-// verified and says nothing about free tiers.
+// verified, with its tier and date.
 //
 // The example asks are each language's version of the same ask; the marked
-// parts carry the labels. The second ask has nothing decided: the teacher's
+// parts carry the labels. The chess ask is a description with no sheets, close
+// to the words of its run. The open ask has nothing decided: the teacher's
 // open request; that the AI then asks what it needs is the guidance's
-// "Build with the teacher". The site's address in both is replaced by the
-// one the browser opened.
+// "Build with the teacher". The site's address in all three is replaced by
+// the one the browser opened.
 
 import type { SiteFull } from "../shared/limits.ts";
 
@@ -47,13 +48,17 @@ export interface Text {
   step1: string;
   step1detail: string;
   step2: string;
-  forExample: string;
+  /** The example asks' tabs, by what the teacher brings: sheets, a description, nothing yet. */
+  tabSheets: string;
+  tabChess: string;
+  tabOpen: string;
   ask: AskPart[];
   labels: string[];
-  /** The second example ask, with its lead-in and what follows it. */
-  orOpen: string;
+  /** The chess ask, and which AI answered it (its run: design/guidance-page.md). */
+  askChess: string;
+  chessWho: string;
+  /** The ask with nothing decided. */
   ask2: string;
-  asksBack: string;
   copy: string;
   copied: string;
   run: string;
@@ -105,9 +110,11 @@ const en: Text = {
   capTap: "Each student taps",
   build: "Build a quiz",
   step1: "Choose any good AI.",
-  step1detail: "Claude Opus wrote the example quiz, 3 Nov 2026.",
+  step1detail: "Free Claude Sonnet wrote the example above, 4 Nov 2026: the one free AI that does this reliably.",
   step2: "Ask the AI to build you a quiz for",
-  forExample: "For example, with photos of two sheets:",
+  tabSheets: "With photos of exercise sheets",
+  tabChess: "From a description: a chess quiz",
+  tabOpen: "With nothing decided yet",
   ask: [
     { s: "Read " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -122,9 +129,9 @@ const en: Text = {
     { s: "." },
   ],
   labels: ["this site", "which exercises", "your class", "how many", "which language"],
-  orOpen: "Or, with nothing decided yet:",
+  askChess: "Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?",
+  chessWho: "Claude Opus 5.5, paid plan, 5 Nov 2026",
   ask2: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
-  asksBack: "The AI then asks you for what it still needs, such as your sheets and your class, before it builds the quiz.",
   copy: "Copy",
   copied: "Copied",
   run: "Run a quiz",
@@ -176,9 +183,11 @@ const de: Text = {
   capTap: "Jedes Kind tippt",
   build: "Ein Quiz bauen",
   step1: "Wähle eine gute KI.",
-  step1detail: "Das Beispiel-Quiz hat Claude Opus geschrieben, 3. Nov. 2026.",
+  step1detail: "Das Beispiel oben hat das kostenlose Claude Sonnet geschrieben, 4. Nov. 2026: die eine kostenlose KI, die das zuverlässig kann.",
   step2: "Bitte die KI um ein Quiz für",
-  forExample: "Zum Beispiel, mit Fotos von zwei Aufgabenblättern:",
+  tabSheets: "Mit Fotos von Aufgabenblättern",
+  tabChess: "Aus einer Beschreibung: ein Schach-Quiz",
+  tabOpen: "Wenn noch nichts feststeht",
   ask: [
     { s: "Lies " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -193,9 +202,9 @@ const de: Text = {
     { s: "." },
   ],
   labels: ["diese Seite", "welche Aufgaben", "deine Klasse", "wie viele", "welche Sprache"],
-  orOpen: "Oder, wenn noch nichts feststeht:",
+  askChess: "Lies classyquiz.pages.dev. Bitte mach mir ein classyQuiz zu Schach: 8-Jährige, 400–500 Elo, nur 5 Fragen. Such dafür bewertete Puzzles. Ich lasse ihnen bei jeder Frage etwas Zeit, bevor ich die Antworten zeige und den Countdown starte. Die Antworten dürfen in Schachnotation sein, aber ohne + oder Matt, das wäre zu einfach. Vergiss nicht zu sagen, wer am Zug ist. Bei der letzten Frage gib ihnen 2 ähnliche Stellungen zur Wahl, eine aussichtsreich, eine gewinnend. Auf Deutsch. Was brauchst du?",
+  chessWho: "Claude Opus 5.5, bezahltes Abo, 5. Nov. 2026",
   ask2: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
-  asksBack: "Dann fragt dich die KI, was ihr noch fehlt, etwa deine Blätter oder deine Klasse, bevor sie das Quiz baut.",
   copy: "Kopieren",
   copied: "Kopiert",
   run: "Ein Quiz starten",
@@ -247,9 +256,11 @@ const fr: Text = {
   capTap: "Chaque élève touche",
   build: "Créer un quiz",
   step1: "Choisissez une bonne IA.",
-  step1detail: "Le quiz d'exemple a été écrit par Claude Opus, le 3 nov. 2026.",
+  step1detail: "L'exemple ci-dessus a été écrit par Claude Sonnet gratuit, le 4 nov. 2026 : la seule IA gratuite qui le fait de façon fiable.",
   step2: "Demandez à l'IA un quiz pour",
-  forExample: "Par exemple, avec les photos de deux fiches :",
+  tabSheets: "Avec les photos de fiches",
+  tabChess: "D'après une description : un quiz d'échecs",
+  tabOpen: "Sans rien avoir décidé",
   ask: [
     { s: "Lis " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -264,9 +275,9 @@ const fr: Text = {
     { s: "." },
   ],
   labels: ["ce site", "quels exercices", "votre classe", "combien", "quelle langue"],
-  orOpen: "Ou, sans rien avoir décidé :",
+  askChess: "Lis classyquiz.pages.dev. Fais-moi un classyQuiz d'échecs, s'il te plaît : enfants de 8 ans, 400–500 Elo, 5 questions seulement. Prends des puzzles notés. Je leur laisse un peu de temps sur chaque question avant de montrer les choix et de lancer le compte à rebours. Les choix peuvent être en notation, mais sans + ni mat, ce serait trop facile. N'oublie pas de dire qui a le trait. Pour la dernière question, donne-leur 2 positions semblables au choix, l'une prometteuse, l'autre gagnante. En français. De quoi as-tu besoin ?",
+  chessWho: "Claude Opus 5.5, abonnement payant, 5 nov. 2026",
   ask2: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
-  asksBack: "L'IA vous demande alors ce qui lui manque encore, comme vos fiches et votre classe, avant de faire le quiz.",
   copy: "Copier",
   copied: "Copié",
   run: "Lancer un quiz",
@@ -318,9 +329,11 @@ const it: Text = {
   capTap: "Ogni alunno tocca",
   build: "Crea un quiz",
   step1: "Scegli una buona IA.",
-  step1detail: "Il quiz di esempio l'ha scritto Claude Opus, 3 nov 2026.",
+  step1detail: "L'esempio qui sopra l'ha scritto Claude Sonnet gratuito, 4 nov 2026: l'unica IA gratuita che lo fa in modo affidabile.",
   step2: "Chiedi all'IA un quiz per",
-  forExample: "Per esempio, con le foto di due schede:",
+  tabSheets: "Con le foto di schede",
+  tabChess: "Da una descrizione: un quiz di scacchi",
+  tabOpen: "Senza aver ancora deciso nulla",
   ask: [
     { s: "Leggi " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -335,9 +348,9 @@ const it: Text = {
     { s: "." },
   ],
   labels: ["questo sito", "quali esercizi", "la tua classe", "quante", "quale lingua"],
-  orOpen: "Oppure, senza aver ancora deciso nulla:",
+  askChess: "Leggi classyquiz.pages.dev. Fammi un classyQuiz di scacchi, per favore: bambini di 8 anni, 400–500 Elo, solo 5 domande. Cerca dei puzzle con rating. Lascio loro un po' di tempo su ogni domanda prima di mostrare le scelte e avviare il conto alla rovescia. Le scelte possono essere in notazione scacchistica, ma senza + né matto, sarebbe troppo facile. Non dimenticare di dire a chi tocca muovere. Per l'ultima domanda dai loro 2 posizioni simili tra cui scegliere, una promettente e una vincente. In italiano. Di cosa hai bisogno?",
+  chessWho: "Claude Opus 5.5, abbonamento a pagamento, 5 nov 2026",
   ask2: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
-  asksBack: "Allora l'IA ti chiede ciò che le manca ancora, come le tue schede e la tua classe, prima di fare il quiz.",
   copy: "Copia",
   copied: "Copiato",
   run: "Avvia un quiz",

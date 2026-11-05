@@ -130,18 +130,27 @@ screens, and the order for keyboards and screen readers keep Build first.
 
 ### Build: two steps
 
-Step 1 is "Choose any good AI." Its detail states only what is verified: which AI
-wrote the example quiz, and when. No claim about what an AI can do goes on the
-page without the tier and date of the test (the pattern in backlog v4, owned by design/guidance-page.md);
-nothing says "the free version works" or gives a duration. A free account was
-never tried end to end.
+Step 1 is "Choose any good AI." Its detail states only what is verified, with
+tier and date: free Claude Sonnet wrote the strip's example, 4 Nov 2026
+(`design/example-page.md`), and is the one free AI that does this reliably,
+the owner's finding of 5 Nov 2026 against free ChatGPT, Gemini and Copilot
+(`design/guidance-page.md`, "The AIs verified against"). No claim about what an
+AI can do goes on the page without the tier and date of the test (the pattern
+in backlog v4, owned by design/guidance-page.md); nothing gives a duration.
 
-Step 2 is the ask. It and the line after the open ask say "the AI" where a
-pronoun would do: in the owner's testing Build had too many "it"s to follow.
-The address shown in the bubbles and in Copy is the one the
-browser opened, so an own copy shows its own. Two examples:
+Step 2 is the ask. It says "the AI" where a pronoun would do: in the owner's
+testing Build had too many "it"s to follow. The address shown in the bubbles
+and in Copy is the one the browser opened, so an own copy shows its own.
 
-- With photos of two sheets: a chat bubble with five parts underlined and
+Three example asks, one per thing a teacher may bring: exercise sheets, an idea
+put in words, or nothing yet. They are tabs, one picture each (the two sheets,
+a chess board, a question mark), the chosen one joined to its bubble, so the
+picture names the situation and no lead-in sentence is needed ("For example",
+"Or", "The AI then" were cut for it). Each tab's name in words is its
+accessible name and tooltip. The tabs are made by `home.ts`: without it, and
+for an AI's fetcher, the three asks stand one under the other, sheets first.
+
+- **Sheets**: a chat bubble with five parts underlined and
   labelled under their words: this site, which exercises, your class, how many,
   which language. The labels are advice on how to ask, given without ordering
   anything. The labels stay under their words on a phone too: in the owner's
@@ -151,25 +160,29 @@ browser opened, so an own copy shows its own. Two examples:
   were read wrongly in the owner's testing: "pages" as the site's pages, and
   "no. 1, 3 and 4" as frames of the strip. So the ask says "sheets" and ties
   the numbers to them ("like no. 1, 3 and 4 from these two sheets").
-- With nothing decided yet: "Read <address>. I need a classyQuiz. Help?", then
-  the sentence that the AI asks for what it still needs, with two examples, before
-  it builds the quiz (the guidance's "Build with the teacher": what is open,
-  put so the teacher can answer in a line, and the quiz after the answer). The
-  examples and "before" tell a first-timer what the next turn looks like and
-  that no quiz built on guesses comes first. It is the owner's ask, translated.
+- **Chess**: a description with no sheets, the ask of the chess run
+  (`design/guidance-page.md`), tidied; it asks for the quiz in the page's
+  language, where the run asked for German. It shows a brief that says how the
+  teacher will run the quiz (time to look before the choices, whose turn), and
+  ends "What do you need?". A line under it names the AI, plan and date,
+  Claude Opus 5.5 on a paid plan, 5 Nov 2026, since step 1 names a free model
+  and this one isn't. Its bubble is the longest, on a phone about 350 px.
+- **Nothing decided**: "Read <address>. I need a classyQuiz. Help?". That the
+  AI then asks what it still needs before it builds (the guidance's "Build
+  with the teacher") is no longer said on the page; the chess ask's closing
+  question shows the same turn. It is the owner's ask, translated.
 
-Both examples open with "Read <address>." and call the quiz "a classyQuiz". A
+All three open with "Read <address>." and call the quiz "a classyQuiz". A
 Sonnet-class model told only "make me a quiz for <address>" read the address as
 a publishing target and fetched the page only when told to read it; "Read" makes
 the fetch the first act, and a failed fetch can't pass as a generic quiz (backlog
 v4 item 11).
 
-The example is the same sheet and the same ask in four languages, each producing
+The sheets example is the same sheet and the same ask in four languages, each producing
 a quiz in its language: for a reader of another language the one barrier is the
 German ask, so the page cycles it. The asks are close to what the example runs
 were asked, not word for word. The run's second turn, where the teacher reshapes
-the quiz, is not shown: its payoff differs per language, and the second example
-carries the fact that the AI asks back.
+the quiz, is not shown: its payoff differs per language.
 
 ### Languages
 
@@ -289,31 +302,38 @@ doesn't raise it on a first visit.
   once per visit, and only from such a device.
 - A refused upload says the same at the moment it happens, with the link.
 - `/own-copy` (`src/public/own-copy.html`, static, no script) is the short guide:
-  why (the shared site's allowance; an own copy's is yours alone), then two
-  routes to more quizzes. First setting one up yourself, the path a teacher can
-  take alone, maybe with a paid AI subscription (about $20 a month): who does what (GitHub is where the code is, no account needed; Cloudflare's free plan runs it,
-  on your own account; the AI does the setup); what you need (an AI that runs
-  programs on your computer, such as Claude Code, since a browser chat can explain
-  but not carry out; a computer where you may install programs, which a
-  school-managed laptop often isn't; an email address); a sample prompt; what you
-  do yourself (the account, a token the AI says where to create and where to put,
-  a name for the site; the token goes where the AI says, not into the chat).
-  Then the school's own copy, for the teacher to whom
-  that seems out of reach, or who is in no hurry: they forward a paragraph to
-  the school's IT (copyable, as on `/check#it`), which points to the README for
-  Cloudflare or for converting it to the school's own server. A school is a
-  natural unit for an own copy, and an outside service is red tape at a school:
-  it may need a data protection review first, so the school's own server comes
-  first in the paragraph. The conversion is the school's, done with their AI,
-  so this project maintains one server and checks no conversion; the README
-  gives the AI what to change, what to keep and the tests a converted copy must
-  pass. Afterwards, for both routes: the address to name
-  to the AI is the one the copy's start page shows, and updating is a choice. A
-  copy changes only when its owner updates it; left as it is, it shows the same
-  screens every lesson, which a teacher before a lesson values more than what is
-  new. Updated, it gets the new and the fixed (for a self-set-up copy: ask the
-  AI to update it from GitHub). The page makes no time promise.
-- The capacity sentence ("room for a few dozen classes a day", on `/own-copy`)
+  why (the shared site's few dozen quizzes a day; an own copy's are yours
+  alone), then two routes to more quizzes. First setting one up yourself. In
+  the owner's assessment a cloud VM is a route anyone can take, and free Sonnet
+  in a chat one that takes some technical affinity. So what you need is a
+  computer to deploy from: on a paid subscription an AI like Claude Code sets
+  it up on its own virtual machine "in minutes"; without one, an AI talks the
+  teacher through it on their own computer, "which can take a while"; and a
+  free Cloudflare account. One prompt for both (deploy it; say if another
+  environment of yours makes it easier). What you do yourself: the account; the
+  access token, which the AI walks you through, kept out of the chat, the AI
+  saying how to hand it over securely; a name for the site. The page names no
+  more than a teacher must act on: the AI knows the details at the time, and a
+  detail stated here can go stale.
+  "A computer to deploy through wrangler" is deliberate (owner): a teacher
+  without the affinity reads it as "the AI sets this up in minutes" being
+  their realistic option, or asking someone who has it.
+  Then the school's IT: people with an IT background and a developer AI can
+  adjust it to the school's own servers, or run it on a paid Cloudflare
+  account for "thousands of quizzes per day". The owner: scaling is the point
+  of Cloudflare, a paid plan handles more than thousands, and IT has a budget;
+  the number says the ceiling is the school's to set, not a measured limit. A school is a natural unit for an own copy, and an outside
+  service is red tape at a school: it may need a data protection review first,
+  so the school's own server comes first. The conversion is the school's, done
+  with their AI, so this project maintains one server and checks no
+  conversion; the README gives the AI what to change, what to keep and the
+  tests a converted copy must pass. Afterwards: the address to name to the AI
+  is the one the copy's start page shows, and updating is a choice. A copy
+  changes only when its owner updates it; left as it is, it shows the same
+  screens every lesson, which a teacher before a lesson values more than what
+  is new. Updated, it gets the new and the fixed (for a self-set-up copy: ask
+  the AI to update it from GitHub, the way it was set up).
+- The capacity sentence ("space for a few dozen quizzes a day", on `/own-copy`)
   is per day because the limits reset daily and "full for today" is what a
   teacher meets; what it rests on is in `design/hosting-and-limits.md`,
   Situation.
@@ -360,12 +380,14 @@ the teacher's concern.
   and what they would type to their AI. If they can't say, the strip fails; the
   fallback is one poster frame of the class at the wall. The owner's testing so
   far: read as the example; not seen to open, before the card and its label.
-- Whether free Claude and other free tiers hand over a `.zip`; Step 1 says nothing
-  about tiers until that is tested.
 - Whether an Android tablet's file picker shows a `.zip` downloaded from a chat app
   as selectable.
-- How long a teacher's first own copy takes with Claude Code; untried. The owner's
-  guidance rewrite says an AI can set up an own server "within about 15 minutes".
+- Either own-copy route end to end on the current README; untried; the page's
+  "in minutes" and "a while" are the owner's estimates. The owner's guidance rewrite says an AI can set up an own
+  server "within about 15 minutes". For Claude Code on the web: whether its VM
+  reaches api.cloudflare.com without a change to the environment's network
+  access. A GitHub repository is its convenient way to get work out (owner);
+  the page leaves accounts beyond Cloudflare's to the AI.
 - Whether a spent request allowance can be recorded: the own-copy line counts only
   days the upload cap refused, so it understates a site that runs out of requests
   first.

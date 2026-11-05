@@ -207,11 +207,27 @@ eight-year-olds, in German, the last one a choice between two positions.
 - Free ChatGPT made up its own puzzles, quickly and poorly; several keys were
   wrong.
 
+The free tiers, the owner's findings as of 5 Nov 2026 (in his words where
+quoted; runs not recorded beyond the above):
+- Free Claude Sonnet: the one free AI that builds the quiz reliably (the
+  example's run, `design/example-page.md`).
+- Free ChatGPT: had a web tool on some runs and not on others, and without it
+  "improvised", presenting a quiz built with no idea what was asked; it also
+  hit the daily upload limit on the second photo, which makes it impractical.
+- Free Gemini: has trouble with the `.zip`.
+- Free Microsoft Copilot: "generally slightly above Haiku's level"; not
+  trusted to generate a quiz.
+- Grok: not tested.
+- The owner's expectation, untested: ChatGPT with thinking enabled, and
+  Gemini's paid versions, should do fine where their tools aren't locked,
+  which on paid plans they probably aren't.
+
 ## Not known
 
 - How real fetching behaves, and the effect of the claude.ai system prompt on
   a model reading the page.
-- Behaviour of other models and of free tiers on the current page.
+- Behaviour of other models and of free tiers on the current page; paid
+  ChatGPT and Gemini, and Grok, untested.
 - Whether AI sandboxes have cairosvg or rsvg-convert, without which
   `preview.py` shows SVG pictures as "not drawn here"; untested, as is that
   path of the script.
