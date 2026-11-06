@@ -1,16 +1,20 @@
-# classyQuiz film: the words on the screens
+# The landing film: the words on its screens
 
-Everything below is quoted from the repo (/home/claude/src/ClassyQuiz). Paths are relative to it. `▲ ◆ ● ■` are the site's answer shapes. Where a source disagrees with the storyboard or with another source, it is marked **NOTE**.
+The words the film's screens show, quoted from the site and the example's
+material, with where each comes from: for whoever changes what the film says.
+Paths are relative to the repo's root. `▲ ◆ ● ■` are the site's answer shapes.
+Where a source disagrees with the film or with another source, it is marked
+**NOTE**. The film's words themselves are in `docs/film/build/film.js` (`docs/film/README.md`).
 
-## 0. Things the builder must know first
+## 0. Things to know first
 
-1. **The tablet shows the choice text, not only colour and shape.** `src/client/play.ts` draws every answer button as shape + the choice's text, and `landing/tablet-en.webp` shows "72 130" etc. on the buttons. Only the *question* never reaches the tablet. Storyboard shot 8 ("just the four colours and shapes") is wrong as written; the veiled **wall** tiles are the ones with colour and shape only. Either draw numbers on the tablet buttons (real) or knowingly leave them off.
-2. **The 72 000–73 000 question is in no .zip and no conversation.** It exists only in `landing/wall-en.webp` and `tablet-en.webp`. The real chat's preview card is a different question (646 000, see 2.4). The storyboard's "visual rhyme" (chat card = wall question) therefore needs either (a) a chat card re-typed with the 72 000 question (invented, not the real conversation), or (b) the wall using the chat's real 646 000 question (then wall-en.webp is not the source). Decide; the text for both is below.
-3. **The real conversation has three teacher turns, not two.** The preview cards come after the *third* ask ("Can you make a visual preview…"), not after the second. The storyboard's "short second ask" would be turn 2 (adds questions) and the cards need turn 3.
-4. **Shape/colour pairing differs between the AI's mock-up and the real site.** AI cards: red ▲, blue ●, orange ■, green ◆. Real wall and tablet: red ▲, blue ◆, yellow ●, green ■. The AI itself says "These are my own approximations". For the film use the real pairing on wall and tablet.
+1. **The tablet shows the choice text, not only colour and shape.** `src/client/play.ts` draws every answer button as shape + the choice's text. Only the *question* never reaches the tablet; the veiled **wall** tiles are the ones with colour and shape only. The film draws the text on the tablet's buttons, as the site does.
+2. **The 72 000–73 000 question is in no .zip and no conversation.** It exists only in `src/public/landing/wall-en.webp` and `tablet-en.webp`. The real chat's preview card is a different question (646 000, see 2.4). The film uses the real 646 000 question on the chat's card and on the wall, so the rhyme between them is the real conversation's.
+3. **The real conversation has three teacher turns.** The preview cards come after the *third* ask ("Can you make a visual preview…"). The film shows the first as Build's labelled ask (§1) and the third as the teacher's second message; turn 2 (adding questions) is left out.
+4. **Shape/colour pairing differs between the AI's mock-up and the real site.** AI cards: red ▲, blue ●, orange ■, green ◆. Real wall and tablet: red ▲, blue ◆, yellow ●, green ■. The AI itself says "These are my own approximations". The film keeps the AI's pairing on its card and the real one on wall and tablet.
 5. **Typos:** none found in the three teacher asks (zoomed 2x). Only: ask 3 starts lowercase ("thanks.").
 6. **The question "Show the quiz here, or steer it from here?" is not on screen** as a sentence (it is only in docs/user-flow.md §1 rule 5). The real screen is the quiz title, then two buttons with a small line each (3.5).
-7. **Only English exists for the chat, the check, the join screen, the wall chrome, the Remote and the tablets.** `landing-text.ts` header: "The lobby, the wall, the Remote and the tablets stay English." Only the root page block (header code label, Build/Run text, asks) is in DE/EN/FR/IT. Wall *pictures* exist in 4 languages with a different question each (see 3.9).
+7. **Languages.** The site's own screens after the upload (the check, the join screen, the wall chrome, the Remote, the tablets) exist in English only: `landing-text.ts` header: "The lobby, the wall, the Remote and the tablets stay English too." The root page block (header code label, Build/Run text, asks) is in DE/EN/FR/IT, and the teacher's chat with their AI, and the quiz it makes, are in the teacher's language. The film follows the page's language the same way: the ask and the root page's words come from `landing-text.ts` at build time; the second ask, the AI's status lines and the quiz's words (one quiz, the 646 000 one, translated, not each language's own example) from `CONTENT` in `docs/film/build/film.js`, where `draft: true` marks a language whose words are drafts pending the owner's review; the site's own screens stay English. Wall *pictures* exist in 4 languages with a different question each (see 3.9); the film uses none of them.
 
 ## 1. Ask 1 on the landing page ("#bubble"), all four languages
 
@@ -26,11 +30,11 @@ Source: `src/public/index.html` `#bubble` (EN) and `src/client/landing-text.ts` 
   labels: questo sito · quali esercizi · la tua classe · quante · quale lingua
 - Open ask, not asked for in the film (landing "ask2"): EN "Read classyquiz.pages.dev. I need a classyQuiz. Help?" / DE "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?" / FR "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?" / IT "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?"
 
-**NOTE:** the *real conversation's* first ask differs from the landing ask (2.2): no "like no. 1, 3 and 4", "4th grade", no length, no language. The film types the landing one (as instructed); the AI's reply bars then do not match "10 questions in English" by wording, which nobody reads.
+**NOTE:** the *real conversation's* first ask differs from the landing ask (2.2): no "like no. 1, 3 and 4", "4th grade", no length, no language. The film types the landing one (the storyboard's table says why); the AI's reply bars then do not match "10 questions in English" by wording, which nobody reads.
 
 ## 2. The chat (shot 3)
 
-Source: `src/public/examples/conversation.webp` (681x3784), read in crops; also described on `src/public/example.html` ("Free Claude (Sonnet), 4 November 2026"). **NOTE:** the landing's Build step says "Claude Opus wrote the example quiz, 3 Nov 2026" (`landing-text.ts` `step1detail`); the example page says Sonnet, 4 Nov. Both are in the repo; the film names neither, so harmless.
+Source: `src/public/examples/conversation.webp` (681x3784), read in crops; also described on `src/public/example.html` ("Free Claude (Sonnet), 4 November 2026"); the landing's Build step names the same ("Free Claude Sonnet wrote the example above, 4 Nov 2026", `landing-text.ts` `step1detail`). The film names no AI.
 
 Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain on white, left. Status lines are small grey ("thinking" lines with a ▸). The `.zip` is a grey rounded chip with an archive icon: "Big numbers quiz" over small "ZIP".
 
@@ -44,11 +48,11 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
 - grey line "Checking arrow positions for the number-line questions ▸"; 1 line "Thanks. Next I'll draw the number lines and pack everything into a .zip."; grey line "Hat einen Befehl ausgeführt, dateien geteilt ▸" (German UI: "ran a command, shared files").
 - Then: paragraph 2 lines ("Your quiz is ready as big-numbers-quiz.zip. Upload it on classyquiz.pages.dev to run it."), paragraph 1 line ("It has 10 questions in English, …"), **4 bullets** (1, 1, 1, 2 lines; bold lead-ins "Questions 1–3:", "4–6:", "7–8:", "9–10:"), paragraph 3 lines, paragraph 2 lines, then the **.zip chip**.
 
-### 2.3 Turn 2 (teacher, the "short second ask")
+### 2.3 Turn 2 (teacher; not in the film)
 - Ask, 2 lines (verbatim): "Please add some questions where the number is given and they have to pick the matching marked number line."
 - AI: grey "Planning the spacing of the four new number-line questions ▸"; 1 line "I'll add three matching questions and place them right after the three “read the arrow” questions."; grey "Hat einen Befehl ausgeführt, dateien geteilt ▸"; paragraph 2 lines ("I've updated big-numbers-quiz.zip. It now has 13 questions, with three new ones in the middle as questions 4–6. In each, a number is given and the students pick which of four number lines has the arrow in the right place:"); **3 bullets** (2, 2, 1 lines: "Question 4: the number is 654 000, …", "Question 5: the number is 81 750, …", "Question 6: the number is 308 080, …"); paragraph 4 lines; paragraph 2 lines; **.zip chip** ("Big numbers quiz / ZIP").
 
-### 2.4 Turn 3 (teacher) and the preview cards
+### 2.4 Turn 3 (teacher; the film's second message) and the preview cards
 - Ask, 1 line (verbatim, lowercase start): "thanks. Can you make a visual preview, just one per question type?"
 - AI: grey "Setting up a visualizer mockup of the projector screens ▸"; 1 line "I'll check the site's layout page so the previews match how the class will actually see them."; red grey line "Hat ein Tool verwendet Fehlgeschlagen ▸" (tool used, failed).
 - **Four preview cards**, each: small grey caption above, a white rounded card with a bold question line, optional picture, then four coloured buttons 2x2 (red top-left, blue top-right, orange bottom-left, green bottom-right), each with shape + text.
@@ -58,14 +62,14 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
   4. Caption "Finding the section (questions 12–13)". Question "On which section does 45 200 lie?". Picture: four stacked lines labelled A (4000–5000), B (45 000–46 000), C (405 000–405 100), D (450 000–451 000). Buttons: ▲ A · ● B · ■ C · ◆ D.
 - Then 1 paragraph (2 lines), **4 bullets** (1, 2, 1, 2 lines, bold lead-ins), 1 paragraph (3 lines), a row of small reaction icons. No .zip chip here.
 
-**Where the other languages are:** not as chat pictures. Only the English picture exists. The four .zips of the earlier runs exist in `src/public/examples/` (`big-numbers-quiz.zip` EN, `zahlenstrahl-quiz.zip` DE, `droite-graduee.zip` FR, `quiz-retta-numerica.zip` IT); `docs/backlog.md` items 9 and 12 mention "real two-turn conversations in four languages" / "the four .zips of the earlier runs exist", but no conversation text in DE/FR/IT is in the repo. Not found, not invented.
+**Where the other languages are:** not as chat pictures. Only the English picture exists. The four .zips of the earlier runs exist in `src/public/examples/` (`big-numbers-quiz.zip` EN, `zahlenstrahl-quiz.zip` DE, `droite-graduee.zip` FR, `quiz-retta-numerica.zip` IT); `docs/backlog.md` items 9 and 12 mention "real two-turn conversations in four languages" / "the four .zips of the earlier runs exist", but no conversation text in DE/FR/IT is in the repo. The film's German, French and Italian chat and quiz words are therefore translations of the English (`CONTENT` in `docs/film/build/film.js`), drafts pending the owner's review.
 
 ## 3. The site's screens
 
 ### 3.1 Root page header (`src/public/index.html`, `landing-text.ts`)
 - Left: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only).
 - Right: label **Code** (DE Code, FR Code, IT Codice; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join" / "Beitreten" / "Rejoindre" / "Entra"), then the language selector "EN ▾".
-- Below the (strip, which the film replaces): "Build a quiz" / "Run a quiz" columns (Run first on narrow screens).
+- Below the film: "Build a quiz" / "Run a quiz" columns (Run first on narrow screens).
 
 ### 3.2 Run box (root page, before upload)
 Heading **Run a quiz** (DE Ein Quiz starten, FR Lancer un quiz, IT Avvia un quiz). Dashed box with button and a line under it:
@@ -84,22 +88,22 @@ English only. Top: title as h1 + small count; under it "Class code **63953**" (w
 - List header: "**13 questions**" and a button "Show the solutions" (becomes "Hide the solutions"). Rows: a number, the question text, a › chevron; folded. In the example: 1–3 "Which number does the arrow show?", 4 "Which number line has an arrow at 654 000?", 5 "…at 81 750?", 6 "…at 308 080?", 7 "Count in steps of 20 000: 500 000, 520 000, 540 000, ... What comes next?" (full list in `big-numbers-quiz.zip` `quiz.txt`).
 - Footer: "⋯ More".
 - Open row shows the four choices with shapes (`▲ ◆ ● ■` and ✓ on the right ones) and a link "Change the solution".
-**NOTE:** the film's quiz in the storyboard has 10 questions (the wall says "2 / 10"); the real zip has 13. The check can say either; "13 questions" is what the real chat ends with.
+The film follows the zip: "· 13 questions" on the check, "1 / 13" on the wall and the tablets.
 
 ### 3.4 The Remote on the phone, lobby (`teach.ts` `lobby`)
-Not drawn in the storyboard in detail ("thumb taps Let the class in ▶ on the phone"). Words: **Let the class in ▶** (primary button, above); then the address **classyquiz.pages.dev**, the class code large **63953**, "**n** joined", avatars, the switch "Points for speed" with "A right answer 10, up to 5 more the quicker it comes."; then either "Projector ✓ · ⇄ Swap" (wall there), or "On the projector computer: on classyquiz.pages.dev, type 63953 47."; then the question list. **Start quiz ▶** is pinned at the bottom. On the wall a toast "Remote connected" appears when the phone arrives.
+The film shows only the button, in the bubble of each press. Words: **Let the class in ▶** (primary button, above); then the address **classyquiz.pages.dev**, the class code large **63953**, "**n** joined", avatars, the switch "Points for speed" with "A right answer 10, up to 5 more the quicker it comes."; then either "Projector ✓ · ⇄ Swap" (wall there), or "On the projector computer: on classyquiz.pages.dev, type 63953 47."; then the question list. **Start quiz ▶** is pinned at the bottom. On the wall a toast "Remote connected" appears when the phone arrives.
 
 ### 3.5 Second device, after typing the teacher code (`play.ts` `enter`)
 Site header (fox + classyQuiz), then the quiz title as big heading ("Big numbers on the number line"), then two buttons:
 - **Show the quiz here** / small: "the class watches this screen"
 - **Steer it from here** / small: "Start, next, the solution"
-**NOTE:** user-flow.md says the screen "asks 'Show the quiz here, or steer it from here?'". The code has no such sentence; it is only the two buttons. If the film wants the sentence it would be invented.
+**NOTE:** user-flow.md says the screen "asks 'Show the quiz here, or steer it from here?'". The code has no such sentence; it is only the two buttons, and the film shows only them.
 
 ### 3.6 Join screen = the wall in the lobby (`screen.ts` `renderJoin`, `renderLobby`)
 Wall version (class sees): top bar with the quiz title only; left column: QR code, then the fox + **classyquiz.pages.dev**, then the class code in huge digits **63953**; right column: a person icon with the count ("6"), avatars popping in. While nobody is in: a wordless drawing of a tablet (address bar "classyquiz.pages.dev", site header with the code box showing 63953 and ▶). After 90 s empty: "Nobody in yet? If the tablets can't open classyquiz.pages.dev, the school network may block it: what to tell IT ›" (don't draw this).
 Steering tab's version adds: **Start quiz ▶**, "Points for speed" switch + "A right answer 10, up to 5 more the quicker it comes.", and "‹ Questions", "A second device ›", "⋯" (teacher-only, below the fold).
 
-### 3.7 Wall during a question (`screen.ts` `renderQuestion`, `markTiles`; docs/user-flow.md §3.4; look at `landing/wall-en.webp`)
+### 3.7 Wall during a question (`screen.ts` `renderQuestion`, `markTiles`; docs/user-flow.md §3.4; look at `src/public/landing/wall-en.webp`)
 Constant frame: top bar: left "**2 / 10**", then the answered avatars in a row (only those who answered, never their colour), right a person icon and "**20 / 20**" in green (green when all in; during answering "18 / 20" etc.; hidden while reading). Below: the question as a big centred bold heading, the picture band (white), four tiles 2x2. Corner/footer: "classyquiz.pages.dev · 34654" (the image's code), small "Full screen (F)", "⋯"; when the wall steers itself the footer is the steering bar instead (⋯, address · code, "⏱ Countdown / 15 s, then closes", "▶ Answers / closes answering"). The labelled buttons on the phone are the same: **Choices → Answers → Solution → Ranking → Question 3** ("Final ranking" after the last).
 Tile colours/shapes: red ▲, blue ◆, yellow ●, green ■.
 
@@ -110,17 +114,11 @@ States:
 4. **Solution:** tick ✓ before the count on the right tile(s); the others fade; the right students' avatars jump in a band over the question for about 4 s.
 5. **Ranking** (3.10).
 
-### 3.8 The question for the film, from `landing/wall-en.webp` and `tablet-en.webp`
-Question "**Which number does the arrow show?**" (bold). Picture: number line, ticks, arrow between 72 500 and 73 000 (at the 72 650 tick); labels "72 000", "72 500", "73 000". Counter "2 / 10", "20 / 20".
-Tiles and the split in the image (this is state 4, the solution; counts are the same as the split): ▲ red **72 130** 6 · ◆ blue **72 650** ✓ 12 · ● yellow **73 300** 0 · ■ green **72 065** 2. Right answer: blue ◆ 72 650.
-Tablet (`tablet-en.webp`, answering state): top bar: the child's avatar (left), "2 / 10" (centre), "★ 1" (right); four full-height buttons 2x2 (red ▲ "72 130", blue ◆ "72 650", yellow ● "73 300", green ■ "72 065"), shape above text.
-**NOTE:** the image's code is 34654, not 63953; it is in the footer, small; the film's 63953 is fine.
+### 3.8 The question in the film
+Question 1 of `big-numbers-quiz.zip` (`quiz.txt`): "**Which number does the arrow show?**", a number line labelled 640 000 · 650 000 · 660 000 with the arrow at 646 000 (`q1.svg`), `Order: fixed`, the right answer first. On the wall and tablets, in the site's pairing: red ▲ **646 000** (right) · blue ◆ **645 000** · yellow ● **644 000** · green ■ **647 000**. The split (12 / 6 / 2 / 0) is the film's own (`docs/film/build/film.js`; the storyboard says why); the class code 63953 and the teacher code 63953 47 are docs/user-flow.md's example.
 
-### 3.9 The same wall in the other languages (each its own question, not translations)
-- DE `wall-de.webp`: "Welche Zahl zeigt der Pfeil?" 56 000 · 56 500 · 57 000; 56 660 (2) · 56 640 ✓ (12) · 56 320 (6) · 57 640 (0); "2 / 11".
-- FR `wall-fr.webp`: "Quel nombre la flèche montre-t-elle ?" 320 000 · 330 000 · 340 000; 327 000 ✓ (12) · 320 700 (6) · 370 000 (0) · 326 000 (2); "1 / 12".
-- IT `wall-it.webp`: "Quale numero indica la freccia?" 15 000 · 15 200 · 15 400; 15 120 (0) · 15 140 ✓ (12) · 15 160 (2) · 15 070 (6); "5 / 11".
-Wall chrome ("Full screen (F)", "⋯", the count) stays English in all four.
+### 3.9 The landing's old pictures of the wall and a tablet
+`src/public/landing/wall-xx.webp` and `tablet-xx.webp` (de en fr it) show the wall at a solution and a tablet answering, each language its own question, not translations: EN "Which number does the arrow show?" with the arrow at 72 650 (right: blue ◆ 72 650; "2 / 10"; the footer's code 34654), DE 56 640, FR 327 000, IT 15 140. The wall's chrome ("Full screen (F)", "⋯", the count) is English in all four. The site doesn't show them and the film uses none of them; the README shows `wall-en.webp`.
 
 ### 3.10 Tablets (`play.ts` `render`, `look.ts`)
 Top bar when playing: avatar left, "n / total" centre, "★ score" right.
@@ -139,5 +137,5 @@ Quiz title in the top bar. Podium with the top entries: avatar, place "1.", "★
 - Landing words, asks, Run box in 4 languages: `src/client/landing-text.ts`, `src/public/index.html`.
 - Check, join, wall, ranking: `src/client/screen.ts`, `final.ts`, `manage.ts`, `teach.ts`, `steps.ts`.
 - Second device screen, tablet states: `src/client/play.ts`.
-- Pictures of wall/tablet (EN/DE/FR/IT): `src/public/landing/wall-xx.webp`, `tablet-xx.webp`.
+- Pictures of wall/tablet (EN/DE/FR/IT), not used by the site or the film: `src/public/landing/wall-xx.webp`, `tablet-xx.webp`.
 - Rules and states: `docs/user-flow.md` §1–3, `docs/design/question-flow.md`.

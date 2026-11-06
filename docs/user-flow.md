@@ -98,10 +98,12 @@ Purpose and reasons: docs/design/root-page.md.
 ┌──────────────────────────────────────────────────────────────────────┐
 │ [fox] classyQuiz                   Code [_ _ _ _ _]  ▶      EN ▾     │
 ├──────────────────────────────────────────────────────────────────────┤
-│ [two sheet pages] → [phone: photos up, .zip back] → [laptop: .zip up] │
-│   → [wall] [tablets, fanned]                                         │
-│ Your exercise sheets · Your AI · The .zip, uploaded here ·           │
-│ What the class sees · Each student taps  The example, step by step › │
+│ ┌ the film, 16:9, no sound ─────┐  [still] Your exercise sheets      │
+│ │ poster: the class at the      │  [still] Your AI                   │
+│ │ wall, the votes split, no     │  [still] The .zip, uploaded here   │
+│ │ solution yet  [▶]             │  [still] What the class sees       │
+│ └───────────────────────────────┘  [still] Each student taps         │
+│ [full screen]                 The example, step by step ›            │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
@@ -127,11 +129,15 @@ Purpose and reasons: docs/design/root-page.md.
   (`cq.lang`), else the browser's language, else English. The static HTML is
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
-- **The strip** follows the workflow: the sheet, the ask, the .zip going up
-  to the site, the wall, tablets fanned out. A card with a border and the label "The
-  example, step by step ›"; it links `/example` (the worked example) until the
-  video exists; no ▶. Below 720 px wide its frames are one row that scrolls
-  sideways.
+- **The film**, about 60 s without sound, follows the workflow: the sheets,
+  the AI, the .zip going up to the site, the wall, a student's tablet. Until ▶
+  or a chapter is pressed it is its poster, a picture: the class at the wall,
+  the votes split. Its five chapters, a still and a caption each, stand
+  beside it; on a screen taller than wide and under 900 px they are chips on
+  one row under it that scrolls sideways. A chapter plays from there. A full
+  screen button; at the end a replay icon on the end card, which has no link.
+  Under it, "The example, step by step ›" links `/example` (the worked
+  example).
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
 - **Build's step 2** has three example asks behind three picture tabs: the
   labelled one with photos of sheets, a chess quiz described in words (with
@@ -175,7 +181,7 @@ Purpose and reasons: docs/design/root-page.md.
 
 #### The example, step by step (`/example`)
 
-English, from the strip. Purpose and reasons: docs/design/example-page.md.
+English, from the link under the film. Purpose and reasons: docs/design/example-page.md.
 
 ```
 [fox] classyQuiz                         (the site's small header, to the root)

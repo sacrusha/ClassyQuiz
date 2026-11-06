@@ -1,16 +1,27 @@
-#!/usr/bin/env python3
-"""Builds the classyQuiz film animatic as one HTML page (index.html).
+"""Builds the classyQuiz film animatic as one standalone HTML page.
+Run: py -I build.py [out_file]   (default: .tmp/film/index.html at the repo root, which git ignores;
+the page is generated, ~230 KB, and not kept in the tree. shoot.py and sitebuild.py read it from there.)
 
 The page carries: film.css, the assets (the site's Rubik, the two sheets, the
 brand marks) as data: URIs in one JS object, the avatar drawings taken from
-the repo's client/look.ts, and film.js. On the site the same film.js would
-read the assets from the site's own files instead (see the header of film.js).
+the repo's client/look.ts, the root page's words the film shows (the example
+ask, the Run box) taken from client/landing-text.ts, and film.js. On the site
+the same film.js reads the assets from the site's own files instead (see the
+header of film.js). The page opens in English; page.html?lang=de (en, fr, it)
+plays the film in that language.
 """
-import base64, re, pathlib
+import base64, json, re, sys, pathlib
 
-HERE = pathlib.Path(__file__).parent
-REPO = pathlib.Path('/home/claude/src/ClassyQuiz/src')
+HERE = pathlib.Path(__file__).resolve().parent
+ROOT = HERE.parents[2]          # the repo root
+REPO = ROOT / 'src'             # the site
 PUB = REPO / 'public'
+PAGE = ROOT / '.tmp' / 'film' / 'index.html'   # default output, git-ignored
+
+
+def launch(p):
+    """Chromium for the scripts that render the film: the installed Edge (no bundled browser needed)."""
+    return p.chromium.launch(channel='msedge')
 
 
 def data_uri(path, mime):
@@ -19,7 +30,7 @@ def data_uri(path, mime):
 
 def look_js():
     """The avatars from client/look.ts, types stripped, as plain JS."""
-    src = (REPO / 'client/look.ts').read_text()
+    src = (REPO / 'client/look.ts').read_text(encoding='utf-8')
     start = src.index('const AVATAR_COLOURS')
     end = src.index('/** A background shape alone')
     s = src[start:end]
@@ -42,18 +53,62 @@ def look_js():
     return '/* From client/look.ts (types stripped by build.py). */\n' + s
 
 
-def main():
+LANDING_KEYS = ('code', 'run', 'upload', 'drop', 'reading')
+
+
+def landing_text():
+    """The root page's own words the film shows, per language, from client/landing-text.ts: the example ask
+    (its parts as { s, l }: l 0 is the site's address, other l a labelled part) and the header's and Run box's words,
+    so the film types the very sentence the page prints and its phone shows the root page as a visitor sees it."""
+    src = (REPO / 'client/landing-text.ts').read_text(encoding='utf-8')
+    out = {}
+    for lang in ('de', 'en', 'fr', 'it'):
+        m = re.search(r'\nconst %s: Text = \{\n(.*?)\n\};\n' % lang, src, re.S)
+        if not m:
+            raise SystemExit(f'landing-text.ts: no "const {lang}: Text" block')
+        block = '\n' + m.group(1)
+        a = re.search(r'\n  ask: \[\n(.*?)\n  \],\n', block, re.S)
+        if not a:
+            raise SystemExit(f'landing-text.ts {lang}: no ask')
+        parts = []
+        for line in a.group(1).splitlines():
+            p = re.fullmatch(r'\s*\{ s: ("(?:[^"\\]|\\.)*")(?:, l: (\d))? \},', line)
+            if not p:
+                raise SystemExit(f'landing-text.ts {lang}: an ask line the film can\'t read: {line.strip()}')
+            parts.append({'s': json.loads(p.group(1)), **({'l': int(p.group(2))} if p.group(2) else {})})
+        if [x.get('l') for x in parts if 'l' in x] != [0, 1, 2, 3, 4]:
+            raise SystemExit(f'landing-text.ts {lang}: the ask\'s labelled parts are not 0-4 in order')
+        words = {'ask': parts}
+        for k in LANDING_KEYS:
+            v = re.search(r'\n  %s: ("(?:[^"\\]|\\.)*"),' % k, block)
+            if not v:
+                raise SystemExit(f'landing-text.ts {lang}: no plain string "{k}"')
+            words[k] = json.loads(v.group(1))
+        out[lang] = words
+    return out
+
+
+def film_source(assets_js):
+    """film.js with what the builds fill in: the avatars, the root page's words and the assets (assets_js, a JS expression)."""
+    js = (HERE / 'film.js').read_text(encoding='utf-8')
+    for mark, value in (('/*@LOOK@*/', look_js()), ('/*@LANDING@*/ {}', json.dumps(landing_text(), ensure_ascii=False)),
+                        ('/*@ASSETS@*/ window.CQFILM_ASSETS || {}', assets_js)):
+        if js.count(mark) != 1:
+            raise SystemExit(f'film.js: the mark {mark} is not there exactly once')
+        js = js.replace(mark, value)
+    return js
+
+
+def main(out=None):
     assets = {
         'rubik': data_uri(PUB / 'fonts/rubik-bold-1.100.woff2', 'font/woff2'),
         'sheet1': data_uri(PUB / 'landing/sheet-1.webp', 'image/webp'),
         'sheet2': data_uri(PUB / 'landing/sheet-2.webp', 'image/webp'),
-        'lockup': (PUB / 'brand/classyquiz-horizontal-32-inline.svg').read_text().strip(),
-        'fox': (PUB / 'brand/classyquiz-symbol-colour.svg').read_text().strip(),
+        'lockup': (PUB / 'brand/classyquiz-horizontal-32-inline.svg').read_text(encoding='utf-8').strip(),
+        'fox': (PUB / 'brand/classyquiz-symbol-colour.svg').read_text(encoding='utf-8').strip(),
     }
-    import json
-    css = (HERE / 'film.css').read_text()
-    js = (HERE / 'film.js').read_text()
-    js = js.replace('/*@LOOK@*/', look_js())
+    css = (HERE / 'film.css').read_text(encoding='utf-8')
+    js = film_source('window.CQFILM_ASSETS || {}')
     font_face = ('@font-face{font-family:"Rubik";src:url("%s") format("woff2");'
                  'font-weight:700;font-style:normal;font-display:block}\n' % assets['rubik'])
     html = f'''<!DOCTYPE html>
@@ -68,16 +123,20 @@ def main():
 </head>
 <body>
 <main class="cqf-page"><div id="cqfilm"></div></main>
-<script>window.CQFILM_ASSETS = {json.dumps(assets)};</script>
+<script>window.CQFILM_ASSETS = {json.dumps(assets)};
+/* the film speaks the page's language: ?lang=de (or en, fr, it) sets it here */
+(function () {{ var l = new URLSearchParams(location.search).get('lang'); if (l) document.documentElement.lang = l; }})();</script>
 <script>
 {js}
 </script>
 </body>
 </html>
 '''
-    (HERE / 'index.html').write_text(html)
-    print('index.html', len(html), 'bytes')
+    out = pathlib.Path(out).resolve() if out else PAGE
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(html, encoding='utf-8', newline='\n')
+    print(out, len(html.encode()), 'bytes')
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else None)

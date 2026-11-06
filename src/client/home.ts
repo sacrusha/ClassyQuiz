@@ -13,6 +13,7 @@ import { api, readApi } from "./net.ts";
 import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, LANGS, TEXT, chosenLang, type Lang, type Text } from "./landing-text.ts";
 import { daysFull, recordUploadDay, uploadDays } from "./history.ts";
+import { filmLanguage } from "./film-poster.ts";
 
 // The QR code on the projector points here with the code after "#".
 const fromHash = location.hash.slice(1).replace(/\D/g, "");
@@ -192,9 +193,9 @@ function apply(l: Lang): void {
     const v = t[el.dataset.tAria as keyof Text];
     if (typeof v === "string") el.setAttribute("aria-label", v);
   }
-  for (const img of document.querySelectorAll<HTMLImageElement>("img[data-lang-src]")) img.src = `/landing/${img.dataset.langSrc}-${l}.webp`;
-  ($("#strip") as HTMLAnchorElement).href = `/example?lang=${l}`;
+  ($("#example-link") as HTMLAnchorElement).href = `/example?lang=${l}`;
   for (const id of ["#landing", "header.top .bar"]) $(id).lang = l;
+  filmLanguage(l); // after #landing's lang: the film is built in the language around it
   if (copy) copy.textContent = t.copy;
   renderAsk();
   renderResume();
