@@ -3,18 +3,19 @@
 ## Purpose
 
 A first-time teacher wants to see how a quiz comes about before trying it:
-a walkthrough, the example step by step. The landing's strip shows the path in
-five pictures; this page shows the same path with the real material, and hands
+a walkthrough, the example step by step. The landing's film shows the path in
+about a minute; this page shows the same path with the real material, and hands
 over everything needed to repeat it on the teacher's own AI: the sheets, what
 was said to the AI, what it handed back, and the quiz itself to run (backlog
 v4 item 10).
 
 ## Situation
 
-- The page is reached from the landing's strip ("The example, step by step ›",
-  `root-page.md`, "The strip"). Teachers read the strip as the example; what
-  they look for behind it is a walkthrough, not the result alone.
-- An AI told the site's name may follow the strip's link. A teacher's chat with
+- The page is reached from the link under the landing's film ("The example,
+  step by step ›", `root-page.md`, "The film"). Teachers read the path shown
+  there as the example; what they look for behind it is a walkthrough, not
+  the result alone.
+- An AI told the site's name may follow that link. A teacher's chat with
   an AI, read as page text, could pass for instructions to it.
 - The example's material is the sheet derived from the owner's, the owner's
   phone photographs of it printed, and a conversation with an AI. The
@@ -26,7 +27,7 @@ v4 item 10).
 ## How the site meets it
 
 `src/public/example.html`, static and in English; the four steps follow the
-strip.
+path the film shows.
 
 1. **The exercise sheets**: the two photographs, each as a download, and the
    sheets as a PDF, so a teacher can try the photographs or the clean file on
