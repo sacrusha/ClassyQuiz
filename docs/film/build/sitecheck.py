@@ -4,32 +4,34 @@ Run: py -I sitecheck.py [OUTDIR]   (screenshots go to OUTDIR, default .tmp/sitec
 needs Node and npm, and Playwright with the installed Edge)
 
 The site as the working tree has it (src/, film included, copied to .tmp/sitecheck/work) against the same
-site as it is on `main` (before this change: without the film), `main` as `git archive` gives it (.tmp/sitecheck/main; nothing in git changes).
+site as it is on `main` (before this change), `main` as `git archive` gives it (.tmp/sitecheck/main; nothing in git changes).
 Both get the working tree's src/node_modules (a junction; npm ci only if the lock files differ or there is none).
 The working copy: `npm run check`, the tests and the site's build; the baseline: the build. dist/ is
 served with the headers the build writes (dist/_headers, the CSP among them); then Edge, desktop and phone:
 
   - before any press: the poster picture shows, film.js is not fetched, the
-    page's HTML holds none of the film's words, nothing is a data: URI;
+    page's HTML holds none of the film's words, nothing is a data: URI; the speed
+    button cycles without loading anything;
   - ▶: film.js loads, the picture is replaced, the film plays; the live poster
     frame against the picture (mean difference per pixel);
-  - a chapter as the first press starts there; German chapters come from the page;
-  - a German page shows the German poster (src and srcset) and stills before any press, the chapters
-    with a still each (on a phone on one row); the film built there is German, its ask the page's;
-    a switch to French while it plays goes back to the poster, in French, and the next press builds
-    one French film (nothing of the German left or doubled);
+  - the time bar moved as the first press loads the film and shows that moment, paused; the player's
+    names are the page's (German); its chapter ticks are there once;
+  - a German page shows the German poster (src and srcset) before any press; the film built there is
+    German, its ask the page's; a switch to French while it plays goes back to the poster, in French,
+    the bar at 0, and the next press builds one French film (nothing of the German left or doubled);
   - film.js blocked: the picture stays, a later press loads it;
   - scripts off: the picture still shows;
   - film.js loads but can't draw the film once: the picture stays, the next press draws it;
-  - desktop: ▶ by keyboard leaves the focus on the bar's play/pause; the player's names (German ones
-    from the page), lang="en" on its English parts, the address the browser opened; one animation loop
-    however often a chapter is pressed; Space on a chapter, on the page and in the code box and the
-    arrows on the ask tabs stay theirs, the stage and the time bar take the film's keys; scrolled out
+  - desktop: ▶ by keyboard leaves the focus on the bar's play/pause; the time bar's name and spoken
+    value (time and chapter), the address the browser opened; one animation loop however often the bar
+    is moved and played; a drag shows the chapter's name over the thumb, the release hides it; Space on
+    the page and in the code box and the arrows on the ask tabs stay theirs, the stage and the time bar
+    take the film's keys; scrolled out
     of view or in a hidden tab it pauses and stays paused; at the end the page's replay icon (named in German)
     stands in the band under the end card's address and plays it from the start, the focus on play/pause;
-  - the arrangement: upright phone and desktop as designed (chapters under the film on one row, or beside it), a phone
-    held sideways (844 x 390, 740 x 360, 915 x 412) the chapters beside the film; everywhere the first of the headings
-    of Build and Run wholly on the first screen, no sideways scroll;
+  - the arrangement: desktop, upright phone and a phone held sideways (844 x 390, 740 x 360, 915 x 412): the bar under
+    the film and as wide, on one row as on a desktop except on the upright phone, where the time bar has a row of its
+    own; the time bar at least 150 px wide; no sideways scroll;
   - full screen, desktop and phone, the browser's and the fallback fixed over the viewport (forced by hiding the
     Fullscreen API): the film letterboxed 16:9 as large as the screen allows, the bar under it, the focus on the stage,
     the page under it not scrolling, the film's keys working, Tab going round the player; ended by Esc (the fallback),
@@ -38,7 +40,7 @@ served with the headers the build writes (dist/_headers, the CSP among them); th
   - every language (desktop): each ask typed out before its send, no line wider than its box, no
     fitted text shrunk below 3/4; languages whose film words are drafts are named;
   - the rest of the landing (Build, Run, the guidance) is unchanged against
-    the site without the film: every element's computed style;
+    `main`'s: every element's computed style;
   - no CSP violation, console error or page error anywhere.
 """
 import http.server, io, json, os, pathlib, re, shutil, subprocess, sys, tarfile, threading
@@ -52,7 +54,7 @@ from playwright.sync_api import sync_playwright
 
 TMP = ROOT / '.tmp' / 'sitecheck'
 WORK = TMP / 'work'          # the working tree's src/, copied
-BASE = TMP / 'main'          # main's src/, without the film
+BASE = TMP / 'main'          # main's src/
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else TMP / 'shots').resolve(); OUT.mkdir(parents=True, exist_ok=True)
 FILM_WORDS = ['Which number does the arrow show', 'Let the class in', '646 000', 'Big numbers on the number line', 'Setting up a visualizer mockup', 'Reading an arrow']
 problems = []
@@ -184,28 +186,25 @@ def diff(a, b):
     return sum(ImageStat.Stat(ImageChops.difference(a, b)).mean) / 3
 
 
-POSTER_STATE = """() => { const h = document.getElementById('cqfilm'), st = h.querySelector('.cqf-stage');
+POSTER_STATE = """() => { const h = document.getElementById('cqfilm'), st = h.querySelector('.cqf-stage'), r = h.querySelector('.cqf-seek input');
   return { img: st.querySelectorAll(':scope > img').length, svg: st.querySelectorAll(':scope > svg').length, bar: h.querySelectorAll('.cqf-bar > :not([hidden])').length,
     full: [h.querySelectorAll('.cqf-full').length, h.querySelector('.cqf-full').hidden, h.querySelector('.cqf-full').getAttribute('aria-pressed')],
-    big: !h.querySelector('.cqf-big').hidden, again: !h.querySelector('.cqf-again').hidden, on: h.querySelectorAll('.cqf-ch .on, .cqf-ch [aria-current]').length,
+    big: !h.querySelector('.cqf-big').hidden, again: !h.querySelector('.cqf-again').hidden, marks: h.querySelectorAll('.cqf-marks, .cqf-tip').length,
+    at: [r.value, h.querySelector('.cqf-time').firstChild.nodeValue, h.querySelector('.cqf-play').textContent],
     api: !!window.cqFilm, tabindex: st.getAttribute('tabindex') }; }"""
+POSTER_WANT = {'img': 1, 'svg': 0, 'bar': 4, 'full': [1, True, 'false'], 'big': True, 'again': False, 'marks': 0, 'at': ['0', '0:00', '▶'], 'api': False, 'tabindex': None}
+# the time bar moved by a script as a hand moves it: its value, then the input event
+MOVE = "(x) => { const r = document.querySelector('.cqf-seek input'); r.value = x; r.dispatchEvent(new Event('input', { bubbles: true })); }"
 
 
 def pictures(pg, mode, lang, when):
-    """The poster (src and srcset) and the chapters' stills in `lang`, loaded and shown; on a phone the chapters on one row."""
-    wait_until(pg, "() => [...document.querySelectorAll('#cqfilm img')].every(i => i.complete)")  # the poster and the stills
+    """The poster (src and srcset) in `lang`, loaded and shown."""
+    wait_until(pg, "() => [...document.querySelectorAll('#cqfilm img')].every(i => i.complete)")
     st = pg.evaluate("""() => { const p = document.querySelector('#cqfilm .cqf-stage > img');
-      return { src: p.getAttribute('src'), srcset: p.getAttribute('srcset'), current: p.currentSrc.split('/').pop(), w: p.naturalWidth,
-        stills: [...document.querySelectorAll('.cqf-ch button')].map(b => { const i = b.querySelector('img'), r = i.getBoundingClientRect();
-          return [b.dataset.ch, i.getAttribute('src').split('/').pop(), i.naturalWidth, Math.round(r.width), Math.round(r.height)]; }),
-        rows: new Set([...document.querySelectorAll('.cqf-ch li')].map(li => Math.round(li.getBoundingClientRect().top))).size }; }""")
-    print(f'{mode}: {when}: poster {st["src"]} / {st["srcset"]} (showing {st["current"]}); stills {[x[1:] for x in st["stills"]]}; chapter rows {st["rows"]}')
+      return { src: p.getAttribute('src'), srcset: p.getAttribute('srcset'), current: p.currentSrc.split('/').pop(), w: p.naturalWidth }; }""")
+    print(f'{mode}: {when}: poster {st["src"]} / {st["srcset"]} (showing {st["current"]})')
     if st['src'] != f'/landing/film-{lang}.webp' or st['srcset'] != f'/landing/film-{lang}-800.webp 800w, /landing/film-{lang}.webp 1600w' or not st['current'].startswith(f'film-{lang}') or not st['w']:
         problems.append(f'{mode}: {when}: poster not in {lang}: {st}')
-    for key, name, w, cw, ch in st['stills']:
-        if not w or (name != 'film-sheet.webp' and not name.endswith(f'-{lang}.webp')): problems.append(f'{mode}: {when}: still {key} {name} {w}')
-        if not cw or abs(cw / max(ch, 1) - 16 / 9) > 0.1: problems.append(f'{mode}: {when}: still {key} not shown at 16:9: {cw} x {ch}')
-    if mode == 'phone' and st['rows'] != 1: problems.append(f'{mode}: {when}: the chapters stand on {st["rows"]} rows, not one')
 
 
 def speaks(pg, mode, lang):
@@ -233,6 +232,13 @@ def check(url, mode):
         print(f'{mode}: before ▶: poster {info["src"].split("/")[-1]} ({info["w"]} px wide) on a stage of {info["stage"][0]:.0f} x {info["stage"][1]:.0f} CSS px')
         if not info['w']: problems.append(f'{mode}: poster not loaded')
         if any('film.js' in r for r in log['requests']): problems.append(f'{mode}: film.js fetched before a press')
+        # the speed before the film: it cycles, and nothing loads for it
+        sp = []
+        for _ in range(3):
+            pg.click('.cqf-speed'); sp.append(pg.evaluate("[document.querySelector('.cqf-speed').dataset.rate, document.querySelector('.cqf-speed').textContent]"))
+        pg.wait_for_timeout(200)
+        print(f'{mode}: the speed before ▶: {sp}; film.js fetched: {any("film.js" in r for r in log["requests"])}')
+        if sp != [['0.5', '½×'], ['0.25', '¼×'], ['1', '1×']] or any('film.js' in r for r in log['requests']): problems.append(f'{mode}: the speed before ▶: {sp}')
         before_reqs = len(log['requests'])
         pg.screenshot(path=str(OUT / f'{mode}-page.png'))  # the landing's first screen, the film in the strip's place
         pg.add_style_tag(content='.cqf-big { visibility: hidden }')  # the same frame without ▶, which goes when the film plays
@@ -258,41 +264,46 @@ def check(url, mode):
         if log['errors']: problems.append(f'{mode}: console {log["errors"]}')
         if any(u.startswith('data:') for u in log['requests']): problems.append(f'{mode}: data: requests')
         ctx.close()
-        # 2. a chapter as the first press, in German
+        # 2. the time bar moved as the first press, in German
         ctx, pg, log = page(b, mode)
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         pg.select_option('header select', 'de')
         pictures(pg, mode, 'de', 'German page, before any press')
-        names = pg.evaluate("[...document.querySelectorAll('.cqf-ch button')].map(b => b.textContent)")
-        aria = pg.evaluate("['.cqf-stage', '.cqf-big', '.cqf-ch', '.cqf-again', '.cqf-full'].map(s => document.querySelector(s).getAttribute('aria-label'))")
-        print(f'{mode}: German names of the film, ▶, the chapters, the replay and full screen: {aria}')
-        english = ['From an exercise sheet to the class: a film without sound', 'Play', 'Chapters of the film', 'Play again', 'Full screen']  # index.html's
+        sels = ['.cqf-stage', '.cqf-big', '.cqf-again', '.cqf-full', '.cqf-play', '.cqf-seek input', '.cqf-speed']
+        aria = pg.evaluate('(sels) => sels.map(s => document.querySelector(s).getAttribute("aria-label"))', sels)
+        print(f'{mode}: German names of the film, ▶, the replay, full screen, play, the time bar and the speed: {aria}')
+        english = ['From an exercise sheet to the class: a film without sound', 'Play', 'Play again', 'Full screen', 'Play', 'Time in the film', 'Speed']  # index.html's
         if any(not x or x == e for x, e in zip(aria, english)): problems.append(f'{mode}: names not German: {aria}')
-        pg.click('.cqf-ch button[data-ch=capTap]')
+        pg.evaluate(MOVE, 40)
+        pre = pg.evaluate("document.querySelector('.cqf-time').firstChild.nodeValue")
         wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
         pg.wait_for_timeout(300)
-        tm = pg.evaluate("document.querySelector('.cqf-time').textContent")
-        on = pg.evaluate("[...document.querySelectorAll('.cqf-ch button.on')].map(b => b.textContent)")
-        print(f'{mode}: German chapters {names}; first press "{names[-1]}" plays at {tm}, highlighted {on}')
-        if tm != '0:38': problems.append(f'{mode}: chapter start {tm}, not 0:38')
+        st = pg.evaluate("""() => ({ clock: document.querySelector('.cqf-time').textContent, vt: document.querySelector('.cqf-seek input').getAttribute('aria-valuetext'),
+          play: document.querySelector('.cqf-play').getAttribute('aria-label'), big: document.querySelector('.cqf-big').hidden, marks: document.querySelectorAll('.cqf-marks i').length,
+          tip: document.querySelector('.cqf-tip').hidden })""")
+        print(f'{mode}: time bar moved to 40 s before the film: clock {pre} while it loads; then {st}')
+        if pre != '0:40' or st['clock'] != '0:40 / 1:00' or not st['vt'].startswith('0:40, ') or st['play'] != aria[4] or not st['big'] or st['marks'] != 4 or not st['tip']:
+            problems.append(f'{mode}: the time bar as the first press: {pre} {st}')
+        shot(pg, 'moved-to-40', mode)
+        pg.click('.cqf-play')
         speaks(pg, mode, 'de')
         # a language switch while it plays: back to the poster, in the new language; the next press builds the film in that one
         pg.select_option('header select', 'fr')
         wait_until(pg, "() => document.getElementById('cqfilm').dataset.film !== 'on'")
         st = pg.evaluate(POSTER_STATE)
         print(f'{mode}: switched to French while it played: {st}')
-        if st != {'img': 1, 'svg': 0, 'bar': 0, 'full': [1, True, 'false'], 'big': True, 'again': False, 'on': 0, 'api': False, 'tabindex': None}: problems.append(f'{mode}: after a switch not the poster: {st}')
+        if st != POSTER_WANT: problems.append(f'{mode}: after a switch not the poster: {st}')
         pictures(pg, mode, 'fr', 'switched to French after the film loaded')
         reqs = len(log['requests'])
         pg.click('.cqf-big')
         wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
         pg.wait_for_timeout(300)
-        n = pg.evaluate("[document.querySelectorAll('.cqf-stage > svg').length, document.querySelectorAll('.cqf-bar > *').length, document.querySelector('.cqf-time').textContent]")
+        n = pg.evaluate("[document.querySelectorAll('.cqf-stage > svg').length, document.querySelectorAll('.cqf-bar > *').length, document.querySelectorAll('.cqf-seek > *').length, document.querySelector('.cqf-time').textContent]")
         c = pg.evaluate('window.cqFilm.check()')
-        print(f'{mode}: ▶ after the switch: films {n[0]}, bar items {n[1]}, clock {n[2]}, {c["kids"]} children and {c["avatars"]} avatars (one class), film.js fetched again: {any("film.js" in u for u in log["requests"][reqs:])}')
-        if n[0] != 1 or n[1] != 5 or c['kids'] != 20 or c['avatars'] != 20: problems.append(f'{mode}: rebuilt film doubled: {n} {c["kids"]} {c["avatars"]}')
+        print(f'{mode}: ▶ after the switch: films {n[0]}, bar items {n[1]}, time bar parts {n[2]}, clock {n[3]}, {c["kids"]} children and {c["avatars"]} avatars (one class), film.js fetched again: {any("film.js" in u for u in log["requests"][reqs:])}')
+        if n[0] != 1 or n[1] != 5 or n[2] != 3 or c['kids'] != 20 or c['avatars'] != 20: problems.append(f'{mode}: rebuilt film doubled: {n} {c["kids"]} {c["avatars"]}')
         speaks(pg, mode, 'fr')
-        if pg.evaluate('window.__csp') or log['errors']: problems.append(f'{mode}: chapter run: {pg.evaluate("window.__csp")} {log["errors"]}')
+        if pg.evaluate('window.__csp') or log['errors']: problems.append(f'{mode}: time bar run: {pg.evaluate("window.__csp")} {log["errors"]}')
         ctx.close()
         # 3. film.js blocked, then allowed
         ctx, pg, log = page(b, mode)
@@ -327,11 +338,11 @@ def check(url, mode):
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         pg.click('.cqf-big')
         wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'failed'")
-        st = pg.evaluate("({ img: !!document.querySelector('#cqfilm .cqf-stage > img'), svg: !!document.querySelector('.cqf-stage > svg'), bar: document.querySelectorAll('.cqf-bar > :not([hidden])').length })")
+        st = pg.evaluate("({ img: !!document.querySelector('#cqfilm .cqf-stage > img'), svg: !!document.querySelector('.cqf-stage > svg'), bar: document.querySelectorAll('.cqf-full:not([hidden]), .cqf-marks').length })")
         pg.click('.cqf-big')
         wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
         st2 = pg.evaluate("({ img: !!document.querySelector('#cqfilm .cqf-stage > img'), svgs: document.querySelectorAll('.cqf-stage > svg').length })")
-        print(f'{mode}: film.js fails to draw once: picture stays {st["img"]}, no film left {not st["svg"]}, empty bar {not st["bar"]}; the next press: film {st2}')
+        print(f'{mode}: film.js fails to draw once: picture stays {st["img"]}, no film left {not st["svg"]}, the bar as before {not st["bar"]}; the next press: film {st2}')
         if not st['img'] or st['svg'] or st['bar'] or st2['img'] or st2['svgs'] != 1: problems.append(f'{mode}: failed draw left {st}, then {st2}')
         if [e for e in log['errors'] if 'checked failure' not in e]: problems.append(f'{mode}: failure run: {log["errors"]}')
         ctx.close()
@@ -346,9 +357,9 @@ def check(url, mode):
 
 
 RAF = '''window.__raf = 0; { const r = window.requestAnimationFrame.bind(window); window.requestAnimationFrame = (f) => { window.__raf++; return r(f); }; }'''
-STATE = '''() => { const pb = document.querySelector('.cqf-bar button'); return { t: +document.querySelector('.cqf-bar input').value,
+STATE = '''() => { const pb = document.querySelector('.cqf-play'), tip = document.querySelector('.cqf-tip'); return { t: +document.querySelector('.cqf-bar input').value,
   playing: pb.getAttribute('aria-label') === 'Pause', y: Math.round(scrollY), focus: document.activeElement === pb ? 'play/pause' : document.activeElement.tagName,
-  current: [...document.querySelectorAll('.cqf-ch [aria-current]')].map(b => b.dataset.ch) }; }'''
+  tip: !tip || tip.hidden ? '' : tip.textContent }; }'''
 
 
 def controls(b, url):
@@ -366,27 +377,29 @@ def controls(b, url):
     if s['focus'] != 'play/pause' or not s['playing']: bad(f'after ▶ by Enter {s}')
     names = pg.evaluate('''() => { const r = document.querySelector('.cqf-bar input'), st = document.querySelector('.cqf-stage');
       return { range: r.getAttribute('aria-label'), valuetext: r.getAttribute('aria-valuetext'), clock: document.querySelector('.cqf-time').textContent, step: r.step,
-        stage: [st.getAttribute('role'), st.getAttribute('aria-label'), st.tabIndex], list: document.querySelector('.cqf-ch').getAttribute('aria-label'),
-        en: [...document.querySelectorAll('.cqf-stage > svg, .cqf-bar button:not(.cqf-full), .cqf-bar input')].map(e => e.getAttribute('lang')),
+        stage: [st.getAttribute('role'), st.getAttribute('aria-label'), st.tabIndex],
         text: document.querySelector('.cqf-stage > svg').textContent, host: location.host }; }''')
-    print(f'desk: names: range "{names["range"]}" ({names["valuetext"]}, step {names["step"]}), stage {names["stage"]}, chapters "{names["list"]}", lang {names["en"]}')
-    if not names['range'] or names['valuetext'] != names['clock'] or names['stage'][0] != 'group' or not names['stage'][1] or names['stage'][2] != 0 or not names['list'] or set(names['en']) != {'en'}: bad(f'names { {k: v for k, v in names.items() if k != "text"} }')
+    print(f'desk: names: range "{names["range"]}" ({names["valuetext"]}, step {names["step"]}; clock {names["clock"]}), stage {names["stage"]}')
+    if not names['range'] or names['valuetext'] != names['clock'].split(' / ')[0] + ', Your exercise sheets' or names['stage'][0] != 'group' or not names['stage'][1] or names['stage'][2] != 0: bad(f'names { {k: v for k, v in names.items() if k != "text"} }')
     addr = names['host'] in names['text'] and 'classyquiz.pages.dev' not in names['text']
     print(f'desk: the film shows the address opened ({names["host"]}), not the demo\'s: {addr}')
     if not addr: bad('the film shows another address than the one opened')
-    # one loop, however often a chapter is pressed while it plays
+    # one loop, however often the bar is moved and played while it plays
     def rate():
         n0 = pg.evaluate('window.__raf'); pg.wait_for_timeout(1000); return pg.evaluate('window.__raf') - n0
     r0 = rate()
-    for _ in range(5): pg.click('.cqf-ch button[data-ch=capAi]')
+    for i in range(5):
+        pg.evaluate(MOVE, 5 + i); pg.click('.cqf-play')
     r1 = rate()
-    print(f'desk: animation frames a second while playing: {r0}; after five chapter presses: {r1}')
-    if r1 > r0 * 1.3 + 5: bad(f'frames a second {r0} -> {r1} after chapter presses')
-    # Space on a chapter is that chapter's press
-    pg.focus('.cqf-ch button[data-ch=capWall]'); pg.keyboard.press(' '); pg.wait_for_timeout(300)
-    s = state(); print(f'desk: Space on "What the class sees": at {s["t"]}, playing {s["playing"]}, current {s["current"]}')
-    if not (27.7 <= s['t'] < 29.5 and s['playing'] and s['current'] == ['capWall']): bad(f'Space on a chapter {s}')
-    pg.click('.cqf-bar button'); t0 = state()['t']
+    print(f'desk: animation frames a second while playing: {r0}; after five moves of the bar, each played: {r1}')
+    if r1 > r0 * 1.3 + 5: bad(f'frames a second {r0} -> {r1} after moves of the bar')
+    # a drag: the chapter's name over the thumb while it is held, gone on release; the film paused where it was let go
+    box = pg.locator('.cqf-seek input').bounding_box(); y = box['y'] + box['height'] / 2
+    pg.mouse.move(box['x'] + 8, y); pg.mouse.down(); pg.mouse.move(box['x'] + 8 + (box['width'] - 16) * 30 / 60, y, steps=6); pg.wait_for_timeout(100)
+    held = state(); pg.mouse.up(); pg.wait_for_timeout(100); let_go = state()
+    print(f'desk: a drag to the middle: held {held}; let go {let_go}')
+    if not (29 <= held['t'] <= 31) or held['tip'] != 'What the class sees' or held['playing'] or let_go['tip'] or let_go['playing']: bad(f'drag {held} {let_go}')
+    t0 = state()['t']
     # the page's own keys stay the page's
     tab0 = pg.evaluate("document.querySelector('.ask-tabs [aria-selected=true]').id")
     pg.focus('.ask-tabs [aria-selected=true]'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
@@ -408,7 +421,7 @@ def controls(b, url):
     pg.focus('.cqf-bar input'); pg.keyboard.press('ArrowLeft'); t4 = state()['t']
     vt = pg.evaluate("[document.querySelector('.cqf-bar input').getAttribute('aria-valuetext'), document.querySelector('.cqf-time').textContent]")
     print(f'desk: on the stage Space plays {p1}, Space again pauses {not p2}; ArrowRight {t1} -> {t2}, Shift+ArrowLeft -> {t3}; on the time bar ArrowLeft -> {t4} ({vt[0]})')
-    if not p1 or p2 or abs(t2 - t1 - 1) > 0.11 or abs(t2 - t3 - 0.1) > 0.06 or abs(t3 - t4 - 1) > 0.11 or vt[0] != vt[1]: bad(f'stage and range keys {p1} {p2} {t1} {t2} {t3} {t4} {vt}')
+    if not p1 or p2 or abs(t2 - t1 - 1) > 0.11 or abs(t2 - t3 - 0.1) > 0.06 or abs(t3 - t4 - 1) > 0.11 or not vt[0].startswith(vt[1].split(' / ')[0] + ', '): bad(f'stage and range keys {p1} {p2} {t1} {t2} {t3} {t4} {vt}')
     # never unseen: scrolled away or the tab hidden, it pauses and stays paused
     pg.click('.cqf-bar button'); pg.wait_for_timeout(200)
     pg.evaluate('scrollTo(0, document.body.scrollHeight)'); pg.wait_for_timeout(500); a = state()['playing']
@@ -436,7 +449,7 @@ def ending(b, url, mode):
     wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
     hidden0 = pg.evaluate("document.querySelector('.cqf-again').hidden")
     pg.evaluate('window.cqFilm.render(59.3)')
-    pg.click('.cqf-bar button')  # play the last moment out
+    pg.click('.cqf-play')  # play the last moment out
     wait_until(pg, "() => !document.querySelector('.cqf-again').hidden", 5)
     s = pg.evaluate(STATE)
     a = pg.evaluate("""() => { const a = document.querySelector('.cqf-again'), r = a.getBoundingClientRect(), st = document.querySelector('.cqf-stage').getBoundingClientRect();
@@ -456,29 +469,29 @@ def ending(b, url, mode):
     ctx.close()
 
 
-# Viewports the arrangement is checked at: [name, viewport, phone?, where the chapters stand]
-ARRANGEMENTS = [('desk', (1300, 900), False, 'beside'), ('desk-short', (1024, 600), False, 'beside'), ('phone', (390, 844), True, 'under'),
-                ('sideways-844x390', (844, 390), True, 'beside'), ('sideways-740x360', (740, 360), True, 'beside'), ('sideways-915x412', (915, 412), True, 'beside')]
+# Viewports the arrangement is checked at: [name, viewport, phone?, rows of the bar]
+ARRANGEMENTS = [('desk', (1300, 900), False, 1), ('desk-short', (1024, 600), False, 1), ('phone', (390, 844), True, 2),
+                ('sideways-844x390', (844, 390), True, 1), ('sideways-740x360', (740, 360), True, 1), ('sideways-915x412', (915, 412), True, 1)]
 
 
 def arrangement(b, url):
-    """Where the chapters stand, and that the first of the headings of Build and Run is wholly on the first screen (root-page.md,
-    "The film": a phone held sideways still shows Build and Run below the film), with no sideways scroll."""
-    for name, (w, h), phone, where in ARRANGEMENTS:
+    """The bar under the film and as wide, on the rows given (root-page.md, "The film": a phone held sideways as a desktop),
+    its time bar wide enough to drag, and no sideways scroll."""
+    for name, (w, h), phone, rows in ARRANGEMENTS:
         ctx = b.new_context(viewport={'width': w, 'height': h}, **({'device_scale_factor': 3, 'is_mobile': True, 'has_touch': True} if phone else {}))
         pg = ctx.new_page()
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         m = pg.evaluate("""() => { const r = s => document.querySelector(s).getBoundingClientRect();
-          const st = r('.cqf-stage'), ch = r('.cqf-ch'), heads = [r('#build-h'), r('#run-h')].sort((a, b) => a.top - b.top);
-          return { vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth, stage: [st.width, st.height], first: [heads[0].top, heads[0].bottom],
-            where: ch.left >= st.right ? 'beside' : ch.top >= st.bottom ? 'under' : 'over',
-            rows: new Set([...document.querySelectorAll('.cqf-ch li')].map(li => Math.round(li.getBoundingClientRect().top))).size }; }""")
+          const st = r('.cqf-stage'), bar = r('.cqf-bar'), seek = r('.cqf-seek'), heads = [r('#build-h'), r('#run-h')].sort((a, b) => a.top - b.top);
+          return { vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth, stage: [st.left, st.width, st.height], first: [heads[0].top, heads[0].bottom],
+            bar: [bar.left, bar.width, bar.top - st.bottom],  seek: seek.width,
+            rows: new Set([...document.querySelectorAll('.cqf-bar > *')].map(e => Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2))).size > 1 ? 2 : 1 }; }""")
         pg.screenshot(path=str(OUT / f'layout-{name}.png'))
-        print(f'{name} {w} x {h}: film {m["stage"][0]:.0f} x {m["stage"][1]:.0f}, chapters {m["where"]} it ({m["rows"]} rows), the first heading of Build and Run'
-              f' from {m["first"][0]:.0f} to {m["first"][1]:.0f} of {m["vh"]}; page {m["sw"]} wide; layout-{name}.png')
-        if m['where'] != where: problems.append(f'{name}: chapters {m["where"]} the film, not {where}')
-        if where == 'under' and m['rows'] != 1: problems.append(f'{name}: chapters on {m["rows"]} rows')
-        if m['first'][1] > m['vh'] + 0.5: problems.append(f'{name}: the first heading of Build and Run ends at {m["first"][1]:.0f}, below the screen ({m["vh"]})')
+        print(f'{name} {w} x {h}: film {m["stage"][1]:.0f} x {m["stage"][2]:.0f}, bar {m["bar"][1]:.0f} wide {m["bar"][2]:.0f} px under it on {m["rows"]} row(s), time bar {m["seek"]:.0f} wide;'
+              f' the first heading of Build and Run from {m["first"][0]:.0f} to {m["first"][1]:.0f} of {m["vh"]}; page {m["sw"]} wide; layout-{name}.png')
+        if abs(m['bar'][0] - m['stage'][0]) > 0.5 or abs(m['bar'][1] - m['stage'][1]) > 0.5 or not 0 <= m['bar'][2] <= 12: problems.append(f'{name}: the bar is not under the film and as wide: {m}')
+        if m['rows'] != rows: problems.append(f'{name}: the bar on {m["rows"]} row(s), not {rows}')
+        if m['seek'] < 150: problems.append(f'{name}: the time bar is {m["seek"]:.0f} px wide')
         if m['sw'] > m['vw']: problems.append(f'{name}: the page scrolls sideways ({m["sw"]} > {m["vw"]})')
         ctx.close()
 
@@ -499,7 +512,7 @@ def fullscreen(b, url, mode, fallback):
     bad = lambda what: problems.append(f'{mode} full screen ({how}): {what}')
     pg.click('.cqf-big')
     wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
-    pg.click('.cqf-bar button')  # paused, so the keys' effect shows
+    pg.click('.cqf-play')  # paused, so the keys' effect shows
     y0 = 60
     def enter():
         pg.evaluate(f'scrollTo(0, {y0})'); pg.wait_for_timeout(100)
@@ -605,7 +618,7 @@ def rest_unchanged(dist0, dist, port=0):
     for mode in ('desk', 'phone'):
         a, c = got[mode, 'before'], got[mode, 'after']
         bad = [(x, y) for x, y in zip(a, c) if x != y]
-        print(f'{mode}: Build, Run and the guidance against the site without the film: {len(a)} elements, {len(bad) + abs(len(a) - len(c))} with another style')
+        print(f'{mode}: Build, Run and the guidance against main: {len(a)} elements, {len(bad) + abs(len(a) - len(c))} with another style')
         if bad or len(a) != len(c): problems.append(f'{mode}: the landing below the film changed: {bad[:3]}')
 
 

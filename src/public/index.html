@@ -34,20 +34,16 @@
   .lang select { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; font-size: 16px; }
   .lang:focus-within { outline: 2px solid var(--accent); }
 
-  /* The film in the strip's place (root-page.md, "The film"; docs/film/). Until someone presses ▶ or a chapter,
-     the page holds only the poster frame as a picture and the strip's captions as chapters, each with a small still: nothing else
-     loads or plays, and the film's own words stay out of this page, which AIs read. The pictures are English here and in the page's
-     language once client/home.ts has set it. The first press loads /js/film.js (client/film-poster.ts); it takes this markup over,
-     paints the same frame over the picture and plays, in the page's language. On a screen taller than wide and under 900 px (a phone
-     held upright) the chapters are chips under the film; from 900 px, or on any screen wider than tall (a phone held sideways), the
-     film takes up to two thirds and the chapters stand beside it. The film's height is at most 62% of the viewport's and leaves
-     220 px for the header above and the bar, the example's link and the headings of Build and Run below, so those headings show on
-     the first screen, a phone held sideways included (--film-h; svh: the viewport with a phone browser's bars shown). Watching it
-     big there is the full screen button's. */
+  /* The film in the strip's place (root-page.md, "The film"; docs/film/). Until someone presses ▶ or moves the time bar, the
+     page holds the poster frame as a picture and the player's bar: nothing else loads or plays, and the film's own words stay
+     out of this page, which AIs read. The picture is English here and in the page's language once client/home.ts has set it.
+     The first press loads /js/film.js (client/film-poster.ts); it takes this markup over, paints the same frame over the picture
+     and plays, or shows the moment the time bar was moved to, in the page's language. Centred, the example's link under its
+     right edge, at most 62% of the viewport's height (--film-h; svh: the viewport with a phone browser's bars shown). A phone
+     held sideways gets the desktop's layout. Watching it big is the full screen button's. */
   .film { margin: 18px 0 6px; }
-  .cqf { --film-h: min(62svh, 100svh - 220px); display: grid; gap: 10px; }
-  @media (min-width: 900px), (orientation: landscape) { .cqf { grid-template-columns: min((100% - 18px) * 2 / 3, var(--film-h) * 16 / 9) minmax(0, 1fr); gap: 18px; align-items: start; } }
-  .cqf-film { width: 100%; max-width: calc(var(--film-h) * 16 / 9); }
+  .film, .see { --film-h: 62svh; }
+  .cqf-film { width: 100%; max-width: calc(var(--film-h) * 16 / 9); margin: 0 auto; container-type: inline-size; }
   .cqf-stage { position: relative; border-radius: var(--radius); overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
   .cqf-stage > svg { display: block; width: 100%; height: 100%; }
   .cqf-stage > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; } /* over the film while it builds underneath */
@@ -61,12 +57,26 @@
   .cqf-again svg { width: 50%; height: 50%; }
   .cqf-again[hidden] { display: none; }
   .film.loading .cqf-big { cursor: progress; opacity: .6; }
-  .cqf-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; min-height: 36px; }
+  /* The bar, as video players have it: play, the time bar, the time and the length, the speed, full screen. It works before
+     film.js is there: the speed is client/film-poster.ts's, and a move of the time bar loads the film, which then shows that
+     moment. Full screen needs the film, so it keeps its place hidden until then, and nothing moves when it appears. The
+     chapters' starts are ticks under the time bar (film.js); its name shows over the thumb while the bar is moved. --thumb:
+     the browser's thumb, whose centre stops half a thumb in from either end; the ticks and the name are placed the same way.
+     Where the film is under 390 px wide (a phone held upright) one row would leave the time bar too short to drag, so it takes
+     a row of its own. */
+  .cqf-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 6px; min-height: 36px; }
   .cqf-bar button { font: 600 15px var(--font-text); min-width: 44px; min-height: 36px; border-radius: 10px; border: 1px solid var(--rule); background: var(--card); color: var(--fg); cursor: pointer; }
-  .cqf-bar input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
-  .cqf-time { font: 600 14px var(--font-brand); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 3.2em; text-align: right; }
+  .cqf-seek { --thumb: 16px; position: relative; flex: 1; min-width: 0; display: flex; align-items: center; height: 36px; }
+  .cqf-seek input { width: 100%; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .cqf-marks { position: absolute; inset: 0; pointer-events: none; }
+  .cqf-marks i { position: absolute; left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--at)); top: calc(50% + 7px); width: 2px; height: 5px; margin-left: -1px; border-radius: 1px; background: var(--muted); }
+  .cqf-tip { position: absolute; bottom: calc(50% + 14px); left: 0; z-index: 2; white-space: nowrap; pointer-events: none; font: 600 13px/1.3 var(--font-text); padding: 3px 8px; border-radius: 6px; background: var(--fg); color: var(--bg); }
+  .cqf-tip[hidden] { display: none; }
+  .cqf-time { font: 600 14px var(--font-brand); font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+  .cqf-dur { font-weight: 400; }
+  @container (max-width: 389px) { .cqf-seek { order: -1; flex-basis: 100%; height: 28px; } .cqf-time { margin-right: auto; } }
   .cqf-full { display: grid; place-items: center; padding: 0; }
-  .cqf-full[hidden] { display: none; }
+  .cqf-full[hidden] { display: grid; visibility: hidden; }
   .cqf-full svg { width: 20px; height: 20px; }
   .cqf-full .out, .cqf-full[aria-pressed="true"] .in { display: none; }
   .cqf-full[aria-pressed="true"] .out { display: inline; }
@@ -79,41 +89,13 @@
   .cqf-fs .cqf-bar { width: var(--fs-w); margin: 6px auto 0; padding: 0 8px; box-sizing: border-box; }
   .cqf-fs .cqf-time { color: #c9c6bf; }
   html:has(.cqf-fs) { overflow: hidden; }
-  /* Each chapter a still of its moment in the film and its caption: what the poster's classroom leaves out (your AI, the upload)
-     shows in a picture too. Under the film (upright, under 900 px) the chapters are chips on one row that scrolls sideways;
-     beside it a list. The stills only from 560 px of height, and below it the list packed: a shorter screen keeps Build and Run
-     in view. */
-  .cqf-ch { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; }
-  .cqf-ch button { display: flex; align-items: center; gap: 8px; font: 14px/1.2 var(--font-text); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--card); color: var(--muted); cursor: pointer; white-space: nowrap; }
-  .cqf-ch img { display: none; flex: none; height: auto; aspect-ratio: 16 / 9; border-radius: 5px; background: var(--code-bg); }
-  .cqf-ch button.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-  @media (max-width: 899px) and (orientation: portrait) {
-    .cqf-ch { overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; padding-bottom: 4px; }
-    .cqf-ch li { flex: none; margin: 0; scroll-snap-align: start; }
-  }
-  @media (max-width: 899px) and (orientation: portrait) and (min-height: 560px) {
-    .cqf-ch button { padding: 4px 12px 4px 4px; border-radius: 10px; }
-    .cqf-ch img { display: block; width: 48px; }
-  }
-  @media (min-width: 900px), (orientation: landscape) {
-    .cqf-ch { flex-direction: column; gap: 4px; }
-    .cqf-ch button { width: 100%; text-align: left; border-radius: 10px; padding: 6px 12px; gap: 12px; font-size: 15px; white-space: normal; }
-  }
-  @media (min-width: 900px) and (min-height: 560px), (orientation: landscape) and (min-height: 560px) {
-    .cqf-ch button { padding-left: 6px; }
-    .cqf-ch img { display: block; width: 88px; }
-  }
-  /* Without stills a chapter would read as an empty field: its number in the film's order stands in the still's place. */
-  .cqf-ch { counter-reset: ch; }
-  .cqf-ch button::before { counter-increment: ch; content: counter(ch); display: none; flex: none; width: 18px; height: 18px; margin: -2px 0; border-radius: 50%; background: var(--code-bg); color: var(--fg); font: 600 12px/18px var(--font-brand); text-align: center; } /* no taller than the caption's line: the list keeps its height */
-  @media (max-height: 559px) { .cqf-ch li { margin: 0; } .cqf-ch button::before { display: block; } }
   /* the faces inside the film (its SVG text) */
   .cqf-stage text { font-family: var(--font-text); }
   .cqf-stage .b { font-family: var(--font-brand); font-weight: 700; font-variant-numeric: tabular-nums; }
   .cqf-stage .tb { font-weight: 700; }
   .cqf-stage .ts { font-weight: 600; }
   .cqf-stage .tn { font-variant-numeric: tabular-nums; }
-  .see { display: block; margin: 4px 0 6px; text-align: right; color: var(--accent); font-weight: 600; text-decoration: none; }
+  .see { display: block; max-width: calc(var(--film-h) * 16 / 9); margin: 4px auto 6px; text-align: right; color: var(--accent); font-weight: 600; text-decoration: none; }
   .see:hover, .see:focus-visible { text-decoration: underline; }
 
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; }
@@ -202,15 +184,8 @@
 
 <div class="landing wide" id="landing">
 <div class="film" id="cqfilm"><div class="cqf">
-  <div class="cqf-film"><div class="cqf-stage" role="group" aria-label="From an exercise sheet to the class: a film without sound" data-t-aria="film"><img src="/landing/film-en.webp" srcset="/landing/film-en-800.webp 800w, /landing/film-en.webp 1600w" sizes="(min-width: 900px) 720px, 100vw" alt="" width="1600" height="900"><button class="cqf-big" type="button" aria-label="Play" data-t-aria="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg></button><button class="cqf-again" type="button" aria-label="Play again" data-t-aria="again" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-    <div class="cqf-bar"><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
-  <ol class="cqf-ch" aria-label="Chapters of the film" data-t-aria="chapters">
-    <li><button type="button" data-ch="capSheet"><img src="/landing/film-sheet.webp" alt="" width="192" height="108" loading="lazy"><span data-t="capSheet">Your exercise sheets</span></button></li>
-    <li><button type="button" data-ch="capAi"><img src="/landing/film-ai-en.webp" data-lang-src="film-ai" alt="" width="192" height="108" loading="lazy"><span data-t="capAi">Your AI</span></button></li>
-    <li><button type="button" data-ch="capZip"><img src="/landing/film-zip-en.webp" data-lang-src="film-zip" alt="" width="192" height="108" loading="lazy"><span data-t="capZip">The .zip, uploaded here</span></button></li>
-    <li><button type="button" data-ch="capWall"><img src="/landing/film-wall-en.webp" data-lang-src="film-wall" alt="" width="192" height="108" loading="lazy"><span data-t="capWall">What the class sees</span></button></li>
-    <li><button type="button" data-ch="capTap"><img src="/landing/film-tap-en.webp" data-lang-src="film-tap" alt="" width="192" height="108" loading="lazy"><span data-t="capTap">Each student taps</span></button></li>
-  </ol>
+  <div class="cqf-film"><div class="cqf-stage" role="group" aria-label="From an exercise sheet to the class: a film without sound" data-t-aria="film"><img src="/landing/film-en.webp" srcset="/landing/film-en-800.webp 800w, /landing/film-en.webp 1600w" sizes="min(100vw, 110svh)" alt="" width="1600" height="900"><button class="cqf-big" type="button" aria-label="Play" data-t-aria="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg></button><button class="cqf-again" type="button" aria-label="Play again" data-t-aria="again" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="cqf-bar"><button class="cqf-play" type="button" aria-label="Play" data-t-aria="play">&#9654;</button><span class="cqf-seek"><input type="range" min="0" max="60" step="0.1" value="0" aria-label="Time in the film" data-t-aria="seek" aria-valuetext="0:00"></span><span class="cqf-time">0:00<span class="cqf-dur"> / 1:00</span></span><button class="cqf-speed" type="button" aria-label="Speed" data-t-aria="speed" data-rate="1">1&times;</button><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
 </div></div>
 <a class="see" id="example-link" href="/example" data-t="see">The example, step by step &rsaquo;</a>
 

@@ -2,7 +2,7 @@
 
 A film of about 60 s, without sound, in the root page's top block, where the
 strip of five stills stood. What it does on the page (the poster, the
-chapters, the layout, what loads when): `docs/design/root-page.md`, "The
+player's bar, the layout, what loads when): `docs/design/root-page.md`, "The
 film". This folder is the film itself: this file (what it is for, what it
 lives with, how it is made and checked), `storyboard-classyquiz.md` (the
 shots, and how they depart from the owner's brief), `film-text.md` (the
@@ -48,8 +48,8 @@ it.
 - **A phone held upright** gives the 16:9 film about 358 × 201 CSS px. Text
   that must be read needs a close-up and time on screen; everything else may
   be illegible (codes typed by children, the AI's prose).
-- **It never plays by itself**, so its poster frame and the chapters beside
-  or under it must do the five-second job unplayed (`docs/design/root-page.md`).
+- **It never plays by itself**: until a press the page shows its poster frame
+  (`docs/design/root-page.md`).
 - **No sound, no words of its own.** Text appears only on the screens it
   shows, in the language those screens have on the real site: the teacher's
   chat, the quiz and the root page in the page's language, the site's screens
@@ -75,22 +75,23 @@ it.
 `build/` holds the source:
 
 - `film.js`: the film and its player, one script. Its words: `LANDING` (the
-  root page's own words, the example ask and the Run box, filled in from
-  `src/client/landing-text.ts` at build time), `CONTENT` (per language: the
+  root page's own words, the example ask, the Run box, the chapters' names and
+  the player's, filled in from `src/client/landing-text.ts` at build time), `CONTENT` (per language: the
   teacher's second message, the AI's status lines, the `.zip`'s name, the
   quiz's title and questions; `draft: true` marks a language whose words are
   drafts pending the owner's review) and `COMMON` (the site's English
-  screens, the timings of the chapters).
+  screens, the chapters' starts).
 - `film.css`: the standalone page's player and the faces the film uses (on
   the site they come from `index.html` and `site.css`).
 - `build.py`: the standalone page, `.tmp/film/index.html` at the repo root
   (git-ignored; `?lang=de` and so on picks the language), with the assets as
   `data:` URIs and the avatars taken from `src/client/look.ts`.
 - `sitebuild.py`: the site's version, straight into `src/`:
-  `src/public/js/film.js`, the poster frames `src/public/landing/film-<lang>.webp`
-  and `-800.webp`, and the chapters' stills `film-<still>[-<lang>].webp`,
-  rendered from a fresh standalone page. These are generated: edit the
-  source, not them.
+  `src/public/js/film.js` and the poster frames
+  `src/public/landing/film-<lang>.webp` and `-800.webp`, rendered from a fresh
+  standalone page. These are generated: edit the source, not them. It refuses
+  to build while `index.html`'s time bar carries another length than the
+  film's (the bar works before `film.js` is there).
 - `shoot.py`: stills of the standalone page at any times, desktop or phone,
   and a contact sheet, into `.tmp/film/shots`.
 - `sitecheck.py`: the site's version checked in the real site, under the
@@ -102,7 +103,7 @@ rebuild, and what the scripts need: `src/DEVELOPING.md`, "The landing film".
 ### The film's shape
 
 - **The whole picture is a function of film time**: `render(t)` sets
-  everything, so the poster frame, a chapter's seek, pausing and playing are
+  everything, so the poster frame, a seek, pausing and playing are
   one code path, with nothing chained on timers. The standalone page exposes
   it as `window.cqFilm.render(t)`, which makes every moment checkable.
 - The SVG is built once from templates; after that a frame only sets
@@ -180,8 +181,9 @@ Only rendered pictures found them, so the film is checked by looking:
   and served with the site's headers, in Edge on a desktop and a phone. Its
   header lists every check: nothing of the film fetched before a press and
   none of its words in the HTML; the poster picture against the live frame;
-  chapters, languages and the switch back to the poster; failures to load or
-  to draw; keys and focus; the arrangement on upright and sideways phones;
+  the bar before and after the film loads, languages and the switch back to
+  the poster; failures to load or to draw; keys, focus and a drag; the
+  arrangement on desktops and upright and sideways phones;
   full screen, the browser's and the fallback; every language's ask typed
   out in time and no fitted text shrunk below three quarters; and the rest
   of the landing unchanged, by every element's computed style (a picture
@@ -197,9 +199,12 @@ Only rendered pictures found them, so the film is checked by looking:
   `site.css`. `sitebuild.py` refuses a `film.js` with a `data:` URI in it.
 - The avatars are `src/client/look.ts`'s own, read by `build.py` with the
   types stripped, not copied.
-- The chapters on the page are the captions in `landing-text.ts` (`data-t`);
-  their times are only in `film.js` (`COMMON.chapters`, keyed by the same
-  names).
+- The chapters' names are in `landing-text.ts` (`capSheet` and so on), the
+  player's too (`play`, `pause`, `speed`, `seek`); the chapters' starts are
+  only in `film.js` (`COMMON.chapters`, keyed by the same names), drawn as
+  ticks on the page's time bar.
+- The time bar is the page's, so its length is in `index.html` too (its
+  `max` and the length beside it); `sitebuild.py` checks it against `DUR`.
 - The poster picture lies over the SVG, absolutely placed, while the film
   builds underneath it; then the film replaces it.
 - The CSP stops Playwright's `wait_for_function` (it evaluates a string,
@@ -227,5 +232,7 @@ Only rendered pictures found them, so the film is checked by looking:
   the wall.
 - The site's version only as `sitecheck.py` serves it: not yet on Cloudflare
   Pages, not looked at in the page's dark mode, not with a screen reader.
-- Whether teachers read the poster and chapters in five seconds:
+- What the poster tells a teacher who doesn't play the film:
   `docs/design/root-page.md`, "Not known".
+- Dragging the time bar on a slow phone: the film then draws at most one frame
+  per screen refresh, and skips the rest. It hasn't been tried on a real one.

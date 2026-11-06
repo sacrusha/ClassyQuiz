@@ -37,15 +37,20 @@ export interface Text {
   language: string;
   /** The film's accessible name (its stage), in the place the strip had: what it shows, and that it has no sound. */
   film: string;
-  /** The film's ▶. */
+  /** The film's ▶, on the stage and on its bar. */
   play: string;
+  /** The bar's play button while the film plays. */
+  pause: string;
+  /** The bar's speed button (1×, ½×, ¼×). */
+  speed: string;
+  /** The film's time bar. */
+  seek: string;
   /** The name of the replay icon on the film's end card, once it has played to the end: from the start again. */
   again: string;
   /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
   full: string;
-  /** The accessible name of the film's chapter list: the captions below. */
-  chapters: string;
   see: string;
+  /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
   capSheet: string;
   capAi: string;
   /** The .zip going up to the site, the film's third chapter. */
@@ -111,9 +116,11 @@ const en: Text = {
   language: "Language",
   film: "From an exercise sheet to the class: a film without sound",
   play: "Play",
+  pause: "Pause",
+  speed: "Speed",
+  seek: "Time in the film",
   again: "Play again",
   full: "Full screen",
-  chapters: "Chapters of the film",
   see: "The example, step by step ›",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
@@ -188,9 +195,11 @@ const de: Text = {
   language: "Sprache",
   film: "Vom Aufgabenblatt bis zur Klasse: ein Film ohne Worte",
   play: "Abspielen",
+  pause: "Pause",
+  speed: "Tempo",
+  seek: "Position im Film",
   again: "Nochmals abspielen",
   full: "Vollbild",
-  chapters: "Kapitel des Films",
   see: "Das Beispiel Schritt für Schritt ›",
   capSheet: "Deine Aufgabenblätter",
   capAi: "Deine KI",
@@ -265,9 +274,11 @@ const fr: Text = {
   language: "Langue",
   film: "De la fiche d'exercices à la classe : un film sans paroles",
   play: "Lire",
+  pause: "Pause",
+  speed: "Vitesse",
+  seek: "Position dans le film",
   again: "Revoir",
   full: "Plein écran",
-  chapters: "Chapitres du film",
   see: "L'exemple pas à pas ›",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
@@ -342,9 +353,11 @@ const it: Text = {
   language: "Lingua",
   film: "Dalla scheda alla classe: un film senza parole",
   play: "Riproduci",
+  pause: "Pausa",
+  speed: "Velocità",
+  seek: "Posizione nel film",
   again: "Rivedi",
   full: "Schermo intero",
-  chapters: "Capitoli del film",
   see: "L'esempio passo per passo ›",
   capSheet: "Le tue schede",
   capAi: "La tua IA",

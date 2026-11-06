@@ -5,7 +5,8 @@ the page is generated, ~230 KB, and not kept in the tree. shoot.py and sitebuild
 The page carries: film.css, the assets (the site's Rubik, the two sheets, the
 brand marks) as data: URIs in one JS object, the avatar drawings taken from
 the repo's client/look.ts, the root page's words the film shows (the example
-ask, the Run box) taken from client/landing-text.ts, and film.js. On the site
+ask, the Run box, the chapters' and the player's names) taken from
+client/landing-text.ts, and film.js. On the site
 the same film.js reads the assets from the site's own files instead (see the
 header of film.js). The page opens in English; page.html?lang=de (en, fr, it)
 plays the film in that language.
@@ -53,13 +54,14 @@ def look_js():
     return '/* From client/look.ts (types stripped by build.py). */\n' + s
 
 
-LANDING_KEYS = ('code', 'run', 'upload', 'drop', 'reading')
+LANDING_KEYS = ('code', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
 
 
 def landing_text():
     """The root page's own words the film shows, per language, from client/landing-text.ts: the example ask
     (its parts as { s, l }: l 0 is the site's address, other l a labelled part) and the header's and Run box's words,
-    so the film types the very sentence the page prints and its phone shows the root page as a visitor sees it."""
+    so the film types the very sentence the page prints and its phone shows the root page as a visitor sees it; and the
+    chapters' names and the player's, which the film shows on the page's time bar."""
     src = (REPO / 'client/landing-text.ts').read_text(encoding='utf-8')
     out = {}
     for lang in ('de', 'en', 'fr', 'it'):

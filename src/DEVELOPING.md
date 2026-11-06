@@ -107,17 +107,20 @@ The film on the root page is built from its source in `docs/film/build/`
 (`film.js` and the Python that builds and checks it); what it is for and how
 it is made is `docs/film/README.md`. Generated from that source, and not to
 be edited by hand: `public/js/film.js` and the pictures
-`public/landing/film-*.webp` (the poster frames and the chapters' stills).
+`public/landing/film-*.webp` (the poster frames).
 The page side, `client/film-poster.ts`, is ordinary code.
 
 Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
 `--no-poster` writes `film.js` only, without the pictures) when:
 
 - `docs/film/build/film.js` changes;
-- `client/landing-text.ts` changes the example ask or the words of the
+- `client/landing-text.ts` changes the example ask, the words of the
   header's code box and the Run box (`ask`, `code`, `run`, `upload`, `drop`,
-  `reading`): the film shows them as they were at its build, and
-  `npm test` fails until it is rebuilt;
+  `reading`), the chapters' names (`capSheet` … `capTap`) or the player's
+  (`play`, `pause`, `speed`, `seek`): the film shows them as they were at
+  its build, and `npm test` fails until it is rebuilt;
+- the film's length (`DUR`) changes: `public/index.html`'s time bar carries
+  it too, and `sitebuild.py` refuses to build until both agree;
 - `client/look.ts` changes the avatars, which the film draws; no test
   catches this;
 - the brand files or `public/landing/sheet-*.webp` change: the film shows

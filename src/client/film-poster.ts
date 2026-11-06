@@ -1,20 +1,21 @@
 // The film in the strip's place (public/index.html, "The film in the strip's
 // place"). Until a press the page holds its poster frame as a picture, the
-// strip's captions as chapters with a still each, a hidden replay and full
-// screen button and nothing else: the landing stays light, nothing loads or
-// plays until someone asks, and the film's words (in /js/film.js) stay out of
-// the page AIs read. The first
-// press on ▶, the picture or a chapter loads /js/film.js; it takes the markup
-// over, paints the same frame over the picture, drops the picture and plays
-// from the start or that chapter, in the page's language. If it can't load,
-// or loads but can't draw the film (it then sets data-film to "failed"), the
-// picture stays and the next press tries again.
+// player's bar (play, the time bar, the time, the speed, a hidden full screen
+// button) and a hidden replay, and nothing else: nothing of the film loads or
+// plays until someone asks, and the film's words (in
+// /js/film.js) stay out of the page AIs read. The bar works before the film is
+// there, as a video player's does: the speed is set here, always; ▶, the
+// picture or a move of the time bar loads /js/film.js, which takes the markup
+// over, paints the same frame over the picture, drops the picture, and plays
+// from the start or shows the moment the bar was moved to, in the page's
+// language. While it loads the bar shows the time it was moved to. If it can't
+// load, or loads but can't draw the film (it then sets data-film to "failed"),
+// the picture stays and the next press tries again.
 //
-// The film speaks the page's language, and so do its pictures (the poster
-// frame and the stills, film-<lang>.webp and so on): filmLanguage() below,
-// from client/home.ts whenever the page's language is set. A switch while the
-// film is on goes back to the poster in the new language; the next press
-// builds the film in it.
+// The film speaks the page's language, and so does its poster picture
+// (film-<lang>.webp): filmLanguage() below, from client/home.ts whenever the
+// page's language is set. A switch while the film is on goes back to the
+// poster in the new language; the next press builds the film in it.
 
 declare global {
   interface Window {
@@ -27,15 +28,14 @@ const host = document.getElementById("cqfilm");
 // The poster picture, kept here: while the film plays it is out of the document, and a switch still sets its language.
 const poster = host?.querySelector<HTMLImageElement>(".cqf-stage > img") ?? null;
 
+const RATES: Record<string, [string, string]> = { "1": ["0.5", "½×"], "0.5": ["0.25", "¼×"], "0.25": ["1", "1×"] };
+const clock = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;
+
 if (host) {
   let script: HTMLScriptElement | null = null;
   let loaded = false;
-  host.addEventListener("click", (e) => {
-    if (host.dataset.film === "on") return; // the film handles its own presses
-    const target = e.target as Element;
-    const chapter = target.closest<HTMLButtonElement>(".cqf-ch button[data-ch]");
-    if (!chapter && !target.closest(".cqf-stage")) return;
-    host.dataset.start = chapter?.dataset.ch ?? "";
+  const load = (start: "" | "seek") => {
+    host.dataset.start = start;
     if (window.classyQuizFilm) {
       // loaded before: build it again (back from a language switch, or after a failed draw)
       delete host.dataset.film;
@@ -62,10 +62,32 @@ if (host) {
       script = null;
     };
     document.head.appendChild(script);
+  };
+  host.addEventListener("click", (e) => {
+    const target = e.target as Element;
+    // the speed, before the film and while it plays: the film reads it from the button
+    const speed = target.closest<HTMLButtonElement>(".cqf-speed");
+    if (speed) {
+      const [rate, label] = RATES[speed.dataset.rate ?? "1"] ?? RATES["0.25"];
+      speed.dataset.rate = rate;
+      speed.textContent = label;
+      return;
+    }
+    if (host.dataset.film === "on") return; // the film handles its own presses
+    if (target.closest(".cqf-stage, .cqf-play")) load("");
+  });
+  host.addEventListener("input", (e) => {
+    if (host.dataset.film === "on") return;
+    const range = e.target as HTMLInputElement;
+    if (range.type !== "range") return;
+    const time = host.querySelector(".cqf-time")?.firstChild;
+    if (time) time.nodeValue = clock(+range.value);
+    range.setAttribute("aria-valuetext", clock(+range.value));
+    load("seek");
   });
 }
 
-/** The film's pictures in language `l`, and the film back to its poster if it is on: it is built in the page's language. */
+/** The film's poster picture in language `l`, and the film back to its poster if it is on: it is built in the page's language. */
 export function filmLanguage(l: string): void {
   if (!host) return;
   const pic = (img: HTMLImageElement, src: string, srcset?: string) => {
@@ -74,7 +96,6 @@ export function filmLanguage(l: string): void {
     img.src = src;
   };
   if (poster) pic(poster, `/landing/film-${l}.webp`, `/landing/film-${l}-800.webp 800w, /landing/film-${l}.webp 1600w`);
-  for (const img of host.querySelectorAll<HTMLImageElement>("img[data-lang-src]")) pic(img, `/landing/${img.dataset.langSrc}-${l}.webp`);
   if (host.dataset.film !== "on") return;
   // the poster first decoded, so the stage doesn't stand empty between the film and the picture
   const back = () => {

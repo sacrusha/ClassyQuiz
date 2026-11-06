@@ -29,10 +29,10 @@ test("every language's chess and open asks name the site's address, for the page
   }
 });
 
-// The film (public/js/film.js) types the example ask and shows the Run box's words as this file has them, copied in when
+// The film (public/js/film.js) types the example ask, shows the Run box's words and names its chapters and controls as this file has them, copied in when
 // docs/film/build/sitebuild.py builds it; its pictures are rendered then too. A change here without a rebuild would leave
 // the film saying the old words: this fails until sitebuild.py has run.
-test("the built film carries this file's ask and Run box words", async () => {
+test("the built film carries this file's ask, Run box words and its own names", async () => {
   const { readFile } = await import("node:fs/promises");
   const js = await readFile(new URL("../public/js/film.js", import.meta.url), "utf8");
   const m = js.match(/const LANDING = (\{.*\});\n/);
@@ -40,7 +40,11 @@ test("the built film carries this file's ask and Run box words", async () => {
   const built = JSON.parse(m[1]);
   for (const { id } of LANGS) {
     const t = TEXT[id];
-    const want = { ask: t.ask, code: t.code, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading };
+    const want = {
+      ask: t.ask, code: t.code, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading,
+      capSheet: t.capSheet, capAi: t.capAi, capZip: t.capZip, capWall: t.capWall, capTap: t.capTap,
+      play: t.play, pause: t.pause, speed: t.speed, seek: t.seek,
+    };
     assert.deepEqual(built[id], JSON.parse(JSON.stringify(want)), `${id}: run docs/film/build/sitebuild.py`);
   }
 });

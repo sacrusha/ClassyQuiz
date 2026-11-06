@@ -163,7 +163,7 @@ not deployed; item 1's film built, not deployed.
    deliverable; a carousel or slideshow. Built: a film of about 60 s without
    sound, from the owner's storyboard brief, fed the real screens and the
    example ask in the page's four languages, never autoplaying; until it plays
-   its poster and five chapters with stills stand in its place
+   its poster and a video player's bar stand in its place
    (`design/root-page.md`, "The film"; `docs/film/`). Open: the German "du",
    French "vous" and the translations of the page and the film, drafts
    pending the owner's review (proposals and the questions behind them:
