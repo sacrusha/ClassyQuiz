@@ -166,7 +166,8 @@ not deployed; item 1's film built, not deployed.
    its poster and five chapters with stills stand in its place
    (`design/root-page.md`, "The film"; `docs/film/`). Open: the German "du",
    French "vous" and the translations of the page and the film, drafts
-   pending the owner's review; whether the owner's daylight photographs of
+   pending the owner's review (proposals and the questions behind them:
+   `docs/translation-review.md`); whether the owner's daylight photographs of
    the sheet are still to replace the rendered sheet pages the film and the
    ask's tab show (Open: the sources don't say). One story must work on a desktop and on horizontal tablets as
    well as on vertical phones: the sheet recognizable as a sheet, readability
