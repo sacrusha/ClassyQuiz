@@ -26,7 +26,6 @@
   --card: #ffffff;
   --rule: #e2ddd2;
   --code-bg: #f1eee6;
-  --frame: #2b2b29; /* drawn devices: the strip's, the join screen's tablet */
   /* The teacher's controls are ink, so none of them reads as one of the four
      answer colours (red, blue, yellow, green: .a0–.a3 in app.css). */
   --control: #1d1d1b;
@@ -64,7 +63,6 @@
     --card: #222220;
     --rule: #3a3935;
     --code-bg: #22211f;
-    --frame: #000000;
     --control: #ecebe6;
     --control-ink: #171716;
     --accent: #f0a065;

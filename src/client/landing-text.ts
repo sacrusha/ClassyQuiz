@@ -35,12 +35,20 @@ export interface Text {
   code: string;
   join: string;
   language: string;
-  /** The strip's accessible name; it ends in `see`, the label shown. */
-  strip: string;
+  /** The film's accessible name (its stage), in the place the strip had: what it shows, and that it has no sound. */
+  film: string;
+  /** The film's ▶. */
+  play: string;
+  /** The name of the replay icon on the film's end card, once it has played to the end: from the start again. */
+  again: string;
+  /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
+  full: string;
+  /** The accessible name of the film's chapter list: the captions below. */
+  chapters: string;
   see: string;
   capSheet: string;
   capAi: string;
-  /** The .zip going up to the site, the strip's third frame. */
+  /** The .zip going up to the site, the film's third chapter. */
   capZip: string;
   capWall: string;
   capTap: string;
@@ -101,7 +109,11 @@ const en: Text = {
   code: "Code",
   join: "Join",
   language: "Language",
-  strip: "From an exercise sheet to the class: the example, step by step",
+  film: "From an exercise sheet to the class: a film without sound",
+  play: "Play",
+  again: "Play again",
+  full: "Full screen",
+  chapters: "Chapters of the film",
   see: "The example, step by step ›",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
@@ -174,7 +186,11 @@ const de: Text = {
   code: "Code",
   join: "Beitreten",
   language: "Sprache",
-  strip: "Vom Aufgabenblatt bis zur Klasse: das Beispiel Schritt für Schritt",
+  film: "Vom Aufgabenblatt bis zur Klasse: ein Film ohne Worte",
+  play: "Abspielen",
+  again: "Nochmals abspielen",
+  full: "Vollbild",
+  chapters: "Kapitel des Films",
   see: "Das Beispiel Schritt für Schritt ›",
   capSheet: "Deine Aufgabenblätter",
   capAi: "Deine KI",
@@ -247,7 +263,11 @@ const fr: Text = {
   code: "Code",
   join: "Rejoindre",
   language: "Langue",
-  strip: "De la fiche d'exercices à la classe : l'exemple pas à pas",
+  film: "De la fiche d'exercices à la classe : un film sans paroles",
+  play: "Lire",
+  again: "Revoir",
+  full: "Plein écran",
+  chapters: "Chapitres du film",
   see: "L'exemple pas à pas ›",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
@@ -320,7 +340,11 @@ const it: Text = {
   code: "Codice",
   join: "Entra",
   language: "Lingua",
-  strip: "Dalla scheda alla classe: l'esempio passo per passo",
+  film: "Dalla scheda alla classe: un film senza parole",
+  play: "Riproduci",
+  again: "Rivedi",
+  full: "Schermo intero",
+  chapters: "Capitoli del film",
   see: "L'esempio passo per passo ›",
   capSheet: "Le tue schede",
   capAi: "La tua IA",
