@@ -9,13 +9,13 @@ A working note: delete it once applied. Mark rows you reject or change; unmarked
 
 | # | Question | Proposals | My recommendation |
 |---|---|---|---|
-| D1 | The film's screen-reader name says "without words", but its screens show text; what it lacks is sound. | en "a silent film" / "a film without sound"; de "ein Film ohne Ton"; fr "une vidéo sans son" (or "un film muet"); it "un video senza audio". fr and it prefer "vidéo/video" over "film" (a 60 s clip is a video on a website). | "without sound" in all four; "film" vs "video": your call (it also sets `chapters`). |
+| D1 | The film's screen-reader name says "without words", but its screens show text; what it lacks is sound. | en "a silent film" / "a film without sound"; de "ein Film ohne Ton"; fr "une vidéo sans son" (or "un film muet"); it "un video senza audio". fr and it prefer "vidéo/video" over "film" (a 60 s clip is a video on a website). | "without sound" in all four; "film" vs "video": your call (it also sets `seek`'s "film"). |
 | D2 | The ask's "exercises like no. 1, 3 and 4": the same exercises, or similar new ones? de currently says "ähnlichen" (similar); en/fr/it are open. de translator would drop "ähnlichen" for style, it translator offers "simili ai". | — | State the intent; then all four follow it. |
 | D3 | `tooLong` "(N KB)": unclear whether N is the quiz's size or the limit (it's the limit). | de "Die Seite nimmt höchstens N KB an", fr/it "dépasse la limite / supera il limite (N)". | en: "…longer than the site takes (at most N KB)." |
 | D4 | `step1` "Choose any good AI" next to `step1detail` "the one free AI that does this reliably" — can read as "any AI works"; de asks whether testing backs "the one free AI". | — | Your knowledge: is it tested against the other free AIs? |
 | D5 | Regional defaults | de "5. Klasse" (HarmoS: 7H) keep; fr "CM2" (Romandie: 7H) keep as default; it "quinta elementare" right in Ticino and Italy; it "alunno" (Italy) vs "allievo" (Ticino) keep alunno. | Keep all defaults. |
 | D6 | French typography: narrow no-break space (U+202F) before ; : ! ? is used in some strings, a plain space in others. | fr: U+202F everywhere incl. asks (stops a lone "?" wrapping); plain space only in the film's fast-typed ask3. | Agree. |
-| D7 | Film player labels Pause / Speed / Time stay English (lang="en") on a de/fr/it page. | de Pause / Tempo / Position im Film; fr Pause / Vitesse / Position dans la vidéo. | Add the keys (it: Pausa / Velocità / Posizione nel video — my draft). |
+| D7 | Film player labels Pause / Speed / Time, now in the page's language (keys `pause`, `speed`, `seek`). | de Pause / Tempo / Position im Film; fr Pause / Vitesse / Position dans la vidéo; it Pausa / Velocità / Posizione nel video (draft). | In `landing-text.ts` as proposed, with "film" for "vidéo/video" until D1 is decided. |
 | D8 | The film's zip name for the translated quiz | de proposed the German example's real name "Zahlenstrahl-Quiz" / zahlenstrahl-quiz.zip (a different quiz); fr "Quiz grands nombres" / quiz-grands-nombres.zip; it "Quiz sui grandi numeri" / quiz-grandi-numeri.zip. | Literal for all, since it is the translated big-numbers quiz: de "Grosse-Zahlen-Quiz" / grosse-zahlen-quiz.zip. |
 | D9 | `capTap` "Each student taps": fr/it say a bare "touche/tocca" reads unfinished. | fr "Chaque élève répond"; it "Ogni alunno tocca la risposta"; de keeps "Jedes Kind tippt". | Agree. |
 
@@ -30,7 +30,6 @@ Convention kept: no ß, Swiss words (nochmals, Schlussrangliste, Gratis-Seite).
 | key | current | proposed | why |
 |---|---|---|---|
 | film | Vom Aufgabenblatt bis zur Klasse: ein Film ohne Worte | Vom Arbeitsblatt zur Klasse: ein Film ohne Ton | D1; "bis zur" stiff |
-| chapters | Kapitel des Films | Filmkapitel | normal compound |
 | capSheet | Deine Aufgabenblätter | Deine Arbeitsblätter | everyday teacher word (CH and DE); "Aufgabenblatt" sounds like university sets |
 | build | Ein Quiz bauen | Quiz erstellen | headings drop the article; "bauen" calque |
 | run | Ein Quiz starten | Quiz starten | same |
@@ -71,7 +70,6 @@ Asks:
 | key | current | proposed | why |
 |---|---|---|---|
 | film | De la fiche d'exercices à la classe : un film sans paroles | De la fiche d'exercices à la classe⍽: une vidéo sans son | D1 |
-| chapters | Chapitres du film | Chapitres de la vidéo | only with "vidéo" |
 | capTap | Chaque élève touche | Chaque élève répond | D9 |
 | step1detail | L'exemple ci-dessus a été écrit par Claude Sonnet gratuit, le 4 nov. 2026 : la seule IA gratuite qui le fait de façon fiable. | L'exemple ci-dessus a été réalisé par Claude Sonnet, en version gratuite, le 4 nov. 2026⍽: la seule IA gratuite qui y arrive de façon fiable. | calque |
 | tabSheets | Avec les photos de fiches | Avec des photos de fiches d'exercices | article |
@@ -105,7 +103,6 @@ Asks: `ask` unchanged except "…de ces deux fiches⍽?"; `ask2` U+202F before "
 | key | current | proposed | why | conf. |
 |---|---|---|---|---|
 | film | Dalla scheda alla classe: un film senza parole | Dalla scheda di esercizi alla classe: un video senza audio | D1 | med-high |
-| chapters | Capitoli del film | Capitoli del video | follows film | high |
 | see | L'esempio passo per passo › | L'esempio, passo dopo passo › | idiom | med |
 | capZip | Lo .zip, caricato qui | Il file .zip, caricato qui | "Lo ." odd; aiFixes says "il .zip" | med-high |
 | capTap | Ogni alunno tocca | Ogni alunno tocca la risposta | D9 | med-high |

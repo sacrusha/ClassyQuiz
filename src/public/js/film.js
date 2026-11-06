@@ -245,8 +245,9 @@ function avatarSvg(av, label = true) {
   // question, translated, so every language shows the same film.
 
   /** The root page's words from client/landing-text.ts, filled in by build.py: per language the example ask
-      ({ s, l }: l 0 the site's address, any other l a labelled part) and code, run, upload, drop, reading. */
-  const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz machen, mit ähnlichen Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "run": "Ein Quiz starten", "upload": "Das Quiz deiner KI hochladen (.zip)", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "run": "Run a quiz", "upload": "Upload the quiz your AI made (.zip)", "drop": "or drop it here", "reading": "Reading the quiz…"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "run": "Lancer un quiz", "upload": "Importer le quiz de votre IA (.zip)", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "circa 10 domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "run": "Avvia un quiz", "upload": "Carica il quiz della tua IA (.zip)", "drop": "o trascinalo qui", "reading": "Lettura del quiz…"}};
+      ({ s, l }: l 0 the site's address, any other l a labelled part), code, run, upload, drop, reading, the chapters'
+      names (capSheet, capAi, capZip, capWall, capTap) and the player's (play, pause, speed, seek). */
+  const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz machen, mit ähnlichen Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "run": "Ein Quiz starten", "upload": "Das Quiz deiner KI hochladen (.zip)", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Aufgabenblätter", "capAi": "Deine KI", "capZip": "Die .zip, hier hochgeladen", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "run": "Run a quiz", "upload": "Upload the quiz your AI made (.zip)", "drop": "or drop it here", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, uploaded here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "run": "Lancer un quiz", "upload": "Importer le quiz de votre IA (.zip)", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, importé ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève touche", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans le film"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "circa 10 domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "run": "Avvia un quiz", "upload": "Carica il quiz della tua IA (.zip)", "drop": "o trascinalo qui", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Lo .zip, caricato qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno tocca", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel film"}};
 
   /* The chat's and the quiz's words per language: ask3 is the teacher's second message, then the AI's
      status lines, the .zip it makes (the chip's title and the file's name), the preview card's caption,
@@ -318,10 +319,10 @@ function avatarSvg(av, label = true) {
     addr: 'classyquiz.pages.dev',
     presses: ['Let the class in ▶', 'Start quiz ▶', 'Choices ▶', 'Answers ▶', 'Solution ▶', 'Final ranking ▶'],
     of: ' / 13',
-    // [name, film time, the site's key for the same words (the strip's captions, landing-text.ts)]
-    chapters: [['Your exercise sheets', 0, 'capSheet'], ['Your AI', 4.4, 'capAi'], ['The .zip, uploaded here', 19.6, 'capZip'], ['What the class sees', 27.7, 'capWall'], ['Each student taps', 38.0, 'capTap']],
-    // the player's own labels; on the site the stage's name, ▶'s, the chapter list's, the replay's and the full screen button's come from the page, in its language
-    ui: { play: 'Play', pause: 'Pause', slow: 'Speed', seek: 'Time in the film', again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound', chapters: 'Chapters of the film' },
+    // the chapters' starts, marked on the time bar: [film time, the key of its name in landing-text.ts (LANDING)]
+    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [27.7, 'capWall'], [38.0, 'capTap']],
+    // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
+    ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
   const LANGS = Object.keys(CONTENT);
 
@@ -341,6 +342,9 @@ function avatarSvg(av, label = true) {
       rows: [Q.q1, Q.q1, Q.q1, Q.q4],
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
+      // [name, film time, key]; the player's names (play, pause, speed, the time bar) in the page's language
+      chapters: COMMON.chapters.map(([at, key]) => [L[key], at, key]),
+      ui: Object.assign({}, COMMON.ui, { play: L.play, pause: L.pause, speed: L.speed, seek: L.seek }),
       lang: `${lang.toUpperCase()} ▾`,
     });
   }
@@ -1640,47 +1644,51 @@ function avatarSvg(av, label = true) {
 
     // ---------------------------------------------------------------- player
     /* Two hosts. In the artifact #cqfilm is empty and the film builds its whole player.
-       On the site the page already holds the film's place (until this script runs, or if it never does):
-       .cqf-film, holding .cqf-stage with the poster frame as a picture, ▶ and a hidden replay, and .cqf-bar with only a hidden
-       full screen button; and .cqf-ch, the strip's captions as chapter buttons (data-ch = the caption's key; the times are here,
-       in TX.chapters), each with a still; all in the page's language, the names of the stage, ▶, the replay, the full screen
-       button and the list too. The film takes these over, paints the poster frame over the picture, drops the picture, and
-       plays from data-start. If the picture can't be drawn, the page keeps what it had
-       and data-film says "failed" (client/film-poster.ts then builds it again on the next press). destroy() gives the page
-       back as it was before the press, the picture in its place: a language switch does that (client/film-poster.ts). */
-    const chapterAt = (key) => { const c = TX.chapters.find((x) => x[2] === key); return c ? c[1] : undefined; };
+       On the site the page already holds the film's place (until this script runs, or if it never does): .cqf-film, holding
+       .cqf-stage with the poster frame as a picture, ▶ and a hidden replay, and .cqf-bar: play, the time bar, the clock, the
+       speed and a hidden full screen button (client/film-poster.ts makes the bar work before this script is there: the
+       speed, and a move of the time bar, which loads it). All named in the page's language. The film takes these over, paints
+       the poster frame over the picture, drops the picture, and plays from the start (data-start empty) or shows the moment
+       the time bar was moved to (data-start "seek"). If the picture can't be drawn, the page keeps what it had and data-film
+       says "failed" (client/film-poster.ts then builds it again on the next press). destroy() gives the page back as it was
+       before the press, the picture in its place: a language switch does that (client/film-poster.ts). */
+    const chapterOf = (x) => { let c = TX.chapters[0]; for (const k of TX.chapters) if (x >= k[1]) c = k; return c; };
+    const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg>';
+    const ICON_FULL = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg>';
+    const fmt = (x) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
     function build(host) {
       let stage = host.querySelector('.cqf-stage');
       const adopt = !!stage;
-      let big, bar, ch, again, full;
+      let big, bar, again, full;
       if (!adopt) {
+        // the page's markup (index.html), named from TX
         host.innerHTML = '';
         const wrapEl = document.createElement('div'); wrapEl.className = 'cqf';
         const left = document.createElement('div'); left.className = 'cqf-film';
         stage = document.createElement('div'); stage.className = 'cqf-stage';
         stage.setAttribute('role', 'group'); stage.setAttribute('aria-label', TX.ui.film);
         big = document.createElement('button'); big.type = 'button'; big.className = 'cqf-big'; big.setAttribute('aria-label', TX.ui.play);
-        big.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg>';
+        big.innerHTML = ICON_PLAY;
         stage.appendChild(big);
         left.appendChild(stage);
         bar = document.createElement('div'); bar.className = 'cqf-bar';
+        bar.innerHTML = `<button class="cqf-play" type="button">▶</button><span class="cqf-seek"><input type="range" min="0" max="${DUR}" step="0.1" value="0"></span>`
+          + `<span class="cqf-time">0:00<span class="cqf-dur"> / ${fmt(DUR)}</span></span><button class="cqf-speed" type="button" data-rate="1">1×</button>`
+          + `<button class="cqf-full" type="button" aria-pressed="false" hidden>${ICON_FULL}</button>`;
+        bar.querySelector('.cqf-play').setAttribute('aria-label', TX.ui.play);
+        bar.querySelector('input').setAttribute('aria-label', TX.ui.seek);
+        bar.querySelector('.cqf-speed').setAttribute('aria-label', TX.ui.speed);
+        bar.querySelector('.cqf-full').setAttribute('aria-label', TX.ui.full);
         left.appendChild(bar);
         wrapEl.appendChild(left);
-        ch = document.createElement('ol'); ch.className = 'cqf-ch'; ch.setAttribute('aria-label', TX.ui.chapters);
-        for (const [name, , key] of TX.chapters) { const li = document.createElement('li'); const b = document.createElement('button'); b.type = 'button'; b.dataset.ch = key; b.textContent = name; li.appendChild(b); ch.appendChild(li); }
-        wrapEl.appendChild(ch);
         host.appendChild(wrapEl);
       } else {
         big = stage.querySelector('.cqf-big');
         again = stage.querySelector('.cqf-again');
         bar = host.querySelector('.cqf-bar');
-        full = bar.querySelector('.cqf-full');
-        ch = host.querySelector('.cqf-ch');
       }
-      // the replay and the full screen button: the page's own (named in its language) on the site; named in English on the standalone page
-      const pageFull = full;
+      full = bar.querySelector('.cqf-full');
       if (!again) { again = document.createElement('button'); again.type = 'button'; again.className = 'cqf-again'; again.setAttribute('aria-label', TX.ui.again); again.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'; again.hidden = true; stage.appendChild(again); }
-      if (!full) { full = document.createElement('button'); full.type = 'button'; full.className = 'cqf-full'; full.setAttribute('aria-label', TX.ui.full); full.setAttribute('aria-pressed', 'false'); full.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg>'; }
       const poster = adopt ? stage.querySelector(':scope > img') : null;
 
       // the picture first, whole, before anything of the page changes (measuring needs it in the document, under the poster picture)
@@ -1709,37 +1717,48 @@ function avatarSvg(av, label = true) {
         return null;
       }
 
-      // the player: the stage takes focus for the keys; the bar's own labels are English, the full screen button's the page's
+      // the player: the stage takes focus for the keys; the bar is the page's (index.html), or built above for the artifact
       stage.tabIndex = 0;
       stage.setAttribute('aria-keyshortcuts', 'Space ArrowLeft ArrowRight');
-      const pb = document.createElement('button'); pb.type = 'button'; pb.lang = 'en'; pb.textContent = '▶'; pb.setAttribute('aria-label', TX.ui.play);
-      const range = document.createElement('input'); range.type = 'range'; range.lang = 'en'; range.min = 0; range.max = DUR; range.step = 0.1; range.value = POSTER;
-      range.setAttribute('aria-label', TX.ui.seek);
-      const time = document.createElement('span'); time.className = 'cqf-time';
-      const sp = document.createElement('button'); sp.type = 'button'; sp.lang = 'en'; sp.textContent = '1×'; sp.setAttribute('aria-label', TX.ui.slow);
-      bar.append(pb, range, time, sp, full);
+      const pb = bar.querySelector('.cqf-play'), range = bar.querySelector('input[type=range]'), time = bar.querySelector('.cqf-time');
+      const sp = bar.querySelector('.cqf-speed'), seekBox = bar.querySelector('.cqf-seek');
+      const movedTo = +range.value; // where the bar was moved before this script was there (data-start 'seek'); the first paint sets it to 0
+      const clockNode = time.firstChild, labels = { play: pb.getAttribute('aria-label'), clock: fmt(0) };
       full.hidden = false;
-      const chBtns = [...ch.querySelectorAll('button[data-ch]')].map((b) => [b, chapterAt(b.dataset.ch)]).filter(([, at]) => at !== undefined);
+      /* The chapters' starts as ticks on the time bar, and the chapter's name over the thumb while it is moved by hand. Both are
+         placed as the browser places the thumb's centre: half a thumb in from either end (--thumb, index.html). */
+      const marks = document.createElement('span'); marks.className = 'cqf-marks'; marks.setAttribute('aria-hidden', 'true');
+      for (const [, at] of TX.chapters) { if (!at) continue; const i = document.createElement('i'); i.style.setProperty('--at', at / DUR); marks.appendChild(i); }
+      const tip = document.createElement('span'); tip.className = 'cqf-tip'; tip.setAttribute('aria-hidden', 'true'); tip.hidden = true;
+      seekBox.append(marks, tip);
 
-      let t = POSTER, playing = false, last = 0, rate = 1, started = false, raf = 0;
-      const fmt = (x) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
+      let t = POSTER, playing = false, last = 0, started = false, raf = 0, pend = 0, held = false, tipOff = 0;
+      // the speed is the button's (client/film-poster.ts sets it on the site, before and after this script; the artifact's below)
+      const rate = () => +sp.dataset.rate || 1;
       /** A button that hides takes its focus to the bar's play/pause, not to the page. */
       const showBtn = (b, show) => { if (b.hidden === !show) return; const had = document.activeElement === b; b.hidden = !show; if (!show && had) pb.focus({ preventScroll: true }); };
+      function showTip(on) {
+        clearTimeout(tipOff);
+        tip.hidden = !on;
+        if (!on) return;
+        const name = chapterOf(t)[0];
+        if (tip.textContent !== name) tip.textContent = name;
+        // over the thumb, but inside the bar's width
+        const w = seekBox.clientWidth, th = parseFloat(getComputedStyle(seekBox).getPropertyValue('--thumb')) || 16, tw = tip.offsetWidth;
+        const x = th / 2 + (w - th) * (t / DUR);
+        tip.style.left = `${clamp(x - tw / 2, 0, Math.max(0, w - tw))}px`;
+      }
       function paint() {
         render(t);
-        range.value = t.toFixed(1);
-        const clock = fmt(t);
-        if (time.textContent !== clock) { time.textContent = clock; range.setAttribute('aria-valuetext', clock); }
-        chBtns.forEach(([b, at], i) => {
-          const next = chBtns[i + 1] ? chBtns[i + 1][1] : DUR + 1;
-          const on = started && t >= at && t < next;
-          if (b.classList.contains('on') === on) return;
-          b.classList.toggle('on', on);
-          if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
-          // chips on one row that scrolls (a phone): the current one into view, sideways only, never the page
-          if (on && ch.scrollWidth > ch.clientWidth + 1) { const r = b.getBoundingClientRect(), o = ch.getBoundingClientRect(); if (r.left < o.left || r.right > o.right) ch.scrollLeft += r.left - o.left - 8; }
-        });
-        const label = playing ? TX.ui.pause : TX.ui.play;
+        // before the first start the bar stands at 0, where ▶ starts, though the picture is the poster frame
+        const at = started ? t : 0;
+        if (!held) range.value = at.toFixed(1);
+        const clock = fmt(at);
+        if (clockNode.nodeValue !== clock) { clockNode.nodeValue = clock; }
+        const vt = `${clock}, ${chapterOf(at)[0]}`;
+        if (range.getAttribute('aria-valuetext') !== vt) range.setAttribute('aria-valuetext', vt);
+        if (!tip.hidden) showTip(true);
+        const label = playing ? TX.ui.pause : labels.play;
         if (pb.getAttribute('aria-label') !== label) { pb.textContent = playing ? '❚❚' : '▶'; pb.setAttribute('aria-label', label); }
         // ▶ on the stage goes for good once the film has started; Play again stands on the end card once it has played to the end
         showBtn(big, !(playing || started));
@@ -1749,7 +1768,7 @@ function avatarSvg(av, label = true) {
         raf = 0;
         if (!playing) return;
         // at most a tenth of a second a frame: after a stall the film goes on from where it was, not further on
-        t += clamp((now - last) / 1000, 0, 0.1) * rate; last = now;
+        t += clamp((now - last) / 1000, 0, 0.1) * rate(); last = now;
         if (t >= DUR) { t = DUR; playing = false; }
         paint();
         if (playing) raf = requestAnimationFrame(frame);
@@ -1758,21 +1777,32 @@ function avatarSvg(av, label = true) {
         if (t >= DUR) t = 0;
         if (!started) { started = true; if (t === POSTER) t = 0; }
         playing = true;
-        // one loop: a press while it plays (a chapter) only moves t
+        // one loop: a press while it plays only moves t
         if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
         paint();
       }
       function pause() { playing = false; if (raf) { cancelAnimationFrame(raf); raf = 0; } paint(); }
       function seek(x) { started = true; t = clamp(x, 0, DUR); paint(); }
+      /** The time bar moved by hand: the film follows at most once a frame, so a drag on a slow device skips frames instead of lagging. */
+      function seekSoon(x) {
+        started = true; t = clamp(x, 0, DUR);
+        if (playing) pause();
+        if (!pend) pend = requestAnimationFrame(() => { pend = 0; paint(); });
+      }
       // every listener on the page's elements and the document goes with destroy()
       const ac = new AbortController(), own = { signal: ac.signal };
       big.addEventListener('click', () => { t = 0; play(); }, own);
       again.addEventListener('click', () => { t = 0; play(); }, own);
-      pb.addEventListener('click', () => (playing ? pause() : play()));
-      range.addEventListener('input', () => { pause(); seek(+range.value); });
-      sp.addEventListener('click', () => { rate = rate === 1 ? 0.5 : rate === 0.5 ? 0.25 : 1; sp.textContent = rate === 1 ? '1×' : rate === 0.5 ? '½×' : '¼×'; });
+      pb.addEventListener('click', () => (playing ? pause() : play()), own);
+      // held: also a press that began before this script was there (it loads on the bar's first move)
+      range.addEventListener('input', () => { if (!held && range.matches(':active')) held = true; seekSoon(+range.value); if (held) showTip(true); }, own);
+      range.addEventListener('pointerdown', () => { held = true; showTip(true); }, own);
+      const letGo = () => { if (!held) return; held = false; showTip(false); };
+      document.addEventListener('pointerup', letGo, own);
+      document.addEventListener('pointercancel', letGo, own);
+      range.addEventListener('blur', () => showTip(false), own);
+      if (!adopt) sp.addEventListener('click', () => { const r = { 1: 0.5, 0.5: 0.25, 0.25: 1 }[rate()] || 1; sp.dataset.rate = r; sp.textContent = { 1: '1×', 0.5: '½×', 0.25: '¼×' }[r]; }, own);
       stage.addEventListener('click', (e) => { if (big.contains(e.target) || again.contains(e.target)) return; if (started) playing ? pause() : play(); }, own);
-      chBtns.forEach(([b, at]) => b.addEventListener('click', () => { seek(at); play(); }, own));
 
       /* Full screen, for watching the film big where the page shows it small (a phone, upright or sideways): the film's column, the
          picture and its bar, fills the screen (.cqf-fs; the page's CSS letterboxes it). The browser's full screen where it has one for
@@ -1827,7 +1857,7 @@ function avatarSvg(av, label = true) {
         ring[e.shiftKey ? ring.length - 1 : 0].focus();
       }, own);
 
-      // Keys from inside the player only: the page's own (Space scrolling it, a chapter's or a tab's keys, typing a code) stay the page's.
+      // Keys from inside the player only: the page's own (Space scrolling it, a tab's keys, typing a code) stay the page's.
       // Space plays or pauses where it means nothing else: on the stage and on the time bar. The arrows move a second (with Shift a tenth)
       // on the stage, the bar's buttons and the time bar, there in place of its own steps.
       host.addEventListener('keydown', (e) => {
@@ -1843,6 +1873,8 @@ function avatarSvg(av, label = true) {
         if (!dir || !(mine || el === pb || el === sp)) return;
         e.preventDefault();
         pause(); seek(t + dir * (e.shiftKey ? 0.1 : 1));
+        // on the time bar the chapter's name shows for a moment, as while it is dragged
+        if (el === range) { showTip(true); tipOff = setTimeout(() => showTip(false), 1200); }
       }, own);
       // It never plays unseen: a hidden tab or the film scrolled out of view pauses it, and it waits for a press to go on.
       document.addEventListener('visibilitychange', () => { if (document.hidden && playing) pause(); }, own);
@@ -1853,26 +1885,30 @@ function avatarSvg(av, label = true) {
         // the live film now shows the same frame as the picture; the picture goes in the same task, so no frame shows neither
         poster.remove();
         host.dataset.film = 'on';
-        // data-start: the chapter pressed (its key), or empty for ▶
-        if (host.dataset.start !== undefined) { const at = chapterAt(host.dataset.start); if (at) seek(at); else t = 0; play(); }
+        // data-start: "seek" for the time bar moved before this script was there (that moment, paused), else empty for ▶
+        if (host.dataset.start === 'seek') seek(movedTo);
+        else if (host.dataset.start !== undefined) { t = 0; play(); }
       }
-      /** The page as it was before the first press: out of full screen, the picture back in its place, ▶ on it, the bar holding only
-          its hidden full screen button, no listener left. */
+      /** The page as it was before the first press: out of full screen, the picture back in its place, ▶ on it, the bar at 0 with
+          its full screen button hidden, no listener left. */
       function destroy() {
         if (fs === 'api' && document.fullscreenElement === col) document.exitFullscreen().catch(() => {});
         fsOff();
         playing = false;
         if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        if (pend) { cancelAnimationFrame(pend); pend = 0; }
+        clearTimeout(tipOff);
         ac.abort();
         if (io) io.disconnect();
         if (!adopt) { host.innerHTML = ''; return; }
-        const f = document.activeElement, lost = f && f !== big && stage.parentNode.contains(f) && f !== again;
+        const lost = document.activeElement === stage || document.activeElement === again;
         svg.remove();
-        bar.replaceChildren(...(pageFull ? [pageFull] : []));
-        if (pageFull) pageFull.hidden = true;
+        marks.remove(); tip.remove();
+        full.hidden = true;
+        range.value = 0; range.setAttribute('aria-valuetext', labels.clock); clockNode.nodeValue = labels.clock;
+        pb.textContent = '▶'; pb.setAttribute('aria-label', labels.play);
         stage.removeAttribute('tabindex'); stage.removeAttribute('aria-keyshortcuts');
         big.hidden = false; again.hidden = true;
-        chBtns.forEach(([b]) => { b.classList.remove('on'); b.removeAttribute('aria-current'); });
         if (poster) stage.insertBefore(poster, stage.firstChild);
         delete host.dataset.film; delete host.dataset.start;
         if (window.cqFilm === api) delete window.cqFilm;

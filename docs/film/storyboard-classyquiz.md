@@ -21,7 +21,7 @@ departs from it, and why.
 | Laptop types teacher code, lobby | Same, then **the teacher's thumb taps "Let the class in ▶" on the phone and the big screen answers** | Matches the real phone-first flow (user-flow §1 rule 5) and shows, wordlessly, that the phone steers. |
 | Kids answer | **One over-the-shoulder shot carries the mechanism**: a child's tablet in front, the big screen behind it, the same colours and shapes on both; the finger taps red ▲, that child's avatar pops into the big screen's top bar | The step unfamiliar teachers miss is how a tablet relates to the wall. Real behaviour: only avatars that answered appear, never which answer (question-flow.md, "Who has answered"). |
 | Kids answer, solution, jumping | Insert **the teaching moment**: answering closes, the wall shows the counts split 12 / 6 / 2 / 0 *without* the tick; heads turn, wordless `?` / `!` bubbles; then the tick, avatars jump on the wall (a real feature), some kids jump, others shrug | "Practice, not testing" and "a teaching moment" are what distinguish the site; the split is what only a film can show of it. |
-| (ends on celebration) | The wall's counter runs quickly from 1 / 13 to 13 / 13, then the final ranking of avatars, then the end card: the mark and `classyquiz.pages.dev`, no link (owner); once the film has played to its end, a replay icon on it | Closure, and the address once more. After one question twelve children would tie at ★ 1; a ranking after the whole quiz has places. |
+| (ends on celebration) | The wall's counter runs quickly from 1 / 13 to 13 / 13, then the final ranking of avatars, then the end card: the mark and `classyquiz.pages.dev`; once the film has played to its end, a replay icon on it | Closure, and the address once more. After one question twelve children would tie at ★ 1; a ranking after the whole quiz has places. |
 
 ## The quiz in the film
 
@@ -44,7 +44,7 @@ veiled, tablets show an eye, the teacher reads) → Choices (open everywhere) �
 Answers (the split on the wall, no solution, tablets locked) → Solution (the
 winners' band jumps; tablets show ✓ or ✗) → Ranking.
 
-The five chapters on the page start at 0, 4.4, 19.6, 27.7 and 38.0 s.
+The five chapters start at 0, 4.4, 19.6, 27.7 and 38.0 s, ticks on the page's time bar.
 
 | # | Time | Picture | Reads on a phone? |
 |---|---|---|---|
@@ -60,9 +60,9 @@ The five chapters on the page start at 0, 4.4, 19.6, 27.7 and 38.0 s.
 | 10 | 50–55.4 s | "Solution ▶": the tick on red, the other tiles fade. The winners' avatars jump on the wall; those children jump, the others shrug (the head sinks into the shoulders), one laughs. Over the shoulder again: the tablet's ✓. | Yes. |
 | 11 | 55.4–60 s | The camera onto the wall; the counter runs 1 / 13 → 13 / 13; "Final ranking ▶": the podium of avatars. End card: the fox and `classyquiz.pages.dev`. | Address large. |
 
-**Poster frame** (shown until ▶, does the strip's five-second job): shot 9 at
+**Poster frame** (shown until a press): shot 9 at
 47.3 s, the class at the wall with the split vote, tablets in hands, the
 teacher with the phone.
 
-The page around the film (the chapters with their stills, the layout, full
-screen, the replay): `docs/design/root-page.md`, "The film".
+The page around the film (the player's bar, the layout, full screen, the
+replay): `docs/design/root-page.md`, "The film".

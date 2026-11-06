@@ -98,12 +98,12 @@ Purpose and reasons: docs/design/root-page.md.
 ┌──────────────────────────────────────────────────────────────────────┐
 │ [fox] classyQuiz                   Code [_ _ _ _ _]  ▶      EN ▾     │
 ├──────────────────────────────────────────────────────────────────────┤
-│ ┌ the film, 16:9, no sound ─────┐  [still] Your exercise sheets      │
-│ │ poster: the class at the      │  [still] Your AI                   │
-│ │ wall, the votes split, no     │  [still] The .zip, uploaded here   │
-│ │ solution yet  [▶]             │  [still] What the class sees       │
-│ └───────────────────────────────┘  [still] Each student taps         │
-│ [full screen]                 The example, step by step ›            │
+│          ┌ the film, 16:9, no sound ─────────────┐                   │
+│          │ poster: the class at the wall, the    │                   │
+│          │ votes split, no solution yet  [▶]     │                   │
+│          └───────────────────────────────────────┘                   │
+│          [▶] ──●──'───'─'──'────── 0:00 / 1:00 [1×] [full screen]    │
+│                              The example, step by step ›             │
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
@@ -131,11 +131,11 @@ Purpose and reasons: docs/design/root-page.md.
   English.
 - **The film**, about 60 s without sound, follows the workflow: the sheets,
   the AI, the .zip going up to the site, the wall, a student's tablet. Until ▶
-  or a chapter is pressed it is its poster, a picture: the class at the wall,
-  the votes split. Its five chapters, a still and a caption each, stand
-  beside it; on a screen taller than wide and under 900 px they are chips on
-  one row under it that scrolls sideways. A chapter plays from there. A full
-  screen button; at the end a replay icon on the end card, which has no link.
+  is pressed or the time bar moved it is its poster, a picture: the class at
+  the wall, the votes split. Under it a video player's bar: play, the time bar
+  with ticks where the five steps start (dragging shows the step's name), the
+  time and the length, the speed, full screen; on a phone held upright the
+  time bar has a row of its own. At the end a replay icon on the end card.
   Under it, "The example, step by step ›" links `/example` (the worked
   example).
 - **Below 860 px wide** Build and Run stand one above the other, Run first.

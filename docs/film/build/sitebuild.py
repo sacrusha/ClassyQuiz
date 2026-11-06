@@ -5,9 +5,11 @@ Run: py -I sitebuild.py [--no-poster]   (builds the standalone page first; the p
   src/public/js/film.js                the film; assets are the site's own files (no data:)
   src/public/landing/film-<lang>.webp  the poster frame per language (de en fr it), 1600 x 900, rendered from the film,
   src/public/landing/film-<lang>-800.webp    and 800 x 450
-  src/public/landing/film-<still>[-<lang>].webp  the chapters' stills, 192 x 108 (STILLS below)
-  (src/client/film-poster.ts, the page side, is written by hand: the first ▶ or a chapter loads film.js;
-  it and client/home.ts show the pictures of the page's language)
+  (src/client/film-poster.ts, the page side, is written by hand: the first ▶ or a move of the time bar loads film.js;
+  it and client/home.ts show the poster of the page's language)
+
+index.html's time bar works before film.js is there, so it carries the film's length (its max, and the length shown
+beside it); this script refuses to build while they differ from film.js's.
 
 The site's CSP (src/scripts/build.mjs): scripts only from its own files, images
 'self' and blob:, fonts from default-src 'self'. sitecheck.py checks it there.
@@ -36,14 +38,6 @@ def film_js():
 
 
 LANGS = ('de', 'en', 'fr', 'it')
-# The chapters' stills (index.html, the chapter list): one moment of each chapter that shows what its caption says
-# without words to read: [the chapter's key, the file's name, the film time, whether the frame has words of a language,
-# the part of the frame shown (x, y, width in the film's 1600 x 900; 16:9), so a thumbnail's few pixels go to the subject].
-# The sheets on the desk have none, so one picture serves all four languages; the others have the chat's, the Run box's
-# or the quiz's words, too small to read but in the page's language all the same.
-STILLS = [('capSheet', 'sheet', 3.3, False, None), ('capAi', 'ai', 12.5, True, (200, 130, 1200)), ('capZip', 'zip', 20.95, True, None),
-          ('capWall', 'wall', 33.5, True, (440, 30, 1100)), ('capTap', 'tap', 40.0, True, None)]
-STILL_SIZE = (192, 108)   # 2x of the desktop list's 88 x 50 CSS px (index.html)
 
 
 def frames(lang, times):
@@ -69,36 +63,32 @@ def frames(lang, times):
     return out
 
 
-def pictures(widths=(1600, 800), quality=82, still_quality=72):
-    """Per language: the poster frame (film-<lang>.webp, -800) and the chapters' stills; a still without words once."""
-    from PIL import Image, ImageChops
+def pictures(widths=(1600, 800), quality=82):
+    """Per language: the poster frame, film-<lang>.webp and -800."""
+    from PIL import Image
     land = REPO / 'public/landing'
-    def save(im, name, q):
-        f = land / name
-        im.save(f, 'WEBP', quality=q, method=6)
-        print(f.name, f.stat().st_size, 'bytes')
-    shared = {}
     for lang in LANGS:
-        ims = frames(lang, ['window.cqFilm.poster'] + [x[2] for x in STILLS])
+        im = frames(lang, ['window.cqFilm.poster'])[0]
         for w in widths:
-            save(ims[0] if w == 1600 else ims[0].resize((w, w * 9 // 16), Image.LANCZOS), f'film-{lang}.webp' if w == 1600 else f'film-{lang}-{w}.webp', quality)
-        for (key, name, t, worded, box), im in zip(STILLS, ims[1:]):
-            if box:
-                x, y, w = box
-                im = im.crop((x, y, x + w, y + w * 9 // 16))
-            small = im.resize(STILL_SIZE, Image.LANCZOS)
-            if worded:
-                save(small, f'film-{name}-{lang}.webp', still_quality)
-            elif name not in shared:
-                shared[name] = im
-                save(small, f'film-{name}.webp', still_quality)
-            elif ImageChops.difference(shared[name], im).getbbox():
-                raise SystemExit(f'the still {name} at {t} s differs between languages: give it one file per language (STILLS)')
+            f = land / (f'film-{lang}.webp' if w == 1600 else f'film-{lang}-{w}.webp')
+            (im if w == 1600 else im.resize((w, w * 9 // 16), Image.LANCZOS)).save(f, 'WEBP', quality=quality, method=6)
+            print(f.name, f.stat().st_size, 'bytes')
+
+
+def length_on_page():
+    """index.html's time bar against film.js: its max and the length shown beside it are the film's DUR."""
+    dur = int(re.search(r'const W = 1600, H = 900, DUR = (\d+)', (HERE / 'film.js').read_text(encoding='utf-8')).group(1))
+    html = (REPO / 'public/index.html').read_text(encoding='utf-8')
+    want = (f'type="range" min="0" max="{dur}"', f'<span class="cqf-dur"> / {dur // 60}:{dur % 60:02d}</span>')
+    missing = [w for w in want if w not in html]
+    if missing:
+        raise SystemExit(f'index.html: the time bar does not carry the length of the film ({dur} s): no {missing}')
 
 
 def main():
     (REPO / 'public/js').mkdir(parents=True, exist_ok=True)
     (REPO / 'public/landing').mkdir(parents=True, exist_ok=True)
+    length_on_page()
     js = film_js()
     (REPO / 'public/js/film.js').write_text(js, encoding='utf-8', newline='\n')
     print('film.js', len(js.encode()), 'bytes')

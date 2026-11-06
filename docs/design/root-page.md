@@ -93,66 +93,68 @@ classroom quizzes can't guess, takes motion: the tablet answering to the wall,
 the teacher's phone setting the pace, the votes splitting before the solution.
 What the film itself must get across, and how it is made: `docs/film/`.
 
-The path keeps its five steps, now the film's chapters: the owner found that
-"the step where the zip goes to classyQuiz isn't obvious", and that students
-tap after the big screen. The film never plays by itself, so the poster frame
-and the chapters must do the strip's five-second job without being played.
+The film's player is one people already know from video: a poster with ▶,
+and under it a bar with play, a time bar to drag, the time and the length,
+the speed and full screen. Anything the player does that a video player
+doesn't takes attention away from the film. The five steps the strip
+showed are in the film itself (`docs/film/`). Their starts are ticks on the
+time bar, and dragging shows the step's name over the thumb.
 
 What it lives with, beyond the page's own situation:
 
-- The page is what AIs read, and it must stay light for a teacher who never
-  presses ▶. So the film's words can't be in the HTML, and nothing of the film
-  loads or plays before a press.
+- The page is what AIs read, so the film's words can't be in the HTML.
 - A phone held upright gives the film about 358 × 201 px; a phone held
-  sideways has little height, and Build and Run must still show below.
+  sideways has little height.
 - The film has no sound and no words of its own: text appears only on the
   screens it shows, as on the real ones.
 - The story must work on a desktop and on horizontal tablets as well as on
   vertical phones.
 
-How the page meets it (the layout rule in detail: the comment on "The film in
-the strip's place" in `index.html`; the page side: `client/film-poster.ts`):
+How the page meets it (the details: the comments on the film in
+`index.html`; the page side: `client/film-poster.ts`):
 
-- **Before a press** the page holds the poster frame as a picture, ▶, and the
-  chapters. The poster is the teaching moment: the class at the wall with the
+- **Before a press** the page holds the poster frame as a picture, ▶ and the
+  bar. The poster is the teaching moment: the class at the wall with the
   votes split between the right answer and the typical error, no solution yet,
-  tablets in hands, the teacher with the phone. Each chapter is the strip's
-  caption with a small still of its moment, since the poster shows only the
-  classroom: without them "your AI" and the upload would be on the page only
-  as words. The pictures are rendered from the film per language
-  (`landing/film-*.webp`); the static HTML names the English ones, so a first
-  visit in another language also loads the English poster (owner: accepted):
-  about 30 KB where the browser takes the 800 px picture, 65 KB where it takes
-  the 1600 px one, as a phone's dense screen does.
-- **The first press** on ▶, the picture or a chapter loads `/js/film.js`,
-  which paints the same frame over the picture and plays from the start or
-  from that chapter. If it can't load or can't draw, the picture stays and the
-  next press tries again. A chapter press seeks; the current chapter is marked.
+  tablets in hands, the teacher with the phone. It is rendered from the film
+  per language (`landing/film-*.webp`); the static HTML names the English
+  one, so a first visit in another language also loads the English poster:
+  about 30 KB where the browser takes the 800 px picture, 65 KB where it
+  takes the 1600 px one, as a phone's dense screen does.
+- **The bar works before the film is there.** The film's script, about
+  140 KB, loads on the first press of ▶ or the picture, or on the first move
+  of the time bar. It paints the same frame over the picture, then plays
+  from the start or shows the moment the bar was moved to. The bar shows
+  that time while the script loads. The speed works without loading
+  anything. Full screen needs the film, so it keeps its place hidden until
+  then. If the script can't load or can't draw, the picture stays and the
+  next press tries again.
 - **Words.** The film speaks the page's language up to the upload: the ask
   typed to the AI (Build's labelled ask, word for word), the teacher's second
   message, the quiz, and the root page with its Run box. From the upload on,
   the site's screens (the check, the wall's chrome, the Remote, the tablets)
   are English, as on the real site. Every language shows the same quiz, the
-  example's 646 000 number-line question, translated; owner: the safest, since
-  wrong answers in several different examples would linger. The German, French
-  and Italian words are drafts pending the owner's review. A language switch
-  takes the film back to its poster in the new language.
-- **Layout.** On a screen taller than wide and under 900 px the chapters are
-  chips on one row under the film; from 900 px, or on any screen wider than
-  tall, they stand beside it as a list. The film's height is capped so the
-  headings of Build and Run show on the first screen, a phone held sideways
-  included; the stills show only where the height allows, and where they
-  don't, each chapter shows its number, so it doesn't read as an empty field. Watching it big is
-  the full screen button's: the browser's full screen where it has one, else
-  the film fixed over the viewport (iPhone Safari).
-- **The end card** shows the mark and the address, and no link (owner). Once
-  the film has played to the end, a replay icon stands on it: an icon, not
-  "Play again", so the wordless film carries no words to translate; its
-  accessible name is the page's.
+  example's 646 000 number-line question, translated: wrong answers in
+  several different examples would linger. The German, French and Italian
+  words are drafts pending the owner's review. A language switch takes the
+  film back to its poster in the new language.
+- **Layout.** The film stands centred above Build and Run, at most 62% of the
+  screen's height, the bar under it and as wide. A phone held sideways gets
+  the same layout as a desktop. A phone held upright differs where it has
+  to: its film is about 358 px wide, and one row would leave the time bar
+  too short to drag, so the time bar takes a row of its own. What the site
+  is and how to use it is the film's to show, so Build and Run may start
+  below the first screen. Watching the film big is
+  what the full screen button is for: the browser's full screen where it
+  has one, else the film fixed over the viewport (iPhone Safari).
+- **The end card** shows the mark and the address. Once the film has played
+  to the end, a replay icon stands on it: an icon, not "Play again", so the
+  wordless film carries no words to translate; its accessible name is the
+  page's.
 - The stage's accessible name says what it is, "a film without sound". It,
-  ▶, the chapter list, the replay and full screen are named in the page's
-  language; the player's other controls (play and pause, the speed, the time
-  bar) are English, marked `lang="en"`.
+  ▶, the replay, play and pause, the time bar, the speed and full screen
+  are named in the page's language. The time bar's spoken value is the time
+  and the step's name.
 - Under the film, "The example, step by step ›" links `/example`, the worked
   example (`design/example-page.md`), named for what a teacher looks for (a
   walkthrough), not for what the page is to us ("how it was made").
@@ -165,9 +167,8 @@ sat a full screen down on every phone, past a natural place to stop reading: the
 teacher with a `.zip` on the phone that took the photos, and the one coming back
 mid-lesson, whose way back is in Run, had to scroll for it. Run is short (the
 heading and the upload box), so Build's heading still shows below it on phones
-from 360×640 up. A first-timer meets the upload before the how-to; the film's
-poster and chapters above have told the story and the button says "the quiz
-your AI made". A running
+from 360×640 up. A first-timer meets the upload before the how-to; the film
+above tells the story and the button says "the quiz your AI made". A running
 quiz's card makes Run taller and can push Build off a small screen; that
 teacher came for Run. The order is visual only: the HTML, side by side on wider
 screens, and the order for keyboards and screen readers keep Build first.
@@ -425,10 +426,12 @@ the teacher's concern.
 
 ## Not known
 
-- Whether teachers read the film's poster and chapters in five seconds, unplayed.
-  The check proposed: show the page's top to two or three teachers for five
-  seconds, then ask what the class does and what they would type to their AI;
-  then the same after one viewing of the film. Nobody has done either.
+- What the film's poster tells a teacher who doesn't play it, and whether
+  teachers play it. The check proposed: show the page's top to two or three
+  teachers for five seconds, then ask what the class does and what they would
+  type to their AI; then the same after one viewing of the film. Nobody has
+  done either.
+- Whether the film's end card should link somewhere, `/example` for one.
 - The film on real phones (the cost of a frame, the full screen on an iPhone
   and on Android) and whether its timings read when watched:
   `docs/film/README.md`, "Not known".
