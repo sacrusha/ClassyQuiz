@@ -81,38 +81,81 @@ in the HTML: the Copy button (a fetcher's text conversion would read
 "classyquiz.pages.dev" and "Copy" as one word) and the language switch (so a
 fetcher doesn't read four language names).
 
-### The strip
+### The film
 
-The strip is five pictures that show the whole path in order: the exercise
-sheet; the AI (a drawing of the act: a phone with two pages going up and a
-`.zip` coming back); the `.zip` uploaded on the site (a laptop showing the
-site's header, the dashed Run box and the `.zip` dropping in); the wall; a
-tablet. It answers "what even is a quiz?" before the teacher reads anything. It
-has five frames because the owner found that "the step where the zip goes to
-classyQuiz isn't obvious", and that students tap after the big screen.
+Purpose: that of the strip of five stills it replaces, carried over. A
+first-timer should see what a quiz is before reading anything: the whole path
+from the exercise sheet to the class playing (backlog v4 item 1). The owner's purpose for a film in the strip's
+place: "make it easier for users to understand what this page is and does, so
+they understand whether it's what they need, and how to use it if it is." Five
+stills showed the path; what the class does, which a teacher who doesn't know
+classroom quizzes can't guess, takes motion: the tablet answering to the wall,
+the teacher's phone setting the pace, the votes splitting before the solution.
+What the film itself must get across, and how it is made: `docs/film/`.
 
-- The class frames are the largest; they are the payoff. The wall frame shows
-  the teaching moment: the votes split between the right answer and a typical
-  error. Two more tablets fan out behind the front one, drawn with only their
-  colour buttons: every student has a device, all showing the same buttons. The
-  tablet shows the plain colour buttons, since the example runs'
-  second ask wanted pictures to tap, which a first-time teacher wouldn't ask for.
-- The sheet frame is the rendered pages of a sheet derived from the owner's
-  (his photographs can't be published), standing in until his photographs replace them.
-- Until the video exists, the strip is one link to `/example`, the worked
-  example (`design/example-page.md`), with no play mark. Teachers in the
-  owner's testing read the strip as the example but didn't see that it opens:
-  it is a card with a border and a label in the page's link style, "The
-  example, step by step ›", named for what a teacher looks for (a walkthrough),
-  not for what the page is to us ("how it was made"). The pictures are WebP in `src/public/landing/`;
-  the wall and tablet exist in all four languages.
-- Layout: a grid of two rows so the pictures stand on one line whatever their
-  captions' lengths, sized by `--h` to fit the width. Below 720 px wide the
-  frames are a single row that scrolls sideways inside the card, the label
-  staying in view below, the sheet first and the next frame peeking in, and its height is capped by the viewport's height as well as its width, so
-  a phone held sideways still shows Build and Run.
+The path keeps its five steps, now the film's chapters: the owner found that
+"the step where the zip goes to classyQuiz isn't obvious", and that students
+tap after the big screen. The film never plays by itself, so the poster frame
+and the chapters must do the strip's five-second job without being played.
+
+What it lives with, beyond the page's own situation:
+
+- The page is what AIs read, and it must stay light for a teacher who never
+  presses ▶. So the film's words can't be in the HTML, and nothing of the film
+  loads or plays before a press.
+- A phone held upright gives the film about 358 × 201 px; a phone held
+  sideways has little height, and Build and Run must still show below.
+- The film has no sound and no words of its own: text appears only on the
+  screens it shows, as on the real ones.
 - The story must work on a desktop and on horizontal tablets as well as on
-  vertical phones; on a phone the sheet may lose readability.
+  vertical phones.
+
+How the page meets it (the layout rule in detail: the comment on "The film in
+the strip's place" in `index.html`; the page side: `client/film-poster.ts`):
+
+- **Before a press** the page holds the poster frame as a picture, ▶, and the
+  chapters. The poster is the teaching moment: the class at the wall with the
+  votes split between the right answer and the typical error, no solution yet,
+  tablets in hands, the teacher with the phone. Each chapter is the strip's
+  caption with a small still of its moment, since the poster shows only the
+  classroom: without them "your AI" and the upload would be on the page only
+  as words. The pictures are rendered from the film per language
+  (`landing/film-*.webp`); the static HTML names the English ones, so a first
+  visit in another language also loads the English poster (owner: accepted):
+  about 30 KB where the browser takes the 800 px picture, 65 KB where it takes
+  the 1600 px one, as a phone's dense screen does.
+- **The first press** on ▶, the picture or a chapter loads `/js/film.js`,
+  which paints the same frame over the picture and plays from the start or
+  from that chapter. If it can't load or can't draw, the picture stays and the
+  next press tries again. A chapter press seeks; the current chapter is marked.
+- **Words.** The film speaks the page's language up to the upload: the ask
+  typed to the AI (Build's labelled ask, word for word), the teacher's second
+  message, the quiz, and the root page with its Run box. From the upload on,
+  the site's screens (the check, the wall's chrome, the Remote, the tablets)
+  are English, as on the real site. Every language shows the same quiz, the
+  example's 646 000 number-line question, translated; owner: the safest, since
+  wrong answers in several different examples would linger. The German, French
+  and Italian words are drafts pending the owner's review. A language switch
+  takes the film back to its poster in the new language.
+- **Layout.** On a screen taller than wide and under 900 px the chapters are
+  chips on one row under the film; from 900 px, or on any screen wider than
+  tall, they stand beside it as a list. The film's height is capped so the
+  headings of Build and Run show on the first screen, a phone held sideways
+  included; the stills show only where the height allows, and where they
+  don't, each chapter shows its number, so it doesn't read as an empty field. Watching it big is
+  the full screen button's: the browser's full screen where it has one, else
+  the film fixed over the viewport (iPhone Safari).
+- **The end card** shows the mark and the address, and no link (owner). Once
+  the film has played to the end, a replay icon stands on it: an icon, not
+  "Play again", so the wordless film carries no words to translate; its
+  accessible name is the page's.
+- The stage's accessible name says what it is, "a film without sound". It,
+  ▶, the chapter list, the replay and full screen are named in the page's
+  language; the player's other controls (play and pause, the speed, the time
+  bar) are English, marked `lang="en"`.
+- Under the film, "The example, step by step ›" links `/example`, the worked
+  example (`design/example-page.md`), named for what a teacher looks for (a
+  walkthrough), not for what the page is to us ("how it was made").
 
 ### Run first when stacked
 
@@ -122,8 +165,9 @@ sat a full screen down on every phone, past a natural place to stop reading: the
 teacher with a `.zip` on the phone that took the photos, and the one coming back
 mid-lesson, whose way back is in Run, had to scroll for it. Run is short (the
 heading and the upload box), so Build's heading still shows below it on phones
-from 360×640 up. A first-timer meets the upload before the how-to; the strip
-above has told the story and the button says "the quiz your AI made". A running
+from 360×640 up. A first-timer meets the upload before the how-to; the film's
+poster and chapters above have told the story and the button says "the quiz
+your AI made". A running
 quiz's card makes Run taller and can push Build off a small screen; that
 teacher came for Run. The order is visual only: the HTML, side by side on wider
 screens, and the order for keyboards and screen readers keep Build first.
@@ -131,8 +175,8 @@ screens, and the order for keyboards and screen readers keep Build first.
 ### Build: two steps
 
 Step 1 is "Choose any good AI." Its detail states only what is verified, with
-tier and date: free Claude Sonnet wrote the strip's example, 4 Nov 2026
-(`design/example-page.md`), and is the one free AI that does this reliably,
+tier and date: free Claude Sonnet wrote the example above (the film's quiz,
+and `/example`'s), 4 Nov 2026 (`design/example-page.md`), and is the one free AI that does this reliably,
 the owner's finding of 5 Nov 2026 against free ChatGPT, Gemini and Copilot
 (`design/guidance-page.md`, "The AIs verified against"). No claim about what an
 AI can do goes on the page without the tier and date of the test (the pattern
@@ -158,7 +202,8 @@ for an AI's fetcher, the three asks stand one under the other, sheets first.
   320 px up no label overlaps another or leaves the bubble, in the four
   languages. Its words
   were read wrongly in the owner's testing: "pages" as the site's pages, and
-  "no. 1, 3 and 4" as frames of the strip. So the ask says "sheets" and ties
+  "no. 1, 3 and 4" as frames of the row of pictures above it (the strip of
+  five stills that the film's chapters replace). So the ask says "sheets" and ties
   the numbers to them ("like no. 1, 3 and 4 from these two sheets").
 - **Chess**: a description with no sheets, the ask of the chess run
   (`design/guidance-page.md`), tidied; it asks for the quiz in the page's
@@ -182,7 +227,9 @@ The sheets example is the same sheet and the same ask in four languages, each pr
 a quiz in its language: for a reader of another language the one barrier is the
 German ask, so the page cycles it. The asks are close to what the example runs
 were asked, not word for word. The run's second turn, where the teacher reshapes
-the quiz, is not shown: its payoff differs per language.
+the quiz, is not shown: its payoff differs per language. The film types this
+ask in the page's language, then the run's short third ask, translated
+(`docs/film/film-text.md`).
 
 ### Languages
 
@@ -199,7 +246,10 @@ visitor's choice is made with a switch top right, kept on the device
 English. The words are in `client/landing-text.ts`, one table per language, Run's
 messages included. The quiz's own problems, the archive's messages and the text
 copied for the AI stay English. Register: German "du", French "vous", Italian
-"tu".
+"tu". The film follows the same line: the page's language up to the upload, the
+site's English screens after it ("The film", Words); its words are in
+`docs/film/build/film.js`, the page's own taken from `landing-text.ts` when it
+is built.
 
 ### Run: the `.zip` and nothing else
 
@@ -375,11 +425,13 @@ the teacher's concern.
 
 ## Not known
 
-- Whether teachers read the strip in five seconds. The check proposed: show the
-  strip to two or three teachers for five seconds, then ask what the class does
-  and what they would type to their AI. If they can't say, the strip fails; the
-  fallback is one poster frame of the class at the wall. The owner's testing so
-  far: read as the example; not seen to open, before the card and its label.
+- Whether teachers read the film's poster and chapters in five seconds, unplayed.
+  The check proposed: show the page's top to two or three teachers for five
+  seconds, then ask what the class does and what they would type to their AI;
+  then the same after one viewing of the film. Nobody has done either.
+- The film on real phones (the cost of a frame, the full screen on an iPhone
+  and on Android) and whether its timings read when watched:
+  `docs/film/README.md`, "Not known".
 - Whether an Android tablet's file picker shows a `.zip` downloaded from a chat app
   as selectable.
 - Either own-copy route end to end on the current README; untried; the page's
@@ -392,15 +444,8 @@ the teacher's concern.
   days the upload cap refused, so it understates a site that runs out of requests
   first.
 - The German, French and Italian wording, by a native reader (Italian, by anyone).
+  The page's and the film's in these three are drafts pending the owner's review.
 - How a fetcher's text conversion reads the labelled ask.
-- The video: about 60 s, wordless so one storyboard serves four languages with the
-  screens swapped, fed the real screens, never autoplaying, played from the strip
-  only. The brief is the owner's, from his storyboard project. What it shows is
-  what the stills cannot: the room, children typing the code, avatars popping up,
-  the murmur when the votes split, the teacher pointing at one tick, the groan and
-  cheer at the answer, the ranking as closure. Whether the tool's output fits the
-  site's content-security policy (its own scripts only) is the one technical check;
-  whether the video's last frame links `/example` is open.
 - Whether one own copy per school, set up once by a colleague or IT, should be said
   on `/own-copy`: many teachers have neither an AI that runs programs nor a
   computer where they may install.

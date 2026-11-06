@@ -120,7 +120,7 @@ version in `docs/brand/svg/` and the Python that draws them in
   writes `<!--#brand file.svg-->` where it goes and the build writes the
   file in (`scripts/build.mjs`). One file feeds every page.
   - The root page is what teachers' AIs fetch to read the guidance, so the
-    drawings don't stand before it: the header and the strip write
+    drawings don't stand before it: the header writes
     `<!--#brand-use file.svg-->`, a few bytes that `<use>` the drawing, and
     the drawing is written once at the page's end (`<!--#brand-defs-->`),
     after the guidance. `currentColor` still follows the header's ink.
@@ -133,13 +133,15 @@ version in `docs/brand/svg/` and the Python that draws them in
   landing's header on a phone held upright. The lockup needs about 430 px
   beside the code box and the language; narrower, the fox stands alone and
   its label still names the site to a screen reader.
-- **The fox for 16 px, inline** (`classyquiz-symbol-16-inline.svg`): the
-  header of the strip's drawn laptop, where the fox is drawn 16 px tall
-  (about 15 on a phone). The kit has no lockup that small, and the picture
-  is there to show the `.zip` going to classyQuiz (`root-page.md`), so the
-  name stays: the header lockup's name, its fox clipped off, beside the
-  16-grid fox at the lockup's proportions. A lockup the kit doesn't have,
-  put together in the page (`index.html`, `.mini`): the stated deviation.
+- **The fox for 16 px, inline** (`classyquiz-symbol-16-inline.svg`) is
+  among the copies, and no page uses it.
+- **The landing film** (`docs/film/`) draws the header lockup
+  (`classyquiz-horizontal-32-inline.svg`) in the site's headers it shows
+  full frame and on the laptop, and the full fox
+  (`classyquiz-symbol-colour.svg`) where the phone in hand and the phone in
+  each press's bubble show the site, on the join screen and on the end card.
+  `sitebuild.py` writes both into the film as text, and the film's camera
+  scales them with everything else.
 - **The light-ground files** on the wall, which stays light: before the
   join screen's address, the full fox (`classyquiz-symbol-colour.svg`) on a
   wall of 1920 x 1080 or more, where it is drawn about 57 px tall, else the
@@ -171,18 +173,22 @@ Where it is:
   lockup in the wordless drawing of where the code goes, which mirrors the
   landing's header and changes with it (`class-and-wall.md`, "Getting in").
   The drawing's foot fades out: the top of a tablet, not a cut-off one.
-- **The landing's strip**: the drawn laptop shows the header with the mark.
+- **The landing film**: the drawn site headers show the mark and the name,
+  the join screen the mark before the address, as on the site; the end card
+  the mark over the address.
 - **A small header on the pages a teacher reaches from the landing**
   (`/example`, `/own-copy`, `/check`, the teacher-code entry and the second
   device's screens, its question and its note that both roles are taken):
   the mark and the name, back to the landing.
 - **The browser tab**, everywhere.
 - **The README**, where `/own-copy` sends a teacher weighing their own copy:
-  the lockup as its title and the wall's picture from the landing.
+  the lockup as its title and a picture of the wall
+  (`landing/wall-en.webp`).
 
 Not on the question screens, the rankings, the Remote or the students'
-answer screens: there the quiz and the class are the content, and the wall's
-pictures on the landing (`landing/wall-*.webp`, `tablet-*.webp`) stay true.
+answer screens: there the quiz and the class are the content, and the
+film's wall and tablets and the README's picture of the wall show them as
+they are.
 
 ## Not known
 
@@ -192,6 +198,9 @@ pictures on the landing (`landing/wall-*.webp`, `tablet-*.webp`) stay true.
   iPad (checked in Edge on Windows only).
 - Which icon each browser puts in its tab: Chromium is expected to take the
   SVG over the `.ico`; not looked at in a real tab strip.
+- Whether the mark in the film keeps the kit's minimum sizes
+  (`docs/brand/guidelines.md`) on a phone: the camera sets its size; not
+  checked.
 - The font's cost on school Wi-Fi beyond its size; it loads with
   `font-display: swap`, so a slow load shows the system font first.
 - The worked example's conversation picture shows the asks in a blue

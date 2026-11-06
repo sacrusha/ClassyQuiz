@@ -34,37 +34,87 @@
   .lang select { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; font-size: 16px; }
   .lang:focus-within { outline: 2px solid var(--accent); }
 
-  /* The strip: the example from the sheet to the class in five frames, in the workflow's order; until the video exists, a link to /example.
-     A card with a border and a label in the page's link style, so it reads as something to open (root-page.md, "The strip").
-     The frames are a grid of two rows, the pictures standing on one line and the captions under them, however many lines a caption takes.
-     --h, the class frames' height, is what lets the row fit the width: the frames add up to about 4.6 of it, gaps, arrows and the card's padding about 270px. */
-  .strip { display: block; margin: 18px 0 6px; padding: 14px 14px 10px; border: 1px solid var(--rule); border-radius: 14px; color: inherit; text-decoration: none; }
-  .strip:hover, .strip:focus-visible { border-color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-  .strip .frames { --h: clamp(96px, calc((min(100vw, 1120px) - 270px) / 4.6), 224px); display: grid; grid-auto-flow: column; grid-template-rows: auto auto; justify-content: center; align-items: end; column-gap: 14px; }
-  .strip figure { display: contents; }
-  .strip .pic { grid-row: 1; justify-self: center; }
-  .strip figcaption { grid-row: 2; align-self: start; justify-self: center; margin-top: 8px; font-size: .9rem; line-height: 1.3; color: var(--muted); text-align: center; max-width: 9.5em; }
-  .strip .arrow { grid-row: 1; align-self: center; color: var(--muted); font-size: 1.4rem; }
-  .strip .see { display: block; margin-top: 6px; text-align: right; color: var(--accent); font-weight: 600; }
-  .strip:hover .see, .strip:focus-visible .see { text-decoration: underline; }
-  .strip .pic { position: relative; }
-  .strip img { display: block; }
-  .f-sheet .pic { height: calc(var(--h) * .8); aspect-ratio: .86; }
-  .f-sheet img { position: absolute; height: 92%; width: auto; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
-  .f-sheet .p2 { right: 0; top: 0; transform: rotate(4deg); }
-  .f-sheet .p1 { left: 0; bottom: 0; transform: rotate(-3deg); }
-  .f-ask .pic { height: calc(var(--h) * .8); aspect-ratio: .62; }
-  .f-ask .pic > svg, .f-zip .pic > svg { width: 100%; height: 100%; display: block; }
-  .f-zip .pic { height: calc(var(--h) * .66); aspect-ratio: 160 / 110; }
-  .f-zip figcaption { max-width: 11.5em; }
-  .f-tablet .pic { height: var(--h); aspect-ratio: .66; background: var(--frame); border-radius: 12px; padding: 6px; box-sizing: border-box; }
-  .f-tablet img { width: 100%; height: 100%; border-radius: 4px; }
-  /* Two more tablets fanned out behind the front one: every student has one, showing the same buttons. Drawn, not pictured, so the four languages need no more images. */
-  .f-tablet .pic::before, .f-tablet .pic::after { content: ""; position: absolute; inset: 0; z-index: -1; box-sizing: border-box; border: 6px solid var(--frame); border-top-width: 14px; border-radius: 12px; transform-origin: 50% 100%; background: conic-gradient(#2f6fd6 0 25%, #1f9d55 0 50%, #e8b100 0 75%, #d93b3b 0); }
-  .f-tablet .pic::before { transform: rotate(6deg); opacity: .75; }
-  .f-tablet .pic::after { transform: rotate(12deg); opacity: .45; }
-  .f-wall .pic { height: var(--h); aspect-ratio: 16 / 9; background: var(--frame); padding: 4px; box-sizing: border-box; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
-  .f-wall img { width: 100%; height: 100%; }
+  /* The film in the strip's place (root-page.md, "The film"; docs/film/). Until someone presses ▶ or a chapter,
+     the page holds only the poster frame as a picture and the strip's captions as chapters, each with a small still: nothing else
+     loads or plays, and the film's own words stay out of this page, which AIs read. The pictures are English here and in the page's
+     language once client/home.ts has set it. The first press loads /js/film.js (client/film-poster.ts); it takes this markup over,
+     paints the same frame over the picture and plays, in the page's language. On a screen taller than wide and under 900 px (a phone
+     held upright) the chapters are chips under the film; from 900 px, or on any screen wider than tall (a phone held sideways), the
+     film takes up to two thirds and the chapters stand beside it. The film's height is at most 62% of the viewport's and leaves
+     220 px for the header above and the bar, the example's link and the headings of Build and Run below, so those headings show on
+     the first screen, a phone held sideways included (--film-h; svh: the viewport with a phone browser's bars shown). Watching it
+     big there is the full screen button's. */
+  .film { margin: 18px 0 6px; }
+  .cqf { --film-h: min(62svh, 100svh - 220px); display: grid; gap: 10px; }
+  @media (min-width: 900px), (orientation: landscape) { .cqf { grid-template-columns: min((100% - 18px) * 2 / 3, var(--film-h) * 16 / 9) minmax(0, 1fr); gap: 18px; align-items: start; } }
+  .cqf-film { width: 100%; max-width: calc(var(--film-h) * 16 / 9); }
+  .cqf-stage { position: relative; border-radius: var(--radius); overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
+  .cqf-stage > svg { display: block; width: 100%; height: 100%; }
+  .cqf-stage > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; } /* over the film while it builds underneath */
+  .cqf-big { position: absolute; left: 6%; bottom: 8%; width: clamp(52px, 13%, 76px); aspect-ratio: 1; border-radius: 50%; border: 0; background: rgba(29, 29, 27, .82); color: #fff; cursor: pointer; display: grid; place-items: center; } /* sized with the stage: on a phone it would cover the teacher in the poster frame */
+  .cqf-big svg { width: 45%; height: 45%; margin-left: 7%; }
+  .cqf-big[hidden] { display: none; }
+  /* Replay, once the film has played to its end: ▶'s look, an icon with no words to translate on the wordless film, its name the
+     page's. Centred in the band under the end card's address (its underline at 72% of the height), sized with the stage as ▶ is
+     but without ▶'s 52 px floor, so it stays in that band on a phone's film too. */
+  .cqf-again { position: absolute; left: 50%; top: 86%; transform: translate(-50%, -50%); width: min(12%, 76px); aspect-ratio: 1; border-radius: 50%; border: 0; background: rgba(29, 29, 27, .82); color: #fff; cursor: pointer; display: grid; place-items: center; padding: 0; }
+  .cqf-again svg { width: 50%; height: 50%; }
+  .cqf-again[hidden] { display: none; }
+  .film.loading .cqf-big { cursor: progress; opacity: .6; }
+  .cqf-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; min-height: 36px; }
+  .cqf-bar button { font: 600 15px var(--font-text); min-width: 44px; min-height: 36px; border-radius: 10px; border: 1px solid var(--rule); background: var(--card); color: var(--fg); cursor: pointer; }
+  .cqf-bar input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .cqf-time { font: 600 14px var(--font-brand); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 3.2em; text-align: right; }
+  .cqf-full { display: grid; place-items: center; padding: 0; }
+  .cqf-full[hidden] { display: none; }
+  .cqf-full svg { width: 20px; height: 20px; }
+  .cqf-full .out, .cqf-full[aria-pressed="true"] .in { display: none; }
+  .cqf-full[aria-pressed="true"] .out { display: inline; }
+  /* Full screen: the film and its bar fill the screen, the film as large as the screen allows at 16:9 on black, the bar under it.
+     The browser's full screen where it has one for the film's element (film.js chooses); where it hasn't (iPhone Safari),
+     the same column fixed over the viewport, and the page under it doesn't scroll. One class, .cqf-fs, for both. dvh: the viewport
+     as it is now, with or without a phone browser's bars. */
+  .cqf-film.cqf-fs { --fs-w: min(100vw, (100dvh - 48px) * 16 / 9); position: fixed; inset: 0; z-index: 100; max-width: none; margin: 0; background: #000; display: flex; flex-direction: column; justify-content: center; }
+  .cqf-fs .cqf-stage { width: var(--fs-w); margin: 0 auto; border-radius: 0; }
+  .cqf-fs .cqf-bar { width: var(--fs-w); margin: 6px auto 0; padding: 0 8px; box-sizing: border-box; }
+  .cqf-fs .cqf-time { color: #c9c6bf; }
+  html:has(.cqf-fs) { overflow: hidden; }
+  /* Each chapter a still of its moment in the film and its caption: what the poster's classroom leaves out (your AI, the upload)
+     shows in a picture too. Under the film (upright, under 900 px) the chapters are chips on one row that scrolls sideways;
+     beside it a list. The stills only from 560 px of height, and below it the list packed: a shorter screen keeps Build and Run
+     in view. */
+  .cqf-ch { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; }
+  .cqf-ch button { display: flex; align-items: center; gap: 8px; font: 14px/1.2 var(--font-text); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--card); color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .cqf-ch img { display: none; flex: none; height: auto; aspect-ratio: 16 / 9; border-radius: 5px; background: var(--code-bg); }
+  .cqf-ch button.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  @media (max-width: 899px) and (orientation: portrait) {
+    .cqf-ch { overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; padding-bottom: 4px; }
+    .cqf-ch li { flex: none; margin: 0; scroll-snap-align: start; }
+  }
+  @media (max-width: 899px) and (orientation: portrait) and (min-height: 560px) {
+    .cqf-ch button { padding: 4px 12px 4px 4px; border-radius: 10px; }
+    .cqf-ch img { display: block; width: 48px; }
+  }
+  @media (min-width: 900px), (orientation: landscape) {
+    .cqf-ch { flex-direction: column; gap: 4px; }
+    .cqf-ch button { width: 100%; text-align: left; border-radius: 10px; padding: 6px 12px; gap: 12px; font-size: 15px; white-space: normal; }
+  }
+  @media (min-width: 900px) and (min-height: 560px), (orientation: landscape) and (min-height: 560px) {
+    .cqf-ch button { padding-left: 6px; }
+    .cqf-ch img { display: block; width: 88px; }
+  }
+  /* Without stills a chapter would read as an empty field: its number in the film's order stands in the still's place. */
+  .cqf-ch { counter-reset: ch; }
+  .cqf-ch button::before { counter-increment: ch; content: counter(ch); display: none; flex: none; width: 18px; height: 18px; margin: -2px 0; border-radius: 50%; background: var(--code-bg); color: var(--fg); font: 600 12px/18px var(--font-brand); text-align: center; } /* no taller than the caption's line: the list keeps its height */
+  @media (max-height: 559px) { .cqf-ch li { margin: 0; } .cqf-ch button::before { display: block; } }
+  /* the faces inside the film (its SVG text) */
+  .cqf-stage text { font-family: var(--font-text); }
+  .cqf-stage .b { font-family: var(--font-brand); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cqf-stage .tb { font-weight: 700; }
+  .cqf-stage .ts { font-weight: 600; }
+  .cqf-stage .tn { font-variant-numeric: tabular-nums; }
+  .see { display: block; margin: 4px 0 6px; text-align: right; color: var(--accent); font-weight: 600; text-decoration: none; }
+  .see:hover, .see:focus-visible { text-decoration: underline; }
 
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; }
   .cols h2 { border: 0; padding: 0; margin: 1.6rem 0 .6rem; font-size: 1.35rem; }
@@ -132,16 +182,6 @@
     .cols { grid-template-columns: minmax(0, 1fr); }
     .cols .run { order: -1; }
   }
-  /* A phone held upright, or anything narrower than the five frames at a readable size: the strip's frames are one row that scrolls sideways inside the card, the label staying in view below, the sheet first, the next frame peeking in. Its height is capped by the viewport's height as well as its width, so a phone held sideways still shows Build and Run below it. */
-  @media (max-width: 720px) {
-    .strip { margin-top: 14px; padding: 10px 0 8px; }
-    .strip .frames { --h: min(50vw, 230px, 34vh); justify-content: start; overflow-x: auto; scroll-snap-type: x proximity; padding: 0 12px 8px; column-gap: 12px; scrollbar-width: thin; }
-    .strip .pic { scroll-snap-align: start; scroll-margin-left: 12px; }
-    .strip .see { margin: 2px 12px 0; }
-    .f-sheet .pic, .f-ask .pic { height: var(--h); }
-    .f-zip .pic { height: calc(var(--h) * .62); }
-    .strip .arrow { display: none; }
-  }
   @media (max-width: 600px) {
     .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
@@ -161,46 +201,18 @@
 </div></header>
 
 <div class="landing wide" id="landing">
-<a class="strip" id="strip" href="/example" aria-label="From an exercise sheet to the class: the example, step by step" data-t-aria="strip"><div class="frames">
-  <figure class="f-sheet"><div class="pic"><img class="p2" src="/landing/sheet-2.webp" alt="" width="440" height="622"><img class="p1" src="/landing/sheet-1.webp" alt="" width="440" height="622"></div><figcaption data-t="capSheet">Your exercise sheets</figcaption></figure>
-  <span class="arrow" aria-hidden="true">&rarr;</span>
-  <figure class="f-ask"><div class="pic"><svg viewBox="0 0 124 200" aria-hidden="true">
-    <rect x="2" y="2" width="120" height="196" rx="16" fill="var(--frame)"/>
-    <rect x="8" y="14" width="108" height="172" rx="6" fill="var(--bg)"/>
-    <rect x="48" y="7" width="28" height="3" rx="1.5" fill="#555"/>
-    <rect x="34" y="24" width="76" height="64" rx="10" fill="var(--accent)"/>
-    <rect x="41" y="31" width="27" height="36" rx="1" fill="#fff" transform="rotate(-4 54 49)"/>
-    <rect x="73" y="31" width="27" height="36" rx="1" fill="#fff" transform="rotate(3 86 49)"/>
-    <g stroke="#9aa6b8" stroke-width="1.6"><path d="M45 40h18M45 46h14M45 53h18M45 59h12"/><path d="M77 40h18M77 46h15M77 53h18M77 59h10"/></g>
-    <rect x="41" y="73" width="62" height="4" rx="2" fill="#fff" opacity=".75"/><rect x="41" y="80" width="40" height="4" rx="2" fill="#fff" opacity=".75"/>
-    <rect x="14" y="98" width="80" height="78" rx="10" fill="var(--code-bg)" stroke="var(--rule)"/>
-    <rect x="21" y="106" width="58" height="4" rx="2" fill="var(--muted)" opacity=".55"/><rect x="21" y="114" width="44" height="4" rx="2" fill="var(--muted)" opacity=".55"/>
-    <path d="M22 125h22l6 6v34H22z" fill="#f2c94c"/><path d="M44 125v6h6" fill="#d9ad2b"/>
-    <g fill="#8a6d12"><rect x="32" y="128" width="3" height="3"/><rect x="35" y="132" width="3" height="3"/><rect x="32" y="136" width="3" height="3"/><rect x="35" y="140" width="3" height="3"/><rect x="31" y="145" width="8" height="8" rx="1.5"/></g>
-    <text x="56" y="151" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--fg)">.zip</text>
-  </svg></div><figcaption data-t="capAi">Your AI</figcaption></figure>
-  <span class="arrow" aria-hidden="true">&rarr;</span>
-  <figure class="f-zip"><div class="pic"><svg viewBox="0 0 160 110" aria-hidden="true">
-    <rect x="12" y="2" width="136" height="96" rx="7" fill="var(--frame)"/>
-    <rect x="18" y="8" width="124" height="84" rx="2" fill="var(--bg)"/>
-    <!-- the 16-grid fox and the header lockup's name (identity.md, the strip) -->
-    <clipPath id="mini-name"><rect x="26" y="0" width="110" height="40"/></clipPath>
-    <g class="mini" style="color: var(--fg)">
-      <g transform="translate(23 9.02) scale(.4823)" clip-path="url(#mini-name)"><!--#brand-use classyquiz-horizontal-32-inline.svg--></g>
-      <g transform="translate(21.67 9.5) scale(.904)"><!--#brand-use classyquiz-symbol-16-inline.svg--></g>
-    </g>
-    <path d="M18 26.5h124" stroke="var(--rule)"/>
-    <rect x="34" y="32" width="92" height="52" rx="7" fill="none" stroke="#b9b3a5" stroke-width="1.5" stroke-dasharray="4 3"/>
-    <path d="M71 37h12l6 6v20H71z" fill="#f2c94c"/><path d="M83 37v6h6" fill="#d9ad2b"/>
-    <g fill="#8a6d12"><rect x="76" y="39" width="2.5" height="2.5"/><rect x="78.5" y="41.5" width="2.5" height="2.5"/><rect x="76" y="44" width="2.5" height="2.5"/><rect x="78.5" y="46.5" width="2.5" height="2.5"/><rect x="75.5" y="50" width="6.5" height="6.5" rx="1.2"/></g>
-    <g stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M57 39v14m-4.5-4.5 4.5 4.5 4.5-4.5"/><path d="M103 39v14m-4.5-4.5 4.5 4.5 4.5-4.5"/></g>
-    <rect x="50" y="69" width="60" height="9" rx="4.5" fill="var(--control)"/>
-    <path d="M2 99h156v3a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5z" fill="var(--frame)"/><rect x="66" y="99" width="28" height="2.5" rx="1.2" fill="#555"/>
-  </svg></div><figcaption data-t="capZip">The .zip, uploaded here</figcaption></figure>
-  <span class="arrow" aria-hidden="true">&rarr;</span>
-  <figure class="f-wall"><div class="pic"><img src="/landing/wall-en.webp" data-lang-src="wall" alt="" width="960" height="540"></div><figcaption data-t="capWall">What the class sees</figcaption></figure>
-  <figure class="f-tablet"><div class="pic"><img src="/landing/tablet-en.webp" data-lang-src="tablet" alt="" width="400" height="640"></div><figcaption data-t="capTap">Each student taps</figcaption></figure>
-</div><span class="see" data-t="see">The example, step by step &rsaquo;</span></a>
+<div class="film" id="cqfilm"><div class="cqf">
+  <div class="cqf-film"><div class="cqf-stage" role="group" aria-label="From an exercise sheet to the class: a film without sound" data-t-aria="film"><img src="/landing/film-en.webp" srcset="/landing/film-en-800.webp 800w, /landing/film-en.webp 1600w" sizes="(min-width: 900px) 720px, 100vw" alt="" width="1600" height="900"><button class="cqf-big" type="button" aria-label="Play" data-t-aria="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg></button><button class="cqf-again" type="button" aria-label="Play again" data-t-aria="again" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="cqf-bar"><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
+  <ol class="cqf-ch" aria-label="Chapters of the film" data-t-aria="chapters">
+    <li><button type="button" data-ch="capSheet"><img src="/landing/film-sheet.webp" alt="" width="192" height="108" loading="lazy"><span data-t="capSheet">Your exercise sheets</span></button></li>
+    <li><button type="button" data-ch="capAi"><img src="/landing/film-ai-en.webp" data-lang-src="film-ai" alt="" width="192" height="108" loading="lazy"><span data-t="capAi">Your AI</span></button></li>
+    <li><button type="button" data-ch="capZip"><img src="/landing/film-zip-en.webp" data-lang-src="film-zip" alt="" width="192" height="108" loading="lazy"><span data-t="capZip">The .zip, uploaded here</span></button></li>
+    <li><button type="button" data-ch="capWall"><img src="/landing/film-wall-en.webp" data-lang-src="film-wall" alt="" width="192" height="108" loading="lazy"><span data-t="capWall">What the class sees</span></button></li>
+    <li><button type="button" data-ch="capTap"><img src="/landing/film-tap-en.webp" data-lang-src="film-tap" alt="" width="192" height="108" loading="lazy"><span data-t="capTap">Each student taps</span></button></li>
+  </ol>
+</div></div>
+<a class="see" id="example-link" href="/example" data-t="see">The example, step by step &rsaquo;</a>
 
 <div class="cols">
 <section class="build" aria-labelledby="build-h">

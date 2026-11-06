@@ -101,6 +101,38 @@ Things that bite:
   Stopping only the shell leaves workerd holding the ports; killing only workerd
   makes wrangler start a new one.
 
+## The landing film
+
+The film on the root page is built from its source in `docs/film/build/`
+(`film.js` and the Python that builds and checks it); what it is for and how
+it is made is `docs/film/README.md`. Generated from that source, and not to
+be edited by hand: `public/js/film.js` and the pictures
+`public/landing/film-*.webp` (the poster frames and the chapters' stills).
+The page side, `client/film-poster.ts`, is ordinary code.
+
+Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
+`--no-poster` writes `film.js` only, without the pictures) when:
+
+- `docs/film/build/film.js` changes;
+- `client/landing-text.ts` changes the example ask or the words of the
+  header's code box and the Run box (`ask`, `code`, `run`, `upload`, `drop`,
+  `reading`): the film shows them as they were at its build, and
+  `npm test` fails until it is rebuilt;
+- `client/look.ts` changes the avatars, which the film draws; no test
+  catches this;
+- the brand files or `public/landing/sheet-*.webp` change: the film shows
+  them, and its pictures carry them.
+
+Then `py -I docs/film/build/sitecheck.py`: it builds the working tree's site
+and `main`'s in `.tmp/sitecheck/`, serves both with the site's headers and
+checks the film in Edge, desktop and phone; it ends with "no problems" or
+lists them. Its header says what it checks.
+
+The scripts need Python 3 with Playwright for Python and Pillow, and the
+installed Microsoft Edge (they launch it; no browser of Playwright's own is
+needed); `sitecheck.py` also needs Node, npm and git. What they write goes to
+`.tmp/film/` and `.tmp/sitecheck/` at the repo root.
+
 ## A second local stack
 
 For a second developer or agent beside the main stack. Wrangler's dev registry

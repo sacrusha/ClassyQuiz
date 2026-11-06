@@ -151,7 +151,7 @@ tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
 items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
 bar, all in the open list; item 15 built, not deployed; item 16 in part,
-not deployed.
+not deployed; item 1's film built, not deployed.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -160,15 +160,15 @@ not deployed.
    words that produced it are the how-to-ask. The forms are renderings of that
    one instance, so more than one can exist; not a closed list: a video; a
    static display of the input leading into the playable quiz as its
-   deliverable; a carousel or slideshow. Built: the strip with the derived
-   sheet and real two-turn conversations in four languages,
-   `design/root-page.md`. Open: the sheet photographed by the owner in
-   daylight to replace the strip's rendered first frame; the classroom
-   interaction still needs visualizing, the job of a South-Park-ish 2D video
-   from the owner's storyboard project, fed the real screens, never
-   autoplaying on the root (brief with the owner, `design/root-page.md` Not
-   known); the German "du", French "vous" and the translations' nits want the
-   owner's read. One story must work on a desktop and on horizontal tablets as
+   deliverable; a carousel or slideshow. Built: a film of about 60 s without
+   sound, from the owner's storyboard brief, fed the real screens and the
+   example ask in the page's four languages, never autoplaying; until it plays
+   its poster and five chapters with stills stand in its place
+   (`design/root-page.md`, "The film"; `docs/film/`). Open: the German "du",
+   French "vous" and the translations of the page and the film, drafts
+   pending the owner's review; whether the owner's daylight photographs of
+   the sheet are still to replace the rendered sheet pages the film and the
+   ask's tab show (Open: the sources don't say). One story must work on a desktop and on horizontal tablets as
    well as on vertical phones: the sheet recognizable as a sheet, readability
    on a phone may suffer, phone variants such as clickable or scrollable are
    allowed. Owner, on how the page addresses teachers: "commands only for what
@@ -230,7 +230,8 @@ not deployed.
    the weak spot is a short question beside its picture, where ten winners come
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
-    `/example`, "The example, step by step" from the strip, in English. Open:
+    `/example`, "The example, step by step" from the link under the landing's
+    film, in English. Open:
     - The conversation and `.zip` are a real free Claude Sonnet run of
       2026-11-04, reviewed by the owner (two turns; the second inverts the
       sheet's no. 1, the number given and the picture to pick). The photographs
@@ -421,8 +422,7 @@ With the owner:
 - Verify the guidance with other AIs (ChatGPT, Gemini, Copilot); ChatGPT
   currently breaks with two attachments, maybe temporarily (`design/guidance-page.md`).
 - The daylight photographs of the sheet, the turn-2 ask (v4 item 10), the
-  storyboard video brief from the real screens (its first beat needs a screen
-  of the new join screen), the read of the translations (v4 item 1), the
+  read of the translations, the page's and the film's (v4 item 1), the
   personal line in step 1 if wanted.
 - Tools beside the avatar, and whether four seconds suits the winners' band
   (v4 item 9).
