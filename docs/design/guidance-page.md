@@ -31,13 +31,15 @@ shaped as it is. The screens the page describes are in `docs/user-flow.md`.
   AI that may be a free one, "Designed for Claude; other mainstream AIs
   verified") is the backlog's Project and Constraints sections. The guidance
   puts the part of it the reading model can't know into its own words.
-- A capable model already knows teaching, question design and how to talk to a
-  teacher. What it can't know is the site: what it does, how the screens and a
+- Plausible assumption: a capable model already knows teaching, question
+  design and how to talk to a teacher (what the cut to the site's facts rests
+  on). What it can't know is the site: what it does, how the screens and a
   lesson run, how long data lives, the format with examples, the limits, how a
   quiz reaches the site and what the upload shows.
-- Fetched text that gives orders to the reader can trip an AI's
-  prompt-injection guards, while reference material gets read. A well-marked
-  example of using an AI with the site trips no guard.
+- Plausible assumption: fetched text that gives orders to the reader can trip
+  an AI's prompt-injection guards, while reference material gets read, and a
+  well-marked example of using an AI with the site trips no guard (why the
+  page informs rather than instructs, below).
 - The teacher's own words to their AI are not the page's voice; whether the
   AI fetches the page at all depends on them (the example asks, `root-page.md`,
   "Build: two steps").
@@ -77,9 +79,8 @@ the format it is shown).
 
 ### Cut to what the reading model can't know
 
-The page says only what the reading model can't already know. The section was
-cut from 4311 words to about 2266 on that standard. What stays is the site's
-facts. What went is advice a capable model derives from them or already has:
+The page says only what the reading model can't already know: the site's
+facts. Left out is advice a capable model derives from them or already has:
 how to design wrong answers, short questions, when a fixed order fits, how
 long a countdown a kind of task needs, cropping of pictures,
 notes to the teacher outside the quiz text. The facts those rested on stay: the

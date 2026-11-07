@@ -27,5 +27,8 @@ Docs carry situation and purpose. Situation is kept current, with one home
 per fact and pointers elsewhere; purpose is refined, stated first, and never
 displaced by the rules or rulings that came from it — write the purpose and
 situation behind a ruling instead. A purpose the sources don't give is asked
-for, not supplied. History, evidence and logs are git's: describe what is,
-not what happened.
+for, not supplied. A fact that is assumed rather than observed is written as
+a plausible assumption, beside the ruling that rests on it, and dropped if
+none does; one that stops looking plausible is raised, not obeyed. The example
+class is the design target, a decision, not an assumption. History, evidence
+and logs are git's: describe what is, not what happened.

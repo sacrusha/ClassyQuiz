@@ -32,9 +32,10 @@ The first target is a teacher whose AI can make a zip. The owner:
   whose AI can't make a zip has no way to bring pictures (see Not known).
   The product's constraints are in `backlog.md` (Constraints); the zip
   reader's limits are in `src/client/unzip.ts`.
-- The projector is read from the back row, eight to ten metres away. Its
-  size varies; the layouts are checked at 1366x768 (a common school
-  laptop), 1920x1080, 1280x800, 1024x768 and a phone.
+- Plausible assumption: the projector is read from the back row, eight to
+  ten metres away (what the sizes below are for). Its size varies; the
+  layouts are checked at 1366x768 (a common school laptop), 1920x1080,
+  1280x800, 1024x768 and a phone.
 - Real sheets give wide strips (number lines, 6:1 to 2.6:1), squares,
   upright figures and photos, and often a run of questions with the same
   text ("Welche Zahl ist mit dem Pfeil markiert?"). Photos from phones are

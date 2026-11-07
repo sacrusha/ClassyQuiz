@@ -12,7 +12,7 @@ How one question moves from the teacher reading it out to the key on the wall, h
 
 ## Situation
 
-- The teacher reads the question aloud while the class looks at the projector. The answers on the tablets are colour-coded buttons; a mis-tap is likelier than a tactic.
+- Plausible assumptions: the teacher reads the question aloud while the class looks at the projector (the Question state, choices hidden), and a mis-tap is likelier than a tactic (the tap rules below trust the device). The answers on the tablets are colour-coded buttons.
 - The teacher steers from a phone (the Remote), from the projector page itself, or with a presentation clicker that has forward keys only. A hand in flow presses fast; clickers bounce; a double press may be a mistake or a deliberate fast-forward. What misleads a hand is the screen moving under it, not the time since the press (the owner's observation).
 - Device clocks are not synchronised, and on school Wi-Fi a delivery can take longer than any window that would still be fair. A tablet that is offline still shows the question as open.
 - The teacher is in the room and deals with a child who copies the key from the projector. The design is against the normal user, not a malicious one.

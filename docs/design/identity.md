@@ -32,9 +32,8 @@ for its own sake.
   the first measure would leave a wrong fit.
 - Quiz text is in any language and script; the site's own words are English,
   and the landing's block also German, French and Italian.
-- School Wi-Fi is slow, and nothing on the site loads from a third party
-  (backlog, Constraints; the Content-Security-Policy in
-  `hosting-and-limits.md`).
+- School Wi-Fi is slow and filtered, so nothing on the site loads from a
+  third party (the Content-Security-Policy in `hosting-and-limits.md`).
 
 ## How the site meets it
 
@@ -52,7 +51,7 @@ on `body`); the wall and the students' screens stay light, because
 projectors wash dark backgrounds out.
 
 App screens are set at 1.45 line height, pages read top to bottom (the root,
-`/example`, `/own-copy`, `/layout`) at 1.55: a distinction, not drift.
+`/example`, `/own-copy`, `/layout`) at 1.55.
 
 ### Colours
 
@@ -161,9 +160,9 @@ version in `docs/brand/svg/` and the Python that draws them in
   dark mode; `favicon.ico` (16, 32 and 48 px) for browsers without SVG icons;
   `apple-touch-icon.png`, the fox on a paper tile for a home-screen bookmark.
   A file at the root also answers `/favicon.ico`, which browsers ask for
-  unprompted. School laptops run Chromium browsers, which take the SVG; the
-  `.ico` and the touch icon have no keyline for a dark tab strip
-  (backlog, v4 item 14).
+  unprompted. Plausible assumption: school laptops run Chromium browsers,
+  which take the SVG; so the `.ico` and the touch icon have no keyline for a
+  dark tab strip (backlog, v4 item 14).
 
 Where it is:
 
@@ -203,6 +202,3 @@ they are.
   checked.
 - The font's cost on school Wi-Fi beyond its size; it loads with
   `font-display: swap`, so a slow load shows the system font first.
-- The worked example's conversation picture shows the asks in a blue
-  bubble, where the landing's are warm (`--bubble`); it is a mock-up that
-  the owner's real run replaces (`example-page.md`).

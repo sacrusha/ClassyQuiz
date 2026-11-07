@@ -2,10 +2,10 @@
 
 ## Purpose
 
-The site is a tool, not a product, so it has no domain of its own and runs on
-the owner's Cloudflare Free plan, designed to stay within that plan for a few
-users. Usage limits nudge heavy use toward self-hosting. Three things follow
-from that, and this file is about them:
+Monetization is not a concern of the project, so the site runs on the owner's
+Cloudflare Free plan, designed to stay within that plan for a few users, and
+usage limits nudge heavy use toward self-hosting. It has no domain of its own
+(Situation). Three things follow from that, and this file is about them:
 
 - the address a teacher, an AI and children meet;
 - how long a quiz lives on the server, so that "nothing public, nothing kept
@@ -34,8 +34,8 @@ from that, and this file is about them:
   rejected or not. A determined script can spend the day's requests and
   nothing on this plan prevents it. The remedy is self-hosting, or a domain
   with a rate-limiting rule at the edge (the Free plan includes one such
-  rule); that would reopen the no-domain decision, an open question with the
-  owner (backlog, open list).
+  rule); whether to take one is an open question with the owner (backlog, open
+  list).
 - **The threat is accident, not malice.** The Project's "a normal user who
   can't use it, not a malicious one" (backlog): children hammer buttons, a
   tablet is left on over the weekend, a class is bigger than the design
@@ -138,11 +138,12 @@ guidance.
 ### What lives, and for how long
 
 Keeping a quiz on the server serves one purpose: a device that lost its
-connection, for whatever reason, gets back into the quiz in progress. The
-breaks a lesson resumes after are the short break and, less often, lunch,
-with the projector likely left on the quiz; Swiss midday breaks run up to
-about two hours. The next day is not one. Seeing results after an accidental
-close is not a reason to keep anything; it has other answers.
+connection, for whatever reason, gets back into the quiz in progress.
+Plausible assumption: the breaks a lesson resumes after are the short break
+and, less often, lunch, with the projector likely left on the quiz; Swiss
+midday breaks run up to about two hours; the next day is not one. Seeing
+results after an accidental close is not a reason to keep anything; it has
+other answers.
 
 So the rule is one, and the same everywhere: everything is deleted three
 hours after the teacher last used the quiz, or when the teacher ends it. One

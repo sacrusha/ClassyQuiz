@@ -12,9 +12,9 @@ v4 item 10).
 ## Situation
 
 - The page is reached from the link under the landing's film ("The example,
-  step by step ›", `root-page.md`, "The film"). Teachers read the path shown
-  there as the example; what they look for behind it is a walkthrough, not
-  the result alone.
+  step by step ›", `root-page.md`, "The film"). Plausible assumption: teachers
+  read the path shown there as the example, and look behind it for a
+  walkthrough, not the result alone (the page's name and its four steps).
 - An AI told the site's name may follow that link. A teacher's chat with
   an AI, read as page text, could pass for instructions to it.
 - The example's material is the sheet derived from the owner's, the owner's

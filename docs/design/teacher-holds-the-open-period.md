@@ -178,7 +178,5 @@ timer keeping the object awake until the flush (unchecked, see below).
   `setAlarm` writes a row.
 - The 2 MB value cap against `MAX_PLAYERS` (60): a run of 60 players over 15
   questions is far smaller as JSON than `hosting-and-limits.md` implies.
-- `INSTANCE_IDLE_MS` in `server/instance.ts` is 48 hours; `hosting-and-limits.md`
-  says 3 hours.
 - Whether the single tab, which both shows and steers, can be the holder
   without the wall's wake lock (needs HTTPS) keeping it awake.

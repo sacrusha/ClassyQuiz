@@ -16,8 +16,8 @@ The format's specification is the "How quizzes are built" section of the guidanc
 - AIs vary what they write. They add prose around the quiz, wrap it in code fences, use curly quotes and typographic dashes, number inconsistently, put Markdown on keywords, add letters to answers ("A)"), and sometimes write two quizzes in one answer.
 - A chat window may render the text before it is copied. Then `+` and `-` turn into bullet points and the marks are lost.
 - The AI may be working from an older or cached reading of the guidance, so it may still write lines the format no longer has.
-- A quiz is single-use. One with a format error is regenerated far more often than repaired by hand.
-- A class that sees the right answer in the same place learns "tap red" within a few questions. In one quiz the owner's AI wrote, the right answer came first in 14 of 19 questions.
+- Plausible assumption: a quiz is single-use, and one with a format error is regenerated rather than repaired by hand (so the parser reports what it can't resolve instead of guessing, and the message is one to hand to the AI).
+- Plausible assumption: a class that sees the right answer in the same place learns "tap red" within a few questions (why answers are shuffled). In one quiz the owner's AI wrote, the right answer came first in 14 of 19 questions.
 - The teacher checks the key after upload and can fix it during the run: user-flow.md §3.3 for the list, `question-flow.md` for fixing.
 - Who the teacher is, which AIs, and that a quiz arrives as a zip (not pasted text) are in the backlog's Project and Constraints sections and in `root-page.md`.
 
@@ -29,7 +29,7 @@ The format's specification is the "How quizzes are built" section of the guidanc
 
 Any number of a question's answers may be right, from one to all, and a student who picks any of them scores. The owner's frame, in his words: "There is fun to be had with questions where all answers are correct." A question with none marked right is an error. That is how lost marks (a copy from a rendered bubble) fail loudly instead of the parser guessing a key.
 
-A question has two to four answers (`MIN_ANSWERS`, `MAX_ANSWERS` in `format.ts`). The guidance and the format's messages call them choices, as the teacher's screens do (`question-flow.md`, "The steering bar"); this file keeps the code's word.
+A question has two to four answers (`MIN_ANSWERS`, `MAX_ANSWERS` in `format.ts`; four is the tiles' colours and shapes, `class-and-wall.md`). The guidance and the format's messages call them choices, as the teacher's screens do (`question-flow.md`, "The steering bar"); this file keeps the code's word.
 
 Rejected formats, kept as one line each so nobody tries them again:
 - Aiken (lettered answers plus "ANSWER: B"): an index key, which hides errors.

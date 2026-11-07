@@ -4,32 +4,38 @@ Project → versions as goals → items that get picked, worked and delivered. E
 item names the problem it solves for the teacher or the class. Done items are one
 line with a pointer to the design file that holds their purpose and situation
 (`design/<file>.md`); what is still to do is in full, and in the one list at the
-end. Last settled: 2026-11-05.
+end. Last settled: 2026-11-07.
 
 ## Project
 
 A teacher has an exercise sheet and wants fifteen minutes of fun practice on
-exactly that content. Existing tools fail on authoring time, premade content
-fails on topic. The product is the path from sheet to a running classroom quiz.
-Often the quiz is made in the ten-minute break before the lesson, with the
-teacher's own AI, and used once. The material arrives as a few photos taken with
-a phone, or as a document or PDF uploaded from a laptop; the teacher may be on
-either device. Any age group, including settings beyond school with adult
-participants; the example to design against is a Swiss German-speaking primary
-class: a school-issued laptop on the projector, Android tablets for the kids,
-the teacher's phone as remote, and an AI account that may be a free one.
-Teachers understand English; students may read slowly, or not
-read English at all, and the teacher is in the room. The guidance to the AI is
-in English, which AIs are trained on; quizzes come out in whatever language the
-teacher needs, and the AI asks when the sheet's language and the ask's differ.
-The measure is teacher time. The failure mode to
-design against is a normal user who can't use it, not a malicious one: a
-disruptive student is handled by the teacher walking over to the tablet and
-taking care of the student. Children actively and openly sabotaging the class
-while in class is not a technical problem that needs a technical solution.
-By contrast, children automating a denial of service from outside the class,
-to vandalise while in class or to vandalise another class's quiz, is a
-realistic problem.
+exactly that content. Existing tools fail on authoring time: their AI hands
+the teacher a starting point to fix by hand in a slide editor; premade content
+fails on topic. The product is the path from sheet to a running classroom
+quiz, and the measure is teacher time. Plausible assumption: the quiz is often
+made in the ten-minute break before the lesson, with the teacher's own AI, and
+used once (so the format is checkable in seconds and the run is the review:
+`design/quiz-format.md`, `design/question-flow.md`). The material arrives as a
+few photos taken with a phone, or as a document or PDF uploaded from a laptop;
+the teacher may be on either device. Any age group, including settings beyond
+school with adult participants. The design target is a Swiss German-speaking
+primary class: a school-issued laptop on the projector, Android tablets for
+the kids, the teacher's phone as remote, an AI account that may be a free one,
+students who may read slowly or not read English at all, and the teacher in
+the room. The design files call it the example class; what they say of
+children and the room is said of it. Plausible assumption: teachers understand
+English (so the guidance and the site's own words are English; Localization,
+under Later, is the queued change). The guidance to the AI is in English,
+which AIs are trained on; quizzes come out in whatever language the teacher
+needs, and the AI asks when the sheet's language and the ask's differ. The
+failure mode to design against is a normal user who can't use it, not a
+malicious one: a disruptive student is handled by the teacher walking over to
+the tablet and taking care of the student. Children actively and openly
+sabotaging the class while in class is not a technical problem that needs a
+technical solution. Plausible assumption: children automating a denial of
+service from outside the class, to vandalise while in class or to vandalise
+another class's quiz, is realistic (so the site bounds what one quiz costs,
+v2 item 4).
 
 ## Constraints
 
@@ -43,15 +49,19 @@ Hold for every version; not picked as work.
 - **Survives school Wi-Fi** — connections drop, phones go to sleep, a device
   dies mid-quiz, and the lesson must go on. Failure in front of the class ends
   adoption. A deploy or a Durable Object restart in the middle of a run is the
-  same situation from the server's side, and nobody has tested it yet.
-- **Designed for Claude**; other mainstream AIs verified to produce usable
-  quizzes from the guidance.
-- **Hosted on the owner's Cloudflare account, no domain of its own** — a
-  teacher's laptop can't be relied on to be reachable over school Wi-Fi; it's a
-  tool, not a product, and usage limits nudge heavy use toward self-hosting, on
-  Cloudflare or another provider. Free plan, designed to stay within its limits
-  for a few users. The README promises that an AI can set up one's own instance
-  from the public repo.
+  same situation from the server's side.
+- **Designed for Claude**; other mainstream AIs build from the guidance where
+  their plan gives them the tools: free Gemini can't choose its strong models,
+  free ChatGPT has its tools on some runs and not others. Findings by model
+  and tier: `design/guidance-page.md`, "The AIs verified against".
+- **Hosted on the owner's Cloudflare account** — a teacher's laptop can't be
+  relied on to be reachable over school Wi-Fi. Monetization is not a concern of
+  the project, so the shared site runs on the Free plan, designed to stay
+  within its limits for a few users, and usage limits nudge heavy use toward
+  self-hosting, on Cloudflare or another provider. The README promises that an
+  AI can set up one's own instance from the public repo. It has no domain of
+  its own today, a situation, not a rule; what a domain would change is in
+  `design/hosting-and-limits.md`.
 
 ## v1 — One real teacher runs one real quiz their AI made in the break
 
@@ -119,7 +129,7 @@ garbage.
    script from spending the account's daily allowance for every class — the
    code can only bound what one quiz costs, which it does. The known remedy is
    a domain in front of the site with a rate-limiting rule at the edge, which
-   the free plan includes; that reopens the no-domain constraint (open list).
+   the free plan includes; a domain is on the open list.
 5. Avatars the students find interesting, without wasting time or fights —
    built, `design/class-and-wall.md`.
 6. Spread, then key: the pause-and-discuss moment before the key is on the
@@ -148,10 +158,8 @@ Pattern, for every item below: any claim about what an AI can do carries the
 tier and the date it was tested, e.g. "free Claude Sonnet, tested 4 Nov 2026"
 (`design/guidance-page.md`).
 
-Built and live (twelfth deploy, 9f50079): items 2, 5, 6, 8, 9, 14 and most of 1, 4. Left:
-items 3 and 10, the rest of 1, 4, 9 and 11, and review E's follow-ups on the
-bar, all in the open list; item 15 built, not deployed; item 16 in part,
-not deployed; item 1's film built, not deployed.
+What is deployed: `deploy-log.md`. What is still open is in each item and in
+the open list at the end.
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
    — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
@@ -235,13 +243,9 @@ not deployed; item 1's film built, not deployed.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
     `/example`, "The example, step by step" from the link under the landing's
     film, in the landing's four languages (item 12). Open:
-    - The conversation and `.zip` are a real free Claude Sonnet run of
-      2026-11-04, reviewed by the owner (two turns; the second inverts the
-      sheet's no. 1, the number given and the picture to pick). The photographs
-      are his own since 2026-11-05; the run was made on the stand-ins before
-      them. The picture shows all three turns, the AI's screen mock-up
-      included (owner). Open: a run of his own may replace this one; whether
-      the quiz's growth past the asked ten is worth leaving in the picture.
+    - The run, its photographs and its picture: `design/example-page.md`.
+      Open: a run of the owner's may replace it; whether the quiz's growth
+      past the asked ten is worth leaving in the picture.
     - Whether the check screen holds a socket or poll while a visitor only
       looks at the example: each "Start the example quiz" is a real upload.
 11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not
@@ -323,7 +327,7 @@ not deployed; item 1's film built, not deployed.
     included, beside the conversation, says what needs work, and sees the
     correction. Built: the guidance page's two presentation kinds, high
     density (a layout in a short notation, and `/preview.py`, which draws it
-    from the zip as one picture) and high fidelity (`/layout`). Not deployed.
+    from the zip as one picture) and high fidelity (`/layout`).
     Open: an element that previews a zip on the device and edits it in local
     state, before the lobby and on any page that can hold it, handing back
     the zip; checking the look on an average projector, on an improved
@@ -388,6 +392,13 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- Consumers beyond the classroom: the owner is weighing a build/run split in
+  how the page presents the product, with a learner quizzing themselves and a
+  host who plays too (pub quiz, family, a parent with homework) as further
+  consumers; the host case needs no build. What rests on the decision: the
+  landing's first sentence and README's descriptor, a fourth example ask after
+  one real run, team names against "nothing identified", the quiz carrying no
+  notes. Discussion continues next session; the minutes of 2026-11-07 hold it.
 - A class refused for the day's room can't run in that lesson; only waiting
   or an own copy are offered. Whether the refusal should also offer running
   the quiz on the projector alone (the browser plays it; the class answers by
@@ -424,8 +435,6 @@ With the owner:
   until the landing and guidance are settled: every fetch from claude.ai
   restarts the fetch cache's clock, so no fetch tests of the live root until
   then.
-- Verify the guidance with other AIs (ChatGPT, Gemini, Copilot); ChatGPT
-  currently breaks with two attachments, maybe temporarily (`design/guidance-page.md`).
 - The daylight photographs of the sheet, the turn-2 ask (v4 item 10), the
   read of the translations, the page's and the film's (v4 item 1), the
   personal line in step 1 if wanted.
@@ -471,10 +480,8 @@ Needs a real classroom or real devices, nobody has run it:
 
 ## Housekeeping and process, for the next session
 
-- The deploy worktree is at 9f50079, which is live; the credentials stay in
-  the main checkout's `secrets/`, passed to `scripts/deploy.mjs` with
-  `node --env-file=<main checkout>/secrets/cloudflare.env`. The worked
-  example's photographs and conversation are live and real, no stand-ins.
+- What is deployed, and from where: `deploy-log.md`; how: `src/DEVELOPING.md`,
+  "Deploying".
 - `app.css` is one global namespace (about 340 top-level rules on short class
   names), linked by every app page and `/example`; a bare rule for one screen
   can land on another page, as the podium's `.steps` did on `/example`.

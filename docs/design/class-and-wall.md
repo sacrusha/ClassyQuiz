@@ -21,13 +21,14 @@ The product's classroom (shared, school-managed tablets, a laptop on the
 projector, the teacher's phone, young and slow readers, a teacher in the room)
 is in `backlog.md`, Project. What shapes this file:
 
-- Children are the users and may not read English, or at all. Everything a
-  child sees or does is a picture, a colour, a shape or a number. Labels are
-  icons and numbers wherever possible.
+- The users are the example class's children, who may not read English, or
+  at all. Everything a child sees or does is a picture, a colour, a shape or
+  a number. Labels are icons and numbers wherever possible.
 - Tablets are shared and nothing is kept on them beyond the class. Nothing may
   identify a child: no names, no accounts.
-- Reaching the site and typing the code is the slowest step, and tablets
-  arrive over about a minute. The early ones wait in the lobby.
+- Plausible assumption: reaching the site and typing the code is the slowest
+  step, and tablets arrive over about a minute, so the early ones wait in the
+  lobby (what the dressing is for, below).
 - Colour-blind children are in some classes. A tablet can be switched off
   after one lesson and opened for the next class; a battery can die mid-quiz
   without closing its connection.
@@ -35,8 +36,8 @@ is in `backlog.md`, Project. What shapes this file:
   who-answered bar, up to about 100 px when the winners jump. At those sizes
   a child mostly sees the colour and the outline of an avatar; the animal
   barely reads.
-- A disruptive child is handled by the teacher walking over (backlog, Project).
-  The design offers the teacher no moderation beyond Remove.
+- A disruptive child is handled by the teacher walking over (backlog, Project),
+  so the teacher gets no moderation beyond Remove.
 
 ## How the site meets it
 
@@ -50,7 +51,7 @@ audience sees and why.
   `/play#<code>`. Typing the address leads to the landing page, the teachers'
   page, with the code box in its header (`root-page.md`). Without JavaScript
   the box still submits to `/play?c=...`.
-- First users who typed the address didn't find that box. Until the first
+- In testing, people who typed the address didn't find that box. Until the first
   avatar, the wall shows where it is: a wordless picture of a tablet's top,
   the address in the browser's field and the site's header (the mark and the
   name) with the class's code in its box, ringed. The address under the QR
@@ -122,7 +123,7 @@ quiz under way.
 - What this gives up: a stranger in the first minutes or during the first
   question gets in, as one in the lobby always could. The avatar then shows on
   the wall.
-- Rejected, each failing a real class: a cap relative to the class at Start (a
+- Rejected, each failing a plausible class: a cap relative to the class at Start (a
   teacher who starts with 3 of 25 strands 17); a window after the last join (a
   teacher who starts and then fetches the tablet cart strands the class); a
   "let more in" control in the teacher's menu (a teacher in front of a class

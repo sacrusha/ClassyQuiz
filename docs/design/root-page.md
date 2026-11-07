@@ -38,8 +38,8 @@ Who arrives, and what each needs:
   photos. Needs to upload, at once.
 - A teacher coming back mid-lesson: a closed tab, a laptop that slept. Needs the
   way back, and certainty that it is the right quiz.
-- A regular teacher, who will run perhaps 20 to 30 quizzes a month and wants to
-  know whether they can rely on the site.
+- A regular teacher (plausible assumption: 20 to 30 quizzes a month) who wants
+  to know whether they can rely on the site.
 - A student on a tablet, with the address the teacher called out. Needs the code
   box and nothing else.
 - The teacher's AI, with the site's name. Needs the guidance section.
@@ -57,7 +57,8 @@ live with in particular:
 - A school network may block the site, or only its live connection, or only the
   students' network may be stricter than the teacher's. The owner's frame: no
   probe days ahead before the package works; a check can be part of what is
-  presented. A teacher is rarely at school when they first read the page.
+  presented. Plausible assumption: a teacher is rarely at school when they
+  first read the page (so the network help sits where the failure shows).
 
 ## How the site meets it
 
@@ -187,8 +188,8 @@ Step 2 is the ask. It says "the AI" where a pronoun would do: in the owner's
 testing Build had too many "it"s to follow. The address shown in the bubbles
 and in Copy is the one the browser opened, so an own copy shows its own.
 
-Three example asks, one per thing a teacher may bring: exercise sheets, an idea
-put in words, or nothing yet. They are tabs, one picture each (the two sheets,
+Three example asks, each for something a teacher may bring: exercise sheets,
+an idea put in words, or nothing yet. They are tabs, one picture each (the two sheets,
 a chess board, a question mark), the chosen one joined to its bubble, so the
 picture names the situation and no lead-in sentence is needed ("For example",
 "Or", "The AI then" were cut for it). Each tab's name in words is its

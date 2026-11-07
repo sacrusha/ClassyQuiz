@@ -60,10 +60,10 @@ The state Worker has observability off and no public address.
 - `npm run check` runs both tsconfigs (`tsconfig.json` for client, shared and
   quiz; `tsconfig.server.json` for the rest).
 - Dev dependencies (`wrangler`, `esbuild`, `typescript`,
-  `@cloudflare/workers-types`) are pinned to exact versions, and a version is
-  taken once it is at least two weeks old. Wrangler is the exception on purpose:
-  it is the tool that holds the deploy token, and the older versions' bundled
-  undici carries advisories, one of them about TLS certificate validation.
+  `@cloudflare/workers-types`) are pinned to exact versions. Wrangler is kept
+  current: it is the tool that holds the deploy token, and the older versions'
+  bundled undici carries advisories, one of them about TLS certificate
+  validation.
 - The one runtime dependency is `qrcode-generator` (MIT, no dependencies of its
   own), bundled into the projector page: a QR encoder is too error-prone to
   hand-write. Zip reading in the browser uses `DecompressionStream`, no library.

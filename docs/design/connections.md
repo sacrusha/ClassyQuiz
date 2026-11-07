@@ -22,13 +22,14 @@ twice, and that a flaky line never costs a question.
   can die with the socket still open, so the server sees silence rather than a
   close.
 - A deploy or a Durable Object restart in the middle of a run is the same
-  situation from the server's side. The backlog notes nobody has tested it
-  yet.
+  situation from the server's side.
 - A student whose device died joins again as a new player (or picks their
   avatar back, `class-and-wall.md`). When they do not pick it back, the earlier
-  score is lost: that is accepted because it is rare, the ranking is
-  "somewhat anonymous" (the owner's words) and grading is unlikely.
-- A lesson is 45 minutes. Tablets are often left on afterwards.
+  score is lost: accepted on the plausible assumption that it is rare, and
+  because the ranking is "somewhat anonymous" (the owner's words) and grading
+  is unlikely.
+- Plausible assumption: a lesson is 45 minutes and tablets are often left on
+  afterwards (`SLEEP_AFTER_MS`, "Devices left on").
 - The free plan has a daily allowance (`hosting-and-limits.md`). Every open
   connection or poll spends some of it.
 
@@ -145,6 +146,8 @@ with pictures already need a length.
   score of a student who does not pick their avatar back may not stay
   acceptable.
 - A deploy or Durable Object restart during a run has not been tested.
+- Why a page on long-polling never tries WebSocket again: the behaviour is
+  v1's (`client/net.ts`), its reason unrecorded.
 - The wording of the platform's spent-limit error is a best reading, matched
   on "free tier", "daily limit", "quota". What Cloudflare returns once Pages
   Functions pass their requests is undocumented (the Workers documentation
