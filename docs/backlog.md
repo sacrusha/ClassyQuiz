@@ -440,6 +440,10 @@ With the owner:
   personal line in step 1 if wanted.
 - Tools beside the avatar, and whether four seconds suits the winners' band
   (v4 item 9).
+- Business avatar styling: avatar options more suitable to business use (the
+  animals suit a classroom; a business audience is among the consumers beyond
+  the classroom, above). Not designed: which options, and whether a host picks
+  the set or the choice is per quiz.
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
