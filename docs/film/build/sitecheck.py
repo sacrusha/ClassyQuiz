@@ -577,15 +577,15 @@ def languages(b, url):
         pg.click('.cqf-big')
         wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
         c = pg.evaluate('window.cqFilm.check()')
-        a1, a3 = c['ask1'], c['ask3']
+        a1, a2 = c['ask1'], c['ask2']
         small = [(x['text'], round(x['k'], 2)) for x in c['fits']]
         print(f'desk {lang}: ask {a1["chars"]} characters on {a1["lines"]} lines at {a1["cps"]:.1f}/s, typed out {a1["send"] - a1["typed"]:.2f} s before its send;'
-              f' the second {a3["chars"]} on {a3["lines"]} at {a3["cps"]:.1f}/s, {a3["send"] - a3["typed"]:.2f} s; composer just before the sends {c["typedBefore"]};'
+              f' the second {a2["chars"]} on {a2["lines"]} at {a2["cps"]:.1f}/s, {a2["send"] - a2["typed"]:.2f} s; composer just before the sends {c["typedBefore"]};'
               f' shrunk to fit {small}{"; DRAFT words" if c["draft"] else ""}')
         if c['lang'] != lang: problems.append(f'desk {lang}: the film is in {c["lang"]}')
         for x in c['typedBefore']:
             if x['shown'] != x['of'] or x['top'] < 80: problems.append(f'desk {lang}: an ask not typed out before its send, or its composer over the top bar: {x}')
-        if a1['send'] - a1['typed'] < 1 or a3['send'] - a3['typed'] < 0.1: problems.append(f'desk {lang}: an ask typed out too late: {a1} {a3}')
+        if a1['send'] - a1['typed'] < 1 or a2['send'] - a2['typed'] < 0.1: problems.append(f'desk {lang}: an ask typed out too late: {a1} {a2}')
         if c['overflow']: problems.append(f'desk {lang}: wider than its box: {c["overflow"]}')
         for t, k in small:
             if k < 0.75: problems.append(f'desk {lang}: "{t}" shrunk to {k} of its size to fit')

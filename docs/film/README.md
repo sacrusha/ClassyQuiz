@@ -12,15 +12,15 @@ words its screens show, and where in the repo each comes from), and `build/`
 ## Purpose
 
 A teacher on the root page, usually not at school, should come away knowing
-two things:
+two things, in this order (owner):
 
-1. **The workflow**: photos of my sheets and one sentence to my own AI give a
-   `.zip`; the `.zip` goes up on this site; the class plays it on the big
-   screen and their tablets.
-2. **That it solves a problem I have**: I have the material and a lesson
-   coming up, not much time; what comes out is a whole class practising at
-   once, and a moment to talk about a typical error, which nobody is graded
+1. **Whether the site is something for them**: I have the material and a
+   lesson coming up, not much time; what comes out is a whole class practising
+   at once, and a moment to talk about a typical error, which nobody is graded
    on.
+2. **How to use it**: photos of my sheets and one sentence to my own AI give a
+   `.zip`, and another sentence changes it; the `.zip` goes up on this site;
+   the class plays it on the big screen and their tablets.
 
 The owner, on the five stills: the last part, the class playing, works for
 people who know classroom quizzes and may be tricky for those who don't. So
@@ -76,11 +76,13 @@ it.
 
 - `film.js`: the film and its player, one script. Its words: `LANDING` (the
   root page's own words, the example ask, the Run box, the chapters' names and
-  the player's, filled in from `src/client/landing-text.ts` at build time), `CONTENT` (per language: the
-  teacher's second message, the AI's status lines, the `.zip`'s name, the
-  quiz's title and questions; `draft: true` marks a language whose words are
-  drafts pending the owner's review) and `COMMON` (the site's English
-  screens, the chapters' starts).
+  the player's, filled in from `src/client/landing-text.ts` at build time; the
+  AI chapter's name is also the AI app's name on the phone), `CONTENT` (per
+  language: the letters for an AI on the app's tile, the teacher's second
+  message, the AI's status lines, the `.zip`'s name, the quiz's title and
+  questions; `draft: true` marks a language whose words are drafts pending
+  the owner's review) and `COMMON` (the site's English screens, the chapters'
+  starts).
 - `film.css`: the standalone page's player and the faces the film uses (on
   the site they come from `index.html` and `site.css`).
 - `build.py`: the standalone page, `.tmp/film/index.html` at the repo root
@@ -112,10 +114,13 @@ rebuild, and what the scripts need: `src/DEVELOPING.md`, "The landing film".
   interpolated logarithmically) for the room; **full-frame layers** for what
   must be read: the chat, the site on the phone, the shots over a child's
   shoulder. The opening, over the teacher's head onto the desk, is a layer
-  with its own camera; it cuts to the room at the moment the laptop's screen
-  fills both views alike, so the cut doesn't show. The chat grows out of the
-  phone's screen to the full frame and shrinks back into it: once that
-  convention is set, the site on the phone keeps it.
+  with its own camera. Its last shot, the laptop's screen filling the frame,
+  is reached by a cut from the phone, and the room opens with a cut from that
+  screen to the teacher beside the laptop: a pan across the desk into the
+  laptop's screen and a zoom back out of it stood there first, and the owner
+  found them busy for what they said, that this is a second device. The chat
+  grows out of the phone's screen to the full frame and shrinks back into it:
+  once that convention is set, the site on the phone keeps it.
 - **The screens are parts drawn once and used several times** (the wall
   960 × 540, the tablet 400 × 640, the laptop 960 × 600): the wall in the
   room, in the laptop and behind the child's shoulder read the same state of
@@ -202,7 +207,9 @@ Only rendered pictures found them, so the film is checked by looking:
 - The chapters' names are in `landing-text.ts` (`capSheet` and so on), the
   player's too (`play`, `pause`, `speed`, `seek`); the chapters' starts are
   only in `film.js` (`COMMON.chapters`, keyed by the same names), drawn as
-  ticks on the page's time bar.
+  ticks on the page's time bar. `capAi` is also the AI app's name under its
+  tile on the phone and in the chat's header, so the tick and the screen say
+  the same.
 - The time bar is the page's, so its length is in `index.html` too (its
   `max` and the length beside it); `sitebuild.py` checks it against `DUR`.
 - The poster picture lies over the SVG, absolutely placed, while the film
@@ -219,17 +226,24 @@ Only rendered pictures found them, so the film is checked by looking:
   full screen, the browser's and the fallback, is checked in Edge only, not on
   an iPhone's Safari or on Android.
 - **Whether the timings read** when watched: the hold after the ask, the
-  preview card's second or so, the split's six seconds. Checked only as
+  second ask (112 characters typed in about 2.3 s, in the frame about 4 s in
+  all before the chat shrinks away), the split's six seconds. Checked only as
   stills.
+- **The pace for the teacher who has decided and now wants the steps.** The
+  owner, watching: the default pace serves the first question, is this for
+  me, and is too fast for learning the steps. Under consideration: calling the
+  default speed 2× and the half speed 1× (the convention says which one is
+  sped up; the clock would then show the film as 2:00 or stay as it is; at
+  half speed the classroom's motion floats, the chat and the upload read
+  well), or a slower setting that halves only the chat, upload and laptop.
+  The other ways to the steps are on the page: Build's ask under the film,
+  and "The example, step by step ›".
 - **Other fonts.** The fit of fixed texts is checked with one wider stand-in
   font. The poster picture carries the font of the machine that rendered it;
   on a device with another `system-ui` the live frame that replaces it shows
   slightly different text.
 - **The German, French and Italian words** of the film are drafts pending the
   owner's review (`CONTENT`, `draft: true`; `sitecheck.py` names them).
-- Whether the AI's preview card, in the AI's own colours and shapes rather
-  than the site's (`film-text.md` §0.4), weakens the rhyme between the chat and
-  the wall.
 - The site's version only as `sitecheck.py` serves it: not yet on Cloudflare
   Pages, not looked at in the page's dark mode, not with a screen reader.
 - What the poster tells a teacher who doesn't play the film:

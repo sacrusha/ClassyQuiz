@@ -169,7 +169,9 @@ not deployed; item 1's film built, not deployed.
    pending the owner's review (proposals and the questions behind them:
    `docs/translation-review.md`); whether the owner's daylight photographs of
    the sheet are still to replace the rendered sheet pages the film and the
-   ask's tab show (Open: the sources don't say). One story must work on a desktop and on horizontal tablets as
+   ask's tab show (Open: the sources don't say); the film's pace for the
+   teacher who has decided and wants the steps (`docs/film/README.md`, "Not
+   known"). One story must work on a desktop and on horizontal tablets as
    well as on vertical phones: the sheet recognizable as a sheet, readability
    on a phone may suffer, phone variants such as clickable or scrollable are
    allowed. Owner, on how the page addresses teachers: "commands only for what

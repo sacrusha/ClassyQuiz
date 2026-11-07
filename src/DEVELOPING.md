@@ -116,9 +116,10 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
 - `docs/film/build/film.js` changes;
 - `client/landing-text.ts` changes the example ask, the words of the
   header's code box and the Run box (`ask`, `code`, `run`, `upload`, `drop`,
-  `reading`), the chapters' names (`capSheet` … `capTap`) or the player's
-  (`play`, `pause`, `speed`, `seek`): the film shows them as they were at
-  its build, and `npm test` fails until it is rebuilt;
+  `reading`), the chapters' names (`capSheet` … `capTap`; `capAi` is also
+  the AI app's name on the phone) or the player's (`play`, `pause`, `speed`,
+  `seek`): the film shows them as they were at its build, and `npm test`
+  fails until it is rebuilt;
 - the film's length (`DUR`) changes: `public/index.html`'s time bar carries
   it too, and `sitebuild.py` refuses to build until both agree;
 - `client/look.ts` changes the avatars, which the film draws; no test

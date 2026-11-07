@@ -249,52 +249,54 @@ function avatarSvg(av, label = true) {
       names (capSheet, capAi, capZip, capWall, capTap) and the player's (play, pause, speed, seek). */
   const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz machen, mit ähnlichen Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "run": "Ein Quiz starten", "upload": "Das Quiz deiner KI hochladen (.zip)", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Aufgabenblätter", "capAi": "Deine KI", "capZip": "Die .zip, hier hochgeladen", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "run": "Run a quiz", "upload": "Upload the quiz your AI made (.zip)", "drop": "or drop it here", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, uploaded here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "run": "Lancer un quiz", "upload": "Importer le quiz de votre IA (.zip)", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, importé ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève touche", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans le film"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "circa 10 domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "run": "Avvia un quiz", "upload": "Carica il quiz della tua IA (.zip)", "drop": "o trascinalo qui", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Lo .zip, caricato qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno tocca", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel film"}};
 
-  /* The chat's and the quiz's words per language: ask3 is the teacher's second message, then the AI's
-     status lines, the .zip it makes (the chip's title and the file's name), the preview card's caption,
-     the quiz's title, its question 1 and its question 4 (the check's list shows 1-4).
+  /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
+     on the AI app's tile (its name under the tile is the chapter's, LANDING.capAi); ask2 is the teacher's
+     second message, the real conversation's second ask, which changes the quiz; then the AI's status
+     lines, the .zip it makes (the chip's title and the file's name), the quiz's title, its question 1 and
+     its question 4 (the check's list shows 1-4).
      en is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
      to be replaced by the translators' (build.py and sitecheck.py name them). */
   const CONTENT = {
     en: {
       draft: false,
-      ask3: 'thanks. Can you make a visual preview, just one per question type?',
+      ai: 'AI',
+      ask2: 'Please add some questions where the number is given and they have to pick the matching marked number line.',
       status1: 'Fetching the classyquiz.pages.dev page now.',
-      status3: 'Setting up a visualizer mockup of the projector screens',
+      status2: 'Planning the spacing of the four new number-line questions',
       zipTitle: 'Big numbers quiz', zipFile: 'big-numbers-quiz.zip',
-      cardCaption: 'Reading an arrow (questions 1–3)',
       title: 'Big numbers on the number line',
       q1: 'Which number does the arrow show?',
       q4: 'Which number line has an arrow at 654 000?',
     },
     de: {
       draft: true,
-      ask3: 'danke. Kannst du eine Vorschau machen, nur eine pro Fragetyp?',
+      ai: 'KI',
+      ask2: 'Bitte füge ein paar Fragen hinzu, bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen.',
       status1: 'Rufe jetzt die Seite classyquiz.pages.dev ab.',
-      status3: 'Erstelle eine Vorschau der Bildschirme für den Beamer',
+      status2: 'Plane die Abstände der vier neuen Zahlenstrahl-Fragen',
       zipTitle: 'Grosse Zahlen Quiz', zipFile: 'grosse-zahlen-quiz.zip',
-      cardCaption: 'Einen Pfeil ablesen (Fragen 1–3)',
       title: 'Grosse Zahlen am Zahlenstrahl',
       q1: 'Welche Zahl zeigt der Pfeil?',
       q4: 'Welcher Zahlenstrahl hat einen Pfeil bei 654 000?',
     },
     fr: {
       draft: true,
-      ask3: 'merci. Tu peux faire un aperçu visuel, juste un par type de question ?',
+      ai: 'IA',
+      ask2: 'Ajoute s’il te plaît quelques questions où le nombre est donné et où ils doivent choisir la droite graduée marquée qui correspond.',
       status1: 'Je consulte la page classyquiz.pages.dev.',
-      status3: 'Préparation d’une maquette des écrans du projecteur',
+      status2: 'Planification de l’espacement des quatre nouvelles questions sur la droite graduée',
       zipTitle: 'Quiz grands nombres', zipFile: 'quiz-grands-nombres.zip',
-      cardCaption: 'Lire une flèche (questions 1 à 3)',
       title: 'Les grands nombres sur la droite graduée',
       q1: 'Quel nombre la flèche montre-t-elle ?',
       q4: 'Quelle droite graduée a une flèche à 654 000 ?',
     },
     it: {
       draft: true,
-      ask3: 'grazie. Puoi fare un’anteprima visiva, solo una per tipo di domanda?',
+      ai: 'IA',
+      ask2: 'Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente.',
       status1: 'Sto leggendo la pagina classyquiz.pages.dev.',
-      status3: 'Preparo un modello delle schermate del proiettore',
+      status2: 'Pianifico la spaziatura delle quattro nuove domande sulla retta numerica',
       zipTitle: 'Quiz grandi numeri', zipFile: 'quiz-grandi-numeri.zip',
-      cardCaption: 'Leggere una freccia (domande 1–3)',
       title: 'I grandi numeri sulla retta numerica',
       q1: 'Quale numero indica la freccia?',
       q4: 'Quale retta numerica ha una freccia a 654 000?',
@@ -336,9 +338,10 @@ function avatarSvg(av, label = true) {
     const glue = (s) => s.replace(/ (?=[?!:;»])/g, ' ').replace(/« /g, '« ');
     return Object.assign(JSON.parse(JSON.stringify(COMMON)), {
       ask1: L.ask.map((p) => (p.l === 0 ? [p.s, 'addr'] : p.l !== undefined ? [nb(p.s), 'part'] : [glue(p.s)])),
-      ask3: [[glue(Q.ask3)]],
-      status1: Q.status1, status3: Q.status3,
-      zipTitle: Q.zipTitle, cardCaption: Q.cardCaption, title: Q.title, q1: Q.q1,
+      ask2: [[glue(Q.ask2)]],
+      ai: Q.ai, aiName: L.capAi,
+      status1: Q.status1, status2: Q.status2,
+      zipTitle: Q.zipTitle, title: Q.title, q1: Q.q1,
       rows: [Q.q1, Q.q1, Q.q1, Q.q4],
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
@@ -362,9 +365,6 @@ function avatarSvg(av, label = true) {
   };
   const ANS = ['#d93b3b', '#2f6fd6', '#e8b100', '#1f9d55'];
   const ANS_INK = ['#ffffff', '#ffffff', '#1b1b1f', '#ffffff'];
-  // The AI's own mock-up pairs colours and shapes differently from the site (film-text.md 0.4).
-  const AI_ANS = ['#e5484d', '#3e7bfa', '#f2a31b', '#3f9a2f'];
-  const AI_SHAPE = [0, 2, 3, 1];
   const SHAPES = [
     'M50 12 L90 84 H10Z',
     'M50 8 L92 50 L50 92 L8 50Z',
@@ -401,16 +401,16 @@ function avatarSvg(av, label = true) {
       sheet1: 0.3, sheet2: 0.75, raise: [1.7, 2.4], flash1: 2.95, flash2: 3.75, home: 4.3,
       pulse: 5.55, open: 6.25, expand: [6.85, 7.3],
       attach: 7.45, type1: 7.85, send1: 13.5, status1: 13.85, bars1: [14.05, 14.85], zip1: 14.95,
-      type3: 15.35, send3: 16.95, status3: 17.2, card: [17.4, 17.8], scrollBack: [18.75, 19.15], tapZip: 19.3,
+      type2: 15.35, send2: 17.8, status2: 18.05, bars2: [18.2, 18.6], zip2: 18.75, tapZip: 19.45,
       web: 19.7, tapUpload: 20.3, sheetUp: [20.5, 20.75], tapFile: 21.0, sheetDown: [21.1, 21.3], check: 21.7,
       zoomCode: [22.05, 22.6], shrink: [23.0, 23.6],
-      lapOn: 23.7, typeCode: 24.5, codeStep: 0.11, enterClick: 25.55, enter: 25.75, showClick: 26.2,
+      lapOn: 24.0, typeCode: 24.5, codeStep: 0.11, enterClick: 25.55, enter: 25.75, showClick: 26.2,
       kidsIn: 28.6, oneTap: 39.6, ots: [36.9, 41.3], ots2: [52.55, 54.4], flick: [55.4, 56.25], end: [58.5, 59.0],
-      cut: 26.3, walk: [28.2, 29.3],
+      cut: 26.6, walk: [28.2, 29.3],
     };
     // The asks type at whatever speed ends them this long before their send, however long they are in a language
     // or with an own copy's address: the first holds for the address to be read, the second barely.
-    const HOLD1 = 1.425, HOLD3 = 0.165;
+    const HOLD1 = 1.425, HOLD2 = 0.165;
     const PH = [150, 512]; // the phone in the teacher's left hand, world coordinates
     const LAPTOP = { x: 425, y: 525, w: 140, s: 140 / 960 };
     const SCREEN = { x: 600, y: 70, w: 760, s: 760 / 960 };
@@ -949,30 +949,23 @@ function avatarSvg(av, label = true) {
     // ---------------------------------------------------------------- the phone (300 x 600), in the teacher's hand
     function makePhone(parent) {
       const g = G(parent);
-      const icons = [
-        ['#3949ab', '<circle cx="0" cy="0" r="16" fill="#fff"/><ellipse cx="0" cy="0" rx="30" ry="10" fill="none" stroke="#fff" stroke-width="5" transform="rotate(-20)"/>'],
-        ['#2e7d32', '<path d="M-18 18 Q-20 -18 20 -20 Q20 18 -18 18Z" fill="#fff"/><path d="M-16 16 L10 -10" stroke="#2e7d32" stroke-width="4"/>'],
-        ['#00838f', '<path d="M-24 -8 q8 -8 16 0 t16 0 t16 0 M-24 6 q8 -8 16 0 t16 0 t16 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>'],
-        ['#6d4c41', '<path d="M0 -22 L20 -10 L20 12 L0 24 L-20 12 L-20 -10Z M0 -22 V0 M0 0 L20 -10 M0 0 L-20 -10" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>'],
-        ['#c2185b', '<path d="M0 -24 Q18 0 0 22 Q-18 0 0 -24Z" fill="#fff"/>'],
-        ['#455a64', '<path d="M-20 14 L22 -20 L8 22 L0 6Z" fill="#fff"/>'],
-      ];
-      const ring = icons.map(([c, d], i) => {
-        const a = -Math.PI / 2 + (i * 2 * Math.PI) / icons.length;
-        return `<g class="ph-ic" transform="${tr(150 + 92 * Math.cos(a), 300 + 92 * Math.sin(a))}"><rect x="-36" y="-36" width="72" height="72" rx="18" fill="${c}"/>${d}</g>`;
-      }).join('');
+      // The AI app on the home screen: one white tile with the letters the page's language uses for an AI (AI, KI, IA),
+      // the chapter's name under it as a home screen names its apps. (A ring of invented app icons stood here first;
+      // the owner, watching: nothing said AI.) The tile opens into the white chat.
       g.innerHTML = `<rect width="300" height="600" rx="40" fill="#1b1b1d"/><rect x="14" y="22" width="272" height="556" rx="28" fill="#000" class="ph-scr"/>
         <g class="ph-cam"><image class="ph-sheet" x="40" y="90" width="220" height="311" preserveAspectRatio="none"/><circle cx="150" cy="510" r="34" fill="#fff"/><circle cx="150" cy="510" r="27" fill="none" stroke="#000" stroke-width="3"/>
           <g class="ph-th1"><image href="${ASSETS.sheet1 || ''}" width="44" height="62"/></g><g class="ph-th2"><image href="${ASSETS.sheet2 || ''}" width="44" height="62"/></g>
           <rect class="ph-flash" x="14" y="22" width="272" height="556" rx="28" fill="#fff"/></g>
-        <g class="ph-home">${ring}<rect class="ph-open" rx="28" fill="#fff"/></g>
+        <g class="ph-home"><g class="ph-tile"><rect x="-65" y="-65" width="130" height="130" rx="30" fill="#fff"/></g>
+          ${T_(150, 380, TX.aiName, 30, { cls: 'ts ph-name', fill: '#e6e6e6', anchor: 'middle', fit: 250 })}
+          <rect class="ph-open" rx="28" fill="#fff"/><g class="ph-ai">${T_(0, 25, TX.ai, 72, { cls: 'b', anchor: 'middle' })}</g></g>
         <g class="ph-site"><rect x="14" y="22" width="272" height="556" rx="28" fill="${C.paper}"/><use href="#cq-fox" x="30" y="40" width="34" height="34"/>
           <rect x="30" y="100" width="210" height="16" rx="5" fill="${C.ink}"/><rect x="30" y="126" width="120" height="10" rx="4" fill="${C.muted}"/>
           <rect x="30" y="160" width="240" height="64" rx="12" fill="${C.ink}" class="ph-btn"/><rect x="30" y="250" width="240" height="10" rx="4" fill="#bdb8ae"/><rect x="30" y="270" width="200" height="10" rx="4" fill="#bdb8ae"/>
           <rect x="30" y="310" width="240" height="1" fill="${C.rule}"/><rect x="30" y="330" width="230" height="10" rx="4" fill="#cfcac0"/><rect x="30" y="360" width="230" height="10" rx="4" fill="#cfcac0"/><rect x="30" y="390" width="230" height="10" rx="4" fill="#cfcac0"/></g>`;
       const q = (s) => g.querySelector(s);
       const camG = q('.ph-cam'), home = q('.ph-home'), site = q('.ph-site'), sheet = q('.ph-sheet'), fl = q('.ph-flash'), th1 = q('.ph-th1'), th2 = q('.ph-th2');
-      const ics = [...g.querySelectorAll('.ph-ic')], openR = q('.ph-open');
+      const tile = q('.ph-tile'), aiG = q('.ph-ai'), name = q('.ph-name'), openR = q('.ph-open');
       function update(t) {
         const camOn = t >= T.raise[1] - 0.2 && t < T.home;
         vis(camG, camOn);
@@ -990,15 +983,15 @@ function avatarSvg(av, label = true) {
         const homeOn = t >= T.home && t < T.expand[1] + 0.1;
         vis(home, homeOn);
         if (homeOn) {
-          ics.forEach((e, i) => {
-            const p = popIn(t, T.home + 0.05 + i * 0.06, 0.3);
-            const a = -Math.PI / 2 + (i * 2 * Math.PI) / ics.length;
-            const pulse = i === 0 ? 1 + 0.22 * Math.sin(Math.PI * seg(t, T.pulse, T.pulse + 0.32)) + 0.18 * Math.sin(Math.PI * seg(t, T.pulse + 0.32, T.pulse + 0.64)) : 1;
-            tf(e, tr(150 + 92 * Math.cos(a), 300 + 92 * Math.sin(a), Math.max(0.001, p * pulse)));
-          });
+          // the tile pops in, pulses twice under the thumb, then its white grows to the whole screen; the letters and the name fade as it goes
+          const p = popIn(t, T.home + 0.05, 0.3);
+          const pulse = 1 + 0.22 * Math.sin(Math.PI * seg(t, T.pulse, T.pulse + 0.32)) + 0.18 * Math.sin(Math.PI * seg(t, T.pulse + 0.32, T.pulse + 0.64));
+          const s = Math.max(0.001, p * pulse);
+          tf(tile, tr(150, 270, s)); tf(aiG, tr(150, 270, s));
+          op(name, p * (1 - seg(t, T.open, T.open + 0.25))); op(aiG, p * (1 - seg(t, T.open, T.open + 0.3)));
           const k = eseg(t, T.open, T.open + 0.5);
           vis(openR, k > 0);
-          if (k > 0) { const x = lerp(114, 14, k), y = lerp(172, 22, k), w = lerp(72, 272, k), h = lerp(72, 556, k); set(openR, 'x', f1(x)); set(openR, 'y', f1(y)); set(openR, 'width', f1(w)); set(openR, 'height', f1(h)); }
+          if (k > 0) { const x = lerp(85, 14, k), y = lerp(205, 22, k), w = lerp(130, 272, k), h = lerp(130, 556, k); set(openR, 'x', f1(x)); set(openR, 'y', f1(y)); set(openR, 'width', f1(w)); set(openR, 'height', f1(h)); }
         }
         vis(site, t >= T.shrink[0]);
       }
@@ -1081,9 +1074,11 @@ function avatarSvg(av, label = true) {
     const PO = { x: 810, y: 500, s: 0.44 };             // the phone held up, centre and scale (phone drawn 300 x 600)
     const OLAP = { x: 1730, y: 250, w: 330, s: 330 / 960 };
     let opening, ocam = [800, 450, 1];
+    // After the site has shrunk back into the phone, a cut to the laptop's screen (two keys at one time): the laptop is a
+    // second device, and a pan across the desk to it only said so with a swoop (owner: unnecessary, too busy).
     const OCAM = [
       [0, [800, 450, 1]], [T.home + 0.1, [800, 450, 1]], [5.4, [PO.x, PO.y, 2.9]],
-      [T.shrink[1], [PO.x, PO.y, 2.9]], [24.0, [1320, 420, 1.4]], [24.45, [OLAP.x + OLAP.w / 2, OLAP.y + OLAP.w * 600 / 1920, 1484 / OLAP.w]],
+      [T.lapOn, [PO.x, PO.y, 2.9]], [T.lapOn, [OLAP.x + OLAP.w / 2, OLAP.y + OLAP.w * 600 / 1920, 1484 / OLAP.w]],
     ];
     const O2F = (x, y) => [(x - ocam[0]) * ocam[2] + 800, (y - ocam[1]) * ocam[2] + 450];
     function makeOpening() {
@@ -1305,19 +1300,19 @@ function avatarSvg(av, label = true) {
       // composer (bottom) and top bar drawn over the conversation
       const comp = G(g);
       const top = G(g, `<rect width="${W}" height="78" fill="#fff"/><rect y="77" width="${W}" height="2" fill="#ececec"/>
-        <g transform="translate(64 39)"><rect x="-24" y="-24" width="48" height="48" rx="13" fill="#3949ab"/><g transform="scale(.66)"><circle r="16" fill="#fff"/><ellipse rx="30" ry="10" fill="none" stroke="#fff" stroke-width="5" transform="rotate(-20)"/></g></g>
-        <rect x="110" y="30" width="170" height="18" rx="9" fill="#e9e9e9"/>`);
+        <g transform="translate(64 39)"><rect x="-24" y="-24" width="48" height="48" rx="11" fill="#fff" stroke="#d6d6d6" stroke-width="2"/>${T_(0, 9, TX.ai, 27, { cls: 'b', anchor: 'middle' })}</g>
+        ${T_(110, 49, TX.aiName, 30, { cls: 'ts', fit: 500 })}`);
       const clsOf = () => ''; // one face for the whole ask; the address stands out by colour and underline (opts)
       // the first ask: typed in the composer, then a bubble
       // the text keeps clear of the send button at the box's right end
       const maxW = X1 - X0 - 36 - 110;
       const w1 = wrap(TX.ask1, FS, maxW, clsOf);
-      const w3 = wrap(TX.ask3, FS, maxW, clsOf);
-      const typeEnd1 = T.send1 - HOLD1, typeEnd3 = T.send3 - HOLD3;
+      const w2 = wrap(TX.ask2, FS, maxW, clsOf);
+      const typeEnd1 = T.send1 - HOLD1, typeEnd2 = T.send2 - HOLD2;
       T.cps1 = w1.total / (typeEnd1 - T.type1);
-      T.cps3 = w3.total / (typeEnd3 - T.type3);
-      for (const [k, w] of [['ask1', w1], ['ask3', w3]]) {
-        CHECK[k] = { chars: w.total, lines: w.lines.length, cps: k === 'ask1' ? T.cps1 : T.cps3, typed: k === 'ask1' ? T.type1 + w.total / T.cps1 : T.type3 + w.total / T.cps3, send: k === 'ask1' ? T.send1 : T.send3 };
+      T.cps2 = w2.total / (typeEnd2 - T.type2);
+      for (const [k, w] of [['ask1', w1], ['ask2', w2]]) {
+        CHECK[k] = { chars: w.total, lines: w.lines.length, cps: k === 'ask1' ? T.cps1 : T.cps2, typed: k === 'ask1' ? T.type1 + w.total / T.cps1 : T.type2 + w.total / T.cps2, send: k === 'ask1' ? T.send1 : T.send2 };
         w.lines.forEach((l, i) => { const lw = lineW(l, FS, clsOf); if (lw > maxW + 0.5) CHECK.overflow.push(`${k} line ${i + 1}: ${Math.round(lw)} > ${maxW}`); });
       }
       const opts = { clsOf, fillOf: (k) => (k === 'addr' ? C.accent : null), underline: (k) => (k === 'addr' ? C.accent : null) };
@@ -1326,7 +1321,7 @@ function avatarSvg(av, label = true) {
       const attach = G(comp, `<g transform="translate(0 0)"><rect x="-3" y="-3" width="96" height="126" rx="12" fill="#6b4a2e"/><image href="${ASSETS.sheet1 || ''}" x="8" y="8" width="80" height="104" preserveAspectRatio="none"/></g>
         <g transform="translate(110 0)"><rect x="-3" y="-3" width="96" height="126" rx="12" fill="#6b4a2e"/><image href="${ASSETS.sheet2 || ''}" x="8" y="8" width="80" height="104" preserveAspectRatio="none"/></g>`);
       const typed1 = drawLines(comp, w1, X0 + 36, 0, FS, LH, opts);
-      const typed3 = drawLines(comp, w3, X0 + 36, 0, FS, LH, opts);
+      const typed2 = drawLines(comp, w2, X0 + 36, 0, FS, LH, opts);
       const caret = E('rect', { width: 4, height: FS * 1.1, fill: C.ink }, comp);
       const sendB = G(comp, `<circle r="34" fill="${C.ink}"/><path d="M0 16 V-14 M-13 -2 L0 -15 L13 -2" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`);
       // conversation content, y from 0 (scrolled)
@@ -1344,38 +1339,37 @@ function avatarSvg(av, label = true) {
       y += 36;
       const bars1 = [1080, 1010, 1100, 720, 1040, 860, 600].map((w, i) => E('rect', { x: X0, y: y + 14 + i * 42, width: w, height: 22, rx: 11, fill: '#d9d9d6' }, ai1));
       y += 14 + 7 * 42 + 20;
-      const zipY = y;
-      const zip = G(conv, `<rect x="${X0}" y="${y}" width="470" height="104" rx="18" fill="#f4f4f2" stroke="#e0e0dc" stroke-width="2"/>
-        <rect x="${X0 + 24}" y="${y + 22}" width="60" height="60" rx="12" fill="#fff" stroke="#d0d0cc" stroke-width="2"/><path d="M${X0 + 40} ${y + 40} h28 v28 h-28z M${X0 + 46} ${y + 40} v28 M${X0 + 52} ${y + 46} h4 M${X0 + 52} ${y + 54} h4 M${X0 + 52} ${y + 62} h4" fill="none" stroke="#6a6a66" stroke-width="3"/>
-        ${T_(X0 + 104, y + 50, TX.zipTitle, 32, { cls: 'ts', fit: 270 })}${T_(X0 + 104, y + 84, TX.zipSub, 22, { fill: '#8a8a8a', fit: 270 })}
-        <g class="zip-ok"><circle cx="${X0 + 420}" cy="${y + 52}" r="26" fill="${C.good}"/>${icon('check', X0 + 402, y + 34, 36, '#fff', true)}</g>`);
-      const zipOk = zip.querySelector('.zip-ok');
+      // the AI's .zip as a chip, twice: the quiz, then the quiz changed by the second ask; the thumb takes the second
+      const zipChip = (yy) => {
+        const z = G(conv, `<rect x="${X0}" y="${yy}" width="470" height="104" rx="18" fill="#f4f4f2" stroke="#e0e0dc" stroke-width="2"/>
+          <rect x="${X0 + 24}" y="${yy + 22}" width="60" height="60" rx="12" fill="#fff" stroke="#d0d0cc" stroke-width="2"/><path d="M${X0 + 40} ${yy + 40} h28 v28 h-28z M${X0 + 46} ${yy + 40} v28 M${X0 + 52} ${yy + 46} h4 M${X0 + 52} ${yy + 54} h4 M${X0 + 52} ${yy + 62} h4" fill="none" stroke="#6a6a66" stroke-width="3"/>
+          ${T_(X0 + 104, yy + 50, TX.zipTitle, 32, { cls: 'ts', fit: 270 })}${T_(X0 + 104, yy + 84, TX.zipSub, 22, { fill: '#8a8a8a', fit: 270 })}
+          <g class="zip-ok"><circle cx="${X0 + 420}" cy="${yy + 52}" r="26" fill="${C.good}"/>${icon('check', X0 + 402, yy + 34, 36, '#fff', true)}</g>`);
+        const pop = (t, at) => { vis(z, t >= at); if (t >= at) tf(z, `translate(${X0} ${yy + 52}) scale(${popIn(t, at, 0.3).toFixed(3)}) translate(${-X0} ${-(yy + 52)})`); };
+        return { g: z, ok: z.querySelector('.zip-ok'), y: yy, pop };
+      };
+      const zip1 = zipChip(y);
+      vis(zip1.ok, false);
       y += 104 + 60;
-      const bw3 = Math.max(...w3.lines.map((l) => lineW(l, FS, clsOf))) + 60;
-      const b3Y = y;
-      const b3 = G(conv);
-      E('rect', { x: X1 - bw3, y, width: bw3, height: typed3.height + 40, rx: 28, fill: '#f0f0ee' }, b3);
-      drawLines(b3, w3, X1 - bw3 + 30, y + 20 + FS * 0.82, FS, LH, opts).show(w3.total);
-      y += typed3.height + 40 + 46;
-      const ai3 = G(conv, T_(X0, y, TX.status3, 28, { fill: '#8a8a8a', fit: X1 - X0 }));
-      y += 50;
-      // the preview card: the real chat's first card (the AI's own colours and shapes)
-      const cardY = y;
-      const btnHtml = [0, 1, 2, 3].map((i) => {
-        const bx = X0 + 40 + (i % 2) * 570, by = y + 418 + (i < 2 ? 0 : 92);
-        return `<rect x="${bx}" y="${by}" width="550" height="78" rx="12" fill="${AI_ANS[i]}"/>${shape(AI_SHAPE[i], bx + 22, by + 25, 28, '#fff')}${T_(bx + 66, by + 51, TX.choices[i], 32, { fill: '#fff', cls: 'tn', fit: 460 })}`;
-      }).join('');
-      const card = G(conv, `${T_(X0, y + 4, TX.cardCaption, 28, { fill: '#6f6f6a', fit: X1 - X0 })}
-        <rect x="${X0}" y="${y + 26}" width="${X1 - X0}" height="590" rx="22" fill="#fff" stroke="#e3e3df" stroke-width="3"/>
-        ${T_((X0 + X1) / 2, y + 110, TX.q1, 44, { cls: 'ts', anchor: 'middle', fit: X1 - X0 - 80 })}
-        <use href="#cq-q1" x="${X0 + 150}" y="${y + 150}" width="900" height="191"/>${btnHtml}`);
-      const cardBottom = y + 26 + 590;
+      const bw2 = Math.max(...w2.lines.map((l) => lineW(l, FS, clsOf))) + 60;
+      const b2Y = y;
+      const b2 = G(conv);
+      E('rect', { x: X1 - bw2, y, width: bw2, height: typed2.height + 40, rx: 28, fill: '#f0f0ee' }, b2);
+      drawLines(b2, w2, X1 - bw2 + 30, y + 20 + FS * 0.82, FS, LH, opts).show(w2.total);
+      y += typed2.height + 40 + 46;
+      const ai2 = G(conv, T_(X0, y, TX.status2, 28, { fill: '#8a8a8a', fit: X1 - X0 }));
+      y += 36;
+      const bars2 = [980, 1060, 760, 520].map((w, i) => E('rect', { x: X0, y: y + 14 + i * 42, width: w, height: 22, rx: 11, fill: '#d9d9d6' }, ai2));
+      y += 14 + 4 * 42 + 20;
+      const zip2 = zipChip(y);
+      // where the conversation rests at the end: the second .zip just above the composer, empty again (64 + one line high, at the foot)
+      const scEnd = Math.max(0, zip2.y + 104 - (880 - 64 - LH - 30));
       // geometry of the composer
       function compose(t) {
         // which ask is in the composer, how much of it is typed
         let w = null, n = 0, typedL = null, lines = 1;
         if (t < T.send1) { w = w1; typedL = typed1; n = Math.floor((t - T.type1) * T.cps1); }
-        else if (t >= T.type3 && t < T.send3) { w = w3; typedL = typed3; n = Math.floor((t - T.type3) * T.cps3); }
+        else if (t >= T.type2 && t < T.send2) { w = w2; typedL = typed2; n = Math.floor((t - T.type2) * T.cps2); }
         n = clamp(n, 0, w ? w.total : 0);
         if (w && n > 0) lines = clamp(typedL.caret(n)[1] / LH + 1, 1, w.lines.length) | 0;
         const att = t >= T.attach && t < T.send1;
@@ -1391,8 +1385,8 @@ function avatarSvg(av, label = true) {
         op(attach, c.att ? popIn(t, T.attach, 0.3) : 0);
         tf(attach, tr(X0 + 30, c.topY + 22));
         const textTop = c.topY + (c.att ? 160 : 22) + FS * 0.85;
-        tf(typed1.g, tr(0, textTop)); tf(typed3.g, tr(0, textTop));
-        vis(typed1.g, c.typedL === typed1); vis(typed3.g, c.typedL === typed3);
+        tf(typed1.g, tr(0, textTop)); tf(typed2.g, tr(0, textTop));
+        vis(typed1.g, c.typedL === typed1); vis(typed2.g, c.typedL === typed2);
         if (c.typedL) c.typedL.show(c.n);
         const blink = c.typedL && (Math.floor(t * 2.4) % 2 === 0 || (c.n > 0 && c.n < c.w.total));
         vis(caret, !!blink);
@@ -1407,28 +1401,27 @@ function avatarSvg(av, label = true) {
         op(b1, seg(t, T.send1, T.send1 + 0.15)); op(photos, seg(t, T.send1, T.send1 + 0.15));
         vis(ai1, t >= T.status1);
         bars1.forEach((b, i) => { const k = seg(t, T.bars1[0] + i * 0.11, T.bars1[0] + i * 0.11 + 0.25); vis(b, k > 0); set(b, 'width', f1(k * +b.getAttribute('data-w') || 0)); });
-        vis(zip, t >= T.zip1); if (t >= T.zip1) tf(zip, `translate(${X0} ${zipY + 52}) scale(${popIn(t, T.zip1, 0.3).toFixed(3)}) translate(${-X0} ${-(zipY + 52)})`);
-        vis(zipOk, t >= T.tapZip + 0.15);
-        vis(b3, t >= T.send3); op(b3, seg(t, T.send3, T.send3 + 0.15));
-        vis(ai3, t >= T.status3);
-        const ck = eseg(t, T.card[0], T.card[1]);
-        op(card, ck); tf(card, tr(0, (1 - ck) * 40));
-        // scroll: keep the newest thing above the composer; back to the .zip at the end
+        zip1.pop(t, T.zip1);
+        vis(b2, t >= T.send2); op(b2, seg(t, T.send2, T.send2 + 0.15));
+        vis(ai2, t >= T.status2);
+        bars2.forEach((b, i) => { const k = seg(t, T.bars2[0] + i * 0.11, T.bars2[0] + i * 0.11 + 0.25); vis(b, k > 0); set(b, 'width', f1(k * +b.getAttribute('data-w') || 0)); });
+        zip2.pop(t, T.zip2);
+        vis(zip2.ok, t >= T.tapZip + 0.15);
+        // scroll: keep the newest thing above the composer
         const bottomOf = (yy) => Math.max(0, yy - (c.topY - 30));
         const sc = keys(t, [
-          [T.send1, 0], [T.status1, bottomOf(zipY - 40)], [T.zip1, bottomOf(zipY - 40)], [T.zip1 + 0.3, bottomOf(zipY + 104)],
-          [T.type3, bottomOf(zipY + 104)], [T.send3 - 0.01, Math.max(0, zipY + 104 - (880 - 64 - w3.lines.length * LH - 30))],
-          [T.send3 + 0.3, Math.max(0, b3Y + typed3.height + 30 - 770)], [T.card[0], Math.max(0, b3Y + typed3.height + 30 - 770)], [T.card[1], cardBottom - 745],
-          [T.scrollBack[0], cardBottom - 745], [T.scrollBack[1], zipY - 330],
+          [T.send1, 0], [T.status1, bottomOf(zip1.y - 40)], [T.zip1, bottomOf(zip1.y - 40)], [T.zip1 + 0.3, bottomOf(zip1.y + 104)],
+          [T.type2, bottomOf(zip1.y + 104)], [T.send2 - 0.01, Math.max(0, zip1.y + 104 - (880 - 64 - w2.lines.length * LH - 30))],
+          [T.send2 + 0.3, bottomOf(b2Y + typed2.height + 40)], [T.status2, bottomOf(zip2.y - 40)], [T.zip2, bottomOf(zip2.y - 40)], [T.zip2 + 0.3, scEnd],
         ]);
         tf(conv, tr(0, -sc));
-        thumb.update(t, [[T.send1, X1 - 52, 470 + compose(T.send1 - 0.01).hgt / 2 - 46], [T.send3, X1 - 52, 834], [T.tapZip, X0 + 240, zipY + 52 - (zipY - 330)]]);
+        thumb.update(t, [[T.send1, X1 - 52, 470 + compose(T.send1 - 0.01).hgt / 2 - 46], [T.send2, X1 - 52, 834], [T.tapZip, X0 + 240, zip2.y + 52 - scEnd]]);
       }
-      bars1.forEach((b) => b.setAttribute('data-w', b.getAttribute('width')));
+      [...bars1, ...bars2].forEach((b) => b.setAttribute('data-w', b.getAttribute('width')));
       const thumb = makeThumb(g, 0.9, [210, 470]);
       chat = { F, update };
       // for check(): how much of each ask the composer shows just before its send, and the composer's top then (under the top bar at 78)
-      CHECK.typedBefore = () => [[T.send1 - 0.02, typed1, w1], [T.send3 - 0.02, typed3, w3]].map(([at, typed, w]) => { render(at); return { shown: typed.g.textContent.length, of: w.total, top: Math.round(compose(at).topY) }; });
+      CHECK.typedBefore = () => [[T.send1 - 0.02, typed1, w1], [T.send2 - 0.02, typed2, w2]].map(([at, typed, w]) => { render(at); return { shown: typed.g.textContent.length, of: w.total, top: Math.round(compose(at).topY) }; });
     }
 
     // ---------------------------------------------------------------- the site on the phone (full frame)
@@ -1590,9 +1583,10 @@ function avatarSvg(av, label = true) {
     // ---------------------------------------------------------------- camera and layers
     // The room from "Let the class in" on: the wall, the class and the teacher; the mug and the sheets may leave the frame (owner).
     const ROOM = [850, 455, 1.06], SPLIT = [840, 425, 1.15];
+    // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
+    // ("Let the class in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
     const CAM = [
-      [T.cut, [LAPTOP.x + LAPTOP.w / 2, LAPTOP.y + LAPTOP.w * 600 / 1920, 1484 / LAPTOP.w]],
-      [26.7, [431, 537, 2.3]], [28.1, [431, 537, 2.3]], [29.5, ROOM],
+      [T.cut, [431, 537, 2.3]], [28.1, [431, 537, 2.3]], [29.5, ROOM],
       [44.3, ROOM], [45.6, SPLIT], [49.6, SPLIT], [50.3, ROOM],
       [54.6, ROOM], [55.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
     ];
@@ -1918,7 +1912,7 @@ function avatarSvg(av, label = true) {
       const api = {
         render: (x) => { pause(); started = true; t = x; paint(); }, duration: DUR, poster: POSTER, lang,
         check: () => ({
-          lang, draft: CONTENT[lang].draft, ask1: CHECK.ask1, ask3: CHECK.ask3, overflow: CHECK.overflow.slice(), kids: KIDS.length, avatars: AVATARS.length,
+          lang, draft: CONTENT[lang].draft, ask1: CHECK.ask1, ask2: CHECK.ask2, overflow: CHECK.overflow.slice(), kids: KIDS.length, avatars: AVATARS.length,
           typedBefore: (() => { const r = CHECK.typedBefore(); paint(); return r; })(),
           // each fitted text and how far it is shrunk to stay in its box (1: not at all)
           fits: [...svg.querySelectorAll('[data-fit]')].map((el) => ({ text: el.textContent, k: Math.min(1, +el.getAttribute('data-fit') / (el.getComputedTextLength() || 1)) })).filter((x) => x.text && x.k < 1),
