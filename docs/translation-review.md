@@ -21,6 +21,41 @@ A working note: delete it once applied. Mark rows you reject or change; unmarked
 
 | D10 | New key `again` (the film's end button), drafted by the implementer | en "Play again"; de "Nochmals abspielen"; fr "Revoir"; it "Rivedi" | — |
 
+## The worked example (`/example`)
+
+Drafts, not in the tables above: the page's words (`src/client/example-text.ts`), the conversation
+pictures' words (`docs/example/text.py`, four languages side by side; rebuild with
+`py -I docs/example/build.py`), the quizzes (`docs/example/quiz_zips.py`). Where they overlap with
+the film they are the film's words, so D1–D10 apply to both; where the example would word a shared
+piece differently, the proposal is under "The film's words" below. The translations render what each
+moment means in the language, not the English words. Open for you:
+
+- E1, de, the AI's question about the quiz's language: in English it rests on "the sheets are German,
+  but you wrote in English". With German sheets and a German ask there is no conflict, so the German AI
+  confirms instead: "In welcher Sprache soll das Quiz sein? Auf Deutsch, wie die Blätter?" / "Deutsch".
+  fr and it keep the premise (German sheets, a French or Italian ask). Is that the moment you want?
+- E2, the question card's labels are each language's app's: en Q/A (your call), de F/A (as in the
+  screenshot), fr Q/R, it D/R. fr and it are inferred from Question/Réponse and Domanda/Risposta, not
+  seen in the app. The app's other lines: de as the screenshot ("Hat einen Befehl ausgeführt …"); fr
+  and it as participles ("Commande exécutée, fichiers partagés", "Comando eseguito, file condivisi"),
+  likewise inferred.
+- E3, regional choices: "4th grade" fr CM1 (Romandie would write 6H; follows D5's CM2 on the landing),
+  de 4. Klasse, it quarta elementare. Students: de "die Kinder" (as the landing's capTap, also on the
+  page's runNote), fr "les élèves", it "gli alunni". de "Beamer", "Lektion", "Handy", "Lehrervorschau",
+  "Häuschenpapier"; fr "leçon" (Romand sense), "importer" for upload (as the landing; the page had
+  "téléversé"); « » in de, fr, it. fr ranges "questions 1 à 3", "12 et 13"; de and it keep "1–3".
+- E4, words of the sheets: de quotes the sheet's own heading («Zeichne den Abschnitt auf
+  Häuschenpapier») and its "in 20 000er-Schritten"; fr and it translate it. "Section" is de Abschnitt
+  (the sheet's), fr/it "segment(o)"; "tick" de Strich (the sheet's), fr trait, it tacca.
+- E5, depends on the landing: the page says "Arbeitsblätter" (the German proposal for capSheet); if you
+  keep "Aufgabenblätter" there, the page and the quiz chat follow. it h1 "passo per passo" matches the
+  landing's current `see`; if you take "passo dopo passo" there, change the page too.
+- The AI says du / tu to the teacher in de, fr, it (as the film's asks); the page itself says du /
+  vous / tu (the landing's register).
+
+The quizzes (`quiz_zips.py`) are unchanged: questions 7–13 read as the sheets' own instructions
+in de and as the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
+
 Also flagged, no decision needed: film-text.md §2 note is stale (Opus/3 Nov → Sonnet/4 Nov); fixed with the docs pass.
 
 ## German (you review)
@@ -139,5 +174,20 @@ Asks: `ask` "circa 10 domande" → "una decina di domande" (med); optionally "co
 | q1, rows 1–3 | Welche Zahl zeigt der Pfeil? | Quel nombre la flèche montre-t-elle ? | Quale numero indica la freccia? |
 | row 4 | Auf welchem Zahlenstrahl zeigt der Pfeil auf 654 000? | Quelle droite graduée a une flèche à 654 000 ? | Su quale retta numerica la freccia indica 654 000? |
 | cardCaption | Pfeil ablesen (Fragen 1–3) | Lecture d'une flèche (questions 1 à 3) | Leggere la freccia (domande 1–3) |
+
+From the example's translator, for keys the film's `CONTENT` now has (the example's chat and quizzes
+quote them, so whatever you decide applies to film, pictures and zips together; for row 4, the quizzes'
+questions 5 and 6 follow its pattern in `quiz_zips.py`):
+
+| key | current | proposed | why |
+|---|---|---|---|
+| ask2 de | …bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen. | …bei denen die Zahl gegeben ist und sie den Zahlenstrahl auswählen müssen, auf dem sie markiert ist. | "passenden markierten" stacks two adjectives; "matching marked" means "the one it is marked on" |
+| ask2 fr | …choisir la droite graduée marquée qui correspond. | …choisir la droite graduée sur laquelle il est marqué. | "droite marquée" isn't said |
+| ask2 it | Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente. | Per favore aggiungi qualche domanda in cui è dato il numero e devono scegliere la retta numerica su cui è segnato. | same |
+| q1 fr | Quel nombre la flèche montre-t-elle ? | Quel nombre la flèche indique-t-elle ? | an arrow "indique" |
+| q4 fr | Quelle droite graduée a une flèche à 654 000 ? | Sur quelle droite graduée la flèche indique-t-elle 654 000 ? | as de/it's row-4 proposals above |
+
+The rows above for ask1, ask3, status3 and cardCaption name keys the film's `CONTENT` no longer has
+(it now has ask2 and status2); ask3, status3 and the captions are the example pictures' alone, in `text.py`.
 
 Choices 646 000 · 645 000 · 644 000 · 647 000 unchanged in all (each language's example quiz uses a space as thousands separator); right answer unchanged. Titles and q1 match each language's own example quiz wording. File names sheet-photo-1/2.jpg stay.

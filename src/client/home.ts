@@ -11,7 +11,9 @@ import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, store, tabLobby, tabRole, t
 import { prepareImages, uploadQuiz } from "./images.ts";
 import { api, readApi } from "./net.ts";
 import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
-import { LANG_KEY, LANGS, TEXT, chosenLang, type Lang, type Text } from "./landing-text.ts";
+import { LANG_KEY, TEXT, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
+import { EXAMPLE_ZIP } from "./example-text.ts";
+import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, recordUploadDay, uploadDays } from "./history.ts";
 import { filmLanguage } from "./film-poster.ts";
 
@@ -26,43 +28,9 @@ const DEMO = "classyquiz.pages.dev";
 let lang: Lang = chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
 let t: Text = TEXT[lang];
 
-// The code box: the students' class code, and the teacher code, the
-// class code and two digits (docs/design/teacher-devices.md, "One entry: the teacher code"). It routes by length
-// and never submits by itself, so typing seven isn't cut off at five.
-
-const join = $("#join") as HTMLFormElement;
+codeBox();
 const codeInput = $("#code") as HTMLInputElement;
-join.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const code = codeInput.value.replace(/\D/g, "");
-  if (JOIN_CODE.test(code) || TEACHER_CODE.test(code)) location.href = `/play#${code}`;
-  else {
-    codeInput.focus();
-    codeInput.select();
-  }
-});
-codeInput.addEventListener("input", () => {
-  const code = codeInput.value.replace(/\D/g, "");
-  if (code !== codeInput.value) codeInput.value = code;
-});
-
-// The language switch, top right (docs/design/root-page.md, "Languages"): "EN ▾" over a
-// native select, which lists the four by their own names. Made here, not in
-// the HTML, so an AI's fetcher doesn't read four language names.
-
-const switchBox = document.createElement("label");
-switchBox.className = "lang";
-const switchShown = document.createElement("span");
-const select = document.createElement("select");
-select.innerHTML = LANGS.map((l) => `<option value="${l.id}" lang="${l.id}">${esc(l.name)}</option>`).join("");
-switchBox.append(switchShown, select);
-$("header.top .bar").append(switchBox);
-select.addEventListener("change", () => {
-  const next = LANGS.find((l) => l.id === select.value)?.id;
-  if (!next) return;
-  store.set(LANG_KEY, next);
-  apply(next);
-});
+const showLang = langSwitch((l) => apply(l));
 
 // Build a quiz: copy the address. The button is made here, not in the
 // HTML: an AI's fetcher converting the page to text would otherwise read the
@@ -181,10 +149,7 @@ function chooseAsk(i: number): void {
 function apply(l: Lang): void {
   lang = l;
   t = TEXT[l];
-  select.value = l;
-  switchShown.textContent = `${l.toUpperCase()} ▾`;
-  switchBox.title = t.language;
-  select.setAttribute("aria-label", t.language);
+  showLang(l, t.language);
   for (const el of document.querySelectorAll<HTMLElement>("[data-t]")) {
     const v = t[el.dataset.t as keyof Text];
     if (typeof v === "string") el.textContent = v;
@@ -414,14 +379,6 @@ function renderOwnCopy(): void {
   line.innerHTML = fullDays ? `${esc(t.ownCopy(fullDays))} <a href="/own-copy">${esc(t.how)}</a>` : "";
 }
 
-/** The example's quizzes, as /example's "Start the example quiz" names them (docs/design/example-page.md). */
-const EXAMPLE_ZIPS: Record<string, string> = {
-  de: "zahlenstrahl-quiz.zip",
-  en: "big-numbers-quiz.zip",
-  fr: "droite-graduee.zip",
-  it: "quiz-retta-numerica.zip",
-};
-
 /** The example goes up as a dropped .zip does, through fromFiles: one path, so it can't drift from a teacher's upload. */
 async function runExample(name: string): Promise<void> {
   out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
@@ -441,7 +398,9 @@ async function runExample(name: string): Promise<void> {
 apply(lang);
 void findOpen();
 void findFull();
-const example = EXAMPLE_ZIPS[new URLSearchParams(location.search).get("example") ?? ""];
+// /example's "Start the example quiz" (docs/design/example-page.md): the example's quiz in that language.
+const exampleLang = new URLSearchParams(location.search).get("example");
+const example = isLang(exampleLang) ? EXAMPLE_ZIP[exampleLang] : undefined;
 if (example) {
   // A reload or Back must not upload it again.
   history.replaceState(null, "", "/");

@@ -14,7 +14,9 @@ constraints and versions: docs/backlog.md.
   isn't known), user-flow.md (the screens and their words), brand/ (the
   mark: its guidelines, SVG masters and the scripts that draw them), film/
   (the root page's film: its design, its words, and the source and scripts
-  that build it into src/public), and working notes.
+  that build it into src/public), example/ (the worked example's
+  conversation pictures and translated quizzes: the source and the scripts
+  that build them into src/public), and working notes.
   src/DEVELOPING.md is for whoever changes the code.
 - src/ — the site, in whatever layout its toolchain expects.
 - secrets/ — local deploy credentials, git-ignored except its README.

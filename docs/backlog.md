@@ -234,17 +234,14 @@ not deployed; item 1's film built, not deployed.
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
     `/example`, "The example, step by step" from the link under the landing's
-    film, in English. Open:
+    film, in the landing's four languages (item 12). Open:
     - The conversation and `.zip` are a real free Claude Sonnet run of
       2026-11-04, reviewed by the owner (two turns; the second inverts the
       sheet's no. 1, the number given and the picture to pick). The photographs
       are his own since 2026-11-05; the run was made on the stand-ins before
-      them. Open: a run of his own may replace this one; whether the quiz's growth past the asked ten and the
-      AI's unrequested screen mock-up are worth leaving in the picture.
-    - The conversation picture is one light screenshot, shown to light and dark
-      devices alike. Proper light and dark variants, chosen by the device's
-      mode as the mock-up's were (`<picture>`, and the links to the whole
-      picture), want the run reproduced or re-rendered in both themes.
+      them. The picture shows all three turns, the AI's screen mock-up
+      included (owner). Open: a run of his own may replace this one; whether
+      the quiz's growth past the asked ten is worth leaving in the picture.
     - Whether the check screen holds a socket or poll while a visitor only
       looks at the example: each "Start the example quiz" is a real upload.
 11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not
@@ -266,9 +263,14 @@ not deployed; item 1's film built, not deployed.
       can enlarge a picture" and "a smaller picture is enlarged on the wall"
       allowed the reading; they now name the question's picture and say
       "scaled up". Z, click and students aren't on the page.
-12. **The worked example in the landing's other three languages.** The page,
-    its conversation picture and its `.zip` are English; the four `.zip`s of
-    the earlier runs exist, and the landing passes `?lang=`.
+12. **The worked example in the landing's other three languages** — built,
+    `design/example-page.md`: the page, the conversation picture (light and
+    dark) and the quiz in de, fr and it, the English run translated so the
+    example is the same in each, as the page says. Open: the translations are
+    drafts pending the owner's review (`docs/example/text.py`, the page's
+    words in `client/example-text.ts`, the quizzes in
+    `docs/example/quiz_zips.py`); the choices for the owner are
+    `docs/translation-review.md` E1–E5.
 13. **The example's upload as a special case**, e.g. not booked against the
     free site's caps, or kept ready instead of uploaded per click. Only with a
     test set that runs the same `.zip` through the special path and the normal

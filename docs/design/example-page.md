@@ -26,22 +26,36 @@ v4 item 10).
 
 ## How the site meets it
 
-`src/public/example.html`, static and in English; the four steps follow the
+`src/public/example.html`, static and in English for an AI that reads it;
+`client/example.ts` puts it in the visitor's language, one of the landing's
+four (`?lang=` from the landing's link, otherwise the device's choice, as on
+the landing; words in `client/example-text.ts`). The header is the landing's,
+code box and language switch (`client/top.ts`). The four steps follow the
 path the film shows.
 
 1. **The exercise sheets**: the two photographs, each as a download, and the
    sheets as a PDF, so a teacher can try the photographs or the clean file on
    their own AI.
 2. **The conversation**, as a picture, not text: an AI reading the page doesn't
-   read it, and the layout is the AI app's own (a screenshot of a free Claude
-   Sonnet session of 4 Nov 2026, light only). The preview shows its top; the
-   link opens the whole picture. The line above it names model, plan and date.
-3. **The quiz**: the `.zip` the AI handed over.
-4. **Run it**: "Start the example quiz" opens `/?example=en`; the landing fetches
+   read it, and the layout is the AI app's own. All three turns of the free
+   Claude Sonnet session of 4 Nov 2026, rendered from its screenshot in the
+   page's language and the device's light or dark mode (`<picture>`; the link
+   to the whole picture follows the mode). How they are made:
+   `docs/example/README.md`. The preview shows its top. The line above it
+   names model, plan and date.
+3. **The quiz**: the `.zip` the AI handed over, in the page's language.
+4. **Run it**: "Start the example quiz" opens `/?example=<lang>`; the landing fetches
    the static `.zip` and sends it through the same function as a dropped file
    (`home.ts`, `runExample`), so the example can't run differently from a
    teacher's upload. It is a real upload: booked and counted like any, and the
    teacher lands on the check screen.
+
+Under the steps, a note: the example was tested in all four languages and
+works in each; so that it is the same example in each, the German, French and
+Italian pages show the English run translated. One quiz in every language,
+the one the film shows (its `CONTENT` in `docs/film/build/film.js`): the
+conversation's words and the `.zip`s agree with the film's where they
+overlap (`docs/example/`).
 
 The files are in `src/public/examples/` (not `example/`, which would collide
 with the page's address). The photographs are the owner's
@@ -56,4 +70,5 @@ camera's metadata.
   second turn. The owner may still replace them with a run of his own.
 - Whether a teacher on a phone reads the conversation: the preview is the
   picture scaled to the screen; the whole picture opens at full size.
-- The page in the landing's other three languages (backlog).
+- The German, French and Italian words, pictures and quizzes are drafts
+  pending the owner's review (backlog item 12).

@@ -34,7 +34,7 @@ Source: `src/public/index.html` `#bubble` (EN) and `src/client/landing-text.ts` 
 
 ## 2. The chat (shot 3)
 
-Source: `src/public/examples/conversation.webp` (681x3784), read in crops; also described on `src/public/example.html` ("Free Claude (Sonnet), 4 November 2026"); the landing's Build step names the same ("Free Claude Sonnet wrote the example above, 4 Nov 2026", `landing-text.ts` `step1detail`). The film names no AI: the app's tile reads **AI** (DE **KI**, FR and IT **IA**; `CONTENT.ai` in `film.js`), and its name, under the tile on the phone's home screen and in the chat's header, is the AI chapter's, `landing-text.ts` `capAi`: *Your AI / Deine KI / Votre IA / La tua IA*.
+Source: `docs/example/conversation-original.webp` (681x3784, the run's screenshot), read in crops; also described on `src/public/example.html` ("Free Claude (Sonnet), 4 November 2026"); the landing's Build step names the same ("Free Claude Sonnet wrote the example above, 4 Nov 2026", `landing-text.ts` `step1detail`). The film names no AI: the app's tile reads **AI** (DE **KI**, FR and IT **IA**; `CONTENT.ai` in `film.js`), and its name, under the tile on the phone's home screen and in the chat's header, is the AI chapter's, `landing-text.ts` `capAi`: *Your AI / Deine KI / Votre IA / La tua IA*.
 
 Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain on white, left. Status lines are small grey ("thinking" lines with a ▸). The `.zip` is a grey rounded chip with an archive icon: "Big numbers quiz" over small "ZIP".
 
@@ -62,7 +62,7 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
   4. Caption "Finding the section (questions 12–13)". Question "On which section does 45 200 lie?". Picture: four stacked lines labelled A (4000–5000), B (45 000–46 000), C (405 000–405 100), D (450 000–451 000). Buttons: ▲ A · ● B · ■ C · ◆ D.
 - Then 1 paragraph (2 lines), **4 bullets** (1, 2, 1, 2 lines, bold lead-ins), 1 paragraph (3 lines), a row of small reaction icons. No .zip chip here.
 
-**Where the other languages are:** not as chat pictures. Only the English picture exists. The four .zips of the earlier runs exist in `src/public/examples/` (`big-numbers-quiz.zip` EN, `zahlenstrahl-quiz.zip` DE, `droite-graduee.zip` FR, `quiz-retta-numerica.zip` IT); `docs/backlog.md` items 9 and 12 mention "real two-turn conversations in four languages" / "the four .zips of the earlier runs exist", but no conversation text in DE/FR/IT is in the repo. The film's German, French and Italian chat and quiz words are therefore translations of the English (`CONTENT` in `docs/film/build/film.js`), drafts pending the owner's review.
+**Where the other languages are:** the same run, translated: the pictures `src/public/examples/conversation-<lang>-<light|dark>.webp` and their words in `docs/example/text.py`, which `docs/example/build.py` holds to the film's `CONTENT` in `docs/film/build/film.js` where they overlap; the translated quizzes `grosse-zahlen-quiz.zip`, `quiz-grands-nombres.zip`, `quiz-grandi-numeri.zip` (`docs/example/quiz_zips.py`). All drafts pending the owner's review.
 
 ## 3. The site's screens
 
@@ -133,7 +133,7 @@ Top bar when playing: avatar left, "n / total" centre, "★ score" right.
 Quiz title in the top bar. Podium with the top entries: avatar, place "1.", "★ 9 / 13" (score / questions; with speed just the score). Beside it the class result: a large percentage ("64%"), "✓ 83 / 130" (right / given), and one little bar per question. The **final** ranking: podium 1–3 as steps with the numbers on the blocks, everyone else in front of it, all jumping, trophy in the top bar, "Exit" in the steering bar ("ends the quiz for everyone"). No names anywhere, only avatars.
 
 ## 4. Sources in short
-- Chat: `src/public/examples/conversation.webp`; `big-numbers-quiz.zip` `quiz.txt`.
+- Chat: `docs/example/conversation-original.webp`; `big-numbers-quiz.zip` `quiz.txt`.
 - Landing words, asks, Run box in 4 languages: `src/client/landing-text.ts`, `src/public/index.html`.
 - Check, join, wall, ranking: `src/client/screen.ts`, `final.ts`, `manage.ts`, `teach.ts`, `steps.ts`.
 - Second device screen, tablet states: `src/client/play.ts`.

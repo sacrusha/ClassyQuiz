@@ -95,3 +95,25 @@ h1, h2, h3 { font-family: var(--font-brand); font-weight: 700; }
 .brand svg, .brand img { display: block; height: 32px; width: auto; flex: none; }
 .site-head { border-bottom: 1px solid var(--rule); }
 .site-head .in { max-width: var(--page-w, 42rem); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; min-height: 58px; }
+
+/* The header the root page and /example share (client/top.ts): the mark, the code box, the language switch. */
+header.top { border-bottom: 1px solid var(--rule); }
+header.top .bar { max-width: var(--page-w, 1120px); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+header.top .logo { flex: 1; margin: 0; min-width: 0; }
+header.top .join { display: flex; align-items: center; gap: 6px; }
+header.top .join label { color: var(--muted); font-size: .95rem; }
+header.top .join input { width: 8.2em; min-width: 0; font: 700 1.25rem var(--font-brand); font-variant-numeric: tabular-nums; letter-spacing: .15em; text-align: center; padding: 6px; border: 2px solid var(--rule); border-radius: 10px; background: var(--bg); color: var(--fg); }
+header.top .join button { height: 42px; width: 46px; border: 0; border-radius: 10px; background: var(--control); color: var(--control-ink); font-size: 1.1rem; cursor: pointer; }
+header.top .lang { position: relative; display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; font-weight: 600; font-size: .95rem; color: var(--muted); white-space: nowrap; }
+header.top .lang select { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; font-size: 16px; }
+header.top .lang:focus-within { outline: 2px solid var(--accent); }
+@media (max-width: 600px) {
+  header.top .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  header.top .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
+}
+/* A phone held upright: the code box and the language need the row, so the fox stands alone, still named for a screen reader (its aria-label). */
+header.top .symbol { display: none; }
+@media (max-width: 440px) {
+  header.top .lockup { display: none; }
+  header.top .symbol { display: block; }
+}
