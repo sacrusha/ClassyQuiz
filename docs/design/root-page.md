@@ -243,7 +243,8 @@ immediate use. About and the
 rest of the site stay English: the AI reads English, and the lobby, wall, Remote
 and tablets wait for the backlog's Localization. The static HTML is English. The
 visitor's choice is made with a switch top right, kept on the device
-(`cq.lang`); otherwise the browser's first language among the four; otherwise
+(`cq.lang`); the header with the code box and the switch is shared with
+`/example` (`client/top.ts`), so the choice holds on both; otherwise the browser's first language among the four; otherwise
 English. The words are in `client/landing-text.ts`, one table per language, Run's
 messages included. The quiz's own problems, the archive's messages and the text
 copied for the AI stay English. Register: German "du", French "vous", Italian

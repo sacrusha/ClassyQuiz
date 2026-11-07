@@ -11,7 +11,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
-  /* The worked example (docs/design/example-page.md): the steps of the landing's strip, each with what a teacher needs to repeat it. */
+  /* The worked example (docs/design/example-page.md): the steps of the landing's film, each with what a teacher needs to repeat it. */
+  header.top { --page-w: 42rem; }
   .ex { max-width: 42rem; margin: 0 auto; padding: 12px 16px 64px; line-height: var(--leading-prose); }
   .ex h1 { font-size: var(--h1); line-height: 1.2; margin: .6rem 0 .3rem; }
   .ex .lede { color: var(--muted); margin: 0 0 1.4rem; }
@@ -27,46 +28,52 @@
   .ex .files { display: flex; flex-wrap: wrap; gap: 8px; margin: .6rem 0 0; padding: 0; list-style: none; }
   .ex .files a { display: inline-block; border: 1px solid var(--rule); border-radius: 10px; padding: 6px 12px; text-decoration: none; font-weight: 600; background: var(--card); }
   .ex .files a:hover { border-color: var(--accent); }
-  /* The conversation is a picture, not text (an AI reading the page shouldn't take a teacher's chat as page text); the preview shows its top. */
+  /* The conversation is a picture, not text (an AI reading the page shouldn't take a teacher's chat as page text); the preview shows its top, in the device's mode. */
   .ex .convo { display: block; position: relative; max-height: 26rem; overflow: hidden; border: 1px solid var(--rule); border-radius: 12px; margin: .6rem 0 .4rem; }
   .ex .convo img { display: block; width: 100%; height: auto; }
   .ex .convo::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5rem; background: linear-gradient(transparent, var(--bg)); }
   .ex .btn.go { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 1.4em; text-decoration: none; font-weight: 700; margin: .5rem 0 .2rem; }
+  .ex .translated { border-top: 1px solid var(--rule); padding-top: 1rem; }
 </style>
 </head>
 <body class="follows-dark">
-<header class="site-head"><div class="in"><a class="brand" href="/"><!--#brand classyquiz-horizontal-32-inline.svg--></a></div></header>
+<header class="top"><div class="bar">
+  <p class="logo"><a class="brand" href="/" aria-label="classyQuiz"><span class="lockup"><!--#brand classyquiz-horizontal-32-inline.svg--></span><span class="symbol"><!--#brand classyquiz-symbol-32-inline.svg--></span></a></p>
+  <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join">&#9654;</button></form>
+</div></header>
 <div class="ex">
-<h1>The example, step by step</h1>
-<p class="lede">How the example quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.</p>
+<h1 data-t="h1">The example, step by step</h1>
+<p class="lede" data-t="lede">How the example quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.</p>
 
 <ol class="steps">
-  <li><h2>The exercise sheets</h2>
-    <p>Two maths sheets on number lines, in German, photographed with a phone.</p>
+  <li><h2 data-t="sheetsH">The exercise sheets</h2>
+    <p data-t="sheetsP">Two maths sheets on number lines, in German, photographed with a phone.</p>
     <div class="pics">
-      <a href="/examples/sheet-photo-1.jpg"><img src="/examples/sheet-photo-1.jpg" alt="Photo of page 1" width="1200" height="1544"></a>
-      <a href="/examples/sheet-photo-2.jpg"><img src="/examples/sheet-photo-2.jpg" alt="Photo of page 2" width="1200" height="1567"></a>
+      <a href="/examples/sheet-photo-1.jpg"><img src="/examples/sheet-photo-1.jpg" alt="Photo of page 1" data-t-alt="photo1" width="1200" height="1544"></a>
+      <a href="/examples/sheet-photo-2.jpg"><img src="/examples/sheet-photo-2.jpg" alt="Photo of page 2" data-t-alt="photo2" width="1200" height="1567"></a>
     </div>
     <ul class="files">
-      <li><a href="/examples/sheet-photo-1.jpg" download>Photo, page 1 (.jpg)</a></li>
-      <li><a href="/examples/sheet-photo-2.jpg" download>Photo, page 2 (.jpg)</a></li>
-      <li><a href="/examples/sheet.pdf" download>The sheets (.pdf)</a></li>
+      <li><a href="/examples/sheet-photo-1.jpg" download data-t="dl1">Photo, page 1 (.jpg)</a></li>
+      <li><a href="/examples/sheet-photo-2.jpg" download data-t="dl2">Photo, page 2 (.jpg)</a></li>
+      <li><a href="/examples/sheet.pdf" download data-t="dlPdf">The sheets (.pdf)</a></li>
     </ul></li>
 
-  <li><h2>The conversation</h2>
-    <p>The photos and two asks to the AI. Its first answer was a quiz; the second ask changed it. Free Claude (Sonnet), 4 November 2026; the conversation as it happened.</p>
-    <a class="convo" href="/examples/conversation.webp"><img src="/examples/conversation.webp" alt="The conversation, as a picture" width="681" height="3784"></a>
-    <p><a href="/examples/conversation.webp">Read the whole conversation &rsaquo;</a></p></li>
+  <li><h2 data-t="convoH">The conversation</h2>
+    <p data-t="convoP">The photos and three asks to the AI. Its first answer was a quiz; the second ask changed it; the third asked for a preview of the screens. Free Claude (Sonnet), 4 November 2026.</p>
+    <a class="convo" href="/examples/conversation-en-light.webp" data-convo><picture><source id="convo-dark" media="(prefers-color-scheme: dark)" srcset="/examples/conversation-en-dark.webp"><img id="convo-img" src="/examples/conversation-en-light.webp" alt="The conversation, as a picture" data-t-alt="convoAlt" width="681" height="3675"></picture></a>
+    <p><a href="/examples/conversation-en-light.webp" data-convo data-t="readAll">Read the whole conversation &rsaquo;</a></p></li>
 
-  <li><h2>The quiz</h2>
-    <p>What the AI handed over: one <code>.zip</code> with the quiz and its pictures.</p>
-    <ul class="files"><li><a href="/examples/big-numbers-quiz.zip" download>big-numbers-quiz.zip</a></li></ul></li>
+  <li><h2 data-t="quizH">The quiz</h2>
+    <p data-t="quizP">What the AI handed over: one .zip with the quiz and its pictures.</p>
+    <ul class="files"><li><a id="zip" href="/examples/big-numbers-quiz.zip" download>big-numbers-quiz.zip</a></li></ul></li>
 
-  <li><h2>Run it</h2>
-    <p>Start the example as if you had uploaded it: you check its questions, then let the class in with a code.</p>
-    <a class="btn primary go" href="/?example=en">Start the example quiz</a>
-    <p class="note">It runs on this site like any quiz, on the projector and on your students' devices.</p></li>
+  <li><h2 data-t="runH">Run it</h2>
+    <p data-t="runP">Start the example as if you had uploaded it: you check its questions, then let the class in with a code.</p>
+    <a class="btn primary go" id="start" href="/?example=en" data-t="start">Start the example quiz</a>
+    <p class="note" data-t="runNote">It runs on this site like any quiz, on the projector and on your students' devices.</p></li>
 </ol>
+<p class="note translated" data-t="translated">The example was tested in all four of the site's languages and works in each. So that it is the same example in each, the German, French and Italian pages show this run, made in English, translated.</p>
 </div>
+<script src="/js/example.js" defer></script>
 </body>
 </html>

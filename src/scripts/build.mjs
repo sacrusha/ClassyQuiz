@@ -13,7 +13,7 @@ import { dirname, join } from "node:path";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 const watch = process.argv.includes("--watch");
-const pages = ["home", "teach", "screen", "play", "check"];
+const pages = ["home", "example", "teach", "screen", "play", "check"];
 
 // Security headers for every page; scripts are revalidated so a deploy shows
 // up on the next load. A font is kept a year: its file name carries the
