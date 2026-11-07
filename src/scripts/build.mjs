@@ -24,8 +24,12 @@ const pages = ["home", "example", "teach", "screen", "play", "check"];
 // page that builds HTML from it must not run as script. Scripts only from the
 // site's own files; pictures also as blob: (the projector fetches the quiz's
 // pictures into object URLs). Styles stay open (the pages set many inline),
-// and so do WebSocket addresses: matching wss: by 'self' is uneven on the
-// older browsers school devices run.
+// and so do WebSocket addresses, for one reason only: Safari before 16 (every
+// browser on an iOS 15 device) doesn't let 'self' match same-origin wss:
+// (WebKit bugs 201591, 235873), and the target schools have iPads stuck on
+// iOS 15. A static header can't target a version, so the rule is wider than
+// its reason: reassess it (design/hosting-and-limits.md, "Not known") when
+// iOS 15 stops mattering, and by November 2028 at the latest.
 const csp = [
   "default-src 'self'",
   "script-src 'self'",

@@ -227,8 +227,12 @@ them, and the README points self-hosters there.
   `<base>`, forms to the site, no framing; pictures also as `blob:` (the
   projector fetches pictures into object URLs).
   Styles stay open because the pages set many inline; WebSocket addresses stay
-  open (`ws: wss:`) because matching them by `'self'` is uneven on the older
-  browsers school devices run. It is the second layer behind escaping: quiz
+  open (`ws: wss:`) because Safari before 16 doesn't let `'self'` match a
+  same-origin `wss:` address (WebKit bugs 201591 and 235873, fixed in trunk
+  April 2022), and every browser on an iOS 15 device is WebKit. Devices that
+  can't leave iOS 15 stay in schools; without the rule they would fall to
+  long-polling. The Safari release carrying the fix is inferred from dates,
+  not tested. It is the second layer behind escaping: quiz
   text is the teacher's AI's and shows on every screen of the class, so a slip
   in a page that builds HTML from it must not run as script.
 
@@ -361,6 +365,14 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 
 ## Not known
 
+- Whether `ws: wss:` in the CSP still earns its place. It exists only for
+  iOS 15 and other Safari before 16 (see "Protecting the day's allowance"),
+  which the target schools' stock of old iPads keeps in use; a static header
+  can't target a version, so every browser gets the wider rule. Reassess when
+  the schools' iPads have moved past iOS 15, when the design target is no
+  longer a school, or by November 2028; then try `'self'` alone on a real
+  iOS 15 device through `/check`, and drop the two schemes if the WebSocket
+  connects or iOS 15 no longer matters.
 - Whether the AIs' user-triggered fetchers read a page on `pages.dev`, and
   whether the target schools' filters let `*.pages.dev` through. ChatGPT
   failed to read the site depending on how the address was capitalised, and
