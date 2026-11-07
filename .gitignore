@@ -5,3 +5,4 @@ src/dist/
 .wrangler/
 # agent worktrees
 .worktrees/
+__pycache__/
