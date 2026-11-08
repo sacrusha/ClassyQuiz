@@ -315,8 +315,10 @@ So, once for all entries:
   whoever answers.
 - **"Teacher", "class", "students", "lesson"** stay where the classroom is
   meant: the film (the example class's story, `docs/film/`), the sheets and
-  chess asks, the classroom's lines in the guidance, the network check's
-  "school", and the design docs, which speak of the example class.
+  chess asks, the classroom's lines in the guidance, and the design docs,
+  which speak of the example class. The network check (`/check`) says
+  "school or work" and "our network": it is reached from any room that
+  can't open.
 
 ### Run: the `.zip` and nothing else
 

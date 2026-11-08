@@ -70,7 +70,7 @@ function ws(): Promise<boolean> {
 
 function forIt(now: string): string {
   const host = location.host;
-  const text = `Please allow ${host} on the school network. It is a site for classroom quizzes: students answer on their own devices. It needs HTTPS and WebSocket connections to ${host}. ${now}`;
+  const text = `Please allow ${host} on our network. It is a quiz site: the players, a class or a group, answer on their own devices. It needs HTTPS and WebSocket connections to ${host}. ${now}`;
   return `<p>What to send IT:</p><p class="it">${esc(text)}</p>`;
 }
 
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     ? `<p class="err">${ICON.cross} This device can't reach the quiz's server: the network blocks it.</p>${forIt("At the moment this network blocks it.")}`
     : okWs
       ? `<p>${ICON.check} All good: the quiz runs live on this network.</p>`
-      : `<p>${ICON.check} The quiz runs on this network, a little slower: answers and screens follow a moment later, because live connections are blocked. That is fine for a lesson. To make it live:</p>${forIt("At the moment the WebSocket connections are blocked, and the quiz runs more slowly.")}`;
+      : `<p>${ICON.check} The quiz runs on this network, a little slower: answers and screens follow a moment later, because live connections are blocked. That is fine for playing. To make it live:</p>${forIt("At the moment the WebSocket connections are blocked, and the quiz runs more slowly.")}`;
 }
 
 // The part for a network that blocks the site entirely names this site's address.
