@@ -17,7 +17,14 @@ a quiz just because they know its class code.
 
 Before the class joins, the teacher also needs to see at once that this is the
 right quiz and to spot a wrong key. That is what the local check is for,
-before anything goes up (`local-check.md`), and the lobby's check after.
+before anything goes up (`local-check.md`); the lobby's check keeps the
+questions and their fixes at hand, folded.
+
+The same screens serve a host who runs a quiz for a crowd that isn't a class
+— a pub, a family, a training room, a video call (backlog v5 item 4,
+Quizmaster). Such a host needs the screens to read as theirs, and only the
+setup they have explained: some steer from a phone, many from the one screen
+everyone sees.
 
 ## Situation
 
@@ -62,6 +69,27 @@ What matters here:
   teacher's second device when pupils on the same Wi-Fi try codes.
 - **A big all-in-one touch screen as the wall** leaves the teacher unable to
   unshare; nothing is private there. Out of scope (owner).
+- **Three arrangements of screens** (`playing-redefined-notes.md`, 4): a
+  screen and a remote (the example class's: the laptop on the
+  projector, the teacher's phone); one screen that steers itself, by its bar,
+  the keyboard or a clicker (built: `question-flow.md`); and devices only,
+  the question on each player's device and no wall (not built for a room;
+  Peers builds the room with the question on each device, v5 items 3 and 6).
+  A video call that shares a window has a big screen: the shared window.
+  Only some hosts have a remote; a teacher at a mirrored laptop, a pub host
+  at the TV and a trainer in a call need none.
+- **Words that name the classroom's roles** (teacher, class, students,
+  "your teacher") tell a host who isn't a teacher that the screens are
+  someone else's. Owner: "host" is acceptable, not
+  great, in English (in software, participants connect to a host too), and
+  a role noun is avoided where a sentence does without one; translations
+  come later and will hit meaning, not the literal word. The site's own
+  screens are English (`local-check.md`, Situation). Which word stands where
+  "teacher" stands on the README, the landing and the guidance is v5 item
+  9's, decided once for all entries.
+- **A Quizmaster reaches the lobby having seen the questions:** the local
+  check shows them before the upload, with their fixes, which go up with
+  the quiz.
 
 ## How the site meets it
 
@@ -84,9 +112,10 @@ and Delete use it) and needs no digits: Resume goes in with the secret.
 `/teacher` is kept only for old links; on a device that did not upload, it
 asks for the teacher code.
 
-Where the code is shown: on the teacher's own screens at rest (the check, the
-steering tab), behind "A second device" on the join screen and in the wall's
-menu during the quiz, on the uploading device's Resume card, and in Leave's
+Where the code is shown: on the teacher's own screens at rest (the check
+once a remote is wanted, below; the steering tab), behind "A second device"
+on the join screen (likewise) and in the wall's menu in the lobby and during
+the quiz, on the uploading device's Resume card, and in Leave's
 confirmation. It is not in the steering bar in front of the class: when the
 Remote is away the bar says only that the Remote is gone and points to the
 menu, because the bar is in front of the class exactly when the Remote is
@@ -97,10 +126,13 @@ steering. Screens and wording: `user-flow.md §1`, `§3.2`, `§3.3`.
 
 The tab that uploads is the Projector and steers itself. It opens on the
 **check**, the teacher's private screen: title and number of questions (the
-count is what most often tells two versions of a quiz apart), the class code
-small (with a count once someone has joined), the teacher code in one
-sentence naming both needs, and the question list with its fixes. One tap,
-"Let the class in", leads to the **join screen** and lets the class in:
+count is what most often tells two versions of a quiz apart), the join code
+small (with a count once someone has joined), how the screens are arranged
+(below) with the teacher code where a remote is wanted, and the question
+list with its fixes, folded and closed on arrival: the local check showed
+it before the upload, and its fixes came up with the quiz, so a list open
+here would only make the teacher scroll past it a second time. One tap,
+"Let everyone in", leads to the **join screen** and lets the class in:
 teacher devices come in at any time, student devices only from that tap (or
 Start) on, and one that arrives earlier waits and joins by itself. Letting
 the class in is the moment the quiz starts to cost the day's allowance, so a
@@ -108,7 +140,8 @@ quiz uploaded only to look it over costs none (`hosting-and-limits.md`,
 "Running classes finish"). With a Remote, the Remote's lobby has the same
 button until it is tapped, and the wall shows the title without the code. The
 **join screen** is the class's: address, code, QR, avatars, Start. The class's screen
-ends at the fold; a quiet line goes back to the questions or opens the
+ends at the fold; a quiet line goes back to the check ("‹ Back": it holds
+more than the questions) or, where a remote is wanted, opens the
 second-device sheet.
 
 Which of the two a tab shows is kept per tab (`tabLobby` in `client/dom.ts`,
@@ -124,6 +157,62 @@ to tell it from. Labels: `user-flow.md §3.3`.
 The worked example's "Start the example quiz" (`example-page.md`) opens
 the local check; its "Open the lobby" is an upload like any, and leads to
 this same check, with codes and fixes.
+
+### How the screens are arranged
+
+The owner's sequence for a Quizmaster: the choice first (the local check's
+card, `local-check.md`), then how the screens are arranged, as a toggle with
+an explanation, and the remote's how-to only where it applies. The how-to
+needs the teacher code, which exists only once the quiz is up, so the toggle
+sits on the lobby's check, not on the local check's card.
+
+- **Two values:** *One screen* ("It shows the quiz and steers it: the
+  buttons under the quiz, the keyboard or a clicker.") and *Screen and
+  remote* ("One device shows the quiz, another steers it: a phone, say.").
+  Under Screen and remote, the how-to: "On the second device, open
+  classyquiz.pages.dev and type 63953 47", and on a laptop the second
+  screen's window. It names neither device's role, since either may be the
+  one in hand (the phone-first and the laptop-first lesson). Under both, a
+  video call: "the window you share is the screen everyone sees".
+- **It changes words, not what a device can do.** A second device still
+  comes in by the same teacher code, whatever the toggle says, and ⋯ →
+  A second device… has it on every steering wall; with One screen it is
+  only there, off the check and the join screen. A Remote that was there
+  and is gone brings the how-to back after "Remote gone.", whatever the
+  toggle says. The server isn't told: nothing it does depends on it.
+- **One screen unless this browser knows better.** One screen is what every
+  host has and what needs no setup (rule 4 of `user-flow.md` §1); the
+  remote is the optional second device in the owner's words. The choice is
+  kept per browser (`arrangement`, `client/dom.ts`), and a browser that has
+  had a Remote, on either side, is set to Screen and remote: the example
+  class's teacher who steers from the phone makes the choice once, or not
+  at all. Plausible assumption: a laptop or phone is used the same way
+  lesson after lesson; on a shared school laptop the next teacher at worst
+  sees the how-to they may not need.
+- **Devices only is not offered.** For a Quizmaster it would be a host who
+  steers with nobody watching a common screen: a call shares a window, a
+  table of friends is Peers, and a host without any wall can already be the
+  one screen that steers and read the questions aloud (`user-flow.md` §4,
+  "Phone only"). What it would take: the room with the question on each
+  device that Peers builds, steered by this site's Remote, with the join
+  code on the host's device; cheap once that room exists, if a host turns
+  out to want it.
+
+### Words for any crowd
+
+From the check on, the screens' words name no role where a sentence does
+without one, so they read as a class's and as a pub's: "Let everyone in",
+"Join code", "Joining opens in a moment.", "Ask whoever runs it.",
+"everyone watches this screen", "everyone reads the question", "The last
+two digits don't match this quiz." The example class is still the design
+target: a child who reads slowly or no English shows the tablet to the
+teacher, as before. "Projector" and "Remote" stay, the roles' names, which
+the owner uses for any host ("use one as remote the other as a
+projector"). These docs keep "teacher", "class" and "teacher code": they
+speak of the example class. The words before the check (the root page, its
+resume card's "Class code", the guidance, the README) and the `/check` page
+for IT ("a site for classroom quizzes") are v5 item 9's. Screens and words:
+`user-flow.md` §3.2–3.5.
 
 ### A second device: one question, only when needed
 
@@ -219,6 +308,14 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
 - Whether teachers read "63953 47" as theirs and "63953" as the class's.
 - Whether the words (Show the quiz here, Steer it from here, A second device,
   Swap) are the ones teachers reach for.
+- Whether hosts read the toggle as a question about their setup, and
+  whether One screen as the first default costs the example class's teacher
+  the remote's how-to they came for (it is one tap, then remembered).
+- Whether a teacher or a host misses the questions open on the lobby's
+  check; whether "‹ Back" says where it leads.
+- Whether "Join code", "Let everyone in" and "Ask whoever runs it" read
+  naturally to a teacher, a child's helper and a pub host; no one outside
+  the project has read them.
 - Whether "another device via the menu" is read as meant on a wall.
 - How a phone's browser behaves while casting by Miracast (sleeps, drops the
   page).

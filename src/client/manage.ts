@@ -268,12 +268,12 @@ export class Steer {
         await send({ op: "zoom", value: !v.zoom, at });
         return true;
       case "remove":
-        if (confirm("Remove this avatar? Its answers stop counting. For a double, or a device that isn't from this class.")) {
+        if (confirm("Remove this avatar? Its answers stop counting. For a double, or a device that doesn't belong here.")) {
           await send({ op: "remove", player: el.dataset.player! });
         }
         return true;
       case "delete":
-        if (confirm(`Delete “${v.title || "this quiz"}”? The class can't join it any more.`)) await send({ op: "endInstance" });
+        if (confirm(`Delete “${v.title || "this quiz"}”? Nobody can join it any more.`)) await send({ op: "endInstance" });
         return true;
       default:
         return false;
@@ -349,7 +349,7 @@ export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuIt
   const items: MenuItem[] = [];
   if (v.phase === "question") {
     items.push({ label: "Skip this question", run: () => open("skip-current") });
-    items.push({ label: onWall ? "Change the solution – the class sees it" : "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
+    items.push({ label: onWall ? "Change the solution – everyone sees it" : "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
   }
   if (v.phase === "reveal") items.push({ label: "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
   if (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") items.push({ label: `${ICON.trophy} End the quiz: final ranking`, run: () => open("finish") });
@@ -372,10 +372,11 @@ export function toast(msg: string, ms = 4000): void {
 
 /** "classyquiz.pages.dev · 63953"; on a phone-sized wall the address gives way to the code (app.css). */
 /**
- * Before the class is let in, on a day the free site is nearly or quite full:
- * what that means for this class, and the way to more quizzes
+ * Before the players are let in, on a day the free site is nearly or quite
+ * full: what that means for this quiz, and the way to more quizzes
  * (docs/design/hosting-and-limits.md, "Running classes finish"). It stays
- * while it holds; the page opens beside the quiz.
+ * while it holds; the page opens beside the quiz. The words are
+ * classesFullMessage's (shared/limits.ts), the refusal's.
  */
 export function roomNotice(v: TeacherView): string {
   const room = v.room;
@@ -383,8 +384,8 @@ export function roomNotice(v: TeacherView): string {
   const at = quotaResetAt();
   const says =
     room === 0
-      ? `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
-      : `The free site is nearly full today: room for ${room === 1 ? "one more class" : `about ${room} more classes`}.`;
+      ? `The free site can't take more players today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
+      : `The free site is nearly full today: room for ${room === 1 ? "one more group" : `about ${room} more groups`}.`;
   return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">More quizzes: a site of your own or your school's ›</a></p>`;
 }
 

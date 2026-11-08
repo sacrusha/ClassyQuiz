@@ -149,6 +149,32 @@ export const tabLobby = {
   },
 };
 
+/**
+ * How the screens are arranged, as the single tab's check asks it
+ * (docs/design/teacher-devices.md, "How the screens are arranged"): one
+ * screen that shows and steers, or a screen and a remote. It changes only
+ * which how-to the check shows; every device still comes in by the same
+ * code. Per browser, not per quiz: a host who steers from the phone does so
+ * each time. Without storage it is one screen.
+ */
+export type Arrangement = "one" | "remote";
+export const arrangement = {
+  get(): Arrangement {
+    try {
+      return localStorage.getItem("cq.screens") === "remote" ? "remote" : "one";
+    } catch {
+      return "one";
+    }
+  },
+  set(a: Arrangement): void {
+    try {
+      localStorage.setItem("cq.screens", a);
+    } catch {
+      /* the choice holds on this page until it reloads */
+    }
+  },
+};
+
 export function rolePage(instance: string, role: "screen" | "remote"): string {
   return `/${role === "screen" ? "screen" : "teach"}?q=${instance}`;
 }

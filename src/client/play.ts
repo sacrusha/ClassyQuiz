@@ -64,7 +64,7 @@ let unreachedTimer: number | undefined;
 // what is wrong. Gone once the line is back.
 
 const UNREACHED_MS = 15_000;
-const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell your teacher.");
+const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell whoever runs it.");
 const bannerWords = document.createElement("span");
 bannerWords.hidden = true;
 bannerWords.textContent = unreachedText();
@@ -106,7 +106,7 @@ let dressSpent = false;
 
 async function start(): Promise<void> {
   if (oldAddress && !teacher) {
-    showTeacherForm(JOIN_CODE.test(code) ? "This quiz now takes the teacher code." : "");
+    showTeacherForm(JOIN_CODE.test(code) ? "This quiz now takes its code and two more digits." : "");
     return;
   }
   if (!JOIN_CODE.test(code)) {
@@ -330,13 +330,13 @@ function showNoQuiz(): void {
  */
 function showTeacherForm(note: string): void {
   document.body.classList.add("follows-dark");
-  document.title = "classyQuiz · teacher";
+  document.title = "classyQuiz · show or steer";
   main.innerHTML = `${siteHead()}<div class="center teacher-entry">
     <h1>Show or steer a quiz from here</h1>
     ${note ? `<p class="muted">${esc(note)}</p>` : ""}
-    <p class="muted">The teacher code:</p>
+    <p class="muted">The quiz's code and two more digits:</p>
     ${codeForm(JOIN_CODE.test(code) ? code : "", "12345 67")}
-    <p class="muted">It is the class code and two more digits, as the quiz's own screen shows it.</p>
+    <p class="muted">The screen that runs the quiz shows them.</p>
   </div>`;
   wireCodeForm();
 }
@@ -378,7 +378,7 @@ let entered = false;
  * aside. Nothing the device senses decides it.
  */
 function enter(c: Choice): void {
-  document.title = `${c.title || "Quiz"} · teacher`;
+  document.title = `${c.title || "Quiz"} · show or steer`;
   const entry: Entry = c.entry;
   if (entry === "screen" || entry === "remote") {
     void takeRole(entry);
@@ -387,7 +387,7 @@ function enter(c: Choice): void {
   if (entry === "full") {
     main.innerHTML = `${siteHead()}<div class="center choice">
       <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
-      <p class="muted">This quiz already has a screen for the class and one that steers.</p>
+      <p class="muted">This quiz already has a screen that shows it and one that steers.</p>
       <p class="muted">If one of them was on this device a moment ago, try again in half a minute.</p>
       <button class="btn" data-retry>Try again</button>
     </div>`;
@@ -401,7 +401,7 @@ function enter(c: Choice): void {
   main.innerHTML = `${siteHead()}<div class="center choice">
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
     <div class="entry-roles">
-      <button class="btn role" data-role="screen">Show the quiz here<small>the class watches this screen</small></button>
+      <button class="btn role" data-role="screen">Show the quiz here<small>everyone watches this screen</small></button>
       <button class="btn role" data-role="remote">Steer it from here<small>Start, next, the solution</small></button>
     </div>
   </div>`;

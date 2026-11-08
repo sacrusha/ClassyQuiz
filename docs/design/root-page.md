@@ -416,14 +416,14 @@ The help reaches the teacher at:
 - `/check#it`: "If the site doesn't open at school at all", readable without
   running anything (if the site is blocked, nothing runs), with the text for IT;
 - the wall's join screen, steering or not: after `NOBODY_MS` (90 s) with nobody
-  in, "Nobody in yet? If the tablets can't open <address>, the school network may
-  block it", with the IT link in a new tab so the wall stays; gone with the first
+  in, "Nobody in yet? If phones and tablets can't open <address>, their network
+  may block it", with the IT link in a new tab so the wall stays; gone with the first
   avatar, counted anew for each class. It shows in front of the class on a
   mirrored laptop: harmless text, at the moment the class watches the teacher
   wait;
 - a device that reaches the page but not the quiz: after `UNREACHED_MS` (15 s), at
-  joining or in the offline banner, "This device can't reach the quiz. Tell your
-  teacher." (a teacher device without the second sentence).
+  joining or in the offline banner, "This device can't reach the quiz. Tell whoever
+  runs it." (a teacher device without the second sentence).
 
 When only live connections are blocked, HTTP takes over by itself
 (`design/connections.md`); that costs the shared site more requests, which is not

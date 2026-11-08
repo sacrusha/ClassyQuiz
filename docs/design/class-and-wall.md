@@ -116,7 +116,7 @@ quiz under way.
   out the tablets waits at the first question, because nobody answers. What
   tells a slow tablet from a stranger is when it comes.
 - After that, `MAX_LATE_JOINERS` (5) more get in, then the refusal "This quiz
-  has started and takes no more players. Ask your teacher." Only those who
+  has started and takes no more players. Ask whoever runs it." Only those who
   joined once the quiz was under way count towards the 5. A child returning to
   their own avatar is not a new player.
 - Remove is sticky: the removed device keeps its token and shows the cross,

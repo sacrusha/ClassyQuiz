@@ -389,6 +389,15 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .cstart .btn.big { width: auto; padding: 0 1.4em; }
 .roomnote { border-left: 3px solid var(--rule); padding: 4px 12px; margin: 14px 0 0; }
 .check .cline { text-align: left; font-size: 16px; margin: 6px 0; }
+/* How the screens are arranged (docs/design/teacher-devices.md, "How the screens are arranged"): a toggle of two, each
+   side saying what it means; the remote's how-to follows only under "Screen and remote". */
+.arrange-ask { font-size: 1em; margin: 1.2em 0 .5em; }
+.arrange { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 10px; }
+.arrange-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; font: inherit; color: var(--fg);
+  padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--rule); background: var(--card); cursor: pointer; touch-action: manipulation; }
+.arrange-opt small { font-size: .85em; color: var(--muted); }
+.arrange-opt[aria-pressed="true"] { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
+.arrange-call { color: var(--muted); font-size: 16px; margin: 6px 0; }
 
 /* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
    play it as cards, each with its own button; the questions folded under them, closed by default, so whoever will play
