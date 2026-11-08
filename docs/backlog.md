@@ -11,14 +11,18 @@ end. Last settled: 2026-11-08.
 A teacher has an exercise sheet and wants fifteen minutes of fun practice on
 exactly that content. Existing tools fail on authoring time: their AI hands
 the teacher a starting point to fix by hand in a slide editor; premade content
-fails on topic. The product is the path from sheet to a running classroom
-quiz, and the measure is teacher time. Plausible assumption: the quiz is often
+fails on topic. The product is the path from someone's material to a quiz
+being played — run by a quizmaster for a class or another group, among
+friends with nobody running it, or alone — and the measure is the asker's
+time. Plausible assumption: the quiz is often
 made in the ten-minute break before the lesson, with the teacher's own AI, and
 used once (so the format is checkable in seconds and the run is the review:
 `design/quiz-format.md`, `design/question-flow.md`). The material arrives as a
 few photos taken with a phone, or as a document or PDF uploaded from a laptop;
 the teacher may be on either device. Any age group, including settings beyond
-school with adult participants. The design target is a Swiss German-speaking
+school with adult participants: the site offers the ways to play by name,
+Solo, Peers and Quizmaster, and the classroom is a Quizmaster's quiz (v5).
+The design target is a Swiss German-speaking
 primary class: a school-issued laptop on the projector, Android tablets for
 the kids, the teacher's phone as remote, an AI account that may be a free one,
 students who may read slowly or not read English at all, and the teacher in
@@ -26,7 +30,7 @@ the room. The design files call it the example class; what they say of
 children and the room is said of it. Plausible assumption: teachers understand
 English (so the guidance and the site's own words are English; Localization,
 under Later, is the queued change). The guidance to the AI is in English,
-which AIs are trained on; quizzes come out in whatever language the teacher
+which AIs are trained on; quizzes come out in whatever language the asker
 needs, and the AI asks when the sheet's language and the ask's differ. The
 failure mode to design against is a normal user who can't use it, not a
 malicious one: a disruptive student is handled by the teacher walking over to
@@ -336,114 +340,86 @@ the open list at the end.
 
 ## v5 — Playing the quiz, redefined
 
-People have to understand classroom quizzes before they can use the site: it
-presents one way to play, the projector with the teacher's phone and the
-students' devices, and a newcomer must grasp it before anything else. The file
-the AI makes is independent of that way, and the person who asked for the
-quiz need not know its answers, so a quiz is also for playing alone, with
+People had to understand classroom quizzes before they could use the site: it
+presented one way to play, the projector with the teacher's phone and the
+students' devices, and a newcomer had to grasp it before anything else. The
+file the AI makes is independent of that way, and the person who asked for
+the quiz need not know its answers, so a quiz is also for playing alone, with
 friends, or for a crowd where the host plays too. Plausible assumption (the
 owner's, 2026-11-08): people think in use cases, not capabilities — so the
 site offers entries a person recognises before knowing any setting, named by
 the owner **Solo** (you play the quiz on your own, for learning or review),
 **Peers** (play with friends, the quiz runs on its own) and **Quizmaster** (a
-host running the quiz for a crowd); entries that turn out the same underneath
-are one thing, and that shared thing needs its right name (owner). The
-classroom is a Quizmaster's quiz; nothing built is undone. The exploration
-behind these items — options and what each would cost — is
-`playing-redefined-notes.md`, a working note, not a design.
+host running the quiz for a crowd), on the check a quiz opens into
+(`design/local-check.md`). Underneath, Solo is the browser alone, nothing
+uploaded; Peers and Quizmaster are the one room, running on its own or by a
+hand; the classroom is a Quizmaster's quiz, and nothing built was undone. The
+exploration behind these items — options and what each would cost — is
+`playing-redefined-notes.md`, a working note, not a design. What is deployed:
+`deploy-log.md`; what the owner hasn't seen: the open list at the end.
 
-1. Looking at a quiz, or playing it alone, shouldn't cost the shared site a
-   class — the local check: the zip read and checked in the browser, the
-   entries offered there, the questions folded, opening the lobby the upload
-   with the check's fixes; the example's start lands there. Built,
-   `design/local-check.md`. Not deployed.
+1. Looking at a quiz, or playing it alone, doesn't cost the shared site a
+   class: the zip is read and checked in the browser, the entries are offered
+   there, and opening a room is the upload — `design/local-check.md`.
 
-2. Solo, a learner practising or reviewing on their own without having seen
-   the answers — built, `design/solo.md`. Not deployed.
+2. Solo: a learner practises or reviews alone, without having seen the
+   answers, the solution after each one, the run copied for their AI at the
+   end — `design/solo.md`.
 
-3. Peers, friends playing together with nobody running it, whoever asked
-   for the quiz among them — built, `design/peers.md`: the room moves on
-   once everyone present is done, whoever opened it plays and has a ⋯ to go
-   on without waiting, fix a solution, remove an avatar and end it. Not
-   deployed. Open: `design/peers.md`, "Not known".
+3. Peers: friends play together with nobody running it, whoever asked for
+   the quiz among them; the room moves on once everyone present is done —
+   `design/peers.md`.
 
-4. **Quizmaster — a host runs a quiz for a crowd that isn't a class**: a pub,
-   a family, a training room, a video call, on the classroom's screens.
-   Owner: the Quizmaster choice comes first, then how the screens are
-   arranged, as a toggle with an explanation and the remote's manual only
-   where it applies; auto-play (item 7) is the quizmaster's option. Built:
-   the local check's card is the choice; the lobby's check asks how the
-   screens are arranged (One screen, Screen and remote, remembered per
-   browser) and gives the teacher code's how-to only under Screen and
-   remote; it keeps the questions folded, the local check having shown
-   them; from the check on, the words name no role ("Let everyone in",
-   "Join code", "Ask whoever runs it"); the avatars have tools beside the
-   animal, in the one menu with the top hat (`design/class-and-wall.md`,
-   "Dressing the avatar"). `design/teacher-devices.md`, "How the screens
-   are arranged" and "Words for any crowd". Not deployed. Devices only (no
-   wall) is not offered; why, and what would make it cheap after Peers: same
-   file. The landing's film shows the local check, the lobby's check with
-   the toggle and these words (`docs/film/`); the words before the check:
-   item 9.
+4. Quizmaster: a host runs a quiz for a class or any other crowd; the lobby
+   asks how the screens are arranged, the remote's how-to shows only where a
+   remote is wanted, no screen names a role, and the avatars have tools
+   beside the animal for a business crowd — `design/teacher-devices.md`
+   ("How the screens are arranged", "Words for any crowd"),
+   `design/class-and-wall.md` ("Dressing the avatar"). Devices only, a room
+   with no wall, isn't offered; why, and what would make it cheap now:
+   `design/teacher-devices.md`.
 
-5. **Whoever asked the AI for the quiz plays it without having seen the
-   questions** — what lets a quiz be played by its own maker, a trivia quiz
-   that is nobody's agenda. Built: the guidance's "When the user will play
-   the quiz" (the questions, choices and solutions stay out of the
-   conversation; the AI reports what it can, count, topics, difficulty,
-   pictures, and hands over the `.zip`; a wrong solution is caught in play),
-   and the example asks that say "I'll play it myself" and "I'm playing too"
-   (`design/guidance-page.md`, "The user who plays"); the local check's fold
-   (`design/local-check.md`); a wrong solution fixed by the Peers opener or
-   taken to the player's AI after Solo. Not deployed. Open: whether AIs do
-   it, ask when it's unclear, and report enough; no run since the page says
-   it.
+5. Whoever asked the AI for the quiz plays it without having seen the
+   questions — what lets a quiz be played by its own maker: the guidance's
+   "When the user will play the quiz" and the local check's fold —
+   `design/guidance-page.md` ("The user who plays"),
+   `design/local-check.md`. Open: whether AIs keep the questions out of the
+   chat and report enough; no run since the page says it.
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
-   and no student devices (the open "projector alone" question). In a room
-   the question lives on the wall only and the tablets show colour-coded
-   buttons, on `design/question-flow.md`'s plausible assumption that the
-   teacher reads aloud while the class looks at the projector. The device
-   screen (the question, its picture and the tiles on the player's own
-   device, then the key) is built with Solo (`design/solo.md`, "The device
-   screen"). A Peers room stands on it, the code on the device that opened
-   it, the spread, the winners and the ranking on each device
+   and no student devices (the open "projector alone" question, in the list
+   at the end). The device screen — the question, its picture and the tiles
+   on the player's own device, then the key — is built with Solo
+   (`design/solo.md`, "The device screen"), and a Peers room stands on it
    (`design/peers.md`). Open: a Quizmaster's devices-only room; a wall in a
-   Peers room (a family at the TV); whether the guidance should say where a
+   Peers room, a family at the TV; whether the guidance should say where a
    quiz will be read.
 
-7. **Nobody has to steer.** Peers' side built: everyone ready, the question
-   closing once everyone present has answered and the next coming once
-   everyone present is done with the solution (`design/peers.md`, "Nobody
-   steers"). Open: a quizmaster whose hands are elsewhere (Later, "Runs by
-   itself", whose cadence design is still owed); everyone ready rests on a
-   few friends waiting for each other, which a class of 25 doesn't
-   (`playing-redefined-notes.md`, item 4).
+7. Nobody has to steer — Peers' side: everyone ready, the question closing
+   once everyone present has answered and the next coming once everyone is
+   done with the solution — `design/peers.md` ("Nobody steers"). It rests
+   on a few friends waiting for each other, which a class of 25 doesn't
+   (`playing-redefined-notes.md`, item 4); a quizmaster whose hands are
+   elsewhere is Later, "Runs by itself", whose cadence design is still owed.
 
 8. **Players at their own pace** — a race: fast players don't wait, slow ones
-   don't hold the room. Open with the owner: in a classroom, whether the tail
-   of the field is shown (`design/class-and-wall.md` shows winners only).
+   don't hold the room. Not pursued in this delivery: it serves a classroom's
+   throughput, not the widening; what it would need is in
+   `playing-redefined-notes.md`, item 8. Open with the owner: in a classroom,
+   whether the tail of the field is shown (`design/class-and-wall.md` shows
+   winners only).
 
-9. **A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
-   lesson's, recognise themselves on the page** — built, the example class's
-   teacher still served first: the word decided once, no role noun where the
-   words are translated, "quizmaster", "the user" and "players" where English
-   needs one, teacher and class where the classroom is meant
-   (`design/root-page.md`, "Words for whoever comes"); the guidance describes
-   Solo, Peers and Quizmaster and where each reads a question, so the AI
-   specialises (`design/guidance-page.md`); three more example asks
-   (practising alone, friends, a training session), with no line under them
-   since no run is behind them; the README's descriptor, the lede, the
-   example's last step, the resume card's "Join code", `/check`'s and
-   `/layout`'s words, the network help's "a school or a company"; "Play a
-   quiz" and "Open the quiz your AI made" on the Run box, and the film's
-   chapter "The .zip, opened here", the film rebuilt. Not deployed. Open:
-   the de/fr/it drafts
-   (`docs/translation-review.md`, "The other ways to play", E6); the film
-   tells the classroom's story only; whether someone who isn't a teacher
-   reads the page as theirs, which nobody outside the project has tried;
-   CLAUDE.md's first lines still say "live classroom quizzes".
+9. A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
+   lesson's, recognise themselves on the page, the example class's teacher
+   still served first: the word decided once (`design/root-page.md`, "Words
+   for whoever comes"), the guidance describing the three ways and where each
+   reads a question (`design/guidance-page.md`), three more example asks with
+   no line under them since no run is behind them, and the film showing the
+   check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
+   (`translation-review.md`, "The other ways to play", E6); whether someone
+   who isn't a teacher reads the page as theirs, which nobody outside the
+   project has tried.
 
 Out under the lifetime as decided (v4 item 3: keeping serves rejoining a quiz
 in progress): playing at different times — each at home when they like, a

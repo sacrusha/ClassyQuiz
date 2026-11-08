@@ -1,9 +1,10 @@
 # classyQuiz
 
-Hosted website for live classroom quizzes. A teacher makes the quiz from
-exercise sheets with their own AI by naming the site, uploads it, and the class
-plays it on the projector and their own devices. Product definition,
-constraints and versions: docs/backlog.md.
+Hosted website for playing quizzes. Whoever wants one makes it from their own
+material — exercise sheets, say — with their own AI by naming the site, opens
+the file here, and plays it: alone, among friends on their own devices, or run
+by a quizmaster for a class or another group on a big screen. Product
+definition, constraints and versions: docs/backlog.md.
 
 ## Layout
 
