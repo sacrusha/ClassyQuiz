@@ -625,9 +625,10 @@ Your AI can explain a mistake, or check a solution that looks wrong.
   Start ▶.
 - **A question:** the bar at the top (where the question stands, after the
   answer ✓, ✗ or ⊘ for not counted, the avatar, ★ the score), the question
-  laid out as on the wall, its answers showing at once; on an upright phone
-  the question smaller than on a wall and long answers in one column. A tap
-  answers, and the key shows on the tiles: the solution ticked, the rest
+  laid out as on the wall in that window, its answers showing at once; on
+  an upright phone or tablet the question smaller than on a wall and long
+  answers in one column. A tap answers, and the key shows on the tiles:
+  the solution ticked, the rest
   dim, the tap outlined, ✗ on it when wrong; a right answer makes the
   avatar jump over the question. At the foot the quiz's title and the next
   step, "▶ Question 5", "▶ Result" after the last, absent before the

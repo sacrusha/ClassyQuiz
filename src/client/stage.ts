@@ -28,18 +28,26 @@ export interface StageOptions {
   /** The tiles are buttons, data-i their place on screen: a player answers on them. */
   buttons?: boolean;
   /**
-   * A player's own device, read at arm's length and often held upright:
-   * the question takes less of the height than on a wall read from the back
-   * row, since the answers are what is tapped, and text tiles stand in one
-   * column where two would break their words or set them small.
+   * A player's own device. Held upright (the stage taller than wide), it is
+   * laid out apart from the wall: the question takes less of the height,
+   * since the answers are what is tapped, text tiles stand in one column
+   * where two would break their words or set them small, and alone the
+   * tiles keep room for the mark only (app.css, `dupright`). Wider than
+   * tall, it is laid out as the wall is, so a laptop or a projector shows a
+   * question as the wall would (docs/design/solo.md, "Where a device differs").
    */
   device?: boolean;
 }
 
-/** On a device, the share of the height the question's text may take, against the wall's. */
+/** On an upright device, the share of the height the question's text may take, against the wall's. */
 const DEVICE_TEXT_ROOM = 0.7;
-/** On a device, text tiles set smaller than this (em) in two columns try one. */
+/** On an upright device, text tiles set smaller than this (em) in two columns try one. */
 const DEVICE_TILE_MIN = 1.3;
+
+/** Whether the stage is laid out as an upright device's rather than as the wall's; its tiles then carry `dupright`. */
+function upright(stage: HTMLElement, o: StageOptions): boolean {
+  return !!o.device && stage.clientHeight > stage.clientWidth;
+}
 
 /** One tile's element: a button where a player taps it, a block on the wall. */
 function tile(i: number, cls: string, inner: string, o: StageOptions): string {
@@ -65,17 +73,18 @@ function questionSize(len: number, withPicture: boolean): number {
  */
 export function layQuestion(stage: HTMLElement, q: StageQuestion, o: StageOptions = {}): void {
   const at = (sel: string) => stage.querySelector<HTMLElement>(sel)!;
+  const up = upright(stage, o);
   if (q.pics) {
-    layPictureAnswers(stage, q, q.pics, o);
+    layPictureAnswers(stage, q, q.pics, o, up);
     return;
   }
   const n = q.answers.length;
   const longest = Math.max(...q.answers.map((a) => a.length));
   const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
-  const room = o.device ? DEVICE_TEXT_ROOM : 1;
-  const fitAnswers = () => fitTiles(at("#tiles"), tileSize, !!o.device);
+  const room = up ? DEVICE_TEXT_ROOM : 1;
+  const fitAnswers = () => fitTiles(at("#tiles"), tileSize, up);
   const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
-  const tilesHtml = `<div class="tiles" id="tiles">${q.answers
+  const tilesHtml = `<div class="tiles${up ? " dupright" : ""}" id="tiles">${q.answers
     .map((a, i) => tile(i, `a${i}`, `${shapeSvg(i)}<span class="txt">${lines(a)}</span><span class="side"></span>`, o))
     .join("")}</div>`;
   const img = q.image;
@@ -136,13 +145,13 @@ export function layQuestion(stage: HTMLElement, q: StageQuestion, o: StageOption
  * answer picture come out about alike. A text answer among them takes a
  * picture's place.
  */
-function layPictureAnswers(stage: HTMLElement, q: StageQuestion, pics: (ImageRef | null)[], o: StageOptions): void {
+function layPictureAnswers(stage: HTMLElement, q: StageQuestion, pics: (ImageRef | null)[], o: StageOptions, up: boolean): void {
   const at = (sel: string) => stage.querySelector<HTMLElement>(sel)!;
-  const room = o.device ? DEVICE_TEXT_ROOM : 1;
+  const room = up ? DEVICE_TEXT_ROOM : 1;
   const aspects = pics.map((p) => (p ? p.w / p.h : null));
   const longestText = Math.max(0, ...q.answers.map((a) => a.length));
   const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
-  const tilesHtml = `<div class="tiles pics" id="tiles">${q.answers
+  const tilesHtml = `<div class="tiles pics${up ? " dupright" : ""}" id="tiles">${q.answers
     .map((a, i) => {
       const p = pics[i];
       const card = p ? picImg(p.src, p.w, p.h) : a ? `<span class="txt">${lines(a)}</span>` : "";
@@ -240,8 +249,8 @@ function fitCardTexts(box: HTMLElement, start: number): void {
 
 /**
  * Largest font, from `start` down, at which no answer word is cut and no
- * answer overflows its tile. With `column` (a device), tiles that two
- * columns squeeze or set small stand in one, where that sets them larger.
+ * answer overflows its tile. With `column` (an upright device), tiles that
+ * two columns squeeze or set small stand in one, where that sets them larger.
  */
 function fitTiles(box: HTMLElement, start: number, column = false): { size: number; squeezed: boolean } {
   box.classList.remove("onecol");

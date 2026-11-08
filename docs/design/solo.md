@@ -33,10 +33,8 @@ devices-only room is to come.
   holds it in memory only (`local-check.md`, "From the root page to the
   check").
 - The player may be on a phone held upright, a tablet, or a laptop, and on
-  a laptop it may be the one on the projector.
-- `app.css` is one namespace for every app page (backlog, Housekeeping): a
-  new class can pick up an old rule (`.device` is the network check's
-  line), so the device screen's names carry a `d` (`dscreen`, `dbar`).
+  a laptop it may be the one on the projector. A projector and a laptop are
+  wider than tall; a phone held upright is taller than wide.
 
 ## How the site meets it
 
@@ -96,13 +94,20 @@ and score), the stage, and a bar at the foot with one button.
 
 - **The stage is the wall's** (`client/stage.ts`, `layQuestion`): the
   question, its picture between or beside, picture answers arranged by
-  their shapes, laid out in the room the device has. On a laptop, Solo
-  therefore shows a question as the projector at that size would.
-- **Where a device differs** (`device` option): it is read at arm's
-  length and often held upright, and its answers are what is tapped. The
-  question takes less of the height than on a wall (0.7 of the wall's
-  share), and text tiles that two columns would break or set small stand
-  in one column. The tiles are buttons.
+  their shapes, laid out in the room the device has, in the same frame
+  as the wall that steers itself (the bar at the top, the foot's bar of
+  the same height). Wider than tall, nothing else differs (the tiles keep
+  the wall's room for the mark and the count too): on a laptop or a
+  projector, Solo shows a question as the wall would in that window. The
+  tiles are buttons at every size.
+- **Where a device differs** (`device` option): held upright, the stage
+  taller than wide, it is read at arm's length in a narrow column, and
+  its answers are what is tapped. The question takes less of the height
+  than on a wall (0.7 of the wall's share), text tiles that two columns
+  would break or set small stand in one column, and alone the tiles keep
+  room for the mark only, without the count. The wall itself, on a phone
+  (the "phone only" variant), is laid out as a wall: its tiles stay two by
+  two.
 - **The foot's button** is the steering bar's Play in another hand: a noun
   for what comes next, in the same place on every question, kept there
   invisible while there is none, so a double tap never lands on something
@@ -155,7 +160,9 @@ lean; neither use is confirmed.
   as the projector at that window's size would, pictures and fitting
   included; the solutions are the check's fold, without playing. What the
   wall adds (the question read first with its answers veiled, who has
-  answered, the spread) isn't the quiz's look.
+  answered, the spread) isn't the quiz's look. A wall steered from the
+  Remote has no foot's bar, so its stage is 30 px taller than the
+  preview's in the same window.
 - **A projector and no student devices** (backlog, Open): Solo on the
   projector shows the question as the wall does; the class answers by hand
   or with coloured cards, and whoever taps puts the key up. Nothing scores
@@ -177,9 +184,9 @@ lean; neither use is confirmed.
   class at a projector.
 - Pull to refresh is asked off while Solo is on (`overscroll-behavior`);
   checked headless in Edge only, not on Android or iOS.
-- How much of the question's height a device should give up (0.7) and
-  when tiles go to one column (under 1.3 em in two): tuned on the example
-  quiz, a quiz of sentence answers and the picture-answer quiz at 360x740
-  and 1280x800.
-- The wall's layout on a phone wall (the "phone only" variant) is
-  unchanged: its tiles stay two by two.
+- How much of the question's height an upright device should give up
+  (0.7) and when tiles go to one column (under 1.3 em in two): tuned on
+  the example quiz, a quiz of sentence answers and the picture-answer quiz
+  at 360x740, and seen headless on an upright tablet (800x1280).
+- Whether a tablet on its side, laid out as the wall, taps as well as one
+  held upright; seen headless at 1280x800 only.

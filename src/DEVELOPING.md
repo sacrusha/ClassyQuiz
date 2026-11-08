@@ -40,6 +40,11 @@ All commands run in `src/` unless said otherwise.
 - `public/site.css`: the shared look. Every page links it first; in `dist/`
   it is the front of `app.css`, or written into a page without `app.css`
   (`build.mjs`), so there is no `dist/site.css`.
+- `public/app.css`: one namespace for every app page and `/example`. A new
+  class can pick up an old rule (`.device` is the network check's line), so
+  a new screen's names carry a prefix of their own: the device screen's a
+  `d` (`dscreen`, `dbar`, `dupright`). The usual remedies, deferred by the
+  owner: `docs/backlog.md`, Housekeeping.
 
 The site is two Cloudflare deployables. The state Worker (`classyquiz-state`)
 holds the Durable Objects (`Instance`, `JoinCode`, `UploadStats`, `SiteBudget`).
