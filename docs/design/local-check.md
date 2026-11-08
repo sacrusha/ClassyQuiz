@@ -58,9 +58,14 @@ A page can't hand a file to the next one. The quiz read (its text, its
 pictures redrawn, whether some were left out) goes through the browser's
 IndexedDB for the moment of the page change (`client/handoff.ts`): the root
 page stores it under a random key and opens `/open#<key>`; the check takes
-it out and deletes it on arrival, with any record older than a minute that
-never reached its page (a tab closed in between). From then on the quiz
-lives only in the page's memory. A reload of the check therefore finds
+it out and deletes it on arrival. From then on the quiz lives only in the
+page's memory. A record whose page never came (the tab closed in between,
+the navigation lost) stays in the browser's site data until the site next
+runs a page that sweeps: the start page, a check, or the next handover each
+delete every record older than a minute. Where the browser doesn't list its
+databases (`indexedDB.databases`), only the next handover and its check
+sweep: elsewhere, opening the database to look would create it. So on a shared school laptop a quiz can outlast its use only on
+this failure path, and only until the site is next opened there. A reload of the check therefore finds
 nothing and says so ("No quiz open here", the way back to the start page):
 nothing is kept. A browser that keeps no site data can't pass the quiz on;
 the root page says so in its language.

@@ -14,7 +14,7 @@ import type { TeacherQuestion } from "../shared/protocol.ts";
 import { $, esc, lines } from "./dom.ts";
 import { ENTRIES, type Entry, type EntryContext } from "./entries.ts";
 import { EXAMPLE_ZIP } from "./example-text.ts";
-import { takeOver } from "./handoff.ts";
+import { sweepStale, takeOver } from "./handoff.ts";
 import { TEXT, isLang } from "./landing-text.ts";
 import { newUI, patch, questionList, toast, viewAct, type QuestionsView } from "./manage.ts";
 import { openQuiz, readQuiz, type OpenedQuiz, type QuizFiles } from "./opening.ts";
@@ -35,6 +35,8 @@ async function arrive(): Promise<void> {
   const key = location.hash.slice(1);
   // The key is spent once read; a reload must not look for it again.
   if (key) history.replaceState(null, "", location.pathname + location.search);
+  // takeOver sweeps as it reads; without a key, what an earlier handover left goes here.
+  else void sweepStale();
   let files: QuizFiles | null = null;
   if (isLang(example)) {
     files = await exampleFiles(EXAMPLE_ZIP[example]);

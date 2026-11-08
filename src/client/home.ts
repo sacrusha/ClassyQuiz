@@ -12,7 +12,7 @@ import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, uploadDays } from "./history.ts";
-import { handOver } from "./handoff.ts";
+import { handOver, sweepStale } from "./handoff.ts";
 import { readQuiz } from "./opening.ts";
 import { filmLanguage } from "./film-poster.ts";
 
@@ -22,6 +22,8 @@ if (JOIN_CODE.test(fromHash) || TEACHER_CODE.test(fromHash)) location.replace(`/
 // The worked example's start as an earlier /example linked it: the example opens on the local check now.
 const exampleLang = new URLSearchParams(location.search).get("example");
 if (isLang(exampleLang)) location.replace(`/open?example=${exampleLang}`);
+// A quiz handed to a check that never opened is still in this browser: it goes now (client/handoff.ts).
+void sweepStale();
 
 /** The address the browser opened: an own copy shows its own (the build writes it into the static page for AIs). */
 const host = location.host || "classyquiz.pages.dev";
