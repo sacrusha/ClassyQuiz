@@ -299,10 +299,13 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   (`hosting-and-limits.md`).
 - On a tablet the nine hats stay on one line: each picture is 60 px, or as
   little as 46 where the picker is narrower (53 px on a 1024 px tablet held
-  sideways). On a phone they are 46 px, six to a line, so the hats and the
-  third row take two lines each; narrower than 340 px they shrink to 42 px
-  and the gaps tighten, so the menu and the avatar fit a 320 by 568 screen
-  without scrolling (`.dress` in `app.css`).
+  sideways). Where the picker cannot hold them on one line they break into
+  halves (five and four), never a full line and a stray one, and the tools
+  (seven) are one line down to a 360 px phone: there every picture is 41 px,
+  so the menu is four lines and Start stays on the first screen of a 360 by
+  640 phone. At 320 px the tools break four and three, and the menu and the
+  avatar still fit a 320 by 568 screen without scrolling (`.dress` in
+  `app.css`, by the picker's own width).
 - The server writes the class's looks at most once per `LOOK_WRITE_MS` (1 s);
   views go out after the write, so nothing shows that is not stored. Each
   stored change is two rows, so the cost of a class is bounded whatever the

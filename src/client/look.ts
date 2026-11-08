@@ -347,7 +347,7 @@ export function toolSvg(t: number): string {
  */
 export function pickerRows(colour: number): string {
   const row = (part: string, from: number, to: number, svg: (i: number) => string) =>
-    `<div class="prow">${Array.from({ length: to - from }, (_, k) => `<button class="pick" type="button" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
+    `<div class="prow prow-${part}">${Array.from({ length: to - from }, (_, k) => `<button class="pick" type="button" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
   return row("b", 0, BACKGROUND_COUNT, (b) => backgroundSvg(b, colour)) + row("h", 1, HAT_COUNT, hatSvg) + row("t", 1, TOOL_COUNT, toolSvg);
 }
 
