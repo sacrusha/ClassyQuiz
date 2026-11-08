@@ -206,7 +206,7 @@ const en: Text = {
       ? `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use).`
       : `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
   quota: (at) => `The free site has used up today's allowance. It works again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
-  ownCopyLink: "More quizzes: a site of your own or your school's ›",
+  ownCopyLink: "More quizzes: a site of your own, your school's or your company's ›",
   offline: "No connection to the site. Check the network and try again. If it stays like this, the network of a school or a company may block the site.",
   whatToTellIt: "What to tell IT ›",
   notStarted: "before the first question",
@@ -216,7 +216,7 @@ const en: Text = {
   joinCode: "Join code",
   otherDevice: (c) => `On another device: type <b>${c}</b> in the code box.`,
   untitled: "Your quiz",
-  ownCopy: (n) => `On ${n === 1 ? "one" : n} of the last 30 days this shared site was full or busy. For more quizzes, a site of your own or your school's:`,
+  ownCopy: (n) => `On ${n === 1 ? "one" : n} of the last 30 days this shared site was full or busy. For more quizzes, a site of your own, your school's or your company's:`,
   how: "how ›",
 };
 
@@ -293,9 +293,9 @@ const de: Text = {
       ? `Die Gratis-Seite hat im Moment keinen Platz für ein weiteres Quiz. Es geht wieder, wenn andere Quiz beendet oder abgelaufen sind (drei Stunden nach der letzten Benutzung).`
       : `Die Gratis-Seite kann heute keine Quiz mehr annehmen. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} nimmt sie wieder neue.`,
   quota: (at) => `Die Gratis-Seite hat ihr Kontingent für heute aufgebraucht. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} geht sie wieder.`,
-  ownCopyLink: "Mehr Quiz: eine eigene Seite oder eine der Schule ›",
+  ownCopyLink: "Mehr Quiz: eine eigene Seite oder eine der Schule oder Firma ›",
   offline: "Keine Verbindung zur Seite. Prüf das Netz und versuch es nochmals. Bleibt es so, sperrt vielleicht das Netz einer Schule oder Firma die Seite.",
-  whatToTellIt: "Was du der Schul-IT sagen kannst ›",
+  whatToTellIt: "Was du der IT sagen kannst ›",
   notStarted: "vor der ersten Frage",
   question: (n, t) => `Frage ${n} von ${t}`,
   finalRanking: "Schlussrangliste",
@@ -303,7 +303,7 @@ const de: Text = {
   joinCode: "Code zum Beitreten",
   otherDevice: (c) => `Auf einem anderen Gerät: <b>${c}</b> ins Code-Feld tippen.`,
   untitled: "Dein Quiz",
-  ownCopy: (n) => `An ${n === 1 ? "einem" : n} der letzten 30 Tage war diese geteilte Seite voll oder stark ausgelastet. Für mehr Quiz eine eigene Seite oder eine der Schule:`,
+  ownCopy: (n) => `An ${n === 1 ? "einem" : n} der letzten 30 Tage war diese geteilte Seite voll oder stark ausgelastet. Für mehr Quiz eine eigene Seite oder eine der Schule oder Firma:`,
   how: "wie ›",
 };
 
@@ -380,7 +380,7 @@ const fr: Text = {
       ? `Le site gratuit n'a pour l'instant plus de place pour un autre quiz. Il en reprend dès que d'autres sont terminés ou expirés (trois heures après leur dernière utilisation).`
       : `Le site gratuit ne peut plus prendre de quiz aujourd'hui. Il en reprend à ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
   quota: (at) => `Le site gratuit a épuisé son quota du jour. Il remarche à ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
-  ownCopyLink: "Plus de quiz : un site à vous ou à votre école ›",
+  ownCopyLink: "Plus de quiz : un site à vous, à votre école ou à votre entreprise ›",
   offline: "Pas de connexion au site. Vérifiez le réseau et réessayez. Si cela persiste, le réseau d'une école ou d'une entreprise bloque peut-être le site.",
   whatToTellIt: "Ce qu'il faut dire au service informatique ›",
   notStarted: "avant la première question",
@@ -390,7 +390,7 @@ const fr: Text = {
   joinCode: "Code pour rejoindre",
   otherDevice: (c) => `Sur un autre appareil : tapez <b>${c}</b> dans la case du code.`,
   untitled: "Votre quiz",
-  ownCopy: (n) => `Ce site partagé a été complet ou très chargé ${n} ${n === 1 ? "jour" : "jours"} sur les 30 derniers. Pour plus de quiz, un site à vous ou à votre école :`,
+  ownCopy: (n) => `Ce site partagé a été complet ou très chargé ${n} ${n === 1 ? "jour" : "jours"} sur les 30 derniers. Pour plus de quiz, un site à vous, à votre école ou à votre entreprise :`,
   how: "comment ›",
 };
 
@@ -467,7 +467,7 @@ const it: Text = {
       ? `Il sito gratuito per ora non ha più posto per un altro quiz. Ne riprende quando altri sono terminati o scaduti (tre ore dopo l'ultimo uso).`
       : `Il sito gratuito oggi non può prendere altri quiz. Ne riprende alle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
   quota: (at) => `Il sito gratuito ha esaurito la quota di oggi. Torna a funzionare alle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
-  ownCopyLink: "Più quiz: un sito tuo o della tua scuola ›",
+  ownCopyLink: "Più quiz: un sito tuo, della tua scuola o della tua azienda ›",
   offline: "Nessuna connessione al sito. Controlla la rete e riprova. Se resta così, forse la rete di una scuola o di un'azienda blocca il sito.",
   whatToTellIt: "Cosa dire al servizio informatico ›",
   notStarted: "prima della prima domanda",
@@ -477,7 +477,7 @@ const it: Text = {
   joinCode: "Codice per entrare",
   otherDevice: (c) => `Su un altro dispositivo: digita <b>${c}</b> nella casella del codice.`,
   untitled: "Il tuo quiz",
-  ownCopy: (n) => `Negli ultimi 30 giorni questo sito condiviso è stato pieno o molto carico ${n === 1 ? "un giorno" : `${n} giorni`}. Per più quiz, un sito tuo o della tua scuola:`,
+  ownCopy: (n) => `Negli ultimi 30 giorni questo sito condiviso è stato pieno o molto carico ${n === 1 ? "un giorno" : `${n} giorni`}. Per più quiz, un sito tuo, della tua scuola o della tua azienda:`,
   how: "come ›",
 };
 

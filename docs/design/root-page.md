@@ -354,8 +354,10 @@ So, once for all entries:
   meant: the film (the example class's story, `docs/film/`), the sheets and
   chess asks, the classroom's lines in the guidance, and the design docs,
   which speak of the example class. The network check (`/check`) says
-  "school or work" and "our network": it is reached from any room that
-  can't open.
+  "school or work" and "our network", and leaves allowing the site to
+  "whoever looks after the network": it is reached from any room that
+  can't open. The way to more quizzes names "your school's or your
+  company's" site ("The own copy").
 
 ### Run: the `.zip` and nothing else
 
@@ -385,7 +387,7 @@ file's name is checked after choosing, and anything else gets the message below.
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
   request allowance has its own message. Each is followed by "More quizzes: a site
-  of your own or your school's ›" to `/own-copy`, which names what the link
+  of your own, your school's or your company's ›" to `/own-copy`, which names what the link
   gives (the owner: "Your own copy" was too ambiguous). The caps are `design/hosting-and-limits.md`.
 - A quiz that reads goes to the local check (`local-check.md`), where
   nothing has gone to the site yet; opening the lobby there uploads it, and
@@ -452,7 +454,7 @@ doesn't raise it on a first visit.
   refused an upload or a class, or the classes' bookings reached
   `NEARLY_FULL` (half; the owner: lower than 80%) of the day's rows. It states the fact: "On 3 of the last
   30 days this shared site was full or busy. For more quizzes, a site
-  of your own or your school's:", then the link. Counting the busy
+  of your own, your school's or your company's:", then the link. Counting the busy
   days brings the way to more quizzes to the teacher who relies on the site
   before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
@@ -477,13 +479,18 @@ doesn't raise it on a first visit.
   "A computer to deploy through wrangler" is deliberate (owner): a teacher
   without the affinity reads it as "the AI sets this up in minutes" being
   their realistic option, or asking someone who has it.
-  Then the school's IT: people with an IT background and a developer AI can
-  adjust it to the school's own servers, or run it on a paid Cloudflare
-  account for "thousands of quizzes per day". The owner: scaling is the point
-  of Cloudflare, a paid plan handles more than thousands, and IT has a budget;
-  the number says the ceiling is the school's to set, not a measured limit. A school is a natural unit for an own copy, and an outside
+  Then the IT of a school or company: people with an IT background and a
+  developer AI can adjust it to their own servers, or run it on a paid
+  Cloudflare account for "thousands of quizzes per day". The owner: scaling
+  is the point of Cloudflare, a paid plan handles more than thousands, and IT
+  has a budget; the number says the ceiling is the school's to set, not a
+  measured limit. A school is a natural unit for an own copy, and an outside
   service is red tape at a school: it may need a data protection review first,
-  so the school's own server comes first. The conversion is the school's, done
+  so the school's own server comes first. A company that runs trainings meets
+  the same IT and the same review, and a trainer who reads "your school's"
+  is told the route isn't theirs; so this page, the line under Run and the
+  link on a refusal name a company after the school (the words widen who
+  else is, they don't displace the teacher: "Words for whoever comes"). The conversion is theirs, done
   with their AI, so this project maintains one server and checks no
   conversion; the README gives the AI what to change, what to keep and the
   tests a converted copy must pass. Afterwards: the address to name to the AI

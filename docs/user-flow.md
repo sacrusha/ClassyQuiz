@@ -188,8 +188,8 @@ Purpose and reasons: docs/design/root-page.md.
   groups." (one more: "room for one more group"); when no class fits
   or letting in was refused: "The free site can't take more players today:
   the quizzes under way use what is left. It takes new ones again at 01:00
-  Swiss time." Both followed by "More quizzes: a site of your own or your
-  school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
+  Swiss time." Both followed by "More quizzes: a site of your own, your
+  school's or your company's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
 - **The network check** is no longer on the root page: opening the lobby,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
@@ -276,7 +276,8 @@ Big numbers on the number line · 13 questions
   English): the
   site's day ("The free site can't take more quizzes today. …", "… has no
   room for another quiz right now …", "… has used up today's allowance …",
-  each with "More quizzes: a site of your own or your school's ›"), or no
+  each with "More quizzes: a site of your own, your school's or your
+  company's ›"), or no
   connection or an answer that isn't the site's (a filter's page): the
   network named as a possible cause, with "What to tell IT ›" to
   `/check#it`.

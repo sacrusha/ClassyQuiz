@@ -72,6 +72,23 @@ tuo", as the solo tab); fr "chacun sur son appareil" and it "ognuno" are the gen
 in fr has U+202F before ":" and ";" (D6), since it wraps on every phone and a plain space would let a
 ";" start a line.
 
+The way to more quizzes names a company after the school, so a trainer isn't told the route is a
+school's (`design/root-page.md`, "The own copy"); the German IT link drops "Schul-", as the network
+help it follows already says "Schule oder Firma". These supersede the rows for `ownCopyLink`,
+`ownCopy` and `whatToTellIt` in the language tables below where they name the school alone; their
+other proposals (word order, "Tageskontingent") still stand.
+
+| key | en | de | fr | it |
+|---|---|---|---|---|
+| ownCopyLink | More quizzes: a site of your own, your school's or your company's › | Mehr Quiz: eine eigene Seite oder eine der Schule oder Firma › | Plus de quiz⍽: un site à vous, à votre école ou à votre entreprise › | Più quiz: un sito tuo, della tua scuola o della tua azienda › |
+| ownCopy (end) | For more quizzes, a site of your own, your school's or your company's: | Für mehr Quiz eine eigene Seite oder eine der Schule oder Firma: | Pour plus de quiz, un site à vous, à votre école ou à votre entreprise⍽: | Per più quiz, un sito tuo, della tua scuola o della tua azienda: |
+| whatToTellIt | (unchanged) | Was du der IT sagen kannst › | (unchanged) | (unchanged) |
+
+Where these words now show: a room's refusals on the local check (`siteFull`, `quota`, `offline`,
+`whatToTellIt`, `ownCopyLink`, `quizHead`) and "Sending the quiz…" before them (`sending`) speak the
+root page's language there too (`design/local-check.md`, "Opening a room"), so the proposals for
+those keys apply to the check as well as to the root page.
+
 ## The worked example (`/example`)
 
 Drafts, not in the tables above: the page's words (`src/client/example-text.ts`), the conversation

@@ -223,7 +223,8 @@ the open list at the end.
    copy is a choice, an unchanging copy being what a teacher values before a
    lesson. The conversion is the school's, not checked here (owner: the point of
    telling them to convert is so we don't have to); `simulate.mjs` is their
-   check (`design/hosting-and-limits.md`, "A copy on a school's own server").
+   check (`design/hosting-and-limits.md`, "A copy on a school's or company's
+   own server").
    Open: the page says the VM route takes "minutes" and the walk-through "a
    while" (owner), untimed on the current README; the VM's network access
    (`root-page.md`, "Not known"). The own-copy line
@@ -319,7 +320,7 @@ the open list at the end.
     quiz if that one never started; the days' classes, rows written and
     peak are in `GET /api/site` for the owner. The check warns while fewer
     than three classes fit and keeps the refusal on screen, both with "More
-    quizzes: a site of your own or your school's ›" (the owner: "Your own
+    quizzes: a site of your own, your school's or your company's ›" (the owner: "Your own
     copy" too ambiguous); the landing's line counts busy days too (half the day's rows booked at once). Not
     deployed. Owner: booking slots and releasing them, the shrink at
     Start, one stored quiz per device, the low cap instead of overbooking,
