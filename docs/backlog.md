@@ -383,8 +383,11 @@ exploration behind these items — options and what each would cost — is
    questions — what lets a quiz be played by its own maker: the guidance's
    "When the user will play the quiz" and the local check's fold —
    `design/guidance-page.md` ("The user who plays"),
-   `design/local-check.md`. Open: whether AIs keep the questions out of the
-   chat and report enough; no run since the page says it.
+   `design/local-check.md`. A quizmaster doesn't play: the guidance says
+   so, and has the AI ask a user who will host and play which they mean,
+   Peers or Quizmaster. Open: whether AIs keep the questions out of the
+   chat, ask, and report enough without naming a question; no run since
+   the page says it.
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
