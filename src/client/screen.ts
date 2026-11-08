@@ -35,8 +35,6 @@ let tickTimer: number | undefined;
 let lobbyScreen: "check" | "join" = instance ? tabLobby.get(instance) : "join";
 /** How the screens are arranged, the check's toggle: it decides which how-to the lobby shows, nothing else. */
 let arranged: Arrangement = arrangement.get();
-/** The check's question list, folded: the local check showed it before the upload. */
-let foldOpen = false;
 const steer = new Steer(() => line, () => view?.steer ?? null, newUI(), () => render());
 
 function start(): void {
@@ -256,8 +254,9 @@ function arrangeOption(a: Arrangement, name: string, line: string): string {
  * The check: the host's page before anyone joins
  * (docs/design/teacher-devices.md, "The single tab: check, then join"). It
  * asks how the screens are arranged and gives the remote's how-to only to a
- * host who has one; the questions are folded, since the local check showed
- * them before the upload (docs/design/local-check.md). The join code is
+ * host who has one; it lists the questions, their answers folded: the local
+ * check keeps them closed for whoever plays, so this is where whoever runs
+ * the quiz sees them and catches a wrong key before the wall. The join code is
  * small; a second device can use it with the two more digits, the players
  * only once "Let everyone in" is tapped: the one tap to the join screen,
  * which lets them in.
@@ -266,7 +265,6 @@ function renderCheck(v: ScreenView): void {
   const t = v.steer!;
   const n = v.players.length;
   const nq = t.questions.length;
-  const notes = t.warnings.length;
   // A Remote that was here and went: the how-to to bring it back, whatever the toggle says.
   const howTo = arranged === "remote" || t.remote === "away";
   const gone = t.remote === "away" ? "Remote gone. " : "";
@@ -284,10 +282,7 @@ function renderCheck(v: ScreenView): void {
     ${howTo ? `<p class="device cline">${gone}${checkHowTo(v)}</p>` : ""}
     <p class="arrange-call">In a video call, the window you share is the screen everyone sees.</p>
     <p class="cstart"><button class="btn primary big" data-act="show-join">Let everyone in &#9654;</button></p>
-    <details class="open-fold"${foldOpen ? " open" : ""}>
-      <summary data-act="fold"><span class="open-fold-name">The questions and their solutions</span>${notes ? `<span class="open-fold-notes"> · ${notes} ${notes === 1 ? "note" : "notes"} from the site</span>` : ""}</summary>
-      ${foldOpen ? questionList(t, steer.ui) : ""}
-    </details>
+    ${questionList(t, steer.ui)}
     <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
   </div>`;
   patch(main, html);
@@ -783,12 +778,6 @@ for (const area of [main, sbar]) {
     }
     else if (act === "show-check") setLobby("check");
     else if (act === "arrange") arrange(el.dataset.to === "remote" ? "remote" : "one");
-    else if (act === "fold") {
-      // The fold is drawn from foldOpen, not left to the browser: the check is redrawn on every view.
-      e.preventDefault();
-      foldOpen = !foldOpen;
-      render();
-    }
     else if (act === "second-device") {
       if (view) showNote(secondDevice(view));
     } else if (act === "swap") void swap();

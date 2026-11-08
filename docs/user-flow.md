@@ -37,7 +37,7 @@ docs/design/; this file says what the screens show.
    sleep or dropped connection resumes the same role with nothing to do.
 4. **The tab that opens the lobby becomes the Projector, and it steers itself.**
    In the lobby it shows the teacher's check first (how the screens are
-   arranged, the questions folded), then, one tap on, the class's join
+   arranged, the questions listed with their answers folded), then, one tap on, the class's join
    screen (§3.3). During the quiz a slim bar carries the next step. One
    mirrored laptop needs nothing else: the check's "One screen". A clicker or the keyboard
    works on any Projector during the quiz (§3.4).
@@ -336,7 +336,7 @@ check" in this section is the lobby's.
 
 The single tab, which shows and steers, has two screens. **The check is the
 teacher's** (how the screens are arranged, the teacher code where a remote
-is wanted, the questions and fixes folded); **the join screen is the
+is wanted, the questions with their answers folded and the fixes); **the join screen is the
 class's** (title, address, class code, QR, count, avatars, Start, the
 points-for-speed switch). The teacher shares the screen when they choose;
 the site doesn't know whether it is shared. Both screens' words name no
@@ -360,7 +360,11 @@ screens serve a class and any other crowd.
 │  everyone sees.                                            │
 │                                       [ Let everyone in ▶ ]│
 │ ───────────────────────────────────────────────────────────│
-│ ▸ The questions and their solutions · 1 note from the site │
+│ 12 questions                         [ Show the solutions ]│
+│ ⚠ Question 4 has the choice "20 Franken" twice.            │
+│    1  Ein Pullover kostet 40 Franken …                  ›  │
+│    2  Eine Jacke kostet 80 Franken …                    ›  │
+│    …                                                       │
 │                                                   ⋯ More   │
 └────────────────────────────────────────────────────────────┘
 ```
@@ -377,7 +381,7 @@ screens serve a class and any other crowd.
 └────────────────────────────────────────────────────────────┘
 ```
 
-The fold opened, a question opened (or all of them, with Show the solutions / Hide the solutions):
+A question opened (or all of them, with Show the solutions / Hide the solutions):
 
 ```
 │    2  Eine Jacke kostet 80 Franken …                    ⌄  │
@@ -409,10 +413,12 @@ The fold opened, a question opened (or all of them, with Show the solutions / Hi
   With One screen, ⋯ → A second device… is the way to it. "open a second
   screen in a new window" (hidden on a phone) opens a window that asks the
   same question as any other device.
-- **The questions are folded,** under "The questions and their solutions"
-  with how many notes the site has, closed on arrival: the local check
-  showed them before the upload, its fixes included. Opened, the list as
-  below.
+- **The questions are listed,** each a line with its number and text and
+  its picture beside it, the site's notes above them, open on arrival: the
+  local check keeps them closed for whoever plays, so this is where whoever
+  runs the quiz sees them (docs/design/teacher-devices.md, "The single tab:
+  check, then join"). Fixes made on the local check came up with the quiz
+  and show here.
 - **Answers start folded,** so a shared check shows no key until the
   teacher presses a button that says it shows the answers.
 - **"Change the solution"** makes the choices tappable ("Tap every right
@@ -436,7 +442,7 @@ The fold opened, a question opened (or all of them, with Show the solutions / Hi
 
 The Remote's lobby is the check in one column: the class code large, the
 count and avatars, the points-for-speed switch, the teacher code's sentence, "Projector ✓ ·
-⇄ Swap" while the wall is there, and the questions folded as on the wall's check, with Start quiz pinned at
+⇄ Swap" while the wall is there, and the questions listed as on the wall's check, with Start quiz pinned at
 the bottom. Without a wall it says how to bring one: "On the projector
 computer: on classyquiz.pages.dev, type 63953 47." A Projector that doesn't
 steer shows only the class's part (address, code, QR and avatars), with

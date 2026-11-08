@@ -24,8 +24,6 @@ let view: TeacherView | null = null;
 /** Panels the teacher opened from ⋯ during the quiz. */
 let showAll = false;
 let showPlayers = false;
-/** The lobby's question list, folded: the local check showed it before the upload. */
-let foldOpen = false;
 let lastButtons = "";
 const steer = new Steer(() => line, () => view, newUI(), () => render());
 
@@ -125,7 +123,6 @@ function lobby(v: TeacherView): string {
       ? `<p class="device"><span class="ok">Projector ✓</span> · <button class="link" data-act="swap">&#8644; Swap</button></p><p class="device">${secondDevice(v)}</p>`
       : projectorLine(v);
   const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">Let everyone in &#9654;</button></p>` : "";
-  const notes = v.warnings.length;
   return `${letIn}<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
@@ -134,10 +131,7 @@ function lobby(v: TeacherView): string {
       <p class="device">${speedSwitch(v)}</p>
     </section>
     ${projector}
-    <details class="open-fold"${foldOpen ? " open" : ""}>
-      <summary data-act="fold"><span class="open-fold-name">The questions and their solutions</span>${notes ? `<span class="open-fold-notes"> · ${notes} ${notes === 1 ? "note" : "notes"} from the site</span>` : ""}</summary>
-      ${foldOpen ? questionList(v, steer.ui) : ""}
-    </details>`;
+    ${questionList(v, steer.ui)}`;
 }
 
 /** The teacher code at rest, in the sentence the wall's check uses. */
@@ -266,13 +260,6 @@ for (const area of [main, actions]) {
       // A second monitor: the window takes the free Projector; this tab stays the Remote.
       const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
       if (!w) toast(`The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type ${teacherCode(held!.code, teacherDigits())}.`, 8000);
-      return;
-    }
-    if (el.dataset.act === "fold") {
-      // Drawn from foldOpen, not left to the browser: the lobby is redrawn on every view.
-      e.preventDefault();
-      foldOpen = !foldOpen;
-      render();
       return;
     }
     if (el.dataset.act === "swap") {

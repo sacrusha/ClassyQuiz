@@ -132,17 +132,21 @@ element to play there, and give the check back as it was.
   (`peers.md`). The check is replaced in the tab's history, as below.
 - **Quizmaster** (`client/entry-quizmaster.ts`): "Open the lobby ▶" opens a
   room, and this tab becomes the Projector on the lobby's check
-  (`teacher-devices.md`), which keeps the questions with the fixes folded
-  and adds what the lobby needs (how the screens are arranged, the teacher
-  code where a remote is wanted, Let everyone in). The check
+  (`teacher-devices.md`), which lists the questions, their answers folded,
+  with the fixes made here: the fold here stays closed for a Quizmaster as
+  for anyone, so the lobby's check is where whoever runs the quiz sees the
+  questions and catches a wrong key. It adds what the lobby needs (how the
+  screens are arranged, the teacher code where a remote is wanted, Let
+  everyone in). The check
   is replaced in the tab's history, not followed: Back from the lobby passes
   it, where the same button would put up a second quiz.
 
 ## Not known
 
-- Whether teachers miss the question list open on the check: it is folded
-  for every entry, and on the lobby's check too (`teacher-devices.md`,
-  "The single tab: check, then join").
+- Whether a teacher who will run the quiz opens the fold here anyway, to
+  check before uploading, and then sees the questions twice; the lobby's
+  check lists them open (`teacher-devices.md`, "The single tab: check, then
+  join").
 - Whether "Open the lobby" is the word a pub host or a teacher reaches for.
 - Whether school browsers that block site data (IndexedDB) exist in the
   target schools; such a browser can't reach the check.

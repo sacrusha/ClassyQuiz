@@ -553,10 +553,13 @@ With the owner:
   owner (`design/teacher-devices.md`): the toggle on the lobby's check
   rather than the local check's card (the how-to needs the teacher code,
   made at upload); One screen as the first default, then whatever this
-  browser chose or last had; devices only not offered; the questions
-  folded on the lobby's check and the Remote's lobby; the words ("Join
+  browser chose or last had; devices only not offered; the words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
-  it", "‹ Back"), which the landing's film now shows too.
+  it", "‹ Back"), which the landing's film now shows too. The
+  delegate's decisions after the review of v5, likewise not yet seen by
+  the owner: the lobby's check and the Remote's lobby list the questions
+  open with the answers folded, as before v5, since the local check keeps
+  them closed for every entry.
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the

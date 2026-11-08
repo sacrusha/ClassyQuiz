@@ -16,9 +16,11 @@ scripts are the real attacker: they must not be able to take the steering of
 a quiz just because they know its class code.
 
 Before the class joins, the teacher also needs to see at once that this is the
-right quiz and to spot a wrong key. That is what the local check is for,
-before anything goes up (`local-check.md`); the lobby's check keeps the
-questions and their fixes at hand, folded.
+right quiz and to spot a wrong key: with break-time authoring the run is the
+review (`question-flow.md`), and the lobby's check is where a wrong key is
+caught before it reaches the wall. The local check can't be that place for
+a Quizmaster: it keeps the questions closed, since whoever plays mustn't
+see them (`local-check.md`).
 
 The same screens serve a host who runs a quiz for a crowd that isn't a class
 — a pub, a family, a training room, a video call (backlog v5 item 4,
@@ -87,8 +89,11 @@ What matters here:
   screens are English (`local-check.md`, Situation). Which word stands where
   "teacher" stood on the README, the landing and the guidance is decided
   once for all entries: `root-page.md`, "Words for whoever comes".
-- **A Quizmaster reaches the lobby having seen the questions:** the local
-  check shows them before the upload, with their fixes, which go up with
+- **A Quizmaster reaches the lobby, as a rule, without having seen the
+  questions:** the local check folds them for every entry, under a line
+  telling whoever will play to leave them closed, since the page can't know
+  which entry a person will press. A host who opened the fold there and
+  fixed a key finds the fixes on the lobby's check, since they go up with
   the quiz.
 
 ## How the site meets it
@@ -129,9 +134,10 @@ The tab that uploads is the Projector and steers itself. It opens on the
 count is what most often tells two versions of a quiz apart), the join code
 small (with a count once someone has joined), how the screens are arranged
 (below) with the teacher code where a remote is wanted, and the question
-list with its fixes, folded and closed on arrival: the local check showed
-it before the upload, and its fixes came up with the quiz, so a list open
-here would only make the teacher scroll past it a second time. One tap,
+list with its fixes, open, each question's answers folded: this is the
+first place a Quizmaster sees the questions (Situation), and folded answers
+keep the key off a shared screen until the teacher taps a button that says
+it shows them. One tap,
 "Let everyone in", leads to the **join screen** and lets the class in:
 teacher devices come in at any time, student devices only from that tap (or
 Start) on, and one that arrives earlier waits and joins by itself. Letting
@@ -311,8 +317,12 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
 - Whether hosts read the toggle as a question about their setup, and
   whether One screen as the first default costs the example class's teacher
   the remote's how-to they came for (it is one tap, then remembered).
-- Whether a teacher or a host misses the questions open on the lobby's
-  check; whether "‹ Back" says where it leads.
+- Whether "‹ Back" says where it leads.
+- Whether a host who means to play along, as in backlog v5's "a crowd
+  where the host plays too", opens the lobby: its check lists the questions,
+  and only the answers are folded. The entry says it isn't played by whoever
+  starts it (`plays: false`); Peers is built for whoever asked for the quiz
+  playing among the others (backlog v5 item 3).
 - Whether "Join code", "Let everyone in" and "Ask whoever runs it" read
   naturally to a teacher, a child's helper and a pub host; no one outside
   the project has read them.
