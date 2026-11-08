@@ -558,7 +558,12 @@ With the owner:
   it: whether that serves a training room, and the implementer's items.
   Should one menu not serve both rooms, the fallback is a set per upload,
   defaulted by the entry and changeable among the host's settings on the
-  check screen.
+  check screen. The look cap moves with the menu, now 38 (every picture
+  once and seventeen more), so a let-in booking is about 10,700 rows and
+  seven lobbies fit the day's ledger at once. Not designed: booking the
+  looks per class by writes rather than per player by changes, since the
+  run is written whole at most once a second (`design/hosting-and-limits.md`,
+  "Running classes finish").
 - Quizmaster (v5 item 4), the implementer's calls, not yet seen by the
   owner (`design/teacher-devices.md`): the toggle on the lobby's check
   rather than the local check's card (the how-to needs the teacher code,

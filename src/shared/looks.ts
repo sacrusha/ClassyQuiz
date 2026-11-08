@@ -11,13 +11,17 @@ export const BACKGROUND_COUNT = 6;
 export const HAT_COUNT = 10;
 /** The row beside the hats, held, worn at the neck or set before the animal ("tools"): 0 is none, the default. */
 export const TOOL_COUNT = 8;
+/** The menu's pictures a player can put on (the plain disc, no hat and nothing beside it are defaults). */
+export const LOOK_PICTURES = BACKGROUND_COUNT - 1 + HAT_COUNT - 1 + TOOL_COUNT - 1;
 /**
- * Changes of look a child can store in one class. Generous for a child who
- * tries everything; it stops a child who makes a game of hammering the
+ * Changes of look a player can store in one class: every picture once and
+ * seventeen more, the room to explore a child had before the menu grew, so
+ * it moves with the menu. It stops a child who makes a game of hammering the
  * pictures from spending the site's daily allowance (docs/design/class-and-wall.md,
- * "Dressing the avatar": each stored change is two rows).
+ * "Dressing the avatar": each stored change is two rows, booked for every
+ * player a class may have when it is let in: server/rows.ts).
  */
-export const MAX_LOOK_CHANGES = 30;
+export const MAX_LOOK_CHANGES = LOOK_PICTURES + 17;
 /** The server stores the class's looks at most this often: one write covers every child who changed in between. */
 export const LOOK_WRITE_MS = 1000;
 

@@ -291,9 +291,10 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   look whole, so a resend changes nothing; a page from before the tools sends
   no `t`, which means none. It is accepted only in the lobby,
   only for what the menu has, never for a removed avatar, and at most
-  `MAX_LOOK_CHANGES` (30) changes per child, after which the pictures stop
-  responding: trying every picture once is 21. The animal and colour are
-  never touched. The cap stops a child
+  `MAX_LOOK_CHANGES` (38) changes per player, after which the pictures stop
+  responding: every picture once (21, `LOOK_PICTURES`) and seventeen more,
+  the room to explore a child had before the menu grew, so the cap moves
+  with the menu. The animal and colour are never touched. The cap stops a child
   who hammers the pictures from spending the site's daily allowance
   (`hosting-and-limits.md`).
 - On a tablet the nine hats stay on one line: each picture is 60 px, or as
