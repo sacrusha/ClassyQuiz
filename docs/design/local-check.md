@@ -33,7 +33,8 @@ Solo learner mustn't be shown them.
   the page is closed (`pictures.md`, "Stored and served").
 - The site's own screens are English; the root page's top block, Run's
   messages with it, is in the visitor's language (`root-page.md`,
-  "Languages").
+  "Languages"), and so are those messages where opening a room moved them
+  (below, "Opening a room").
 - Pages allow pictures only from the site and as `blob:` URLs, scripts only
   from the site's files (`hosting-and-limits.md`, Content-Security-Policy).
 - Only what is built is offered: the site never promises what isn't (v5).
@@ -109,8 +110,14 @@ doesn't fit its question is left as the quiz has it. The device's own
 bookkeeping moves with it: the previous unstarted quiz ends
 (`hosting-and-limits.md`, "Running classes finish"), the quiz is remembered
 for the resume card and the day for the own-copy line. Refusals (the day's
-caps, the allowance, no connection) show under the entry's button in
-English, the root page's words.
+caps, the allowance, no connection), and "Sending the quiz…" before them,
+show under the entry's button in the root page's words and language
+(`visitorLang`: the device's choice, else the browser's; `root-page.md`,
+"Languages"). They are Run's messages, moved here with the upload, and they
+say what to do next (wait, an own copy, what to tell IT), which a visitor
+who doesn't read English needs as much on this page as on the root page;
+the card around them stays English, the site's own screen. The quiz's own
+problems stay English, as on the root page.
 
 ### The entries
 

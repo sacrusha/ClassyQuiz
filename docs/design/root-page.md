@@ -303,7 +303,9 @@ visitor's choice is made with a switch top right, kept on the device
 (`cq.lang`); the header with the code box and the switch is shared with
 `/example` (`client/top.ts`), so the choice holds on both; otherwise the browser's first language among the four; otherwise
 English. The words are in `client/landing-text.ts`, one table per language, Run's
-messages included. The quiz's own problems, the archive's messages and the text
+messages included, also where opening a room moved them: the local check's
+"Sending the quiz…" and its refusals speak the language this page spoke
+(`local-check.md`, "Opening a room"). The quiz's own problems, the archive's messages and the text
 copied for the AI stay English. Register: German "du", French "vous", Italian
 "tu". The film follows the same line: the page's language up to the upload, the
 site's English screens after it ("The film", Words); its words are in
@@ -378,7 +380,8 @@ file's name is checked after choosing, and anything else gets the message below.
   your AI", which asks for a corrected `.zip`. When the problem is pictures that
   can't go up, the teacher may continue without them. The format and its
   validation are `design/quiz-format.md`.
-- A refused upload, at "Open the lobby" on the local check, says which cap it hit, since the two come back differently:
+- A refused upload, at "Open the lobby" or "Play together" on the local
+  check and in this page's language there ("Languages"), says which cap it hit, since the two come back differently:
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
   request allowance has its own message. Each is followed by "More quizzes: a site

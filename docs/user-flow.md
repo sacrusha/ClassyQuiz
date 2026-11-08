@@ -271,7 +271,9 @@ Big numbers on the number line · 13 questions
   lobby.
 - **Open the lobby ▶** uploads the quiz and lands on the lobby's check
   (§3.3), in this tab as the Projector; Back from there passes this page.
-  While it goes up: "Sending the quiz…". Refused, under the button: the
+  While it goes up: "Sending the quiz…", and refused, under the button,
+  in the language the root page speaks on this device (the card stays
+  English): the
   site's day ("The free site can't take more quizzes today. …", "… has no
   room for another quiz right now …", "… has used up today's allowance …",
   each with "More quizzes: a site of your own or your school's ›"), or no
