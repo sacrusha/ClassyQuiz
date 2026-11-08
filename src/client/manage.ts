@@ -5,6 +5,7 @@ import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.
 import { POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { ROOM_WARN, quotaResetAt } from "../shared/limits.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
+import { TEXT } from "./landing-text.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import type { Line } from "./net.ts";
 import { fillPictures, picImg } from "./pictures.ts";
@@ -386,7 +387,7 @@ export function roomNotice(v: TeacherView): string {
     room === 0
       ? `The free site can't let another group in today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
       : `The free site is nearly full today: room for ${room === 1 ? "one more group" : `about ${room} more groups`}.`;
-  return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">More quizzes: a site of your own or your school's ›</a></p>`;
+  return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">${esc(TEXT.en.ownCopyLink)}</a></p>`;
 }
 
 export function addressAndCode(code: string): string {

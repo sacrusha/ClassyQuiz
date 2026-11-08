@@ -29,6 +29,17 @@ test("every language's other asks name the site's address, for the page to repla
   }
 });
 
+// The three ways keep the local check's names in every language (docs/design/root-page.md, "The three ways, named"),
+// and the static page, which AIs read, carries the English sentence.
+test("every language names the three ways by the check's names, in its order", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { ENTRIES } = await import("./entries.ts");
+  const names = ENTRIES.map((e) => e.name);
+  for (const { id } of LANGS) assert.deepEqual([...TEXT[id].ways.matchAll(/<b>(.*?)<\/b>/g)].map((m) => m[1]), names, id);
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes(`data-t-html="ways">${TEXT.en.ways}</p>`), "index.html's sentence differs from landing-text.ts's");
+});
+
 // The film (public/js/film.js) types the example ask, shows the Run box's words and names its chapters and controls as this file has them, copied in when
 // docs/film/build/sitebuild.py builds it; its pictures are rendered then too. A change here without a rebuild would leave
 // the film saying the old words: this fails until sitebuild.py has run.

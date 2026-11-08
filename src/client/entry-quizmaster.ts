@@ -7,7 +7,7 @@
 import { esc, tabLobby, tabRole } from "./dom.ts";
 import type { Entry } from "./entries.ts";
 import { TEXT } from "./landing-text.ts";
-import { openRoom, roomRefusal, type RoomResult } from "./opening.ts";
+import { openRoom, roomRefusal, visitorLang, type RoomResult } from "./opening.ts";
 
 export const quizmaster: Entry = {
   name: "Quizmaster",
@@ -16,7 +16,8 @@ export const quizmaster: Entry = {
   note: "This puts the quiz on the site. Until then it is only in this browser.",
   plays: false,
   async start(quiz, ctx) {
-    ctx.say(`<p class="muted">${esc(TEXT.en.sending)}</p>`);
+    const lang = visitorLang();
+    ctx.say(`<p class="muted" lang="${lang}">${esc(TEXT[lang].sending)}</p>`);
     let r: RoomResult;
     try {
       r = await openRoom(quiz);

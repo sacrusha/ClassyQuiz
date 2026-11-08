@@ -223,7 +223,8 @@ the open list at the end.
    copy is a choice, an unchanging copy being what a teacher values before a
    lesson. The conversion is the school's, not checked here (owner: the point of
    telling them to convert is so we don't have to); `simulate.mjs` is their
-   check (`design/hosting-and-limits.md`, "A copy on a school's own server").
+   check (`design/hosting-and-limits.md`, "A copy on a school's or company's
+   own server").
    Open: the page says the VM route takes "minutes" and the walk-through "a
    while" (owner), untimed on the current README; the VM's network access
    (`root-page.md`, "Not known"). The own-copy line
@@ -319,7 +320,7 @@ the open list at the end.
     quiz if that one never started; the days' classes, rows written and
     peak are in `GET /api/site` for the owner. The check warns while fewer
     than three classes fit and keeps the refusal on screen, both with "More
-    quizzes: a site of your own or your school's ›" (the owner: "Your own
+    quizzes: a site of your own, your school's or your company's ›" (the owner: "Your own
     copy" too ambiguous); the landing's line counts busy days too (half the day's rows booked at once). Not
     deployed. Owner: booking slots and releasing them, the shrink at
     Start, one stored quiz per device, the low cap instead of overbooking,
@@ -383,8 +384,11 @@ exploration behind these items — options and what each would cost — is
    questions — what lets a quiz be played by its own maker: the guidance's
    "When the user will play the quiz" and the local check's fold —
    `design/guidance-page.md` ("The user who plays"),
-   `design/local-check.md`. Open: whether AIs keep the questions out of the
-   chat and report enough; no run since the page says it.
+   `design/local-check.md`. A quizmaster doesn't play: the guidance says
+   so, and has the AI ask a user who will host and play which they mean,
+   Peers or Quizmaster. Open: whether AIs keep the questions out of the
+   chat, ask, and report enough without naming a question; no run since
+   the page says it.
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
@@ -413,11 +417,17 @@ exploration behind these items — options and what each would cost — is
 9. A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
    lesson's, recognise themselves on the page, the example class's teacher
    still served first: the word decided once (`design/root-page.md`, "Words
-   for whoever comes"), the guidance describing the three ways and where each
-   reads a question (`design/guidance-page.md`), three more example asks with
+   for whoever comes"), the three ways named in one sentence above Build and
+   Run, in the visitor's language, by the names the check's cards carry
+   (`design/root-page.md`, "The three ways, named"), Run's words leaving
+   "play" to the check's cards so a child with a code isn't drawn into the
+   file picker ("Run first when stacked"), the guidance describing the three
+   ways and where each reads a question (`design/guidance-page.md`), three
+   more example asks with
    no line under them since no run is behind them, and the film showing the
    check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
-   (`translation-review.md`, "The other ways to play", E6); whether someone
+   (`translation-review.md`, "The other ways to play", "The words before
+   the check", E6); whether someone
    who isn't a teacher reads the page as theirs, which nobody outside the
    project has tried.
 

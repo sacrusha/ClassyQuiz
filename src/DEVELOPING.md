@@ -19,8 +19,8 @@ All commands run in `src/` unless said otherwise.
 - The Cloudflare-specific code stays in the Durable Object classes and the
   `/api` router, with the logic they call kept pure (`server/game.ts`,
   `server/images.ts`, `quiz/`, `shared/`). A school converts the server to its
-  own with an AI, and converts again to take an update (README, "On your
-  school's own server"); code that spreads the platform further makes every
+  own with an AI, and converts again to take an update (README, "On a
+  school's or company's own server"); code that spreads the platform further makes every
   conversion bigger. The local check (`client/open.ts`, `client/opening.ts`)
   runs `quiz/`, `server/images.ts` (`matchImages`) and `server/game.ts` (the
   fixes) in the browser, to check a quiz as the server will before anything

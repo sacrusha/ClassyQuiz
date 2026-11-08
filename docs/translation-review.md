@@ -31,7 +31,7 @@ tu). No role noun, by meaning (`design/root-page.md`, "Words for whoever comes")
 | key | en | de | fr | it |
 |---|---|---|---|---|
 | tabSolo | To practise on your own | Zum Üben für dich allein | Pour réviser en solo | Per esercitarti per conto tuo |
-| tabFriends | With friends, playing too | Mit Freunden, du spielst mit | Entre amis, en jouant aussi | Con gli amici, giocando anche tu |
+| tabFriends | To play with friends | Zum Spielen mit Freunden | Pour jouer entre amis | Per giocare con gli amici |
 | tabGroup | For a group you lead: a training session | Für eine Gruppe, die du leitest: eine Schulung | Pour un groupe que vous animez : une formation | Per un gruppo che guidi: una formazione |
 | joinCode | Join code | Code zum Beitreten | Code pour rejoindre | Codice per entrare |
 
@@ -45,10 +45,49 @@ Changed by the same pass in all four, so the rows above that quote the old wordi
 offline, capZip) apply to the new one: nothing goes to the site when the `.zip` is opened, so the Run
 box and its hints say open, not upload ("öffnen", "ouvrir", "aprire"; `upload`, `zipOnly`, `aiFixes`),
 and the chapter is "Die .zip, hier geöffnet / Le .zip, ouvert ici / Lo .zip, aperto qui" (`capZip`);
-the English heading is "Play a quiz" (the others already said start). The network help (`offline`)
+Run's heading and button are below, "The words before the check". The network help (`offline`)
 names "the network of a school or a company" ("das Netz einer Schule oder Firma", "le réseau d'une
 école ou d'une entreprise", "la rete di una scuola o di un'azienda"). fr keeps a plain space before ":" and
 "?" as the other asks do until D6 is decided.
+
+## The words before the check (after v5)
+
+Drafted by the words pass, not by a translator agent. Run's heading speaks to whoever has the AI's
+quiz and its button names the file, so neither says play or start: a child with a code who missed
+the box at the top would go to the largest words and the strongest button (`design/root-page.md`, "Run
+first when stacked"). One sentence above Build and Run names the three ways by the check's names,
+which stay English in every language ("Peers" is a name), each with what it is (`design/root-page.md`,
+"The three ways, named"). The friends tab is named like the solo tab, as a purpose.
+
+| key | en | de | fr | it |
+|---|---|---|---|---|
+| run | Open the quiz your AI made | Das Quiz deiner KI öffnen | Ouvrir le quiz de votre IA | Apri il quiz della tua IA |
+| upload | Choose the .zip file | Die .zip-Datei wählen | Choisir le fichier .zip | Scegli il file .zip |
+| ways | A quiz is played here in three ways: **Solo**, on your own; **Peers**, with friends, each on their own device; **Quizmaster**, you run it for a group, on a big screen. | Gespielt wird ein Quiz hier auf drei Arten: **Solo**, für dich allein; **Peers**, mit Freunden, alle am eigenen Gerät; **Quizmaster**, du leitest es für eine Gruppe, am grossen Bildschirm. | Ici, un quiz se joue de trois façons⍽: **Solo**, de votre côté⍽; **Peers**, entre amis, chacun sur son appareil⍽; **Quizmaster**, vous l'animez pour un groupe, sur grand écran. | Qui un quiz si gioca in tre modi: **Solo**, per conto tuo; **Peers**, con gli amici, ognuno sul proprio dispositivo; **Quizmaster**, lo guidi tu per un gruppo, sul grande schermo. |
+| tabFriends | To play with friends | Zum Spielen mit Freunden | Pour jouer entre amis | Per giocare con gli amici |
+
+Choices made: `run` is the earlier button's words without "(.zip)", and "starten / lancer / avviare"
+are gone with "play"; fr "de votre côté" for on your own, since "seul" is gendered (it "per conto
+tuo", as the solo tab); fr "chacun sur son appareil" and it "ognuno" are the generic masculine; `ways`
+in fr has U+202F before ":" and ";" (D6), since it wraps on every phone and a plain space would let a
+";" start a line.
+
+The way to more quizzes names a company after the school, so a trainer isn't told the route is a
+school's (`design/root-page.md`, "The own copy"); the German IT link drops "Schul-", as the network
+help it follows already says "Schule oder Firma". These supersede the rows for `ownCopyLink`,
+`ownCopy` and `whatToTellIt` in the language tables below where they name the school alone; their
+other proposals (word order, "Tageskontingent") still stand.
+
+| key | en | de | fr | it |
+|---|---|---|---|---|
+| ownCopyLink | More quizzes: a site of your own, your school's or your company's › | Mehr Quiz: eine eigene Seite oder eine der Schule oder Firma › | Plus de quiz⍽: un site à vous, à votre école ou à votre entreprise › | Più quiz: un sito tuo, della tua scuola o della tua azienda › |
+| ownCopy (end) | For more quizzes, a site of your own, your school's or your company's: | Für mehr Quiz eine eigene Seite oder eine der Schule oder Firma: | Pour plus de quiz, un site à vous, à votre école ou à votre entreprise⍽: | Per più quiz, un sito tuo, della tua scuola o della tua azienda: |
+| whatToTellIt | (unchanged) | Was du der IT sagen kannst › | (unchanged) | (unchanged) |
+
+Where these words now show: a room's refusals on the local check (`siteFull`, `quota`, `offline`,
+`whatToTellIt`, `ownCopyLink`, `quizHead`) and "Sending the quiz…" before them (`sending`) speak the
+root page's language there too (`design/local-check.md`, "Opening a room"), so the proposals for
+those keys apply to the check as well as to the root page.
 
 ## The worked example (`/example`)
 
@@ -100,12 +139,12 @@ Convention kept: no ß, Swiss words (nochmals, Schlussrangliste, Gratis-Seite).
 | film | Vom Aufgabenblatt bis zur Klasse: ein Film ohne Worte | Vom Arbeitsblatt zur Klasse: ein Film ohne Ton | D1; "bis zur" stiff |
 | capSheet | Deine Aufgabenblätter | Deine Arbeitsblätter | everyday teacher word (CH and DE); "Aufgabenblatt" sounds like university sets |
 | build | Ein Quiz bauen | Quiz erstellen | headings drop the article; "bauen" calque |
-| run | Ein Quiz starten | Quiz starten | same |
+| run | Ein Quiz starten | Quiz starten | superseded: "The words before the check" |
 | step1 | Wähle eine gute KI. | Wähle eine gute KI, egal welche. | carries "any" (see D4) |
 | step1detail | Das Beispiel oben hat das kostenlose Claude Sonnet geschrieben, 4. Nov. 2026: die eine kostenlose KI, die das zuverlässig kann. | Das Beispiel oben hat das kostenlose Claude Sonnet am 4. Nov. 2026 geschrieben – die einzige kostenlose KI, die das zuverlässig kann. | "die eine" anglicism |
 | tabSheets | Mit Fotos von Aufgabenblättern | Mit Fotos von Arbeitsblättern | follows capSheet |
 | tabChess | Aus einer Beschreibung: ein Schach-Quiz | Nach einer Beschreibung: ein Schachquiz | idiom; closed compound |
-| upload | Das Quiz deiner KI hochladen (.zip) | Quiz deiner KI hochladen (.zip) | button, no article |
+| upload | Das Quiz deiner KI hochladen (.zip) | Quiz deiner KI hochladen (.zip) | superseded: "The words before the check" |
 | drop | oder hier ablegen | oder hierher ziehen | everyday drag-and-drop (low priority) |
 | zipOnly | Deine KI kann das Quiz als eine .zip-Datei machen, zum Herunterladen aus dem Chat und Hochladen hier. | Deine KI kann das Quiz als einzelne .zip-Datei erstellen: im Chat herunterladen, hier hochladen. | nominal chain clumsy |
 | notText | Die Seite nimmt das Quiz als .zip-Datei, nicht als Text. | Die Seite braucht das Quiz als .zip-Datei, nicht als Text. | "nimmt … als" not idiomatic |

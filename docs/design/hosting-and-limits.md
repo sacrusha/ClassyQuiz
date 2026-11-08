@@ -119,12 +119,12 @@ The refusal messages in `shared/limits.ts` (`OWN_COPY`) still name
 `classyquiz.pages.dev/own-copy`, so a copy shows the demo's address there. A
 copy that raises its limits rarely shows them.
 
-### A copy on a school's own server
+### A copy on a school's or company's own server
 
-The README's "On your school's own server" is what a school's AI converts
-from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
+The README's "On a school's or company's own server" is what a school's or
+company's AI converts from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
 and the two checks it passes. `/own-copy` offers the route to teachers
-(`root-page.md`, "The own copy"). The conversion is the school's and is not
+(`root-page.md`, "The own copy"). The conversion is theirs and is not
 checked here.
 
 A converted copy left as it is has one dependency on the live site: a
@@ -281,8 +281,8 @@ device. The numbers and the rest are the implementer's, to confirm.
   refused tap), and the check (and a Remote's lobby) shows, while fewer than
   `ROOM_WARN` (3) classes like this one fit: "nearly full today: room for
   about n more groups", or at none "can't let another group in today … again at
-  01:00 Swiss time", both with "More quizzes: a site of your own or your
-  school's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
+  01:00 Swiss time", both with "More quizzes: a site of your own, your
+  school's or your company's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
   where a toast would be gone before a teacher who looked away saw it. The
   count is from the upload or the last tap, not live; three classes is
   roughly the last third of the day. Days whose bookings reached

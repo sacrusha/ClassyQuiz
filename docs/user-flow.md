@@ -107,15 +107,17 @@ Purpose and reasons: docs/design/root-page.md.
 │          └───────────────────────────────────────┘                   │
 │          [▶] ──●──'───'─'──'────── 0:00 / 1:00 [1×] [full screen]    │
 │                              The example, step by step ›             │
+│ A quiz is played here in three ways: Solo, on your own; Peers, with  │
+│ friends, each on their own device; Quizmaster, you run it for a …    │
 ├──────────────────────────────────┬───────────────────────────────────┤
-│ Build a quiz                     │ Play a quiz                        │
+│ Build a quiz                     │ Open the quiz your AI made        │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
 │   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Join code   ││ quiz this device
 │   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
 │ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
 │   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   [sheets][chess][1][3][▭][?]    │ │ [ Open the quiz your AI        │ │
-│   tabs, one ask shown:           │ │   made (.zip) ] or drop it here│ │
+│   [sheets][chess][1][3][▭][?]    │ │ [ Choose the .zip file ]       │ │
+│   tabs, one ask shown:           │ │   or drop it here              │ │
 │  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
 │                                  │                                   │ uploaded before, the
@@ -141,6 +143,10 @@ Purpose and reasons: docs/design/root-page.md.
   time bar has a row of its own. At the end a replay icon on the end card.
   Under it, "The example, step by step ›" links `/example` (the worked
   example).
+- **The three ways**, one sentence above Build and Run: "A quiz is played
+  here in three ways: **Solo**, on your own; **Peers**, with friends, each
+  on their own device; **Quizmaster**, you run it for a group, on a big
+  screen." The names are the local check's cards', in every language.
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
 - **Build's step 2** has six example asks behind six picture tabs: the
   labelled one with photos of sheets, a chess quiz described in words (with
@@ -151,8 +157,9 @@ Purpose and reasons: docs/design/root-page.md.
   classyquiz.pages.dev. I need a classyQuiz. Help?"). Pictures: the sheets, a
   chess board, one person, three people, a screen before an audience, a
   question mark.
-- **Play a quiz takes a .zip and nothing else.** The button opens the file
-  chooser; a .zip can also be dropped on the box. Nothing invites pasting.
+- **Run ("Open the quiz your AI made") takes a .zip and nothing else.** Its
+  button, "Choose the .zip file", opens the file chooser; a .zip can also
+  be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
     chosen one.
   - Text pasted or dropped anyway gets "The site takes the quiz as a .zip
@@ -181,8 +188,8 @@ Purpose and reasons: docs/design/root-page.md.
   groups." (one more: "room for one more group"); when no class fits
   or letting in was refused: "The free site can't let another group in today:
   the quizzes under way use what is left. It takes new ones again at 01:00
-  Swiss time." Both followed by "More quizzes: a site of your own or your
-  school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
+  Swiss time." Both followed by "More quizzes: a site of your own, your
+  school's or your company's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
 - **The network check** is no longer on the root page: opening the lobby,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
@@ -264,10 +271,13 @@ Big numbers on the number line · 13 questions
   lobby.
 - **Open the lobby ▶** uploads the quiz and lands on the lobby's check
   (§3.3), in this tab as the Projector; Back from there passes this page.
-  While it goes up: "Sending the quiz…". Refused, under the button: the
+  While it goes up: "Sending the quiz…", and refused, under the button,
+  in the language the root page speaks on this device (the card stays
+  English): the
   site's day ("The free site can't take more quizzes today. …", "… has no
   room for another quiz right now …", "… has used up today's allowance …",
-  each with "More quizzes: a site of your own or your school's ›"), or no
+  each with "More quizzes: a site of your own, your school's or your
+  company's ›"), or no
   connection or an answer that isn't the site's (a filter's page): the
   network named as a possible cause, with "What to tell IT ›" to
   `/check#it`.
