@@ -199,10 +199,12 @@ belongs to a child. Random assignment does the first with no fights, since
 nothing can be grabbed and nobody chose the frog. The second is given to the
 child by dressing the animal in the lobby.
 
-The same avatars serve a crowd that isn't a class, a business audience among
-them (v5 item 4). The owner, 2026-11-08: the animals stay; expanding on the
-top hat is businessy enough; pulling the pickable tools back in (laptop,
-chart, calculator, …) might be one approach.
+Purpose (v5 item 4; the owner, 2026-11-08): the avatars let a wider
+audience use the site, a business or training room among them. The owner's
+direction for it: the animals stay; expanding on the top hat is businessy
+enough; pulling the pickable tools back in (laptop, chart, calculator, …)
+might be one approach. The top hat is also the site's mark: the fox in a top
+hat is what makes it classy (`identity.md`).
 
 Why this shape:
 
@@ -223,52 +225,84 @@ Why this shape:
   pick.
 - No words on the menu, and no new control for the teacher. Start ends the
   dressing. Late joiners get no menu and play plain.
-- One menu for every room, with no avatar set for a host to pick per upload
-  and none carried by the quiz, as the owner's words lean. The menu carries a
-  business register beside the classroom's instead: the top hat, and tools
-  that belong to an office and to a classroom alike (a calculator, a book).
-  Plausible assumption, unseen with either audience: adults at work find a
-  look that suits them in it, and children don't find the office things
-  dull. Should it fail, a set per room is the fallback, and its setting the
-  host's (backlog, Open).
+- The wider audience is served by each adult's own look: one who finds an
+  animal on a disc out of place at work dresses it into something that fits,
+  from the same menu. The rulings above were written for children and hold
+  for adults as they stand: the same menu for everybody, nothing scarce or
+  earned, a plain start, dressing optional. So there is no look for a room,
+  no default against the plain start, no set for a host to pick per upload
+  and none carried by the quiz, and a training room where nobody dresses
+  looks as a class does: animals on discs. Plausible assumption, unseen with
+  either audience: an adult at work finds a fitting look in the menu, and
+  children don't find the office's things dull. Should one menu not serve
+  both, a set per room is the fallback, its setting the host's (backlog,
+  Open).
+- Two registers for adults sit beside the children's. The dapper one is
+  the implementer's reading of the owner's "expanding on the top hat": the
+  bowler and the bow tie. The office's is the owner's examples, the laptop,
+  the chart and the calculator, with the implementer's coffee, briefcase and
+  book. Each is in the menu because it survives the bar's sizes on the
+  wall's paper (figure, below).
+- Tools for the children themselves, the students' own wish (backlog v4
+  item 9), are not these: the office's things serve the adults. That
+  register is still open.
 
 What it is (`shared/looks.ts`, `client/look.ts`):
 
-- Six shapes in the child's own colour (circle, which is the default, hexagon,
-  star, heart, flower, pond; `BACKGROUND_COUNT`), eight hats (crown, top hat,
-  cap, wizard hat, party hat, flower, beanie, viking helmet; `HAT_COUNT` is 9
-  with "none") and six tools held beside the animal (laptop, chart,
-  calculator, coffee, briefcase, book; `TOOL_COUNT` is 7 with "none"), a row
-  each in the picker. Tapping a shape puts the animal on it; tapping a hat or
-  a tool puts it on; tapping the worn one takes it off. One hat and one tool
-  at a time. Figure `../avatars/tools.png`: every animal with a tool, with and
-  without the top hat, at 80 px, and a class of 25 at the bar's 26 and 34 px.
+- Six shapes in the player's own colour (circle, which is the default,
+  hexagon, star, heart, flower, pond; `BACKGROUND_COUNT`), nine hats (crown,
+  top hat, cap, wizard hat, party hat, flower, beanie, viking helmet,
+  bowler; `HAT_COUNT` is 10 with "none") and seven things held, worn or set
+  before the animal, called the tools in the code (laptop, chart,
+  calculator, coffee, briefcase, book, bow tie; `TOOL_COUNT` is 8 with
+  "none"), a row each in the picker. Tapping a shape puts the animal on it;
+  tapping a hat or a thing puts it on; tapping the worn one takes it off.
+  One hat and one thing from the third row at a time, so the bow tie and the
+  laptop don't go together. Figure `../avatars/tools.png`: every animal with
+  a thing from the row, with the top hat or the bowler, and with the top hat
+  and the bow tie, at 80 px; a class of 25 at the bar's 26 and 34 px on the
+  wall's paper; the Remote's list of players at 44 px, light and dark.
 - Rejected shapes: rhombus, square and triangle, because the answer marks are
   a red triangle, blue diamond, yellow circle and green square, and the bar
   must never read as an answer's colour. A cloud reads as a disc at 26 px.
-- Tools are solid blobs, about two fifths of the avatar across: the animals are heads
-  without paws, and at 21 to 34 px a thin tool (a staff, a shovel, a wand) is 1
-  to 2 px wide and gone, while a blob shows as a patch on that side, as a hat
-  does on top. Each is held at the same place on every animal, low on the
-  right, over the cheek and past the disc's edge, so it changes the outline
-  there. Their colours are neutral (grey, white, brown, the site's rust) and
-  none is an answer's colour in an answer's shape.
-- Considered and not built: a bow tie or a necktie, the top hat's own
-  register, which would need a seat under each animal's chin and a fourth row
-  or a place in the tools' row; a necktie is a thin line at 26 px.
+- The third row's things are solid blobs: the animals are heads without
+  paws, and at 21 to 34 px a thin tool (a staff, a shovel, a wand) is 1 to 2
+  px wide and gone, while a blob shows as a patch, as a hat does on top.
+  Things held sit at the same place on every animal, low on the right, over
+  the cheek and past the disc's edge, so they change the outline there; they
+  measure 0.30 to 0.36 of the avatar across and 0.31 to 0.42 high (the
+  coffee's steam the tallest). Where they pass the disc's edge they are
+  dark, brown or the site's rust: white there is lost on the wall's paper at
+  26 px. The bow tie
+  sits under each animal's chin, 0.31 across, black with a faint white edge
+  so it shows on a dark disc. The laptop stands before the animal, seen from
+  its lid, low in the middle and below every mouth, 0.46 across: held low on
+  the right, at 44 px on the Remote's list of players, a laptop sits where
+  apps put a status badge and reads as the device the player is on.
+- Their colours are greys, black, brown, white and the site's rust, with a
+  pale green calculator screen and a pale label on the book; none is an
+  answer's colour, and so none an answer's colour in an answer's shape.
+- Not in the menu: a monocle, the dapper register's third piece. From 34 px
+  it reads as a monocle; at 21 to 26 px it is a grey smudge over one eye, a
+  flaw in the drawing rather than a smaller monocle. A necktie is a thin line
+  at 26 px.
 - The look is stored with the player as `b`, `h` and `t` beside the animal and
   colour (`Avatar`); absent means the default. The command `dress` sets the
   look whole, so a resend changes nothing; a page from before the tools sends
   no `t`, which means none. It is accepted only in the lobby,
   only for what the menu has, never for a removed avatar, and at most
-  `MAX_LOOK_CHANGES` (30) changes per child, after which the pictures stop
-  responding: trying every picture once is 19. The animal and colour are
-  never touched. The cap stops a child
+  `MAX_LOOK_CHANGES` (38) changes per player, after which the pictures stop
+  responding: every picture once (21, `LOOK_PICTURES`) and seventeen more,
+  the room to explore a child had before the menu grew, so the cap moves
+  with the menu. The animal and colour are never touched. The cap stops a child
   who hammers the pictures from spending the site's daily allowance
   (`hosting-and-limits.md`).
-- On a phone narrower than 340 px the pictures shrink to 42 px, six to a line,
-  so the three rows fit on the screen with the avatar (`.dress` in
-  `app.css`).
+- On a tablet the nine hats stay on one line: each picture is 60 px, or as
+  little as 46 where the picker is narrower (53 px on a 1024 px tablet held
+  sideways). On a phone they are 46 px, six to a line, so the hats and the
+  third row take two lines each; narrower than 340 px they shrink to 42 px
+  and the gaps tighten, so the menu and the avatar fit a 320 by 568 screen
+  without scrolling (`.dress` in `app.css`).
 - The server writes the class's looks at most once per `LOOK_WRITE_MS` (1 s);
   views go out after the write, so nothing shows that is not stored. Each
   stored change is two rows, so the cost of a class is bounded whatever the
@@ -376,10 +410,12 @@ added, and some teachers want to photograph it. So it has its own screen
 - Whether the students' buttons need the answer text, or heads stay down (the
   owner has not said whether the colour-coded setup he saw had text on the
   devices).
-- Whether the top hat and the tools are businessy enough for a training room
-  or a team event (owner, on seeing them), and whether children take to the
-  office things; whether a tool at the bar's 26 px helps a child find their
-  avatar or only crowds it.
+- Whether adults at work dress at all, and whether the dapper and the
+  office's registers give them a look that fits (the owner, on seeing them);
+  whether a training room of undressed animals keeps anyone from using the
+  site; whether children take to the office's things, and read the laptop
+  seen from its lid as a laptop; whether a thing from the third row at the
+  bar's 26 px helps a child find their avatar or only crowds it.
 - Pairs and teams: two children on one tablet already work as one player;
   whether "of 25" and the ranking read sensibly when twelve tablets stand for
   twenty-four children is unchecked, and team play is a mode of its own.

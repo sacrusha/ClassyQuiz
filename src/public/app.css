@@ -270,9 +270,10 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
    one above the other when upright. No words. */
 .play .dress { flex: 1; display: grid; gap: 16px; align-items: center; justify-items: center; grid-template: "hero picker" 1fr "look picker" auto / auto 1fr; }
 .dress .hero { grid-area: hero; width: min(44vw, 58vh); height: min(44vw, 58vh); }
-.dress .picker { grid-area: picker; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 560px; }
+.dress .picker { grid-area: picker; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 610px; container-type: inline-size; }
 .dress .prow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.dress .pick { width: 60px; height: 60px; border-radius: 14px; border: 3px solid var(--rule); background: var(--card); padding: 6px; touch-action: manipulation; }
+/* The nine hats on one line wherever a tablet's picker is narrower than they need at 60 px. */
+.dress .pick { --pick: clamp(46px, calc((100cqw - 64px) / 9), 60px); width: var(--pick); height: var(--pick); border-radius: 14px; border: 3px solid var(--rule); background: var(--card); padding: 6px; touch-action: manipulation; }
 .dress .pick svg { width: 100%; height: 100%; display: block; }
 .dress .pick.on { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
 .dress.spent .pick { opacity: .45; }
@@ -289,6 +290,7 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 /* Six to a line on the narrowest phones, so the three rows fit without scrolling. */
 @media (max-width: 340px) {
   .dress .pick { width: 42px; height: 42px; padding: 3px; }
+  .play .dress { gap: 20px; }
 }
 /* A changed look: the child sees which one on the wall is theirs. */
 @keyframes wiggle { 0% { transform: none; } 25% { transform: scale(1.12) rotate(-8deg); } 50% { transform: scale(1.12) rotate(8deg); } 75% { transform: scale(1.05) rotate(-4deg); } 100% { transform: none; } }

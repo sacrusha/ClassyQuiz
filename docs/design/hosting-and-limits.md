@@ -268,7 +268,7 @@ device. The numbers and the rest are the implementer's, to confirm.
   look up to `MAX_LOOK_CHANGES` (2 rows each), answers each question at most
   three times (`MAX_ANSWER_CHANGES`, 2: a mis-tap and one rethink, the owner:
   adequate; 2 rows each), plus the teacher's steps. For 15 questions that is
-  about 9,700 rows, the looks a third of it. Start without letting in books
+  about 10,700 rows, the looks over two fifths of it. Start without letting in books
   the same. `SiteBudget` keeps the day's ledger (`r:` and the day, back at
   00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
   the rest is for uploads, whose quiz and pictures are rows, the site's small
@@ -298,11 +298,11 @@ device. The numbers and the rest are the implementer's, to confirm.
   that call fails, the quiz's end settles it instead. The
   quiz itself stays its three hours for photographs and rejoining. A quiz
   that ends or expires before its final ranking settles then.
-- So the ledger limits classes at the same time, not in the day: about 8
+- So the ledger limits classes at the same time, not in the day: about 7
   lobbies let in at once, or about 24 started classes of 25, while finished
   classes count only what they wrote. The last booking of a busy day leaves
   some of the day unused, which is accepted.
-- **A let-in lobby that is left holds its booking**, about 12% of the day,
+- **A let-in lobby that is left holds its booking**, about 13% of the day,
   until the quiz expires three hours after the teacher's last step. One
   quiz per device bounds that per device: a device's next upload ends its
   previous quiz if that one never started (`POST /api/i/:id/replaced` with

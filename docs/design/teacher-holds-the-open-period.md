@@ -16,8 +16,8 @@ that no two sources ever have to be reconciled.
 - Every stored change writes the run and the instance's meta: two rows
   (`server/instance.ts`, `persist`; `server/rows.ts`). Answers are most of a
   class: about 750 of the ~1,300 rows of a class of 25 over 15 questions, and
-  5,400 of the ~9,700 a let-in booking assumes. Looks are most of the rest of
-  that booking: a player may change look `MAX_LOOK_CHANGES` (30) times, 2
+  5,400 of the ~10,700 a let-in booking assumes. Looks are most of the rest of
+  that booking: a player may change look `MAX_LOOK_CHANGES` (38) times, 2
   rows each.
 - Rows are counted per row written, not per byte (Cloudflare's billing, to
   confirm), so a smaller layout does not save rows; fewer keys and fewer
