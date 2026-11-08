@@ -81,6 +81,8 @@ export interface Text {
   notText: string;
   notFile: (what: "several" | "this" | string) => string;
   unreadable: string;
+  /** The quiz couldn't be passed to the local check: the browser keeps no site data (client/handoff.ts). */
+  noHandoff: string;
   tooLong: (kb: number) => string;
   reading: string;
   preparing: (done: number, of: number) => string;
@@ -160,6 +162,7 @@ const en: Text = {
   notText: "The site takes the quiz as a .zip file, not as text.",
   notFile: (w) => `The site takes the quiz as a .zip file, not ${w === "several" ? "several files at once" : w === "this" ? "this file" : `a .${w} file`}.`,
   unreadable: "The file couldn't be read.",
+  noHandoff: "This browser didn't let the site open the quiz (it may block site data). Try another browser.",
   tooLong: (kb) => `The quiz text is longer than the site takes (${kb} KB).`,
   reading: "Reading the quiz…",
   preparing: (d, o) => `Preparing the pictures… ${d} of ${o}`,
@@ -239,6 +242,7 @@ const de: Text = {
   notText: "Die Seite nimmt das Quiz als .zip-Datei, nicht als Text.",
   notFile: (w) => `Die Seite nimmt das Quiz als .zip-Datei, nicht ${w === "several" ? "mehrere Dateien auf einmal" : w === "this" ? "diese Datei" : `eine .${w}-Datei`}.`,
   unreadable: "Die Datei liess sich nicht lesen.",
+  noHandoff: "Dieser Browser hat das Quiz nicht öffnen lassen (er blockiert vielleicht Website-Daten). Versuch es in einem anderen Browser.",
   tooLong: (kb) => `Der Quiztext ist länger, als die Seite nimmt (${kb} KB).`,
   reading: "Das Quiz wird gelesen…",
   preparing: (d, o) => `Die Bilder werden vorbereitet… ${d} von ${o}`,
@@ -318,6 +322,7 @@ const fr: Text = {
   notText: "Le site prend le quiz en fichier .zip, pas en texte.",
   notFile: (w) => `Le site prend le quiz en fichier .zip, pas ${w === "several" ? "plusieurs fichiers à la fois" : w === "this" ? "ce fichier" : `un fichier .${w}`}.`,
   unreadable: "Le fichier n'a pas pu être lu.",
+  noHandoff: "Ce navigateur n'a pas laissé le site ouvrir le quiz (il bloque peut-être les données de site). Essayez un autre navigateur.",
   tooLong: (kb) => `Le texte du quiz est plus long que ce que le site accepte (${kb} Ko).`,
   reading: "Lecture du quiz…",
   preparing: (d, o) => `Préparation des images… ${d} sur ${o}`,
@@ -397,6 +402,7 @@ const it: Text = {
   notText: "Il sito prende il quiz come file .zip, non come testo.",
   notFile: (w) => `Il sito prende il quiz come file .zip, non ${w === "several" ? "più file insieme" : w === "this" ? "questo file" : `un file .${w}`}.`,
   unreadable: "Non è stato possibile leggere il file.",
+  noHandoff: "Questo browser non ha lasciato aprire il quiz al sito (forse blocca i dati dei siti). Prova con un altro browser.",
   tooLong: (kb) => `Il testo del quiz è più lungo di quanto il sito accetti (${kb} KB).`,
   reading: "Lettura del quiz…",
   preparing: (d, o) => `Preparazione delle immagini… ${d} di ${o}`,

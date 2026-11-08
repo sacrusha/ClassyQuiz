@@ -20,6 +20,7 @@ import {
   SMALL_LONG_SIDE,
   type UploadResult,
 } from "../shared/protocol.ts";
+import type { Fix } from "../server/game.ts";
 import { api, readApi } from "./net.ts";
 import type { ZipEntry } from "./unzip.ts";
 
@@ -203,16 +204,18 @@ async function sizedSvg(blob: Blob, longSide: number): Promise<Blob> {
 /**
  * Sends the quiz: as JSON without pictures, as multipart/form-data with them.
  * `leaveOut`: the teacher chose to run without the pictures that couldn't go
- * up. `json: false`: the answer wasn't the site's (a school filter's page,
+ * up. `fixes`: the local check's, by question in the text's order
+ * (server/game.ts, Fix); the server checks them as it checks a teacher's. `json: false`: the answer wasn't the site's (a school filter's page,
  * say); `quota`: the daily allowance is spent.
  */
-export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut: boolean): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
+export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut: boolean, fixes: Fix[]): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
   if (images.length === 0) {
-    return (await api<UploadResult & { error?: string }>("/api/quiz", leaveOut ? { text, leaveOut: "missing" } : { text })).body;
+    return (await api<UploadResult & { error?: string }>("/api/quiz", { text, fixes, ...(leaveOut ? { leaveOut: "missing" } : {}) })).body;
   }
   const form = new FormData();
   form.append("text", text);
   if (leaveOut) form.append("leaveOut", "missing");
+  form.append("fixes", JSON.stringify(fixes));
   // The name travels as a text field: a non-ASCII file name in a multipart
   // header is decoded differently from one runtime to the next.
   images.forEach((im, i) => {

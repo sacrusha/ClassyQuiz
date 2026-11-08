@@ -50,6 +50,15 @@ export function load(src: string, first = false): Promise<string | null> {
   return p;
 }
 
+/**
+ * A picture this page already holds as a blob URL (the local check's, read
+ * from the zip): used as it is. Fetching it would be refused, the
+ * Content-Security-Policy letting pages fetch only from the site.
+ */
+export function own(url: string): void {
+  urls.set(url, url);
+}
+
 export function preload(srcs: string[]): void {
   for (const s of srcs) void load(s);
 }

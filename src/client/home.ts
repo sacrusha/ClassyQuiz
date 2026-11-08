@@ -5,21 +5,23 @@
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
-import { quotaResetAt } from "../shared/limits.ts";
 import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
-import { $, esc, forgetQuiz, saveQuiz, savedQuizzes, store, tabLobby, tabRole, teacherCode, teacherEntry, type SavedQuiz } from "./dom.ts";
-import { prepareImages, uploadQuiz } from "./images.ts";
+import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, type SavedQuiz } from "./dom.ts";
 import { api, readApi } from "./net.ts";
 import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
-import { EXAMPLE_ZIP } from "./example-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
-import { daysFull, recordUploadDay, uploadDays } from "./history.ts";
+import { daysFull, uploadDays } from "./history.ts";
+import { handOver } from "./handoff.ts";
+import { readQuiz } from "./opening.ts";
 import { filmLanguage } from "./film-poster.ts";
 
 // The QR code on the projector points here with the code after "#".
 const fromHash = location.hash.slice(1).replace(/\D/g, "");
 if (JOIN_CODE.test(fromHash) || TEACHER_CODE.test(fromHash)) location.replace(`/play#${fromHash}`);
+// The worked example's start as an earlier /example linked it: the example opens on the local check now.
+const exampleLang = new URLSearchParams(location.search).get("example");
+if (isLang(exampleLang)) location.replace(`/open?example=${exampleLang}`);
 
 /** The address the browser opened: an own copy shows its own (the build writes it into the static page for AIs). */
 const host = location.host || "classyquiz.pages.dev";
@@ -170,7 +172,8 @@ function apply(l: Lang): void {
 const runbox = $("#runbox");
 const out = $("#out");
 const file = $("#file") as HTMLInputElement;
-let sending = false;
+/** A quiz is being read: another file waits. */
+let reading = false;
 
 /** Counted by format only; a failure here never touches the upload. */
 function countAttempt(format: UploadFormat): void {
@@ -179,8 +182,6 @@ function countAttempt(format: UploadFormat): void {
 
 const problem = (err: string, more = "") => `<div class="problem"><p class="err">${esc(err)}</p>${more}</div>`;
 const zipOnly = () => `<p>${esc(t.zipOnly)}</p>`;
-/** Where failure shows, the help (docs/design/root-page.md, "Network help, where failure shows"): the network may be the cause; what to tell IT is on /check. */
-const networkHelp = () => problem(t.offline, `<p><a href="/check#it">${esc(t.whatToTellIt)}</a></p>`);
 
 $("#open").addEventListener("click", () => file.click());
 file.addEventListener("change", () => {
@@ -230,58 +231,45 @@ async function fromFiles(files: File[]): Promise<void> {
   }
   try {
     const entries = listZip(await files[0].arrayBuffer());
-    await submit(await quizTextFromEntries(entries), entries);
+    await toCheck(await quizTextFromEntries(entries), entries);
   } catch (e) {
     // The archive's own messages (client/unzip.ts) are English, like the quiz's problems.
     out.innerHTML = problem(e instanceof Error ? e.message : t.unreadable);
   }
 }
 
-/** leaveOut: the teacher chose to run the quiz without the pictures that can't go up. */
-async function submit(value: string, archive: ZipEntry[], leaveOut = false): Promise<void> {
-  if (sending) return;
+/**
+ * The quiz read and checked here, then handed to the local check (/open),
+ * where the person picks how it will be played: nothing goes to the site
+ * until a room opens there (docs/design/local-check.md). leaveOut: the
+ * person chose to go on without the pictures that can't be read.
+ */
+async function toCheck(value: string, archive: ZipEntry[], leaveOut = false): Promise<void> {
+  if (reading) return;
   if (new Blob([value]).size > MAX_QUIZ_BYTES) {
     out.innerHTML = problem(t.tooLong(Math.round(MAX_QUIZ_BYTES / 1000)));
     return;
   }
-  sending = true;
+  reading = true;
   out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
   try {
-    const prepared = await prepareImages(value, archive, (done, of) => {
+    const r = await readQuiz(value, archive, leaveOut, (done, of) => {
       out.innerHTML = `<p class="muted">${esc(t.preparing(done, of))}</p>`;
     });
-    if (prepared.problems.length > 0 && !leaveOut) {
-      showProblems(prepared.problems, true, () => void submit(value, archive, true));
+    if (!r.ok) {
+      showProblems(r.errors, r.pictures, () => void toCheck(value, archive, true));
       return;
     }
-    out.innerHTML = `<p class="muted">${esc(t.sending)}</p>`;
-    const r = await uploadQuiz(value, prepared.images, leaveOut);
-    if (r.ok) {
-      // One quiz that hasn't started per device: the previous upload ends if
-      // it never started (docs/design/hosting-and-limits.md, "Running classes
-      // finish"). keepalive: it outlives the page's change below.
-      const previous = savedQuizzes()[0];
-      if (previous && previous.id !== r.id) {
-        void fetch(`/api/i/${previous.id}/replaced`, { method: "POST", keepalive: true, headers: { "content-type": "application/json" }, body: JSON.stringify({ secret: previous.secret }) }).catch(() => {});
-      }
-      saveQuiz({ id: r.id, secret: r.secret, code: r.code, teacher: r.teacher, title: "", at: Date.now() });
-      recordUploadDay();
-      // This tab is the Projector that steers itself (user flow, rule 3); it opens on the check screen.
-      tabRole.set(r.id, { role: "screen", token: r.token, code: r.code, teacher: r.teacher });
-      tabLobby.set(r.id, "check");
-      location.href = `/screen?q=${r.id}`;
+    let key: string;
+    try {
+      key = await handOver(r.files);
+    } catch {
+      out.innerHTML = problem(t.noHandoff);
       return;
     }
-    if ((r.errors?.length ?? 0) > 0) showProblems(r.errors, (r.missingImages?.length ?? 0) > 0, () => void submit(value, archive, true));
-    else if (r.quota) out.innerHTML = problem(t.quota(quotaResetAt()), `<p><a href="/own-copy">${esc(t.ownCopyLink)}</a></p>`);
-    else if (r.full) out.innerHTML = problem(t.siteFull(r.full, quotaResetAt()), `<p><a href="/own-copy">${esc(t.ownCopyLink)}</a></p>`);
-    // Not the site's answer: most likely a filter's page in between.
-    else if (r.json === false) out.innerHTML = networkHelp();
-    else out.innerHTML = problem(r.error ?? t.notTaken);
-  } catch {
-    out.innerHTML = networkHelp();
+    location.href = `/open#${key}`;
   } finally {
-    sending = false;
+    reading = false;
   }
 }
 
@@ -379,30 +367,10 @@ function renderOwnCopy(): void {
   line.innerHTML = fullDays ? `${esc(t.ownCopy(fullDays))} <a href="/own-copy">${esc(t.how)}</a>` : "";
 }
 
-/** The example goes up as a dropped .zip does, through fromFiles: one path, so it can't drift from a teacher's upload. */
-async function runExample(name: string): Promise<void> {
-  out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
-  runbox.scrollIntoView({ block: "center" });
-  let zip: Blob;
-  try {
-    const res = await fetch(`/examples/${name}`);
-    if (!res.ok) throw new Error(String(res.status));
-    zip = await res.blob();
-  } catch {
-    out.innerHTML = networkHelp();
-    return;
-  }
-  await fromFiles([new File([zip], name, { type: "application/zip" })]);
-}
-
 apply(lang);
 void findOpen();
 void findFull();
-// /example's "Start the example quiz" (docs/design/example-page.md): the example's quiz in that language.
-const exampleLang = new URLSearchParams(location.search).get("example");
-const example = isLang(exampleLang) ? EXAMPLE_ZIP[exampleLang] : undefined;
-if (example) {
-  // A reload or Back must not upload it again.
-  history.replaceState(null, "", "/");
-  void runExample(example);
-}
+// Back to this page after a quiz was handed on: the reading line is done with.
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) out.innerHTML = "";
+});

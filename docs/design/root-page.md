@@ -11,8 +11,9 @@ one, nothing else on the site matters, however good the guidance below it is
   faces two obstacles, "how do I ask?" and "what even is a quiz?", and one
   concrete instance answers both: what the AI hands over is what the class
   plays, and the words that produced it are the how-to-ask (backlog v4 item 1).
-- **Run**: take the `.zip` the teacher's AI made, and give the teacher who comes
-  back mid-lesson the way back to their quiz.
+- **Run**: take the `.zip` the teacher's AI made to the local check
+  (`local-check.md`), and give the teacher who comes back mid-lesson the way
+  back to their quiz.
 - **Be found by students**: a code box in the header, since the teacher tells
   the class the address and the class needs one box. Unobtrusive on the
   teachers' page, and easily found by whoever knows to look at the top and
@@ -277,13 +278,15 @@ file's name is checked after choosing, and anything else gets the message below.
   your AI", which asks for a corrected `.zip`. When the problem is pictures that
   can't go up, the teacher may continue without them. The format and its
   validation are `design/quiz-format.md`.
-- A refused upload says which cap it hit, since the two come back differently:
+- A refused upload, at "Open the lobby" on the local check, says which cap it hit, since the two come back differently:
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
   request allowance has its own message. Each is followed by "More quizzes: a site
   of your own or your school's ›" to `/own-copy`, which names what the link
   gives (the owner: "Your own copy" was too ambiguous). The caps are `design/hosting-and-limits.md`.
-- On success the tab becomes the projector, on the check screen
+- A quiz that reads goes to the local check (`local-check.md`), where
+  nothing has gone to the site yet; opening the lobby there uploads it, and
+  the tab becomes the projector on the lobby's check
   (`design/teacher-devices.md`).
 
 ### Upload attempts counted by format
@@ -407,7 +410,7 @@ connections, and what is blocked now. `/check` is not linked from the root page.
 
 The help reaches the teacher at:
 
-- the upload: no connection, or an answer that isn't the site's (a filter's page),
+- opening the lobby on the local check: no connection, or an answer that isn't the site's (a filter's page),
   names the school network as a possible cause, with "What to tell IT ›" to
   `/check#it`;
 - `/check#it`: "If the site doesn't open at school at all", readable without

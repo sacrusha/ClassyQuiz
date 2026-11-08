@@ -16,7 +16,8 @@ scripts are the real attacker: they must not be able to take the steering of
 a quiz just because they know its class code.
 
 Before the class joins, the teacher also needs to see at once that this is the
-right quiz and to spot a wrong key. That is what the check is for.
+right quiz and to spot a wrong key. That is what the local check is for,
+before anything goes up (`local-check.md`), and the lobby's check after.
 
 ## Situation
 
@@ -120,8 +121,9 @@ Start reads the same on every screen that steers: the mode is named where
 there is a choice, on the second device, since a single tab has no other mode
 to tell it from. Labels: `user-flow.md §3.3`.
 
-The worked example's "Start the example quiz" (`example-page.md`) is an
-upload like any, so it opens this same check, with codes and fixes.
+The worked example's "Start the example quiz" (`example-page.md`) opens
+the local check; its "Open the lobby" is an upload like any, and leads to
+this same check, with codes and fixes.
 
 ### A second device: one question, only when needed
 

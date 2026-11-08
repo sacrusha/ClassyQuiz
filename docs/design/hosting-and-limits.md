@@ -213,7 +213,8 @@ them, and the README points self-hosters there.
   after their last use (`INSTANCE_IDLE_MS`). Both point to the own-copy page
   as the self-hosting nudge, and show to the teacher as a message, not as a
   problem to copy for the AI. Wording on the screen is in
-  `client/landing-text.ts` (`siteFull`), in the four languages.
+  `client/landing-text.ts` (`siteFull`), shown in English on the local
+  check, where the upload happens (`local-check.md`).
 - **A request body without a length.** Every POST to an instance is read in
   the Function and capped at 20 KB (`MAX_COMMAND_BYTES`,
   `functions/api/[[path]].ts`) whatever its Content-Length says, and forwarded
@@ -259,7 +260,8 @@ device. The numbers and the rest are the implementer's, to confirm.
 - **Students join once the class is let in** (`teacher-devices.md`, "The
   single tab: check, then join"); teacher devices come in at any time. So a
   quiz uploaded only to look it over (for tomorrow, say) writes nothing for
-  a class and books nothing.
+  a class and books nothing; looking it over on the local check, before any
+  upload, costs no upload either (`local-check.md`).
 - **Letting the class in books the most its class can write**
   (`server/rows.ts`), so nothing is overbooked and no margin is guessed. The
   class isn't known yet, so it is `MAX_PLAYERS`: each joins (2 rows), changes

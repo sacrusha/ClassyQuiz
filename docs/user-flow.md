@@ -6,8 +6,10 @@ docs/design/; this file says what the screens show.
 
 ## 1. The model
 
-1. **One quiz, one class.** Uploading starts it: the upload is the lesson's
-   quiz, and a parallel class gets its own upload. Its code is made at
+1. **One quiz, one class.** A quiz file opens in the browser first, on the
+   local check (§3.1), and nothing of it goes to the site there. Opening the
+   lobby uploads it and starts it: the upload is the lesson's quiz, and a
+   parallel class gets its own upload. Its code is made at
    upload and lives as long as the quiz: until the teacher ends it (Exit at
    the final ranking, or Delete), or 3 h after the last teacher action. The
    class joins with it.
@@ -33,7 +35,7 @@ docs/design/; this file says what the screens show.
    Roles belong to tabs, not devices: a laptop with two screens holds both in
    two windows. Each tab keeps its role token in sessionStorage. A reload,
    sleep or dropped connection resumes the same role with nothing to do.
-4. **The tab you open the quiz in becomes the Projector, and it steers itself.**
+4. **The tab that opens the lobby becomes the Projector, and it steers itself.**
    In the lobby it shows the teacher's check first, then, one tap on, the
    class's join screen (§3.3). During the quiz a slim bar carries the next
    step. One mirrored laptop needs nothing else. A clicker or the keyboard
@@ -80,7 +82,7 @@ tablets, and a quiz made in the break.
 | When | Teacher | Class |
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
-| Break | **Laptop:** opens `classyquiz.pages.dev` and uploads the AI's .zip there (or drops it). The check: the right quiz, a spot fix (§3.3). | — |
+| Break | **Laptop:** opens `classyquiz.pages.dev` and chooses the AI's .zip there (or drops it). The local check: the right quiz, a spot fix, Open the lobby (§3.1). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
@@ -152,13 +154,14 @@ Purpose and reasons: docs/design/root-page.md.
     download from the chat and upload here." It is counted as "paste".
   - Any other file gets "The site takes the quiz as a .zip file, not a
     .docx file." and the same sentence. Attempts are counted by format.
-  - No connection, or an answer that isn't the site's (a filter's page):
-    the network is named as a possible cause, with "What to tell IT ›" to
-    `/check#it`.
 - **Problems with the quiz:** listed in place, with "Copy the message for your
   AI" (which asks for a corrected .zip, in English), plus "Continue without
   these pictures" when it's pictures.
-- **On success:** straight to the check, in this tab as the Projector.
+- **A browser that keeps no site data** can't pass the quiz to the check:
+  "This browser didn't let the site open the quiz (it may block site data).
+  Try another browser."
+- **On success:** the local check (below), in this tab. Nothing has gone to
+  the site.
 - **Coming back:** the latest quiz this device started, while it is on
   the site (until Exit, final ranking included): its title, where it stands, Back to the
   quiz (`/play#` + the teacher code), the class code, and "On another device:
@@ -167,14 +170,14 @@ Purpose and reasons: docs/design/root-page.md.
 - **The own copy:** one line under Run, only on a device that has
   uploaded before (`cq.days`, dates only) and only when the site was full
   or busy on a day of the last 30 (`GET /api/site`).
-- **On the check, before the class is let in,** on a day the free site is
+- **On the lobby's check (§3.3), before the class is let in,** on a day the free site is
   nearly full: "The free site is nearly full today: room for about 2 more
   classes." (one more class: "room for one more class"); when no class fits
   or letting in was refused: "The free site can't take more classes today:
   the ones running now use what is left. It takes new ones again at 01:00
   Swiss time." Both followed by "More quizzes: a site of your own or your
   school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
-- **The network check** is no longer on the root page: the upload error,
+- **The network check** is no longer on the root page: opening the lobby,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
   shows (docs/design/root-page.md).
@@ -198,8 +201,54 @@ everything to try the same on your own AI.
                           and on your students' devices.
 ```
 
-"Start the example quiz" uploads the example as Run does and lands on the
-check (§3.3). `/own-copy` and `/check` have the same small header.
+"Start the example quiz" opens `/open?example=<lang>`: the example on the
+local check, read as Run reads a file, nothing uploaded. `/own-copy` and
+`/check` have the same small header.
+
+#### The local check (`/open`)
+
+A quiz read from its .zip in this browser, before anything of it goes to
+the site; English. Purpose and reasons: docs/design/local-check.md.
+
+```
+[fox] classyQuiz                         (the site's small header, to the root)
+─────────────────────────────────────────────────────────────
+Big numbers on the number line · 13 questions
+  How will it be played?               (only with two or more ways)
+┌ Quizmaster ───────────────────────────────────────────────┐
+│ You run the quiz for a class or a group: the questions on │
+│ a big screen, the answers on everyone's own device.       │
+│ [ Open the lobby ▶ ]                                      │
+│ This puts the quiz on the site. Until then it is only in  │
+│ this browser.                                             │
+└───────────────────────────────────────────────────────────┘
+─────────────────────────────────────────────────────────────
+▸ The questions and their solutions · 2 notes from the site
+    If you will play it yourself, leave this closed.
+                                  (only once a way to play it yourself is offered)
+```
+
+- **One card per way to play it**, each with its own button; the first
+  card's is the primary one. Only what is built is offered: today
+  Quizmaster alone.
+- **The questions are folded** under the cards, closed on arrival. Opened,
+  they are the lobby's list (§3.3): thumbnails, answers folded, Show the
+  solutions, the site's warnings, and Change the solution with its fixes
+  (Don't count this question, Skip it, Hide the picture). The fixes go up
+  with the quiz.
+- **Open the lobby ▶** uploads the quiz and lands on the lobby's check
+  (§3.3), in this tab as the Projector; Back from there passes this page.
+  While it goes up: "Sending the quiz…". Refused, under the button: the
+  site's day ("The free site can't take more quizzes today. …", "… has no
+  room for another quiz right now …", "… has used up today's allowance …",
+  each with "More quizzes: a site of your own or your school's ›"), or no
+  connection or an answer that isn't the site's (a filter's page): the
+  network named as a possible cause, with "What to tell IT ›" to
+  `/check#it`.
+- **A reload, or arriving with nothing:** "No quiz open here. A quiz opens
+  from the .zip your AI made, on the start page. This page keeps nothing of
+  it once it reloads or closes, so open the .zip there again." [To the
+  start page]. The example's check reads the example again instead.
 
 ### 3.2 The two entrances after a code
 
@@ -250,6 +299,9 @@ question above and the note that both are there have the site's small
 header.
 
 ### 3.3 The lobby: the check, then the join screen
+
+The lobby opens from the local check's "Open the lobby ▶" (§3.1); "the
+check" in this section is the lobby's.
 
 The single tab, which shows and steers, has two screens. **The check is the
 teacher's** (the questions, the fixes, the teacher code); **the

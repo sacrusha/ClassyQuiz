@@ -44,11 +44,11 @@ path the film shows.
    `docs/example/README.md`. The preview shows its top. The line above it
    names model, plan and date.
 3. **The quiz**: the `.zip` the AI handed over, in the page's language.
-4. **Run it**: "Start the example quiz" opens `/?example=<lang>`; the landing fetches
-   the static `.zip` and sends it through the same function as a dropped file
-   (`home.ts`, `runExample`), so the example can't run differently from a
-   teacher's upload. It is a real upload: booked and counted like any, and the
-   teacher lands on the check screen.
+4. **Run it**: "Start the example quiz" opens `/open?example=<lang>`, the
+   local check (`local-check.md`): it fetches the static `.zip` and reads it
+   through the same function as a dropped file (`opening.ts`, `readQuiz`),
+   so the example can't run differently from a teacher's. Looking costs the
+   site nothing; "Open the lobby" there is a real upload, booked like any.
 
 Under the steps, a note: the example was tested in all four languages and
 works in each; so that it is the same example in each, the German, French and

@@ -21,7 +21,10 @@ All commands run in `src/` unless said otherwise.
   `server/images.ts`, `quiz/`, `shared/`). A school converts the server to its
   own with an AI, and converts again to take an update (README, "On your
   school's own server"); code that spreads the platform further makes every
-  conversion bigger.
+  conversion bigger. The local check (`client/open.ts`, `client/opening.ts`)
+  runs `quiz/`, `server/images.ts` (`matchImages`) and `server/game.ts` (the
+  fixes) in the browser, to check a quiz as the server will before anything
+  goes up; they stay free of platform code for that too.
 - `shared/`: the protocol types and the constants that are tuned (`limits.ts`,
   `tempo.ts`).
 - `client/`: the page scripts, plain DOM without a framework, bundled per page

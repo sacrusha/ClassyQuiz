@@ -246,8 +246,6 @@ the open list at the end.
     - The run, its photographs and its picture: `design/example-page.md`.
       Open: a run of the owner's may replace it; whether the quiz's growth
       past the asked ten is worth leaving in the picture.
-    - Whether the check screen holds a socket or poll while a visitor only
-      looks at the example: each "Start the example quiz" is a real upload.
 11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not
     recorded, so no tier claim)
     - "Make me a quiz for classyquiz.pages.dev" was read as a publish target
@@ -279,7 +277,9 @@ the open list at the end.
     free site's caps, or kept ready instead of uploaded per click. Only with a
     test set that runs the same `.zip` through the special path and the normal
     upload and fails when they differ, so the example can't drift from what a
-    teacher's upload does. Today it is a normal upload, counted as one.
+    teacher's upload does. Looking at the example costs nothing
+    (`design/local-check.md`); opening its lobby is a normal upload, counted
+    as one.
 14. **One product, made on purpose** — the teacher deciding whether to rely
     on the site in front of a class meets the same name, mark, paper, ink and
     type on every page.
@@ -351,12 +351,11 @@ classroom is a Quizmaster's quiz; nothing built is undone. The exploration
 behind these items — options and what each would cost — is
 `playing-redefined-notes.md`, a working note, not a design.
 
-1. **Looking at a quiz, or playing it alone, shouldn't cost the shared site
-   a class.** Every quiz today is an upload, and the day's uploads, rows and
-   instances are the classes' (Constraints); the example page's every "Start"
-   is one (v4 item 13). Owner: the zip is read in the browser first, and only
-   opening a lobby uploads it. The browser already reads and parses it
-   (`client/unzip.ts`, `quiz/format.ts`).
+1. Looking at a quiz, or playing it alone, shouldn't cost the shared site a
+   class — the local check: the zip read and checked in the browser, the
+   entries offered there, the questions folded, opening the lobby the upload
+   with the check's fixes; the example's start lands there. Built,
+   `design/local-check.md`. Not deployed.
 
 2. **Solo — a learner wants to practise or review on their own**, with a quiz
    their AI or their teacher's made, without having seen the answers. Today a
@@ -589,7 +588,10 @@ Needs a real classroom or real devices, nobody has run it:
   punctuation in the labelled ask across widths, full-page shots),
   `landing-stacked-order.mjs` (where Build and Run start on upright screens),
   `example-launch.mjs` ("Start the example quiz" to the check, on a running
-  stack), `labels-walk.mjs` (the bar's labels and small lines through every
+  stack; it waits for the lobby, which comes after the local check now),
+  `../v5-check/walk.mjs` (the local check: the example and a root upload to
+  `/open`, nothing uploaded while looking, the fold, fixes reaching the
+  lobby, reload and Back, the root's problems; a site at 8868 by default), `labels-walk.mjs` (the bar's labels and small lines through every
   step on walls of 1366, 600 and 360 px and a 360 px Remote: text cut or
   not, height, shots). They read a site at 127.0.0.1:8931 or 8788; read before running.
 - Process, the owner's words, for whoever orchestrates next: delegate on

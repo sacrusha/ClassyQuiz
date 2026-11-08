@@ -386,6 +386,25 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .roomnote { border-left: 3px solid var(--rule); padding: 4px 12px; margin: 14px 0 0; }
 .check .cline { text-align: left; font-size: 16px; margin: 6px 0; }
 
+/* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
+   play it as cards, each with its own button; the questions folded under them, closed by default, so whoever will play
+   gets to playing without passing them. */
+.open-check .ctitle + p, .open-check > p { margin: .6em 0; }
+.open-ask { font-size: 1em; margin: 1.4em 0 0; }
+.open-entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; margin: 16px 0 8px; }
+.open-entry { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; }
+.open-entry h2 { font-size: 1.1em; margin: 0 0 .2em; }
+.open-entry p { margin: .3em 0; }
+.open-entry .btn { margin-top: .4em; }
+.open-note { color: var(--muted); font-size: .85em; }
+.open-say:empty { display: none; }
+.open-problem { border-left: 3px solid var(--bad); padding: 2px 12px; margin: 12px 0; }
+.open-problem ul { margin: .3em 0; padding-left: 1.2em; }
+.open-fold { border-top: 1px solid var(--rule); margin-top: 20px; }
+.open-fold > summary { cursor: pointer; padding: 14px 2px; font-weight: 700; }
+.open-fold-notes { color: var(--muted); font-weight: 600; }
+.open-fold-hint { display: block; color: var(--muted); font-weight: 400; font-size: .85em; margin-left: 1.1em; }
+
 button.link { background: none; border: 0; padding: 0; color: var(--control); text-decoration: underline; font: inherit; cursor: pointer; }
 .hint { color: var(--muted); font-size: .9em; margin: .4em 0; }
 .qlist-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; }
