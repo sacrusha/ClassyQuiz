@@ -180,7 +180,7 @@ redraws each on a canvas.
 
 ### The projector
 
-`layQuestion` and `layPictureAnswers` in `src/client/screen.ts`. The aim: the
+`layQuestion` and `layPictureAnswers` in `src/client/stage.ts`. The aim: the
 figure as large as the room allows, with the question and the tiles still
 readable, chosen by the page, not by the AI or the teacher.
 

@@ -297,7 +297,7 @@ Purpose (v4 item 9, the students' own wish): winners only, after every
 question, jumping; ten easily told apart, crowding accepted beyond.
 
 - After every reveal, the avatars of everyone whose answer counts jump on the
-  wall for about four seconds (`PARTY_MS`, `client/screen.ts`); then the band
+  wall for about four seconds (`PARTY_MS`, `client/stage.ts`); then the band
   fades. It is a band over the top of the stage where the question was read,
   stopping above the first tile, so the tick and the counts stay in view: the
   key is the teaching moment. It is a layer, so nothing moves.

@@ -7,15 +7,15 @@
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
-import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
-import { ICON, avatarSvg, partySize, shapeSvg, syncAvatars } from "./look.ts";
+import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { finalHtml, fitFinal } from "./final.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
+import { backdrop, endJump, jump, layQuestion, markTiles } from "./stage.ts";
 
 const main = $("main");
 const sbar = $("#sbar");
@@ -437,7 +437,7 @@ function renderQuestion(v: ScreenView): void {
   // The answers hidden: the tiles are laid out with their answers from the
   // start, so nothing moves when they show; until then only their colours and shapes.
   document.getElementById("tiles")?.classList.toggle("veiled", reading);
-  markTiles(r, v.votes ?? null);
+  markTiles(main, { counts: r ? r.counts : null, dist: r ? r.dist : (v.votes ?? null) });
 }
 
 /**
@@ -497,15 +497,7 @@ function stripSize(n: number, w: number, h: number): number {
 // the first isn't the fastest. Once per key: a view that comes again (a tick,
 // a reconnect) doesn't restart it; a fix of the key does, for its new winners.
 
-/** How long they jump, before the band goes (ms); app.css times the jumps. */
-const PARTY_MS = 4200;
 let partyKey = "";
-let partyTimer: number | undefined;
-
-function endParty(): void {
-  clearTimeout(partyTimer);
-  document.getElementById("party")?.remove();
-}
 
 function renderParty(v: ScreenView): void {
   const r = v.phase === "reveal" ? v.reveal : null;
@@ -514,46 +506,13 @@ function renderParty(v: ScreenView): void {
   const winners = (r && !r.void ? r.winners : []).flatMap((id) => (byId.has(id) ? [{ id, avatar: byId.get(id)! }] : []));
   const stage = document.getElementById("stage");
   if (!r || !stage || v.zoom || winners.length === 0) {
-    endParty();
+    endJump();
     return;
   }
   const key = `${v.current}|${r.winners.join()}`;
   if (key === partyKey) return;
   partyKey = key;
-  endParty();
-  const box = stage.getBoundingClientRect();
-  // The band stops above the first tile: the key stays in view whatever the
-  // layout (a short question beside its picture leaves little room).
-  const tiles = [...stage.querySelectorAll("#tiles .tile")].map((t) => t.getBoundingClientRect().top);
-  const room = tiles.length ? Math.min(...tiles) - box.top - 2 : Infinity;
-  const L = partySize(winners.length, box.width, box.height, room);
-  const el = document.createElement("div");
-  el.id = "party";
-  el.setAttribute("aria-hidden", "true");
-  // The band over the top of the stage; the rows stand on its floor, the
-  // back one higher, room above them for the jump.
-  el.style.cssText = `left:${box.left}px;top:${box.top}px;width:${box.width}px;height:${L.band}px`;
-  const pad = Math.max(4, 0.06 * L.s);
-  const rows = Math.ceil(winners.length / L.perRow);
-  el.innerHTML = winners
-    .map((w, i) => {
-      const row = Math.floor(i / L.perRow);
-      const inRow = Math.min(L.perRow, winners.length - row * L.perRow);
-      const width = L.s + (inRow - 1) * L.step;
-      // A back row half a step aside, its faces between the front row's.
-      const shift = rows > 1 && width + L.step / 2 <= box.width ? ((row % 2 ? -1 : 1) * L.step) / 4 : 0;
-      const x = (box.width - width) / 2 + shift + (i - row * L.perRow) * L.step;
-      const y = pad + (rows - 1 - row) * L.rise;
-      // Neighbours out of step, so ten side by side read as ten.
-      const delay = (0.3 + ((i * 0.618) % 1) * 0.5).toFixed(2);
-      return `<div class="jumper" data-id="${esc(w.id)}" style="left:${x.toFixed(1)}px;bottom:${y.toFixed(1)}px;width:${L.s}px;height:${L.s}px"><span style="animation-delay:${delay}s">${avatarSvg(w.avatar, false)}</span></div>`;
-    })
-    .join("");
-  document.body.appendChild(el);
-  partyTimer = window.setTimeout(() => {
-    el.classList.add("out");
-    partyTimer = window.setTimeout(() => el.remove(), 400);
-  }, PARTY_MS);
+  jump(stage, winners);
 }
 
 /**
@@ -580,253 +539,6 @@ function renderClock(v: ScreenView): void {
     document.body.appendChild(el);
   }
   el.innerHTML = clockBar(c.ms, localEnd(`${v.current}|${c.ms}`, c), "wall");
-}
-
-/**
- * The votes, then the reveal, on the tiles. The votes: how many
- * picked each, with a bar, and no answer marked or faded. The reveal adds a
- * tick on the ones that count and fades the others; the bars stay. The mark
- * and count have their place at the right of every tile from the start, so
- * neither step moves any answer text.
- */
-function markTiles(r: ScreenView["reveal"], votes: number[] | null): void {
-  const dist = r ? r.dist : votes;
-  const max = dist ? Math.max(1, ...dist) : 1;
-  main.querySelectorAll<HTMLElement>("#tiles .tile").forEach((tile, i) => {
-    const right = r ? r.counts[i] : false;
-    tile.classList.toggle("dim", !!r && !right);
-    const side = tile.querySelector<HTMLElement>(".side")!;
-    const html = dist ? `${right ? `<span class="mark">${ICON.check}</span>` : ""}<span class="n">${dist[i]}</span>` : "";
-    if (side.innerHTML !== html) side.innerHTML = html;
-    let fill = tile.querySelector<HTMLElement>(".fill");
-    if (!dist) {
-      fill?.remove();
-      return;
-    }
-    const width = `${(100 * dist[i]) / max}%`;
-    if (!fill) {
-      // Grows from nothing when the spread first shows.
-      const f = document.createElement("span");
-      f.className = "fill";
-      f.style.width = "0";
-      tile.appendChild(f);
-      requestAnimationFrame(() => requestAnimationFrame(() => (f.style.width = width)));
-      fill = f;
-    } else fill.style.width = width;
-  });
-}
-
-/** Font size (em) for the question by its length; smaller when it shares the screen with a picture. */
-function questionSize(len: number, withPicture: boolean): number {
-  if (withPicture) return len <= 40 ? 3 : len <= 90 ? 2.5 : len <= 160 ? 2.1 : 1.8;
-  return len <= 40 ? 3.6 : len <= 90 ? 3 : len <= 160 ? 2.4 : 1.9;
-}
-
-/**
- * The question, its picture and the tiles in the room below the bar. The
- * picture goes between the question and the tiles, or beside both: whichever
- * shows it larger, from its shape (known before it has loaded) and the room
- * the question's text leaves. Wide figures such as number lines end up
- * between; square and upright ones beside a short question. Beside needs the
- * question to stay readable in the narrower column, so a long question keeps
- * the picture between.
- */
-function layQuestion(stage: HTMLElement, q: NonNullable<ScreenView["question"]>): void {
-  if (q.pics) {
-    layPictureAnswers(stage, q, q.pics);
-    return;
-  }
-  const n = q.answers.length;
-  const longest = Math.max(...q.answers.map((a) => a.length));
-  const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
-  const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
-  const tilesHtml = `<div class="tiles" id="tiles">${q.answers
-    .map((a, i) => `<div class="tile a${i}">${shapeSvg(i)}<span class="txt">${lines(a)}</span><span class="side"></span></div>`)
-    .join("")}</div>`;
-  const img = q.image;
-  if (!img) {
-    stage.className = "stage";
-    stage.innerHTML = qHtml + tilesHtml;
-    fitText($("#qtext"), questionSize(q.text.length, false), window.innerHeight * 0.34);
-    fitTiles($("#tiles"), tileSize);
-    return;
-  }
-  const W = stage.clientWidth;
-  const H = stage.clientHeight;
-  const gap = parseFloat(getComputedStyle(stage).rowGap) || 0;
-  const aspect = img.w / img.h;
-  const figure = (w: number, h: number) =>
-    `<div class="figure" id="figure" data-zoom style="width:${Math.floor(w)}px;height:${Math.floor(h)}px">${picImg(img.src, img.w, img.h)}</div>`;
-
-  const between = (): number => {
-    stage.className = "stage fig between";
-    stage.innerHTML = qHtml + figure(0, 0) + tilesHtml;
-    fitText($("#qtext"), questionSize(q.text.length, true), H * 0.3);
-    const qh = $("#qtext").offsetHeight;
-    // The tiles keep room for their answers: a row of short numbers needs less than a row of sentences.
-    const rows = n > 2 ? 2 : 1;
-    const tilesMin = rows * H * (longest <= 12 ? 0.135 : longest <= 30 ? 0.16 : 0.2);
-    const h = Math.max(40, Math.min(W / aspect, H - qh - tilesMin - (q.text ? 2 : 1) * gap, H * 0.62));
-    const fig = $("#figure");
-    fig.style.width = `${Math.floor(h * aspect)}px`;
-    fig.style.height = `${Math.floor(h)}px`;
-    fitTiles($("#tiles"), tileSize);
-    return h * h * aspect;
-  };
-
-  const betweenArea = between();
-  // Beside, the picture takes up to 58% of the width, else half; the text
-  // must stay readable in the column that leaves, or it's between after all.
-  let beside = false;
-  for (const share of [0.58, 0.5]) {
-    const sideH = Math.min(H, (share * W) / aspect);
-    if (sideH * sideH * aspect <= 1.3 * betweenArea) break;
-    stage.className = "stage fig beside";
-    stage.innerHTML = figure(sideH * aspect, sideH) + `<div class="col">${qHtml}${tilesHtml}</div>`;
-    const textSize = fitText($("#qtext"), questionSize(q.text.length, true), H * 0.42);
-    const tiles = fitTiles($("#tiles"), tileSize);
-    if (textSize >= 1.5 && !tiles.squeezed && tiles.size >= Math.min(tileSize, 1.3)) {
-      beside = true;
-      break;
-    }
-  }
-  if (!beside && stage.classList.contains("beside")) between();
-  fillPictures(stage);
-}
-
-/**
- * Pictures as answers (docs/design/pictures.md): tiles arranged by the
- * pictures' shape (answergrid.ts), the question's own picture beside its text
- * or between text and tiles, the room shared so that it and the smallest
- * answer picture come out about alike. A text answer among them takes a
- * picture's place.
- */
-function layPictureAnswers(stage: HTMLElement, q: NonNullable<ScreenView["question"]>, pics: (ImageRef | null)[]): void {
-  const aspects = pics.map((p) => (p ? p.w / p.h : null));
-  const longestText = Math.max(0, ...q.answers.map((a) => a.length));
-  const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
-  const tilesHtml = `<div class="tiles pics" id="tiles">${q.answers
-    .map((a, i) => {
-      const p = pics[i];
-      const card = p ? picImg(p.src, p.w, p.h) : a ? `<span class="txt">${lines(a)}</span>` : "";
-      return `<div class="tile pic a${i} row">${shapeSvg(i)}<div class="apic${p ? "" : " text"}">${card}</div><span class="side"></span></div>`;
-    })
-    .join("")}</div>`;
-  const W = stage.clientWidth;
-  const H = stage.clientHeight;
-  const gap = parseFloat(getComputedStyle(stage).rowGap) || 0;
-  // No question text: its heading is hidden (app.css, .qtext:empty) and takes no gap.
-  const textGap = q.text ? gap : 0;
-
-  // What a tile takes around its card, in either orientation: fixed by the tiles' font, not by their size.
-  stage.className = "stage picans";
-  stage.innerHTML = tilesHtml;
-  const tiles = $("#tiles");
-  const tileGap = parseFloat(getComputedStyle(tiles).rowGap) || 0;
-  const chromeOf = (orient: Orient): Chrome => {
-    const t = tiles.querySelector<HTMLElement>(".tile")!;
-    t.className = `tile pic a0 ${orient}`;
-    const c = t.querySelector<HTMLElement>(".apic")!;
-    return { w: t.offsetWidth - c.offsetWidth, h: t.offsetHeight - c.offsetHeight };
-  };
-  const chrome = { row: chromeOf("row"), col: chromeOf("col") };
-  const grid = (h: number) => chooseGrid(aspects, W, Math.max(0, h), tileGap, chrome);
-
-  const img = q.image;
-  let best: { html: string; tilesH: number; fit: () => void; score: number } | null = null;
-  if (!img) {
-    stage.innerHTML = qHtml;
-    fitText($("#qtext"), questionSize(q.text.length, true), H * 0.26);
-    const tilesH = H - $("#qtext").offsetHeight - textGap;
-    best = { html: qHtml, tilesH, fit: () => fitText($("#qtext"), questionSize(q.text.length, true), H * 0.26), score: 0 };
-  } else {
-    const aspect = img.w / img.h;
-    const figure = (w: number, h: number) =>
-      `<div class="figure" id="figure" data-zoom style="width:${Math.floor(w)}px;height:${Math.floor(h)}px">${picImg(img.src, img.w, img.h)}</div>`;
-    // Between: the text, the picture at the full width, the tiles.
-    stage.innerHTML = qHtml;
-    fitText($("#qtext"), questionSize(q.text.length, true), H * 0.22);
-    const qh = $("#qtext").offsetHeight;
-    for (const share of [0.22, 0.3, 0.38, 0.46]) {
-      const fh = Math.min(W / aspect, H * share);
-      const tilesH = H - qh - fh - gap - textGap;
-      const score = Math.min(fh * fh * aspect, grid(tilesH).score);
-      if (!best || score > best.score)
-        best = { html: qHtml + figure(fh * aspect, fh), tilesH, fit: () => fitText($("#qtext"), questionSize(q.text.length, true), H * 0.22), score };
-    }
-    // Beside: the picture and the text in one band above the tiles, while the text stays readable.
-    for (const share of [0.3, 0.38, 0.46]) {
-      const bh = H * share;
-      const fw = Math.min(bh * aspect, W * 0.55);
-      const fh = fw / aspect;
-      const tilesH = H - bh - gap;
-      const score = Math.min(fh * fh * aspect, grid(tilesH).score);
-      if (best && score <= best.score) continue;
-      const html = `<div class="qband" style="height:${Math.floor(bh)}px">${figure(fw, fh)}${qHtml}</div>`;
-      stage.innerHTML = html;
-      const fit = () => fitText($("#qtext"), questionSize(q.text.length, true), bh);
-      if (fit() < 1.5 && q.text.length > 40) continue;
-      best = { html, tilesH, fit, score };
-    }
-  }
-  const b = best!;
-  const g = grid(b.tilesH);
-  stage.innerHTML = b.html + tilesHtml;
-  b.fit();
-  const box = $("#tiles");
-  box.style.gridTemplateColumns = `repeat(${g.cols}, minmax(0, 1fr))`;
-  box.style.gridTemplateRows = `repeat(${g.rows}, minmax(0, 1fr))`;
-  box.style.height = `${Math.floor(b.tilesH)}px`;
-  box.querySelectorAll<HTMLElement>(".tile").forEach((t) => {
-    t.classList.remove("row", "col");
-    t.classList.add(g.orient);
-  });
-  box.dataset.grid = `${g.cols}x${g.rows} ${g.orient}`;
-  fitCardTexts(box, longestText <= 12 ? 2.2 : longestText <= 30 ? 1.7 : 1.3);
-  fillPictures(stage);
-}
-
-/** A text answer among picture answers: the largest font, from `start` down, that fits its card. */
-function fitCardTexts(box: HTMLElement, start: number): void {
-  const texts = [...box.querySelectorAll<HTMLElement>(".apic.text .txt")];
-  if (texts.length === 0) return;
-  let size = start;
-  const set = () => texts.forEach((t) => (t.style.fontSize = `${size}em`));
-  // A word wider than its card, or lines taller than it.
-  const overflows = () => texts.some((t) => t.scrollWidth > t.clientWidth + 1 || t.parentElement!.scrollHeight > t.parentElement!.clientHeight + 1);
-  set();
-  while (overflows() && size > 0.6) {
-    size -= 0.1;
-    set();
-  }
-}
-
-/** Largest font, from `start` down, at which no answer word is cut and no answer overflows its tile. */
-function fitTiles(box: HTMLElement, start: number): { size: number; squeezed: boolean } {
-  const tiles = [...box.querySelectorAll<HTMLElement>(".tile")];
-  const overflows = () =>
-    tiles.some((t) => t.scrollHeight > t.clientHeight + 1 || [...t.querySelectorAll<HTMLElement>(".txt")].some((x) => x.scrollWidth > x.clientWidth + 1));
-  let size = start;
-  box.style.fontSize = `${size}em`;
-  while (overflows() && size > 1) {
-    size -= 0.1;
-    box.style.fontSize = `${size}em`;
-  }
-  // Still too long at the smallest size: break inside words rather than hide text.
-  const squeezed = overflows();
-  box.classList.toggle("squeezed", squeezed);
-  return { size, squeezed };
-}
-
-/** Largest font, from `start` down, that keeps the question within `limit` pixels of height. */
-function fitText(el: HTMLElement, start: number, limit: number): number {
-  let size = start;
-  el.style.fontSize = `${size}em`;
-  while (el.scrollHeight > limit && size > 1.1) {
-    size -= 0.15;
-    el.style.fontSize = `${size}em`;
-  }
-  return size;
 }
 
 /**
@@ -864,24 +576,7 @@ function renderZoom(v: ScreenView): void {
  * a question is up, the quiz's in the lobby and at the rankings.
  */
 function renderBackdrop(v: ScreenView): void {
-  const bg = v.phase === "question" || v.phase === "reveal" ? (v.question?.background ?? null) : v.background;
-  let el = document.getElementById("backdrop");
-  document.body.classList.toggle("has-backdrop", !!bg);
-  if (!bg) {
-    el?.remove();
-    return;
-  }
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "backdrop";
-    el.setAttribute("aria-hidden", "true");
-    document.body.prepend(el);
-  }
-  if (el.dataset.src !== bg.src) {
-    el.dataset.src = bg.src;
-    el.innerHTML = picImg(bg.src, bg.w, bg.h);
-  }
-  fillPictures(el);
+  backdrop(v.phase === "question" || v.phase === "reveal" ? (v.question?.background ?? null) : v.background);
 }
 
 function renderRanking(v: ScreenView): void {
@@ -1122,7 +817,7 @@ document.addEventListener("fullscreenchange", () => {
 });
 window.addEventListener("resize", () => {
   // The band is laid out for the old size; it doesn't come back for this key.
-  endParty();
+  endJump();
   // A window dragged to the projector screen: fit the question to its size.
   if (view && (view.phase === "question" || view.phase === "reveal")) {
     questionKey = "";
