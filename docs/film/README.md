@@ -248,11 +248,6 @@ Only rendered pictures found them, so the film is checked by looking:
   check's three cards (about 1 s before the thumb takes Quizmaster) and the
   lobby's check (about half a second of One screen before the tap on Screen
   and remote). Checked only as stills.
-- **The chapter "The .zip, uploaded here"** (`capZip` in
-  `src/client/landing-text.ts`) now spans the local check, where nothing has
-  gone up yet; the file goes up at "Open the lobby". Whether the name
-  should change is the landing's words' (`docs/design/local-check.md`, "Not
-  known", on the Run box's words).
 - **The pace for the teacher who has decided and now wants the steps.** The
   owner, watching: the default pace serves the first question, is this for
   me, and is too fast for learning the steps. Under consideration: calling the

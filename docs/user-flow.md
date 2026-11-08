@@ -108,13 +108,13 @@ Purpose and reasons: docs/design/root-page.md.
 │          [▶] ──●──'───'─'──'────── 0:00 / 1:00 [1×] [full screen]    │
 │                              The example, step by step ›             │
 ├──────────────────────────────────┬───────────────────────────────────┤
-│ Build a quiz                     │ Run a quiz                         │
+│ Build a quiz                     │ Play a quiz                        │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
 │   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Join code   ││ quiz this device
 │   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
 │ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
 │   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   [sheets][chess][1][3][▭][?]    │ │ [ Upload the quiz your AI      │ │
+│   [sheets][chess][1][3][▭][?]    │ │ [ Open the quiz your AI        │ │
 │   tabs, one ask shown:           │ │   made (.zip) ] or drop it here│ │
 │  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
@@ -151,13 +151,13 @@ Purpose and reasons: docs/design/root-page.md.
   classyquiz.pages.dev. I need a classyQuiz. Help?"). Pictures: the sheets, a
   chess board, one person, three people, a screen before an audience, a
   question mark.
-- **Run a quiz takes a .zip and nothing else.** The button opens the file
+- **Play a quiz takes a .zip and nothing else.** The button opens the file
   chooser; a .zip can also be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
     chosen one.
   - Text pasted or dropped anyway gets "The site takes the quiz as a .zip
     file, not as text. Your AI can make the quiz as one .zip file, to
-    download from the chat and upload here." It is counted as "paste".
+    download from the chat and open here." It is counted as "paste".
   - Any other file gets "The site takes the quiz as a .zip file, not a
     .docx file." and the same sentence. Attempts are counted by format.
 - **Problems with the quiz:** listed in place, with "Copy the message for your

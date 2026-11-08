@@ -435,10 +435,11 @@ behind these items — options and what each would cost — is
    specialises (`design/guidance-page.md`); three more example asks
    (practising alone, friends, a training session), with no line under them
    since no run is behind them; the README's descriptor, the lede, the
-   example's last step, the resume card's "Join code", `/check`'s words. Not
-   deployed. Open: the landing's "Run a quiz" and "Upload the quiz your AI
-   made" are also the film's words, changed only with a rebuild of the film
-   (`src/DEVELOPING.md`, "The landing film"); the de/fr/it drafts
+   example's last step, the resume card's "Join code", `/check`'s and
+   `/layout`'s words, the network help's "a school or a company"; "Play a
+   quiz" and "Open the quiz your AI made" on the Run box, and the film's
+   chapter "The .zip, opened here", the film rebuilt. Not deployed. Open:
+   the de/fr/it drafts
    (`docs/translation-review.md`, "The other ways to play", E6); the film
    tells the classroom's story only; whether someone who isn't a teacher
    reads the page as theirs, which nobody outside the project has tried;

@@ -178,7 +178,11 @@ teacher with a `.zip` on the phone that took the photos, and the one coming back
 mid-lesson, whose way back is in Run, had to scroll for it. Run is short (the
 heading and the upload box), so Build's heading still shows below it on phones
 from 360×640 up. A first-timer meets the upload before the how-to; the film
-above tells the story and the button says "the quiz your AI made". A running
+above tells the story and the button says "Open the quiz your AI made".
+The heading is "Play a quiz" and the button "Open", not "Run" and
+"Upload": a Solo player runs nothing, and nothing goes to the site until a
+room opens on the local check ("Words for whoever comes"). German, French
+and Italian already said "start". A running
 quiz's card makes Run taller and can push Build off a small screen; that
 teacher came for Run. The order is visual only: the HTML, side by side on wider
 screens, and the order for keyboards and screen readers keep Build first.

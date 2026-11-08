@@ -44,7 +44,8 @@ Solo learner mustn't be shown them.
 
 ### Reading on the root page
 
-The Run box reads the `.zip` as before, then checks it here instead of
+The Run box ("Open the quiz your AI made", since nothing goes up there)
+reads the `.zip` as before, then checks it here instead of
 uploading it (`client/home.ts`; `readQuiz` in `client/opening.ts`): the text
 first (the parser's errors, with "Copy the message for your AI"), then the
 pictures the quiz names (with "Continue without these pictures"), then the
@@ -143,8 +144,6 @@ element to play there, and give the check back as it was.
   for every entry, and on the lobby's check too (`teacher-devices.md`,
   "The single tab: check, then join").
 - Whether "Open the lobby" is the word a pub host or a teacher reaches for.
-- The Run box still says "Upload the quiz your AI made"; the file goes up
-  only when a room opens. Its words are also the film's (`docs/film/`).
 - Whether school browsers that block site data (IndexedDB) exist in the
   target schools; such a browser can't reach the check.
 - Pull-to-refresh on a phone reloads the check, which then holds nothing.

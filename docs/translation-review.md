@@ -39,7 +39,15 @@ The asks (`askSolo`, `askFriends`, `askGroup`) are in the file. Choices made the
 ("Biologieprüfung", "contrôle", "verifica"), a games night ("Spieleabend", "soirée jeux", "serata
 giochi"), colleagues trained on safety rules ("Kolleginnen und Kollegen", "Folien", "diapositives",
 "slide"); "Ich spiele es selbst / J'y jouerai moi-même / Ci gioco io" and "Ich spiele mit / Je joue
-aussi / Gioco anch'io" carry the point, that whoever asks plays. fr keeps a plain space before ":" and
+aussi / Gioco anch'io" carry the point, that whoever asks plays.
+
+Changed by the same pass in all four, so the rows above that quote the old wording (zipOnly, aiFixes,
+offline, capZip) apply to the new one: nothing goes to the site when the `.zip` is opened, so the Run
+box and its hints say open, not upload ("öffnen", "ouvrir", "aprire"; `upload`, `zipOnly`, `aiFixes`),
+and the chapter is "Die .zip, hier geöffnet / Le .zip, ouvert ici / Lo .zip, aperto qui" (`capZip`);
+the English heading is "Play a quiz" (the others already said start). The network help (`offline`)
+names "the network of a school or a company" ("das Netz einer Schule oder Firma", "le réseau d'une
+école ou d'une entreprise", "la rete di una scuola o di un'azienda"). fr keeps a plain space before ":" and
 "?" as the other asks do until D6 is decided.
 
 ## The worked example (`/example`)

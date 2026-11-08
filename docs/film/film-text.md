@@ -69,14 +69,14 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
 ### 3.1 Root page header (`src/public/index.html`, `landing-text.ts`)
 - Left: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only).
 - Right: label **Code** (DE Code, FR Code, IT Codice; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join" / "Beitreten" / "Rejoindre" / "Entra"), then the language selector "EN ▾".
-- Below the film: "Build a quiz" / "Run a quiz" columns (Run first on narrow screens).
+- Below the film: "Build a quiz" / "Play a quiz" columns (Run first on narrow screens).
 
 ### 3.2 Run box (root page, before upload)
-Heading **Run a quiz** (DE Ein Quiz starten, FR Lancer un quiz, IT Avvia un quiz). Dashed box with button and a line under it:
-- EN: button "Upload the quiz your AI made (.zip)", line "or drop it here"
-- DE: "Das Quiz deiner KI hochladen (.zip)" / "oder hier ablegen"
-- FR: "Importer le quiz de votre IA (.zip)" / "ou déposez-le ici"
-- IT: "Carica il quiz della tua IA (.zip)" / "o trascinalo qui"
+Heading **Play a quiz** (DE Ein Quiz starten, FR Lancer un quiz, IT Avvia un quiz). Dashed box with button and a line under it:
+- EN: button "Open the quiz your AI made (.zip)", line "or drop it here"
+- DE: "Das Quiz deiner KI öffnen (.zip)" / "oder hier ablegen"
+- FR: "Ouvrir le quiz de votre IA (.zip)" / "ou déposez-le ici"
+- IT: "Apri il quiz della tua IA (.zip)" / "o trascinalo qui"
 Progress after the pick (EN): "Reading the quiz…", "Preparing the pictures… 3 of 12", "Sending the quiz…" (DE "Das Quiz wird gelesen…", FR "Lecture du quiz…", IT "Lettura del quiz…"). Then the local check (3.3), in this tab. The file sheet (the .zip on top) is the OS's, no site text.
 
 ### 3.3 The local check, after the upload (`open.ts` `renderCheck`, the entries in `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`; docs/user-flow.md §3.1, "The local check")
