@@ -924,7 +924,7 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "dress") {
           // In the lobby: the child's look. Acknowledged once stored, with
           // the class's other changes of the same second.
-          const outcome = G.dress(game, session.player, cmd.b, cmd.h);
+          const outcome = G.dress(game, session.player, cmd.b, cmd.h, cmd.t);
           if (outcome === "stored") await this.storeLooks();
           return { direct: [ack(outcome !== "refused")] };
         }

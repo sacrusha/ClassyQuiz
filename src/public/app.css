@@ -286,6 +286,10 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
   .dress .pick { width: 46px; height: 46px; padding: 4px; }
   .dress .prow { gap: 6px; }
 }
+/* Six to a line on the narrowest phones, so the three rows fit without scrolling. */
+@media (max-width: 340px) {
+  .dress .pick { width: 42px; height: 42px; padding: 3px; }
+}
 /* A changed look: the child sees which one on the wall is theirs. */
 @keyframes wiggle { 0% { transform: none; } 25% { transform: scale(1.12) rotate(-8deg); } 50% { transform: scale(1.12) rotate(8deg); } 75% { transform: scale(1.05) rotate(-4deg); } 100% { transform: none; } }
 .dress .hero.wiggle, .lobby .crowd .av.wiggle, .avatars > .wiggle { animation: wiggle .55s ease-out; }

@@ -92,8 +92,8 @@ export type Command =
    * appeared on this device it was tapped (points for speed).
    */
   | { op: "answer"; q: number; choice: number; seq: number; v: number; ms?: number }
-  /** In the lobby: the child's look, whole (shared/looks.ts); the latest one sent counts. */
-  | { op: "dress"; b: number; h: number };
+  /** In the lobby: the child's look, whole (shared/looks.ts); the latest one sent counts. t absent: no tool. */
+  | { op: "dress"; b: number; h: number; t?: number };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
 

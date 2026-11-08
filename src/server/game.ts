@@ -53,6 +53,8 @@ export interface Avatar {
   b?: number;
   /** The hat the child chose in the lobby; absent: none. */
   h?: number;
+  /** The tool the child chose in the lobby; absent: none. */
+  t?: number;
 }
 
 export interface Player {
@@ -252,23 +254,23 @@ export function addPlayer(g: Game, id: string, token: string, now: number, rando
 
 /**
  * A child dresses their animal (docs/design/class-and-wall.md, "Dressing the
- * avatar"): the background shape and the hat, set as a whole so a resend
- * changes nothing.
+ * avatar"): the background shape, the hat and the tool, set as a whole so a
+ * resend changes nothing. A page from before the tools sends no tool: none.
  * Only in the lobby; the look is fixed at Start, so the wall's avatars stay
  * as the children last saw them. "same": nothing to store. "refused": not
  * now, not a look the menu has, or MAX_LOOK_CHANGES spent; the device then
  * shows the look that is stored.
  */
-export function dress(g: Game, playerId: string, b: unknown, h: unknown): "stored" | "same" | "refused" {
+export function dress(g: Game, playerId: string, b: unknown, h: unknown, t: unknown = 0): "stored" | "same" | "refused" {
   const run = g.run;
   const p = run ? playerById(run, playerId) : null;
-  if (!run || !p || p.removed || run.phase !== "lobby" || !validLook(b, h)) return "refused";
-  const look = { b: b as number, h: h as number };
+  if (!run || !p || p.removed || run.phase !== "lobby" || !validLook(b, h, t)) return "refused";
+  const look = { b: b as number, h: h as number, t: t as number };
   if (sameLook(p.avatar, look)) return "same";
   if ((p.looks ?? 0) >= MAX_LOOK_CHANGES) return "refused";
   p.looks = (p.looks ?? 0) + 1;
   const { a, c } = p.avatar;
-  p.avatar = { a, c, ...(look.b ? { b: look.b } : {}), ...(look.h ? { h: look.h } : {}) };
+  p.avatar = { a, c, ...(look.b ? { b: look.b } : {}), ...(look.h ? { h: look.h } : {}), ...(look.t ? { t: look.t } : {}) };
   return "stored";
 }
 
