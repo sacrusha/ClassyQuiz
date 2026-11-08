@@ -8,7 +8,7 @@ import sys, pathlib
 HERE = pathlib.Path(__file__).resolve().parent
 sys.dont_write_bytecode = True  # no __pycache__ in the tree
 sys.path.insert(0, str(HERE))
-from build import PAGE, ROOT, launch  # noqa: E402
+from build import PAGE, ROOT, film_length, launch  # noqa: E402
 from playwright.sync_api import sync_playwright
 from PIL import Image, ImageDraw
 
@@ -21,7 +21,7 @@ page_path = opt('--page', PAGE)
 lang = opt('--lang', None, path=False)
 out = opt('--out', ROOT / '.tmp' / 'film' / (f'shots-{lang}' if lang else 'shots')); out.mkdir(parents=True, exist_ok=True)
 mode = args.pop(0) if args and args[0] in ('phone', 'desk') else 'desk'
-times = [float(x) for x in args] or [x * 1.0 for x in range(0, 61)]
+times = [float(x) for x in args] or [x * 1.0 for x in range(0, film_length() + 1)]
 
 with sync_playwright() as p:
     b = launch(p)

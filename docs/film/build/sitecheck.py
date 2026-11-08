@@ -48,7 +48,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 HERE = pathlib.Path(__file__).resolve().parent
 sys.dont_write_bytecode = True  # no __pycache__ in the tree
 sys.path.insert(0, str(HERE))
-from build import ROOT, launch  # noqa: E402
+from build import ROOT, film_length, launch  # noqa: E402
 from PIL import Image, ImageChops, ImageStat
 from playwright.sync_api import sync_playwright
 
@@ -58,6 +58,8 @@ BASE = TMP / 'main'          # main's src/
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else TMP / 'shots').resolve(); OUT.mkdir(parents=True, exist_ok=True)
 FILM_WORDS = ['Which number does the arrow show', 'Let everyone in', 'How will it be played', '646 000', 'Big numbers on the number line', 'Setting up a visualizer mockup', 'Reading an arrow']
 problems = []
+DUR = film_length()
+CLOCK = lambda x: f'{x // 60}:{x % 60:02d}'
 NPM = shutil.which('npm')
 NODE = shutil.which('node')
 GIT = shutil.which('git')
@@ -282,7 +284,7 @@ def check(url, mode):
           play: document.querySelector('.cqf-play').getAttribute('aria-label'), big: document.querySelector('.cqf-big').hidden, marks: document.querySelectorAll('.cqf-marks i').length,
           tip: document.querySelector('.cqf-tip').hidden })""")
         print(f'{mode}: time bar moved to 40 s before the film: clock {pre} while it loads; then {st}')
-        if pre != '0:40' or st['clock'] != '0:40 / 1:00' or not st['vt'].startswith('0:40, ') or st['play'] != aria[4] or not st['big'] or st['marks'] != 4 or not st['tip']:
+        if pre != '0:40' or st['clock'] != f'0:40 / {CLOCK(DUR)}' or not st['vt'].startswith('0:40, ') or st['play'] != aria[4] or not st['big'] or st['marks'] != 4 or not st['tip']:
             problems.append(f'{mode}: the time bar as the first press: {pre} {st}')
         shot(pg, 'moved-to-40', mode)
         pg.click('.cqf-play')
@@ -448,7 +450,7 @@ def ending(b, url, mode):
     pg.click('.cqf-big')
     wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
     hidden0 = pg.evaluate("document.querySelector('.cqf-again').hidden")
-    pg.evaluate('window.cqFilm.render(59.3)')
+    pg.evaluate(f'window.cqFilm.render({DUR - 0.7})')
     pg.click('.cqf-play')  # play the last moment out
     wait_until(pg, "() => !document.querySelector('.cqf-again').hidden", 5)
     s = pg.evaluate(STATE)
@@ -461,7 +463,7 @@ def ending(b, url, mode):
     print(f'{mode}: the replay hidden while it plays {hidden0}; at the end (at {s["t"]}, playing {s["playing"]}, {f.name}) named "{a["label"]}", words "{a["text"]}", icon {a["icon"]},'
           f' {a["w"]:.0f} x {a["h"]:.0f} px from {a["top"]:.3f} to {a["bottom"]:.3f} of the height (the underline ends at {END_UNDERLINE:.3f}), centre at {a["mid"]:.3f} of the width;'
           f' pressed: at {s2["t"]}, playing {s2["playing"]}, hidden {hidden2}, focus on {s2["focus"]}')
-    if not hidden0 or s['t'] < 59.9 or s['playing'] or not a['label'] or a['label'] == 'Play again' or a['text'] or not a['icon'] or not (s2['playing'] and s2['t'] < 1 and hidden2 and s2['focus'] == 'play/pause'):
+    if not hidden0 or s['t'] < DUR - 0.1 or s['playing'] or not a['label'] or a['label'] == 'Play again' or a['text'] or not a['icon'] or not (s2['playing'] and s2['t'] < 1 and hidden2 and s2['focus'] == 'play/pause'):
         problems.append(f'{mode}: replay: {hidden0} {a} {s} {s2} {hidden2}')
     if a['top'] < END_UNDERLINE + 0.02 or a['bottom'] > 0.985 or abs(a['mid'] - 0.5) > 0.005 or abs(a['w'] - a['h']) > 0.5:
         problems.append(f'{mode}: the replay is not a round button in the band under the address: {a}')
