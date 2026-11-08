@@ -430,7 +430,7 @@ export const JOIN_CODE = /^\d{5}$/;
 /** The teacher code: the class code and two digits, typed in the same box (docs/design/teacher-devices.md, "One entry: the teacher code"). */
 export const TEACHER_CODE = /^\d{7}$/;
 /** Said to a device whose teacher code's last two digits are wrong. */
-export const WRONG_TEACHER_CODE = "That isn't this quiz's teacher code.";
+export const WRONG_TEACHER_CODE = "The last two digits don't match this quiz.";
 /** Said to a device after too many wrong teacher codes. */
 export const TOO_MANY_CODES = "Too many wrong codes for this quiz. Try again in a few minutes.";
 export const MAX_QUIZ_BYTES = 200_000;

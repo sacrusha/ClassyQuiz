@@ -58,12 +58,18 @@ export const SLEEP_AFTER_MS = 45 * 60_000;
 /** The self-hosting nudge, appended to every refusal. */
 const OWN_COPY = "For more quizzes, a site of your own or your school's: classyquiz.pages.dev/own-copy says how.";
 
-/** Why a device can't join a class (server/game.ts); shown on it, in words its teacher can act on. */
-export const CLASS_FULL = "This class is full. Ask your teacher.";
-/** A student device before the teacher let the class in: it waits, and joins by itself once they do. */
-export const CLASS_WAITING = "Your teacher lets the class in in a moment.";
-export const CLASS_STARTED = "This quiz has started and takes no more players. Ask your teacher.";
-/** The same in a Peers room, where nobody is a teacher (docs/design/peers.md). */
+/**
+ * Why a device can't join (server/game.ts); shown on it. Whoever runs the
+ * quiz is in the room and can act on it; the words name no role, so they fit
+ * a class and any other crowd (docs/design/teacher-devices.md, "Words for
+ * any crowd"). The pages match these strings: a change reaches a page open
+ * during a deploy only once it reloads.
+ */
+export const CLASS_FULL = "This quiz is full. Ask whoever runs it.";
+/** A player's device before the players are let in: it waits, and joins by itself once they are. */
+export const CLASS_WAITING = "Joining opens in a moment.";
+export const CLASS_STARTED = "This quiz has started and takes no more players. Ask whoever runs it.";
+/** The same in a Peers room, where nobody runs it (docs/design/peers.md). */
 export const ROOM_FULL = "This quiz is full: it takes no more players.";
 export const ROOM_STARTED = "This quiz has started and takes no more players.";
 
@@ -88,7 +94,7 @@ export function quotaResetAt(now = new Date()): string | null {
 /** Letting a class in, refused: the day's rows are booked by the classes under way. */
 export function classesFullMessage(now = new Date()): string {
   const at = quotaResetAt(now);
-  return `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+  return `The free site can't take more players today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
 /** The same for a Peers room, refused as it opens: it is a quiz among friends, not a class. */

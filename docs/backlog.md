@@ -368,14 +368,25 @@ behind these items — options and what each would cost — is
    deployed. Open: `design/peers.md`, "Not known".
 
 4. **Quizmaster — a host runs a quiz for a crowd that isn't a class**: a pub,
-   a family, a training room, a video call. The words are the classroom's
-   (teacher code, teacher devices), the avatars are animals (built for
-   this crowd: a tool beside the animal, in the one menu with the top hat;
-   `design/class-and-wall.md`, "Dressing the avatar"), and the remote's how-to is shown to
-   every host though only some have a remote. Owner: the Quizmaster choice
-   comes first, then how the screens are arranged, as a toggle with an
-   explanation and the remote's manual only where it applies; auto-play
-   (item 7) is the quizmaster's option.
+   a family, a training room, a video call, on the classroom's screens.
+   Owner: the Quizmaster choice comes first, then how the screens are
+   arranged, as a toggle with an explanation and the remote's manual only
+   where it applies; auto-play (item 7) is the quizmaster's option. Built:
+   the local check's card is the choice; the lobby's check asks how the
+   screens are arranged (One screen, Screen and remote, remembered per
+   browser) and gives the teacher code's how-to only under Screen and
+   remote; it keeps the questions folded, the local check having shown
+   them; from the check on, the words name no role ("Let everyone in",
+   "Join code", "Ask whoever runs it"); the avatars have tools beside the
+   animal, in the one menu with the top hat (`design/class-and-wall.md`,
+   "Dressing the avatar"). `design/teacher-devices.md`, "How the screens
+   are arranged" and "Words for any crowd". Not deployed. Devices only (no
+   wall) is not offered; why, and what would make it cheap after Peers: same
+   file. Open: the landing's film draws the lobby with the classroom's words
+   ("Let the class in ▶", "Class code", "the class watches this screen",
+   "The class is let in in a moment.") and its check without the toggle
+   (`docs/film/build/film.js`, `COMMON`); the words before the check are
+   item 9's.
 
 5. **Whoever asked the AI for the quiz wants to play it, and so must not have
    seen the questions.** This is what lets a quiz be played by its own maker
@@ -547,6 +558,14 @@ With the owner:
   neckwear (a bow tie). Should one menu not serve both rooms, the fallback
   is a set per upload, defaulted by the entry and changeable among the
   host's settings on the check screen.
+- Quizmaster (v5 item 4), the implementer's calls, not yet seen by the
+  owner (`design/teacher-devices.md`): the toggle on the lobby's check
+  rather than the local check's card (the how-to needs the teacher code,
+  made at upload); One screen as the first default, then whatever this
+  browser chose or last had; devices only not offered; the questions
+  folded on the lobby's check and the Remote's lobby; the words ("Join
+  code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
+  it", "‹ Back"); whether the film is redrawn for them now or with item 9.
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a

@@ -131,18 +131,17 @@ element to play there, and give the check back as it was.
   (`peers.md`). The check is replaced in the tab's history, as below.
 - **Quizmaster** (`client/entry-quizmaster.ts`): "Open the lobby ▶" opens a
   room, and this tab becomes the Projector on the lobby's check
-  (`teacher-devices.md`), which repeats the questions with the fixes and
-  adds what the lobby needs (the teacher code, Let the class in). The check
+  (`teacher-devices.md`), which keeps the questions with the fixes folded
+  and adds what the lobby needs (how the screens are arranged, the teacher
+  code where a remote is wanted, Let everyone in). The check
   is replaced in the tab's history, not followed: Back from the lobby passes
   it, where the same button would put up a second quiz.
 
 ## Not known
 
 - Whether teachers miss the question list open on the check: it is folded
-  for every entry; the lobby's check lists it open.
-- Whether the lobby's check, repeating the questions after the local check,
-  costs a Quizmaster more than it gives; Quizmaster's own screens are v5
-  item 4's.
+  for every entry, and on the lobby's check too (`teacher-devices.md`,
+  "The single tab: check, then join").
 - Whether "Open the lobby" is the word a pub host or a teacher reaches for.
 - The Run box still says "Upload the quiz your AI made"; the file goes up
   only when a room opens. Its words are also the film's (`docs/film/`), which shows

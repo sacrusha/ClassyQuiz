@@ -931,7 +931,7 @@ log("swapped three times, from either side; the other tab left");
 // With the class in: the class code reaches no role; the teacher code does.
 {
   const child = await guestTry("child", "remote", {});
-  check(!child.ack.ok && child.ack.error === "That isn't this quiz's teacher code.", `the class code alone takes no role (${child.ack.error})`);
+  check(!child.ack.ok && child.ack.error === "The last two digits don't match this quiz.", `the class code alone takes no role (${child.ack.error})`);
   check(projector.view?.role === "screen" && !!projector.view.steer, "the Projector still steers");
   child.d.kill();
   const own = await guestTry("own-phone", "remote", { secret: up.body.secret });

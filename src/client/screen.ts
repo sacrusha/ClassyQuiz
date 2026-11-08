@@ -7,7 +7,7 @@
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
-import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
+import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
@@ -33,6 +33,10 @@ let wasFull = false;
 let tickTimer: number | undefined;
 /** The single tab's lobby screen: the teacher's check, or the class's join screen. */
 let lobbyScreen: "check" | "join" = instance ? tabLobby.get(instance) : "join";
+/** How the screens are arranged, the check's toggle: it decides which how-to the lobby shows, nothing else. */
+let arranged: Arrangement = arrangement.get();
+/** The check's question list, folded: the local check showed it before the upload. */
+let foldOpen = false;
 const steer = new Steer(() => line, () => view?.steer ?? null, newUI(), () => render());
 
 function start(): void {
@@ -65,7 +69,11 @@ function onMessage(m: ServerMessage): void {
     // or went away) keeps showing the class's screen, not the check.
     if (before && !before.steer && view.steer && view.phase === "lobby" && !view.waiting) setLobby("join", false);
     if (before && before.remote !== view.remote) {
-      if (view.remote === "present") toast("Remote connected");
+      if (view.remote === "present") {
+        toast("Remote connected");
+        // This host steers from a second device: the next check here says how.
+        arrange("remote", false);
+      }
       // On the wall: nothing here invites the class to the teacher's page.
       else if (before.remote === "present") toast("Remote gone – steering here", 8000);
     }
@@ -197,14 +205,21 @@ function comeBack(): string {
 }
 
 /**
- * The teacher code at rest, in one sentence naming both needs
+ * The second device's how-to, in one sentence naming both needs
  * (docs/design/teacher-devices.md, "The single tab: check, then join"); it doesn't guess which device this is. "Open a second
  * screen in a new window" opens a window that asks the same question as any other
  * device; it is always there, so a laptop that gains its second screen after
- * the check finds it where it was (hidden on a phone).
+ * the check finds it where it was (hidden on a phone). This is the sheet's
+ * and the menu's; the check says it under "Screen and remote", which has
+ * already named both needs (checkHowTo).
  */
 function secondDevice(v: ScreenView): string {
   return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open a second screen in a new window</button> with a click.</span>`;
+}
+
+/** The how-to under the check's "Screen and remote". */
+function checkHowTo(v: ScreenView): string {
+  return `On the second device, open <strong>${esc(siteAddress())}</strong> and type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> With two screens on this computer: <button class="link" data-act="projector-window">open a second screen in a new window</button>.</span>`;
 }
 
 /** The single tab's lobby screen; the class never sees the check unless the teacher shares it. */
@@ -224,26 +239,55 @@ function renderManagedLobby(v: ScreenView): void {
   else renderJoin(v);
 }
 
+/** The check's toggle (docs/design/teacher-devices.md, "How the screens are arranged"); remembered in this browser. */
+function arrange(a: Arrangement, draw = true): void {
+  if (arranged === a) return;
+  arranged = a;
+  arrangement.set(a);
+  if (draw) render();
+}
+
+/** One side of the toggle: its name and what it means, pressed when it is the arrangement. */
+function arrangeOption(a: Arrangement, name: string, line: string): string {
+  return `<button class="arrange-opt" type="button" data-act="arrange" data-to="${a}" aria-pressed="${arranged === a}"><strong>${name}</strong><small>${line}</small></button>`;
+}
+
 /**
- * The check: the teacher's page to confirm it is the right quiz before the
- * class joins (docs/design/teacher-devices.md, "The single tab: check, then
- * join"). The class code is small; a teacher device can use it with the
- * teacher code, the class only once "Let the class in" is tapped: the one tap
- * to the join screen, which lets the class in.
+ * The check: the host's page before anyone joins
+ * (docs/design/teacher-devices.md, "The single tab: check, then join"). It
+ * asks how the screens are arranged and gives the remote's how-to only to a
+ * host who has one; the questions are folded, since the local check showed
+ * them before the upload (docs/design/local-check.md). The join code is
+ * small; a second device can use it with the two more digits, the players
+ * only once "Let everyone in" is tapped: the one tap to the join screen,
+ * which lets them in.
  */
 function renderCheck(v: ScreenView): void {
   const t = v.steer!;
   const n = v.players.length;
+  const nq = t.questions.length;
+  const notes = t.warnings.length;
+  // A Remote that was here and went: the how-to to bring it back, whatever the toggle says.
+  const howTo = arranged === "remote" || t.remote === "away";
   const gone = t.remote === "away" ? "Remote gone. " : "";
   const html = `<div class="check">
     <div class="checkhead">
-      <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${t.questions.length} ${t.questions.length === 1 ? "question" : "questions"}</span></h1>
-      <p class="classcode">Class code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
+      <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${nq} ${nq === 1 ? "question" : "questions"}</span></h1>
+      <p class="classcode">Join code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
     ${roomNotice(t)}
-    <p class="cstart"><button class="btn primary big" data-act="show-join">Let the class in &#9654;</button></p>
-    <p class="device cline">${gone}${secondDevice(v)}</p>
-    ${questionList(t, steer.ui)}
+    <h2 class="arrange-ask">How are the screens arranged?</h2>
+    <div class="arrange" role="group" aria-label="How are the screens arranged?">
+      ${arrangeOption("one", "One screen", "It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker.")}
+      ${arrangeOption("remote", "Screen and remote", "One device shows the quiz, another steers it: a phone, say.")}
+    </div>
+    ${howTo ? `<p class="device cline">${gone}${checkHowTo(v)}</p>` : ""}
+    <p class="arrange-call">In a video call, the window you share is the screen everyone sees.</p>
+    <p class="cstart"><button class="btn primary big" data-act="show-join">Let everyone in &#9654;</button></p>
+    <details class="open-fold"${foldOpen ? " open" : ""}>
+      <summary data-act="fold"><span class="open-fold-name">The questions and their solutions</span>${notes ? `<span class="open-fold-notes"> · ${notes} ${notes === 1 ? "note" : "notes"} from the site</span>` : ""}</summary>
+      ${foldOpen ? questionList(t, steer.ui) : ""}
+    </details>
     <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
   </div>`;
   patch(main, html);
@@ -261,7 +305,7 @@ function renderCheck(v: ScreenView): void {
 const NOBODY_MS = 90_000;
 /**
  * When this tab first let the class in to an empty lobby; the wait
- * counts from there, across ‹ Questions and back. It goes with the first
+ * counts from there, across ‹ Back and the join screen again. It goes with the first
  * avatar and with the quiz's start.
  */
 let joinSince: { code: string; at: number } | null = null;
@@ -315,13 +359,14 @@ function joinAddress(): string {
 
 function nobodyLine(): string {
   const host = esc(siteAddress());
-  return `Nobody in yet? If the tablets can't open ${host}, the school network may block it: <a href="/check#it" target="_blank" rel="noopener">what to tell IT ›</a>`;
+  return `Nobody in yet? If phones and tablets can't open ${host}, their network may block it: <a href="/check#it" target="_blank" rel="noopener">what to tell IT ›</a>`;
 }
 
 /**
- * The class's join screen: QR, code, avatars and Start. The part the class
- * sees ends at the fold; "‹ Questions" goes back to the check, "A second
- * device ›" shows the teacher code in a sheet.
+ * The join screen, everyone's: QR, code, avatars and Start. The part
+ * everyone sees ends at the fold; "‹ Back" goes back to the check, and
+ * with a remote "A second device ›" shows its how-to in a sheet (on one
+ * screen it is in ⋯ only).
  */
 function renderJoin(v: ScreenView): void {
   const t = v.steer!;
@@ -344,8 +389,8 @@ function renderJoin(v: ScreenView): void {
       </div>
       <div class="mstart"><button class="btn primary big" data-act="begin">Start quiz &#9654;</button>
         <p class="device">${speedSwitch(t)}</p>
-        <p class="joinnav"><button class="link" data-act="show-check">‹ Questions</button>
-          <button class="link" data-act="second-device">${t.remote === "away" ? "Remote gone: a" : "A"} second device ›</button>
+        <p class="joinnav"><button class="link" data-act="show-check">‹ Back</button>
+          ${arranged === "remote" || t.remote === "away" ? `<button class="link" data-act="second-device">${t.remote === "away" ? "Remote gone: a" : "A"} second device ›</button>` : ""}
           <button class="link" data-menu aria-label="more">⋯</button></p>
       </div>
     </div>
@@ -363,7 +408,7 @@ function renderLobby(v: ScreenView): void {
     lobbyKey = "waiting";
     delete main.dataset.skeleton;
     main.innerHTML = `<div class="bar"><span class="grow">${esc(v.title)}</span></div>
-      <div class="center"><p class="muted">The class is let in in a moment.</p></div>`;
+      <div class="center"><p class="muted">Joining opens in a moment.</p></div>`;
     return;
   }
   const key = `${v.code}`;
@@ -713,7 +758,7 @@ async function leave(): Promise<void> {
 /** Two screens: a new window, which asks the same question as any other device. */
 function projectorWindow(): void {
   const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
-  if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type the teacher code.", 8000);
+  if (!w) toast(`The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type ${teacherCode(held!.code, teacherDigits())}.`, 8000);
 }
 
 for (const area of [main, sbar]) {
@@ -737,6 +782,13 @@ for (const area of [main, sbar]) {
       setLobby("join");
     }
     else if (act === "show-check") setLobby("check");
+    else if (act === "arrange") arrange(el.dataset.to === "remote" ? "remote" : "one");
+    else if (act === "fold") {
+      // The fold is drawn from foldOpen, not left to the browser: the check is redrawn on every view.
+      e.preventDefault();
+      foldOpen = !foldOpen;
+      render();
+    }
     else if (act === "second-device") {
       if (view) showNote(secondDevice(view));
     } else if (act === "swap") void swap();
