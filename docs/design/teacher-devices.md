@@ -16,9 +16,11 @@ scripts are the real attacker: they must not be able to take the steering of
 a quiz just because they know its class code.
 
 Before the class joins, the teacher also needs to see at once that this is the
-right quiz and to spot a wrong key. That is what the local check is for,
-before anything goes up (`local-check.md`); the lobby's check keeps the
-questions and their fixes at hand, folded.
+right quiz and to spot a wrong key: with break-time authoring the run is the
+review (`question-flow.md`), and the lobby's check is where a wrong key is
+caught before it reaches the wall. The local check can't be that place for
+a Quizmaster: it keeps the questions closed, since whoever plays mustn't
+see them (`local-check.md`).
 
 The same screens serve a host who runs a quiz for a crowd that isn't a class
 — a pub, a family, a training room, a video call (backlog v5 item 4,
@@ -87,8 +89,11 @@ What matters here:
   screens are English (`local-check.md`, Situation). Which word stands where
   "teacher" stood on the README, the landing and the guidance is decided
   once for all entries: `root-page.md`, "Words for whoever comes".
-- **A Quizmaster reaches the lobby having seen the questions:** the local
-  check shows them before the upload, with their fixes, which go up with
+- **A Quizmaster reaches the lobby, as a rule, without having seen the
+  questions:** the local check folds them for every entry, under a line
+  telling whoever will play to leave them closed, since the page can't know
+  which entry a person will press. A host who opened the fold there and
+  fixed a key finds the fixes on the lobby's check, since they go up with
   the quiz.
 
 ## How the site meets it
@@ -129,9 +134,10 @@ The tab that uploads is the Projector and steers itself. It opens on the
 count is what most often tells two versions of a quiz apart), the join code
 small (with a count once someone has joined), how the screens are arranged
 (below) with the teacher code where a remote is wanted, and the question
-list with its fixes, folded and closed on arrival: the local check showed
-it before the upload, and its fixes came up with the quiz, so a list open
-here would only make the teacher scroll past it a second time. One tap,
+list with its fixes, open, each question's answers folded: this is the
+first place a Quizmaster sees the questions (Situation), and folded answers
+keep the key off a shared screen until the teacher taps a button that says
+it shows them. One tap,
 "Let everyone in", leads to the **join screen** and lets the class in:
 teacher devices come in at any time, student devices only from that tap (or
 Start) on, and one that arrives earlier waits and joins by itself. Letting
@@ -162,9 +168,13 @@ this same check, with codes and fixes.
 
 The owner's sequence for a Quizmaster: the choice first (the local check's
 card, `local-check.md`), then how the screens are arranged, as a toggle with
-an explanation, and the remote's how-to only where it applies. The how-to
-needs the teacher code, which exists only once the quiz is up, so the toggle
-sits on the lobby's check, not on the local check's card.
+an explanation, and the remote's how-to only where it applies. The toggle
+sits where its answer can show what it means at once: on the lobby's check,
+Screen and remote puts the teacher code in front of the host the moment it
+is tapped. On the local check's card the code doesn't exist yet (it is drawn
+at upload), so the same toggle could only promise it for later, and a toggle
+whose explanation has to say "you'll see the code later" tells less than
+one that shows it.
 
 - **Two values:** *One screen* ("It shows the quiz and steers it: the
   buttons under the quiz, the keyboard or a clicker.") and *Screen and
@@ -180,15 +190,28 @@ sits on the lobby's check, not on the local check's card.
   only there, off the check and the join screen. A Remote that was there
   and is gone brings the how-to back after "Remote gone.", whatever the
   toggle says. The server isn't told: nothing it does depends on it.
-- **One screen unless this browser knows better.** One screen is what every
-  host has and what needs no setup (rule 4 of `user-flow.md` §1); the
-  remote is the optional second device in the owner's words. The choice is
-  kept per browser (`arrangement`, `client/dom.ts`), and a browser that has
-  had a Remote, on either side, is set to Screen and remote: the example
-  class's teacher who steers from the phone makes the choice once, or not
-  at all. Plausible assumption: a laptop or phone is used the same way
-  lesson after lesson; on a shared school laptop the next teacher at worst
-  sees the how-to they may not need.
+- **Screen and remote unless this browser has run a quiz without one.** The
+  example class's teacher steers from the phone and has to find the
+  remote's how-to on a first visit, on the screen in front of them before
+  the class is let in. One screen first would hide it there, and where it
+  is needed most: a phone that uploads first (the phone-first lesson) is,
+  as a plausible assumption, nearly never the one screen (`user-flow.md`
+  §4, "Phone only", is the exception), so its default would be wrong for
+  it; and a teacher who reads the code the check does show, the join code,
+  and types it on the laptop gets an avatar, not the wall. Screen and remote first
+  costs a host with one screen a how-to they don't need, until the browser
+  knows better. The choice is kept per browser (`arrangement`,
+  `client/dom.ts`): a tap on the toggle sets it; a browser that has had a
+  Remote, on either side and whichever arrived first, is set to Screen and
+  remote; one whose Projector reached the final ranking with no Remote in
+  the quiz is set to One screen (`tabHadRemote`, kept per tab, so a reload
+  after the Remote left doesn't forget it). So the example class's teacher
+  makes the choice once, or not at all, and so does a host at one screen,
+  after the first quiz. Plausible assumption: a laptop or phone is used the
+  same way lesson after lesson; on a shared school laptop the next teacher
+  at worst finds the toggle on the other value and taps it. This first
+  default was decided on the owner's behalf; the owner hasn't seen it
+  (backlog, Open).
 - **Devices only is not offered.** For a Quizmaster it would be a host who
   steers with nobody watching a common screen: a call shares a window, a
   table of friends is Peers, and a host without any wall can already be the
@@ -309,10 +332,14 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
 - Whether the words (Show the quiz here, Steer it from here, A second device,
   Swap) are the ones teachers reach for.
 - Whether hosts read the toggle as a question about their setup, and
-  whether One screen as the first default costs the example class's teacher
-  the remote's how-to they came for (it is one tap, then remembered).
-- Whether a teacher or a host misses the questions open on the lobby's
-  check; whether "‹ Back" says where it leads.
+  whether a host at one screen, on a first visit, reads the how-to under
+  Screen and remote as a step they have to take before letting everyone in.
+- Whether "‹ Back" says where it leads.
+- Whether a host who means to play along, as in backlog v5's "a crowd
+  where the host plays too", opens the lobby: its check lists the questions,
+  and only the answers are folded. The entry says it isn't played by whoever
+  starts it (`plays: false`); Peers is built for whoever asked for the quiz
+  playing among the others (backlog v5 item 3).
 - Whether "Join code", "Let everyone in" and "Ask whoever runs it" read
   naturally to a teacher, a child's helper and a pub host; no one outside
   the project has read them.

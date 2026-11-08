@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { imageInfo, matchImages } from "./images.ts";
+import { bundles, imageInfo, matchImages } from "./images.ts";
 import { parseQuiz } from "../quiz/format.ts";
 import { MAX_IMAGE_BYTES, MAX_SMALL_BYTES, PACK_BYTES } from "../shared/protocol.ts";
 
@@ -47,7 +47,7 @@ test("pictures are matched by imageKey; one used twice is stored once; unnamed f
     false,
   );
   assert.ok(r.ok);
-  assert.deepEqual(r.index, { "q1.png": { type: "image/png", w: 800, h: 600, n: 0 }, "q3.jpg": { type: "image/jpeg", w: 640, h: 480, n: 1 } });
+  assert.deepEqual(r.index, { "q1.png": { type: "image/png", w: 800, h: 600, n: 0, l: 33 }, "q3.jpg": { type: "image/jpeg", w: 640, h: 480, n: 1, l: 39 } });
   assert.deepEqual(Object.keys(r.files), ["img:0", "img:1"]);
 });
 
@@ -151,4 +151,49 @@ test("answer pictures: a missing small copy is no error; different proportions g
   assert.ok(l.ok);
   assert.deepEqual(l.warnings.map((w) => w.message), ['Question 1 runs without its picture choice "b.png": that choice shows only its colour and shape.']);
   assert.equal(left.questions[0].answers[1].image, "");
+});
+
+test("Peers: the questions' pictures and backgrounds in bundles within the pack size, each once; answer pictures not", () => {
+  const q = parseQuiz(`Title: T
+Background: wald.jpg
+1. Q1?
+Image: q1.png
++ Image: a.png
+- b
+2. Q2?
+Image: q2.png
+Background: q1.png
++ a
+- b
+3. Q3?
+Image: q3.png
++ a
+- b
+`).quiz;
+  // A PNG header and `extra` bytes: three pictures of 600 KB don't fit one bundle.
+  const pic = (extra: number) => {
+    const b = new Uint8Array(33 + extra);
+    b.set(pngHeader(1600, 900));
+    return b;
+  };
+  const files = [
+    { name: "wald.jpg", bytes: jpegHeader(1920, 1080) },
+    { name: "q1.png", bytes: pic(600_000) },
+    { name: "a.png", bytes: pic(10) },
+    { name: "q2.png", bytes: pic(600_000) },
+    { name: "q3.png", bytes: pic(600_000) },
+  ];
+  const r = matchImages(q, files, false);
+  assert.ok(r.ok);
+  const b = bundles(q, r.index);
+  const n = (name: string) => r.index[name].n;
+  assert.deepEqual(b.flat().sort(), [n("wald.jpg"), n("q1.png"), n("q2.png"), n("q3.png")].sort(), "each question picture and background once, no answer picture");
+  assert.equal(b.length, 2);
+  for (const list of b) {
+    const size = list.reduce((s, k) => s + Object.values(r.index).find((i) => i.n === k)!.l!, 0);
+    assert.ok(size <= PACK_BYTES || list.length === 1, "within the pack size");
+  }
+  // A picture stored without its size isn't bundled: it is fetched by itself.
+  delete r.index["q3.png"].l;
+  assert.ok(!bundles(q, r.index).flat().includes(n("q3.png")));
 });

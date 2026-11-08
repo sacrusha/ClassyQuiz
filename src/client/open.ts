@@ -14,7 +14,7 @@ import type { TeacherQuestion } from "../shared/protocol.ts";
 import { $, esc, lines } from "./dom.ts";
 import { ENTRIES, type Entry, type EntryContext } from "./entries.ts";
 import { EXAMPLE_ZIP } from "./example-text.ts";
-import { takeOver } from "./handoff.ts";
+import { sweepStale, takeOver } from "./handoff.ts";
 import { TEXT, isLang } from "./landing-text.ts";
 import { newUI, patch, questionList, toast, viewAct, type QuestionsView } from "./manage.ts";
 import { openQuiz, readQuiz, type OpenedQuiz, type QuizFiles } from "./opening.ts";
@@ -35,6 +35,8 @@ async function arrive(): Promise<void> {
   const key = location.hash.slice(1);
   // The key is spent once read; a reload must not look for it again.
   if (key) history.replaceState(null, "", location.pathname + location.search);
+  // takeOver sweeps as it reads; without a key, what an earlier handover left goes here.
+  else void sweepStale();
   let files: QuizFiles | null = null;
   if (isLang(example)) {
     files = await exampleFiles(EXAMPLE_ZIP[example]);
@@ -123,11 +125,16 @@ function renderCheck(): void {
   if (foldOpen) renderList();
 }
 
+/**
+ * An entry's card. No button is the primary one: a teacher in a hurry who
+ * means to run the quiz would press the one that stands out, and the first
+ * is Solo's (docs/design/local-check.md, "The check").
+ */
 function entryCard(e: Entry, i: number): string {
   return `<section class="open-entry">
     <h2>${esc(e.name)}</h2>
     <p>${esc(e.line)}</p>
-    <p><button class="btn${i === 0 ? " primary" : ""}" type="button" data-entry="${i}">${esc(e.button)}</button></p>
+    <p><button class="btn" type="button" data-entry="${i}">${esc(e.button)}</button></p>
     ${e.note ? `<p class="open-note">${esc(e.note)}</p>` : ""}
     <div class="open-say" data-say="${i}" role="status"></div>
   </section>`;

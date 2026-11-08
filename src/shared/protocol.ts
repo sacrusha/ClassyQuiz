@@ -355,7 +355,9 @@ export interface PlayerView {
   /**
    * The answer pictures' small copies, in packs: fetched once, as soon as a
    * view names them, so they are on the device before the answers are shown.
-   * Absent when the quiz has no picture answers.
+   * Absent when the quiz has no picture answers. In a Peers room, followed
+   * by the bundles of the questions' pictures and backgrounds
+   * (`PeersView.inPacks`), absent when there are neither.
    */
   packs?: string[];
   /**
@@ -390,6 +392,8 @@ export interface PlayerView {
  * the ranking. Every list of answers is in the order on screen.
  */
 export interface PeersView {
+  /** This device's player, as in `players` and the ranking. */
+  player?: string;
   title: string;
   /** The code friends join with, shown on the device of whoever opened the room. */
   code: string;
@@ -405,8 +409,14 @@ export interface PeersView {
   ready: boolean;
   /** No question comes after the open one: the final ranking does. */
   last: boolean;
-  /** In the lobby: every picture the quiz will show, to fetch ahead. */
+  /**
+   * In the lobby, what to fetch ahead: the player view's `packs` carry the
+   * answer pictures' small copies and the questions' pictures and
+   * backgrounds, which sit in them as `inPacks` says, under the address the
+   * views name them by; `pictures`, one by one, what no pack carries.
+   */
   pictures?: string[];
+  inPacks?: { src: string; pic: PackPic }[];
   /** The open question, as the device lays it out. */
   question: { text: string; image: ImageRef | null; background: ImageRef | null; pics?: (ImageRef | null)[] } | null;
   /** With the solution: how many picked each answer, and who got it right (they jump). */

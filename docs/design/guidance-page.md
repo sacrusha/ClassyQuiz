@@ -196,8 +196,10 @@ the instruction is the point and the AI doesn't derive it (Situation): when
 the person in the conversation will be among the players, the questions,
 their choices and their solutions stay out of the conversation and out of
 everything the AI shows; the AI reports what it can without giving a
-question away (how many, the topics and their spread, the difficulty, which
-have pictures, what of the material is covered) and hands over the `.zip`.
+question away (how many, the difficulty, how many have pictures, what of the
+material is covered and what isn't) and hands over the `.zip`. The report
+names the material at a grain coarser than the questions: for a short quiz,
+a topic per question would be the question list.
 What decides it is who plays, not the way it is played: a teacher making a
 quiz for a class's practice alone reviews it as usual. Nobody looks at the
 solutions before the game, so the page names where a wrong one is caught
@@ -208,6 +210,18 @@ so an AI that can't tell asks. The site's side is the local check's fold
 (`local-check.md`); the user's side, the example asks that say "I'll play it
 myself" and "I'm playing too" in the user's own words (`root-page.md`,
 "Build: two steps").
+
+A quizmaster doesn't play. Their screens, the big screen and a second
+device that steers, take no answers; they set when the choices come and
+when the solution shows; and a second device shows the current question's
+solution while the players answer (`teacher-devices.md`; `user-flow.md`
+§3.5). The page says so under Quizmaster, and under `#plays` the AI asks a
+user who says they will host and play too which they mean: to play among
+the others with nobody running it (Peers), the questions kept out of the
+conversation, or to run it for the group (Quizmaster), reviewed as usual.
+Plausible assumption: without it, an AI told "I'm hosting and playing too"
+makes a Quizmaster quiz and keeps it from the user, who then runs a quiz
+nobody checked and can't play it.
 
 ### Claims about what an AI can do
 
@@ -288,8 +302,9 @@ quoted; runs not recorded beyond the above):
   getting the page fetched before the first build; the test waits until the
   landing and guidance settle, because of the fetch cache.
 - Whether AIs keep the questions out of the conversation when the user says
-  they'll play, whether they ask when it's unclear, and whether what they
-  report instead is enough to trust the zip; no run since the page says it.
+  they'll play, whether they ask when it's unclear or when the user will
+  host and play, and whether what they report instead is enough to trust
+  the zip without naming a question; no run since the page says it.
 - Whether an AI told how the quiz will be played shapes it differently
   (questions for a phone at arm's length, a length for friends); untested.
 - Whether AIs give answer pictures a ground of their own often enough: the

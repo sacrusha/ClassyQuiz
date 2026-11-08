@@ -33,7 +33,8 @@ Solo learner mustn't be shown them.
   the page is closed (`pictures.md`, "Stored and served").
 - The site's own screens are English; the root page's top block, Run's
   messages with it, is in the visitor's language (`root-page.md`,
-  "Languages").
+  "Languages"), and so are those messages where opening a room moved them
+  (below, "Opening a room").
 - Pages allow pictures only from the site and as `blob:` URLs, scripts only
   from the site's files (`hosting-and-limits.md`, Content-Security-Policy).
 - Only what is built is offered: the site never promises what isn't (v5).
@@ -44,8 +45,8 @@ Solo learner mustn't be shown them.
 
 ### Reading on the root page
 
-The Run box ("Open the quiz your AI made", since nothing goes up there)
-reads the `.zip` as before, then checks it here instead of
+The Run box (under "Open the quiz your AI made", since nothing goes up
+there) reads the `.zip`, then checks it here instead of
 uploading it (`client/home.ts`; `readQuiz` in `client/opening.ts`): the text
 first (the parser's errors, with "Copy the message for your AI"), then the
 pictures the quiz names (with "Continue without these pictures"), then the
@@ -58,9 +59,14 @@ A page can't hand a file to the next one. The quiz read (its text, its
 pictures redrawn, whether some were left out) goes through the browser's
 IndexedDB for the moment of the page change (`client/handoff.ts`): the root
 page stores it under a random key and opens `/open#<key>`; the check takes
-it out and deletes it on arrival, with any record older than a minute that
-never reached its page (a tab closed in between). From then on the quiz
-lives only in the page's memory. A reload of the check therefore finds
+it out and deletes it on arrival. From then on the quiz lives only in the
+page's memory. A record whose page never came (the tab closed in between,
+the navigation lost) stays in the browser's site data until the site next
+runs a page that sweeps: the start page, a check, or the next handover each
+delete every record older than a minute. Where the browser doesn't list its
+databases (`indexedDB.databases`), only the next handover and its check
+sweep: elsewhere, opening the database to look would create it. So on a shared school laptop a quiz can outlast its use only on
+this failure path, and only until the site is next opened there. A reload of the check therefore finds
 nothing and says so ("No quiz open here", the way back to the start page):
 nothing is kept. A browser that keeps no site data can't pass the quiz on;
 the root page says so in its language.
@@ -83,10 +89,12 @@ left out taken off the quiz with a warning each) and shows:
 - **The entries**, each a card with its name, one sentence on who it is for
   and how it plays, its own button, and an optional quiet line (what
   starting it costs). One button per entry: picking and starting is one
-  press, which is the frictionless way for the newcomer's Solo. The first
-  card's button is the primary one, so the order of the entries is a
-  decision (`client/entries.ts`). "How will it be played?" heads them once
-  there are two or more.
+  press, which is the frictionless way for the newcomer's Solo. The three
+  buttons look alike: whoever opens a quiz meaning to run it, a teacher in
+  a hurry before the lesson, would otherwise press the one that stands out,
+  and Solo plays the quiz in this tab instead of opening the lobby. The
+  order is still a decision, the reading order (`client/entries.ts`). "How
+  will it be played?" heads them once there are two or more.
 - **The questions folded away**, under "The questions and their solutions"
   (with how many notes the site has, the parser's and the pictures'
   warnings, which quote the quiz). Closed, the list isn't in the page at all.
@@ -109,8 +117,14 @@ doesn't fit its question is left as the quiz has it. The device's own
 bookkeeping moves with it: the previous unstarted quiz ends
 (`hosting-and-limits.md`, "Running classes finish"), the quiz is remembered
 for the resume card and the day for the own-copy line. Refusals (the day's
-caps, the allowance, no connection) show under the entry's button in
-English, the root page's words.
+caps, the allowance, no connection), and "Sending the quiz…" before them,
+show under the entry's button in the root page's words and language
+(`visitorLang`: the device's choice, else the browser's; `root-page.md`,
+"Languages"). They are Run's messages, moved here with the upload, and they
+say what to do next (wait, an own copy, what to tell IT), which a visitor
+who doesn't read English needs as much on this page as on the root page;
+the card around them stays English, the site's own screen. The quiz's own
+problems stay English, as on the root page.
 
 ### The entries
 
@@ -123,26 +137,29 @@ open, and each picture as a blob URL on the page with its size. The context
 lets an entry say something under its button, take over the page's main
 element to play there, and give the check back as it was.
 
-- **Solo** (`client/entry-solo.ts`), first, so its button is the page's
-  primary one: "Play ▶" plays the quiz in this page, nothing uploaded, and
-  Back gives the check back (`solo.md`).
+- **Solo** (`client/entry-solo.ts`), first: "Play ▶" plays the quiz in
+  this page, nothing uploaded, and Back gives the check back (`solo.md`).
 - **Peers** (`client/entry-peers.ts`), second: "Play together ▶" opens a
   room that runs on its own (`mode`: `peers` beside the fixes), and this
   tab comes into it as its first player, on the player page
   (`peers.md`). The check is replaced in the tab's history, as below.
 - **Quizmaster** (`client/entry-quizmaster.ts`): "Open the lobby ▶" opens a
   room, and this tab becomes the Projector on the lobby's check
-  (`teacher-devices.md`), which keeps the questions with the fixes folded
-  and adds what the lobby needs (how the screens are arranged, the teacher
-  code where a remote is wanted, Let everyone in). The check
+  (`teacher-devices.md`), which lists the questions, their answers folded,
+  with the fixes made here: the fold here stays closed for a Quizmaster as
+  for anyone, so the lobby's check is where whoever runs the quiz sees the
+  questions and catches a wrong key. It adds what the lobby needs (how the
+  screens are arranged, the teacher code where a remote is wanted, Let
+  everyone in). The check
   is replaced in the tab's history, not followed: Back from the lobby passes
   it, where the same button would put up a second quiz.
 
 ## Not known
 
-- Whether teachers miss the question list open on the check: it is folded
-  for every entry, and on the lobby's check too (`teacher-devices.md`,
-  "The single tab: check, then join").
+- Whether a teacher who will run the quiz opens the fold here anyway, to
+  check before uploading, and then sees the questions twice; the lobby's
+  check lists them open (`teacher-devices.md`, "The single tab: check, then
+  join").
 - Whether "Open the lobby" is the word a pub host or a teacher reaches for.
 - Whether school browsers that block site data (IndexedDB) exist in the
   target schools; such a browser can't reach the check.

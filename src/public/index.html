@@ -87,6 +87,9 @@
   .cqf-stage .tn { font-variant-numeric: tabular-nums; }
   .see { display: block; max-width: calc(var(--film-h) * 16 / 9); margin: 4px auto 6px; text-align: right; color: var(--accent); font-weight: 600; text-decoration: none; }
   .see:hover, .see:focus-visible { text-decoration: underline; }
+  /* The three ways, by the names the local check's cards carry, above Build and Run (root-page.md, "The three ways, named"). */
+  .ways { margin: 1.2rem 0 0; font-size: 1.05rem; text-wrap: pretty; }
+  .ways b { white-space: nowrap; }
 
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; }
   .cols h2 { border: 0; padding: 0; margin: 1.6rem 0 .6rem; font-size: 1.35rem; }
@@ -165,9 +168,10 @@
 <div class="landing wide" id="landing">
 <div class="film" id="cqfilm"><div class="cqf">
   <div class="cqf-film"><div class="cqf-stage" role="group" aria-label="From an exercise sheet to the class: a film without sound" data-t-aria="film"><img src="/landing/film-en.webp" srcset="/landing/film-en-800.webp 800w, /landing/film-en.webp 1600w" sizes="min(100vw, 110svh)" alt="" width="1600" height="900"><button class="cqf-big" type="button" aria-label="Play" data-t-aria="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg></button><button class="cqf-again" type="button" aria-label="Play again" data-t-aria="again" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-    <div class="cqf-bar"><button class="cqf-play" type="button" aria-label="Play" data-t-aria="play">&#9654;</button><span class="cqf-seek"><input type="range" min="0" max="60" step="0.1" value="0" aria-label="Time in the film" data-t-aria="seek" aria-valuetext="0:00"></span><span class="cqf-time">0:00<span class="cqf-dur"> / 1:00</span></span><button class="cqf-speed" type="button" aria-label="Speed" data-t-aria="speed" data-rate="1">1&times;</button><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
+    <div class="cqf-bar"><button class="cqf-play" type="button" aria-label="Play" data-t-aria="play">&#9654;</button><span class="cqf-seek"><input type="range" min="0" max="67" step="0.1" value="0" aria-label="Time in the film" data-t-aria="seek" aria-valuetext="0:00"></span><span class="cqf-time">0:00<span class="cqf-dur"> / 1:07</span></span><button class="cqf-speed" type="button" aria-label="Speed" data-t-aria="speed" data-rate="1">1&times;</button><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
 </div></div>
 <a class="see" id="example-link" href="/example" data-t="see">The example, step by step &rsaquo;</a>
+<p class="ways" data-t-html="ways">A quiz is played here in three ways: <b>Solo</b>, on your own; <b>Peers</b>, with friends, each on their own device; <b>Quizmaster</b>, you run it for a group, on a big screen.</p>
 
 <div class="cols">
 <section class="build" aria-labelledby="build-h">
@@ -202,10 +206,10 @@
 </section>
 
 <section class="run" aria-labelledby="run-h">
-  <h2 id="run-h" data-t="run">Play a quiz</h2>
+  <h2 id="run-h" data-t="run">Open the quiz your AI made</h2>
   <div id="resume"></div>
   <div class="runbox" id="runbox">
-    <button type="button" class="open" id="open" data-t="upload">Open the quiz your AI made&nbsp;(.zip)</button>
+    <button type="button" class="open" id="open" data-t="upload">Choose the .zip file</button>
     <p data-t="drop">or drop it here</p>
     <input id="file" type="file" hidden>
   </div>
@@ -228,7 +232,7 @@
 <ul>
   <li><strong>Solo.</strong> One person plays it on their own device, to learn or review: the question, its picture and the choices on that device, the solution right after each answer, the score at the end. Nothing goes to the server, and closing the tab ends it. At the end the player can copy their answers, with the solutions, for their own AI.</li>
   <li><strong>Peers.</strong> Friends play it together, each on their own phone, tablet or laptop, at a table or on a call, and nobody runs it. Whoever opens the room plays too, and has the code for the others. The question and its choices show on every device; once everyone present has answered, the solution, with how many picked each choice; then the ranking; the next question comes once everyone has tapped on. The opener can go on without waiting for someone, change a solution once it shows, and end the quiz.</li>
-  <li><strong>Quizmaster.</strong> Someone runs the quiz for a group: a class, a training session, a party, a video call. The questions are on a big screen (a projector, a TV, a shared window), and the players answer on their own phones or tablets, which show the choices only. The quizmaster steers question by question, on the big screen itself or from a second device such as a phone. In a class, the quizmaster is the teacher.</li>
+  <li><strong>Quizmaster.</strong> Someone runs the quiz for a group: a class, a training session, a party, a video call. The questions are on a big screen (a projector, a TV, a shared window), and the players answer on their own phones or tablets, which show the choices only. The quizmaster steers question by question, on the big screen itself or from a second device such as a phone. In a class, the quizmaster is the teacher. The quizmaster doesn't play: their screens take no answers, they decide when the choices come and when the solution shows, and a second device shows them the solution while the others answer.</li>
 </ul>
 
 <p>No accounts; players join a room with its code, or its QR code. A room's quiz, with its players' answers and scores, is deleted when it is ended, or three hours after its last use. The user's lasting copy is the <code>.zip</code>. The browser strips picture metadata before anything goes to the server. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device opens that copy's own address.</p>
@@ -335,9 +339,11 @@ Order: fixed
 
 <h3 id="plays">When the user will play the quiz</h3>
 
-<p>A user who will play the quiz, alone to practise or with friends, plays it without having seen the questions. So the questions, their choices and their solutions stay out of the conversation, and out of anything the AI shows: no draft, no presentation, no preview picture, no question quoted in a summary. What the AI reports instead is what it can without giving a question away: how many questions, the topics and how they are spread, the difficulty, which questions have pictures, what of the material is covered and what was left out. Then it hands over the <code>.zip</code>.</p>
+<p>A user who will play the quiz, alone to practise or with friends, plays it without having seen the questions. So the questions, their choices and their solutions stay out of the conversation, and out of anything the AI shows: no draft, no presentation, no preview picture, no question quoted in a summary. What the AI reports instead is what it can without giving a question away: how many questions, the difficulty, how many have pictures, and what of the material is covered and what was left out, named at a grain coarser than the questions, since for a short quiz a topic per question is the question list. Then it hands over the <code>.zip</code>.</p>
 
 <p>What decides it is whether the person in the conversation will be among the players, not the way it is played: a teacher making a quiz for their class to practise with alone reviews it as usual. Nobody looks at the solutions before the game, so the AI checks them itself; a wrong one is caught in play, among friends by whoever opened the room, who can change it once it shows, and alone in the answers the player copies to their AI at the end.</p>
+
+<p>A quizmaster isn't among the players, so a user who says they will host the quiz and play it too is asked which they mean: playing among the others with nobody running it, each on their own device (Peers), where the questions stay out of the conversation; or running it for the group on a big screen (Quizmaster), where the user reviews it as usual.</p>
 
 <h3 id="presenting">Presenting</h3>
 

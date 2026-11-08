@@ -270,9 +270,10 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
    one above the other when upright. No words. */
 .play .dress { flex: 1; display: grid; gap: 16px; align-items: center; justify-items: center; grid-template: "hero picker" 1fr "look picker" auto / auto 1fr; }
 .dress .hero { grid-area: hero; width: min(44vw, 58vh); height: min(44vw, 58vh); }
-.dress .picker { grid-area: picker; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 560px; }
-.dress .prow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.dress .pick { width: 60px; height: 60px; border-radius: 14px; border: 3px solid var(--rule); background: var(--card); padding: 6px; touch-action: manipulation; }
+.dress .picker { grid-area: picker; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 610px; container-type: inline-size; }
+.dress .picker { --gap: 8px; }
+.dress .prow { display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center; /* The nine hats on one line wherever a tablet's picker is narrower than they need at 60 px. */ --pick: clamp(46px, calc((100cqw - 64px) / 9), 60px); }
+.dress .pick { width: var(--pick); height: var(--pick); border-radius: 14px; border: 3px solid var(--rule); background: var(--card); padding: 6px; touch-action: manipulation; }
 .dress .pick svg { width: 100%; height: 100%; display: block; }
 .dress .pick.on { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
 .dress.spent .pick { opacity: .45; }
@@ -283,12 +284,24 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
   .dress .hero { width: min(62vw, 40vh); height: min(62vw, 40vh); }
 }
 @media (max-width: 420px) {
-  .dress .pick { width: 46px; height: 46px; padding: 4px; }
-  .dress .prow { gap: 6px; }
+  .dress .picker { --gap: 6px; }
+  .dress .pick { padding: 4px; }
 }
-/* Six to a line on the narrowest phones, so the three rows fit without scrolling. */
 @media (max-width: 340px) {
-  .dress .pick { width: 42px; height: 42px; padding: 3px; }
+  .play .dress { gap: 20px; }
+}
+/* A row that cannot hold its pictures on one line breaks into halves, not into a full line and a stray picture
+   (the picker's own width decides: it is narrower beside a Peers lobby's code than on a tablet's own screen). */
+@container (max-width: 477px) {
+  .dress .prow-h { max-width: calc(5 * var(--pick) + 4 * var(--gap)); margin-inline: auto; }
+}
+/* The phones' width, 360 and down: the seven tools on one line, so Start stays on the first screen of a 640 px phone. */
+@container (max-width: 357px) {
+  .dress .prow { --pick: 41px; }
+  .dress .pick { padding: 3px; }
+}
+@container (max-width: 322px) {
+  .dress .prow-t { max-width: calc(4 * var(--pick) + 3 * var(--gap)); margin-inline: auto; }
 }
 /* A changed look: the child sees which one on the wall is theirs. */
 @keyframes wiggle { 0% { transform: none; } 25% { transform: scale(1.12) rotate(-8deg); } 50% { transform: scale(1.12) rotate(8deg); } 75% { transform: scale(1.05) rotate(-4deg); } 100% { transform: none; } }
@@ -678,7 +691,7 @@ body.teach { padding-bottom: 96px; }
 body.screen > .site-head { display: none; }
 /* A pull to refresh would reload the page, and a Solo quiz is only in it. */
 html.solo-on, html.solo-on body { overscroll-behavior-y: none; }
-/* Text tiles in one column where two would break their words (client/stage.ts, the device option). */
+/* Text tiles in one column where two would break their words (client/stage.ts, an upright device). */
 .tiles.onecol { grid-template-columns: minmax(0, 1fr); }
 button.tile { border: 0; margin: 0; font: inherit; font-weight: 700; text-align: left; color: var(--ans-ink); cursor: default; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .tiles.open button.tile { cursor: pointer; }
@@ -686,9 +699,12 @@ button.tile { border: 0; margin: 0; font: inherit; font-weight: 700; text-align:
 /* The answer chosen; with the key, still readable if it doesn't count. */
 .tile.mine { outline: 6px solid var(--fg); outline-offset: -6px; }
 .tile.mine.dim { opacity: .75; }
-/* Alone there is no count beside the mark: the tile keeps room for the mark only. A room that shows the spread passes it (dspread). */
-.dscreen:not(.dspread) .tile .side { width: 1.6em; }
-.dscreen:not(.dspread) .tile.pic.row, .dscreen:not(.dspread) .tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 1.6em; }
+/* Alone on an upright device there is no count beside the mark: the tile
+   keeps room for the mark only. A room that shows the spread passes it
+   (dspread); wider than tall, the tiles keep the wall's room, so their text
+   sets as on the wall. */
+.dscreen:not(.dspread) .tiles.dupright .tile .side { width: 1.6em; }
+.dscreen:not(.dspread) .tiles.dupright .tile.pic.row, .dscreen:not(.dspread) .tiles.dupright .tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 1.6em; }
 #qbar .dme { width: 1.6em; height: 1.6em; flex: none; }
 #qbar .dme svg { width: 100%; height: 100%; display: block; }
 #qbar #dscore { flex: none; display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }

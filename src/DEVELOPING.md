@@ -19,8 +19,8 @@ All commands run in `src/` unless said otherwise.
 - The Cloudflare-specific code stays in the Durable Object classes and the
   `/api` router, with the logic they call kept pure (`server/game.ts`,
   `server/images.ts`, `quiz/`, `shared/`). A school converts the server to its
-  own with an AI, and converts again to take an update (README, "On your
-  school's own server"); code that spreads the platform further makes every
+  own with an AI, and converts again to take an update (README, "On a
+  school's or company's own server"); code that spreads the platform further makes every
   conversion bigger. The local check (`client/open.ts`, `client/opening.ts`)
   runs `quiz/`, `server/images.ts` (`matchImages`) and `server/game.ts` (the
   fixes) in the browser, to check a quiz as the server will before anything
@@ -40,6 +40,11 @@ All commands run in `src/` unless said otherwise.
 - `public/site.css`: the shared look. Every page links it first; in `dist/`
   it is the front of `app.css`, or written into a page without `app.css`
   (`build.mjs`), so there is no `dist/site.css`.
+- `public/app.css`: one namespace for every app page and `/example`. A new
+  class can pick up an old rule (`.device` is the network check's line), so
+  a new screen's names carry a prefix of their own: the device screen's a
+  `d` (`dscreen`, `dbar`, `dupright`). The usual remedies, deferred by the
+  owner: `docs/backlog.md`, Housekeeping.
 
 The site is two Cloudflare deployables. The state Worker (`classyquiz-state`)
 holds the Durable Objects (`Instance`, `JoinCode`, `UploadStats`, `SiteBudget`).
@@ -90,8 +95,8 @@ comment says what it exercises. It is the check that the whole flow holds; run
 it after changes to the game, the protocol or the transport.
 `node scripts/simulate-peers.mjs [base-url]` is the same for a Peers room
 (`docs/design/peers.md`): friends, nobody steering, a phone going silent;
-about a minute and a half, most of it waiting for that phone to count as
-away.
+about two minutes, most of it waiting for that phone to count as away and
+for a held poll's end.
 
 Things that bite:
 

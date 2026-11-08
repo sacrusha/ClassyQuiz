@@ -15,7 +15,7 @@
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED } from "../shared/limits.ts";
-import { $, esc, findQuiz, keepAwake, lines, playerKey, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
+import { $, esc, findQuiz, forgetQuiz, keepAwake, lines, playerKey, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, lookKey, pickerRows, shapeSvg, wiggle } from "./look.ts";
 import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
@@ -280,6 +280,8 @@ function onMessage(m: ServerMessage): void {
     render();
   } else if (m.t === "gone") {
     store.remove(key);
+    // Gone: the start page's resume card needn't ask after it (a Peers room's opener uploaded it).
+    forgetQuiz(instanceId);
     line?.stop();
     clearInterval(tickTimer);
     if (m.home) {

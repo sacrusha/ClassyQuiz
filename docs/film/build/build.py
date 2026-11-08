@@ -25,6 +25,11 @@ def launch(p):
     return p.chromium.launch(channel='msedge')
 
 
+def film_length():
+    """The film's length in whole seconds: DUR in film.js."""
+    return int(re.search(r'const W = 1600, H = 900, DUR = (\d+)', (HERE / 'film.js').read_text(encoding='utf-8')).group(1))
+
+
 def data_uri(path, mime):
     return f'data:{mime};base64,' + base64.b64encode(path.read_bytes()).decode()
 

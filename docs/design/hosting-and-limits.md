@@ -29,6 +29,29 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
   some 75 classes a day on rows and 30 with every device polling. The
   landing page's "room for a few dozen classes a day" rests on this
   (`shared/limits.ts`, comment on `MAX_UPLOADS_PER_DAY`).
+- **What a Peers room costs** (`peers.md`) is held to what a class costs,
+  since the day is the classes'. Its view changes with every friend's
+  answer, look and line (who the room waits for, who is away), where a
+  class's tablet changes only with its own answer and the teacher's steps.
+  On a WebSocket that is a message out, which the plan doesn't count
+  (Cloudflare's Durable Objects pricing: incoming messages count, twenty to
+  a request; outgoing ones not at all). On the long-poll fallback each would
+  answer a held poll, a Function and a Durable Object request: some 10,000
+  each for 25 players over 15 questions, a tenth of the day. So such a
+  change doesn't end a poll; it comes with the poll's end, at most 25 s
+  later (`pollKey`, `server/instance.ts`), and a polling device costs what
+  a class's tablet does: its polls, the room's steps, its own answers and
+  taps on, about 3,000 of each for 25 players. Rows: each answer 2, as in a
+  class, and the taps on from a solution ride on the run's next write, at
+  most one a second (`LOOK_WRITE_MS`), as the looks do, so 25 players over
+  15 questions write about 1,500 (plausible assumption: friends tap on
+  within some seconds of each other; each tap on its own would add 750).
+  The booking still counts every tap on (`server/rows.ts`). Pictures: each
+  device lays out the question itself, so it fetches the questions'
+  pictures and backgrounds as well as the answer pictures' small copies;
+  both come in packs of at most 1.5 MB (`pictures.md`), a few requests per
+  device, where one by one a quiz with a picture and four picture answers
+  per question would cost each device 75 for 15 questions.
 - **No edge to defend with.** A `pages.dev` address has no zone, so no WAF and
   no rate-limiting rule: every request reaches the Function and counts,
   rejected or not. A determined script can spend the day's requests and
@@ -119,12 +142,12 @@ The refusal messages in `shared/limits.ts` (`OWN_COPY`) still name
 `classyquiz.pages.dev/own-copy`, so a copy shows the demo's address there. A
 copy that raises its limits rarely shows them.
 
-### A copy on a school's own server
+### A copy on a school's or company's own server
 
-The README's "On your school's own server" is what a school's AI converts
-from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
+The README's "On a school's or company's own server" is what a school's or
+company's AI converts from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
 and the two checks it passes. `/own-copy` offers the route to teachers
-(`root-page.md`, "The own copy"). The conversion is the school's and is not
+(`root-page.md`, "The own copy"). The conversion is theirs and is not
 checked here.
 
 A converted copy left as it is has one dependency on the live site: a
@@ -268,7 +291,7 @@ device. The numbers and the rest are the implementer's, to confirm.
   look up to `MAX_LOOK_CHANGES` (2 rows each), answers each question at most
   three times (`MAX_ANSWER_CHANGES`, 2: a mis-tap and one rethink, the owner:
   adequate; 2 rows each), plus the teacher's steps. For 15 questions that is
-  about 9,700 rows, the looks a third of it. Start without letting in books
+  about 10,700 rows, the looks over two fifths of it. Start without letting in books
   the same. `SiteBudget` keeps the day's ledger (`r:` and the day, back at
   00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
   the rest is for uploads, whose quiz and pictures are rows, the site's small
@@ -280,9 +303,9 @@ device. The numbers and the rest are the implementer's, to confirm.
   the day's rows booked, kept with the quiz (`Meta.dayRows`, also after a
   refused tap), and the check (and a Remote's lobby) shows, while fewer than
   `ROOM_WARN` (3) classes like this one fit: "nearly full today: room for
-  about n more groups", or at none "can't take more players today … again at
-  01:00 Swiss time", both with "More quizzes: a site of your own or your
-  school's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
+  about n more groups", or at none "can't let another group in today … again at
+  01:00 Swiss time", both with "More quizzes: a site of your own, your
+  school's or your company's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
   where a toast would be gone before a teacher who looked away saw it. The
   count is from the upload or the last tap, not live; three classes is
   roughly the last third of the day. Days whose bookings reached
@@ -298,11 +321,11 @@ device. The numbers and the rest are the implementer's, to confirm.
   that call fails, the quiz's end settles it instead. The
   quiz itself stays its three hours for photographs and rejoining. A quiz
   that ends or expires before its final ranking settles then.
-- So the ledger limits classes at the same time, not in the day: about 8
+- So the ledger limits classes at the same time, not in the day: about 7
   lobbies let in at once, or about 24 started classes of 25, while finished
   classes count only what they wrote. The last booking of a busy day leaves
   some of the day unused, which is accepted.
-- **A let-in lobby that is left holds its booking**, about 12% of the day,
+- **A let-in lobby that is left holds its booking**, about 13% of the day,
   until the quiz expires three hours after the teacher's last step. One
   quiz per device bounds that per device: a device's next upload ends its
   previous quiz if that one never started (`POST /api/i/:id/replaced` with

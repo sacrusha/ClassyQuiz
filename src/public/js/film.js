@@ -1,5 +1,5 @@
 /* classyQuiz film, built by the film project's sitebuild.py from film.js; loaded by client/film-poster.ts on the first ▶. Edit the source, not this. */
-/* classyQuiz film (animatic): about 60 s, wordless, flat SVG.
+/* classyQuiz film (animatic): about 67 s, wordless, flat SVG.
 
    Purpose: a teacher who has never seen a classroom quiz sees what they would
    type to their AI, how the .zip reaches the site, and what the class does:
@@ -188,6 +188,15 @@ const HATS = [
     height: 24,
     box: "-26 -27 52 32",
   },
+  {
+    // With the top hat and the bow tie, the dapper register (identity.md: the mark is the fox in a top hat).
+    name: "bowler",
+    svg:
+      `<path d="M-13.5 -2 C-13.5 -15.5 -8 -22.5 0 -22.5 C8 -22.5 13.5 -15.5 13.5 -2Z" fill="#23262e"/><rect x="-13.5" y="-7.3" width="27" height="3.8" fill="#5d636e"/>` +
+      `<path d="M-20.5 -0.9 Q-19 -4.9 -14 -3.6 H14 Q19 -4.9 20.5 -0.9 Q18.5 1.8 13.5 1 H-13.5 Q-18.5 1.8 -20.5 -0.9Z" fill="#23262e"/>`,
+    height: 22.5,
+    box: "-23 -25 46 29",
+  },
 ];
 
 /**
@@ -219,32 +228,38 @@ function hatOn(animal, hat) {
 }
 
 /**
- * Tools held beside the animal, in the order of shared/looks.ts (0: none),
- * each drawn round (0, 0) within about 19 of it; `box` shows it alone in the
- * picker. Each is a solid blob, since at the who-answered bar's 21 to 36 px a
- * line is a pixel wide and gone; in neutral colours, never an answer's colour
- * in an answer's shape (docs/design/class-and-wall.md, "Dressing the avatar").
- * The types are inferred: docs/film/build/build.py lifts this part of the
- * file into the film as plain JavaScript.
+ * The row beside the hats: things held, worn or set before the animal, in the
+ * order of shared/looks.ts (0: none), each drawn round (0, 0); `at` says where
+ * it goes (toolOn), `box` shows it alone in the picker. Each is a solid blob,
+ * since at the who-answered bar's 21 to 36 px a line is a pixel wide and gone,
+ * and dark or coloured where it passes the disc's edge, since white is lost
+ * on the wall's paper there. No answer's colour in an answer's shape
+ * (docs/design/class-and-wall.md, "Dressing the avatar"). The types are
+ * inferred: docs/film/build/build.py lifts this part of the file into the
+ * film as plain JavaScript.
  */
 const TOOLS = [
-  { name: "", svg: "", box: "0 0 1 1" },
+  { name: "", svg: "", box: "0 0 1 1", at: "hand" },
   {
+    // The animal behind its open laptop, seen from the lid's side: low in the
+    // middle, not a small laptop at the corner, where a list of players would
+    // read it as the device the player is on.
     name: "laptop",
     svg:
-      `<rect x="-13" y="-15" width="26" height="19" rx="2.2" fill="#c9ced6" stroke="#5d636e" stroke-width="1.3"/><rect x="-10.4" y="-12.4" width="20.8" height="13.8" rx="1" fill="#2b3a55"/>` +
-      `<path d="M-10.4 1.4 L2 -12.4 H7 L-5.4 1.4Z" fill="#fff" opacity=".18"/>` +
-      `<path d="M-15.5 4 H15.5 L18.5 9.2 Q18.5 11 16.7 11 H-16.7 Q-18.5 11 -18.5 9.2Z" fill="#aeb4bd" stroke="#5d636e" stroke-width="1.3" stroke-linejoin="round"/>`,
-    box: "-21 -18 42 32",
+      `<rect x="-18" y="-9" width="36" height="17" rx="2" fill="#aeb4bd" stroke="#5d636e" stroke-width="1.4"/><circle cx="0" cy="-0.5" r="2.8" fill="#e8e6e1"/>` +
+      `<path d="M-19 7.5 H19 L23 12 Q23 13 22 13 H-22 Q-23 13 -23 12Z" fill="#8a909a" stroke="#5d636e" stroke-width="1.2" stroke-linejoin="round"/>`,
+    box: "-25 -12 50 27",
+    at: "front",
   },
   {
     name: "chart",
     svg:
-      `<path d="M-8 9 L-12 18 M8 9 L12 18" stroke="#5d636e" stroke-width="2.6" stroke-linecap="round"/>` +
-      `<rect x="-15" y="-16" width="30" height="26" rx="2" fill="#fff" stroke="#5d636e" stroke-width="1.6"/>` +
+      `<path d="M-8 9 L-12 18 M8 9 L12 18" stroke="#3a3f4a" stroke-width="3" stroke-linecap="round"/>` +
+      `<rect x="-15" y="-16" width="30" height="26" rx="2" fill="#fff" stroke="#3a3f4a" stroke-width="3.4"/>` +
       `<rect x="-10.5" y="-1" width="5.5" height="7" fill="#3a3f4a"/><rect x="-2.75" y="-6" width="5.5" height="12" fill="#3a3f4a"/><rect x="5" y="-11" width="5.5" height="17" fill="#3a3f4a"/>` +
-      `<path d="M-11 -5 L-2 -10.5 L3 -8.5 L9.5 -13.5" stroke="#d9541e" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+      `<path d="M-11 -5 L-2 -10.5 L3 -8.5 L9.5 -13.5" stroke="#a8471a" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
     box: "-18 -19 36 39",
+    at: "hand",
   },
   {
     name: "calculator",
@@ -252,60 +267,86 @@ const TOOLS = [
       `<g transform="rotate(-10)"><rect x="-11.5" y="-16" width="23" height="32" rx="3.5" fill="#3a3f4a" stroke="#23262e" stroke-width="1.2"/>` +
       `<rect x="-8.5" y="-13" width="17" height="7.5" rx="1.2" fill="#cfe3c8"/>` +
       `<g fill="#e8e6e1">${[-3, 2.5, 8].map((y) => [-8, -2, 4].map((x) => `<rect x="${x}" y="${y}" width="4.5" height="3.6" rx=".8"/>`).join("")).join("")}</g>` +
-      `<rect x="4" y="8" width="4.5" height="3.6" rx=".8" fill="#f29a1d"/></g>`,
+      `<rect x="4" y="8" width="4.5" height="3.6" rx=".8" fill="#a8471a"/></g>`,
     box: "-16 -20 32 40",
+    at: "hand",
   },
   {
     name: "coffee",
     svg:
       `<path d="M-6 -13 q-3 -3 0 -6 q3 -3 0 -6 M2 -13 q-3 -3 0 -6 q3 -3 0 -6" stroke="#9aa1ad" stroke-width="2" fill="none" stroke-linecap="round"/>` +
-      `<path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#5d636e" stroke-width="5.4" fill="none"/><path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#fff" stroke-width="2.8" fill="none"/>` +
-      `<path d="M-13 -9 H9 V10 Q9 15 4 15 H-8 Q-13 15 -13 10Z" fill="#fff" stroke="#5d636e" stroke-width="1.3"/>` +
-      `<ellipse cx="-2" cy="-9" rx="11" ry="2.4" fill="#6b3e1f" stroke="#5d636e" stroke-width="1.1"/>`,
+      `<path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#7d3412" stroke-width="5.4" fill="none"/><path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#a8471a" stroke-width="2.8" fill="none"/>` +
+      `<path d="M-13 -9 H9 V10 Q9 15 4 15 H-8 Q-13 15 -13 10Z" fill="#a8471a" stroke="#7d3412" stroke-width="1.3"/><path d="M-10 -3 V9" stroke="#fff" stroke-opacity=".35" stroke-width="2.4" stroke-linecap="round"/>` +
+      `<ellipse cx="-2" cy="-9" rx="11" ry="2.4" fill="#4a2a14" stroke="#7d3412" stroke-width="1.1"/>`,
     box: "-16 -28 37 46",
+    at: "hand",
   },
   {
     name: "briefcase",
     svg:
       `<path d="M-6 -9 V-13.5 Q-6 -16 -3.5 -16 H3.5 Q6 -16 6 -13.5 V-9" stroke="#4e3220" stroke-width="3" fill="none"/>` +
       `<rect x="-17" y="-9.5" width="34" height="23" rx="3" fill="#8a5a30" stroke="#4e3220" stroke-width="1.3"/>` +
-      `<path d="M-17 -0.5 H17" stroke="#4e3220" stroke-width="1.3"/><rect x="-3" y="-3.5" width="6" height="5" rx="1" fill="#f7b500" stroke="#9a6a00" stroke-width=".9"/>`,
+      `<path d="M-17 -0.5 H17" stroke="#4e3220" stroke-width="1.3"/><rect x="-3" y="-3.5" width="6" height="5" rx="1" fill="#c9ced6" stroke="#5d636e" stroke-width=".9"/>`,
     box: "-20 -19 40 35",
+    at: "hand",
   },
   {
     name: "book",
     svg:
-      `<path d="M0 -7 Q-9 -13 -18.5 -9.5 V11.5 Q-9 8 0 13 Q9 8 18.5 11.5 V-9.5 Q9 -13 0 -7Z" fill="#a8471a"/>` +
-      `<path d="M0 -8 Q-8 -13 -16.5 -10.5 V9 Q-8 6 0 10.5Z M0 -8 Q8 -13 16.5 -10.5 V9 Q8 6 0 10.5Z" fill="#fff" stroke="#c9c2b8" stroke-width=".9" stroke-linejoin="round"/>` +
-      `<path d="M-13 -5.5 Q-8 -7.5 -3.5 -4.5 M-13 -1 Q-8 -3 -3.5 0 M-13 3.5 Q-8 1.5 -3.5 4.5 M13 -5.5 Q8 -7.5 3.5 -4.5 M13 -1 Q8 -3 3.5 0 M13 3.5 Q8 1.5 3.5 4.5" stroke="#9aa1ad" stroke-width="1.3" fill="none" stroke-linecap="round"/>`,
-    box: "-21 -16 42 32",
+      `<g transform="rotate(-8)"><rect x="-12" y="-16" width="24" height="32" rx="2" fill="#a8471a" stroke="#6b2a0c" stroke-width="1.3"/>` +
+      `<path d="M-12 -16 V16" stroke="#6b2a0c" stroke-width="3.4"/><rect x="-6" y="-10" width="14" height="5" rx="1" fill="#f3d9c4"/>` +
+      `<path d="M12 -14 V14" stroke="#fff" stroke-width="2"/></g>`,
+    box: "-17 -19 34 38",
+    at: "hand",
+  },
+  {
+    // The top hat's own register (identity.md: the mark is the fox in a top hat).
+    name: "bow tie",
+    svg:
+      `<path d="M-2 0 L-13 -7.5 Q-16.5 0 -13 7.5Z M2 0 L13 -7.5 Q16.5 0 13 7.5Z" fill="#fff" stroke="#fff" stroke-opacity=".6" stroke-width="3.2" stroke-linejoin="round"/>` +
+      `<path d="M-2 0 L-13 -7.5 Q-16.5 0 -13 7.5Z M2 0 L13 -7.5 Q16.5 0 13 7.5Z" fill="#23262e" stroke="#23262e" stroke-width="2" stroke-linejoin="round"/>` +
+      `<rect x="-3.6" y="-3.8" width="7.2" height="7.6" rx="2" fill="#3a3f4a" stroke="#23262e" stroke-width="1"/>`,
+    box: "-19 -11 38 22",
+    at: "neck",
   },
 ];
 
+/** Where a bow tie sits on each animal (order of ANIMAL_NAMES): just under the chin. */
+const NECKS = [86, 83, 85, 85, 86, 88, 88, 86, 86, 86, 86, 89];
+
 /**
- * Where a tool is held: low on the right, the same for every animal, over the
- * cheek and past the disc's edge, so it changes the outline on that side.
+ * Where each goes: a thing held, low on the right, the same for every animal,
+ * over the cheek and past the disc's edge, so it changes the outline on that
+ * side; a bow tie under the chin; a laptop low in the middle, below every
+ * animal's mouth.
  */
-const toolOn = (tool = 0) => (TOOLS[tool]?.svg ? `<g transform="translate(78 80) scale(1.05)">${TOOLS[tool].svg}</g>` : "");
+const toolOn = (animal = 0, tool = 0) => {
+  const it = TOOLS[tool];
+  if (!it?.svg) return "";
+  const at = it.at === "neck" ? `translate(50 ${NECKS[animal]}) scale(1.05)` : it.at === "front" ? "translate(50 87)" : "translate(78 80) scale(1.05)";
+  return `<g transform="${at}">${it.svg}</g>`;
+};
 
 const lookIndex = (i, n) => (typeof i === "number" && Number.isInteger(i) && i >= 0 && i < n ? i : 0);
 
 function avatarSvg(av, label = true) {
   const colour = AVATAR_COLOURS[av.c % AVATAR_COLOURS.length];
   const a = av.a % ANIMALS.length;
-  const b = lookIndex(av.b, 6);
-  const h = lookIndex(av.h, 9);
-  const t = lookIndex(av.t, 7);
+  // The drawings' own counts, which the menu's equal (look.test.ts), so the
+  // film's copy of this function needs no count (docs/film/build/build.py).
+  const b = lookIndex(av.b, BACKGROUNDS.length);
+  const h = lookIndex(av.h, HATS.length);
+  const t = lookIndex(av.t, TOOLS.length);
   const name = [ANIMAL_NAMES[a], HATS[h].name, TOOLS[t].name].filter(Boolean).join(", ");
   const aria = label ? ` role="img" aria-label="${name}"` : ` aria-hidden="true"`;
-  return `<svg class="avatar" viewBox="0 0 100 100"${aria}>${BACKGROUNDS[b](colour)}${ANIMALS[a]()}${hatOn(a, h)}${toolOn(t)}</svg>`;
+  return `<svg class="avatar" viewBox="0 0 100 100"${aria}>${BACKGROUNDS[b](colour)}${ANIMALS[a]()}${hatOn(a, h)}${toolOn(a, t)}</svg>`;
 }
 
 
 
   const ASSETS = {"sheet1": "/landing/sheet-1.webp", "sheet2": "/landing/sheet-2.webp", "lockup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 133.77 32\" width=\"133.77\" height=\"32\" role=\"img\" aria-label=\"classyQuiz\"><g transform=\"translate(-4 0)\"><path fill=\"#E26B22\" d=\"M5 17V3.5L9.62 11.5H22.38L27 3.5V17Q25.6 27.4 16 31Q6.4 27.4 5 17Z\"/><path fill=\"#FFFFFF\" d=\"M7 18.4Q9.8 15.4 14.2 16.6L15 25.4H17L17.8 16.6Q22.2 15.4 25 18.4Q23.8 26.6 16 29.6Q8.2 26.6 7 18.4Z\"/><g fill=\"#1D1D1B\"><circle cx=\"11.6\" cy=\"20\" r=\"1.75\"/><circle cx=\"20.4\" cy=\"20\" r=\"1.75\"/><rect x=\"14\" y=\"24.8\" width=\"4\" height=\"2.8\" rx=\"1.4\"/></g><path fill=\"currentColor\" d=\"M12 1.6Q12 1 12.6 1H19.4Q20 1 20 1.6V8H12ZM12 9H20V11.5H12ZM9 11H23A1 1 0 0 1 23 13H9A1 1 0 0 1 9 11Z\"/></g><g><path fill=\"currentColor\" d=\"M35.8 27.36Q36.4 27.36 36.75 27.18Q37.1 27.01 37.34 26.66Q37.45 26.46 37.58 26.36Q37.71 26.27 37.9 26.27H40.45Q40.67 26.27 40.82 26.41Q40.98 26.56 40.98 26.75Q40.98 27.32 40.49 28.17Q40.01 29.01 38.85 29.69Q37.69 30.38 35.8 30.38Q34.34 30.38 33.16 29.82Q31.98 29.27 31.27 28.25Q30.56 27.24 30.52 25.9L30.5 25.12L30.52 24.34Q30.56 22.99 31.27 21.98Q31.98 20.97 33.16 20.41Q34.34 19.86 35.8 19.86Q37.67 19.86 38.82 20.52Q39.97 21.18 40.45 22.02Q40.94 22.86 40.98 23.44Q41 23.66 40.83 23.81Q40.67 23.97 40.45 23.97H37.9Q37.71 23.97 37.58 23.87Q37.45 23.77 37.34 23.58Q37.1 23.23 36.75 23.05Q36.4 22.88 35.8 22.88Q35.04 22.88 34.56 23.31Q34.08 23.73 34.03 24.44Q34.01 24.63 34.01 25.12Q34.01 25.6 34.03 25.8Q34.08 26.5 34.56 26.93Q35.04 27.36 35.8 27.36ZM45.4 30.18H42.95Q42.73 30.18 42.58 30.03Q42.42 29.87 42.42 29.66V16.88Q42.42 16.66 42.58 16.51Q42.73 16.35 42.95 16.35H45.4Q45.62 16.35 45.77 16.51Q45.93 16.66 45.93 16.88V29.66Q45.93 29.87 45.77 30.03Q45.62 30.18 45.4 30.18ZM53.76 23.56Q53.76 22.49 52.63 22.49Q51.99 22.49 51.58 22.84Q51.42 22.99 51.27 23.03Q51.11 23.07 50.88 23.07H48.4Q48.21 23.07 48.08 22.95Q47.95 22.84 47.97 22.64Q48.03 22.04 48.65 21.39Q49.26 20.73 50.31 20.3Q51.36 19.86 52.63 19.86Q54.95 19.86 56.11 20.91Q57.27 21.96 57.27 23.75V29.66Q57.27 29.87 57.11 30.03Q56.95 30.18 56.74 30.18H54.29Q54.07 30.18 53.92 30.03Q53.76 29.87 53.76 29.66V29.11Q53.25 29.73 52.55 30.06Q51.85 30.38 50.78 30.38Q49.14 30.38 48.22 29.52Q47.29 28.66 47.29 27.3Q47.29 25.99 48.31 25.16Q49.32 24.32 51.48 23.95ZM51.97 26.15Q51.42 26.25 51.11 26.49Q50.8 26.73 50.8 27.08Q50.8 27.75 51.73 27.75Q52.59 27.75 53.18 27.2Q53.76 26.66 53.76 25.88ZM58.84 22.99Q58.84 22.12 59.42 21.41Q59.99 20.69 61.04 20.28Q62.08 19.86 63.4 19.86Q64.71 19.86 65.77 20.26Q66.83 20.66 67.45 21.28Q68.08 21.9 68.14 22.58Q68.16 22.8 67.99 22.95Q67.82 23.11 67.61 23.11H65.29Q65.08 23.11 64.79 22.9Q64.53 22.7 64.24 22.59Q63.95 22.49 63.4 22.49Q62.94 22.49 62.64 22.62Q62.35 22.76 62.35 23.03Q62.35 23.27 62.46 23.38Q62.56 23.5 62.85 23.56Q63.13 23.62 63.83 23.71L65.04 23.91Q66.73 24.18 67.58 25.07Q68.43 25.95 68.43 27.18Q68.43 28.06 67.83 28.79Q67.24 29.52 66.12 29.95Q65 30.38 63.48 30.38Q62.02 30.38 60.94 29.96Q59.86 29.54 59.28 28.9Q58.71 28.25 58.65 27.59Q58.63 27.38 58.8 27.22Q58.96 27.06 59.18 27.06H61.59Q61.73 27.06 61.81 27.11Q61.9 27.16 62.02 27.28Q62.25 27.49 62.55 27.62Q62.84 27.75 63.48 27.75Q64.08 27.75 64.5 27.58Q64.92 27.42 64.92 27.14Q64.92 26.83 64.62 26.72Q64.32 26.62 63.32 26.46L61.92 26.23Q60.44 25.95 59.64 25.13Q58.84 24.3 58.84 22.99ZM69.56 22.99Q69.56 22.12 70.13 21.41Q70.71 20.69 71.75 20.28Q72.79 19.86 74.12 19.86Q75.42 19.86 76.48 20.26Q77.55 20.66 78.17 21.28Q78.79 21.9 78.85 22.58Q78.87 22.8 78.7 22.95Q78.54 23.11 78.32 23.11H76.01Q75.79 23.11 75.5 22.9Q75.25 22.7 74.95 22.59Q74.66 22.49 74.12 22.49Q73.65 22.49 73.36 22.62Q73.06 22.76 73.06 23.03Q73.06 23.27 73.17 23.38Q73.28 23.5 73.56 23.56Q73.84 23.62 74.55 23.71L75.75 23.91Q77.45 24.18 78.3 25.07Q79.14 25.95 79.14 27.18Q79.14 28.06 78.55 28.79Q77.95 29.52 76.83 29.95Q75.71 30.38 74.19 30.38Q72.73 30.38 71.65 29.96Q70.57 29.54 70 28.9Q69.42 28.25 69.36 27.59Q69.34 27.38 69.51 27.22Q69.68 27.06 69.89 27.06H72.31Q72.44 27.06 72.53 27.11Q72.62 27.16 72.73 27.28Q72.97 27.49 73.26 27.62Q73.55 27.75 74.19 27.75Q74.8 27.75 75.22 27.58Q75.64 27.42 75.64 27.14Q75.64 26.83 75.33 26.72Q75.03 26.62 74.04 26.46L72.64 26.23Q71.16 25.95 70.36 25.13Q69.56 24.3 69.56 22.99ZM84.93 33.88H82.38Q82.18 33.88 82.05 33.75Q81.91 33.61 81.91 33.42Q81.91 33.34 81.93 33.28L83.41 29.79L79.47 20.66Q79.45 20.6 79.45 20.52Q79.45 20.32 79.59 20.19Q79.73 20.05 79.92 20.05H82.47Q82.86 20.05 83.04 20.52L85.2 25.58L87.34 20.52Q87.52 20.05 87.91 20.05H90.48Q90.68 20.05 90.81 20.19Q90.95 20.32 90.95 20.52Q90.95 20.6 90.93 20.66L85.49 33.42Q85.32 33.88 84.93 33.88ZM104.12 21.63Q104.16 22.18 104.16 23.38Q104.16 24.57 104.12 25.1Q104 27.22 102.68 28.62L104.21 30.84Q104.27 30.96 104.27 31.02V31.08Q104.27 31.23 104.16 31.34Q104.04 31.45 103.88 31.45H101.14Q100.82 31.45 100.64 31.32Q100.45 31.19 100.32 31L99.77 30.18Q98.86 30.38 98.04 30.38Q96.19 30.38 94.84 29.68Q93.5 28.97 92.77 27.78Q92.04 26.58 91.96 25.1Q91.92 24.05 91.92 23.38Q91.92 22.72 91.96 21.63Q92.04 20.15 92.77 18.95Q93.5 17.75 94.84 17.05Q96.19 16.35 98.04 16.35Q99.89 16.35 101.23 17.05Q102.58 17.75 103.31 18.95Q104.04 20.15 104.12 21.63ZM98.04 19.47Q96.89 19.47 96.28 20.08Q95.66 20.69 95.56 21.73Q95.51 22.37 95.51 23.34Q95.51 24.3 95.56 25Q95.66 26.03 96.28 26.65Q96.89 27.26 98.04 27.26Q99.19 27.26 99.8 26.65Q100.42 26.03 100.51 25Q100.57 24.3 100.57 23.34Q100.57 22.37 100.51 21.73Q100.42 20.69 99.8 20.08Q99.19 19.47 98.04 19.47ZM106.36 20.05H108.81Q109.03 20.05 109.18 20.21Q109.34 20.36 109.34 20.58V25.51Q109.34 26.38 109.73 26.87Q110.12 27.36 110.94 27.36Q112.51 27.36 112.51 25.51V20.58Q112.51 20.36 112.67 20.21Q112.82 20.05 113.04 20.05H115.49Q115.71 20.05 115.86 20.21Q116.02 20.36 116.02 20.58V29.66Q116.02 29.87 115.86 30.03Q115.71 30.18 115.49 30.18H113.23Q113.02 30.18 112.86 30.03Q112.71 29.87 112.71 29.66V29.21Q112.3 29.71 111.67 30.05Q111.03 30.38 109.96 30.38Q108.01 30.38 106.92 29.27Q105.83 28.16 105.83 25.94V20.58Q105.83 20.36 105.99 20.21Q106.14 20.05 106.36 20.05ZM121.03 18.98H118.57Q118.36 18.98 118.2 18.82Q118.05 18.67 118.05 18.45V16.49Q118.05 16.27 118.2 16.12Q118.36 15.96 118.57 15.96H121.03Q121.24 15.96 121.4 16.12Q121.55 16.27 121.55 16.49V18.45Q121.55 18.67 121.4 18.82Q121.24 18.98 121.03 18.98ZM121.03 30.18H118.57Q118.36 30.18 118.2 30.03Q118.05 29.87 118.05 29.66V20.58Q118.05 20.36 118.2 20.21Q118.36 20.05 118.57 20.05H121.03Q121.24 20.05 121.4 20.21Q121.55 20.36 121.55 20.58V29.66Q121.55 29.87 121.4 30.03Q121.24 30.18 121.03 30.18ZM132.77 27.69V29.66Q132.77 29.87 132.62 30.03Q132.46 30.18 132.25 30.18H123.75Q123.54 30.18 123.38 30.03Q123.23 29.87 123.23 29.66V27.77Q123.23 27.55 123.31 27.41Q123.38 27.26 123.54 27.08L127.4 23.07H123.95Q123.73 23.07 123.58 22.92Q123.42 22.76 123.42 22.55V20.58Q123.42 20.36 123.58 20.21Q123.73 20.05 123.95 20.05H131.86Q132.07 20.05 132.23 20.21Q132.38 20.36 132.38 20.58V22.47Q132.38 22.72 132.11 23.03L128.16 27.16H132.25Q132.46 27.16 132.62 27.32Q132.77 27.47 132.77 27.69Z\"/></g></svg>", "fox": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"256\" height=\"256\" role=\"img\" aria-labelledby=\"t\"><title id=\"t\">classyQuiz</title><g id=\"symbol\"><path fill=\"#E26B22\" d=\"M45.47 133.89L45.47 35.45L85.29 104.42L170.71 104.42L210.53 35.45L210.53 133.89Q198.74 216.42 128 240Q57.26 216.42 45.47 133.89Z\"/><path fill=\"#FFFFFF\" d=\"M61.98 147.45Q81.43 123.28 114.44 138.02Q117.39 181.05 119.1 209.47A13.85 10.61 0 1 0 136.9 209.47Q138.61 181.05 141.56 138.02Q174.57 123.28 194.02 147.45Q185.18 208.76 128 231.16Q70.82 208.76 61.98 147.45Z\"/><path fill=\"#1D1D1B\" fill-rule=\"evenodd\" d=\"M85.56 155.71A11.49 11.49 0 0 1 108.55 155.71A11.49 11.49 0 0 1 85.56 155.71ZM97.49 150.99A3.83 3.83 0 0 0 105.16 150.99A3.83 3.83 0 0 0 97.49 150.99ZM147.45 155.71A11.49 11.49 0 0 1 170.44 155.71A11.49 11.49 0 0 1 147.45 155.71ZM159.39 150.99A3.83 3.83 0 0 0 167.05 150.99A3.83 3.83 0 0 0 159.39 150.99ZM114.15 217.6A13.85 10.61 0 0 1 141.85 217.6A13.85 10.61 0 0 1 114.15 217.6Z\"/><path fill=\"#1D1D1B\" d=\"M93.77 79.66L88.2 21.31A5.31 5.31 0 0 1 93.51 16L162.49 16A5.31 5.31 0 0 1 167.8 21.31L162.23 79.66ZM94.24 84.97L161.76 84.97L160.42 100.29L95.58 100.29ZM72.29 94.11Q128 100.59 183.71 94.11A7.66 7.66 0 0 1 183.71 109.43Q128 115.92 72.29 109.43A7.66 7.66 0 0 1 72.29 94.11Z\"/></g></svg>"};
   const NS = 'http://www.w3.org/2000/svg';
-  const W = 1600, H = 900, DUR = 60, POSTER = 47.3;
+  const W = 1600, H = 900, DUR = 67, POSTER = 54.3;
 
   // ---------------------------------------------------------------- words
   // The film's only words, all on screens, in the page's language (de en fr it) where the real
@@ -318,13 +359,13 @@ function avatarSvg(av, label = true) {
   /** The root page's words from client/landing-text.ts, filled in by build.py: per language the example ask
       ({ s, l }: l 0 the site's address, any other l a labelled part), code, run, upload, drop, reading, the chapters'
       names (capSheet, capAi, capZip, capWall, capTap) and the player's (play, pause, speed, seek). */
-  const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz machen, mit ähnlichen Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "run": "Ein Quiz starten", "upload": "Das Quiz deiner KI öffnen (.zip)", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Aufgabenblätter", "capAi": "Deine KI", "capZip": "Die .zip, hier geöffnet", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "run": "Play a quiz", "upload": "Open the quiz your AI made (.zip)", "drop": "or drop it here", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, opened here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "run": "Lancer un quiz", "upload": "Ouvrir le quiz de votre IA (.zip)", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, ouvert ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève touche", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans le film"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "circa 10 domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "run": "Avvia un quiz", "upload": "Apri il quiz della tua IA (.zip)", "drop": "o trascinalo qui", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Lo .zip, aperto qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno tocca", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel film"}};
+  const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz machen, mit ähnlichen Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "run": "Das Quiz deiner KI öffnen", "upload": "Die .zip-Datei wählen", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Aufgabenblätter", "capAi": "Deine KI", "capZip": "Die .zip, hier geöffnet", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "run": "Open the quiz your AI made", "upload": "Choose the .zip file", "drop": "or drop it here", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, opened here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "run": "Ouvrir le quiz de votre IA", "upload": "Choisir le fichier .zip", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, ouvert ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève touche", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans le film"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "circa 10 domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "run": "Apri il quiz della tua IA", "upload": "Scegli il file .zip", "drop": "o trascinalo qui", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Lo .zip, aperto qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno tocca", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel film"}};
 
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
      on the AI app's tile (its name under the tile is the chapter's, LANDING.capAi); ask2 is the teacher's
      second message, the real conversation's second ask, which changes the quiz; then the AI's status
      lines, the .zip it makes (the chip's title and the file's name), the quiz's title and its question 1.
-     q4, question 4, is no longer shown (the checks keep the questions folded); docs/example/build.py
+     q4, question 4, is not shown (the lobby's list shows only question 1 in the frame); docs/example/build.py
      holds the example's words to it (docs/example/text.py, FILM).
      en is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
      to be replaced by the translators' (build.py and sitecheck.py name them). */
@@ -382,12 +423,12 @@ function avatarSvg(av, label = true) {
     right: 0,
     codePh: '12345',
     photos: ['sheet-photo-1.jpg', 'sheet-photo-2.jpg'],
-    nq: ' · 13 questions',
+    nq: ' · 13 questions', nqList: '13 questions',
     code: '63953', teacherCode: '63953 47',
     addr: 'classyquiz.pages.dev',
     of: ' / 13',
     // the chapters' starts, marked on the time bar: [film time, the key of its name in landing-text.ts (LANDING)]
-    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [28.7, 'capWall'], [38.0, 'capTap']],
+    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [34.7, 'capWall'], [45.0, 'capTap']],
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
@@ -403,7 +444,9 @@ function avatarSvg(av, label = true) {
       { name: 'Peers', line: 'You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it.', button: 'Play together ▶', note: 'This puts the quiz on the site, with a code for the others. Until then it is only in this browser.' },
       { name: 'Quizmaster', line: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device.", button: 'Open the lobby ▶', note: 'This puts the quiz on the site. Until then it is only in this browser.' },
     ],
-    fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.',
+    fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.', // under the cards, below the frame
+    // the question list, open on the lobby's check (client/manage.ts)
+    showSol: 'Show the solutions',
     // the lobby's check (client/screen.ts, renderCheck; on a phone, so without the line on a second screen in a new window)
     joinCode: 'Join code ',
     arrangeAsk: 'How are the screens arranged?',
@@ -489,18 +532,21 @@ function avatarSvg(av, label = true) {
 
     // ---------------------------------------------------------------- timeline
     // Every teacher press on the phone, and when its change lands on the wall.
-    const PRESS = [28.4, 35.0, 38.0, 44.0, 50.0, 56.3];
+    const PRESS = [34.4, 42.0, 45.0, 51.0, 57.0, 63.3];
     const LAG = 0.25;
+    // The upload carries the two choices a newcomer must follow (README, Purpose): which way to play, on the local check, and how
+    // the second device comes in, on the lobby's check. Each gets a hold at full width, then the camera moves in on what is read
+    // there (Quizmaster's card; the how-to with the teacher code), and the laptop then does what the how-to said.
     const T = {
       sheet1: 0.3, sheet2: 0.75, raise: [1.7, 2.4], flash1: 2.95, flash2: 3.75, home: 4.3,
       pulse: 5.55, open: 6.25, expand: [6.85, 7.3],
       attach: 7.45, type1: 7.85, send1: 13.5, status1: 13.85, bars1: [14.05, 14.85], zip1: 14.95,
       type2: 15.35, send2: 17.8, status2: 18.05, bars2: [18.2, 18.6], zip2: 18.75, tapZip: 19.45,
-      web: 19.7, tapUpload: 20.3, sheetUp: [20.5, 20.75], tapFile: 21.0, sheetDown: [21.1, 21.3],
-      local: 21.55, tapLobby: 22.5, lobby: 22.75, tapRemote: 23.3, zoomCode: [23.6, 24.1], shrink: [24.45, 25.05],
-      lapOn: 25.4, typeCode: 25.75, codeStep: 0.11, enterClick: 26.75, enter: 26.95, showClick: 27.35,
-      kidsIn: 29.6, oneTap: 39.6, ots: [36.9, 41.3], ots2: [52.55, 54.4], flick: [55.4, 56.25], end: [58.5, 59.0],
-      cut: 27.7, walk: [29.2, 30.3],
+      web: 19.7, tapUpload: 20.65, sheetUp: [20.85, 21.1], tapFile: 21.45, sheetDown: [21.55, 21.75],
+      local: 22.1, zoomQm: [23.3, 23.85], tapLobby: 25.5, lobby: 25.75, zoomCode: [26.7, 27.25], shrink: [29.2, 29.8],
+      lapOn: 30.15, typeCode: 30.55, codeStep: 0.11, enterClick: 31.6, enter: 31.8, showClick: 32.75, shown: 33.05,
+      kidsIn: 35.6, oneTap: 46.6, ots: [43.9, 48.3], ots2: [59.55, 61.4], flick: [62.4, 63.25], end: [65.5, 66.0],
+      cut: 33.7, walk: [35.2, 36.3],
     };
     // The asks type at whatever speed ends them this long before their send, however long they are in a language
     // or with an own copy's address: the first holds for the address to be read, the second barely.
@@ -688,10 +734,10 @@ function avatarSvg(av, label = true) {
         k.seated = k.enter + k.walk;
       });
       const byJoin = KIDS.slice().sort((a, b) => a.seated + a.jitter * 0.8 - (b.seated + b.jitter * 0.8));
-      byJoin.forEach((k, n) => { k.join = 31.6 + n * 0.16; });
+      byJoin.forEach((k, n) => { k.join = 37.6 + n * 0.205; });
       // Answers: a few before the shown child, the shown child at T.oneTap, the rest after the cut back.
       const others = KIDS.filter((k) => k !== ots).sort((a, b) => a.jitter - b.jitter);
-      others.forEach((k, n) => { k.answer = n < 4 ? 38.95 + n * 0.17 : n < 7 ? 39.9 + (n - 4) * 0.4 : 41.45 + (n - 7) * 0.16; });
+      others.forEach((k, n) => { k.answer = n < 4 ? 45.95 + n * 0.17 : n < 7 ? 46.9 + (n - 4) * 0.4 : 48.45 + (n - 7) * 0.16; });
       ots.answer = T.oneTap + 0.3; // stored a moment after the tap
       ots.tap = T.oneTap;
       KIDS.forEach((k) => { k.tap = k.tap || k.answer - 0.25; });
@@ -705,7 +751,7 @@ function avatarSvg(av, label = true) {
 
     // ---------------------------------------------------------------- state of the screens at t
     function wallMode(t) {
-      if (t < T.showClick + 0.1) return 'off';
+      if (t < T.shown) return 'off';
       if (t < PRESS[0] + LAG) return 'wait';
       if (t < PRESS[1] + LAG) return 'join';
       if (t < T.flick[0]) return 'q';
@@ -1151,7 +1197,7 @@ function avatarSvg(av, label = true) {
         const toArrow = [(ARROW[0] - nx) / s - SH[0], (ARROW[1] - ny) / s - SH[1]];
         const dl = Math.hypot(toArrow[0], toArrow[1]);
         const read = eseg(t, PRESS[1] + 0.4, PRESS[1] + 0.8) * (1 - eseg(t, PRESS[2] - 0.5, PRESS[2] - 0.2));
-        const point = eseg(t, 46.2, 46.7) * (1 - eseg(t, 49.4, 49.9));
+        const point = eseg(t, 53.2, 53.7) * (1 - eseg(t, 56.4, 56.9));
         const rx = SH[0] + toArrow[0] / dl * (L1 + L2) * 0.55, ry = SH[1] + toArrow[1] / dl * (L1 + L2) * 0.55 + 20;
         const qx = SH[0] + toArrow[0] / dl * (L1 + L2) * 0.97, qy = SH[1] + toArrow[1] / dl * (L1 + L2) * 0.97;
         tx = lerp(lerp(tx, rx, read), qx, point); ty = lerp(lerp(ty, ry, read), qy, point);
@@ -1261,20 +1307,22 @@ function avatarSvg(av, label = true) {
       const off = q('.lp-off'), home = q('.lp-home'), enter = q('.lp-enter'), wallG = q('.lp-wall'), code = q('.lp-code'), ph = q('.lp-ph'), cur = q('.lp-cursor'), click = q('.lp-click');
       const wall = makeWall(q('.lp-wallin'), 'laptop');
       function update(t) {
-        const m = t < T.lapOn ? 'off' : t < T.enter ? 'home' : t < T.showClick + 0.1 ? 'enter' : 'wall';
+        const m = t < T.lapOn ? 'off' : t < T.enter ? 'home' : t < T.shown ? 'enter' : 'wall';
         vis(off, m === 'off'); vis(home, m === 'home'); vis(enter, m === 'enter'); vis(wallG, m === 'wall');
         if (m === 'home') {
           const n = clamp(Math.floor((t - T.typeCode) / T.codeStep) + 1, 0, TX.teacherCode.length);
           txt(code, TX.teacherCode.slice(0, n)); vis(ph, n === 0);
         }
         if (m === 'wall') wall.update(t);
-        // the mouse: to ▶, then to "Show the quiz here"
-        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, 812, 40], [T.enter + 0.05, 812, 40], [T.showClick - 0.05, 360, 280], [T.showClick + 0.4, 360, 280], [T.showClick + 0.9, 900, 560]];
+        // the mouse: to ▶, then, once the question has been seen, to "Show the quiz here"; after that click it leaves for the corner
+        // before the screen changes, so "Joining opens in a moment." is clear, and its ring is gone by then too
+        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, 812, 40], [T.showClick - 0.55, 812, 40], [T.showClick - 0.05, 360, 280],
+          [T.showClick + 0.08, 360, 280], [T.shown - 0.02, 880, 540]];
         const p = keys(t, pts.map(([tt, x, y]) => [tt, [x, y]]));
-        vis(cur, t > T.lapOn && t < T.showClick + 0.9);
+        vis(cur, t > T.lapOn && t < T.shown + 0.3);
         tf(cur, tr(p[0], p[1]));
         let ck = -1, cx = 0, cy = 0;
-        for (const [tc, x, y] of [[T.enterClick, 812, 40], [T.showClick, 360, 280]]) if (t >= tc && t < tc + 0.4) { ck = seg(t, tc, tc + 0.4); cx = x; cy = y; }
+        for (const [tc, x, y, d] of [[T.enterClick, 812, 40, 0.4], [T.showClick, 360, 280, T.shown - T.showClick]]) if (t >= tc && t < tc + d) { ck = seg(t, tc, tc + d); cx = x; cy = y; }
         vis(click, ck >= 0);
         if (ck >= 0) { tf(click, tr(cx, cy, 0.5 + ck * 1.6)); set(click, 'opacity', (1 - ck).toFixed(2)); }
       }
@@ -1328,14 +1376,14 @@ function avatarSvg(av, label = true) {
         }
         tf(all, `${tr(x, y, k.s)} scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
         // head: turns to a neighbour at the split; nods while laughing
-        const turn = (k.turn || 0) * eseg(t, 44.75 + k.jitter * 0.4, 45.1 + k.jitter * 0.4) * (1 - eseg(t, 48.8, 49.2));
+        const turn = (k.turn || 0) * eseg(t, 51.75 + k.jitter * 0.4, 52.1 + k.jitter * 0.4) * (1 - eseg(t, 55.8, 56.2));
         const laugh = k.i === 9 && t > sol + 0.4 && t < sol + 2.6 ? Math.abs(Math.sin((t - sol) * 14)) * 4 : 0;
         const shr = k.ans !== TX.right ? Math.sin(Math.PI * seg(t, sol + 0.3 + k.jitter * 0.3, sol + 1.5 + k.jitter * 0.3)) : 0;
         tf(head, tr(turn * 4, laugh + shr * 6));
         tf(hair, tr(-turn * 9, 0));
         op(nose, Math.abs(turn));
         set(nose, 'cx', turn < 0 ? '-31' : '31');
-        vis(up, k.i === 5 && t > 45.6 && t < 49.6);
+        vis(up, k.i === 5 && t > 52.6 && t < 56.6);
         // the tablet
         const s = kidScreen(k, t);
         vis(S.code, s === 'code' || s === 'typing');
@@ -1358,10 +1406,10 @@ function avatarSvg(av, label = true) {
         : kind === 'ha' ? `<path d="M-22 -6 Q0 22 22 -6Z" fill="${C.ink}"/><path d="M-20 -18 q6 -6 12 0 M8 -18 q6 -6 12 0" fill="none" stroke="${C.ink}" stroke-width="4" stroke-linecap="round"/>`
           : `<text class="b" x="0" y="15" font-size="44" text-anchor="middle" fill="${kind === '!' ? C.accent : C.ink}">${kind}</text>`;
       const list = [
-        { at: [508, 374], t: [35.5, 36.85], kind: 'read', w: 90, tail: -1 },
-        { kid: 1, t: [45.0, 48.6], kind: '?' }, { kid: 4, t: [45.35, 48.9], kind: '!' }, { kid: 11, t: [45.6, 48.5], kind: '?' },
-        { kid: 15, t: [46.0, 49.0], kind: '!' }, { kid: 7, t: [46.4, 48.9], kind: '?' }, { kid: 18, t: [46.8, 49.1], kind: '?' },
-        { kid: 9, t: [50.75, 52.9], kind: 'ha' }, { kid: 13, t: [50.6, 52.6], kind: '!' },
+        { at: [508, 374], t: [42.5, 43.85], kind: 'read', w: 90, tail: -1 },
+        { kid: 1, t: [52.0, 55.6], kind: '?' }, { kid: 4, t: [52.35, 55.9], kind: '!' }, { kid: 11, t: [52.6, 55.5], kind: '?' },
+        { kid: 15, t: [53.0, 56.0], kind: '!' }, { kid: 7, t: [53.4, 55.9], kind: '?' }, { kid: 18, t: [53.8, 56.1], kind: '?' },
+        { kid: 9, t: [57.75, 59.9], kind: 'ha' }, { kid: 13, t: [57.6, 59.6], kind: '!' },
       ];
       const els = list.map((b) => {
         const w = b.w || 62;
@@ -1522,9 +1570,10 @@ function avatarSvg(av, label = true) {
 
     // ---------------------------------------------------------------- the site on the phone (full frame)
     // The root page's Run box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
-    // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check; there "Screen and
-    // remote" brings the how-to with the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
-    // window shows them (client/open.ts, client/screen.ts), scaled to the frame; what doesn't fit lies below it.
+    // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check, where Screen and remote
+    // is pressed and the how-to gives the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
+    // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too (film-text.md 0.8); what
+    // doesn't fit lies below it. On each check the camera moves in on what is read there.
     let web;
     function makeWeb() {
       const F = mkFrame(svg, 'cq-clip-web');
@@ -1552,7 +1601,7 @@ function avatarSvg(av, label = true) {
       const plain = { clsOf: () => '', fillOf: () => null, underline: () => null };
       const titleLine = (y, fit = 1280) => `<text x="160" y="${y}" font-size="52" class="tb" data-fit="${fit}">${esc(TX.title)}<tspan fill="${C.muted}" font-size="36" font-weight="600">${esc(TX.nq)}</tspan></text>`;
       const button = (x, y, w, h, label, size, primary) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${primary ? C.ink : '#fff'}" stroke="${primary ? C.ink : C.rule}" stroke-width="3"/>${T_(x + w / 2, y + h / 2 + size * 0.36, label, size, { cls: 'ts', fill: primary ? '#fff' : C.ink, anchor: 'middle', fit: w - 30 })}`;
-      // the local check: three cards side by side, each its name, its line, its button (the first the primary) and its quiet line
+      // the local check: three cards side by side, each its name, its line, its button (the three alike, none primary) and its quiet line
       const local = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${header}${titleLine(196)}${T_(160, 262, TX.playedAsk, 32, { cls: 'b', fit: 1280 })}`);
       const CW = 413, CG = 20, CY = 290, CP = 28;
       const cards = TX.entries.map((e, i) => {
@@ -1567,29 +1616,36 @@ function avatarSvg(av, label = true) {
       const CH = Math.max(...cards.map((c) => c.bottom)) - CY;
       cards.forEach((c) => {
         G(c.cg, `<rect x="${c.x}" y="${CY}" width="${CW}" height="${CH}" rx="22" fill="#fff" stroke="${C.rule}" stroke-width="3"/>${T_(c.x + CP, CY + 62, c.e.name, 40, { cls: 'b', fit: CW - 2 * CP })}
-          ${button(c.x + CP, c.btnY, c.bw, 76, c.e.button, 30, c.i === 0)}`);
+          ${button(c.x + CP, c.btnY, c.bw, 76, c.e.button, 30, false)}`);
         drawLines(c.cg, c.line, c.x + CP, c.lineY, 28, 38, plain).show(c.line.total);
         drawLines(c.cg, c.note, c.x + CP, c.noteY, 22, 30, Object.assign({ fill: C.muted }, plain)).show(c.note.total);
       });
       const qm = cards[2], lobbyBtn = [qm.x + CP + qm.bw / 2, qm.btnY + 38];
       // under the cards, out of the frame: the questions, folded ("If you will play it yourself, leave this closed.")
       G(local, `<rect x="160" y="${CY + CH + 30}" width="1280" height="2" fill="${C.rule}"/>`);
-      // the lobby's check: the join code small; how the screens are arranged, One screen until this browser knows better;
-      // "Screen and remote" brings the how-to with the teacher code, and what follows moves down to make room for it
+      // The camera on a page: [x, y, zoom], the page's point at the frame's top left and the scale. The whole width first, then in
+      // on Quizmaster's card, its line (28 units) and its button large enough to read on a phone; the page's right edge stays the
+      // frame's, so Peers is half in the frame, the card that is passed.
+      const ZQ = 1.8;
+      const qmView = [W - W / ZQ, CY - 70, ZQ];
+      const viewOf = (v, k) => [lerp(0, -v[0] * v[2], k), lerp(0, -v[1] * v[2], k), lerp(1, v[2], k)];
+      const inView = (v, x, y) => [(x - v[0]) * v[2], (y - v[1]) * v[2]];
+      // The lobby's check as it opens on a first visit: Screen and remote pressed, so the how-to with the teacher code is there,
+      // and the questions listed under it, no fold, each with its answers folded (teacher-devices.md, "How the screens are arranged"). The join
+      // code small; on a phone, so without the line on a second screen in a new window.
       const jc = measure(TX.code, 32, 'b') + 8, jl = measure(TX.joinCode.trim(), 30, '') + 12;
-      const lobby = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${titleLine(110, 1280 - jc - jl - 40)}`);
-      G(lobby, `${T_(1440 - jc - 12, 110, TX.joinCode.trim(), 30, { fill: C.muted, anchor: 'end' })}${T_(1440, 110, TX.code, 32, { cls: 'b', anchor: 'end', extra: ' letter-spacing="2"' })}
-        ${T_(160, 190, TX.arrangeAsk, 30, { cls: 'b', fit: 1280 })}`);
+      const lobby = G(page, `<rect y="-300" width="${W}" height="${H + 600}" fill="${C.paper}"/>`);
+      const dimmed = []; // what the camera leaves at the edges when it moves in on the how-to
+      dimmed.push(G(lobby, `${titleLine(110, 1280 - jc - jl - 40)}${T_(1440 - jc - 12, 110, TX.joinCode.trim(), 30, { fill: C.muted, anchor: 'end' })}${T_(1440, 110, TX.code, 32, { cls: 'b', anchor: 'end', extra: ' letter-spacing="2"' })}`));
+      G(lobby, T_(160, 190, TX.arrangeAsk, 30, { cls: 'b', fit: 1280 }));
       const TW = 630, TY = 214, TH = 170;
-      const toggles = TX.arrange.map((a, i) => {
+      TX.arrange.forEach((a, i) => {
         const x = 160 + i * (TW + 20);
         const tg = G(lobby);
-        const off = E('rect', { x, y: TY, width: TW, height: TH, rx: 18, fill: '#fff', stroke: C.rule, 'stroke-width': 3 }, tg);
-        const on = E('rect', { x, y: TY, width: TW, height: TH, rx: 18, fill: '#ededed', stroke: C.ink, 'stroke-width': 4 }, tg);
+        E('rect', i === 1 ? { x, y: TY, width: TW, height: TH, rx: 18, fill: '#ededed', stroke: C.ink, 'stroke-width': 4 } : { x, y: TY, width: TW, height: TH, rx: 18, fill: '#fff', stroke: C.rule, 'stroke-width': 3 }, tg);
         G(tg, T_(x + 28, TY + 56, a.name, 32, { cls: 'tb', fit: TW - 56 }));
         const lw = wrap([[a.line]], 26, TW - 56, plain.clsOf);
         drawLines(tg, lw, x + 28, TY + 100, 26, 36, Object.assign({ fill: C.muted }, plain)).show(lw.total);
-        return { on, off, c: [x + TW / 2, TY + TH / 2] };
       });
       const howOpts = { clsOf: (k) => (k === 'code' ? 'b' : k === 'bold' ? 'tb' : ''), fillOf: () => null, underline: () => null, fill: C.muted };
       const hw = wrap(TX.howTo, 32, 1280, howOpts.clsOf);
@@ -1603,14 +1659,23 @@ function avatarSvg(av, label = true) {
       codeO.w = Math.max(...codeOs.filter((o) => o.li === codeO.li).map((o) => o.x + o.w)) - codeO.x;
       const hl = howG.querySelector('.wb-hl');
       set(hl, 'x', f1(codeO.x - 12)); set(hl, 'y', f1(HY + codeO.li * 46 - 34)); set(hl, 'width', f1(codeO.w + 24)); set(hl, 'height', '48');
-      const codeC = [codeO.x + codeO.w / 2, HY + codeO.li * 46 - 10];
-      const rest = G(lobby);
-      const lw = measure(TX.letIn, 34, 'ts') + 90;
-      G(rest, `${T_(160, HY, TX.call, 28, { fill: C.muted, fit: 1280 })}${button(1440 - lw, HY + 32, lw, 104, TX.letIn, 34, true)}
-        <rect x="160" y="${HY + 170}" width="1280" height="2" fill="${C.rule}"/><path d="M164 ${HY + 208} L184 ${HY + 220} L164 ${HY + 232}Z" fill="${C.ink}"/>${T_(200, HY + 232, TX.fold, 30, { cls: 'tb', fit: 1200 })}
-        ${button(1440 - 180, HY + 280, 180, 76, TX.more, 28, false)}`);
-      const howH = hw.lines.length * 46 + 16;
+      const howW = Math.max(...hw.lines.map((l) => lineW(l, 32, howOpts.clsOf)));
+      // then the line on a call, Let everyone in, and the questions, open: each its number, its text and its picture, the answers folded
+      const CL = HY + (hw.lines.length - 1) * 46 + 62;
+      const lw = measure(TX.letIn, 34, 'ts') + 90, sw = measure(TX.showSol, 26, 'ts') + 50;
+      const q1W = 300, q1H = q1W * 340 / 1600;
+      dimmed.push(G(lobby, `${T_(160, CL, TX.call, 28, { fill: C.muted, fit: 1280 })}${button(1440 - lw, CL + 32, lw, 104, TX.letIn, 34, true)}
+        <rect x="160" y="${CL + 160}" width="1280" height="2" fill="${C.rule}"/>
+        ${T_(160, CL + 216, TX.nqList, 28, { cls: 'tb' })}${button(1440 - sw, CL + 176, sw, 60, TX.showSol, 26, false)}
+        <rect x="160" y="${CL + 252}" width="1280" height="2" fill="${C.rule}"/>${T_(176, CL + 298, '1', 28, { cls: 'b', fill: C.muted, anchor: 'middle' })}
+        ${T_(214, CL + 298, TX.q1, 30, { cls: 'ts', fit: 1150 })}${T_(1426, CL + 298, '›', 34, { fill: C.muted, anchor: 'middle' })}
+        <rect x="214" y="${CL + 322}" width="${q1W}" height="${f1(q1H)}" rx="6" fill="#fff" stroke="${C.rule}" stroke-width="2"/><use href="#cq-q1" x="214" y="${CL + 322}" width="${q1W}" height="${f1(q1H)}"/>`));
+      // in on the how-to: the whole sentence across the frame, Screen and remote above it, the frame's foot just under the line on a
+      // call, so Let everyone in, which is not what gets pressed here (the laptop comes in next), stays below it
+      const ZH = clamp(1520 / howW, 1.2, 1.6);
+      const howView = [clamp(160 + howW / 2 - W / ZH / 2, 0, W - W / ZH), CL + 24 - H / ZH, ZH];
       const thumb = makeThumb(g, 0.9, [210, 470]);
+      const tapLobbyAt = inView(qmView, lobbyBtn[0], lobbyBtn[1]);
       function update(t) {
         // slides in from the right over the chat
         const k = eseg(t, T.web, T.web + 0.35);
@@ -1621,18 +1686,15 @@ function avatarSvg(av, label = true) {
         const sk = eseg(t, T.sheetUp[0], T.sheetUp[1]) * (1 - eseg(t, T.sheetDown[0], T.sheetDown[1]));
         op(sheet, sk > 0 ? 1 : 0);
         if (sk > 0) { set(sheet.firstChild, 'opacity', (0.35 * sk).toFixed(2)); tf(sheetIn, tr(0, (1 - sk) * 700)); }
-        // the arrangement: One screen, then Screen and remote once tapped, and the how-to with it
-        const remote = t >= T.tapRemote + 0.05;
-        toggles.forEach((tg, i) => { const pressed = (i === 1) === remote; vis(tg.on, pressed); vis(tg.off, !pressed); });
-        vis(howG, remote);
-        tf(rest, tr(0, remote ? howH : 0));
-        // the teacher code: zoom and pulse
-        const z = eseg(t, T.zoomCode[0], T.zoomCode[1]);
-        const zs = lerp(1, 1.9, z);
-        tf(zoomG, `translate(${f1(lerp(0, 800 - codeC[0] * zs, z))} ${f1(lerp(0, 450 - codeC[1] * zs, z))}) scale(${zs.toFixed(3)})`);
+        // the camera: in on Quizmaster's card, then, on the lobby's check, in on the how-to, the teacher code pulsing
+        const z = scr === 'lobby' ? eseg(t, T.zoomCode[0], T.zoomCode[1]) : 0;
+        const v = scr === 'local' ? viewOf(qmView, eseg(t, T.zoomQm[0], T.zoomQm[1])) : scr === 'lobby' ? viewOf(howView, z) : [0, 0, 1];
+        tf(zoomG, `translate(${f1(v[0])} ${f1(v[1])}) scale(${v[2].toFixed(3)})`);
+        dimmed.forEach((d) => op(d, 1 - 0.5 * z));
         op(hl, t > T.zoomCode[0] ? 0.55 + 0.45 * Math.sin((t - T.zoomCode[0]) * 7) : 0);
-        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462], [T.tapLobby, lobbyBtn[0], lobbyBtn[1]], [T.tapRemote, toggles[1].c[0], toggles[1].c[1]]]);
+        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462], [T.tapLobby, tapLobbyAt[0], tapLobbyAt[1]]]);
       }
+      CHECK.views = { qm: qmView, how: howView, howW };
       web = { F, update };
     }
 
@@ -1733,9 +1795,9 @@ function avatarSvg(av, label = true) {
     // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
     // ("Let everyone in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
     const CAM = [
-      [T.cut, [431, 537, 2.3]], [29.1, [431, 537, 2.3]], [30.4, ROOM],
-      [44.3, ROOM], [45.6, SPLIT], [49.6, SPLIT], [50.3, ROOM],
-      [54.6, ROOM], [55.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
+      [T.cut, [431, 537, 2.3]], [35.1, [431, 537, 2.3]], [36.4, ROOM],
+      [51.3, ROOM], [52.6, SPLIT], [56.6, SPLIT], [57.3, ROOM],
+      [61.6, ROOM], [62.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
     ];
     function layers(t) {
       cam = keys(t, CAM, [false, false, true]);

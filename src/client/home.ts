@@ -1,7 +1,7 @@
-// The root page's top (docs/design/root-page.md): code box, language, example
-// ask, Run a quiz. The guidance for AIs below reads without this script, in
-// English; this script puts the block above it in the visitor's language
-// (client/landing-text.ts).
+// The root page's top (docs/design/root-page.md): code box, language, the
+// three ways to play, example ask, and Run, which opens the AI's .zip. The
+// guidance for AIs below reads without this script, in English; this script
+// puts the block above it in the visitor's language (client/landing-text.ts).
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
@@ -12,7 +12,7 @@ import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, uploadDays } from "./history.ts";
-import { handOver } from "./handoff.ts";
+import { handOver, sweepStale } from "./handoff.ts";
 import { readQuiz } from "./opening.ts";
 import { filmLanguage } from "./film-poster.ts";
 
@@ -22,6 +22,8 @@ if (JOIN_CODE.test(fromHash) || TEACHER_CODE.test(fromHash)) location.replace(`/
 // The worked example's start as an earlier /example linked it: the example opens on the local check now.
 const exampleLang = new URLSearchParams(location.search).get("example");
 if (isLang(exampleLang)) location.replace(`/open?example=${exampleLang}`);
+// A quiz handed to a check that never opened is still in this browser: it goes now (client/handoff.ts).
+void sweepStale();
 
 /** The address the browser opened: an own copy shows its own (the build writes it into the static page for AIs). */
 const host = location.host || "classyquiz.pages.dev";
@@ -166,6 +168,11 @@ function apply(l: Lang): void {
   for (const el of document.querySelectorAll<HTMLElement>("[data-t]")) {
     const v = t[el.dataset.t as keyof Text];
     if (typeof v === "string") el.textContent = v;
+  }
+  // Words with markup of the page's own (landing-text.ts), never anyone else's.
+  for (const el of document.querySelectorAll<HTMLElement>("[data-t-html]")) {
+    const v = t[el.dataset.tHtml as keyof Text];
+    if (typeof v === "string") el.innerHTML = v;
   }
   for (const el of document.querySelectorAll<HTMLElement>("[data-t-aria]")) {
     const v = t[el.dataset.tAria as keyof Text];

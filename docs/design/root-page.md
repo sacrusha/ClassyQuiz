@@ -20,7 +20,8 @@ how to start one, nothing else on the site matters, however good the guidance be
   the class the address and the class needs one box. Unobtrusive on the
   teachers' page, and easily found by whoever knows to look at the top and
   what the box looks like; the wall shows both until the first student is in
-  (`class-and-wall.md`, "Getting in").
+  (`class-and-wall.md`, "Getting in"). Nothing larger on the page draws a
+  child into the file picker instead ("Run first when stacked").
 
 Two further jobs appear only when they apply, at the place where they apply:
 help for a school network that blocks the site, and the offer of an own copy to
@@ -44,7 +45,9 @@ Who arrives, and what each needs:
 - A regular teacher (plausible assumption: 20 to 30 quizzes a month) who wants
   to know whether they can rely on the site.
 - A student on a tablet, with the address the teacher called out. Needs the code
-  box and nothing else.
+  box and nothing else. Plausible assumption: a child who doesn't see the box
+  at once reads the largest words on the page and presses the strongest button
+  under them (what "Run first when stacked" rests on).
 - Someone who isn't a teacher: a learner who wants to practise, friends for
   a games night, whoever runs a quiz for a training session or a party.
   Needs to see that the site is for them too, and how to ask; the asker who
@@ -169,23 +172,48 @@ How the page meets it (the details: the comments on the film in
   example (`design/example-page.md`), named for what a teacher looks for (a
   walkthrough), not for what the page is to us ("how it was made").
 
+### The three ways, named
+
+Purpose (backlog v5 item 9): a visitor who isn't a teacher recognises a way
+to play, in their own language, before anything asks them to choose, and
+knows the names Solo, Peers and Quizmaster before the local check offers
+them as cards, in the site's English. One sentence between the film and
+Build and Run says them, each name in bold with what it is in the page's
+language: on your own; with friends, each on their own device; you run it
+for a group, on a big screen. The asks' tabs under Build can't carry that
+recognition: they are pictures of 34 px whose words are a tooltip, which a
+phone doesn't show. The names are the entries' own in every language, as
+the check's cards carry them (`local-check.md`), so the page and the check
+agree; "Peers" is a name, not a word to translate. The sentence is no
+heading and no button follows it, so it doesn't draw a child with a code
+(below).
+
 ### Run first when stacked
 
 Below 860 px wide Build and Run stand one above the other, and there Run comes
-first. Build is about 650 px tall on a phone, so with Build first the upload box
-sat a full screen down on every phone, past a natural place to stop reading: the
-teacher with a `.zip` on the phone that took the photos, and the one coming back
-mid-lesson, whose way back is in Run, had to scroll for it. Run is short (the
-heading and the upload box), so Build's heading still shows below it on phones
-from 360×640 up. A first-timer meets the upload before the how-to; the film
-above tells the story and the button says "Open the quiz your AI made".
-The heading is "Play a quiz" and the button "Open", not "Run" and
-"Upload": a Solo player runs nothing, and nothing goes to the site until a
-room opens on the local check ("Words for whoever comes"). German, French
-and Italian already said "start". A running
-quiz's card makes Run taller and can push Build off a small screen; that
-teacher came for Run. The order is visual only: the HTML, side by side on wider
-screens, and the order for keyboards and screen readers keep Build first.
+first. Build is about 650 px tall on a phone, so with Build first the upload
+box would sit a full screen down on every phone, past a natural place to stop
+reading: the teacher with a `.zip` on the phone that took the photos, and the
+one coming back mid-lesson, whose way back is in Run, would scroll for it. Run
+is short (the heading and the upload box): under the film and the three
+ways, its button is in the first screen from 390×844 up and at the bottom
+edge of a 360×640 one, and Build starts below it. A first-timer meets the
+upload before the how-to; the film above tells the story. A running quiz's
+card makes Run taller and pushes Build further down; that teacher came for
+Run. The order is visual only: the HTML, side by side on wider screens, and
+the order for keyboards and screen readers keep Build first.
+
+Run's heading is "Open the quiz your AI made" and its button "Choose the
+.zip file": Run is for whoever has the quiz their AI made, and the words
+name what that person holds. On a phone they are the largest words after
+the film and the strongest button, which is where a child with a code who
+missed the box at the top would go (Situation). So neither says "play" or
+"start", the child's words for what they came to do, and both name what a
+child hasn't: the AI's quiz, a `.zip` file. "Play" is the local check's, on
+the cards that start a way to play (`local-check.md`), once the file is
+open. Not "Run" and "Upload" either: a Solo player runs nothing, and nothing
+goes to the site until a room opens on the local check ("Words for whoever
+comes").
 
 ### Build: two steps
 
@@ -275,7 +303,9 @@ visitor's choice is made with a switch top right, kept on the device
 (`cq.lang`); the header with the code box and the switch is shared with
 `/example` (`client/top.ts`), so the choice holds on both; otherwise the browser's first language among the four; otherwise
 English. The words are in `client/landing-text.ts`, one table per language, Run's
-messages included. The quiz's own problems, the archive's messages and the text
+messages included, also where opening a room moved them: the local check's
+"Sending the quiz…" and its refusals speak the language this page spoke
+(`local-check.md`, "Opening a room"). The quiz's own problems, the archive's messages and the text
 copied for the AI stay English. Register: German "du", French "vous", Italian
 "tu". The film follows the same line: the page's language up to the upload, the
 site's English screens after it ("The film", Words); its words are in
@@ -313,7 +343,10 @@ So, once for all entries:
 - **"Quizmaster"** for whoever runs a room, where English needs a noun (the
   guidance, the README): it is the entry's own name, so the role and the
   card picked on the local check agree, and the word for whoever runs a pub
-  quiz. "Host" stays the code's word (`peers.md`).
+  quiz. "Host" stays the code's word (`peers.md`). On the landing, in every
+  language, Solo, Peers and Quizmaster stand as the entries' names, each
+  with a phrase in the page's language that says what it is ("The three
+  ways, named"), not as role nouns.
 - **"The user"** in the guidance for whoever is in the conversation with the
   AI, the AI's own word for that person, whoever they are; **"players"** for
   whoever answers.
@@ -321,8 +354,10 @@ So, once for all entries:
   meant: the film (the example class's story, `docs/film/`), the sheets and
   chess asks, the classroom's lines in the guidance, and the design docs,
   which speak of the example class. The network check (`/check`) says
-  "school or work" and "our network": it is reached from any room that
-  can't open.
+  "school or work" and "our network", and leaves allowing the site to
+  "whoever looks after the network": it is reached from any room that
+  can't open. The way to more quizzes names "your school's or your
+  company's" site ("The own copy").
 
 ### Run: the `.zip` and nothing else
 
@@ -347,11 +382,12 @@ file's name is checked after choosing, and anything else gets the message below.
   your AI", which asks for a corrected `.zip`. When the problem is pictures that
   can't go up, the teacher may continue without them. The format and its
   validation are `design/quiz-format.md`.
-- A refused upload, at "Open the lobby" on the local check, says which cap it hit, since the two come back differently:
+- A refused upload, at "Open the lobby" or "Play together" on the local
+  check and in this page's language there ("Languages"), says which cap it hit, since the two come back differently:
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
   request allowance has its own message. Each is followed by "More quizzes: a site
-  of your own or your school's ›" to `/own-copy`, which names what the link
+  of your own, your school's or your company's ›" to `/own-copy`, which names what the link
   gives (the owner: "Your own copy" was too ambiguous). The caps are `design/hosting-and-limits.md`.
 - A quiz that reads goes to the local check (`local-check.md`), where
   nothing has gone to the site yet; opening the lobby there uploads it, and
@@ -418,7 +454,7 @@ doesn't raise it on a first visit.
   refused an upload or a class, or the classes' bookings reached
   `NEARLY_FULL` (half; the owner: lower than 80%) of the day's rows. It states the fact: "On 3 of the last
   30 days this shared site was full or busy. For more quizzes, a site
-  of your own or your school's:", then the link. Counting the busy
+  of your own, your school's or your company's:", then the link. Counting the busy
   days brings the way to more quizzes to the teacher who relies on the site
   before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
@@ -443,13 +479,18 @@ doesn't raise it on a first visit.
   "A computer to deploy through wrangler" is deliberate (owner): a teacher
   without the affinity reads it as "the AI sets this up in minutes" being
   their realistic option, or asking someone who has it.
-  Then the school's IT: people with an IT background and a developer AI can
-  adjust it to the school's own servers, or run it on a paid Cloudflare
-  account for "thousands of quizzes per day". The owner: scaling is the point
-  of Cloudflare, a paid plan handles more than thousands, and IT has a budget;
-  the number says the ceiling is the school's to set, not a measured limit. A school is a natural unit for an own copy, and an outside
+  Then the IT of a school or company: people with an IT background and a
+  developer AI can adjust it to their own servers, or run it on a paid
+  Cloudflare account for "thousands of quizzes per day". The owner: scaling
+  is the point of Cloudflare, a paid plan handles more than thousands, and IT
+  has a budget; the number says the ceiling is the school's to set, not a
+  measured limit. A school is a natural unit for an own copy, and an outside
   service is red tape at a school: it may need a data protection review first,
-  so the school's own server comes first. The conversion is the school's, done
+  so the school's own server comes first. A company that runs trainings meets
+  the same IT and the same review, and a trainer who reads "your school's"
+  is told the route isn't theirs; so this page, the line under Run and the
+  link on a refusal name a company after the school (the words widen who
+  else is, they don't displace the teacher: "Words for whoever comes"). The conversion is theirs, done
   with their AI, so this project maintains one server and checks no
   conversion; the README gives the AI what to change, what to keep and the
   tests a converted copy must pass. Afterwards: the address to name to the AI

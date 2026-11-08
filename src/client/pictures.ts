@@ -59,6 +59,15 @@ export function own(url: string): void {
   urls.set(url, url);
 }
 
+/**
+ * A picture this page already holds under another address (a Peers
+ * device's, cut from a pack: client/peers.ts): drawn for `src` without
+ * fetching it. One already here stays.
+ */
+export function seed(src: string, url: string): void {
+  if (!urls.has(src)) urls.set(src, url);
+}
+
 export function preload(srcs: string[]): void {
   for (const s of srcs) void load(s);
 }

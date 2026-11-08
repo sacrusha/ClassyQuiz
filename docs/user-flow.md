@@ -37,7 +37,7 @@ docs/design/; this file says what the screens show.
    sleep or dropped connection resumes the same role with nothing to do.
 4. **The tab that opens the lobby becomes the Projector, and it steers itself.**
    In the lobby it shows the teacher's check first (how the screens are
-   arranged, the questions folded), then, one tap on, the class's join
+   arranged, the questions listed with their answers folded), then, one tap on, the class's join
    screen (§3.3). During the quiz a slim bar carries the next step. One
    mirrored laptop needs nothing else: the check's "One screen". A clicker or the keyboard
    works on any Projector during the quiz (§3.4).
@@ -84,7 +84,7 @@ tablets, and a quiz made in the break.
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
 | Break | **Laptop:** opens `classyquiz.pages.dev` and chooses the AI's .zip there (or drops it). The local check: the right quiz, a spot fix, Open the lobby (§3.1). | — |
-| Break, optional | **Laptop:** on the check, Screen and remote, which shows the teacher code. **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
+| Break, optional | **Laptop:** on the check, Screen and remote (pressed unless this laptop has run a quiz without a remote), which shows the teacher code. **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let everyone in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat, a tool) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
 | End | Final ranking: the podium, the class in front of it, the class's result; a photo if wanted. Exit, and every screen goes to the root page. | Their place on their tablet, then the root page. |
@@ -105,17 +105,19 @@ Purpose and reasons: docs/design/root-page.md.
 │          │ poster: the class at the wall, the    │                   │
 │          │ votes split, no solution yet  [▶]     │                   │
 │          └───────────────────────────────────────┘                   │
-│          [▶] ──●──'───'─'──'────── 0:00 / 1:00 [1×] [full screen]    │
+│          [▶] ──●──'───'─'──'────── 0:00 / 1:07 [1×] [full screen]    │
 │                              The example, step by step ›             │
+│ A quiz is played here in three ways: Solo, on your own; Peers, with  │
+│ friends, each on their own device; Quizmaster, you run it for a …    │
 ├──────────────────────────────────┬───────────────────────────────────┤
-│ Build a quiz                     │ Play a quiz                        │
+│ Build a quiz                     │ Open the quiz your AI made        │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
 │   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Join code   ││ quiz this device
 │   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
 │ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
 │   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   [sheets][chess][1][3][▭][?]    │ │ [ Open the quiz your AI        │ │
-│   tabs, one ask shown:           │ │   made (.zip) ] or drop it here│ │
+│   [sheets][chess][1][3][▭][?]    │ │ [ Choose the .zip file ]       │ │
+│   tabs, one ask shown:           │ │   or drop it here              │ │
 │  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
 │                                  │                                   │ uploaded before, the
@@ -132,7 +134,7 @@ Purpose and reasons: docs/design/root-page.md.
   (`cq.lang`), else the browser's language, else English. The static HTML is
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
-- **The film**, about 60 s without sound, follows the workflow: the sheets,
+- **The film**, 67 s without sound, follows the workflow: the sheets,
   the AI, the .zip going up to the site, the wall, a student's tablet. Until ▶
   is pressed or the time bar moved it is its poster, a picture: the class at
   the wall, the votes split. Under it a video player's bar: play, the time bar
@@ -141,6 +143,10 @@ Purpose and reasons: docs/design/root-page.md.
   time bar has a row of its own. At the end a replay icon on the end card.
   Under it, "The example, step by step ›" links `/example` (the worked
   example).
+- **The three ways**, one sentence above Build and Run: "A quiz is played
+  here in three ways: **Solo**, on your own; **Peers**, with friends, each
+  on their own device; **Quizmaster**, you run it for a group, on a big
+  screen." The names are the local check's cards', in every language.
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
 - **Build's step 2** has six example asks behind six picture tabs: the
   labelled one with photos of sheets, a chess quiz described in words (with
@@ -151,8 +157,9 @@ Purpose and reasons: docs/design/root-page.md.
   classyquiz.pages.dev. I need a classyQuiz. Help?"). Pictures: the sheets, a
   chess board, one person, three people, a screen before an audience, a
   question mark.
-- **Play a quiz takes a .zip and nothing else.** The button opens the file
-  chooser; a .zip can also be dropped on the box. Nothing invites pasting.
+- **Run ("Open the quiz your AI made") takes a .zip and nothing else.** Its
+  button, "Choose the .zip file", opens the file chooser; a .zip can also
+  be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
     chosen one.
   - Text pasted or dropped anyway gets "The site takes the quiz as a .zip
@@ -179,10 +186,10 @@ Purpose and reasons: docs/design/root-page.md.
 - **On the lobby's check (§3.3), before the players are let in,** on a day the free site is
   nearly full: "The free site is nearly full today: room for about 2 more
   groups." (one more: "room for one more group"); when no class fits
-  or letting in was refused: "The free site can't take more players today:
+  or letting in was refused: "The free site can't let another group in today:
   the quizzes under way use what is left. It takes new ones again at 01:00
-  Swiss time." Both followed by "More quizzes: a site of your own or your
-  school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
+  Swiss time." Both followed by "More quizzes: a site of your own, your
+  school's or your company's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
 - **The network check** is no longer on the root page: opening the lobby,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
@@ -249,9 +256,9 @@ Big numbers on the number line · 13 questions
                                   (while a way to play it yourself is offered)
 ```
 
-- **One card per way to play it**, each with its own button; the first
-  card's is the primary one. Only what is built is offered: today Solo,
-  Peers, then Quizmaster.
+- **One card per way to play it**, each with its own button, the three
+  alike: none is the page's primary one. Only what is built is offered:
+  today Solo, Peers, then Quizmaster.
 - **The questions are folded** under the cards, closed on arrival. Opened,
   they are the lobby's list (§3.3): thumbnails, answers folded, Show the
   solutions, the site's warnings, and Change the solution with its fixes
@@ -264,10 +271,13 @@ Big numbers on the number line · 13 questions
   lobby.
 - **Open the lobby ▶** uploads the quiz and lands on the lobby's check
   (§3.3), in this tab as the Projector; Back from there passes this page.
-  While it goes up: "Sending the quiz…". Refused, under the button: the
+  While it goes up: "Sending the quiz…", and refused, under the button,
+  in the language the root page speaks on this device (the card stays
+  English): the
   site's day ("The free site can't take more quizzes today. …", "… has no
   room for another quiz right now …", "… has used up today's allowance …",
-  each with "More quizzes: a site of your own or your school's ›"), or no
+  each with "More quizzes: a site of your own, your school's or your
+  company's ›"), or no
   connection or an answer that isn't the site's (a filter's page): the
   network named as a possible cause, with "What to tell IT ›" to
   `/check#it`.
@@ -282,8 +292,8 @@ Students (`/play#63953`) get no screen of their own:
 - before the teacher lets the class in, a wait: "Joining opens in a
   moment.", joining by itself at the tap;
 - in the lobby, straight to their avatar, with three rows of pictures below
-  it to dress it until Start: six background shapes in its colour, eight
-  hats and six tools to hold (docs/design/class-and-wall.md);
+  it to dress it until Start: six background shapes in its colour, nine
+  hats and seven things to hold or wear (docs/design/class-and-wall.md);
 - once running, "Which one are you?" with the absent players' avatars and
   **+**, when there are any; a tablet whose avatar another device took
   back while it was away gets the same choice when it returns;
@@ -336,7 +346,7 @@ check" in this section is the lobby's.
 
 The single tab, which shows and steers, has two screens. **The check is the
 teacher's** (how the screens are arranged, the teacher code where a remote
-is wanted, the questions and fixes folded); **the join screen is the
+is wanted, the questions with their answers folded and the fixes); **the join screen is the
 class's** (title, address, class code, QR, count, avatars, Start, the
 points-for-speed switch). The teacher shares the screen when they choose;
 the site doesn't know whether it is shared. Both screens' words name no
@@ -360,7 +370,11 @@ screens serve a class and any other crowd.
 │  everyone sees.                                            │
 │                                       [ Let everyone in ▶ ]│
 │ ───────────────────────────────────────────────────────────│
-│ ▸ The questions and their solutions · 1 note from the site │
+│ 12 questions                         [ Show the solutions ]│
+│ ⚠ Question 4 has the choice "20 Franken" twice.            │
+│    1  Ein Pullover kostet 40 Franken …                  ›  │
+│    2  Eine Jacke kostet 80 Franken …                    ›  │
+│    …                                                       │
 │                                                   ⋯ More   │
 └────────────────────────────────────────────────────────────┘
 ```
@@ -377,7 +391,7 @@ screens serve a class and any other crowd.
 └────────────────────────────────────────────────────────────┘
 ```
 
-The fold opened, a question opened (or all of them, with Show the solutions / Hide the solutions):
+A question opened (or all of them, with Show the solutions / Hide the solutions):
 
 ```
 │    2  Eine Jacke kostet 80 Franken …                    ⌄  │
@@ -394,8 +408,11 @@ The fold opened, a question opened (or all of them, with Show the solutions / Hi
 - **How the screens are arranged:** a toggle of two, One screen or Screen
   and remote, each saying what it means; under it, always, the line on a
   video call. The toggle changes what the screens say, nothing a device
-  can do. One screen until this browser has chosen otherwise or has had a
-  Remote (localStorage, `cq.screens`); a reload keeps it.
+  can do. Screen and remote on a first visit; One screen once this
+  browser's Projector has reached a final ranking with no Remote in the
+  quiz, or once One screen is tapped; Screen and remote again once a Remote
+  joins a quiz of this browser's, on either side (localStorage,
+  `cq.screens`). A reload keeps it.
 - **The join code is on the check, small,** with the count once someone
   has joined. Teacher devices use it with the teacher code at any time;
   student devices that arrive with it before the tap wait ("Joining opens
@@ -409,10 +426,12 @@ The fold opened, a question opened (or all of them, with Show the solutions / Hi
   With One screen, ⋯ → A second device… is the way to it. "open a second
   screen in a new window" (hidden on a phone) opens a window that asks the
   same question as any other device.
-- **The questions are folded,** under "The questions and their solutions"
-  with how many notes the site has, closed on arrival: the local check
-  showed them before the upload, its fixes included. Opened, the list as
-  below.
+- **The questions are listed,** each a line with its number and text and
+  its picture beside it, the site's notes above them, open on arrival: the
+  local check keeps them closed for whoever plays, so this is where whoever
+  runs the quiz sees them (docs/design/teacher-devices.md, "The single tab:
+  check, then join"). Fixes made on the local check came up with the quiz
+  and show here.
 - **Answers start folded,** so a shared check shows no key until the
   teacher presses a button that says it shows the answers.
 - **"Change the solution"** makes the choices tappable ("Tap every right
@@ -436,7 +455,7 @@ The fold opened, a question opened (or all of them, with Show the solutions / Hi
 
 The Remote's lobby is the check in one column: the class code large, the
 count and avatars, the points-for-speed switch, the teacher code's sentence, "Projector ✓ ·
-⇄ Swap" while the wall is there, and the questions folded as on the wall's check, with Start quiz pinned at
+⇄ Swap" while the wall is there, and the questions listed as on the wall's check, with Start quiz pinned at
 the bottom. Without a wall it says how to bring one: "On the projector
 computer: on classyquiz.pages.dev, type 63953 47." A Projector that doesn't
 steer shows only the class's part (address, code, QR and avatars), with
@@ -625,9 +644,10 @@ Your AI can explain a mistake, or check a solution that looks wrong.
   Start ▶.
 - **A question:** the bar at the top (where the question stands, after the
   answer ✓, ✗ or ⊘ for not counted, the avatar, ★ the score), the question
-  laid out as on the wall, its answers showing at once; on an upright phone
-  the question smaller than on a wall and long answers in one column. A tap
-  answers, and the key shows on the tiles: the solution ticked, the rest
+  laid out as on the wall in that window, its answers showing at once; on
+  an upright phone or tablet the question smaller than on a wall and long
+  answers in one column. A tap answers, and the key shows on the tiles:
+  the solution ticked, the rest
   dim, the tap outlined, ✗ on it when wrong; a right answer makes the
   avatar jump over the question. At the foot the quiz's title and the next
   step, "▶ Question 5", "▶ Result" after the last, absent before the
@@ -720,7 +740,8 @@ Exit ends the quiz on every device.
   Keys as on the device screen.
 - **⋯** (the opener's): "Solution now, without waiting" during a question;
   "Question 2 now, without waiting" or "Final ranking now, without waiting"
-  after the solution; "Change the solution" at the solution (the choices as
+  after the solution; "Change the solution" at the solution, until the
+  opener has tapped on from it (the choices as
   on the lobby's check, §3.3: Tap every right choice, Don't count this
   question, Done); "Remove a player…" (each avatar, Remove); "End the
   quiz: final ranking"; Close.

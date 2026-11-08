@@ -1,23 +1,27 @@
-// How a child dresses their animal in the lobby
+// How a player dresses their animal in the lobby
 // (docs/design/class-and-wall.md, "Dressing the avatar"): a background shape,
-// a hat and a tool, from one menu that is the same for everybody and every
-// room. The animal and its colour stay assigned and tell the
-// children apart; the look is the child's own and is never scarce.
-// The drawings are in client/look.ts, in this order.
+// a hat and a thing beside it, from one menu that is the same for everybody
+// and every room, a class's or a training room's. The animal and its colour
+// stay assigned and tell the players apart; the look is the player's own and
+// is never scarce. The drawings are in client/look.ts, in this order.
 
 /** Background shapes: 0 is the plain disc, the default. */
 export const BACKGROUND_COUNT = 6;
 /** Hats: 0 is none, the default. */
-export const HAT_COUNT = 9;
-/** Tools held beside the animal: 0 is none, the default. */
-export const TOOL_COUNT = 7;
+export const HAT_COUNT = 10;
+/** The row beside the hats, held, worn at the neck or set before the animal ("tools"): 0 is none, the default. */
+export const TOOL_COUNT = 8;
+/** The menu's pictures a player can put on (the plain disc, no hat and nothing beside it are defaults). */
+export const LOOK_PICTURES = BACKGROUND_COUNT - 1 + HAT_COUNT - 1 + TOOL_COUNT - 1;
 /**
- * Changes of look a child can store in one class. Generous for a child who
- * tries everything; it stops a child who makes a game of hammering the
+ * Changes of look a player can store in one class: every picture once and
+ * seventeen more, the room to explore a child had before the menu grew, so
+ * it moves with the menu. It stops a child who makes a game of hammering the
  * pictures from spending the site's daily allowance (docs/design/class-and-wall.md,
- * "Dressing the avatar": each stored change is two rows).
+ * "Dressing the avatar": each stored change is two rows, booked for every
+ * player a class may have when it is let in: server/rows.ts).
  */
-export const MAX_LOOK_CHANGES = 30;
+export const MAX_LOOK_CHANGES = LOOK_PICTURES + 17;
 /** The server stores the class's looks at most this often: one write covers every child who changed in between. */
 export const LOOK_WRITE_MS = 1000;
 

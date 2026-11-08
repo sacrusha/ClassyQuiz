@@ -1,7 +1,7 @@
 // The ways a quiz can be played, offered on the local check
 // (docs/design/local-check.md, "The entries"). Only what is built is listed
 // here: the site never promises what isn't (backlog v5). The order is the
-// page's; the first entry's button is the page's primary one.
+// page's; the buttons look alike, so none is pressed for standing out.
 
 import type { OpenedQuiz } from "./opening.ts";
 import { peers } from "./entry-peers.ts";

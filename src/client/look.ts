@@ -170,6 +170,15 @@ const HATS: { name: string; svg: string; height: number; box: string }[] = [
     height: 24,
     box: "-26 -27 52 32",
   },
+  {
+    // With the top hat and the bow tie, the dapper register (identity.md: the mark is the fox in a top hat).
+    name: "bowler",
+    svg:
+      `<path d="M-13.5 -2 C-13.5 -15.5 -8 -22.5 0 -22.5 C8 -22.5 13.5 -15.5 13.5 -2Z" fill="#23262e"/><rect x="-13.5" y="-7.3" width="27" height="3.8" fill="#5d636e"/>` +
+      `<path d="M-20.5 -0.9 Q-19 -4.9 -14 -3.6 H14 Q19 -4.9 20.5 -0.9 Q18.5 1.8 13.5 1 H-13.5 Q-18.5 1.8 -20.5 -0.9Z" fill="#23262e"/>`,
+    height: 22.5,
+    box: "-23 -25 46 29",
+  },
 ];
 
 /**
@@ -201,32 +210,38 @@ function hatOn(animal: number, hat: number): string {
 }
 
 /**
- * Tools held beside the animal, in the order of shared/looks.ts (0: none),
- * each drawn round (0, 0) within about 19 of it; `box` shows it alone in the
- * picker. Each is a solid blob, since at the who-answered bar's 21 to 36 px a
- * line is a pixel wide and gone; in neutral colours, never an answer's colour
- * in an answer's shape (docs/design/class-and-wall.md, "Dressing the avatar").
- * The types are inferred: docs/film/build/build.py lifts this part of the
- * file into the film as plain JavaScript.
+ * The row beside the hats: things held, worn or set before the animal, in the
+ * order of shared/looks.ts (0: none), each drawn round (0, 0); `at` says where
+ * it goes (toolOn), `box` shows it alone in the picker. Each is a solid blob,
+ * since at the who-answered bar's 21 to 36 px a line is a pixel wide and gone,
+ * and dark or coloured where it passes the disc's edge, since white is lost
+ * on the wall's paper there. No answer's colour in an answer's shape
+ * (docs/design/class-and-wall.md, "Dressing the avatar"). The types are
+ * inferred: docs/film/build/build.py lifts this part of the file into the
+ * film as plain JavaScript.
  */
 const TOOLS = [
-  { name: "", svg: "", box: "0 0 1 1" },
+  { name: "", svg: "", box: "0 0 1 1", at: "hand" },
   {
+    // The animal behind its open laptop, seen from the lid's side: low in the
+    // middle, not a small laptop at the corner, where a list of players would
+    // read it as the device the player is on.
     name: "laptop",
     svg:
-      `<rect x="-13" y="-15" width="26" height="19" rx="2.2" fill="#c9ced6" stroke="#5d636e" stroke-width="1.3"/><rect x="-10.4" y="-12.4" width="20.8" height="13.8" rx="1" fill="#2b3a55"/>` +
-      `<path d="M-10.4 1.4 L2 -12.4 H7 L-5.4 1.4Z" fill="#fff" opacity=".18"/>` +
-      `<path d="M-15.5 4 H15.5 L18.5 9.2 Q18.5 11 16.7 11 H-16.7 Q-18.5 11 -18.5 9.2Z" fill="#aeb4bd" stroke="#5d636e" stroke-width="1.3" stroke-linejoin="round"/>`,
-    box: "-21 -18 42 32",
+      `<rect x="-18" y="-9" width="36" height="17" rx="2" fill="#aeb4bd" stroke="#5d636e" stroke-width="1.4"/><circle cx="0" cy="-0.5" r="2.8" fill="#e8e6e1"/>` +
+      `<path d="M-19 7.5 H19 L23 12 Q23 13 22 13 H-22 Q-23 13 -23 12Z" fill="#8a909a" stroke="#5d636e" stroke-width="1.2" stroke-linejoin="round"/>`,
+    box: "-25 -12 50 27",
+    at: "front",
   },
   {
     name: "chart",
     svg:
-      `<path d="M-8 9 L-12 18 M8 9 L12 18" stroke="#5d636e" stroke-width="2.6" stroke-linecap="round"/>` +
-      `<rect x="-15" y="-16" width="30" height="26" rx="2" fill="#fff" stroke="#5d636e" stroke-width="1.6"/>` +
+      `<path d="M-8 9 L-12 18 M8 9 L12 18" stroke="#3a3f4a" stroke-width="3" stroke-linecap="round"/>` +
+      `<rect x="-15" y="-16" width="30" height="26" rx="2" fill="#fff" stroke="#3a3f4a" stroke-width="3.4"/>` +
       `<rect x="-10.5" y="-1" width="5.5" height="7" fill="#3a3f4a"/><rect x="-2.75" y="-6" width="5.5" height="12" fill="#3a3f4a"/><rect x="5" y="-11" width="5.5" height="17" fill="#3a3f4a"/>` +
-      `<path d="M-11 -5 L-2 -10.5 L3 -8.5 L9.5 -13.5" stroke="#d9541e" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+      `<path d="M-11 -5 L-2 -10.5 L3 -8.5 L9.5 -13.5" stroke="#a8471a" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
     box: "-18 -19 36 39",
+    at: "hand",
   },
   {
     name: "calculator",
@@ -234,53 +249,79 @@ const TOOLS = [
       `<g transform="rotate(-10)"><rect x="-11.5" y="-16" width="23" height="32" rx="3.5" fill="#3a3f4a" stroke="#23262e" stroke-width="1.2"/>` +
       `<rect x="-8.5" y="-13" width="17" height="7.5" rx="1.2" fill="#cfe3c8"/>` +
       `<g fill="#e8e6e1">${[-3, 2.5, 8].map((y) => [-8, -2, 4].map((x) => `<rect x="${x}" y="${y}" width="4.5" height="3.6" rx=".8"/>`).join("")).join("")}</g>` +
-      `<rect x="4" y="8" width="4.5" height="3.6" rx=".8" fill="#f29a1d"/></g>`,
+      `<rect x="4" y="8" width="4.5" height="3.6" rx=".8" fill="#a8471a"/></g>`,
     box: "-16 -20 32 40",
+    at: "hand",
   },
   {
     name: "coffee",
     svg:
       `<path d="M-6 -13 q-3 -3 0 -6 q3 -3 0 -6 M2 -13 q-3 -3 0 -6 q3 -3 0 -6" stroke="#9aa1ad" stroke-width="2" fill="none" stroke-linecap="round"/>` +
-      `<path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#5d636e" stroke-width="5.4" fill="none"/><path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#fff" stroke-width="2.8" fill="none"/>` +
-      `<path d="M-13 -9 H9 V10 Q9 15 4 15 H-8 Q-13 15 -13 10Z" fill="#fff" stroke="#5d636e" stroke-width="1.3"/>` +
-      `<ellipse cx="-2" cy="-9" rx="11" ry="2.4" fill="#6b3e1f" stroke="#5d636e" stroke-width="1.1"/>`,
+      `<path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#7d3412" stroke-width="5.4" fill="none"/><path d="M8 -4 h3 a6.5 6.5 0 0 1 0 13 h-3" stroke="#a8471a" stroke-width="2.8" fill="none"/>` +
+      `<path d="M-13 -9 H9 V10 Q9 15 4 15 H-8 Q-13 15 -13 10Z" fill="#a8471a" stroke="#7d3412" stroke-width="1.3"/><path d="M-10 -3 V9" stroke="#fff" stroke-opacity=".35" stroke-width="2.4" stroke-linecap="round"/>` +
+      `<ellipse cx="-2" cy="-9" rx="11" ry="2.4" fill="#4a2a14" stroke="#7d3412" stroke-width="1.1"/>`,
     box: "-16 -28 37 46",
+    at: "hand",
   },
   {
     name: "briefcase",
     svg:
       `<path d="M-6 -9 V-13.5 Q-6 -16 -3.5 -16 H3.5 Q6 -16 6 -13.5 V-9" stroke="#4e3220" stroke-width="3" fill="none"/>` +
       `<rect x="-17" y="-9.5" width="34" height="23" rx="3" fill="#8a5a30" stroke="#4e3220" stroke-width="1.3"/>` +
-      `<path d="M-17 -0.5 H17" stroke="#4e3220" stroke-width="1.3"/><rect x="-3" y="-3.5" width="6" height="5" rx="1" fill="#f7b500" stroke="#9a6a00" stroke-width=".9"/>`,
+      `<path d="M-17 -0.5 H17" stroke="#4e3220" stroke-width="1.3"/><rect x="-3" y="-3.5" width="6" height="5" rx="1" fill="#c9ced6" stroke="#5d636e" stroke-width=".9"/>`,
     box: "-20 -19 40 35",
+    at: "hand",
   },
   {
     name: "book",
     svg:
-      `<path d="M0 -7 Q-9 -13 -18.5 -9.5 V11.5 Q-9 8 0 13 Q9 8 18.5 11.5 V-9.5 Q9 -13 0 -7Z" fill="#a8471a"/>` +
-      `<path d="M0 -8 Q-8 -13 -16.5 -10.5 V9 Q-8 6 0 10.5Z M0 -8 Q8 -13 16.5 -10.5 V9 Q8 6 0 10.5Z" fill="#fff" stroke="#c9c2b8" stroke-width=".9" stroke-linejoin="round"/>` +
-      `<path d="M-13 -5.5 Q-8 -7.5 -3.5 -4.5 M-13 -1 Q-8 -3 -3.5 0 M-13 3.5 Q-8 1.5 -3.5 4.5 M13 -5.5 Q8 -7.5 3.5 -4.5 M13 -1 Q8 -3 3.5 0 M13 3.5 Q8 1.5 3.5 4.5" stroke="#9aa1ad" stroke-width="1.3" fill="none" stroke-linecap="round"/>`,
-    box: "-21 -16 42 32",
+      `<g transform="rotate(-8)"><rect x="-12" y="-16" width="24" height="32" rx="2" fill="#a8471a" stroke="#6b2a0c" stroke-width="1.3"/>` +
+      `<path d="M-12 -16 V16" stroke="#6b2a0c" stroke-width="3.4"/><rect x="-6" y="-10" width="14" height="5" rx="1" fill="#f3d9c4"/>` +
+      `<path d="M12 -14 V14" stroke="#fff" stroke-width="2"/></g>`,
+    box: "-17 -19 34 38",
+    at: "hand",
+  },
+  {
+    // The top hat's own register (identity.md: the mark is the fox in a top hat).
+    name: "bow tie",
+    svg:
+      `<path d="M-2 0 L-13 -7.5 Q-16.5 0 -13 7.5Z M2 0 L13 -7.5 Q16.5 0 13 7.5Z" fill="#fff" stroke="#fff" stroke-opacity=".6" stroke-width="3.2" stroke-linejoin="round"/>` +
+      `<path d="M-2 0 L-13 -7.5 Q-16.5 0 -13 7.5Z M2 0 L13 -7.5 Q16.5 0 13 7.5Z" fill="#23262e" stroke="#23262e" stroke-width="2" stroke-linejoin="round"/>` +
+      `<rect x="-3.6" y="-3.8" width="7.2" height="7.6" rx="2" fill="#3a3f4a" stroke="#23262e" stroke-width="1"/>`,
+    box: "-19 -11 38 22",
+    at: "neck",
   },
 ];
 
+/** Where a bow tie sits on each animal (order of ANIMAL_NAMES): just under the chin. */
+const NECKS = [86, 83, 85, 85, 86, 88, 88, 86, 86, 86, 86, 89];
+
 /**
- * Where a tool is held: low on the right, the same for every animal, over the
- * cheek and past the disc's edge, so it changes the outline on that side.
+ * Where each goes: a thing held, low on the right, the same for every animal,
+ * over the cheek and past the disc's edge, so it changes the outline on that
+ * side; a bow tie under the chin; a laptop low in the middle, below every
+ * animal's mouth.
  */
-const toolOn = (tool = 0) => (TOOLS[tool]?.svg ? `<g transform="translate(78 80) scale(1.05)">${TOOLS[tool].svg}</g>` : "");
+const toolOn = (animal = 0, tool = 0) => {
+  const it = TOOLS[tool];
+  if (!it?.svg) return "";
+  const at = it.at === "neck" ? `translate(50 ${NECKS[animal]}) scale(1.05)` : it.at === "front" ? "translate(50 87)" : "translate(78 80) scale(1.05)";
+  return `<g transform="${at}">${it.svg}</g>`;
+};
 
 const lookIndex = (i: number | undefined, n: number): number => (typeof i === "number" && Number.isInteger(i) && i >= 0 && i < n ? i : 0);
 
 export function avatarSvg(av: Avatar, label = true): string {
   const colour = AVATAR_COLOURS[av.c % AVATAR_COLOURS.length];
   const a = av.a % ANIMALS.length;
-  const b = lookIndex(av.b, BACKGROUND_COUNT);
-  const h = lookIndex(av.h, HAT_COUNT);
-  const t = lookIndex(av.t, TOOL_COUNT);
+  // The drawings' own counts, which the menu's equal (look.test.ts), so the
+  // film's copy of this function needs no count (docs/film/build/build.py).
+  const b = lookIndex(av.b, BACKGROUNDS.length);
+  const h = lookIndex(av.h, HATS.length);
+  const t = lookIndex(av.t, TOOLS.length);
   const name = [ANIMAL_NAMES[a], HATS[h].name, TOOLS[t].name].filter(Boolean).join(", ");
   const aria = label ? ` role="img" aria-label="${name}"` : ` aria-hidden="true"`;
-  return `<svg class="avatar" viewBox="0 0 100 100"${aria}>${BACKGROUNDS[b](colour)}${ANIMALS[a]()}${hatOn(a, h)}${toolOn(t)}</svg>`;
+  return `<svg class="avatar" viewBox="0 0 100 100"${aria}>${BACKGROUNDS[b](colour)}${ANIMALS[a]()}${hatOn(a, h)}${toolOn(a, t)}</svg>`;
 }
 
 /** A background shape alone, in the child's colour, for the lobby's picker. */
@@ -306,7 +347,7 @@ export function toolSvg(t: number): string {
  */
 export function pickerRows(colour: number): string {
   const row = (part: string, from: number, to: number, svg: (i: number) => string) =>
-    `<div class="prow">${Array.from({ length: to - from }, (_, k) => `<button class="pick" type="button" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
+    `<div class="prow prow-${part}">${Array.from({ length: to - from }, (_, k) => `<button class="pick" type="button" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
   return row("b", 0, BACKGROUND_COUNT, (b) => backgroundSvg(b, colour)) + row("h", 1, HAT_COUNT, hatSvg) + row("t", 1, TOOL_COUNT, toolSvg);
 }
 

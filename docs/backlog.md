@@ -4,7 +4,7 @@ Project → versions as goals → items that get picked, worked and delivered. E
 item names the problem it solves for the teacher or the class. Done items are one
 line with a pointer to the design file that holds their purpose and situation
 (`design/<file>.md`); what is still to do is in full, and in the one list at the
-end. Last settled: 2026-11-08.
+end. Last settled: 2026-11-09.
 
 ## Project
 
@@ -173,7 +173,7 @@ the open list at the end.
    words that produced it are the how-to-ask. The forms are renderings of that
    one instance, so more than one can exist; not a closed list: a video; a
    static display of the input leading into the playable quiz as its
-   deliverable; a carousel or slideshow. Built: a film of about 60 s without
+   deliverable; a carousel or slideshow. Built: a film of about a minute without
    sound, from the owner's storyboard brief, fed the real screens and the
    example ask in the page's four languages, never autoplaying; until it plays
    its poster and a video player's bar stand in its place
@@ -223,7 +223,8 @@ the open list at the end.
    copy is a choice, an unchanging copy being what a teacher values before a
    lesson. The conversion is the school's, not checked here (owner: the point of
    telling them to convert is so we don't have to); `simulate.mjs` is their
-   check (`design/hosting-and-limits.md`, "A copy on a school's own server").
+   check (`design/hosting-and-limits.md`, "A copy on a school's or company's
+   own server").
    Open: the page says the VM route takes "minutes" and the walk-through "a
    while" (owner), untimed on the current README; the VM's network access
    (`root-page.md`, "Not known"). The own-copy line
@@ -241,8 +242,13 @@ the open list at the end.
 9. Avatars: celebration, the lion's mane, tools — student feedback:
    celebrating avatars, winners only, after every question; at least ten
    winners easily distinguishable. Built (winners' band, lion's mane),
-   `design/class-and-wall.md`. Tools beside the animal: built with v5 item 4.
-   Open: whether four seconds is long enough for a child to find themselves;
+   `design/class-and-wall.md`. Open: tools beside the animal in the
+   children's own register. The row built with v5 item 4 is the office's,
+   for the adults, and doesn't answer this wish; the examples on record are
+   v2 item 5's, a lantern, a staff, a pitchfork and a shovel, of which only
+   a blob such as the lantern survives the bar's sizes
+   (`design/class-and-wall.md`, "Dressing the avatar"). Also open: whether
+   four seconds is long enough for a child to find themselves;
    the weak spot is a short question beside its picture, where ten winners come
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
@@ -319,7 +325,7 @@ the open list at the end.
     quiz if that one never started; the days' classes, rows written and
     peak are in `GET /api/site` for the owner. The check warns while fewer
     than three classes fit and keeps the refusal on screen, both with "More
-    quizzes: a site of your own or your school's ›" (the owner: "Your own
+    quizzes: a site of your own, your school's or your company's ›" (the owner: "Your own
     copy" too ambiguous); the landing's line counts busy days too (half the day's rows booked at once). Not
     deployed. Owner: booking slots and releasing them, the shrink at
     Start, one stored quiz per device, the low cap instead of overbooking,
@@ -345,7 +351,8 @@ presented one way to play, the projector with the teacher's phone and the
 students' devices, and a newcomer had to grasp it before anything else. The
 file the AI makes is independent of that way, and the person who asked for
 the quiz need not know its answers, so a quiz is also for playing alone, with
-friends, or for a crowd where the host plays too. Plausible assumption (the
+friends (where whoever brought the quiz plays too), or for a crowd someone
+runs. Plausible assumption (the
 owner's, 2026-11-08): people think in use cases, not capabilities — so the
 site offers entries a person recognises before knowing any setting, named by
 the owner **Solo** (you play the quiz on your own, for learning or review),
@@ -372,8 +379,10 @@ exploration behind these items — options and what each would cost — is
 
 4. Quizmaster: a host runs a quiz for a class or any other crowd; the lobby
    asks how the screens are arranged, the remote's how-to shows only where a
-   remote is wanted, no screen names a role, and the avatars have tools
-   beside the animal for a business crowd — `design/teacher-devices.md`
+   remote is wanted, no screen names a role, and the avatars let a wider
+   audience use the site, a business or training room among them, through
+   each adult's own look: the bowler and the bow tie beside the top hat, and
+   the office's things, in the one menu — `design/teacher-devices.md`
    ("How the screens are arranged", "Words for any crowd"),
    `design/class-and-wall.md` ("Dressing the avatar"). Devices only, a room
    with no wall, isn't offered; why, and what would make it cheap now:
@@ -383,8 +392,11 @@ exploration behind these items — options and what each would cost — is
    questions — what lets a quiz be played by its own maker: the guidance's
    "When the user will play the quiz" and the local check's fold —
    `design/guidance-page.md` ("The user who plays"),
-   `design/local-check.md`. Open: whether AIs keep the questions out of the
-   chat and report enough; no run since the page says it.
+   `design/local-check.md`. A quizmaster doesn't play: the guidance says
+   so, and has the AI ask a user who will host and play which they mean,
+   Peers or Quizmaster. Open: whether AIs keep the questions out of the
+   chat, ask, and report enough without naming a question; no run since
+   the page says it.
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
@@ -413,11 +425,17 @@ exploration behind these items — options and what each would cost — is
 9. A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
    lesson's, recognise themselves on the page, the example class's teacher
    still served first: the word decided once (`design/root-page.md`, "Words
-   for whoever comes"), the guidance describing the three ways and where each
-   reads a question (`design/guidance-page.md`), three more example asks with
+   for whoever comes"), the three ways named in one sentence above Build and
+   Run, in the visitor's language, by the names the check's cards carry
+   (`design/root-page.md`, "The three ways, named"), Run's words leaving
+   "play" to the check's cards so a child with a code isn't drawn into the
+   file picker ("Run first when stacked"), the guidance describing the three
+   ways and where each reads a question (`design/guidance-page.md`), three
+   more example asks with
    no line under them since no run is behind them, and the film showing the
    check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
-   (`translation-review.md`, "The other ways to play", E6); whether someone
+   (`translation-review.md`, "The other ways to play", "The words before
+   the check", E6); whether someone
    who isn't a teacher reads the page as theirs, which nobody outside the
    project has tried.
 
@@ -539,24 +557,49 @@ With the owner:
   read of the translations, the page's and the film's (v4 item 1), the
   personal line in step 1 if wanted.
 - Whether four seconds suits the winners' band (v4 item 9).
-- Business avatar styling (v5 item 4), built on the owner's direction of
-  2026-11-08 and not yet seen by the owner: the animals stay, and one menu
-  for every room gains a row of tools held beside the animal (laptop, chart,
-  calculator, coffee, briefcase, book) next to the top hat; no avatar set is
-  picked per upload or carried by the quiz (figure `avatars/tools.png`,
+- The avatars for a wider audience (v5 item 4), built on the owner's purpose
+  and direction of 2026-11-08 and not yet seen by the owner: the animals
+  stay, every look starts plain, and the one menu for every room carries two
+  registers for adults beside the children's. The owner's examples are the
+  top hat and the laptop, chart and calculator; the implementer's are the
+  bowler and the bow tie (the top hat expanded on; a monocle was rendered
+  and left out) and the coffee, briefcase and book. No look for a room, no
+  set per upload, none carried by the quiz (figure `avatars/tools.png`,
   `design/class-and-wall.md`, "Dressing the avatar"). To decide on seeing
-  it: whether that is businessy enough, and whether to add the top hat's
-  neckwear (a bow tie). Should one menu not serve both rooms, the fallback
-  is a set per upload, defaulted by the entry and changeable among the
-  host's settings on the check screen.
+  it: whether that serves a training room, and the implementer's items.
+  Should one menu not serve both rooms, the fallback is a set per upload,
+  defaulted by the entry and changeable among the host's settings on the
+  check screen. The look cap moves with the menu, now 38 (every picture
+  once and seventeen more), so a let-in booking is about 10,700 rows and
+  seven lobbies fit the day's ledger at once. Not designed: booking the
+  looks per class by writes rather than per player by changes, since the
+  run is written whole at most once a second (`design/hosting-and-limits.md`,
+  "Running classes finish").
+- Solo (v5 item 2) as built, kept by the owner's delegate and not yet seen
+  by the owner (`design/solo.md`, Not known): a tap is the final answer;
+  the avatar is dressed before the first question; the result's "Copy the
+  answers for your AI", in those words; Back ends a run without asking.
 - Quizmaster (v5 item 4), the implementer's calls, not yet seen by the
   owner (`design/teacher-devices.md`): the toggle on the lobby's check
-  rather than the local check's card (the how-to needs the teacher code,
-  made at upload); One screen as the first default, then whatever this
-  browser chose or last had; devices only not offered; the questions
-  folded on the lobby's check and the Remote's lobby; the words ("Join
+  rather than the local check's card (there Screen and remote can show the
+  teacher code at once, made at upload); devices only not offered; the
+  words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
-  it", "‹ Back"), which the landing's film now shows too.
+  it", "‹ Back"), which the landing's film now shows too. The
+  delegate's decisions after the review of v5, likewise not yet seen by
+  the owner: the lobby's check and the Remote's lobby list the questions
+  open with the answers folded, as before v5, since the local check keeps
+  them closed for every entry; Screen and remote as the first default, so
+  the example class's teacher finds the remote's how-to on a first visit,
+  and One screen once this browser has run a quiz to its end without a
+  Remote; the local check's three buttons alike, none primary, so a teacher
+  in a hurry doesn't press Solo's for standing out (`design/local-check.md`).
+- Peers (v5 items 3 and 7), the shapes as built, kept by the owner's
+  delegate and not yet seen by the owner (`design/peers.md`, its "Not
+  known" for each): who the room waits for, shown as avatars on every
+  device that is done; the spread showing with the key, no lock-in
+  before it; a ranking on each device while it waits; the opener's "…
+  now, without waiting"; no points for speed; no wall.
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the
@@ -622,10 +665,17 @@ Needs a real classroom or real devices, nobody has run it:
   `/open`, nothing uploaded while looking, the fold, fixes reaching the
   lobby, reload and Back, the root's problems; a site at 8868 by default), `labels-walk.mjs` (the bar's labels and small lines through every
   step on walls of 1366, 600 and 360 px and a 360 px Remote: text cut or
-  not, height, shots), `../v5-solo/solo-walk.mjs` (Solo on the example,
+  not, height, shots), `../fix-solo/solo-walk.mjs` (Solo on the example,
   desktop and phone, nothing uploaded, Back to the check, then the lobby),
-  `../v5-solo/solo-quizzes.mjs` (Solo with sentence and picture answers on a
-  phone and a tablet), `../v5-solo/wall-walk.mjs` (the wall through a
+  `../fix-solo/solo-quizzes.mjs` (Solo with sentence and picture answers on a
+  phone and a tablet, on its side and upright; both wait out the start's
+  settle window, which `../v5-solo/`'s originals don't),
+  `../fix-solo/preview-compare.mjs` (Solo against the wall that steers
+  itself in the same window, question by question: boxes, fonts, grid; its
+  quizzes from `make-zips.py`), `../fix-solo/double-tap.mjs` (double taps
+  on the check's Play, Start and Result in five windows; these two read a
+  site at 8988 by default),
+  `../v5-solo/wall-walk.mjs` (the wall through a
   question with bot players: spread, key, winners), `../v5-peers/peers-walk.mjs`
   (Peers on the example: the card, the opener's lobby, a phone and a laptop
   joining, a question, the solution, the ranking while waiting, the ⋯, the

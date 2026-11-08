@@ -56,7 +56,7 @@ export const MAX_LIVE_BYTES = 1_000_000_000;
 export const SLEEP_AFTER_MS = 45 * 60_000;
 
 /** The self-hosting nudge, appended to every refusal. */
-const OWN_COPY = "For more quizzes, a site of your own or your school's: classyquiz.pages.dev/own-copy says how.";
+const OWN_COPY = "For more quizzes, a site of your own, your school's or your company's: classyquiz.pages.dev/own-copy says how.";
 
 /**
  * Why a device can't join (server/game.ts); shown on it. Whoever runs the
@@ -94,7 +94,7 @@ export function quotaResetAt(now = new Date()): string | null {
 /** Letting a class in, refused: the day's rows are booked by the classes under way. */
 export function classesFullMessage(now = new Date()): string {
   const at = quotaResetAt(now);
-  return `The free site can't take more players today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+  return `The free site can't let another group in today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
 /** The same for a Peers room, refused as it opens: it is a quiz among friends, not a class. */

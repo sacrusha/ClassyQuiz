@@ -569,7 +569,7 @@ for (const p of players) {
 log(`dressing: ${taps} taps by ${players.length} students in ${((Date.now() - dressStarted) / 1000).toFixed(1)} s${ALL_POLL ? `, ${dressSends} HTTP requests` : ""}`);
 
 // A device that doesn't wait for its answers (not our page): the server
-// stores MAX_LOOK_CHANGES (30) changes per student and refuses the rest.
+// stores MAX_LOOK_CHANGES (38) changes per student and refuses the rest.
 {
   // Over a WebSocket, so the 40 arrive in order and each one is a change.
   const rogue = [...players].reverse().find((p) => p.d.mode === "ws") ?? players[players.length - 1];
@@ -580,7 +580,7 @@ log(`dressing: ${taps} taps by ${players.length} students in ${((Date.now() - dr
   // stored is acknowledged (nothing to store), every change refused.
   const first = acks.findIndex((a) => !a.ok);
   const kept = first > 0 ? flips[first - 1] : null;
-  check(first > 0 && first <= 30, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 40)`);
+  check(first > 0 && first <= 38, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 40)`);
   check(!!kept && acks.every((a, i) => i < first || a.ok === sameLook(flips[i], kept)), "after that, every change is refused");
   // What counts is what is stored; the Remote's view says which.
   await sleep(1500);
