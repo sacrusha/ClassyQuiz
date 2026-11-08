@@ -385,15 +385,21 @@ behind these items — options and what each would cost — is
    file. Open: the landing's film draws the lobby with the classroom's words
    ("Let the class in ▶", "Class code", "the class watches this screen",
    "The class is let in in a moment.") and its check without the toggle
-   (`docs/film/build/film.js`, `COMMON`); the words before the check are
-   item 9's.
+   (`docs/film/build/film.js`, `COMMON`); the words before the check: item
+   9.
 
-5. **Whoever asked the AI for the quiz wants to play it, and so must not have
-   seen the questions.** This is what lets a quiz be played by its own maker
-   — a pub host who guesses along, a trivia quiz that is nobody's agenda.
-   Today the AI shows its draft in the conversation, and the check screen
-   after upload lists every question with its key (v4 item 8). A group
-   catches a wrong key (fixes during the run); alone, it is item 2's problem.
+5. **Whoever asked the AI for the quiz plays it without having seen the
+   questions** — what lets a quiz be played by its own maker, a trivia quiz
+   that is nobody's agenda. Built: the guidance's "When the user will play
+   the quiz" (the questions, choices and solutions stay out of the
+   conversation; the AI reports what it can, count, topics, difficulty,
+   pictures, and hands over the `.zip`; a wrong solution is caught in play),
+   and the example asks that say "I'll play it myself" and "I'm playing too"
+   (`design/guidance-page.md`, "The user who plays"); the local check's fold
+   (`design/local-check.md`); a wrong solution fixed by the Peers opener or
+   taken to the player's AI after Solo. Not deployed. Open: whether AIs do
+   it, ask when it's unclear, and report enough; no run since the page says
+   it.
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
@@ -422,13 +428,23 @@ behind these items — options and what each would cost — is
    of the field is shown (`design/class-and-wall.md` shows winners only).
 
 9. **A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
-   lesson's, must recognise themselves on the page.** The README says
-   "Quizzes for classes", the lede "live classroom quizzes", the landing's
-   "Run a quiz" leads to a classroom, the guidance describes a lesson and its
-   back row, the example asks are a teacher's. Which word stands where
-   "teacher" stands today is decided once, for all entries and the queued
-   localization. Each sentence changes with the delivery it describes, so the
-   page never promises what isn't built.
+   lesson's, recognise themselves on the page** — built, the example class's
+   teacher still served first: the word decided once, no role noun where the
+   words are translated, "quizmaster", "the user" and "players" where English
+   needs one, teacher and class where the classroom is meant
+   (`design/root-page.md`, "Words for whoever comes"); the guidance describes
+   Solo, Peers and Quizmaster and where each reads a question, so the AI
+   specialises (`design/guidance-page.md`); three more example asks
+   (practising alone, friends, a training session), with no line under them
+   since no run is behind them; the README's descriptor, the lede, the
+   example's last step, the resume card's "Join code", `/check`'s words. Not
+   deployed. Open: the landing's "Run a quiz" and "Upload the quiz your AI
+   made" are also the film's words, changed only with a rebuild of the film
+   (`src/DEVELOPING.md`, "The landing film"); the de/fr/it drafts
+   (`docs/translation-review.md`, "The other ways to play", E6); the film
+   tells the classroom's story only; whether someone who isn't a teacher
+   reads the page as theirs, which nobody outside the project has tried;
+   CLAUDE.md's first lines still say "live classroom quizzes".
 
 Out under the lifetime as decided (v4 item 3: keeping serves rejoining a quiz
 in progress): playing at different times — each at home when they like, a
@@ -497,8 +513,8 @@ uncertainty, it is pointed to, not restated.
 
 With the owner:
 - Consumers beyond the classroom: settled as v5 (Solo, Peers, Quizmaster).
-  Of what rested on it, the landing's first sentence, the README's descriptor
-  and the example asks are v5 item 9. Still open: team names against "nothing
+  Of what rested on it, the lede, the README's descriptor and the example
+  asks are built with v5 item 9. Still open: team names against "nothing
   identified" (the constraint's stated purpose is data protection, written
   with children in mind; whether an adult entry is another situation is the
   owner's); and the quiz
@@ -566,6 +582,13 @@ With the owner:
   folded on the lobby's check and the Remote's lobby; the words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
   it", "‹ Back"); whether the film is redrawn for them now or with item 9.
+- The words (v5 item 9), the implementer's calls, not yet seen by the
+  owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
+  the noun where English needs one rather than "host", "the user" in the
+  guidance, no role noun where the words are translated; the three new asks
+  and their pictures (one person, three people, a screen before an
+  audience), six tabs on a phone; "Join code" on the resume card; `/check`
+  speaking of "our network" and "school or work".
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
