@@ -84,7 +84,7 @@ tablets, and a quiz made in the break.
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
 | Break | **Laptop:** opens `classyquiz.pages.dev` and chooses the AI's .zip there (or drops it). The local check: the right quiz, a spot fix, Open the lobby (§3.1). | — |
 | Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
-| Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
+| Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat, a tool) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
 | End | Final ranking: the podium, the class in front of it, the class's result; a photo if wanted. Exit, and every screen goes to the root page. | Their place on their tablet, then the root page. |
 
@@ -255,9 +255,9 @@ Big numbers on the number line · 13 questions
 Students (`/play#63953`) get no screen of their own:
 - before the teacher lets the class in, a wait: "Your teacher lets the
   class in in a moment.", joining by itself at the tap;
-- in the lobby, straight to their avatar, with two rows of pictures below
-  it to dress it until Start: six background shapes in its colour and
-  eight hats (docs/design/class-and-wall.md);
+- in the lobby, straight to their avatar, with three rows of pictures below
+  it to dress it until Start: six background shapes in its colour, eight
+  hats and six tools to hold (docs/design/class-and-wall.md);
 - once running, "Which one are you?" with the absent players' avatars and
   **+**, when there are any; a tablet whose avatar another device took
   back while it was away gets the same choice when it returns;

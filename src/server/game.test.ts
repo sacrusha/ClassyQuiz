@@ -316,11 +316,18 @@ test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start"
   assert.equal(G.dress(g, ids[1], 2, 1), "stored");
   // A resend, or the same look again, stores nothing.
   assert.equal(G.dress(g, ids[0], 2, 1), "same");
+  // A tool is part of the look, set with it.
+  assert.equal(G.dress(g, ids[0], 2, 1, 4), "stored");
+  assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c, b: 2, h: 1, t: 4 });
+  // A page from before the tools sends none: the look without one.
+  assert.equal(G.dress(g, ids[0], 2, 1), "stored");
+  assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c, b: 2, h: 1 });
   // Back to the disc without a hat: the fields go.
   assert.equal(G.dress(g, ids[0], 0, 0), "stored");
   assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c });
   // Only what the menu has.
-  for (const [b, h] of [[6, 0], [0, 9], [-1, 0], [1.5, 0], ["1", 0], [null, 0]] as [unknown, unknown][]) assert.equal(G.dress(g, ids[0], b, h), "refused");
+  for (const [b, h, t] of [[6, 0, 0], [0, 9, 0], [0, 0, 7], [-1, 0, 0], [1.5, 0, 0], ["1", 0, 0], [0, 0, "1"], [null, 0, 0], [0, 0, null]] as [unknown, unknown, unknown][])
+    assert.equal(G.dress(g, ids[0], b, h, t), "refused");
   assert.equal(G.dress(g, "nobody", 1, 1), "refused");
   // Not for a removed avatar.
   G.removePlayer(g, ids[2]);

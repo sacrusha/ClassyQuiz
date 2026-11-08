@@ -47,7 +47,7 @@ def look_js():
     s = s.replace('function hatOn(animal: number, hat: number): string', 'function hatOn(animal, hat)')
     s = s.replace('const lookIndex = (i: number | undefined, n: number): number =>', 'const lookIndex = (i, n) =>')
     s = s.replace('export function avatarSvg(av: Avatar, label = true): string', 'function avatarSvg(av, label = true)')
-    s = s.replace('BACKGROUND_COUNT', '6').replace('HAT_COUNT', '9')
+    s = s.replace('BACKGROUND_COUNT', '6').replace('HAT_COUNT', '9').replace('TOOL_COUNT', '7')
     s = s.replace('(_, i)', '(_, i)')
     if re.search(r':\s*(number|string|Avatar)\b', s):
         raise SystemExit('type annotation left in look.ts extract: ' + re.search(r'.{30}:\s*(number|string|Avatar)\b.{10}', s).group(0))

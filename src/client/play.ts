@@ -16,8 +16,8 @@ import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "..
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING } from "../shared/limits.ts";
 import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
-import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
-import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
+import { ICON, avatarSvg, backgroundSvg, hatSvg, lookKey, shapeSvg, toolSvg, wiggle } from "./look.ts";
+import { BACKGROUND_COUNT, HAT_COUNT, TOOL_COUNT, sameLook, type Look } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
@@ -671,10 +671,13 @@ function render(): void {
   }
 }
 
-// Dressing the animal, in the lobby: a background shape and a hat, the same
-// menu for everyone, no words. Built once and patched in place: a view
-// arriving (a classmate joining changes "of") must not replace a picture
-// under a finger.
+// Dressing the animal, in the lobby: a background shape, a hat and a tool,
+// the same menu for everyone, no words. Built once and patched in place: a
+// view arriving (a classmate joining changes "of") must not replace a
+// picture under a finger.
+
+/** The picker's rows: which part of the look each sets. */
+type Part = "b" | "h" | "t";
 
 function renderDress(stored: Avatar): void {
   // The server's view has caught up with what the child picked.
@@ -682,18 +685,18 @@ function renderDress(stored: Avatar): void {
   const shown = look ? { ...stored, ...look } : stored;
   let box = main.querySelector<HTMLElement>(".dress");
   if (!box) {
-    const backgrounds = Array.from({ length: BACKGROUND_COUNT }, (_, b) => `<button class="pick" data-b="${b}">${backgroundSvg(b, stored.c)}</button>`).join("");
-    const hats = Array.from({ length: HAT_COUNT - 1 }, (_, i) => `<button class="pick" data-h="${i + 1}">${hatSvg(i + 1)}</button>`).join("");
+    const row = (part: Part, from: number, to: number, svg: (i: number) => string) =>
+      `<div class="prow">${Array.from({ length: to - from }, (_, k) => `<button class="pick" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
     main.innerHTML = `<div class="dress">
       <div class="hero"></div>
-      <div class="picker"><div class="prow">${backgrounds}</div><div class="prow">${hats}</div></div>
+      <div class="picker">${row("b", 0, BACKGROUND_COUNT, (b) => backgroundSvg(b, stored.c))}${row("h", 1, HAT_COUNT, hatSvg)}${row("t", 1, TOOL_COUNT, toolSvg)}</div>
       <div class="look">${ICON.eye}</div>
     </div>`;
     box = main.querySelector<HTMLElement>(".dress")!;
     box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => btn.addEventListener("click", () => pick(btn)));
   }
   const hero = box.querySelector<HTMLElement>(".hero")!;
-  const key = `${shown.a}.${shown.c}.${shown.b ?? 0}.${shown.h ?? 0}`;
+  const key = lookKey(shown);
   if (hero.dataset.key !== key) {
     const changed = hero.dataset.key !== undefined;
     hero.dataset.key = key;
@@ -701,7 +704,7 @@ function renderDress(stored: Avatar): void {
     if (changed) wiggle(hero);
   }
   box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => {
-    const on = btn.dataset.b !== undefined ? Number(btn.dataset.b) === (shown.b ?? 0) : Number(btn.dataset.h) === (shown.h ?? 0);
+    const on = Number(btn.dataset.i) === (shown[btn.dataset.part as Part] ?? 0);
     btn.classList.toggle("on", on);
     btn.setAttribute("aria-pressed", String(on));
   });
@@ -711,9 +714,11 @@ function renderDress(stored: Avatar): void {
 function pick(btn: HTMLButtonElement): void {
   const me = view?.me;
   if (!me || view?.phase !== "lobby" || dressSpent) return;
-  const now: Required<Look> = look ?? { b: me.avatar.b ?? 0, h: me.avatar.h ?? 0 };
-  // A shape is always worn; the hat worn comes off with a second tap.
-  const next = btn.dataset.b !== undefined ? { ...now, b: Number(btn.dataset.b) } : { ...now, h: Number(btn.dataset.h) === now.h ? 0 : Number(btn.dataset.h) };
+  const now: Required<Look> = look ?? { b: me.avatar.b ?? 0, h: me.avatar.h ?? 0, t: me.avatar.t ?? 0 };
+  const part = btn.dataset.part as Part;
+  const i = Number(btn.dataset.i);
+  // A shape is always worn; the hat or tool worn comes off with a second tap.
+  const next = { ...now, [part]: part !== "b" && i === now[part] ? 0 : i };
   if (sameLook(next, now)) return;
   look = next;
   renderDress(me.avatar);
@@ -724,7 +729,7 @@ function sendLook(): void {
   if (dressing || !look || !line) return;
   const sent = look;
   dressing = true;
-  void line.send({ op: "dress", b: sent.b, h: sent.h }).then((a) => {
+  void line.send({ op: "dress", b: sent.b, h: sent.h, t: sent.t }).then((a) => {
     dressing = false;
     if (!a.ok) {
       // Not taken: the quiz started, or the changes are spent. The device

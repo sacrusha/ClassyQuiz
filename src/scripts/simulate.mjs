@@ -516,7 +516,7 @@ log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} 
 // next, so a burst of taps sends the first and the last. Every student
 // picks a few looks; the server stores the class's looks once a second.
 const looks = new Map(); // player id → the look last acknowledged
-const sameLook = (x, y) => (x.b ?? 0) === (y.b ?? 0) && (x.h ?? 0) === (y.h ?? 0);
+const sameLook = (x, y) => (x.b ?? 0) === (y.b ?? 0) && (x.h ?? 0) === (y.h ?? 0) && (x.t ?? 0) === (y.t ?? 0);
 function dresser(p) {
   let want = null;
   let inFlight = false;
@@ -524,7 +524,7 @@ function dresser(p) {
     if (inFlight || !want) return;
     const sent = want;
     inFlight = true;
-    void p.d.send({ op: "dress", b: sent.b, h: sent.h }).then((a) => {
+    void p.d.send({ op: "dress", b: sent.b, h: sent.h, t: sent.t }).then((a) => {
       inFlight = false;
       if (a.ok) looks.set(p.id, sent);
       else want = null; // refused: the device shows what is stored
@@ -544,7 +544,7 @@ await Promise.all(
     const n = 1 + Math.floor(Math.random() * 6);
     for (let i = 0; i < n; i++) {
       await sleep(rnd(50, 600));
-      d.pick({ b: Math.floor(Math.random() * 6), h: Math.floor(Math.random() * 9) });
+      d.pick({ b: Math.floor(Math.random() * 6), h: Math.floor(Math.random() * 9), t: Math.floor(Math.random() * 7) });
       taps++;
     }
   }),

@@ -236,8 +236,8 @@ the open list at the end.
 9. Avatars: celebration, the lion's mane, tools — student feedback:
    celebrating avatars, winners only, after every question; at least ten
    winners easily distinguishable. Built (winners' band, lion's mane),
-   `design/class-and-wall.md`. Open: tools beside the animal are the owner's
-   call; whether four seconds is long enough for a child to find themselves;
+   `design/class-and-wall.md`. Tools beside the animal: built with v5 item 4.
+   Open: whether four seconds is long enough for a child to find themselves;
    the weak spot is a short question beside its picture, where ten winners come
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
@@ -375,8 +375,9 @@ behind these items — options and what each would cost — is
 
 4. **Quizmaster — a host runs a quiz for a crowd that isn't a class**: a pub,
    a family, a training room, a video call. The words are the classroom's
-   (teacher code, teacher devices), the avatars are animals (the open
-   business-avatar question lands here), and the remote's how-to is shown to
+   (teacher code, teacher devices), the avatars are animals (built for
+   this crowd: a tool beside the animal, in the one menu with the top hat;
+   `design/class-and-wall.md`, "Dressing the avatar"), and the remote's how-to is shown to
    every host though only some have a remote. Owner: the Quizmaster choice
    comes first, then how the screens are arranged, as a toggle with an
    explanation and the remote's manual only where it applies; auto-play
@@ -528,13 +529,17 @@ With the owner:
 - The daylight photographs of the sheet, the turn-2 ask (v4 item 10), the
   read of the translations, the page's and the film's (v4 item 1), the
   personal line in step 1 if wanted.
-- Tools beside the avatar, and whether four seconds suits the winners' band
-  (v4 item 9).
-- Business avatar styling: avatar options more suitable to business use (the
-  animals suit a classroom; a business audience is among the consumers beyond
-  the classroom, above). Home: v5 item 4. Not designed: which options, and
-  whether a host picks the set per upload, defaulted by the entry (the file
-  is made blind and the host knows the room), or the quiz carries it.
+- Whether four seconds suits the winners' band (v4 item 9).
+- Business avatar styling (v5 item 4), built on the owner's direction of
+  2026-11-08 and not yet seen by the owner: the animals stay, and one menu
+  for every room gains a row of tools held beside the animal (laptop, chart,
+  calculator, coffee, briefcase, book) next to the top hat; no avatar set is
+  picked per upload or carried by the quiz (figure `avatars/tools.png`,
+  `design/class-and-wall.md`, "Dressing the avatar"). To decide on seeing
+  it: whether that is businessy enough, and whether to add the top hat's
+  neckwear (a bow tie). Should one menu not serve both rooms, the fallback
+  is a set per upload, defaulted by the entry and changeable among the
+  host's settings on the check screen.
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a

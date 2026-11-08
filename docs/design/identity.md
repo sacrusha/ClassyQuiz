@@ -24,7 +24,7 @@ for its own sake.
   whole class, every lesson), the landing page's header (where the tablets
   type the code) and the browser tab. Question screens belong to the quiz's
   content.
-- The avatars are animals on a colour, some with a hat; a child finds "the
+- The avatars are animals on a colour, some with a hat or a tool; a child finds "the
   frog on purple" across the room (`class-and-wall.md`). The mark comes from
   them, not from the answers.
 - The wall's type fits the question and the answers by measuring them
