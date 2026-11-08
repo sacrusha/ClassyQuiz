@@ -90,8 +90,8 @@ comment says what it exercises. It is the check that the whole flow holds; run
 it after changes to the game, the protocol or the transport.
 `node scripts/simulate-peers.mjs [base-url]` is the same for a Peers room
 (`docs/design/peers.md`): friends, nobody steering, a phone going silent;
-about a minute and a half, most of it waiting for that phone to count as
-away.
+about two minutes, most of it waiting for that phone to count as away and
+for a held poll's end.
 
 Things that bite:
 

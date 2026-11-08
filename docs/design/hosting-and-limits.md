@@ -29,6 +29,29 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
   some 75 classes a day on rows and 30 with every device polling. The
   landing page's "room for a few dozen classes a day" rests on this
   (`shared/limits.ts`, comment on `MAX_UPLOADS_PER_DAY`).
+- **What a Peers room costs** (`peers.md`) is held to what a class costs,
+  since the day is the classes'. Its view changes with every friend's
+  answer, look and line (who the room waits for, who is away), where a
+  class's tablet changes only with its own answer and the teacher's steps.
+  On a WebSocket that is a message out, which the plan doesn't count
+  (Cloudflare's Durable Objects pricing: incoming messages count, twenty to
+  a request; outgoing ones not at all). On the long-poll fallback each would
+  answer a held poll, a Function and a Durable Object request: some 10,000
+  each for 25 players over 15 questions, a tenth of the day. So such a
+  change doesn't end a poll; it comes with the poll's end, at most 25 s
+  later (`pollKey`, `server/instance.ts`), and a polling device costs what
+  a class's tablet does: its polls, the room's steps, its own answers and
+  taps on, about 3,000 of each for 25 players. Rows: each answer 2, as in a
+  class, and the taps on from a solution ride on the run's next write, at
+  most one a second (`LOOK_WRITE_MS`), as the looks do, so 25 players over
+  15 questions write about 1,500 (plausible assumption: friends tap on
+  within some seconds of each other; each tap on its own would add 750).
+  The booking still counts every tap on (`server/rows.ts`). Pictures: each
+  device lays out the question itself, so it fetches the questions'
+  pictures and backgrounds as well as the answer pictures' small copies;
+  both come in packs of at most 1.5 MB (`pictures.md`), a few requests per
+  device, where one by one a quiz with a picture and four picture answers
+  per question would cost each device 75 for 15 questions.
 - **No edge to defend with.** A `pages.dev` address has no zone, so no WAF and
   no rate-limiting rule: every request reaches the Function and counts,
   rejected or not. A determined script can spend the day's requests and

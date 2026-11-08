@@ -37,8 +37,10 @@ on the device of whoever opened the room, the code for the others (v5 item
   owner); "host" is acceptable, not great, and is the code's word only.
 - Nothing identified (Constraints): the avatars are the room's, as in a
   class.
-- Every stored change is rows of the free plan's day (`hosting-and-limits.md`,
-  "Running classes finish").
+- The free plan's day is the classes' (backlog, Constraints): a Peers room
+  costs no more than a class does (`hosting-and-limits.md`, "What a Peers
+  room costs"). Every stored change is rows of the day ("Running classes
+  finish" there), and every poll and picture fetched is requests.
 
 ## How the site meets it
 
@@ -61,7 +63,7 @@ reloaded device keeps it. The check is replaced in the tab's history, as
 Quizmaster's is.
 
 There is no Projector, no Remote and no teacher code: the teacher code is
-refused (`teacherCheck`, "That isn't this quiz's teacher code."), and the
+refused (`teacherCheck`, "The last two digits don't match this quiz."), and the
 start page's resume card brings the device that opened it back as its
 player. The others join at once, so the day's rows are booked at upload
 (in a steered room, when the class is let in), with a ready tap's rows
@@ -76,6 +78,17 @@ for the others first (the address, the code, a QR code for `/play#<code>`),
 then Start, above the dressing so a phone shows it without scrolling. The
 others see whose Start it is: that avatar, "starts the quiz once everyone
 is in."
+
+### The pictures
+
+There is no wall, so every device shows the question's picture and its
+background besides the answer pictures, and every device fetching every
+picture one by one would cost the day dozens of requests per device. So
+the lobby fetches them in a few packs, one request each, as a class's
+tablets get their answer pictures: the answer pictures' small copies
+(640 px, as on a tablet), then bundles of the questions' pictures and
+backgrounds, whole (a laptop or a tablet shows them large). How:
+`pictures.md`, "Stored and served" and "Loading".
 
 ### Nobody steers
 
@@ -112,7 +125,11 @@ and score; a new device picks an away avatar back as in a class
 A device that is done shows who the room waits for at its foot, as
 avatars, the first six and "+n" beyond: among friends, that is what gets a
 room moving. It is the Remote's "Waiting for" (`question-flow.md`, "Who
-has answered") on every device.
+has answered") on every device. A device on the long-poll fallback gets
+it, and who is in and who is away, with its next poll, up to 25 s late:
+answering its poll for every friend's answer would cost a room of 25
+some 10,000 requests, three polling classes' worth (`hosting-and-limits.md`,
+"What a Peers room costs"). The room's steps and the device's own changes reach it at once.
 
 The answers follow the class's rules (`question-flow.md`, "When a tap
 counts"): a change of mind until the solution shows, a tap on its way
@@ -129,20 +146,27 @@ On their device's top bar, during the quiz:
 - **Solution now, without waiting** (during a question), **Question 5 now,
   without waiting** or **Final ranking now, without waiting** (after the
   solution): for a friend who left a phone awake on the table.
-- **Change the solution**, at the solution: the open question's choices in
-  the steering screens' sheet ("Tap every right choice.", Don't count this
-  question, Done); the points, the spread's marks and the winners follow.
-  The solutions are seen only once everyone has seen them, so the opener
-  keeps playing blind.
+- **Change the solution**, at the solution, until the opener taps on from
+  it: the open question's choices in the steering screens' sheet ("Tap
+  every right choice.", Don't count this question, Done); the points, the
+  spread's marks and the winners follow. The room waits for the opener
+  until they tap on, so it doesn't move while the sheet is open, and a key
+  under the sheet doesn't tap on; once they have, the room may move at any
+  moment, so the menu no longer offers it. The solutions are seen only
+  once everyone has seen them, so the opener keeps playing blind.
 - **Remove a player…**: the avatars, each to remove; the room stops waiting
   for it. Remove is sticky, as in a class.
 - **End the quiz: final ranking.**
 
-At the final ranking, Exit ends the quiz on every device; the others have
-← to the start page. Should the opener's device die, its avatar can be
-picked back on another device, and the ⋯ comes with it.
+At the final ranking, Exit ends the quiz and sends every device to the
+start page, also one that was between two polls (the instance keeps in
+memory, for the moments after, that a hand ended it: `endedBy`); before
+it, the others have ← there. A player's device that hears the quiz is
+gone forgets it, so the opener's start page doesn't ask after it. Should
+the opener's device die, its avatar can be picked back on another device,
+and the ⋯ comes with it.
 
-The others' refusals don't say "Ask your teacher": "This quiz is full: it
+The others' refusals don't say "Ask whoever runs it": "This quiz is full: it
 takes no more players." and "This quiz has started and takes no more
 players." The door is the class's (`class-and-wall.md`, "The door").
 
@@ -156,8 +180,14 @@ players." The door is the class's (`class-and-wall.md`, "The door").
   through it.
 - A family at the TV: a Peers room has no wall. A wall that shows without
   steering is v5 item 6's, with the Quizmaster's devices-only room.
-- Whether fixing at the solution is enough, or a fix at the end is wanted
-  (the exploration's "fixes at the end").
+- Whether the spread showing with the key, with no lock-in before it,
+  suits friends.
+- Whether fixing at the solution, until the opener taps on, is enough, or a
+  fix at the end is wanted (the exploration's "fixes at the end").
+- Whether a "Waiting for" up to 25 s old on a polling device misleads a
+  room; on WebSockets it is current.
+- Whether an answer picture's small copy (640 px) looks soft on a laptop,
+  where its tile can be wider.
 - Whether points for speed are wanted between friends; everyone ready gives
   each question a shared start, which they assume.
 - The words: "Peers" and "Play together" on the check, "Friends join on …

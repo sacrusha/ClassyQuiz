@@ -739,7 +739,8 @@ Exit ends the quiz on every device.
   Keys as on the device screen.
 - **⋯** (the opener's): "Solution now, without waiting" during a question;
   "Question 2 now, without waiting" or "Final ranking now, without waiting"
-  after the solution; "Change the solution" at the solution (the choices as
+  after the solution; "Change the solution" at the solution, until the
+  opener has tapped on from it (the choices as
   on the lobby's check, §3.3: Tap every right choice, Don't count this
   question, Done); "Remove a player…" (each avatar, Remove); "End the
   quiz: final ranking"; Close.
