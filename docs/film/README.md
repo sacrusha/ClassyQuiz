@@ -1,6 +1,6 @@
 # The landing film
 
-A film of about 60 s, without sound, in the root page's top block, where the
+A film of about 67 s, without sound, in the root page's top block, where the
 strip of five stills stood. What it does on the page (the poster, the
 player's bar, the layout, what loads when): `docs/design/root-page.md`, "The
 film". This folder is the film itself: this file (what it is for, what it
@@ -19,8 +19,11 @@ two things, in this order (owner):
    at once, and a moment to talk about a typical error, which nobody is graded
    on.
 2. **How to use it**: photos of my sheets and one sentence to my own AI give a
-   `.zip`, and another sentence changes it; the `.zip` goes up on this site;
-   the class plays it on the big screen and their tablets.
+   `.zip`, and another sentence changes it; the `.zip` goes up on this site,
+   where I choose the way of playing it and bring my second device in (a
+   first-time viewer follows both, on a phone as much as on a laptop; the
+   product owner's delegate); the class plays it on the big screen and their
+   tablets.
 
 The owner, on the five stills: the last part, the class playing, works for
 people who know classroom quizzes and may be tricky for those who don't. So
@@ -50,14 +53,23 @@ it.
   on the local check, with three ways to play it, Solo, Peers and
   Quizmaster (`docs/design/local-check.md`); the classroom is a
   Quizmaster's quiz, and its lobby's check asks how the screens are
-  arranged, with the teacher code only under Screen and remote
-  (`docs/design/teacher-devices.md`, "How the screens are arranged"). The
-  film follows the classroom, the purpose above: Solo and Peers are only
-  the cards the teacher passes, and the teacher picks Screen and remote,
-  since the phone steers. Its words for these screens are the site's,
+  arranged, with the teacher code only under Screen and remote, which a
+  first visit finds pressed, and lists the questions, each one's answers
+  folded (`docs/design/teacher-devices.md`, "How the screens are
+  arranged"). The film follows the classroom, the purpose above: Solo and
+  Peers are only the cards the teacher passes, and the lobby's check is
+  shown as a first visit finds it, since the phone steers. The check is
+  drawn as a laptop-wide window shows it, on a phone too (`film-text.md`
+  0.8). Its words for these screens are the site's,
   English (`SITE` in `build/film.js`), and a test holds them to the site's
   code (`src/client/film.test.ts`), so a screen that changes its words fails
   the tests until the film follows.
+
+- **Its length follows its beats**, about 67 s: the upload's two choices
+  (Purpose, 2) each get a hold and a close-up, and the class's joining
+  keeps its time, whatever that adds to a round minute (the product
+  owner's delegate). The length is in `index.html` too (The site's version,
+  below).
 
 - **A phone held upright** gives the 16:9 film about 358 × 201 CSS px. Text
   that must be read needs a close-up and time on screen; everything else may
@@ -172,11 +184,19 @@ wide, a factor of 0.224.
 
 - 46 units is about 10 CSS px there and reads (the typed ask); 36 to 40 units
   is the lower limit for anything that must be read.
-- The teacher code is shown twice: on the lobby's check once Screen and
-  remote is tapped, zoomed 1.9 times and pulsing, then typed on the laptop
-  with the laptop's screen filling the frame.
-- The local check's cards are read by their names and buttons (40 and 30
-  units); their lines and quiet lines aren't meant to be read on a phone.
+- What must be read on a screen gets a hold at the full width, then the
+  camera moves in on it. The local check: the three cards' names (40 units)
+  read at the full width; then 1.8 times in on Quizmaster's card, so its
+  line (28 units) and its button (30) read as 50 and 54, the card that is
+  chosen and why; Solo's and Peers' lines and buttons aren't meant to be
+  read. The lobby's check: Screen and remote pressed, at the full width;
+  then in on the how-to, the whole sentence across the frame (32 units
+  read as about 46), Screen and remote above it, the frame's foot just
+  under the line on a call, so "Let everyone in ▶", which isn't what gets
+  pressed there, stays below the frame; the title and that line dim while
+  the camera is in.
+- The teacher code is shown twice: in the how-to, pulsing, then typed on
+  the laptop with the laptop's screen filling the frame.
 - The vote counts on the wall barely read in the room's wide shot, so the
   camera moves in for the split.
 - The children's bubbles are drawn 1.35 times larger; smaller, they are dots
@@ -245,14 +265,17 @@ Only rendered pictures found them, so the film is checked by looking:
 - **Whether the timings read** when watched: the hold after the ask, the
   second ask (112 characters typed in about 2.3 s, in the frame about 4 s in
   all before the chat shrinks away), the split's six seconds, the local
-  check's three cards (about 1 s before the thumb takes Quizmaster) and the
-  lobby's check (about half a second of One screen before the tap on Screen
-  and remote). Checked only as stills.
+  check (about 1.2 s at the full width, then 2.2 s in on Quizmaster before
+  the thumb takes it) and the lobby's check (about 1 s at the full width,
+  then 2.5 s on the how-to). Checked only as stills.
+- **Whether 67 s is watched through** by a first-time viewer who came for
+  the first question, is this for me: nobody outside the project has
+  watched it.
 - **The pace for the teacher who has decided and now wants the steps.** The
   owner, watching: the default pace serves the first question, is this for
   me, and is too fast for learning the steps. Under consideration: calling the
   default speed 2× and the half speed 1× (the convention says which one is
-  sped up; the clock would then show the film as 2:00 or stay as it is; at
+  sped up; the clock would then show the film as 2:14 or stay as it is; at
   half speed the classroom's motion floats, the chat and the upload read
   well), or a slower setting that halves only the chat, upload and laptop.
   The other ways to the steps are on the page: Build's ask under the film,
@@ -263,8 +286,9 @@ Only rendered pictures found them, so the film is checked by looking:
   slightly different text.
 - **The German, French and Italian words** of the film are drafts pending the
   owner's review (`CONTENT`, `draft: true`; `sitecheck.py` names them).
-- The site's version only as `sitecheck.py` serves it: not yet on Cloudflare
-  Pages, not looked at in the page's dark mode, not with a screen reader.
+- The site's version on Cloudflare Pages only in headless Edge
+  (`docs/deploy-log.md`), and as `sitecheck.py` serves it: not looked at in
+  the page's dark mode, not with a screen reader.
 - What the poster tells a teacher who doesn't play the film:
   `docs/design/root-page.md`, "Not known".
 - Dragging the time bar on a slow phone: the film then draws at most one frame

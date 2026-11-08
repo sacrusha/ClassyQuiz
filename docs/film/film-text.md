@@ -15,6 +15,7 @@ Where a source disagrees with the film or with another source, it is marked
 5. **Typos:** none found in the three teacher asks (zoomed 2x). Only: ask 3 starts lowercase ("thanks.").
 6. **The second device's question is not a sentence on screen.** The real screen is the quiz title, then two buttons with a small line each (3.5).
 7. **Languages.** The site's own screens after the upload (the local check, the lobby's check, the join screen, the wall chrome, the Remote, the tablets) exist in English only: `landing-text.ts` header: "The lobby, the wall, the Remote and the tablets stay English too." The root page block (header code label, Build/Run text, asks) is in DE/EN/FR/IT, and the teacher's chat with their AI, and the quiz it makes, are in the teacher's language. The film follows the page's language the same way: the ask and the root page's words come from `landing-text.ts` at build time; the second ask, the AI's status lines and the quiz's words (one quiz, the 646 000 one, translated, not each language's own example) from `CONTENT` in `docs/film/build/film.js`, where `draft: true` marks a language whose words are drafts pending the owner's review; the site's own screens stay English (`SITE` in `film.js`, which `src/client/film.test.ts` holds to the site's code). Wall *pictures* exist in 4 languages with a different question each (see 3.9); the film uses none of them.
+8. **The checks are drawn as a laptop-wide window shows them, on a phone too** (a decision, the product owner's delegate's). On a phone the site stacks the local check's cards, Quizmaster's below the fold, and the lobby's toggle (3.3, 3.4). The film is for a first-time viewer to follow which way is chosen, on a phone as much as on a laptop (`README.md`, Purpose): three cards side by side, then a close-up on one, show a choice among three in one frame, where the stacked page would need a scroll to reach the card that is taken. What it costs: a teacher who watched on a phone and opens a quiz there meets the stacked page, not the one the film showed. Plausible assumption it rests on: the same three names and buttons, stacked, are recognised as the screen the film showed; nobody outside the project has tried.
 
 ## 1. Ask 1 on the landing page ("#bubble"), all four languages
 
@@ -69,33 +70,33 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
 ### 3.1 Root page header (`src/public/index.html`, `landing-text.ts`)
 - Left: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only).
 - Right: label **Code** (DE Code, FR Code, IT Codice; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join" / "Beitreten" / "Rejoindre" / "Entra"), then the language selector "EN ▾".
-- Below the film: "Build a quiz" / "Play a quiz" columns (Run first on narrow screens).
+- Below the film: the Build and Run columns, Run headed "Open the quiz your AI made" (Run first on narrow screens).
 
 ### 3.2 Run box (root page, before upload)
-Heading **Play a quiz** (DE Ein Quiz starten, FR Lancer un quiz, IT Avvia un quiz). Dashed box with button and a line under it:
-- EN: button "Open the quiz your AI made (.zip)", line "or drop it here"
-- DE: "Das Quiz deiner KI öffnen (.zip)" / "oder hier ablegen"
-- FR: "Ouvrir le quiz de votre IA (.zip)" / "ou déposez-le ici"
-- IT: "Apri il quiz della tua IA (.zip)" / "o trascinalo qui"
+Heading **Open the quiz your AI made** (DE Das Quiz deiner KI öffnen, FR Ouvrir le quiz de votre IA, IT Apri il quiz della tua IA; `landing-text.ts` `run`). Dashed box with button and a line under it (`upload`, `drop`):
+- EN: button "Choose the .zip file", line "or drop it here"
+- DE: "Die .zip-Datei wählen" / "oder hier ablegen"
+- FR: "Choisir le fichier .zip" / "ou déposez-le ici"
+- IT: "Scegli il file .zip" / "o trascinalo qui"
 Progress after the pick (EN): "Reading the quiz…", "Preparing the pictures… 3 of 12", "Sending the quiz…" (DE "Das Quiz wird gelesen…", FR "Lecture du quiz…", IT "Lettura del quiz…"). Then the local check (3.3), in this tab. The file sheet (the .zip on top) is the OS's, no site text.
 
 ### 3.3 The local check, after the upload (`open.ts` `renderCheck`, the entries in `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`; docs/user-flow.md §3.1, "The local check")
-English only. The `.zip` is read in the browser; nothing has gone to the site. Top: the site's small header; the title as h1 with a small count: "Big numbers on the number line · 13 questions"; then "**How will it be played?**" and three cards, side by side on a laptop-wide window, stacked on a phone; each its name, a line, a button (the first card's the primary one) and a quiet line:
+English only. The `.zip` is read in the browser; nothing has gone to the site. Top: the site's small header; the title as h1 with a small count: "Big numbers on the number line · 13 questions"; then "**How will it be played?**" and three cards, side by side on a laptop-wide window, stacked on a phone; each its name, a line, a button (the three alike, none primary) and a quiet line:
 - **Solo**: "You play the quiz on your own, to learn or review: the solution after each answer." [**Play ▶**] "Nothing goes to the site. A reload or closing the tab ends it."
 - **Peers**: "You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it." [**Play together ▶**] "This puts the quiz on the site, with a code for the others. Until then it is only in this browser."
 - **Quizmaster**: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device." [**Open the lobby ▶**] "This puts the quiz on the site. Until then it is only in this browser."
-Under the cards, folded: "▸ The questions and their solutions" and "If you will play it yourself, leave this closed." The film draws the laptop-wide layout, the fold below the frame, and the thumb taps "Open the lobby ▶" (while it goes up the site says "Sending the quiz…" under the button; the film leaves it out).
+Under the cards, folded: "▸ The questions and their solutions" and "If you will play it yourself, leave this closed." The film draws the laptop-wide layout (0.8), the fold below the frame; the camera moves in on Quizmaster's card, and the thumb taps "Open the lobby ▶" (while it goes up the site says "Sending the quiz…" under the button; the film leaves it out).
 
 ### 3.4 The lobby's check, then the Remote's lobby (`screen.ts` `renderCheck`, `teach.ts` `lobby`; docs/user-flow.md §3.3)
 English only, and no role named (docs/design/teacher-devices.md, "Words for any crowd"). The check, the tab that opened the lobby (here the phone, the Projector until a second device takes that):
 - Title line as on the local check; right of it (under it on a phone) "Join code **63953**".
-- "**How are the screens arranged?**" and a toggle of two, side by side (stacked on a phone): **One screen** "It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker." and **Screen and remote** "One device shows the quiz, another steers it: a phone, say." One screen is pressed until this browser chose otherwise or had a Remote.
+- "**How are the screens arranged?**" and a toggle of two, side by side (stacked on a phone): **One screen** "It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker." and **Screen and remote** "One device shows the quiz, another steers it: a phone, say." Screen and remote is pressed on a first visit (the rule: docs/design/teacher-devices.md, "How the screens are arranged").
 - Under Screen and remote only, the how-to (verbatim): "On the second device, open **classyquiz.pages.dev** and type **63953 47**." and, hidden on a phone, " With two screens on this computer: open a second screen in a new window."
 - Always: "In a video call, the window you share is the screen everyone sees."
-- **Let everyone in ▶**; then folded "▸ The questions and their solutions" (closed on arrival), "⋯ More".
-The film: One screen pressed, the thumb taps Screen and remote, the how-to appears and the teacher code is zoomed and pulsing (on a phone, so without the line on a second screen).
+- **Let everyone in ▶**; then the questions, listed, no fold: "**13 questions**" and [Show the solutions], then each question its number, its text and its picture, the answers folded (`manage.ts` `questionList`); "⋯ More".
+The film: the check as a first visit finds it, Screen and remote pressed and the how-to there, the questions' list starting at the frame's foot (on a phone, so without the line on a second screen); then the camera moves in on the how-to and the teacher code pulses.
 
-Once the laptop has taken the wall, the phone is the Remote; the film shows only its button, in the bubble of each press. Its lobby's words: the title, the join code; **Let everyone in ▶** until tapped; the address **classyquiz.pages.dev**, the code large **63953**, "**n** joined", avatars, the switch "Points for speed"; "Projector ✓ · ⇄ Swap" (wall there), else "On the projector computer: on classyquiz.pages.dev, type 63953 47."; "A second device, to steer from or to show the quiz on: on classyquiz.pages.dev, type 63953 47."; the questions folded. **Start quiz ▶** is pinned at the bottom.
+Once the laptop has taken the wall, the phone is the Remote; the film shows only its button, in the bubble of each press. Its lobby's words: the title, the join code; **Let everyone in ▶** until tapped; the address **classyquiz.pages.dev**, the code large **63953**, "**n** joined", avatars, the switch "Points for speed"; "Projector ✓ · ⇄ Swap" (wall there), else "On the projector computer: on classyquiz.pages.dev, type 63953 47."; "A second device, to steer from or to show the quiz on: on classyquiz.pages.dev, type 63953 47."; the questions listed, each one's answers folded. **Start quiz ▶** is pinned at the bottom.
 
 ### 3.5 Second device, after typing the teacher code (`play.ts` `enter`)
 Site header (fox + classyQuiz), then the quiz title as big heading ("Big numbers on the number line"), then two buttons:
@@ -114,7 +115,7 @@ Tile colours/shapes: red ▲, blue ◆, yellow ●, green ■.
 States:
 1. **Question (veiled):** question + picture visible; four tiles coloured with their shapes, faint (`app.css` `.tiles.veiled`, opacity .55), **no text**; no count; tablets show the eye. Remote line: "The choices are hidden: everyone reads the question."
 2. **Answering:** tiles show their text; the avatars pop into the bar; count "n / of" rises. Countdown: a bar drains along the top edge.
-3. **Locked in / the split:** each tile gets its count at the right and a bar along its foot; **no tick, nothing faded**. Remote: "Answering closed. The wall shows how the class answered, not yet the solution."
+3. **Locked in / the split:** each tile gets its count at the right and a bar along its foot; **no tick, nothing faded**. Remote: "Answering closed. The projector shows how everyone answered, not yet the solution."
 4. **Solution:** tick ✓ before the count on the right tile(s); the others fade; the right students' avatars jump in a band over the question for about 4 s.
 5. **Ranking** (3.10).
 

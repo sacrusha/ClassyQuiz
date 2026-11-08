@@ -19,7 +19,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.dont_write_bytecode = True  # no __pycache__ in the tree
 sys.path.insert(0, str(HERE))
 import build  # noqa: E402
-from build import film_source, PUB, REPO, PAGE, launch  # noqa: E402
+from build import film_length, film_source, PUB, REPO, PAGE, launch  # noqa: E402
 
 
 def film_js():
@@ -77,7 +77,7 @@ def pictures(widths=(1600, 800), quality=82):
 
 def length_on_page():
     """index.html's time bar against film.js: its max and the length shown beside it are the film's DUR."""
-    dur = int(re.search(r'const W = 1600, H = 900, DUR = (\d+)', (HERE / 'film.js').read_text(encoding='utf-8')).group(1))
+    dur = film_length()
     html = (REPO / 'public/index.html').read_text(encoding='utf-8')
     want = (f'type="range" min="0" max="{dur}"', f'<span class="cqf-dur"> / {dur // 60}:{dur % 60:02d}</span>')
     missing = [w for w in want if w not in html]
