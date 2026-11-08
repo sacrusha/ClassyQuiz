@@ -105,7 +105,7 @@ Purpose and reasons: docs/design/root-page.md.
 │          │ poster: the class at the wall, the    │                   │
 │          │ votes split, no solution yet  [▶]     │                   │
 │          └───────────────────────────────────────┘                   │
-│          [▶] ──●──'───'─'──'────── 0:00 / 1:00 [1×] [full screen]    │
+│          [▶] ──●──'───'─'──'────── 0:00 / 1:07 [1×] [full screen]    │
 │                              The example, step by step ›             │
 │ A quiz is played here in three ways: Solo, on your own; Peers, with  │
 │ friends, each on their own device; Quizmaster, you run it for a …    │
@@ -134,7 +134,7 @@ Purpose and reasons: docs/design/root-page.md.
   (`cq.lang`), else the browser's language, else English. The static HTML is
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
-- **The film**, about 60 s without sound, follows the workflow: the sheets,
+- **The film**, 67 s without sound, follows the workflow: the sheets,
   the AI, the .zip going up to the site, the wall, a student's tablet. Until ▶
   is pressed or the time bar moved it is its poster, a picture: the class at
   the wall, the votes split. Under it a video player's bar: play, the time bar

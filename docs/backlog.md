@@ -173,7 +173,7 @@ the open list at the end.
    words that produced it are the how-to-ask. The forms are renderings of that
    one instance, so more than one can exist; not a closed list: a video; a
    static display of the input leading into the playable quiz as its
-   deliverable; a carousel or slideshow. Built: a film of about 60 s without
+   deliverable; a carousel or slideshow. Built: a film of about a minute without
    sound, from the owner's storyboard brief, fed the real screens and the
    example ask in the page's four languages, never autoplaying; until it plays
    its poster and a video player's bar stand in its place
@@ -351,7 +351,8 @@ presented one way to play, the projector with the teacher's phone and the
 students' devices, and a newcomer had to grasp it before anything else. The
 file the AI makes is independent of that way, and the person who asked for
 the quiz need not know its answers, so a quiz is also for playing alone, with
-friends, or for a crowd where the host plays too. Plausible assumption (the
+friends (where whoever brought the quiz plays too), or for a crowd someone
+runs. Plausible assumption (the
 owner's, 2026-11-08): people think in use cases, not capabilities — so the
 site offers entries a person recognises before knowing any setting, named by
 the owner **Solo** (you play the quiz on your own, for learning or review),
