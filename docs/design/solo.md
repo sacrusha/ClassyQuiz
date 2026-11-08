@@ -51,7 +51,8 @@ is the one way to lose a run that a hand makes without meaning to. It
 plays the quiz itself (`plays`), so the fold of questions says that whoever
 will play leaves it closed. One press starts it; it takes over the check's
 page and pushes a step into the tab's history, so Back from any of Solo's
-screens gives the check back as it was, its fold and fixes kept.
+screens gives the check back as it was, its fold and fixes kept; it ends
+the run without asking.
 
 ### The start
 
@@ -181,7 +182,9 @@ lean; neither use is confirmed.
 ## Not known
 
 - Whether a tap as the final answer suits learners, or a mis-tap costs too
-  much; and whether "I don't know" (the key without answering) is wanted.
+  much; whether "I don't know" (the key without answering) is wanted; and
+  whether Back, ending a run without asking, ends runs that were meant to
+  go on.
 - Whether the dressing before the first question is the point for a
   newcomer or a delay; whether a player alone wants to choose the animal,
   which a room assigns so that nothing is grabbed.

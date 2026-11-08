@@ -549,6 +549,10 @@ With the owner:
   neckwear (a bow tie). Should one menu not serve both rooms, the fallback
   is a set per upload, defaulted by the entry and changeable among the
   host's settings on the check screen.
+- Solo (v5 item 2) as built, kept by the owner's delegate and not yet seen
+  by the owner (`design/solo.md`, Not known): a tap is the final answer;
+  the avatar is dressed before the first question; the result's "Copy the
+  answers for your AI", in those words; Back ends a run without asking.
 - Quizmaster (v5 item 4), the implementer's calls, not yet seen by the
   owner (`design/teacher-devices.md`): the toggle on the lobby's check
   rather than the local check's card (the how-to needs the teacher code,
@@ -622,10 +626,17 @@ Needs a real classroom or real devices, nobody has run it:
   `/open`, nothing uploaded while looking, the fold, fixes reaching the
   lobby, reload and Back, the root's problems; a site at 8868 by default), `labels-walk.mjs` (the bar's labels and small lines through every
   step on walls of 1366, 600 and 360 px and a 360 px Remote: text cut or
-  not, height, shots), `../v5-solo/solo-walk.mjs` (Solo on the example,
+  not, height, shots), `../fix-solo/solo-walk.mjs` (Solo on the example,
   desktop and phone, nothing uploaded, Back to the check, then the lobby),
-  `../v5-solo/solo-quizzes.mjs` (Solo with sentence and picture answers on a
-  phone and a tablet), `../v5-solo/wall-walk.mjs` (the wall through a
+  `../fix-solo/solo-quizzes.mjs` (Solo with sentence and picture answers on a
+  phone and a tablet, on its side and upright; both wait out the start's
+  settle window, which `../v5-solo/`'s originals don't),
+  `../fix-solo/preview-compare.mjs` (Solo against the wall that steers
+  itself in the same window, question by question: boxes, fonts, grid; its
+  quizzes from `make-zips.py`), `../fix-solo/double-tap.mjs` (double taps
+  on the check's Play, Start and Result in five windows; these two read a
+  site at 8988 by default),
+  `../v5-solo/wall-walk.mjs` (the wall through a
   question with bot players: spread, key, winners), `../v5-peers/peers-walk.mjs`
   (Peers on the example: the card, the opener's lobby, a phone and a laptop
   joining, a question, the solution, the ranking while waiting, the ⋯, the
