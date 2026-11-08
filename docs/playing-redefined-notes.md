@@ -93,9 +93,10 @@ wall). A video call isn't a fourth value: its shared window is the big
 screen, and the explanation can say so.
 
 Settings would sit collapsed under the entry's defaults. The avatar set:
-per upload, defaulted by the entry (the lean: the file is made blind, and the
-host knows the room), or carried by the quiz as the AI's hint — the owner's
-call, open in the backlog. Auto-play for a quizmaster: which flavour is open;
+none for now, one menu for every room with a business register in it
+(`design/class-and-wall.md`, "Dressing the avatar"); a set per upload,
+defaulted by the entry, is the fallback named in the backlog's Open list.
+Auto-play for a quizmaster: which flavour is open;
 the plausible assumption that 25 children can't be waited on to all tap Next
 points at the clock or the race rather than everyone-ready.
 
