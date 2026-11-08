@@ -208,14 +208,22 @@ async function sizedSvg(blob: Blob, longSide: number): Promise<Blob> {
  * (server/game.ts, Fix); the server checks them as it checks a teacher's. `json: false`: the answer wasn't the site's (a school filter's page,
  * say); `quota`: the daily allowance is spent.
  */
-export async function uploadQuiz(text: string, images: PreparedImage[], leaveOut: boolean, fixes: Fix[]): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
+export async function uploadQuiz(
+  text: string,
+  images: PreparedImage[],
+  leaveOut: boolean,
+  fixes: Fix[],
+  /** How the room plays: "peers" runs on its own (docs/design/peers.md); absent, someone steers it. */
+  mode?: "peers",
+): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
   if (images.length === 0) {
-    return (await api<UploadResult & { error?: string }>("/api/quiz", { text, fixes, ...(leaveOut ? { leaveOut: "missing" } : {}) })).body;
+    return (await api<UploadResult & { error?: string }>("/api/quiz", { text, fixes, ...(leaveOut ? { leaveOut: "missing" } : {}), ...(mode ? { mode } : {}) })).body;
   }
   const form = new FormData();
   form.append("text", text);
   if (leaveOut) form.append("leaveOut", "missing");
   form.append("fixes", JSON.stringify(fixes));
+  if (mode) form.append("mode", mode);
   // The name travels as a text field: a non-ASCII file name in a multipart
   // header is decoded differently from one runtime to the next.
   images.forEach((im, i) => {

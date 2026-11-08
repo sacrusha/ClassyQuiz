@@ -88,6 +88,10 @@ way it finds them by script name when deployed.
 class of bad-Wi-Fi devices against a running site, local or deployed. Its header
 comment says what it exercises. It is the check that the whole flow holds; run
 it after changes to the game, the protocol or the transport.
+`node scripts/simulate-peers.mjs [base-url]` is the same for a Peers room
+(`docs/design/peers.md`): friends, nobody steering, a phone going silent;
+about a minute and a half, most of it waiting for that phone to count as
+away.
 
 Things that bite:
 

@@ -49,6 +49,13 @@ export const store = {
   },
 };
 
+/**
+ * Where a device keeps its player in a quiz ({instance, token}): a reload,
+ * sleep or dropped line comes back as the same avatar. The device that
+ * opens a Peers room writes it before it joins (client/entry-peers.ts).
+ */
+export const playerKey = (code: string): string => `cq.player.${code}`;
+
 export interface SavedQuiz {
   id: string;
   /** Lets this device ask where the quiz stands (the resume card) and come back to it without the teacher code. */

@@ -14,14 +14,15 @@
 
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING } from "../shared/limits.ts";
-import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED } from "../shared/limits.ts";
+import { $, esc, findQuiz, keepAwake, lines, playerKey, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, lookKey, pickerRows, shapeSvg, wiggle } from "./look.ts";
 import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { packPicture, picturesHere, wantPacks } from "./packs.ts";
+import { PeersRoom } from "./peers.ts";
 
 interface Saved {
   instance: string;
@@ -45,7 +46,7 @@ const savedHere = JOIN_CODE.test(code) ? (savedQuizzes().find((q) => q.code === 
 const teacher = !!digits || (oldAddress && !!savedHere);
 /** Opened by "open a second screen in a new window" or "open the projector window" from a teacher tab. */
 const fromWindow = params.get("win") === "1";
-const key = `cq.player.${code}`;
+const key = playerKey(code);
 
 let line: Line | null = null;
 let auth: Auth = { role: "guest" };
@@ -103,6 +104,8 @@ let look: Required<Look> | null = null;
 let dressing = false;
 /** The server took no more changes of look (MAX_LOOK_CHANGES): the pictures stay, without effect. */
 let dressSpent = false;
+/** A Peers room draws its own screens (client/peers.ts); made with its first view. */
+let peers: PeersRoom | null = null;
 
 async function start(): Promise<void> {
   if (oldAddress && !teacher) {
@@ -248,6 +251,10 @@ function onMessage(m: ServerMessage): void {
     tabRole.set(instanceId, { role: m.role, token: m.token, code, teacher: digits || findQuiz(instanceId)?.teacher });
     // A window opened to be dragged to the projector says so until it is full screen.
     location.replace(rolePage(instanceId, m.role) + (fromWindow && m.role === "screen" ? "&drag=1" : ""));
+  } else if (m.t === "state" && m.view.role === "player" && m.view.peers) {
+    view = m.view;
+    peers ??= new PeersRoom({ main, send: (cmd) => line!.send(cmd), dress: (into) => view?.me && renderDress(view.me.avatar, into) });
+    peers.show(m.view);
   } else if (m.t === "state" && m.view.role === "player") {
     // Every answer in the class bumps the version; only redraw when this
     // device's own view changed, or a tap could land on a button being
@@ -436,7 +443,7 @@ function newPlayer(): void {
       busy = false;
       if (choice?.phase === "final") showFinished();
       else if (a.error === CLASS_WAITING) showRefused(CLASS_WAITING, false);
-      else if (a.error === CLASS_FULL || a.error === CLASS_STARTED) {
+      else if (a.error === CLASS_FULL || a.error === CLASS_STARTED || a.error === ROOM_FULL || a.error === ROOM_STARTED) {
         refused = { reason: a.error, phase: choice?.phase ?? "" };
         showRefused(a.error);
       }
@@ -676,13 +683,14 @@ function render(): void {
 // view arriving (a classmate joining changes "of") must not replace a
 // picture under a finger.
 
-function renderDress(stored: Avatar): void {
+/** into: where the menu is built the first time; a Peers lobby has it beside the code and Start (client/peers.ts). */
+function renderDress(stored: Avatar, into: HTMLElement = main): void {
   // The server's view has caught up with what the child picked.
   if (look && !dressing && sameLook(stored, look)) look = null;
   const shown = look ? { ...stored, ...look } : stored;
   let box = main.querySelector<HTMLElement>(".dress");
   if (!box) {
-    main.innerHTML = `<div class="dress">
+    into.innerHTML = `<div class="dress">
       <div class="hero"></div>
       <div class="picker">${pickerRows(stored.c)}</div>
       <div class="look">${ICON.eye}</div>

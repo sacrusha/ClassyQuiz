@@ -37,8 +37,8 @@ Solo learner mustn't be shown them.
 - Pages allow pictures only from the site and as `blob:` URLs, scripts only
   from the site's files (`hosting-and-limits.md`, Content-Security-Policy).
 - Only what is built is offered: the site never promises what isn't (v5).
-  Solo (`solo.md`) and Quizmaster (the classroom's lobby) are built; Peers
-  is to come.
+  Solo (`solo.md`), Peers (`peers.md`) and Quizmaster (the classroom's
+  lobby) are built.
 
 ## How the site meets it
 
@@ -99,7 +99,9 @@ left out taken off the quiz with a warning each) and shows:
 ### Opening a room
 
 Opening a room is the upload (`openRoom` in `client/opening.ts`), with the
-check's fixes (`fixes`, beside `text` and `leaveOut`, JSON or multipart).
+check's fixes (`fixes`, beside `text` and `leaveOut`, JSON or multipart)
+and how the room plays (`mode`; `peers` for a room that runs on its own,
+`peers.md`).
 The server parses the text again and applies the fixes to the new quiz
 through the same rules as a teacher's fix (`G.applyFixes`); a fix that
 doesn't fit its question is left as the quiz has it. The device's own
@@ -123,6 +125,10 @@ element to play there, and give the check back as it was.
 - **Solo** (`client/entry-solo.ts`), first, so its button is the page's
   primary one: "Play ▶" plays the quiz in this page, nothing uploaded, and
   Back gives the check back (`solo.md`).
+- **Peers** (`client/entry-peers.ts`), second: "Play together ▶" opens a
+  room that runs on its own (`mode`: `peers` beside the fixes), and this
+  tab comes into it as its first player, on the player page
+  (`peers.md`). The check is replaced in the tab's history, as below.
 - **Quizmaster** (`client/entry-quizmaster.ts`): "Open the lobby ▶" opens a
   room, and this tab becomes the Projector on the lobby's check
   (`teacher-devices.md`), which repeats the questions with the fixes and

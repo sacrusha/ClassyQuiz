@@ -4,6 +4,7 @@
 // page's; the first entry's button is the page's primary one.
 
 import type { OpenedQuiz } from "./opening.ts";
+import { peers } from "./entry-peers.ts";
 import { quizmaster } from "./entry-quizmaster.ts";
 import { solo } from "./entry-solo.ts";
 
@@ -44,5 +45,6 @@ export interface Entry {
 }
 
 // Solo first: a newcomer's first use is plausibly Solo or a look at the
-// example quiz (docs/design/local-check.md, Situation).
-export const ENTRIES: Entry[] = [solo, quizmaster];
+// example quiz (docs/design/local-check.md, Situation). Then by the size of
+// the group: friends, then a crowd someone runs it for.
+export const ENTRIES: Entry[] = [solo, peers, quizmaster];

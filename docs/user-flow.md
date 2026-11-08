@@ -222,6 +222,14 @@ Big numbers on the number line · 13 questions
 │ Nothing goes to the site. A reload or closing the tab     │
 │ ends it.                                                  │
 └───────────────────────────────────────────────────────────┘
+┌ Peers ────────────────────────────────────────────────────┐
+│ You play the quiz with friends, each on your own device.  │
+│ It moves on once everyone has answered, so nobody has to  │
+│ run it.                                                   │
+│ [ Play together ▶ ]                                       │
+│ This puts the quiz on the site, with a code for the       │
+│ others. Until then it is only in this browser.            │
+└───────────────────────────────────────────────────────────┘
 ┌ Quizmaster ───────────────────────────────────────────────┐
 │ You run the quiz for a class or a group: the questions on │
 │ a big screen, the answers on everyone's own device.       │
@@ -237,13 +245,17 @@ Big numbers on the number line · 13 questions
 
 - **One card per way to play it**, each with its own button; the first
   card's is the primary one. Only what is built is offered: today Solo,
-  then Quizmaster.
+  Peers, then Quizmaster.
 - **The questions are folded** under the cards, closed on arrival. Opened,
   they are the lobby's list (§3.3): thumbnails, answers folded, Show the
   solutions, the site's warnings, and Change the solution with its fixes
   (Don't count this question, Skip it, Hide the picture). The fixes go up
   with the quiz.
 - **Play ▶** plays the quiz in this tab (§3.8); nothing goes to the site.
+- **Play together ▶** uploads the quiz as a room that runs on its own and
+  comes into it, in this tab, as its first player (§3.9); Back from there
+  passes this page. While it goes up and when it is refused, as Open the
+  lobby.
 - **Open the lobby ▶** uploads the quiz and lands on the lobby's check
   (§3.3), in this tab as the Projector; Back from there passes this page.
   While it goes up: "Sending the quiz…". Refused, under the button: the
@@ -596,6 +608,100 @@ Your AI can explain a mistake, or check a solution that looks wrong.
 - **Back,** from any of these, is the check again, its fold and fixes as
   they were. A reload of a quiz from the root page finds nothing (§3.1);
   the example's reads the example again.
+
+### 3.9 Peers
+
+A room that runs on its own, every device a player's, on `/play`; purpose
+and reasons: docs/design/peers.md. English; light, as the class's screens.
+
+```
+The lobby, on the device that opened it
+        Big numbers on the number line
+┌───────────────────────────────────────────┐
+│ [QR]  Friends join on classyquiz.pages.dev │
+│       with the code                        │
+│       50224                                │
+│       or with the QR code.                 │
+└───────────────────────────────────────────┘
+          (avatars of everyone in)
+[ Start ▶ ]
+3 in, you among them. The quiz moves on once everyone has answered.
+(avatar) ● ⬡ ★ ♥ ✿ ◎ / hats / tools
+
+The lobby, on the others' devices
+        Big numbers on the number line
+          (avatars of everyone in)
+(avatar) ● ⬡ ★ ♥ ✿ ◎ / hats / tools   (eye)
+(avatar of whoever opened it) starts the quiz once everyone is in.
+
+A question, answered, waiting
+1 / 13                              (avatar)   ★ 0   [⋯]
+        Which number does the arrow show?
+                [the picture]
+[▲ 646 000          ]  (outlined: the answer)
+[◆ 645 000          ]
+[● 644 000          ]
+[■ 647 000          ]
+Waiting for (avatar) (avatar)
+
+The solution
+1 / 13                         ✓   (avatar)   ★ 1   [⋯]
+   (the winners jump over the question)
+[▲ 646 000      ✓ 2]  [◆ 645 000       1]  (the spread, the rest dim)
+Big numbers on the number line              [ ▶ Ranking ]
+
+The ranking, done
+1 / 13                              (avatar)   ★ 1   [⋯]
+          1.  (avatar)  ★ 1
+          1.  (avatar)  ★ 1
+          3.  (avatar)  ★ 0
+Waiting for (avatar)                        (button hidden)
+
+The final ranking
+        Big numbers on the number line
+     (avatar)   (avatar)   (avatar)      (cheering)
+        1.         1.         3.
+       ★ 1        ★ 1        ★ 0
+     (avatar) 3. / 3  ★ 0  (trophy)
+[ Exit ]                      (the others: [ ← ])
+Exit ends the quiz on every device.
+```
+
+- **The lobby:** the code, the address and the QR code on the device that
+  opened the room only; Start is its player's. The dressing menu as in a
+  class's lobby.
+- **A question:** the device screen of §3.8 with the room's bar (where the
+  question stands, after the solution ✓, ✗ or ⊘, the avatar, ★ the score;
+  ⋯ on the opener's device). The choices show with the question. A tap
+  answers, outlined dashed until the room has it, solid once stored; a
+  change of mind until the solution shows. Once answered, the foot says
+  "Waiting for" and the avatars of those present who haven't (six, then
+  "+n").
+- **The solution** comes once everyone present has answered: the key and
+  the spread on the tiles, the winners jumping over the question. The foot:
+  "▶ Ranking".
+- **The ranking:** places 1 to 3 and, further down, one's own place,
+  highlighted. The foot: "▶ Question 2", or "▶ Final ranking" after the
+  last; tapped, it gives way to "Waiting for" and the avatars of those
+  present who haven't. The next question comes once everyone present has.
+  Keys as on the device screen.
+- **⋯** (the opener's): "Solution now, without waiting" during a question;
+  "Question 2 now, without waiting" or "Final ranking now, without waiting"
+  after the solution; "Change the solution" at the solution (the choices as
+  on the lobby's check, §3.3: Tap every right choice, Don't count this
+  question, Done); "Remove a player…" (each avatar, Remove); "End the
+  quiz: final ranking"; Close.
+- **The final ranking:** places 1 to 3 cheering, one's own place, stars and
+  a trophy. The opener's Exit ends the quiz on every device, which goes to
+  the start page; the others have ←.
+- **When something goes wrong:** a phone asleep or dead stops holding the
+  room 45 s after its last sign, a closed tab at once; back, it is waited
+  for again, with its avatar and score. Another device: the code, and its
+  own avatar under "Which one are you?". The opener's device too: its ⋯
+  comes with the avatar. A device of the opener's that reloads, or comes
+  back from the start page's resume card, is its player again. Turned away:
+  "This quiz is full: it takes no more players." / "This quiz has started
+  and takes no more players."
 
 ## 4. Variants
 

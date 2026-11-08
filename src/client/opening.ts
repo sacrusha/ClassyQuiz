@@ -102,12 +102,13 @@ export async function openQuiz(files: QuizFiles): Promise<{ ok: true; quiz: Open
 export type RoomResult = Awaited<ReturnType<typeof uploadQuiz>>;
 
 /**
- * Opening a room: the upload, with the check's fixes. Fails by throwing
- * when the site can't be reached. On success the device keeps the quiz to
- * come back to (the root page's resume card) and counts the day.
+ * Opening a room: the upload, with the check's fixes and how it will play
+ * (`mode`). Fails by throwing when the site can't be reached. On success
+ * the device keeps the quiz to come back to (the root page's resume card)
+ * and counts the day.
  */
-export async function openRoom(q: OpenedQuiz): Promise<RoomResult> {
-  const r = await uploadQuiz(q.files.text, q.files.images, q.files.leaveOut, q.fixes);
+export async function openRoom(q: OpenedQuiz, mode?: "peers"): Promise<RoomResult> {
+  const r = await uploadQuiz(q.files.text, q.files.images, q.files.leaveOut, q.fixes, mode);
   if (!r.ok) return r;
   // One quiz that hasn't started per device: the previous room ends if it
   // never started (docs/design/hosting-and-limits.md, "Running classes

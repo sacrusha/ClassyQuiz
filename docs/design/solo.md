@@ -8,9 +8,9 @@ Nothing is uploaded and nothing counted; closing the tab ends it, which the
 owner finds fine and expected.
 
 Here the question, its picture and the tiles live on the player's own
-device for the first time, then the key (v5 item 6). That screen is what a
-room without a wall stands on next: Peers, and a Quizmaster's devices-only
-room.
+device for the first time, then the key (v5 item 6). A room without a
+wall stands on that screen too: Peers does (`peers.md`), a Quizmaster's
+devices-only room is to come.
 
 ## Situation
 
@@ -115,10 +115,13 @@ and score), the stage, and a bar at the foot with one button.
   (`question-flow.md`, "Presses").
 - **What it offers a room** (`DeviceView`): the tiles veiled while a
   question is read (`answering: "reading"`), open to a tap, or closed; the
-  answer this device chose; the key; the spread (`dist`: a room that will
-  show it passes it from the question's start, null until it shows, so the
-  tiles keep room for the counts); the avatars that jump (`jump`); and the
-  foot's noun. A room drives it from its views as Solo drives it from its
+  answer this device chose, and whether it is still on its way to the
+  room (`sending`, outlined dashed); the key; the spread (`dist`: a room
+  that will show it passes it from the question's start, null until it
+  shows, so the tiles keep room for the counts); the avatars that jump
+  (`jump`); the foot's noun, and beside it a line of the room's in place
+  of the title (`foot`: who it waits for); a ⋯ for the room's menu
+  (`menu`). A room drives it from its views as Solo drives it from its
   run; the join code, the ranking and the end are the room's own.
 - Light, as the class's screens are; a page of a screen's height has no
   site header.

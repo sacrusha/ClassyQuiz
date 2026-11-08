@@ -36,6 +36,11 @@ export interface DeviceView {
   answering: Answering;
   /** The answer this device chose, outlined. */
   mine: number | null;
+  /**
+   * A room's tap still on its way: outlined dashed until the room has it
+   * stored (docs/design/question-flow.md, "When a tap counts").
+   */
+  sending?: boolean;
   /** The key once it shows: which answers count. */
   counts: boolean[] | null;
   /** Not counted: the key shows, nothing scores. */
@@ -50,6 +55,10 @@ export interface DeviceView {
   me: { avatar: Avatar; score: number } | null;
   /** The foot's button: a noun for what comes next (the bar's vocabulary); null keeps its place, empty. */
   next: string | null;
+  /** Beside the foot's button, as HTML, in place of the title: what a room waits for. */
+  foot?: string;
+  /** A ⋯ at the end of the top bar, for a room's own menu. */
+  menu?: boolean;
 }
 
 const PLAY = "&#9654;";
@@ -65,6 +74,7 @@ export class DeviceScreen {
   private laidAt = 0;
   private onAnswer: (shown: number) => void;
   private onNext: () => void;
+  private onMenu: (() => void) | undefined;
   private live = true;
 
   /**
@@ -72,10 +82,11 @@ export class DeviceScreen {
    * shows. The page's body carries the wall's frame (classes screen and
    * steering: the full height, the foot's bar).
    */
-  constructor(root: HTMLElement, on: { answer: (shown: number) => void; next: () => void }) {
+  constructor(root: HTMLElement, on: { answer: (shown: number) => void; next: () => void; menu?: () => void }) {
     this.root = root;
     this.onAnswer = on.answer;
     this.onNext = on.next;
+    this.onMenu = on.menu;
     root.addEventListener("click", this.click);
     document.addEventListener("keydown", this.key);
     window.addEventListener("resize", this.resize);
@@ -107,7 +118,7 @@ export class DeviceScreen {
     if (!this.root.querySelector("#stage")) {
       this.laid = "";
       this.root.classList.add("dscreen");
-      this.root.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="grow"></span><span id="qicons"></span><span class="dme" id="dme"></span><span id="dscore"></span></div>
+      this.root.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="grow"></span><span id="qicons"></span><span class="dme" id="dme"></span><span id="dscore"></span><button class="dmenu" id="dmenu" type="button" aria-label="menu" hidden>&#8943;</button></div>
         <div class="stage" id="stage"></div>
         <div class="steerbar dbar"><span class="grow" id="dtitle"></span><button class="btn primary bar-play" type="button" id="dnext"></button></div>`;
     }
@@ -127,12 +138,14 @@ export class DeviceScreen {
     this.at("#tiles").classList.toggle("veiled", v.answering === "reading");
     this.at("#tiles").classList.toggle("open", v.answering === "open");
     markTiles(stage, { counts: v.counts, dist: v.dist ?? null, mine: v.mine });
+    stage.querySelectorAll("#tiles .tile").forEach((t, i) => t.classList.toggle("sending", !!v.sending && i === v.mine));
     this.at("#qpos").textContent = `${q.n} / ${q.total}`;
     const verdict = v.void && v.counts ? `<span class="voided">${ICON.void}</span>` : v.counts && v.mine !== null ? (v.counts[v.mine] ? `<span class="dverdict right">${ICON.check}</span>` : `<span class="dverdict wrong">${ICON.cross}</span>`) : "";
     this.set("#qicons", verdict);
     this.set("#dme", v.me ? avatarSvg(v.me.avatar) : "");
     this.set("#dscore", v.me ? `${ICON.star} ${v.me.score}` : "");
-    this.at("#dtitle").textContent = v.title;
+    this.set("#dtitle", v.foot ?? esc(v.title));
+    this.at("#dmenu").hidden = !v.menu;
     const next = this.at("#dnext") as HTMLButtonElement;
     this.set("#dnext", v.next ? `${PLAY}<span class="lbl"><span>${esc(v.next)}</span></span>` : "");
     next.style.visibility = v.next ? "" : "hidden";
@@ -159,6 +172,10 @@ export class DeviceScreen {
     if (!this.view) return;
     if (t.closest("#dnext")) {
       if (this.view.next) this.onNext();
+      return;
+    }
+    if (t.closest("#dmenu")) {
+      this.onMenu?.();
       return;
     }
     if (t.closest("[data-zoom]")) {

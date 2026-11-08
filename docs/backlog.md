@@ -361,10 +361,11 @@ behind these items — options and what each would cost — is
 2. Solo, a learner practising or reviewing on their own without having seen
    the answers — built, `design/solo.md`. Not deployed.
 
-3. **Peers — friends want to play together with nobody running it**, so that
-   everyone plays, including whoever asked for the quiz. Today someone must
-   press Play and Reveal, and that someone has seen the question list.
-   Owner: Peers makes the host a participant; the quiz runs on its own.
+3. Peers, friends playing together with nobody running it, whoever asked
+   for the quiz among them — built, `design/peers.md`: the room moves on
+   once everyone present is done, whoever opened it plays and has a ⋯ to go
+   on without waiting, fix a solution, remove an avatar and end it. Not
+   deployed. Open: `design/peers.md`, "Not known".
 
 4. **Quizmaster — a host runs a quiz for a crowd that isn't a class**: a pub,
    a family, a training room, a video call. The words are the classroom's
@@ -391,14 +392,19 @@ behind these items — options and what each would cost — is
    teacher reads aloud while the class looks at the projector. The device
    screen (the question, its picture and the tiles on the player's own
    device, then the key) is built with Solo (`design/solo.md`, "The device
-   screen"). Open: a room on it (Peers, a Quizmaster's devices-only room),
-   with the join code on the host's device, the spread, ranking and
-   celebration on each device; whether the guidance should say where a quiz
-   will be read.
+   screen"). A Peers room stands on it, the code on the device that opened
+   it, the spread, the winners and the ranking on each device
+   (`design/peers.md`). Open: a Quizmaster's devices-only room; a wall in a
+   Peers room (a family at the TV); whether the guidance should say where a
+   quiz will be read.
 
-7. **Nobody has to steer.** Peers can't do without it; a quizmaster whose
-   hands are elsewhere wants it (Later, "Runs by itself", whose cadence
-   design is still owed).
+7. **Nobody has to steer.** Peers' side built: everyone ready, the question
+   closing once everyone present has answered and the next coming once
+   everyone present is done with the solution (`design/peers.md`, "Nobody
+   steers"). Open: a quizmaster whose hands are elsewhere (Later, "Runs by
+   itself", whose cadence design is still owed); everyone ready rests on a
+   few friends waiting for each other, which a class of 25 doesn't
+   (`playing-redefined-notes.md`, item 4).
 
 8. **Players at their own pace** — a race: fast players don't wait, slow ones
    don't hold the room. Open with the owner: in a classroom, whether the tail
@@ -603,7 +609,11 @@ Needs a real classroom or real devices, nobody has run it:
   desktop and phone, nothing uploaded, Back to the check, then the lobby),
   `../v5-solo/solo-quizzes.mjs` (Solo with sentence and picture answers on a
   phone and a tablet), `../v5-solo/wall-walk.mjs` (the wall through a
-  question with bot players: spread, key, winners). They read a site at
+  question with bot players: spread, key, winners), `../v5-peers/peers-walk.mjs`
+  (Peers on the example: the card, the opener's lobby, a phone and a laptop
+  joining, a question, the solution, the ranking while waiting, the ⋯, the
+  final ranking, Exit) and `../v5-peers/peers-pics.mjs` (Peers with picture
+  answers, every picture loaded; both on a site at 8918, `stacks/peers/`). They read a site at
   127.0.0.1:8931, 8788 or 8958 (`stacks/solo/`); read before running.
 - Process, the owner's words, for whoever orchestrates next: delegate on
   purpose and situation, not steps; no spec changes to an agent in flight —

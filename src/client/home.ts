@@ -336,11 +336,12 @@ function renderResume(): void {
   const { info } = open;
   const s = info.stands;
   const stands = s?.phase === "final" ? t.finalRanking : s && s.n > 0 && s.phase !== "lobby" && s.phase !== "idle" ? t.question(s.n, s.total) : t.notStarted;
-  const href = info.teacher ? teacherEntry(info.code, info.teacher) : `/teacher#${info.code}`;
+  // A Peers room has no teacher devices: this device comes back as its player (docs/design/peers.md).
+  const href = info.peers ? `/play#${info.code}` : info.teacher ? teacherEntry(info.code, info.teacher) : `/teacher#${info.code}`;
   box.innerHTML = `<div class="resume">
     <p class="head"><span class="title">${esc(info.title || t.untitled)}</span><span class="stands">${esc(stands)}</span></p>
     <p class="go"><a class="back" href="${esc(href)}">${esc(t.back)}</a><span class="code">${esc(t.classCode)} <b>${esc(info.code)}</b></span></p>
-    ${info.teacher ? `<p class="other">${t.otherDevice(esc(teacherCode(info.code, info.teacher)))}</p>` : ""}
+    ${info.teacher && !info.peers ? `<p class="other">${t.otherDevice(esc(teacherCode(info.code, info.teacher)))}</p>` : ""}
   </div>`;
 }
 

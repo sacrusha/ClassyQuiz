@@ -714,3 +714,63 @@ body.play.solo { display: flex; flex-direction: column; }
 .solo-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 18px; }
 .solo-ai { margin: 0; font-size: 16px; max-width: 34em; }
 .solo-text { white-space: pre-wrap; text-align: left; max-width: 44em; max-height: 30vh; overflow: auto; margin: 0; padding: 10px 12px; font-size: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; user-select: text; -webkit-user-select: text; }
+
+/* Peers (client/peers.ts): a room that runs on its own, on each player's
+   device. The lobby and the final ranking are pages under nothing (body.play.peers);
+   a question, its solution and the ranking between take a screen's height
+   with the device screen's foot (body.screen.steering.peers). */
+.tile.mine.sending { outline-style: dashed; animation: sending 1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .tile.mine.sending { animation: none; } }
+.dmenu { flex: none; border: 1px solid var(--rule); background: var(--card); color: var(--fg); border-radius: 10px; min-width: 2.2em; min-height: 2em; font-size: 1em; font-weight: 700; line-height: 1; padding: 0 .4em; }
+.pav { display: inline-block; width: 1.6em; height: 1.6em; vertical-align: middle; }
+.pav > svg, .pavs > span > svg { width: 100%; height: 100%; display: block; }
+.pwaiting { display: inline-flex; align-items: center; gap: .4em; color: var(--muted); font-weight: 600; }
+.pavs { display: inline-flex; gap: 2px; }
+.pavs > span { width: 1.8em; height: 1.8em; display: block; }
+.sheet .pav { width: 36px; height: 36px; margin-right: 8px; }
+
+.plobby { width: 100%; max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.plobby .ctitle { margin: 4px 0 0; font-size: 1.5rem; }
+.pjoin { display: flex; align-items: center; justify-content: center; gap: 16px; background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 14px 18px; text-align: left; }
+.pjoin[hidden] { display: none; }
+.pqr { width: 132px; height: 132px; background: #fff; padding: 6px; border-radius: 8px; flex: none; }
+.pqr svg { width: 100%; height: 100%; display: block; }
+.pcodebox p { margin: 0; }
+.pcode { font-family: var(--font-brand); font-size: 3.2rem; font-weight: 700; letter-spacing: .08em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) {
+  .pjoin { gap: 12px; padding: 12px; }
+  .pqr { width: 104px; height: 104px; }
+  .pcode { font-size: 2.4rem; }
+}
+.pcrowd { justify-content: center; min-height: 44px; }
+.pdress { width: 100%; }
+.peers .dress { gap: 14px; width: 100%; }
+.peers .dress .hero { width: min(30vw, 30vh); height: min(30vw, 30vh); }
+.plobby.host .dress .look { display: none; }
+.pstart { width: 100%; max-width: 22rem; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.pstart p { margin: 0; }
+.pwait { display: inline-flex; align-items: center; gap: .4em; }
+@media (orientation: portrait) {
+  .peers .dress .hero { width: min(40vw, 20vh); height: min(40vw, 20vh); }
+}
+
+.pranking { flex: 1; min-height: 0; overflow: auto; display: flex; align-items: center; justify-content: center; }
+.pranks { display: flex; flex-direction: column; gap: 1.2vh; width: min(100%, 26em); }
+.prank { display: grid; grid-template-columns: 2.4em 2.6em 1fr; align-items: center; gap: .6em; font-weight: 800; font-size: 1.3em; padding: .2em .5em; border-radius: 12px; }
+.prank .pav { width: 2.4em; height: 2.4em; }
+.prank .pplace { font-family: var(--font-brand); text-align: right; }
+.prank .pscore { display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }
+.prank.me { background: color-mix(in srgb, var(--control) 10%, var(--card)); }
+.prank.apart { margin-top: 1.5vh; }
+
+.pfinal { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; max-width: 36rem; margin: 0 auto; width: 100%; }
+.pfinal .ctitle { margin: 0; font-size: 1.5rem; }
+.ppodium { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 14px; margin-top: 8vh; }
+.ppodium > div { display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 800; }
+.ppodium .cheer { width: 18vmin; height: 18vmin; }
+.ppodium > div > span:last-child { display: inline-flex; align-items: center; gap: .3em; }
+.ppodium .p1 .cheer { width: 26vmin; height: 26vmin; }
+.pme { display: inline-flex; align-items: center; gap: .4em; font-size: 1.6rem; font-weight: 800; margin: 0; font-variant-numeric: tabular-nums; }
+.pme .pav { width: 2em; height: 2em; }
+.pfinal .solo-go { max-width: 22rem; }
+.pfinal p { margin: 0; }
