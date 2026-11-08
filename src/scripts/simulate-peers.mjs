@@ -13,7 +13,7 @@
 // is let go at once. Whoever opened the room changes a solution, removes an
 // avatar, and goes on without waiting; the others can't. At the end every
 // score must be what the answers and the fixes give, and Exit sends every
-// device away. Takes about a minute and a half (the silent phone).
+// device home, a poll that comes after it too. Takes about a minute and a half (the silent phone).
 
 const BASE = (process.argv[2] ?? "http://127.0.0.1:8788").replace(/\/+$/, "");
 const WS_BASE = BASE.replace(/^http/, "ws");
@@ -280,8 +280,10 @@ check(!(ann.id in scores) && !host.view.peers.players.some((p) => p.id === ann.i
 check((await ben.send({ op: "endInstance" })).ok === false, "nobody else ends it");
 check((await host.send({ op: "endInstance" })).ok, "Exit");
 await sleep(1500);
-// A device between two polls hears only that the quiz is gone, without being sent home: as in a class.
-check([ann, ben].every((d) => d.gone), `every device hears it ended (${[ann, ben].map((d) => `${d.name}: ${d.gone ? (d.gone.home ? "home" : d.gone.reason) : "nothing"}`).join(", ")})`);
+// The polling device too, also when the Exit came between two of its polls.
+check([ann, ben].every((d) => d.gone?.home), `every device is sent home (${[ann, ben].map((d) => `${d.name}: ${d.gone ? (d.gone.home ? "home" : d.gone.reason) : "nothing"}`).join(", ")})`);
+const late = await post(`/api/i/${instance}/poll`, { auth: ben.auth, v: ben.view.v });
+check(late.body?.messages?.some((m) => m.t === "gone" && m.home), "a poll that comes after the Exit is sent home too");
 for (const d of [host, ann, ben]) d.close();
 console.log(failed ? `${failed} FAILED` : "all ok");
 process.exit(failed ? 1 : 0);

@@ -165,6 +165,13 @@ export class Instance extends DurableObject<Env> {
   private sentToSocket = new WeakMap<WebSocket, string>();
   private sentToPoller = new Map<string, { key: string; v: number }>();
   /**
+   * The quiz was ended by a hand (Exit), and what a device that asks now is
+   * told: go home, as the devices whose line was open were. For a device
+   * between two polls then; in memory only, which covers the seconds that
+   * matter.
+   */
+  private endedBy: ServerMessage | null = null;
+  /**
    * "<role>:<old token>" → what a tab still holding that token is told: its
    * Projector moved to another tab and it is the Remote now, or it lost the
    * role. Kept for a tab that was between polls, or reconnecting, when it
@@ -283,6 +290,7 @@ export class Instance extends DurableObject<Env> {
     };
     const teacher = randomDigits(2);
     this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
+    this.endedBy = null;
     if (rows) {
       this.meta.dayRows = rows.rows;
       this.meta.rows = { written: 0 };
@@ -728,7 +736,7 @@ export class Instance extends DurableObject<Env> {
 
   private authenticate(auth: Auth, out: ServerMessage[]): Session {
     if (!this.meta || !this.game) {
-      out.push({ t: "gone", reason: "This quiz has ended." });
+      out.push(this.endedBy ?? { t: "gone", reason: "This quiz has ended." });
       return { role: null };
     }
     const meta = this.meta;
@@ -1438,6 +1446,7 @@ export class Instance extends DurableObject<Env> {
     }
     for (const w of this.waiters) w.resolve([gone]);
     this.waiters.clear();
+    if (ackId) this.endedBy = gone;
     this.meta = null;
     this.game = null;
     this.quizRecord = null;

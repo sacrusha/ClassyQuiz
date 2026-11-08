@@ -138,9 +138,13 @@ On their device's top bar, during the quiz:
   for it. Remove is sticky, as in a class.
 - **End the quiz: final ranking.**
 
-At the final ranking, Exit ends the quiz on every device; the others have
-← to the start page. Should the opener's device die, its avatar can be
-picked back on another device, and the ⋯ comes with it.
+At the final ranking, Exit ends the quiz and sends every device to the
+start page, also one that was between two polls (the instance keeps in
+memory, for the moments after, that a hand ended it: `endedBy`); before
+it, the others have ← there. A player's device that hears the quiz is
+gone forgets it, so the opener's start page doesn't ask after it. Should
+the opener's device die, its avatar can be picked back on another device,
+and the ⋯ comes with it.
 
 The others' refusals don't say "Ask whoever runs it": "This quiz is full: it
 takes no more players." and "This quiz has started and takes no more
