@@ -179,7 +179,7 @@ Purpose and reasons: docs/design/root-page.md.
 - **On the lobby's check (§3.3), before the players are let in,** on a day the free site is
   nearly full: "The free site is nearly full today: room for about 2 more
   groups." (one more: "room for one more group"); when no class fits
-  or letting in was refused: "The free site can't take more players today:
+  or letting in was refused: "The free site can't let another group in today:
   the quizzes under way use what is left. It takes new ones again at 01:00
   Swiss time." Both followed by "More quizzes: a site of your own or your
   school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.

@@ -94,7 +94,7 @@ export function quotaResetAt(now = new Date()): string | null {
 /** Letting a class in, refused: the day's rows are booked by the classes under way. */
 export function classesFullMessage(now = new Date()): string {
   const at = quotaResetAt(now);
-  return `The free site can't take more players today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+  return `The free site can't let another group in today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
 /** The same for a Peers room, refused as it opens: it is a quiz among friends, not a class. */

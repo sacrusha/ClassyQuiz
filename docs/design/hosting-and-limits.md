@@ -280,7 +280,7 @@ device. The numbers and the rest are the implementer's, to confirm.
   the day's rows booked, kept with the quiz (`Meta.dayRows`, also after a
   refused tap), and the check (and a Remote's lobby) shows, while fewer than
   `ROOM_WARN` (3) classes like this one fit: "nearly full today: room for
-  about n more groups", or at none "can't take more players today … again at
+  about n more groups", or at none "can't let another group in today … again at
   01:00 Swiss time", both with "More quizzes: a site of your own or your
   school's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
   where a toast would be gone before a teacher who looked away saw it. The
