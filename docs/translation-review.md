@@ -21,6 +21,27 @@ A working note: delete it once applied. Mark rows you reject or change; unmarked
 
 | D10 | New key `again` (the film's end button), drafted by the implementer | en "Play again"; de "Nochmals abspielen"; fr "Revoir"; it "Rivedi" | — |
 
+## The other ways to play (v5 item 9)
+
+New keys in `landing-text.ts`, drafted by the words pass, not by a translator agent: the asks of
+someone who isn't a teacher, and the resume card's code. The asks are the user's own words to the AI
+(du / tu to it in de, fr, it, as the other asks); the tabs' names are the page's voice (du / vous /
+tu). No role noun, by meaning (`design/root-page.md`, "Words for whoever comes").
+
+| key | en | de | fr | it |
+|---|---|---|---|---|
+| tabSolo | To practise on your own | Zum Üben für dich allein | Pour réviser en solo | Per esercitarti per conto tuo |
+| tabFriends | With friends, playing too | Mit Freunden, du spielst mit | Entre amis, en jouant aussi | Con gli amici, giocando anche tu |
+| tabGroup | For a group you lead: a training session | Für eine Gruppe, die du leitest: eine Schulung | Pour un groupe que vous animez : une formation | Per un gruppo che guidi: una formazione |
+| joinCode | Join code | Code zum Beitreten | Code pour rejoindre | Codice per entrare |
+
+The asks (`askSolo`, `askFriends`, `askGroup`) are in the file. Choices made there: a biology test
+("Biologieprüfung", "contrôle", "verifica"), a games night ("Spieleabend", "soirée jeux", "serata
+giochi"), colleagues trained on safety rules ("Kolleginnen und Kollegen", "Folien", "diapositives",
+"slide"); "Ich spiele es selbst / J'y jouerai moi-même / Ci gioco io" and "Ich spiele mit / Je joue
+aussi / Gioco anch'io" carry the point, that whoever asks plays. fr keeps a plain space before ":" and
+"?" as the other asks do until D6 is decided.
+
 ## The worked example (`/example`)
 
 Drafts, not in the tables above: the page's words (`src/client/example-text.ts`), the conversation

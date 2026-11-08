@@ -161,8 +161,7 @@ players." The door is the class's (`class-and-wall.md`, "The door").
 - Whether points for speed are wanted between friends; everyone ready gives
   each question a shared start, which they assume.
 - The words: "Peers" and "Play together" on the check, "Friends join on …
-  with the code" on the opener's device; the resume card still says
-  "Class code".
+  with the code" on the opener's device.
 - The line's dot (bottom right) sits under the device screen's foot bar
   while a question is up; only the offline banner shows a dropped line
   there.

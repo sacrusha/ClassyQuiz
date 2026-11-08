@@ -79,21 +79,21 @@ function renderAsk(): void {
   bubble.classList.add("inplace");
   bubble.lang = lang;
   $("#labels").innerHTML = t.labels.map((l) => `<span class="nb">${esc(l)}</span>`).join(" · ");
-  for (const [id, text] of [["#bubble3", t.askChess], ["#bubble2", t.ask2]] as const) {
+  for (const [id, text] of [["#bubble3", t.askChess], ["#bubble-solo", t.askSolo], ["#bubble-friends", t.askFriends], ["#bubble-group", t.askGroup], ["#bubble2", t.ask2]] as const) {
     const el = $(id);
     el.textContent = text.replaceAll(DEMO, host);
     el.lang = lang;
   }
   for (const tab of askTabs) {
-    const name = t[tab.dataset.name as "tabSheets" | "tabChess" | "tabOpen"];
+    const name = t[tab.dataset.name as (typeof ASK_TABS)[number]["name"]];
     tab.setAttribute("aria-label", name);
     tab.title = name;
   }
 }
 
-// The example asks as tabs, one picture each for what the teacher brings
-// (docs/design/root-page.md, "Build: two steps"). Made here: without the
-// script, and for an AI's fetcher, the three asks stand one under the other.
+// The example asks as tabs, one picture each for what the visitor brings and
+// who plays (docs/design/root-page.md, "Build: two steps"). Made here: without
+// the script, and for an AI's fetcher, the asks stand one under the other.
 
 const ASK_TABS = [
   { panel: "ask-sheets", name: "tabSheets", icon: `<span class="sheets"><img src="/landing/sheet-2.webp" alt=""><img src="/landing/sheet-1.webp" alt=""></span>` },
@@ -102,8 +102,19 @@ const ASK_TABS = [
     name: "tabChess",
     icon: `<svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#b58863"/><path d="M0 0h2v2H0zM4 0h2v2H4zM2 2h2v2H2zM6 2h2v2H6zM0 4h2v2H0zM4 4h2v2H4zM2 6h2v2H2zM6 6h2v2H6z" fill="#f0d9b5"/><text x="4" y="6.6" text-anchor="middle" font-size="7" fill="#111">&#9822;</text></svg>`,
   },
+  { panel: "ask-solo", name: "tabSolo", icon: `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21.5c0-4.6 3.6-8 8-8s8 3.4 8 8z"/></svg>` },
+  {
+    panel: "ask-friends",
+    name: "tabFriends",
+    icon: `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="4" cy="10" r="2.4"/><circle cx="12" cy="9" r="2.8"/><circle cx="20" cy="10" r="2.4"/><path d="M.5 20c0-3 1.6-5.6 3.5-5.6s3.5 2.6 3.5 5.6zM8 20c0-3.6 1.8-6.4 4-6.4s4 2.8 4 6.4zM16.5 20c0-3 1.6-5.6 3.5-5.6s3.5 2.6 3.5 5.6z"/></svg>`,
+  },
+  {
+    panel: "ask-group",
+    name: "tabGroup",
+    icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2" width="19" height="11.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6.5 6h7M6.5 9.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path fill="currentColor" d="M5 15.6a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8zM12 15.6a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8zM19 15.6a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8zM2 23.5c0-1.9 1.3-3.2 3-3.2s3 1.3 3 3.2zM9 23.5c0-1.9 1.3-3.2 3-3.2s3 1.3 3 3.2zM16 23.5c0-1.9 1.3-3.2 3-3.2s3 1.3 3 3.2z"/></svg>`,
+  },
   { panel: "ask-open", name: "tabOpen", icon: `<span class="q" aria-hidden="true">?</span>` },
-];
+] as const;
 const askTabs: HTMLButtonElement[] = [];
 {
   const asks = $("#asks");
@@ -340,7 +351,7 @@ function renderResume(): void {
   const href = info.peers ? `/play#${info.code}` : info.teacher ? teacherEntry(info.code, info.teacher) : `/teacher#${info.code}`;
   box.innerHTML = `<div class="resume">
     <p class="head"><span class="title">${esc(info.title || t.untitled)}</span><span class="stands">${esc(stands)}</span></p>
-    <p class="go"><a class="back" href="${esc(href)}">${esc(t.back)}</a><span class="code">${esc(t.classCode)} <b>${esc(info.code)}</b></span></p>
+    <p class="go"><a class="back" href="${esc(href)}">${esc(t.back)}</a><span class="code">${esc(t.joinCode)} <b>${esc(info.code)}</b></span></p>
     ${info.teacher && !info.peers ? `<p class="other">${t.otherDevice(esc(teacherCode(info.code, info.teacher)))}</p>` : ""}
   </div>`;
 }

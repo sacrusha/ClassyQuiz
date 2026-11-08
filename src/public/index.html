@@ -109,16 +109,16 @@
   .labels { color: var(--accent); font-size: .85rem; font-weight: 600; margin: .3rem 0 0; }
   .labels .nb { white-space: nowrap; }
   .bubble.inplace + .labels { display: none; }
-  /* The example asks as tabs: a picture each, the chosen one joined to its bubble (root-page.md, "Build: two steps"). Made by home.ts; without it the three asks stand one under the other. */
+  /* The example asks as tabs: a picture each, the chosen one joined to its bubble (root-page.md, "Build: two steps"). Made by home.ts; without it the asks stand one under the other. */
   .example + .example { margin-top: .9rem; }
   .asks.tabbed .example { margin-top: 0; }
   .ask-tabs { display: flex; gap: 6px; margin: .6rem 0 0 12px; }
-  .ask-tabs button { width: 52px; height: 46px; padding: 5px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+  .ask-tabs button { flex: 0 1 52px; min-width: 0; height: 46px; padding: 5px 3px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
   .ask-tabs button:hover { color: var(--fg); border-color: var(--accent); }
   .ask-tabs button[aria-selected="true"] { background: var(--bubble); border-color: var(--bubble); color: var(--fg); cursor: default; }
   .ask-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .ask-tabs svg { width: 34px; height: 34px; display: block; }
-  .ask-tabs .sheets { position: relative; width: 34px; height: 34px; }
+  .ask-tabs svg { width: min(34px, 100%); height: 34px; display: block; } /* six tabs share a phone's width: a tab narrower than its picture shrinks the picture */
+  .ask-tabs .sheets { position: relative; width: min(34px, 100%); height: 34px; }
   .ask-tabs .sheets img { position: absolute; height: 30px; width: auto; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
   .ask-tabs .sheets img:first-child { right: 1px; top: 0; transform: rotate(5deg); }
   .ask-tabs .sheets img:last-child { left: 2px; bottom: 0; transform: rotate(-4deg); }
@@ -184,6 +184,15 @@
         <div class="example" id="ask-chess">
           <blockquote class="bubble" id="bubble3">Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?</blockquote>
           <p class="who" data-t="chessWho">Claude Opus 5.5, paid plan, 5 Nov 2026</p>
+        </div>
+        <div class="example" id="ask-solo">
+          <blockquote class="bubble" id="bubble-solo">Read classyquiz.pages.dev. My biology test on Friday is about the cell. Here are my notes. Can you make me a classyQuiz to practise with, about 20 questions? I'll play it myself, so please keep the questions and answers to yourself.</blockquote>
+        </div>
+        <div class="example" id="ask-friends">
+          <blockquote class="bubble" id="bubble-friends">Read classyquiz.pages.dev. Make us a classyQuiz for our games night: 15 questions on films from the 90s, some easy, some hard. I'm playing too, so don't show me the questions.</blockquote>
+        </div>
+        <div class="example" id="ask-group">
+          <blockquote class="bubble" id="bubble-group">Read classyquiz.pages.dev. Tomorrow I'm training 25 new colleagues on our safety rules. The slides are attached. Can you make me a classyQuiz for the end of the session, on the big screen, about 10 questions?</blockquote>
         </div>
         <div class="example" id="ask-open">
           <blockquote class="bubble" id="bubble2">Read classyquiz.pages.dev. I need a classyQuiz. Help?</blockquote>

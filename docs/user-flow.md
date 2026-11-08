@@ -110,11 +110,11 @@ Purpose and reasons: docs/design/root-page.md.
 ├──────────────────────────────────┬───────────────────────────────────┤
 │ Build a quiz                     │ Run a quiz                         │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
-│   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Class code  ││ quiz this device
+│   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Join code   ││ quiz this device
 │   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
 │ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
 │   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   [sheets] [chess board] [?]     │ │ [ Upload the quiz your AI      │ │
+│   [sheets][chess][1][3][▭][?]    │ │ [ Upload the quiz your AI      │ │
 │   tabs, one ask shown:           │ │   made (.zip) ] or drop it here│ │
 │  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
@@ -142,10 +142,15 @@ Purpose and reasons: docs/design/root-page.md.
   Under it, "The example, step by step ›" links `/example` (the worked
   example).
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
-- **Build's step 2** has three example asks behind three picture tabs: the
+- **Build's step 2** has six example asks behind six picture tabs: the
   labelled one with photos of sheets, a chess quiz described in words (with
-  the AI, plan and date that answered it), and the open one ("Read
-  classyquiz.pages.dev. I need a classyQuiz. Help?").
+  the AI, plan and date that answered it), practising alone for a test ("I'll
+  play it myself, so please keep the questions and answers to yourself"), a
+  games night with friends ("I'm playing too, so don't show me the
+  questions"), a training session on the big screen, and the open one ("Read
+  classyquiz.pages.dev. I need a classyQuiz. Help?"). Pictures: the sheets, a
+  chess board, one person, three people, a screen before an audience, a
+  question mark.
 - **Run a quiz takes a .zip and nothing else.** The button opens the file
   chooser; a .zip can also be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
@@ -165,7 +170,7 @@ Purpose and reasons: docs/design/root-page.md.
   the site.
 - **Coming back:** the latest quiz this device started, while it is on
   the site (until Exit, final ranking included): its title, where it stands, Back to the
-  quiz (`/play#` + the teacher code), the class code, and "On another device:
+  quiz (`/play#` + the teacher code), "Join code" and the code, and "On another device:
   type 63953 47 in the code box". No closing time, no Delete, no older
   quizzes.
 - **The own copy:** one line under Run, only on a device that has

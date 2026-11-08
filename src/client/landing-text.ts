@@ -13,10 +13,14 @@
 //
 // The example asks are each language's version of the same ask; the marked
 // parts carry the labels. The chess ask is a description with no sheets, close
-// to the words of its run. The open ask has nothing decided: the teacher's
-// open request; that the AI then asks what it needs is the guidance's
-// "Build with the teacher". The site's address in all three is replaced by
-// the one the browser opened.
+// to the words of its run. The asks to practise alone, with friends and for a
+// training session are the other ways to play, in the words of whoever asks;
+// the two who play say so, which the guidance's "When the user will play the
+// quiz" answers. They have had no run, so no line names an AI under them
+// (docs/design/root-page.md, "Build: two steps"). The open ask has nothing
+// decided: the open request; that the AI then asks what it needs is the
+// guidance's "Build with the user". The site's address in every ask is
+// replaced by the one the browser opened.
 
 import type { SiteFull } from "../shared/limits.ts";
 
@@ -61,15 +65,22 @@ export interface Text {
   step1: string;
   step1detail: string;
   step2: string;
-  /** The example asks' tabs, by what the teacher brings: sheets, a description, nothing yet. */
+  /** The example asks' tabs, by what the visitor brings and who plays: sheets, a description, practice alone, friends, a training session, nothing yet. */
   tabSheets: string;
   tabChess: string;
+  tabSolo: string;
+  tabFriends: string;
+  tabGroup: string;
   tabOpen: string;
   ask: AskPart[];
   labels: string[];
   /** The chess ask, and which AI answered it (its run: design/guidance-page.md). */
   askChess: string;
   chessWho: string;
+  /** Practising alone, playing with friends, a training session run on a big screen: no run behind them, so no line under them. */
+  askSolo: string;
+  askFriends: string;
+  askGroup: string;
   /** The ask with nothing decided. */
   ask2: string;
   copy: string;
@@ -105,7 +116,8 @@ export interface Text {
   question: (n: number, total: number) => string;
   finalRanking: string;
   back: string;
-  classCode: string;
+  /** The code others join with, on the resume card: the screens' "Join code", for a class, a group or friends. */
+  joinCode: string;
   otherDevice: (code: string) => string;
   untitled: string;
   ownCopy: (n: number) => string;
@@ -135,6 +147,9 @@ const en: Text = {
   step2: "Ask the AI to build you a quiz for",
   tabSheets: "With photos of exercise sheets",
   tabChess: "From a description: a chess quiz",
+  tabSolo: "To practise on your own",
+  tabFriends: "With friends, playing too",
+  tabGroup: "For a group you lead: a training session",
   tabOpen: "With nothing decided yet",
   ask: [
     { s: "Read " },
@@ -152,6 +167,9 @@ const en: Text = {
   labels: ["this site", "which exercises", "your class", "how many", "which language"],
   askChess: "Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?",
   chessWho: "Claude Opus 5.5, paid plan, 5 Nov 2026",
+  askSolo: "Read classyquiz.pages.dev. My biology test on Friday is about the cell. Here are my notes. Can you make me a classyQuiz to practise with, about 20 questions? I'll play it myself, so please keep the questions and answers to yourself.",
+  askFriends: "Read classyquiz.pages.dev. Make us a classyQuiz for our games night: 15 questions on films from the 90s, some easy, some hard. I'm playing too, so don't show me the questions.",
+  askGroup: "Read classyquiz.pages.dev. Tomorrow I'm training 25 new colleagues on our safety rules. The slides are attached. Can you make me a classyQuiz for the end of the session, on the big screen, about 10 questions?",
   ask2: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
   copy: "Copy",
   copied: "Copied",
@@ -185,7 +203,7 @@ const en: Text = {
   question: (n, t) => `question ${n} of ${t}`,
   finalRanking: "final ranking",
   back: "Back to the quiz ▶",
-  classCode: "Class code",
+  joinCode: "Join code",
   otherDevice: (c) => `On another device: type <b>${c}</b> in the code box.`,
   untitled: "Your quiz",
   ownCopy: (n) => `On ${n === 1 ? "one" : n} of the last 30 days this shared site was full or busy. For more quizzes, a site of your own or your school's:`,
@@ -215,6 +233,9 @@ const de: Text = {
   step2: "Bitte die KI um ein Quiz für",
   tabSheets: "Mit Fotos von Aufgabenblättern",
   tabChess: "Aus einer Beschreibung: ein Schach-Quiz",
+  tabSolo: "Zum Üben für dich allein",
+  tabFriends: "Mit Freunden, du spielst mit",
+  tabGroup: "Für eine Gruppe, die du leitest: eine Schulung",
   tabOpen: "Wenn noch nichts feststeht",
   ask: [
     { s: "Lies " },
@@ -232,6 +253,9 @@ const de: Text = {
   labels: ["diese Seite", "welche Aufgaben", "deine Klasse", "wie viele", "welche Sprache"],
   askChess: "Lies classyquiz.pages.dev. Bitte mach mir ein classyQuiz zu Schach: 8-Jährige, 400–500 Elo, nur 5 Fragen. Such dafür bewertete Puzzles. Ich lasse ihnen bei jeder Frage etwas Zeit, bevor ich die Antworten zeige und den Countdown starte. Die Antworten dürfen in Schachnotation sein, aber ohne + oder Matt, das wäre zu einfach. Vergiss nicht zu sagen, wer am Zug ist. Bei der letzten Frage gib ihnen 2 ähnliche Stellungen zur Wahl, eine aussichtsreich, eine gewinnend. Auf Deutsch. Was brauchst du?",
   chessWho: "Claude Opus 5.5, bezahltes Abo, 5. Nov. 2026",
+  askSolo: "Lies classyquiz.pages.dev. Am Freitag habe ich eine Biologieprüfung über die Zelle. Hier sind meine Notizen. Kannst du mir ein classyQuiz zum Üben machen, etwa 20 Fragen? Ich spiele es selbst, also zeig mir bitte weder Fragen noch Antworten.",
+  askFriends: "Lies classyquiz.pages.dev. Mach uns ein classyQuiz für unseren Spieleabend: 15 Fragen zu Filmen aus den 90ern, ein paar leichte, ein paar schwere. Ich spiele mit, also zeig mir die Fragen nicht.",
+  askGroup: "Lies classyquiz.pages.dev. Morgen schule ich 25 neue Kolleginnen und Kollegen zu unseren Sicherheitsregeln. Die Folien sind angehängt. Kannst du mir ein classyQuiz für den Schluss machen, auf dem grossen Bildschirm, etwa 10 Fragen?",
   ask2: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
   copy: "Kopieren",
   copied: "Kopiert",
@@ -265,7 +289,7 @@ const de: Text = {
   question: (n, t) => `Frage ${n} von ${t}`,
   finalRanking: "Schlussrangliste",
   back: "Zurück zum Quiz ▶",
-  classCode: "Klassencode",
+  joinCode: "Code zum Beitreten",
   otherDevice: (c) => `Auf einem anderen Gerät: <b>${c}</b> ins Code-Feld tippen.`,
   untitled: "Dein Quiz",
   ownCopy: (n) => `An ${n === 1 ? "einem" : n} der letzten 30 Tage war diese geteilte Seite voll oder stark ausgelastet. Für mehr Quiz eine eigene Seite oder eine der Schule:`,
@@ -295,6 +319,9 @@ const fr: Text = {
   step2: "Demandez à l'IA un quiz pour",
   tabSheets: "Avec les photos de fiches",
   tabChess: "D'après une description : un quiz d'échecs",
+  tabSolo: "Pour réviser en solo",
+  tabFriends: "Entre amis, en jouant aussi",
+  tabGroup: "Pour un groupe que vous animez : une formation",
   tabOpen: "Sans rien avoir décidé",
   ask: [
     { s: "Lis " },
@@ -312,6 +339,9 @@ const fr: Text = {
   labels: ["ce site", "quels exercices", "votre classe", "combien", "quelle langue"],
   askChess: "Lis classyquiz.pages.dev. Fais-moi un classyQuiz d'échecs, s'il te plaît : enfants de 8 ans, 400–500 Elo, 5 questions seulement. Prends des puzzles notés. Je leur laisse un peu de temps sur chaque question avant de montrer les choix et de lancer le compte à rebours. Les choix peuvent être en notation, mais sans + ni mat, ce serait trop facile. N'oublie pas de dire qui a le trait. Pour la dernière question, donne-leur 2 positions semblables au choix, l'une prometteuse, l'autre gagnante. En français. De quoi as-tu besoin ?",
   chessWho: "Claude Opus 5.5, abonnement payant, 5 nov. 2026",
+  askSolo: "Lis classyquiz.pages.dev. J'ai un contrôle de biologie vendredi sur la cellule. Voici mes notes. Tu peux me faire un classyQuiz pour réviser, une vingtaine de questions ? J'y jouerai moi-même, alors garde les questions et les réponses pour toi.",
+  askFriends: "Lis classyquiz.pages.dev. Fais-nous un classyQuiz pour notre soirée jeux : 15 questions sur les films des années 90, des faciles et des difficiles. Je joue aussi, alors ne me montre pas les questions.",
+  askGroup: "Lis classyquiz.pages.dev. Demain, je forme 25 nouveaux collègues à nos règles de sécurité. Les diapositives sont jointes. Tu peux me faire un classyQuiz pour la fin de la séance, sur le grand écran, une dizaine de questions ?",
   ask2: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   copy: "Copier",
   copied: "Copié",
@@ -345,7 +375,7 @@ const fr: Text = {
   question: (n, t) => `question ${n} sur ${t}`,
   finalRanking: "classement final",
   back: "Retour au quiz ▶",
-  classCode: "Code de la classe",
+  joinCode: "Code pour rejoindre",
   otherDevice: (c) => `Sur un autre appareil : tapez <b>${c}</b> dans la case du code.`,
   untitled: "Votre quiz",
   ownCopy: (n) => `Ce site partagé a été complet ou très chargé ${n} ${n === 1 ? "jour" : "jours"} sur les 30 derniers. Pour plus de quiz, un site à vous ou à votre école :`,
@@ -375,6 +405,9 @@ const it: Text = {
   step2: "Chiedi all'IA un quiz per",
   tabSheets: "Con le foto di schede",
   tabChess: "Da una descrizione: un quiz di scacchi",
+  tabSolo: "Per esercitarti per conto tuo",
+  tabFriends: "Con gli amici, giocando anche tu",
+  tabGroup: "Per un gruppo che guidi: una formazione",
   tabOpen: "Senza aver ancora deciso nulla",
   ask: [
     { s: "Leggi " },
@@ -392,6 +425,9 @@ const it: Text = {
   labels: ["questo sito", "quali esercizi", "la tua classe", "quante", "quale lingua"],
   askChess: "Leggi classyquiz.pages.dev. Fammi un classyQuiz di scacchi, per favore: bambini di 8 anni, 400–500 Elo, solo 5 domande. Cerca dei puzzle con rating. Lascio loro un po' di tempo su ogni domanda prima di mostrare le scelte e avviare il conto alla rovescia. Le scelte possono essere in notazione scacchistica, ma senza + né matto, sarebbe troppo facile. Non dimenticare di dire a chi tocca muovere. Per l'ultima domanda dai loro 2 posizioni simili tra cui scegliere, una promettente e una vincente. In italiano. Di cosa hai bisogno?",
   chessWho: "Claude Opus 5.5, abbonamento a pagamento, 5 nov 2026",
+  askSolo: "Leggi classyquiz.pages.dev. Venerdì ho una verifica di biologia sulla cellula. Ecco i miei appunti. Mi fai un classyQuiz per esercitarmi, circa 20 domande? Ci gioco io, quindi tieni per te le domande e le risposte.",
+  askFriends: "Leggi classyquiz.pages.dev. Facci un classyQuiz per la nostra serata giochi: 15 domande sui film degli anni '90, alcune facili, alcune difficili. Gioco anch'io, quindi non mostrarmi le domande.",
+  askGroup: "Leggi classyquiz.pages.dev. Domani formo 25 nuovi colleghi sulle nostre regole di sicurezza. Le slide sono allegate. Mi fai un classyQuiz per la fine della sessione, sul grande schermo, circa 10 domande?",
   ask2: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
   copy: "Copia",
   copied: "Copiato",
@@ -425,7 +461,7 @@ const it: Text = {
   question: (n, t) => `domanda ${n} di ${t}`,
   finalRanking: "classifica finale",
   back: "Torna al quiz ▶",
-  classCode: "Codice della classe",
+  joinCode: "Codice per entrare",
   otherDevice: (c) => `Su un altro dispositivo: digita <b>${c}</b> nella casella del codice.`,
   untitled: "Il tuo quiz",
   ownCopy: (n) => `Negli ultimi 30 giorni questo sito condiviso è stato pieno o molto carico ${n === 1 ? "un giorno" : `${n} giorni`}. Per più quiz, un sito tuo o della tua scuola:`,

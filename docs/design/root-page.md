@@ -2,9 +2,11 @@
 
 ## Purpose
 
-The root page is the first thing a teacher meets, and the teacher may not be
-technical. If they don't see within seconds how to get a quiz and how to start
-one, nothing else on the site matters, however good the guidance below it is
+The root page is the first thing a visitor meets: first the example class's
+teacher (backlog, Project), who may not be technical, and also anyone else
+who wants a quiz to play, alone, with friends, or for a group they run
+(backlog v5 item 9). If they don't see within seconds how to get a quiz and
+how to start one, nothing else on the site matters, however good the guidance below it is
 (backlog v1 item 16). So the page does three jobs and no more:
 
 - **Build**: tell a first-time teacher how a quiz comes to exist. A first-timer
@@ -43,7 +45,13 @@ Who arrives, and what each needs:
   to know whether they can rely on the site.
 - A student on a tablet, with the address the teacher called out. Needs the code
   box and nothing else.
-- The teacher's AI, with the site's name. Needs the guidance section.
+- Someone who isn't a teacher: a learner who wants to practise, friends for
+  a games night, whoever runs a quiz for a training session or a party.
+  Needs to see that the site is for them too, and how to ask; the asker who
+  will play needs the AI to keep the questions to itself (the asks, below;
+  the words, "Words for whoever comes").
+- The teacher's AI, with the site's name, or the AI of whoever else asks.
+  Needs the guidance section.
 
 The product's situation (the example class, the devices, which AI, the free
 plan) is the backlog's Project and Constraints sections. What the page has to
@@ -189,13 +197,17 @@ Step 2 is the ask. It says "the AI" where a pronoun would do: in the owner's
 testing Build had too many "it"s to follow. The address shown in the bubbles
 and in Copy is the one the browser opened, so an own copy shows its own.
 
-Three example asks, each for something a teacher may bring: exercise sheets,
-an idea put in words, or nothing yet. They are tabs, one picture each (the two sheets,
+Six example asks: three for what a teacher may bring (exercise sheets, an
+idea put in words, nothing yet), and three for the other ways to play
+(practising alone, friends with the one who asks among them, a training
+session on a big screen). They are tabs, one picture each (the two sheets,
 a chess board, a question mark), the chosen one joined to its bubble, so the
 picture names the situation and no lead-in sentence is needed ("For example",
 "Or", "The AI then" were cut for it). Each tab's name in words is its
 accessible name and tooltip. The tabs are made by `home.ts`: without it, and
-for an AI's fetcher, the three asks stand one under the other, sheets first.
+for an AI's fetcher, the asks stand one under the other, sheets first. Six
+tabs share a phone's width: at 320 px each is 36 px wide, its picture
+shrinking with it.
 
 - **Sheets**: a chat bubble with five parts underlined and
   labelled under their words: this site, which exercises, your class, how many,
@@ -215,12 +227,23 @@ for an AI's fetcher, the three asks stand one under the other, sheets first.
   ends "What do you need?". A line under it names the AI, plan and date,
   Claude Opus 5.5 on a paid plan, 5 Nov 2026, since step 1 names a free model
   and this one isn't. Its bubble is the longest, on a phone about 350 px.
+- **Practising alone, friends, a training session** (backlog v5 item 9): the
+  other ways to play, in the words of someone who isn't a teacher, each with
+  what it brings (notes, a topic, slides) and where it will be played. The
+  two who play say so ("I'll play it myself, so please keep the questions and
+  answers to yourself", "I'm playing too, so don't show me the questions"):
+  the asker's side of what the guidance tells the AI (`guidance-page.md`,
+  "The user who plays"). They have had no run and need none: AIs make
+  another kind of quiz reliably (the owner). The line naming AI, plan and
+  date under an ask is for a verified run, so these, like the open ask, have
+  none, and what is verified stays told apart from what isn't. Their
+  pictures: one person, three people, a screen before an audience.
 - **Nothing decided**: "Read <address>. I need a classyQuiz. Help?". That the
   AI then asks what it still needs before it builds (the guidance's "Build
   with the teacher") is no longer said on the page; the chess ask's closing
   question shows the same turn. It is the owner's ask, translated.
 
-All three open with "Read <address>." and call the quiz "a classyQuiz". A
+All of them open with "Read <address>." and call the quiz "a classyQuiz". A
 Sonnet-class model told only "make me a quiz for <address>" read the address as
 a publishing target and fetched the page only when told to read it; "Read" makes
 the fetch the first act, and a failed fetch can't pass as a generic quiz (backlog
@@ -355,8 +378,8 @@ back, and certainty it is the right quiz.
 
 So the card shows only the latest quiz this device started that is still on the
 site: its title, where it stands ("before the first question", "question
-4 of 10", "final ranking"), "Back to the quiz" (to the play page with the teacher code), the class
-code, and the way back from another device, the teacher code typed in the code
+4 of 10", "final ranking"), "Back to the quiz" (to the play page with the teacher code), the join
+code (the screens' word, for a class, a group or friends), and the way back from another device, the teacher code typed in the code
 box. It shows no closing time, no Delete, no older quizzes. A closing time read as
 if the server held a shared, public list, which it must not; and the owner found
 the first design's insistence on it pointed to "a rule that snuck in as a
