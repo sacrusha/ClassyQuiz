@@ -33,10 +33,8 @@ devices-only room is to come.
   holds it in memory only (`local-check.md`, "From the root page to the
   check").
 - The player may be on a phone held upright, a tablet, or a laptop, and on
-  a laptop it may be the one on the projector.
-- `app.css` is one namespace for every app page (backlog, Housekeeping): a
-  new class can pick up an old rule (`.device` is the network check's
-  line), so the device screen's names carry a `d` (`dscreen`, `dbar`).
+  a laptop it may be the one on the projector. A projector and a laptop are
+  wider than tall; a phone held upright is taller than wide.
 
 ## How the site meets it
 
@@ -53,7 +51,8 @@ is the one way to lose a run that a hand makes without meaning to. It
 plays the quiz itself (`plays`), so the fold of questions says that whoever
 will play leaves it closed. One press starts it; it takes over the check's
 page and pushes a step into the tab's history, so Back from any of Solo's
-screens gives the check back as it was, its fold and fixes kept.
+screens gives the check back as it was, its fold and fixes kept; it ends
+the run without asking.
 
 ### The start
 
@@ -64,6 +63,12 @@ the check and the first question; what it is for is the observation
 above: the avatar that celebrates is the player's own. Alone nothing is
 scarce and nothing is spent, so the room's limit on changes doesn't apply.
 The look stays for Play again, within the page.
+
+The start comes up under the hand that pressed Play ▶ on the check, and
+on a short phone (360x640) a row of the dressing menu stands where Play ▶
+was. So its buttons, like the result's, take no tap for `SETTLE_MS`
+(400 ms) after the page comes: the tap was aimed at what was there before
+(`question-flow.md`, "Presses").
 
 ### A question, alone
 
@@ -96,13 +101,20 @@ and score), the stage, and a bar at the foot with one button.
 
 - **The stage is the wall's** (`client/stage.ts`, `layQuestion`): the
   question, its picture between or beside, picture answers arranged by
-  their shapes, laid out in the room the device has. On a laptop, Solo
-  therefore shows a question as the projector at that size would.
-- **Where a device differs** (`device` option): it is read at arm's
-  length and often held upright, and its answers are what is tapped. The
-  question takes less of the height than on a wall (0.7 of the wall's
-  share), and text tiles that two columns would break or set small stand
-  in one column. The tiles are buttons.
+  their shapes, laid out in the room the device has, in the same frame
+  as the wall that steers itself (the bar at the top, the foot's bar of
+  the same height). Wider than tall, nothing else differs (the tiles keep
+  the wall's room for the mark and the count too): on a laptop or a
+  projector, Solo shows a question as the wall would in that window. The
+  tiles are buttons at every size.
+- **Where a device differs** (`device` option): held upright, the stage
+  taller than wide, it is read at arm's length in a narrow column, and
+  its answers are what is tapped. The question takes less of the height
+  than on a wall (0.7 of the wall's share), text tiles that two columns
+  would break or set small stand in one column, and alone the tiles keep
+  room for the mark only, without the count. The wall itself, on a phone
+  (the "phone only" variant), is laid out as a wall: its tiles stay two by
+  two.
 - **The foot's button** is the steering bar's Play in another hand: a noun
   for what comes next, in the same place on every question, kept there
   invisible while there is none, so a double tap never lands on something
@@ -131,8 +143,11 @@ and score), the stage, and a bar at the foot with one button.
 The avatar cheering, whatever the score (the closure the final ranking
 gives a class); ★ right / of; a bar per question, full or empty. Then Play
 again ▶ (a new order, the same avatar), Copy the answers for your AI, and
-← Back. The foot's bar is gone there, as Play's place is empty at the final
-ranking: a double tap on Result lands on nothing.
+← Back. The foot's bar is gone there, as at the final ranking, but the
+buttons stand where the page's height puts them, on a 360 px phone where
+▶ Result was. So they take no tap for `SETTLE_MS` after the result comes,
+and the second of a double tap on Result lands on nothing: it would
+otherwise copy the run, start it again, or end it.
 
 ### After the run: the player's AI
 
@@ -155,7 +170,9 @@ lean; neither use is confirmed.
   as the projector at that window's size would, pictures and fitting
   included; the solutions are the check's fold, without playing. What the
   wall adds (the question read first with its answers veiled, who has
-  answered, the spread) isn't the quiz's look.
+  answered, the spread) isn't the quiz's look. A wall steered from the
+  Remote has no foot's bar, so its stage is 30 px taller than the
+  preview's in the same window.
 - **A projector and no student devices** (backlog, Open): Solo on the
   projector shows the question as the wall does; the class answers by hand
   or with coloured cards, and whoever taps puts the key up. Nothing scores
@@ -165,7 +182,9 @@ lean; neither use is confirmed.
 ## Not known
 
 - Whether a tap as the final answer suits learners, or a mis-tap costs too
-  much; and whether "I don't know" (the key without answering) is wanted.
+  much; whether "I don't know" (the key without answering) is wanted; and
+  whether Back, ending a run without asking, ends runs that were meant to
+  go on.
 - Whether the dressing before the first question is the point for a
   newcomer or a delay; whether a player alone wants to choose the animal,
   which a room assigns so that nothing is grabbed.
@@ -177,9 +196,9 @@ lean; neither use is confirmed.
   class at a projector.
 - Pull to refresh is asked off while Solo is on (`overscroll-behavior`);
   checked headless in Edge only, not on Android or iOS.
-- How much of the question's height a device should give up (0.7) and
-  when tiles go to one column (under 1.3 em in two): tuned on the example
-  quiz, a quiz of sentence answers and the picture-answer quiz at 360x740
-  and 1280x800.
-- The wall's layout on a phone wall (the "phone only" variant) is
-  unchanged: its tiles stay two by two.
+- How much of the question's height an upright device should give up
+  (0.7) and when tiles go to one column (under 1.3 em in two): tuned on
+  the example quiz, a quiz of sentence answers and the picture-answer quiz
+  at 360x740, and seen headless on an upright tablet (800x1280).
+- Whether a tablet on its side, laid out as the wall, taps as well as one
+  held upright; seen headless at 1280x800 only.
