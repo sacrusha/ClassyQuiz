@@ -74,6 +74,10 @@ moment means in the language, not the English words. Open for you:
 - The AI says du / tu to the teacher in de, fr, it (as the film's asks); the page itself says du /
   vous / tu (the landing's register).
 
+- E6, the "Try it" step's words (`runP`, `runNote`), redrafted for the three ways to play by the
+  words pass, not a translator: "allein / en solo / per conto tuo" for on your own (it avoids
+  "da solo", gendered), "Startseite / page d’accueil / pagina iniziale" for the start page.
+
 The quizzes (`quiz_zips.py`) are unchanged: questions 7–13 read as the sheets' own instructions
 in de and as the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
 

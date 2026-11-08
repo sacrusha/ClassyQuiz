@@ -44,11 +44,16 @@ path the film shows.
    `docs/example/README.md`. The preview shows its top. The line above it
    names model, plan and date.
 3. **The quiz**: the `.zip` the AI handed over, in the page's language.
-4. **Run it**: "Start the example quiz" opens `/open?example=<lang>`, the
+4. **Try it**: "Start the example quiz" opens `/open?example=<lang>`, the
    local check (`local-check.md`): it fetches the static `.zip` and reads it
    through the same function as a dropped file (`opening.ts`, `readQuiz`),
    so the example can't run differently from a teacher's. Looking costs the
-   site nothing; "Open the lobby" there is a real upload, booked like any.
+   site nothing, and neither does Solo; opening a room there (Peers, or
+   Quizmaster's "Open the lobby") is a real upload, booked like any. The
+   step's words say so: the visitor chooses how it is played, on their own
+   it stays in the browser, with friends or a class it runs like any quiz
+   (a visitor who isn't a teacher sees the example is theirs to play too,
+   backlog v5 item 9).
 
 Under the steps, a note: the example was tested in all four languages and
 works in each; so that it is the same example in each, the German, French and

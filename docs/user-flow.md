@@ -202,9 +202,9 @@ everything to try the same on your own AI.
                           [Photo, page 1 (.jpg)] [Photo, page 2 (.jpg)] [The sheets (.pdf)]
 2 The conversation        [top of the conversation picture]  Read the whole conversation ›
 3 The quiz                [big-numbers-quiz.zip]
-4 Run it                  [ Start the example quiz ]
-                          It runs on this site like any quiz, on the projector
-                          and on your students' devices.
+4 Try it                  [ Start the example quiz ]
+                          On your own, it stays in this browser. With friends
+                          or a class, it runs on this site like any quiz.
 ```
 
 "Start the example quiz" opens `/open?example=<lang>`: the example on the
