@@ -92,8 +92,9 @@ so there is something to click early; authoring closes the loop.
     for, what quizzes are for, how they're built, how to build them with a
     human — built, `design/guidance-page.md`. Whether a given AI does is a test,
     not an assumption (open list).
-12. Preview as the class will see it — whether it is v5 item 2's problem
-    (Solo) is open there. Not built.
+12. Preview as the class will see it — Solo on the projector's laptop lays
+    every question out as the wall would (`design/solo.md`, "Preview and the
+    projector alone"); whether that is the preview teachers want is unconfirmed.
 13. Validation errors the teacher can hand back to the AI — built, `design/quiz-format.md`.
 14. Self-hosting nudge, the free plan serving a few users — built as `/own-copy`
     and its landing line, `design/root-page.md`.
@@ -357,16 +358,8 @@ behind these items — options and what each would cost — is
    with the check's fixes; the example's start lands there. Built,
    `design/local-check.md`. Not deployed.
 
-2. **Solo — a learner wants to practise or review on their own**, with a quiz
-   their AI or their teacher's made, without having seen the answers. Today a
-   quiz needs a room and a second device. Alone, nobody disputes a wrong key,
-   and the learner can't tell one from their own mistake; the quiz carries no
-   notes (`design/quiz-format.md`). Observed in the owner's user testing:
-   preteens got excited about seeing their avatar celebrate (jump) in solo
-   runs. Owner: closing the tab ends it, fine and expected; "editable" is
-   wanted (what is editable: to confirm). Open: whether a teacher's preview
-   of the quiz as the class will see it (v1 item 12) is this same problem
-   (owner: unclear).
+2. Solo, a learner practising or reviewing on their own without having seen
+   the answers — built, `design/solo.md`. Not deployed.
 
 3. **Peers — friends want to play together with nobody running it**, so that
    everyone plays, including whoever asked for the quiz. Today someone must
@@ -392,11 +385,16 @@ behind these items — options and what each would cost — is
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
-   and no student devices (the open "projector alone" question). Today the
-   question lives on the wall only and the tablets show colour-coded buttons,
-   on `design/question-flow.md`'s plausible assumption that the teacher reads
-   aloud while the class looks at the projector. Open: whether the guidance
-   should say where a quiz will be read.
+   and no student devices (the open "projector alone" question). In a room
+   the question lives on the wall only and the tablets show colour-coded
+   buttons, on `design/question-flow.md`'s plausible assumption that the
+   teacher reads aloud while the class looks at the projector. The device
+   screen (the question, its picture and the tiles on the player's own
+   device, then the key) is built with Solo (`design/solo.md`, "The device
+   screen"). Open: a room on it (Peers, a Quizmaster's devices-only room),
+   with the join code on the host's device, the spread, ranking and
+   celebration on each device; whether the guidance should say where a quiz
+   will be read.
 
 7. **Nobody has to steer.** Peers can't do without it; a quizmaster whose
    hands are elsewhere wants it (Later, "Runs by itself", whose cadence
@@ -427,7 +425,8 @@ The quiz is already made; it can be more than one activity.
 - **Printables** — quick test on paper, answer sheet, review print to take home;
   not every lesson has devices.
 - **Corrected quiz downloadable after the run** — the in-class fixes shouldn't
-  be lost for the next variant. Perhaps v5 item 2's "editable".
+  be lost for the next variant. Not Solo's (owner: a review may edit, solo
+  play doesn't).
 - **Results export** — a teacher who wants to look again.
 - **Rows by holding the open period on the teacher's device** — a design kept
   ready for when the Free plan's rows bind: about a tenth of a class's
@@ -486,8 +485,9 @@ With the owner:
   identified" (the constraint's stated purpose is data protection, written
   with children in mind; whether an adult entry is another situation is the
   owner's); and the quiz
-  carrying no notes, which Solo meets with the key after each answer and
-  nothing to explain it — an explanation line in the format would reopen
+  carrying no notes, which Solo meets with the key after each answer,
+  nothing to explain it, and the run copied for the player's AI at the end
+  (`design/solo.md`) — an explanation line in the format would reopen
   `design/quiz-format.md`'s ruling.
 - A class refused for the day's room can't run in that lesson; only waiting
   or an own copy are offered. Whether the refusal should also offer running
@@ -495,7 +495,8 @@ With the owner:
   hand or with coloured cards; no student devices, no scoring), which costs
   the free plan nothing since static pages don't count
   (`design/hosting-and-limits.md`, "Running classes finish"). Not decided;
-  the situation is v5 item 6's.
+  the situation is v5 item 6's. Solo on the projector is what such an offer
+  would open (`design/solo.md`, "Preview and the projector alone").
 - The identity (v4 item 14) as built, seen by the owner in a local test
   ("looks good", 2026-11-04): the
   implementer's calls are ink controls and a rust accent, no blue,
@@ -598,7 +599,12 @@ Needs a real classroom or real devices, nobody has run it:
   `/open`, nothing uploaded while looking, the fold, fixes reaching the
   lobby, reload and Back, the root's problems; a site at 8868 by default), `labels-walk.mjs` (the bar's labels and small lines through every
   step on walls of 1366, 600 and 360 px and a 360 px Remote: text cut or
-  not, height, shots). They read a site at 127.0.0.1:8931 or 8788; read before running.
+  not, height, shots), `../v5-solo/solo-walk.mjs` (Solo on the example,
+  desktop and phone, nothing uploaded, Back to the check, then the lobby),
+  `../v5-solo/solo-quizzes.mjs` (Solo with sentence and picture answers on a
+  phone and a tablet), `../v5-solo/wall-walk.mjs` (the wall through a
+  question with bot players: spread, key, winners). They read a site at
+  127.0.0.1:8931, 8788 or 8958 (`stacks/solo/`); read before running.
 - Process, the owner's words, for whoever orchestrates next: delegate on
   purpose and situation, not steps; no spec changes to an agent in flight —
   settle the item first, then brief a fresh one; no runs whose outcome is

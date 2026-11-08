@@ -104,6 +104,9 @@ function renderCheck(): void {
   document.title = `${q.quiz.title || "Quiz"} · classyQuiz`;
   const notes = q.warnings.length;
   const plays = ENTRIES.some((e) => e.plays);
+  // An entry that played in this page (Solo) gives it back: the check's own page, as open.html has it.
+  document.body.className = "follows-dark";
+  main.className = "check open-check";
   main.innerHTML = `<div class="checkhead"><h1 class="ctitle">${lines(q.quiz.title || "Quiz")} <span class="cnum">· ${n} ${n === 1 ? "question" : "questions"}</span></h1></div>
     ${ENTRIES.length > 1 ? `<h2 class="open-ask">How will it be played?</h2>` : ""}
     <div class="open-entries">${ENTRIES.map(entryCard).join("")}</div>

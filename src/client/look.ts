@@ -298,6 +298,18 @@ export function toolSvg(t: number): string {
   return `<svg viewBox="${TOOLS[t].box}" role="img" aria-label="${TOOLS[t].name}">${TOOLS[t].svg}</svg>`;
 }
 
+/**
+ * The dressing menu's rows, without words (docs/design/class-and-wall.md,
+ * "Dressing the avatar"): the shapes in the player's colour, the hats, the
+ * tools; each picture a button with data-part (shared/looks.ts, LookPart)
+ * and data-i.
+ */
+export function pickerRows(colour: number): string {
+  const row = (part: string, from: number, to: number, svg: (i: number) => string) =>
+    `<div class="prow">${Array.from({ length: to - from }, (_, k) => `<button class="pick" type="button" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
+  return row("b", 0, BACKGROUND_COUNT, (b) => backgroundSvg(b, colour)) + row("h", 1, HAT_COUNT, hatSvg) + row("t", 1, TOOL_COUNT, toolSvg);
+}
+
 /** Plays the wiggle that says "this one changed" (app.css). */
 export function wiggle(el: HTMLElement): void {
   el.classList.remove("wiggle");

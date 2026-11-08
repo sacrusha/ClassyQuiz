@@ -37,3 +37,11 @@ export function validLook(b: unknown, h: unknown, t: unknown): boolean {
 export function sameLook(x: Look, y: Look): boolean {
   return (x.b ?? 0) === (y.b ?? 0) && (x.h ?? 0) === (y.h ?? 0) && (x.t ?? 0) === (y.t ?? 0);
 }
+
+/** A row of the menu: the shape ("b"), the hat ("h") or the tool ("t"). */
+export type LookPart = "b" | "h" | "t";
+
+/** The look after a tap on picture i of a row: a shape is always worn; the hat or tool worn comes off with a second tap. */
+export function pickLook(now: Required<Look>, part: LookPart, i: number): Required<Look> {
+  return { ...now, [part]: part !== "b" && i === now[part] ? 0 : i };
+}

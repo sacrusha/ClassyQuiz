@@ -16,8 +16,8 @@ import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "..
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING } from "../shared/limits.ts";
 import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
-import { ICON, avatarSvg, backgroundSvg, hatSvg, lookKey, shapeSvg, toolSvg, wiggle } from "./look.ts";
-import { BACKGROUND_COUNT, HAT_COUNT, TOOL_COUNT, sameLook, type Look } from "../shared/looks.ts";
+import { ICON, avatarSvg, lookKey, pickerRows, shapeSvg, wiggle } from "./look.ts";
+import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
@@ -676,20 +676,15 @@ function render(): void {
 // view arriving (a classmate joining changes "of") must not replace a
 // picture under a finger.
 
-/** The picker's rows: which part of the look each sets. */
-type Part = "b" | "h" | "t";
-
 function renderDress(stored: Avatar): void {
   // The server's view has caught up with what the child picked.
   if (look && !dressing && sameLook(stored, look)) look = null;
   const shown = look ? { ...stored, ...look } : stored;
   let box = main.querySelector<HTMLElement>(".dress");
   if (!box) {
-    const row = (part: Part, from: number, to: number, svg: (i: number) => string) =>
-      `<div class="prow">${Array.from({ length: to - from }, (_, k) => `<button class="pick" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
     main.innerHTML = `<div class="dress">
       <div class="hero"></div>
-      <div class="picker">${row("b", 0, BACKGROUND_COUNT, (b) => backgroundSvg(b, stored.c))}${row("h", 1, HAT_COUNT, hatSvg)}${row("t", 1, TOOL_COUNT, toolSvg)}</div>
+      <div class="picker">${pickerRows(stored.c)}</div>
       <div class="look">${ICON.eye}</div>
     </div>`;
     box = main.querySelector<HTMLElement>(".dress")!;
@@ -704,7 +699,7 @@ function renderDress(stored: Avatar): void {
     if (changed) wiggle(hero);
   }
   box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => {
-    const on = Number(btn.dataset.i) === (shown[btn.dataset.part as Part] ?? 0);
+    const on = Number(btn.dataset.i) === (shown[btn.dataset.part as LookPart] ?? 0);
     btn.classList.toggle("on", on);
     btn.setAttribute("aria-pressed", String(on));
   });
@@ -715,10 +710,7 @@ function pick(btn: HTMLButtonElement): void {
   const me = view?.me;
   if (!me || view?.phase !== "lobby" || dressSpent) return;
   const now: Required<Look> = look ?? { b: me.avatar.b ?? 0, h: me.avatar.h ?? 0, t: me.avatar.t ?? 0 };
-  const part = btn.dataset.part as Part;
-  const i = Number(btn.dataset.i);
-  // A shape is always worn; the hat or tool worn comes off with a second tap.
-  const next = { ...now, [part]: part !== "b" && i === now[part] ? 0 : i };
+  const next = pickLook(now, btn.dataset.part as LookPart, Number(btn.dataset.i));
   if (sameLook(next, now)) return;
   look = next;
   renderDress(me.avatar);

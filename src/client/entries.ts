@@ -5,6 +5,7 @@
 
 import type { OpenedQuiz } from "./opening.ts";
 import { quizmaster } from "./entry-quizmaster.ts";
+import { solo } from "./entry-solo.ts";
 
 /** What an entry gets from the check while it starts or runs. */
 export interface EntryContext {
@@ -42,4 +43,6 @@ export interface Entry {
   start(quiz: OpenedQuiz, ctx: EntryContext): Promise<void>;
 }
 
-export const ENTRIES: Entry[] = [quizmaster];
+// Solo first: a newcomer's first use is plausibly Solo or a look at the
+// example quiz (docs/design/local-check.md, Situation).
+export const ENTRIES: Entry[] = [solo, quizmaster];

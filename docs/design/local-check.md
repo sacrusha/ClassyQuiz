@@ -37,7 +37,8 @@ Solo learner mustn't be shown them.
 - Pages allow pictures only from the site and as `blob:` URLs, scripts only
   from the site's files (`hosting-and-limits.md`, Content-Security-Policy).
 - Only what is built is offered: the site never promises what isn't (v5).
-  Quizmaster is built: the classroom's lobby. Solo and Peers are to come.
+  Solo (`solo.md`) and Quizmaster (the classroom's lobby) are built; Peers
+  is to come.
 
 ## How the site meets it
 
@@ -119,6 +120,9 @@ open, and each picture as a blob URL on the page with its size. The context
 lets an entry say something under its button, take over the page's main
 element to play there, and give the check back as it was.
 
+- **Solo** (`client/entry-solo.ts`), first, so its button is the page's
+  primary one: "Play ▶" plays the quiz in this page, nothing uploaded, and
+  Back gives the check back (`solo.md`).
 - **Quizmaster** (`client/entry-quizmaster.ts`): "Open the lobby ▶" opens a
   room, and this tab becomes the Projector on the lobby's check
   (`teacher-devices.md`), which repeats the questions with the fixes and

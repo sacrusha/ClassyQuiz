@@ -215,6 +215,13 @@ the site; English. Purpose and reasons: docs/design/local-check.md.
 ─────────────────────────────────────────────────────────────
 Big numbers on the number line · 13 questions
   How will it be played?               (only with two or more ways)
+┌ Solo ─────────────────────────────────────────────────────┐
+│ You play the quiz on your own, to learn or review: the    │
+│ solution after each answer.                               │
+│ [ Play ▶ ]                                                │
+│ Nothing goes to the site. A reload or closing the tab     │
+│ ends it.                                                  │
+└───────────────────────────────────────────────────────────┘
 ┌ Quizmaster ───────────────────────────────────────────────┐
 │ You run the quiz for a class or a group: the questions on │
 │ a big screen, the answers on everyone's own device.       │
@@ -225,17 +232,18 @@ Big numbers on the number line · 13 questions
 ─────────────────────────────────────────────────────────────
 ▸ The questions and their solutions · 2 notes from the site
     If you will play it yourself, leave this closed.
-                                  (only once a way to play it yourself is offered)
+                                  (while a way to play it yourself is offered)
 ```
 
 - **One card per way to play it**, each with its own button; the first
-  card's is the primary one. Only what is built is offered: today
-  Quizmaster alone.
+  card's is the primary one. Only what is built is offered: today Solo,
+  then Quizmaster.
 - **The questions are folded** under the cards, closed on arrival. Opened,
   they are the lobby's list (§3.3): thumbnails, answers folded, Show the
   solutions, the site's warnings, and Change the solution with its fixes
   (Don't count this question, Skip it, Hide the picture). The fixes go up
   with the quiz.
+- **Play ▶** plays the quiz in this tab (§3.8); nothing goes to the site.
 - **Open the lobby ▶** uploads the quiz and lands on the lobby's check
   (§3.3), in this tab as the Projector; Back from there passes this page.
   While it goes up: "Sending the quiz…". Refused, under the button: the
@@ -533,6 +541,61 @@ only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
   scores 10 and up to 5 more the sooner after the answers appeared it was
   tapped, by the device's own clock, over a fixed 20 s (`shared/tempo.ts`);
   the ranking shows points, not "right out of n".
+
+### 3.8 Solo
+
+Played on the local check's page (`/open`), nothing uploaded; purpose and
+reasons: docs/design/solo.md. English, the site's own words; the pages are
+light, as the class's screens.
+
+```
+The start
+[fox] classyQuiz
+        Big numbers on the number line
+                 13 questions
+(avatar)        ● ⬡ ★ ♥ ✿ ◎        (the shapes, in its colour)
+                hats, tools          (pictures, no words)
+[ Start ▶ ]
+
+A question, answered
+4 / 13                                  ✓   (avatar)   ★ 3
+        Which number does the arrow show?
+                [the picture]
+[▲ 646 000            ✓]  [◆ 645 000             ]
+[● 644 000             ]  [■ 647 000             ]
+Big numbers on the number line         [ ▶ Question 5 ]
+
+The result
+[fox] classyQuiz
+        Big numbers on the number line
+              (avatar, cheering)
+                 ★ 7 / 13
+               ▮ ▯ ▮ ▮ ▯ ▮ …
+[ Play again ▶ ] [ Copy the answers for your AI ] [ ← Back ]
+Your AI can explain a mistake, or check a solution that looks wrong.
+```
+
+- **The start:** the title and how many questions, the avatar (an animal
+  and a colour, assigned) with the lobby's dressing menu, no words, and
+  Start ▶.
+- **A question:** the bar at the top (where the question stands, after the
+  answer ✓, ✗ or ⊘ for not counted, the avatar, ★ the score), the question
+  laid out as on the wall, its answers showing at once; on an upright phone
+  the question smaller than on a wall and long answers in one column. A tap
+  answers, and the key shows on the tiles: the solution ticked, the rest
+  dim, the tap outlined, ✗ on it when wrong; a right answer makes the
+  avatar jump over the question. At the foot the quiz's title and the next
+  step, "▶ Question 5", "▶ Result" after the last, absent before the
+  answer. A tap on the picture enlarges it; a tap closes it. Keys: 1–4
+  answer, Space, Enter, →, ↓, PageDown or N go on, Z enlarges the picture.
+- **The result:** the avatar cheering, ★ right / of, a bar per question
+  that counted, full or empty; Play again ▶ (the same avatar, a new order),
+  Copy the answers for your AI ("Copied: paste it into the chat with your
+  AI", or the text shown to copy by hand), ← Back; under them "Your AI can
+  explain a mistake, or check a solution that looks wrong."
+- **Back,** from any of these, is the check again, its fold and fixes as
+  they were. A reload of a quiz from the root page finds nothing (§3.1);
+  the example's reads the example again.
 
 ## 4. Variants
 

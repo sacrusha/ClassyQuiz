@@ -111,7 +111,7 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 #qbar .strip .av.still { animation: none; }
 #qbar .strip .av svg { width: 100%; height: 100%; display: block; }
 
-/* The winners jump (client/screen.ts, renderParty): a
+/* The winners jump (client/stage.ts, jump): a
    band over the top of the stage after the reveal, stopping above the
    tiles, so the key stays in view. Each avatar pops in, then jumps five
    times, crouching before and landing after each, up to half its size
@@ -140,7 +140,7 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
   #party .jumper > span { animation: none; }
 }
 
-/* A question's picture (client/screen.ts, layQuestion): between the question
+/* A question's picture (client/stage.ts, layQuestion): between the question
    and the tiles, or beside both. The script sets the figure's size in px from
    the picture's shape, so nothing moves when the file arrives. */
 .stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2vh; overflow: hidden; }
@@ -620,7 +620,7 @@ body.teach { padding-bottom: 96px; }
 /* Its room is kept while off, so the switch doesn't move the screen. */
 .speed-switch[aria-checked="false"] + .speed-note { visibility: hidden; }
 
-/* Pictures as answers (docs/design/pictures.md; client/screen.ts,
+/* Pictures as answers (docs/design/pictures.md; client/stage.ts,
    layPictureAnswers). The picture sits on the tile's colour, which shows where
    it is transparent. Its shape and the room for the votes' count and tick sit
    beside the picture ("row") or above it ("col"), reserved from the start so
@@ -661,3 +661,56 @@ body.teach { padding-bottom: 96px; }
 .ans .thumb.ansthumb { background: var(--ans); }
 .ans .thumb.ansthumb img { border: 0; border-radius: 0; }
 .ans.right .t.pic img, .ans.right .thumb { outline: 3px solid var(--good); outline-offset: 1px; }
+
+/* The question on a player's own device (client/device.ts, its root
+   .dscreen): the wall's stage (client/stage.ts) with the tiles as buttons,
+   a bar at the top and the next step at the foot. Light, as the class's
+   screens are. A page of a screen's height has no site header. */
+body.screen > .site-head { display: none; }
+/* A pull to refresh would reload the page, and a Solo quiz is only in it. */
+html.solo-on, html.solo-on body { overscroll-behavior-y: none; }
+/* Text tiles in one column where two would break their words (client/stage.ts, the device option). */
+.tiles.onecol { grid-template-columns: minmax(0, 1fr); }
+button.tile { border: 0; margin: 0; font: inherit; font-weight: 700; text-align: left; color: var(--ans-ink); cursor: default; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.tiles.open button.tile { cursor: pointer; }
+.tiles.open button.tile:active { transform: scale(.98); }
+/* The answer chosen; with the key, still readable if it doesn't count. */
+.tile.mine { outline: 6px solid var(--fg); outline-offset: -6px; }
+.tile.mine.dim { opacity: .75; }
+/* Alone there is no count beside the mark: the tile keeps room for the mark only. A room that shows the spread passes it (dspread). */
+.dscreen:not(.dspread) .tile .side { width: 1.6em; }
+.dscreen:not(.dspread) .tile.pic.row, .dscreen:not(.dspread) .tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 1.6em; }
+#qbar .dme { width: 1.6em; height: 1.6em; flex: none; }
+#qbar .dme svg { width: 100%; height: 100%; display: block; }
+#qbar #dscore { flex: none; display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }
+.dverdict { display: inline-flex; color: #fff; border-radius: 50%; padding: .12em; }
+.dverdict.right { background: var(--good); }
+.dverdict.wrong { background: var(--bad); }
+.dbar .grow { color: var(--muted); }
+.dbar .btn.bar-play { margin-left: auto; }
+
+/* Solo (client/entry-solo.ts): the start with the dressing menu, then the
+   device's screen, then the result. */
+.solo-head { text-align: center; }
+.solo-head .cnum { margin: .2em 0 0; color: var(--muted); font-weight: 600; }
+/* The start fits a phone's screen with Start on it: the avatar smaller than in a room's lobby, where it is all there is. */
+/* The start and the result (body.play.solo): the page below the site's header, not a screen's height beside it. */
+body.play.solo { display: flex; flex-direction: column; }
+.play.solo main { min-height: 0; flex: 1; }
+.solo .dress { gap: 16px; width: 100%; max-width: 56rem; margin: 0 auto; }
+.solo .dress .hero { width: min(30vw, 44vh); height: min(30vw, 44vh); }
+.solo .dress .look { width: 100%; max-width: 22rem; }
+.solo-go { width: 100%; min-height: 56px; font-size: 1.25rem; }
+@media (orientation: portrait) {
+  .solo .dress { gap: 14px; }
+  .solo .dress .hero { width: min(50vw, 26vh); height: min(50vw, 26vh); }
+}
+.solo-end { --hero: min(30vh, 56vw); flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; }
+/* Room above the avatar for its jump (@keyframes cheer lifts it by half its size). */
+.solo-end .hero { width: var(--hero); height: var(--hero); flex: none; margin-top: calc(.45 * var(--hero)); }
+.solo-end .cheer { width: 100%; height: 100%; }
+.solo-score { font-family: var(--font-brand); font-size: 2.6em; font-weight: 700; display: inline-flex; align-items: center; gap: .25em; font-variant-numeric: tabular-nums; }
+.solo-end .classres .bars { height: 9vh; margin-top: 0; }
+.solo-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 18px; }
+.solo-ai { margin: 0; font-size: 16px; max-width: 34em; }
+.solo-text { white-space: pre-wrap; text-align: left; max-width: 44em; max-height: 30vh; overflow: auto; margin: 0; padding: 10px 12px; font-size: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; user-select: text; -webkit-user-select: text; }

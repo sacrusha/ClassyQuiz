@@ -24,7 +24,8 @@ All commands run in `src/` unless said otherwise.
   conversion bigger. The local check (`client/open.ts`, `client/opening.ts`)
   runs `quiz/`, `server/images.ts` (`matchImages`) and `server/game.ts` (the
   fixes) in the browser, to check a quiz as the server will before anything
-  goes up; they stay free of platform code for that too.
+  goes up, and Solo plays a quiz on `server/game.ts` there
+  (`client/solo.ts`); they stay free of platform code for that too.
 - `shared/`: the protocol types and the constants that are tuned (`limits.ts`,
   `tempo.ts`).
 - `client/`: the page scripts, plain DOM without a framework, bundled per page
@@ -193,7 +194,7 @@ the repo; read a script before running it. Directories there:
   `bringToFront()` first.
 - `stacks/<name>/`: per-implementer scripts for starting and stopping a second
   local stack (`after-upload`, `fixc`, `flow`, `hard`, `identity`, `landing`,
-  `lp`, `lp3`, `owner5`, `pics`, `stack`, `tempo-bar`, `v3`, `winners`).
+  `lp`, `lp3`, `owner5`, `pics`, `solo`, `stack`, `tempo-bar`, `v3`, `winners`).
 - `identity/kit/`: the logo kit as it was made, with the boards and renders
   that `docs/brand/` leaves out; their mock-ups carry placeholder content.
 - `sim-diag/`: the instrumented simulation used to chase a score mismatch,
