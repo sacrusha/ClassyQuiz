@@ -382,11 +382,9 @@ behind these items — options and what each would cost — is
    "Dressing the avatar"). `design/teacher-devices.md`, "How the screens
    are arranged" and "Words for any crowd". Not deployed. Devices only (no
    wall) is not offered; why, and what would make it cheap after Peers: same
-   file. Open: the landing's film draws the lobby with the classroom's words
-   ("Let the class in ▶", "Class code", "the class watches this screen",
-   "The class is let in in a moment.") and its check without the toggle
-   (`docs/film/build/film.js`, `COMMON`); the words before the check are
-   item 9's.
+   file. The landing's film shows the local check, the lobby's check with
+   the toggle and these words (`docs/film/`); the words before the check
+   are item 9's.
 
 5. **Whoever asked the AI for the quiz wants to play it, and so must not have
    seen the questions.** This is what lets a quiz be played by its own maker
@@ -565,7 +563,7 @@ With the owner:
   browser chose or last had; devices only not offered; the questions
   folded on the lobby's check and the Remote's lobby; the words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
-  it", "‹ Back"); whether the film is redrawn for them now or with item 9.
+  it", "‹ Back"), which the landing's film now shows too.
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a

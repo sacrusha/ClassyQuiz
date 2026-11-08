@@ -13,8 +13,8 @@ Where a source disagrees with the film or with another source, it is marked
 3. **The real conversation has three teacher turns.** The film shows the first as Build's labelled ask (§1) and the second, which adds questions (2.3), as the teacher's second message, answered with the updated `.zip`; turn 3, the visual preview (2.4), is left out: the owner found the ask that changes the quiz more relevant to show than the AI's mock-up of it.
 4. **Shape/colour pairing differs between the AI's mock-up and the real site.** AI cards: red ▲, blue ●, orange ■, green ◆. Real wall and tablet: red ▲, blue ◆, yellow ●, green ■. The AI itself says "These are my own approximations". The film shows no card of the AI's; wall and tablet use the real pairing.
 5. **Typos:** none found in the three teacher asks (zoomed 2x). Only: ask 3 starts lowercase ("thanks.").
-6. **The question "Show the quiz here, or steer it from here?" is not on screen** as a sentence (it is only in docs/user-flow.md §1 rule 5). The real screen is the quiz title, then two buttons with a small line each (3.5).
-7. **Languages.** The site's own screens after the upload (the check, the join screen, the wall chrome, the Remote, the tablets) exist in English only: `landing-text.ts` header: "The lobby, the wall, the Remote and the tablets stay English too." The root page block (header code label, Build/Run text, asks) is in DE/EN/FR/IT, and the teacher's chat with their AI, and the quiz it makes, are in the teacher's language. The film follows the page's language the same way: the ask and the root page's words come from `landing-text.ts` at build time; the second ask, the AI's status lines and the quiz's words (one quiz, the 646 000 one, translated, not each language's own example) from `CONTENT` in `docs/film/build/film.js`, where `draft: true` marks a language whose words are drafts pending the owner's review; the site's own screens stay English. Wall *pictures* exist in 4 languages with a different question each (see 3.9); the film uses none of them.
+6. **The second device's question is not a sentence on screen.** The real screen is the quiz title, then two buttons with a small line each (3.5).
+7. **Languages.** The site's own screens after the upload (the local check, the lobby's check, the join screen, the wall chrome, the Remote, the tablets) exist in English only: `landing-text.ts` header: "The lobby, the wall, the Remote and the tablets stay English too." The root page block (header code label, Build/Run text, asks) is in DE/EN/FR/IT, and the teacher's chat with their AI, and the quiz it makes, are in the teacher's language. The film follows the page's language the same way: the ask and the root page's words come from `landing-text.ts` at build time; the second ask, the AI's status lines and the quiz's words (one quiz, the 646 000 one, translated, not each language's own example) from `CONTENT` in `docs/film/build/film.js`, where `draft: true` marks a language whose words are drafts pending the owner's review; the site's own screens stay English (`SITE` in `film.js`, which `src/client/film.test.ts` holds to the site's code). Wall *pictures* exist in 4 languages with a different question each (see 3.9); the film uses none of them.
 
 ## 1. Ask 1 on the landing page ("#bubble"), all four languages
 
@@ -77,38 +77,42 @@ Heading **Run a quiz** (DE Ein Quiz starten, FR Lancer un quiz, IT Avvia un quiz
 - DE: "Das Quiz deiner KI hochladen (.zip)" / "oder hier ablegen"
 - FR: "Importer le quiz de votre IA (.zip)" / "ou déposez-le ici"
 - IT: "Carica il quiz della tua IA (.zip)" / "o trascinalo qui"
-Progress after the pick (EN): "Reading the quiz…", "Preparing the pictures… 3 of 12", "Sending the quiz…" (DE "Das Quiz wird gelesen…", FR "Lecture du quiz…", IT "Lettura del quiz…"). Then straight to the check in this tab. The file sheet (the .zip on top) is the OS's, no site text.
+Progress after the pick (EN): "Reading the quiz…", "Preparing the pictures… 3 of 12", "Sending the quiz…" (DE "Das Quiz wird gelesen…", FR "Lecture du quiz…", IT "Lettura del quiz…"). Then the local check (3.3), in this tab. The file sheet (the .zip on top) is the OS's, no site text.
 
-### 3.3 The check, after upload (`screen.ts` `renderCheck`; docs/user-flow.md §3.3)
-English only. Top: title as h1 + small count; under it "Class code **63953**" (with a person icon and joined count once someone joined). Then the big button; then the teacher-code sentence; then the list.
-- Title line: "Big numbers on the number line · 13 questions" (the example's real title, 13 questions; singular would be "· 1 question"). docs/user-flow.md draws "Prozente · 12 questions" as a mock-up.
-- Class code: "Class code 63953"
-- Button: **Let the class in ▶**
-- The teacher-code sentence (verbatim): "A second device, to steer from or to show the quiz on: on **classyquiz.pages.dev**, type **63953 47**. Or open a second screen in a new window with a click." (last sentence is hidden on a phone; "63953 47" bold, tabular digits).
-- List header: "**13 questions**" and a button "Show the solutions" (becomes "Hide the solutions"). Rows: a number, the question text, a › chevron; folded. In the example: 1–3 "Which number does the arrow show?", 4 "Which number line has an arrow at 654 000?", 5 "…at 81 750?", 6 "…at 308 080?", 7 "Count in steps of 20 000: 500 000, 520 000, 540 000, ... What comes next?" (full list in `big-numbers-quiz.zip` `quiz.txt`).
-- Footer: "⋯ More".
-- Open row shows the four choices with shapes (`▲ ◆ ● ■` and ✓ on the right ones) and a link "Change the solution".
-The film follows the zip: "· 13 questions" on the check, "1 / 13" on the wall and the tablets.
+### 3.3 The local check, after the upload (`open.ts` `renderCheck`, the entries in `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`; docs/user-flow.md §3.1, "The local check")
+English only. The `.zip` is read in the browser; nothing has gone to the site. Top: the site's small header; the title as h1 with a small count: "Big numbers on the number line · 13 questions"; then "**How will it be played?**" and three cards, side by side on a laptop-wide window, stacked on a phone; each its name, a line, a button (the first card's the primary one) and a quiet line:
+- **Solo**: "You play the quiz on your own, to learn or review: the solution after each answer." [**Play ▶**] "Nothing goes to the site. A reload or closing the tab ends it."
+- **Peers**: "You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it." [**Play together ▶**] "This puts the quiz on the site, with a code for the others. Until then it is only in this browser."
+- **Quizmaster**: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device." [**Open the lobby ▶**] "This puts the quiz on the site. Until then it is only in this browser."
+Under the cards, folded: "▸ The questions and their solutions" and "If you will play it yourself, leave this closed." The film draws the laptop-wide layout, the fold below the frame, and the thumb taps "Open the lobby ▶" (while it goes up the site says "Sending the quiz…" under the button; the film leaves it out).
 
-### 3.4 The Remote on the phone, lobby (`teach.ts` `lobby`)
-The film shows only the button, in the bubble of each press. Words: **Let the class in ▶** (primary button, above); then the address **classyquiz.pages.dev**, the class code large **63953**, "**n** joined", avatars, the switch "Points for speed" with "A right answer 10, up to 5 more the quicker it comes."; then either "Projector ✓ · ⇄ Swap" (wall there), or "On the projector computer: on classyquiz.pages.dev, type 63953 47."; then the question list. **Start quiz ▶** is pinned at the bottom. On the wall a toast "Remote connected" appears when the phone arrives.
+### 3.4 The lobby's check, then the Remote's lobby (`screen.ts` `renderCheck`, `teach.ts` `lobby`; docs/user-flow.md §3.3)
+English only, and no role named (docs/design/teacher-devices.md, "Words for any crowd"). The check, the tab that opened the lobby (here the phone, the Projector until a second device takes that):
+- Title line as on the local check; right of it (under it on a phone) "Join code **63953**".
+- "**How are the screens arranged?**" and a toggle of two, side by side (stacked on a phone): **One screen** "It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker." and **Screen and remote** "One device shows the quiz, another steers it: a phone, say." One screen is pressed until this browser chose otherwise or had a Remote.
+- Under Screen and remote only, the how-to (verbatim): "On the second device, open **classyquiz.pages.dev** and type **63953 47**." and, hidden on a phone, " With two screens on this computer: open a second screen in a new window."
+- Always: "In a video call, the window you share is the screen everyone sees."
+- **Let everyone in ▶**; then folded "▸ The questions and their solutions" (closed on arrival), "⋯ More".
+The film: One screen pressed, the thumb taps Screen and remote, the how-to appears and the teacher code is zoomed and pulsing (on a phone, so without the line on a second screen).
+
+Once the laptop has taken the wall, the phone is the Remote; the film shows only its button, in the bubble of each press. Its lobby's words: the title, the join code; **Let everyone in ▶** until tapped; the address **classyquiz.pages.dev**, the code large **63953**, "**n** joined", avatars, the switch "Points for speed"; "Projector ✓ · ⇄ Swap" (wall there), else "On the projector computer: on classyquiz.pages.dev, type 63953 47."; "A second device, to steer from or to show the quiz on: on classyquiz.pages.dev, type 63953 47."; the questions folded. **Start quiz ▶** is pinned at the bottom.
 
 ### 3.5 Second device, after typing the teacher code (`play.ts` `enter`)
 Site header (fox + classyQuiz), then the quiz title as big heading ("Big numbers on the number line"), then two buttons:
-- **Show the quiz here** / small: "the class watches this screen"
+- **Show the quiz here** / small: "everyone watches this screen"
 - **Steer it from here** / small: "Start, next, the solution"
-**NOTE:** user-flow.md says the screen "asks 'Show the quiz here, or steer it from here?'". The code has no such sentence; it is only the two buttons, and the film shows only them.
 
 ### 3.6 Join screen = the wall in the lobby (`screen.ts` `renderJoin`, `renderLobby`)
+Before anyone is let in, a wall steered by a Remote shows the title in its top bar and "Joining opens in a moment." (the film's laptop and wall after "Show the quiz here").
 Wall version (class sees): top bar with the quiz title only; left column: QR code, then the fox + **classyquiz.pages.dev**, then the class code in huge digits **63953**; right column: a person icon with the count ("6"), avatars popping in. While nobody is in: a wordless drawing of a tablet (address bar "classyquiz.pages.dev", site header with the code box showing 63953 and ▶). After 90 s empty: "Nobody in yet? If the tablets can't open classyquiz.pages.dev, the school network may block it: what to tell IT ›" (don't draw this).
-Steering tab's version adds: **Start quiz ▶**, "Points for speed" switch + "A right answer 10, up to 5 more the quicker it comes.", and "‹ Questions", "A second device ›", "⋯" (teacher-only, below the fold).
+Steering tab's version adds: **Start quiz ▶**, "Points for speed" switch + "A right answer 10, up to 5 more the quicker it comes.", and "‹ Back", "A second device ›" (only where a remote is wanted), "⋯" (teacher-only, below the fold).
 
 ### 3.7 Wall during a question (`screen.ts` `renderQuestion`, `markTiles`; docs/user-flow.md §3.4; look at `src/public/landing/wall-en.webp`)
-Constant frame: top bar: left "**2 / 10**", then the answered avatars in a row (only those who answered, never their colour), right a person icon and "**20 / 20**" in green (green when all in; during answering "18 / 20" etc.; hidden while reading). Below: the question as a big centred bold heading, the picture band (white), four tiles 2x2. Corner/footer: "classyquiz.pages.dev · 34654" (the image's code), small "Full screen (F)", "⋯"; when the wall steers itself the footer is the steering bar instead (⋯, address · code, "⏱ Countdown / 15 s, then closes", "▶ Answers / closes answering"). The labelled buttons on the phone are the same: **Choices → Answers → Solution → Ranking → Question 3** ("Final ranking" after the last).
+Constant frame: top bar: left "**2 / 10**", then the answered avatars in a row (only those who answered, never their colour), right a person icon and "**20 / 20**" in green (green when all in; during answering "18 / 20" etc.; hidden while reading). Below: the question as a big centred bold heading, the picture band (white), four tiles 2x2. Corner/footer: "classyquiz.pages.dev · 34654" (the image's code), small "Full screen (F)", "⋯"; when the wall steers itself the footer is the steering bar instead (⋯, address · code, "⏱ Countdown / 15 s, then closes", "▶ Answers / closes answering"). The labelled buttons on the phone are the same, ▶ before the label (`steps.ts`; "Start quiz ▶" has it after): **▶ Choices → ▶ Answers → ▶ Solution → ▶ Ranking → ▶ Question 3** ("▶ Final ranking" after the last). The film's bubble shows the label alone, without the small line under some ("closes answering").
 Tile colours/shapes: red ▲, blue ◆, yellow ●, green ■.
 
 States:
-1. **Question (veiled):** question + picture visible; four tiles coloured with their shapes, **no text**; no count; tablets show the eye. Remote line: "The choices are hidden: the class reads the question."
+1. **Question (veiled):** question + picture visible; four tiles coloured with their shapes, faint (`app.css` `.tiles.veiled`, opacity .55), **no text**; no count; tablets show the eye. Remote line: "The choices are hidden: everyone reads the question."
 2. **Answering:** tiles show their text; the avatars pop into the bar; count "n / of" rises. Countdown: a bar drains along the top edge.
 3. **Locked in / the split:** each tile gets its count at the right and a bar along its foot; **no tick, nothing faded**. Remote: "Answering closed. The wall shows how the class answered, not yet the solution."
 4. **Solution:** tick ✓ before the count on the right tile(s); the others fade; the right students' avatars jump in a band over the question for about 4 s.
@@ -122,7 +126,7 @@ Question 1 of `big-numbers-quiz.zip` (`quiz.txt`): "**Which number does the arro
 
 ### 3.10 Tablets (`play.ts` `render`, `look.ts`)
 Top bar when playing: avatar left, "n / total" centre, "★ score" right.
-- **Lobby:** the child's avatar large, two rows of pictures below to dress it (six background shapes, eight hats); no words. Before the teacher lets the class in: "Your teacher lets the class in in a moment." Entering the code: input placeholder "12345", ▶ (aria "go"); wrong code: the code, ✗, the box again.
+- **Lobby:** the child's avatar large, three rows of pictures below to dress it (six background shapes, eight hats, six tools to hold); no words. Before joining opens: "Joining opens in a moment." Entering the code: input placeholder "12345", ▶ (aria "go"); wrong code: the code, ✗, the box again.
 - **Question (reading):** top bar and a large **eye** icon. No text.
 - **Answering:** top bar and four buttons (shape + choice text, colours as above). A tap marks the button at once with a dashed pulsing outline, solid once stored; the other buttons dim ("chosen").
 - **Locked:** the same buttons, no more taps, the chosen one marked, a small eye in the top bar.
@@ -135,7 +139,8 @@ Quiz title in the top bar. Podium with the top entries: avatar, place "1.", "★
 ## 4. Sources in short
 - Chat: `docs/example/conversation-original.webp`; `big-numbers-quiz.zip` `quiz.txt`.
 - Landing words, asks, Run box in 4 languages: `src/client/landing-text.ts`, `src/public/index.html`.
-- Check, join, wall, ranking: `src/client/screen.ts`, `final.ts`, `manage.ts`, `teach.ts`, `steps.ts`.
+- The local check: `src/client/open.ts`, `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`.
+- The lobby's check, join, wall, ranking: `src/client/screen.ts`, `final.ts`, `manage.ts`, `teach.ts`, `steps.ts`.
 - Second device screen, tablet states: `src/client/play.ts`.
 - Pictures of wall/tablet (EN/DE/FR/IT), not used by the site or the film: `src/public/landing/wall-xx.webp`, `tablet-xx.webp`.
 - Rules and states: `docs/user-flow.md` §1–3, `docs/design/question-flow.md`.
