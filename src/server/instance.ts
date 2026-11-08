@@ -16,6 +16,7 @@ import type {
   Entry,
   ImageRef,
   PackPic,
+  PeersView,
   PlayerView,
   Presence,
   QuizInfo,
@@ -29,7 +30,7 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { DAY_ROWS_FOR_CLASSES, classesFullMessage, isQuotaError, siteFullMessage, type SiteFull } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, DAY_ROWS_FOR_CLASSES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
 import { LOOK_WRITE_MS } from "../shared/looks.ts";
 
@@ -235,8 +236,12 @@ export class Instance extends DurableObject<Env> {
     leaveOutMissing = false,
     /** The answer pictures' small copies, for the students' devices. */
     smalls: UploadedImage[] = [],
+    /** The fixes made on the local check before the upload, as the browser sent them (G.applyFixes checks them). */
+    fixes: unknown = null,
+    /** "peers": a room that runs on its own, its opener a player (docs/design/peers.md); anything else: a room someone steers. */
+    mode: unknown = null,
   ): Promise<
-    | { ok: true; secret: string; code: string; teacher: string; token: string }
+    | { ok: true; secret: string; code: string; teacher: string; token: string; player?: string }
     | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull }
   > {
     if (this.meta) throw new Error("instance exists");
@@ -252,6 +257,22 @@ export class Instance extends DurableObject<Env> {
     const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
     const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil);
     if (typeof booked === "string") return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
+    const peers = mode === "peers";
+    // Peers: the others join with the code at once, so the day's rows are
+    // booked now; a steered room books them when the class is let in.
+    let rows: { rows: number } | "rows" | null = null;
+    if (peers) {
+      try {
+        rows = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(r.quiz.questions.length, true), codeUntil);
+      } catch (e) {
+        // The ledger can't be reached: the room opens unbooked rather than be stopped by the site's own bookkeeping.
+        console.error("rows not booked:", e instanceof Error ? e.message : String(e));
+      }
+      if (rows === "rows") {
+        await this.budget().release(this.ctx.id.toString()).catch(() => {});
+        return { ok: false, errors: [], warnings: [], error: roomsFullMessage() };
+      }
+    }
     const code = await this.claimCode(codeUntil);
     this.quizRecord = {
       quiz: r.quiz,
@@ -261,13 +282,26 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
+    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
+    if (rows) {
+      this.meta.dayRows = rows.rows;
+      this.meta.rows = { written: 0 };
+    }
     // The pasting tab is about to open the Projector with it.
-    this.lastPoll.set(`screen:${token}`, now);
+    if (!peers) this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
+    G.applyFixes(this.game, fixes);
     G.startRun(this.game, code, randomToken(9), Math.random);
-    // Teacher devices come in any time; the class once the teacher lets it in.
-    this.game.run!.waiting = true;
+    const run = this.game.run!;
+    let player: string | undefined;
+    if (peers) {
+      // The pasting tab is about to come in as this player, the room's opener.
+      player = randomToken();
+      run.peers = { host: G.addPlayer(this.game, randomToken(12), player, now, Math.random).id };
+    } else {
+      // Teacher devices come in any time; the class once the teacher lets it in.
+      run.waiting = true;
+    }
     // The alarm goes first: should the write below fail halfway, the alarm
     // finds an instance without meta and deletes whatever was written.
     await this.scheduleAlarm();
@@ -278,12 +312,12 @@ export class Instance extends DurableObject<Env> {
       await this.budget().release(this.ctx.id.toString()).catch(() => {});
       throw e;
     }
-    return { ok: true, secret, code, teacher, token };
+    return { ok: true, secret, code, teacher, token: peers ? "" : token, ...(player ? { player } : {}) };
   }
 
   /**
    * The upload with pictures, as multipart/form-data: "text", "leaveOut",
-   * and per picture an "image" file with its "imageName" (a text field: a
+   * "fixes" (JSON, the local check's), "mode", and per picture an "image" file with its "imageName" (a text field: a
    * non-ASCII file name in a multipart header isn't decoded reliably); per
    * answer picture also a "small" file with its "smallName".
    */
@@ -317,8 +351,8 @@ export class Instance extends DurableObject<Env> {
       Promise.all(list.map(async (f, i) => ({ name: names[i] as string, bytes: new Uint8Array(await (f as File).arrayBuffer()) })));
     const images = await read(files, names);
     const smalls = await read(smallFiles, smallNames);
-    const r = await this.create(text, images, form.get("leaveOut") === "missing", smalls);
-    const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token } : r;
+    const r = await this.create(text, images, form.get("leaveOut") === "missing", smalls, readFixes(form.get("fixes")), form.get("mode"));
+    const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token, ...(r.player ? { player: r.player } : {}) } : r;
     return json(body);
   }
 
@@ -406,6 +440,8 @@ export class Instance extends DurableObject<Env> {
    */
   async teacherCheck(digits: string, ip: string | null, secret?: string): Promise<"ok" | "wrong" | "locked"> {
     if (!this.live()) return "wrong";
+    // A Peers room has no teacher devices: every device is a player's.
+    if (this.game!.run?.peers) return "wrong";
     if (typeof secret === "string" && safeEqual(secret, this.meta!.secret)) return "ok";
     return this.checkTeacher(digits, await this.deviceKey(ip));
   }
@@ -580,7 +616,7 @@ export class Instance extends DurableObject<Env> {
     const meta = this.meta!;
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
-    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands } satisfies QuizInfo);
+    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, ...(game.run?.peers ? { peers: true as const } : {}) } satisfies QuizInfo);
   }
 
   /**
@@ -637,8 +673,9 @@ export class Instance extends DurableObject<Env> {
         return;
       }
       if (session.role !== "guest") this.sendView(ws, session);
-      // Someone arrived: the teacher's tabs show who, guests which roles are free.
-      if (session.role !== "guest") this.broadcastStaff();
+      // Someone arrived: the teacher's tabs show who, guests which roles are
+      // free; in a Peers room every device shows who is in.
+      if (session.role !== "guest") this.broadcast(undefined, !this.game?.run?.peers);
       return;
     }
     if (msg.t === "cmd") {
@@ -651,7 +688,7 @@ export class Instance extends DurableObject<Env> {
       for (const m of replies.direct) send(ws, m);
       if (next && next.role === "player") {
         this.sendView(ws, next);
-        this.broadcastStaff();
+        this.broadcast(undefined, !this.game?.run?.peers);
       }
     }
   }
@@ -659,6 +696,11 @@ export class Instance extends DurableObject<Env> {
   async webSocketClose(ws: WebSocket): Promise<void> {
     const session = ws.deserializeAttachment() as Session | null;
     if (!session || session.role === null || session.role === "guest") return;
+    // A Peers room doesn't wait for a device that closed its line (a tab closed).
+    if (session.role === "player" && this.game?.run?.peers) {
+      await this.peersCheck(ws);
+      return;
+    }
     // A teacher's tab that closed its socket (reload, a phone locking its
     // screen) fades like one that went quiet: away after FRESH_MS, not at
     // once, so a reload doesn't flip the steering to the Projector and back.
@@ -879,6 +921,8 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "tick") return { direct: [ack(true), this.chooseMessage()] };
         if (cmd.op === "takeRole") {
           if (cmd.role !== "screen" && cmd.role !== "remote") return { direct: [ack(false, "unknown role")] };
+          // A Peers room has no teacher devices (teacherCheck).
+          if (G.isPeers(game)) return { direct: [ack(false, WRONG_TEACHER_CODE)] };
           // The teacher code, checked here whatever the page did before; the
           // uploading device's secret (Resume) needs no digits and isn't counted.
           const owner = typeof cmd.secret === "string" && safeEqual(cmd.secret, meta.secret);
@@ -924,9 +968,54 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "dress") {
           // In the lobby: the child's look. Acknowledged once stored, with
           // the class's other changes of the same second.
-          const outcome = G.dress(game, session.player, cmd.b, cmd.h);
+          const outcome = G.dress(game, session.player, cmd.b, cmd.h, cmd.t);
           if (outcome === "stored") await this.storeLooks();
           return { direct: [ack(outcome !== "refused")] };
+        }
+        if (cmd.op === "ready") {
+          // Peers: done with the solution; the room steps on once everyone present is.
+          const outcome = G.setReady(game, session.player, cmd.q);
+          if (outcome === "stored") await this.peersStore();
+          return { direct: [ack(outcome !== "refused")] };
+        }
+        if (G.isHost(game, session.player) && cmd.op !== "answer") {
+          // The player who opened a Peers room: Start, on without waiting,
+          // the final ranking, a fix of the solution, Remove, Exit.
+          let changed: ("run" | "fixes")[] = ["run"];
+          switch (cmd.op) {
+            case "begin":
+            case "goOn":
+            case "finish":
+              if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
+              if (cmd.op === "begin") {
+                G.begin(game, now);
+                await this.shrinkRows();
+              } else if (cmd.op === "goOn") G.goOn(game, now, this.nextView());
+              else G.finish(game, now);
+              break;
+            case "setCounts":
+              G.setCounts(game, cmd.q, this.fromScreen(cmd.q, cmd.counts));
+              changed = ["fixes"];
+              break;
+            case "setVoid":
+              G.setVoid(game, cmd.q, !!cmd.value);
+              changed = ["fixes"];
+              break;
+            case "remove":
+              if (cmd.player === session.player) return { direct: [ack(false, "not allowed")] };
+              G.removePlayer(game, cmd.player);
+              // The room may have waited only for that avatar.
+              G.peersStep(game, now, this.nextView(), this.connectedPlayers());
+              break;
+            case "endInstance":
+              await this.endInstance(id);
+              return { direct: [ack(true)] };
+            default:
+              return { direct: [ack(false, "not allowed")] };
+          }
+          await this.afterTeacherChange(changed);
+          if (game.run?.phase === "final") await this.settleRows();
+          return { direct: [ack(true)] };
         }
         if (cmd.op !== "answer") return { direct: [ack(false, "not allowed")] };
         const view = typeof cmd.v === "number" ? cmd.v : Infinity;
@@ -936,7 +1025,9 @@ export class Instance extends DurableObject<Env> {
         // the same button again isn't (children hammer buttons; each write
         // comes out of the account's daily allowance).
         const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now, typeof cmd.ms === "number" ? cmd.ms : undefined);
-        if (outcome === "recorded") {
+        // Peers: the last answer the room waited for shows the solution, in the same write.
+        if (outcome === "recorded" && G.isPeers(game)) await this.peersStore();
+        else if (outcome === "recorded") {
           // Everyone present has answered during Last call: it locks in now
           // rather than leaving the class to watch it run out.
           if (G.runningClock(game) && this.allAnswered()) {
@@ -1072,7 +1163,11 @@ export class Instance extends DurableObject<Env> {
       if (game.run?.phase === "final") await this.settleRows();
       return { direct: [ack(true)] };
     } catch (e) {
-      if (e instanceof G.GameError) return { direct: [ack(false, e.message)] };
+      if (e instanceof G.GameError) {
+        // A Peers room has nobody to ask: the class's refusals without "Ask your teacher".
+        const words = G.isPeers(game) ? ({ [CLASS_FULL]: ROOM_FULL, [CLASS_STARTED]: ROOM_STARTED }[e.message] ?? e.message) : e.message;
+        return { direct: [ack(false, words)] };
+      }
       // The account's daily allowance is spent: the tab says so rather than
       // looking offline (docs/design/hosting-and-limits.md, "When the allowance runs out anyway"). What's in memory may be
       // ahead of storage now; reload it, so nothing shows that isn't stored.
@@ -1129,7 +1224,7 @@ export class Instance extends DurableObject<Env> {
     const rows = this.meta!.rows;
     const run = this.game!.run;
     if (!rows || rows.settled || !run) return;
-    const rest = rowsFromStart(G.activePlayers(run).length, this.game!.quiz.questions.length);
+    const rest = rowsFromStart(G.activePlayers(run).length, this.game!.quiz.questions.length, G.isPeers(this.game!));
     await this.budget().moveRows(this.ctx.id.toString(), rows.written + rest).catch(() => {});
   }
 
@@ -1244,6 +1339,9 @@ export class Instance extends DurableObject<Env> {
     // A device's wrong teacher codes are forgotten once they no longer count.
     const guesses = this.guessesExpire();
     if (guesses != null) at = Math.min(at, guesses);
+    // Peers: someone the room waits for may go away, and the room on without them.
+    const recheck = this.peersRecheck();
+    if (recheck != null) at = Math.min(at, recheck);
     await this.ctx.storage.setAlarm(at);
   }
 
@@ -1266,7 +1364,59 @@ export class Instance extends DurableObject<Env> {
       await this.persist(["run"]);
       this.broadcast();
     }
+    await this.peersCheck();
     await this.scheduleAlarm();
+  }
+
+  /**
+   * Peers: a player's change is stored, and when everyone present is done
+   * the room steps on in the same write (docs/design/peers.md, "Nobody
+   * steers"). A step is the room's use, as a teacher's step is: it keeps
+   * the quiz alive.
+   */
+  private async peersStore(): Promise<void> {
+    const game = this.game!;
+    if (G.peersStep(game, Date.now(), this.nextView(), this.connectedPlayers())) {
+      await this.afterTeacherChange(["run"]);
+      if (game.run?.phase === "final") await this.settleRows();
+      return;
+    }
+    await this.persist(["run"]);
+    await this.scheduleAlarm();
+    this.broadcast();
+  }
+
+  /**
+   * Peers: presence changes with time, not with events, so the alarm and a
+   * closed line look again: the room steps on when those it waited for went
+   * away, and every device's "waiting for" follows. exclude: a line closing.
+   */
+  private async peersCheck(exclude?: WebSocket): Promise<void> {
+    const game = this.game;
+    if (!game || !G.isPeers(game)) return;
+    if (G.peersStep(game, Date.now(), this.nextView(), this.connectedPlayers(exclude))) {
+      await this.afterTeacherChange(["run"]);
+      if (game.run?.phase === "final") await this.settleRows();
+      return;
+    }
+    await this.scheduleAlarm();
+    this.broadcast(exclude);
+  }
+
+  /**
+   * Peers: when the first device the room waits for would count as away
+   * (not heard from for FRESH_MS), for the alarm; null when the room waits
+   * for nobody, or nobody is done yet, which holds it whoever is there.
+   */
+  private peersRecheck(): number | null {
+    const game = this.game;
+    if (!game || !G.isPeers(game)) return null;
+    const now = Date.now();
+    const heard = this.lastHeard();
+    const present = new Set([...heard].filter(([, t]) => now - t < FRESH_MS).map(([id]) => id));
+    const waiting = G.waitingFor(game, present);
+    if (waiting.length === 0 || !G.anyoneDone(game)) return null;
+    return Math.max(now + 1000, Math.min(...waiting.map((id) => heard.get(id) ?? now)) + FRESH_MS + 100);
   }
 
   /**
@@ -1278,9 +1428,11 @@ export class Instance extends DurableObject<Env> {
     const rows = this.meta?.rows;
     await this.budget().release(this.ctx.id.toString(), rows && !rows.settled ? rows.written : undefined).catch(() => {});
     const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
+    const host = this.game?.run?.peers?.host;
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;
-      if (ackId && (s?.role === "screen" || s?.role === "remote")) send(ws, { t: "ack", id: ackId, ok: true });
+      // Whoever ended it hears that it worked before the line closes: a teacher tab, or a Peers room's opener.
+      if (ackId && (s?.role === "screen" || s?.role === "remote" || (s?.role === "player" && s.player === host))) send(ws, { t: "ack", id: ackId, ok: true });
       send(ws, gone);
       ws.close(4000, "gone");
     }
@@ -1295,17 +1447,22 @@ export class Instance extends DurableObject<Env> {
 
   /** Players whose device was heard from recently: an open socket that still pings, or a recent poll. */
   private connectedPlayers(exclude?: WebSocket): Set<string> {
-    const ids = new Set<string>();
     const now = Date.now();
+    return new Set([...this.lastHeard(exclude)].filter(([, t]) => now - t < FRESH_MS).map(([id]) => id));
+  }
+
+  /** When each player's device was last heard from: an open socket's ping or hello, or a poll. */
+  private lastHeard(exclude?: WebSocket): Map<string, number> {
+    const at = new Map<string, number>();
+    const note = (id: string, t: number) => at.set(id, Math.max(at.get(id) ?? 0, t));
     for (const ws of this.ctx.getWebSockets()) {
       if (ws === exclude || ws.readyState !== WebSocket.OPEN) continue;
       const s = ws.deserializeAttachment() as Session | null;
       if (!s || s.role !== "player") continue;
-      const pinged = this.ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? 0;
-      if (now - Math.max(pinged, s.since ?? 0) < FRESH_MS) ids.add(s.player);
+      note(s.player, Math.max(this.ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? 0, s.since ?? 0));
     }
-    for (const [pid, t] of this.lastPoll) if (!pid.includes(":") && now - t < FRESH_MS) ids.add(pid);
-    return ids;
+    for (const [pid, t] of this.lastPoll) if (!pid.includes(":")) note(pid, t);
+    return at;
   }
 
   private chooseMessage(): Extract<ServerMessage, { t: "choose" }> {
@@ -1405,6 +1562,22 @@ export class Instance extends DurableObject<Env> {
     return out;
   }
 
+  /** Question i's picture as the class sees it: none once hidden by a fix. */
+  private shownImage(i: number): string {
+    return this.game!.fixes[i].hidePicture ? "" : this.game!.quiz.questions[i].image;
+  }
+
+  /** Every picture the class may be shown, to fetch ahead (in the lobby) so no question waits on one. */
+  private allPictures(): string[] {
+    const game = this.game!;
+    const pictures = new Set<string>();
+    for (const name of [game.quiz.background, ...game.quiz.questions.flatMap((x, i) => (game.fixes[i].skip ? [] : [this.shownImage(i), x.background, ...x.answers.map((a) => a.image ?? "")]))]) {
+      const ref = this.imageRef(name);
+      if (ref) pictures.add(ref.src);
+    }
+    return [...pictures];
+  }
+
   private screenView(cache: ViewCache, exclude?: WebSocket): ScreenView {
     const game = this.game!;
     const meta = this.meta!;
@@ -1414,13 +1587,7 @@ export class Instance extends DurableObject<Env> {
     const q = run && run.current >= 0 ? game.quiz.questions[run.current] : null;
     const prog = G.progress(game);
     const showQ = q && (phase === "question" || phase === "reveal");
-    const shownImage = (i: number) => (game.fixes[i].hidePicture ? "" : game.quiz.questions[i].image);
-    const pictures = new Set<string>();
-    for (const name of [game.quiz.background, ...game.quiz.questions.flatMap((x, i) => (game.fixes[i].skip ? [] : [shownImage(i), x.background, ...x.answers.map((a) => a.image ?? "")]))]) {
-      const ref = this.imageRef(name);
-      if (ref) pictures.add(ref.src);
-    }
-    const image = showQ ? this.imageRef(shownImage(run!.current)) : null;
+    const image = showQ ? this.imageRef(this.shownImage(run!.current)) : null;
     const pics = showQ ? this.answerPics(run!.current) : undefined;
     // Who answered, and of how many: the devices that are there, or that
     // answered and went away since. A dead tablet stops holding the count
@@ -1434,7 +1601,7 @@ export class Instance extends DurableObject<Env> {
       code: meta.code,
       teacher: meta.teacher,
       background: this.imageRef(game.quiz.background),
-      pictures: [...pictures],
+      pictures: this.allPictures(),
       zoom: !!image && G.zoomed(game),
       phase,
       current: run ? run.current : -1,
@@ -1549,8 +1716,10 @@ export class Instance extends DurableObject<Env> {
     const speed = G.speedScale(game);
     const ans = G.answering(game) ?? "open";
     const votes = G.lockedIn(game);
-    const packs = this.packUrls();
-    const smalls = run && run.current >= 0 && ans !== "reading" ? this.answerSmalls(run.current) : undefined;
+    const peers = run?.peers ? this.peersViews() : null;
+    // A Peers device lays out the question itself, with the pictures the wall would show: not the small copies.
+    const packs = peers ? undefined : this.packUrls();
+    const smalls = !peers && run && run.current >= 0 && ans !== "reading" ? this.answerSmalls(run.current) : undefined;
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
       const phase = run ? run.phase : "idle";
@@ -1591,8 +1760,45 @@ export class Instance extends DurableObject<Env> {
                 points: speed ? G.pointsFor(game, run.current, player) : null,
               }
             : null,
+        ...(peers ? { peers: peers(player) } : {}),
       };
     };
+  }
+
+  /**
+   * Peers (docs/design/peers.md): what a wall would show, on each device,
+   * and what the room's opener needs to start, fix and remove.
+   */
+  private peersViews(): (player: string) => PeersView {
+    const game = this.game!;
+    const meta = this.meta!;
+    const run = game.run!;
+    const present = this.connectedPlayers();
+    const showQ = run.current >= 0 && (run.phase === "question" || run.phase === "reveal");
+    const q = showQ ? game.quiz.questions[run.current] : null;
+    const pics = showQ ? this.answerPics(run.current) : undefined;
+    const host = G.playerById(run, run.peers!.host);
+    const shared = {
+      title: game.quiz.title,
+      code: meta.code,
+      hostAvatar: host && !host.removed ? host.avatar : null,
+      players: G.activePlayers(run).map((p) => ({ id: p.id, avatar: p.avatar, away: !present.has(p.id) })),
+      waitingFor: G.waitingFor(game, present),
+      last: G.lastQuestion(game),
+      ...(run.phase === "lobby" ? { pictures: this.allPictures() } : {}),
+      question: q
+        ? {
+            text: q.text,
+            image: this.imageRef(this.shownImage(run.current)),
+            background: this.imageRef(q.background || game.quiz.background),
+            ...(pics ? { pics } : {}),
+          }
+        : null,
+      dist: run.phase === "reveal" ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
+      winners: run.phase === "reveal" ? G.winners(game, run.current) : [],
+      ranking: run.phase === "reveal" || run.phase === "final" ? this.ranking() : null,
+    };
+    return (player: string): PeersView => ({ ...shared, host: player === run.peers!.host, ready: G.isReady(game, player) });
   }
 
   private viewFor(session: Session, cache: ViewCache = {}, exclude?: WebSocket): View | null {
@@ -1684,4 +1890,14 @@ function safeEqual(a: string, b: string): boolean {
   let d = 0;
   for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return d === 0;
+}
+
+/** The upload's "fixes" field (JSON text), or null when it isn't there or isn't JSON; G.applyFixes checks the rest. */
+function readFixes(field: unknown): unknown {
+  if (typeof field !== "string") return null;
+  try {
+    return JSON.parse(field);
+  } catch {
+    return null;
+  }
 }

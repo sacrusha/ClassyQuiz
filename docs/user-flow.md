@@ -6,8 +6,10 @@ docs/design/; this file says what the screens show.
 
 ## 1. The model
 
-1. **One quiz, one class.** Uploading starts it: the upload is the lesson's
-   quiz, and a parallel class gets its own upload. Its code is made at
+1. **One quiz, one class.** A quiz file opens in the browser first, on the
+   local check (§3.1), and nothing of it goes to the site there. Opening the
+   lobby uploads it and starts it: the upload is the lesson's quiz, and a
+   parallel class gets its own upload. Its code is made at
    upload and lives as long as the quiz: until the teacher ends it (Exit at
    the final ranking, or Delete), or 3 h after the last teacher action. The
    class joins with it.
@@ -33,10 +35,11 @@ docs/design/; this file says what the screens show.
    Roles belong to tabs, not devices: a laptop with two screens holds both in
    two windows. Each tab keeps its role token in sessionStorage. A reload,
    sleep or dropped connection resumes the same role with nothing to do.
-4. **The tab you open the quiz in becomes the Projector, and it steers itself.**
-   In the lobby it shows the teacher's check first, then, one tap on, the
-   class's join screen (§3.3). During the quiz a slim bar carries the next
-   step. One mirrored laptop needs nothing else. A clicker or the keyboard
+4. **The tab that opens the lobby becomes the Projector, and it steers itself.**
+   In the lobby it shows the teacher's check first (how the screens are
+   arranged, the questions folded), then, one tap on, the class's join
+   screen (§3.3). During the quiz a slim bar carries the next step. One
+   mirrored laptop needs nothing else: the check's "One screen". A clicker or the keyboard
    works on any Projector during the quiz (§3.4).
 5. **A second device** types the teacher code. What happens depends on what
    is there, never on anything the site senses about the device:
@@ -47,8 +50,8 @@ docs/design/; this file says what the screens show.
      join screen.
    - *A Projector and a Remote, one of them gone:* no question; it takes the
      role that is free.
-   - *Both there:* "This quiz already has a screen for the class and one that
-     steers." A tab that is there is never pushed aside. A Remote whose tab
+   - *Both there:* "This quiz already has a screen that shows it and one
+     that steers." A tab that is there is never pushed aside. A Remote whose tab
      closed, or that hasn't been heard from for 25 s, isn't there for this:
      the teacher code takes it at once.
    - *Nothing there:* no question; it shows and steers, as a tab that just
@@ -80,9 +83,9 @@ tablets, and a quiz made in the break.
 | When | Teacher | Class |
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
-| Break | **Laptop:** opens `classyquiz.pages.dev` and uploads the AI's .zip there (or drops it). The check: the right quiz, a spot fix (§3.3). | — |
-| Break, optional | **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
-| Lesson starts | **Let the class in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat) sees it change there. |
+| Break | **Laptop:** opens `classyquiz.pages.dev` and chooses the AI's .zip there (or drops it). The local check: the right quiz, a spot fix, Open the lobby (§3.1). | — |
+| Break, optional | **Laptop:** on the check, Screen and remote, which shows the teacher code. **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
+| Lesson starts | **Let everyone in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat, a tool) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
 | End | Final ranking: the podium, the class in front of it, the class's result; a photo if wanted. Exit, and every screen goes to the root page. | Their place on their tablet, then the root page. |
 
@@ -105,13 +108,13 @@ Purpose and reasons: docs/design/root-page.md.
 │          [▶] ──●──'───'─'──'────── 0:00 / 1:00 [1×] [full screen]    │
 │                              The example, step by step ›             │
 ├──────────────────────────────────┬───────────────────────────────────┤
-│ Build a quiz                     │ Run a quiz                         │
+│ Build a quiz                     │ Play a quiz                        │
 │ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
-│   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Class code  ││ quiz this device
+│   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Join code   ││ quiz this device
 │   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
 │ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
 │   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   [sheets] [chess board] [?]     │ │ [ Upload the quiz your AI      │ │
+│   [sheets][chess][1][3][▭][?]    │ │ [ Open the quiz your AI        │ │
 │   tabs, one ask shown:           │ │   made (.zip) ] or drop it here│ │
 │  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
@@ -139,42 +142,48 @@ Purpose and reasons: docs/design/root-page.md.
   Under it, "The example, step by step ›" links `/example` (the worked
   example).
 - **Below 860 px wide** Build and Run stand one above the other, Run first.
-- **Build's step 2** has three example asks behind three picture tabs: the
+- **Build's step 2** has six example asks behind six picture tabs: the
   labelled one with photos of sheets, a chess quiz described in words (with
-  the AI, plan and date that answered it), and the open one ("Read
-  classyquiz.pages.dev. I need a classyQuiz. Help?").
-- **Run a quiz takes a .zip and nothing else.** The button opens the file
+  the AI, plan and date that answered it), practising alone for a test ("I'll
+  play it myself, so please keep the questions and answers to yourself"), a
+  games night with friends ("I'm playing too, so don't show me the
+  questions"), a training session on the big screen, and the open one ("Read
+  classyquiz.pages.dev. I need a classyQuiz. Help?"). Pictures: the sheets, a
+  chess board, one person, three people, a screen before an audience, a
+  question mark.
+- **Play a quiz takes a .zip and nothing else.** The button opens the file
   chooser; a .zip can also be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
     chosen one.
   - Text pasted or dropped anyway gets "The site takes the quiz as a .zip
     file, not as text. Your AI can make the quiz as one .zip file, to
-    download from the chat and upload here." It is counted as "paste".
+    download from the chat and open here." It is counted as "paste".
   - Any other file gets "The site takes the quiz as a .zip file, not a
     .docx file." and the same sentence. Attempts are counted by format.
-  - No connection, or an answer that isn't the site's (a filter's page):
-    the network is named as a possible cause, with "What to tell IT ›" to
-    `/check#it`.
 - **Problems with the quiz:** listed in place, with "Copy the message for your
   AI" (which asks for a corrected .zip, in English), plus "Continue without
   these pictures" when it's pictures.
-- **On success:** straight to the check, in this tab as the Projector.
+- **A browser that keeps no site data** can't pass the quiz to the check:
+  "This browser didn't let the site open the quiz (it may block site data).
+  Try another browser."
+- **On success:** the local check (below), in this tab. Nothing has gone to
+  the site.
 - **Coming back:** the latest quiz this device started, while it is on
   the site (until Exit, final ranking included): its title, where it stands, Back to the
-  quiz (`/play#` + the teacher code), the class code, and "On another device:
+  quiz (`/play#` + the teacher code), "Join code" and the code, and "On another device:
   type 63953 47 in the code box". No closing time, no Delete, no older
   quizzes.
 - **The own copy:** one line under Run, only on a device that has
   uploaded before (`cq.days`, dates only) and only when the site was full
   or busy on a day of the last 30 (`GET /api/site`).
-- **On the check, before the class is let in,** on a day the free site is
+- **On the lobby's check (§3.3), before the players are let in,** on a day the free site is
   nearly full: "The free site is nearly full today: room for about 2 more
-  classes." (one more class: "room for one more class"); when no class fits
-  or letting in was refused: "The free site can't take more classes today:
-  the ones running now use what is left. It takes new ones again at 01:00
+  groups." (one more: "room for one more group"); when no class fits
+  or letting in was refused: "The free site can't take more players today:
+  the quizzes under way use what is left. It takes new ones again at 01:00
   Swiss time." Both followed by "More quizzes: a site of your own or your
   school's ›" (`/own-copy`, in a new tab). The Remote's lobby shows the same.
-- **The network check** is no longer on the root page: the upload error,
+- **The network check** is no longer on the root page: opening the lobby,
   the wall's "Nobody in yet?" line after 90 s of an empty lobby,
   and a device that can't reach the quiz carry the help where the failure
   shows (docs/design/root-page.md).
@@ -193,29 +202,97 @@ everything to try the same on your own AI.
                           [Photo, page 1 (.jpg)] [Photo, page 2 (.jpg)] [The sheets (.pdf)]
 2 The conversation        [top of the conversation picture]  Read the whole conversation ›
 3 The quiz                [big-numbers-quiz.zip]
-4 Run it                  [ Start the example quiz ]
-                          It runs on this site like any quiz, on the projector
-                          and on your students' devices.
+4 Try it                  [ Start the example quiz ]
+                          On your own, it stays in this browser. With friends
+                          or a class, it runs on this site like any quiz.
 ```
 
-"Start the example quiz" uploads the example as Run does and lands on the
-check (§3.3). `/own-copy` and `/check` have the same small header.
+"Start the example quiz" opens `/open?example=<lang>`: the example on the
+local check, read as Run reads a file, nothing uploaded. `/own-copy` and
+`/check` have the same small header.
+
+#### The local check (`/open`)
+
+A quiz read from its .zip in this browser, before anything of it goes to
+the site; English. Purpose and reasons: docs/design/local-check.md.
+
+```
+[fox] classyQuiz                         (the site's small header, to the root)
+─────────────────────────────────────────────────────────────
+Big numbers on the number line · 13 questions
+  How will it be played?               (only with two or more ways)
+┌ Solo ─────────────────────────────────────────────────────┐
+│ You play the quiz on your own, to learn or review: the    │
+│ solution after each answer.                               │
+│ [ Play ▶ ]                                                │
+│ Nothing goes to the site. A reload or closing the tab     │
+│ ends it.                                                  │
+└───────────────────────────────────────────────────────────┘
+┌ Peers ────────────────────────────────────────────────────┐
+│ You play the quiz with friends, each on your own device.  │
+│ It moves on once everyone has answered, so nobody has to  │
+│ run it.                                                   │
+│ [ Play together ▶ ]                                       │
+│ This puts the quiz on the site, with a code for the       │
+│ others. Until then it is only in this browser.            │
+└───────────────────────────────────────────────────────────┘
+┌ Quizmaster ───────────────────────────────────────────────┐
+│ You run the quiz for a class or a group: the questions on │
+│ a big screen, the answers on everyone's own device.       │
+│ [ Open the lobby ▶ ]                                      │
+│ This puts the quiz on the site. Until then it is only in  │
+│ this browser.                                             │
+└───────────────────────────────────────────────────────────┘
+─────────────────────────────────────────────────────────────
+▸ The questions and their solutions · 2 notes from the site
+    If you will play it yourself, leave this closed.
+                                  (while a way to play it yourself is offered)
+```
+
+- **One card per way to play it**, each with its own button; the first
+  card's is the primary one. Only what is built is offered: today Solo,
+  Peers, then Quizmaster.
+- **The questions are folded** under the cards, closed on arrival. Opened,
+  they are the lobby's list (§3.3): thumbnails, answers folded, Show the
+  solutions, the site's warnings, and Change the solution with its fixes
+  (Don't count this question, Skip it, Hide the picture). The fixes go up
+  with the quiz.
+- **Play ▶** plays the quiz in this tab (§3.8); nothing goes to the site.
+- **Play together ▶** uploads the quiz as a room that runs on its own and
+  comes into it, in this tab, as its first player (§3.9); Back from there
+  passes this page. While it goes up and when it is refused, as Open the
+  lobby.
+- **Open the lobby ▶** uploads the quiz and lands on the lobby's check
+  (§3.3), in this tab as the Projector; Back from there passes this page.
+  While it goes up: "Sending the quiz…". Refused, under the button: the
+  site's day ("The free site can't take more quizzes today. …", "… has no
+  room for another quiz right now …", "… has used up today's allowance …",
+  each with "More quizzes: a site of your own or your school's ›"), or no
+  connection or an answer that isn't the site's (a filter's page): the
+  network named as a possible cause, with "What to tell IT ›" to
+  `/check#it`.
+- **A reload, or arriving with nothing:** "No quiz open here. A quiz opens
+  from the .zip your AI made, on the start page. This page keeps nothing of
+  it once it reloads or closes, so open the .zip there again." [To the
+  start page]. The example's check reads the example again instead.
 
 ### 3.2 The two entrances after a code
 
 Students (`/play#63953`) get no screen of their own:
-- before the teacher lets the class in, a wait: "Your teacher lets the
-  class in in a moment.", joining by itself at the tap;
-- in the lobby, straight to their avatar, with two rows of pictures below
-  it to dress it until Start: six background shapes in its colour and
-  eight hats (docs/design/class-and-wall.md);
+- before the teacher lets the class in, a wait: "Joining opens in a
+  moment.", joining by itself at the tap;
+- in the lobby, straight to their avatar, with three rows of pictures below
+  it to dress it until Start: six background shapes in its colour, eight
+  hats and six tools to hold (docs/design/class-and-wall.md);
 - once running, "Which one are you?" with the absent players' avatars and
   **+**, when there are any; a tablet whose avatar another device took
   back while it was away gets the same choice when it returns;
 - after the start, tablets still arriving get in, however many: during
   the first five minutes and the whole first question. After that, five
-  more, then "This quiz has started and takes no more players. Ask your
-  teacher.";
+  more, then "This quiz has started and takes no more players. Ask whoever
+  runs it." (over `MAX_PLAYERS`: "This quiz is full. Ask whoever runs it.");
+- a tablet that reaches the page but not the quiz: after a while "This
+  device can't reach the quiz. Tell whoever runs it.";
 - at the final ranking, their place, stars and a trophy; joining then
   gets a trophy and ←;
 - after the teacher's Exit, the root page;
@@ -230,7 +307,7 @@ uploading device), when one tab shows and steers:
 ├──────────────────────────────┤
 │ Prozente                     │
 │ [ Show the quiz here ]       │
-│   the class watches this     │
+│   everyone watches this      │
 │   screen                     │
 │ [ Steer it from here ]       │
 │   Start, next, the solution  │
@@ -241,33 +318,50 @@ Otherwise there is no question (rule 5): it takes the free role, or says
 both are there, with "If one of them was on this device a moment ago, try
 again in half a minute." and "Try again". The question is acted on once, as
 the device arrives: a device left lying on the question never takes a role
-by itself later. A wrong teacher code shows the box again with "That isn't
-this quiz's teacher code."; after five from the device, or the quiz's ten,
-"Too many wrong codes for this quiz. Try again in a few minutes."
-`/teacher#63953`, the old way in, shows the same box with the class code in
-it. The box's placeholder is a teacher code, "12345 67". This screen, the
+by itself later. A wrong teacher code shows the box again ("Show or steer a
+quiz from here", "The quiz's code and two more digits:", the box, "The
+screen that runs the quiz shows them.") with "The last two digits don't
+match this quiz."; after five from the device, or the quiz's ten, "Too many
+wrong codes for this quiz. Try again in a few minutes." `/teacher#63953`,
+the old way in, shows the same box with the class code in it and "This quiz
+now takes its code and two more digits." The box's placeholder is a teacher
+code, "12345 67". The tab's title ends "· show or steer". This screen, the
 question above and the note that both are there have the site's small
 header.
 
 ### 3.3 The lobby: the check, then the join screen
 
+The lobby opens from the local check's "Open the lobby ▶" (§3.1); "the
+check" in this section is the lobby's.
+
 The single tab, which shows and steers, has two screens. **The check is the
-teacher's** (the questions, the fixes, the teacher code); **the
-join screen is the class's** (title, address, class code, QR, count,
-avatars, Start, the points-for-speed switch). The teacher shares the screen when they choose; the site
-doesn't know whether it is shared.
+teacher's** (how the screens are arranged, the teacher code where a remote
+is wanted, the questions and fixes folded); **the join screen is the
+class's** (title, address, class code, QR, count, avatars, Start, the
+points-for-speed switch). The teacher shares the screen when they choose;
+the site doesn't know whether it is shared. Both screens' words name no
+role (docs/design/teacher-devices.md, "Words for any crowd"): the same
+screens serve a class and any other crowd.
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ Prozente · 12 questions                 Class code 63953   │
-│                                      [ Let the class in ▶ ]│
-│  A second device, to steer from or to show the quiz on:    │
-│  on classyquiz.pages.dev, type 63953 47. Or open a second  │
-│  screen in a new window with a click.                      │
-│   12 questions                       [Show the solutions]  │
-│    1  Was sind 10% von 250?                             ›  │
-│    2  Eine Jacke kostet 80 Franken …                    ›  │
-│   …                                               ⋯ More   │
+│ Prozente · 12 questions                    Join code 63953 │
+│ How are the screens arranged?                              │
+│ ┌ One screen ────────────────┐ ┌ Screen and remote ──────┐ │
+│ │ It shows the quiz and      │ │ One device shows the    │ │
+│ │ steers it: the buttons     │ │ quiz, another steers    │ │
+│ │ under the quiz, the        │ │ it: a phone, say.       │ │
+│ │ keyboard or a clicker.     │ │                         │ │
+│ └────────────────────────────┘ └─────────────────────────┘ │
+│  (Screen and remote only:) On the second device, open      │
+│  classyquiz.pages.dev and type 63953 47. With two screens  │
+│  on this computer: open a second screen in a new window.   │
+│  In a video call, the window you share is the screen       │
+│  everyone sees.                                            │
+│                                       [ Let everyone in ▶ ]│
+│ ───────────────────────────────────────────────────────────│
+│ ▸ The questions and their solutions · 1 note from the site │
+│                                                   ⋯ More   │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -279,11 +373,11 @@ doesn't know whether it is shared.
 │                          └─────┘                           │
 │                    [ Start quiz ▶ ]                        │
 │                  ( ) Points for speed                      │
-│     ‹ Questions        A second device ›        ⋯          │
+│     ‹ Back        A second device ›        ⋯               │
 └────────────────────────────────────────────────────────────┘
 ```
 
-A question opened (or all of them, with Show the solutions / Hide the solutions):
+The fold opened, a question opened (or all of them, with Show the solutions / Hide the solutions):
 
 ```
 │    2  Eine Jacke kostet 80 Franken …                    ⌄  │
@@ -291,23 +385,34 @@ A question opened (or all of them, with Show the solutions / Hide the solutions)
 │       Change the solution                                  │
 ```
 
-- **The tab that uploaded opens on the check;** "Let the class in ▶"
-  lets the class in and is the one tap to the join screen, "‹ Questions" the
+- **The tab that uploaded opens on the check;** "Let everyone in ▶"
+  lets the class in and is the one tap to the join screen, "‹ Back" the
   way back. The tab remembers which it shows (sessionStorage): a reload
   stays there, and before the class is let in it is the check. A wall
   that takes the steering back in the lobby (its Remote left or went away)
   shows the join screen once the class is let in.
-- **The class code is on the check, small,** with the count once someone
+- **How the screens are arranged:** a toggle of two, One screen or Screen
+  and remote, each saying what it means; under it, always, the line on a
+  video call. The toggle changes what the screens say, nothing a device
+  can do. One screen until this browser has chosen otherwise or has had a
+  Remote (localStorage, `cq.screens`); a reload keeps it.
+- **The join code is on the check, small,** with the count once someone
   has joined. Teacher devices use it with the teacher code at any time;
-  student devices that arrive with it before the tap wait ("Your teacher
-  lets the class in in a moment.") and join by themselves at the tap. With
-  a Remote, the Remote's lobby has "Let the class in ▶" until it is
-  tapped, and the wall shows the quiz's title without the code until then.
-  Start also lets the class in.
-- **The teacher code sits at rest** on the check, in one sentence naming
-  both needs; on the join screen it is behind "A second device ›", a sheet.
-  "open a second screen in a new window" (hidden on a phone) opens a window that asks the same
-  question as any other device.
+  student devices that arrive with it before the tap wait ("Joining opens
+  in a moment.") and join by themselves at the tap. With a Remote, the
+  Remote's lobby has "Let everyone in ▶" until it is tapped, and the wall
+  shows the quiz's title and "Joining opens in a moment." without the code
+  until then. Start also lets the class in.
+- **The teacher code sits at rest** on the check under Screen and remote
+  (or once a Remote was there and is gone, after "Remote gone."); on the
+  join screen it is behind "A second device ›", a sheet, also only then.
+  With One screen, ⋯ → A second device… is the way to it. "open a second
+  screen in a new window" (hidden on a phone) opens a window that asks the
+  same question as any other device.
+- **The questions are folded,** under "The questions and their solutions"
+  with how many notes the site has, closed on arrival: the local check
+  showed them before the upload, its fixes included. Opened, the list as
+  below.
 - **Answers start folded,** so a shared check shows no key until the
   teacher presses a button that says it shows the answers.
 - **"Change the solution"** makes the choices tappable ("Tap every right
@@ -331,7 +436,7 @@ A question opened (or all of them, with Show the solutions / Hide the solutions)
 
 The Remote's lobby is the check in one column: the class code large, the
 count and avatars, the points-for-speed switch, the teacher code's sentence, "Projector ✓ ·
-⇄ Swap" while the wall is there, and the questions, with Start quiz pinned at
+⇄ Swap" while the wall is there, and the questions folded as on the wall's check, with Start quiz pinned at
 the bottom. Without a wall it says how to bring one: "On the projector
 computer: on classyquiz.pages.dev, type 63953 47." A Projector that doesn't
 steer shows only the class's part (address, code, QR and avatars), with
@@ -395,9 +500,9 @@ throughout, and the final ranking (below). While it steers, the bottom line is t
 
 | State | Wall | Tablets | Steering tab |
 |---|---|---|---|
-| Question | the question and picture; tiles coloured, without text | the eye | "The choices are hidden: the class reads the question."; **▶ Choices**, Countdown |
+| Question | the question and picture; tiles coloured, without text | the eye | "The choices are hidden: everyone reads the question."; **▶ Choices**, Countdown |
 | Answering | the choices; in the bar at the top, the avatar of each student whose answer has arrived pops in, and "answered / of"; during Countdown a bar drains along the top edge | buttons (and the same bar) | the counts with the solution; **▶ Answers**, Countdown |
-| Locked in | each tile's count and a bar; no tick, nothing faded | buttons locked, the chosen one marked, 👁 | "Answering closed. The wall shows how the class answered, not yet the solution."; **▶ Solution** |
+| Locked in | each tile's count and a bar; no tick, nothing faded | buttons locked, the chosen one marked, 👁 | "Answering closed. The projector shows how everyone answered, not yet the solution."; **▶ Solution** |
 | Revealed | the tick, the other tiles faded; the avatars of those right jump for about four seconds in a band over the question | ✓ or ✗, "+13" with points for speed | **▶ Ranking** (Final ranking after the last question) |
 | Ranking | places and stars | place and stars | **▶ Question 3** |
 
@@ -482,6 +587,155 @@ only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
   tapped, by the device's own clock, over a fixed 20 s (`shared/tempo.ts`);
   the ranking shows points, not "right out of n".
 
+### 3.8 Solo
+
+Played on the local check's page (`/open`), nothing uploaded; purpose and
+reasons: docs/design/solo.md. English, the site's own words; the pages are
+light, as the class's screens.
+
+```
+The start
+[fox] classyQuiz
+        Big numbers on the number line
+                 13 questions
+(avatar)        ● ⬡ ★ ♥ ✿ ◎        (the shapes, in its colour)
+                hats, tools          (pictures, no words)
+[ Start ▶ ]
+
+A question, answered
+4 / 13                                  ✓   (avatar)   ★ 3
+        Which number does the arrow show?
+                [the picture]
+[▲ 646 000            ✓]  [◆ 645 000             ]
+[● 644 000             ]  [■ 647 000             ]
+Big numbers on the number line         [ ▶ Question 5 ]
+
+The result
+[fox] classyQuiz
+        Big numbers on the number line
+              (avatar, cheering)
+                 ★ 7 / 13
+               ▮ ▯ ▮ ▮ ▯ ▮ …
+[ Play again ▶ ] [ Copy the answers for your AI ] [ ← Back ]
+Your AI can explain a mistake, or check a solution that looks wrong.
+```
+
+- **The start:** the title and how many questions, the avatar (an animal
+  and a colour, assigned) with the lobby's dressing menu, no words, and
+  Start ▶.
+- **A question:** the bar at the top (where the question stands, after the
+  answer ✓, ✗ or ⊘ for not counted, the avatar, ★ the score), the question
+  laid out as on the wall, its answers showing at once; on an upright phone
+  the question smaller than on a wall and long answers in one column. A tap
+  answers, and the key shows on the tiles: the solution ticked, the rest
+  dim, the tap outlined, ✗ on it when wrong; a right answer makes the
+  avatar jump over the question. At the foot the quiz's title and the next
+  step, "▶ Question 5", "▶ Result" after the last, absent before the
+  answer. A tap on the picture enlarges it; a tap closes it. Keys: 1–4
+  answer, Space, Enter, →, ↓, PageDown or N go on, Z enlarges the picture.
+- **The result:** the avatar cheering, ★ right / of, a bar per question
+  that counted, full or empty; Play again ▶ (the same avatar, a new order),
+  Copy the answers for your AI ("Copied: paste it into the chat with your
+  AI", or the text shown to copy by hand), ← Back; under them "Your AI can
+  explain a mistake, or check a solution that looks wrong."
+- **Back,** from any of these, is the check again, its fold and fixes as
+  they were. A reload of a quiz from the root page finds nothing (§3.1);
+  the example's reads the example again.
+
+### 3.9 Peers
+
+A room that runs on its own, every device a player's, on `/play`; purpose
+and reasons: docs/design/peers.md. English; light, as the class's screens.
+
+```
+The lobby, on the device that opened it
+        Big numbers on the number line
+┌───────────────────────────────────────────┐
+│ [QR]  Friends join on classyquiz.pages.dev │
+│       with the code                        │
+│       50224                                │
+│       or with the QR code.                 │
+└───────────────────────────────────────────┘
+          (avatars of everyone in)
+[ Start ▶ ]
+3 in, you among them. The quiz moves on once everyone has answered.
+(avatar) ● ⬡ ★ ♥ ✿ ◎ / hats / tools
+
+The lobby, on the others' devices
+        Big numbers on the number line
+          (avatars of everyone in)
+(avatar) ● ⬡ ★ ♥ ✿ ◎ / hats / tools   (eye)
+(avatar of whoever opened it) starts the quiz once everyone is in.
+
+A question, answered, waiting
+1 / 13                              (avatar)   ★ 0   [⋯]
+        Which number does the arrow show?
+                [the picture]
+[▲ 646 000          ]  (outlined: the answer)
+[◆ 645 000          ]
+[● 644 000          ]
+[■ 647 000          ]
+Waiting for (avatar) (avatar)
+
+The solution
+1 / 13                         ✓   (avatar)   ★ 1   [⋯]
+   (the winners jump over the question)
+[▲ 646 000      ✓ 2]  [◆ 645 000       1]  (the spread, the rest dim)
+Big numbers on the number line              [ ▶ Ranking ]
+
+The ranking, done
+1 / 13                              (avatar)   ★ 1   [⋯]
+          1.  (avatar)  ★ 1
+          1.  (avatar)  ★ 1
+          3.  (avatar)  ★ 0
+Waiting for (avatar)                        (button hidden)
+
+The final ranking
+        Big numbers on the number line
+     (avatar)   (avatar)   (avatar)      (cheering)
+        1.         1.         3.
+       ★ 1        ★ 1        ★ 0
+     (avatar) 3. / 3  ★ 0  (trophy)
+[ Exit ]                      (the others: [ ← ])
+Exit ends the quiz on every device.
+```
+
+- **The lobby:** the code, the address and the QR code on the device that
+  opened the room only; Start is its player's. The dressing menu as in a
+  class's lobby.
+- **A question:** the device screen of §3.8 with the room's bar (where the
+  question stands, after the solution ✓, ✗ or ⊘, the avatar, ★ the score;
+  ⋯ on the opener's device). The choices show with the question. A tap
+  answers, outlined dashed until the room has it, solid once stored; a
+  change of mind until the solution shows. Once answered, the foot says
+  "Waiting for" and the avatars of those present who haven't (six, then
+  "+n").
+- **The solution** comes once everyone present has answered: the key and
+  the spread on the tiles, the winners jumping over the question. The foot:
+  "▶ Ranking".
+- **The ranking:** places 1 to 3 and, further down, one's own place,
+  highlighted. The foot: "▶ Question 2", or "▶ Final ranking" after the
+  last; tapped, it gives way to "Waiting for" and the avatars of those
+  present who haven't. The next question comes once everyone present has.
+  Keys as on the device screen.
+- **⋯** (the opener's): "Solution now, without waiting" during a question;
+  "Question 2 now, without waiting" or "Final ranking now, without waiting"
+  after the solution; "Change the solution" at the solution (the choices as
+  on the lobby's check, §3.3: Tap every right choice, Don't count this
+  question, Done); "Remove a player…" (each avatar, Remove); "End the
+  quiz: final ranking"; Close.
+- **The final ranking:** places 1 to 3 cheering, one's own place, stars and
+  a trophy. The opener's Exit ends the quiz on every device, which goes to
+  the start page; the others have ←.
+- **When something goes wrong:** a phone asleep or dead stops holding the
+  room 45 s after its last sign, a closed tab at once; back, it is waited
+  for again, with its avatar and score. Another device: the code, and its
+  own avatar under "Which one are you?". The opener's device too: its ⋯
+  comes with the avatar. A device of the opener's that reloads, or comes
+  back from the start page's resume card, is its player again. Turned away:
+  "This quiz is full: it takes no more players." / "This quiz has started
+  and takes no more players."
+
 ## 4. Variants
 
 - **One laptop, mirrored.** The Projector steers itself all lesson. Changing
@@ -512,7 +766,7 @@ only clock is Countdown, fifteen seconds (`LAST_CALL_MS`, `shared/tempo.ts`).
 | The Remote's tab closed by mistake | Nothing on the wall for 45 s | The teacher code again, at once: a closed tab's Remote is taken without waiting (on the HTTP fallback, within 25 s) |
 | A wrong answer to the second device's question | The wall steers where the phone should, or the other way round | ⇄ Swap, on either device |
 | Projector dies | The Remote says "Projector gone" and how to bring it back | Read off the Remote. Optionally another computer: the teacher code (the free Projector, after 45 s), or the projector window on a two-screen laptop |
-| Wrong code | Students: the code, ✗, the box. Teacher: "That isn't this quiz's teacher code." | Type it again; after five wrong teacher codes in a minute, that device waits 10 minutes; after ten for the quiz, any device waits up to six minutes. The device that uploaded gets in with Resume regardless |
+| Wrong code | Students: the code, ✗, the box. Teacher: "The last two digits don't match this quiz." | Type it again; after five wrong teacher codes in a minute, that device waits 10 minutes; after ten for the quiz, any device waits up to six minutes. The device that uploaded gets in with Resume regardless |
 | Quiz ended by the teacher (Exit, Delete) | Every open screen goes to the root page | Upload the .zip again |
 | Quiz expired (3 h unused) | Gone from the resume card; open screens say "This quiz has ended" | Upload the .zip again |
 | School network blocks WebSockets | Nothing; a moment slower (v1 fallback) | Nothing |

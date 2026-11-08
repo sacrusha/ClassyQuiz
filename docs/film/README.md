@@ -45,6 +45,20 @@ it.
 
 ## Situation
 
+- **The film shows the site as built**, so a newcomer who has watched it
+  meets the screens it showed. After the upload a quiz opens in the browser
+  on the local check, with three ways to play it, Solo, Peers and
+  Quizmaster (`docs/design/local-check.md`); the classroom is a
+  Quizmaster's quiz, and its lobby's check asks how the screens are
+  arranged, with the teacher code only under Screen and remote
+  (`docs/design/teacher-devices.md`, "How the screens are arranged"). The
+  film follows the classroom, the purpose above: Solo and Peers are only
+  the cards the teacher passes, and the teacher picks Screen and remote,
+  since the phone steers. Its words for these screens are the site's,
+  English (`SITE` in `build/film.js`), and a test holds them to the site's
+  code (`src/client/film.test.ts`), so a screen that changes its words fails
+  the tests until the film follows.
+
 - **A phone held upright** gives the 16:9 film about 358 × 201 CSS px. Text
   that must be read needs a close-up and time on screen; everything else may
   be illegible (codes typed by children, the AI's prose).
@@ -81,7 +95,8 @@ it.
   language: the letters for an AI on the app's tile, the teacher's second
   message, the AI's status lines, the `.zip`'s name, the quiz's title and
   questions; `draft: true` marks a language whose words are drafts pending
-  the owner's review) and `COMMON` (the site's English screens, the chapters'
+  the owner's review), `SITE` (the words it quotes from the site's English
+  screens) and `COMMON` (its own: the example's figures, the chapters'
   starts).
 - `film.css`: the standalone page's player and the faces the film uses (on
   the site they come from `index.html` and `site.css`).
@@ -126,8 +141,8 @@ rebuild, and what the scripts need: `src/DEVELOPING.md`, "The landing film".
   room, in the laptop and behind the child's shoulder read the same state of
   `t`, so they agree across every cut.
 - **One motif for every press of the teacher**: a bubble at the lower left
-  zooming in on the phone with the real button (Let the class in ▶, Start
-  quiz ▶, Choices ▶, Answers ▶, Solution ▶, Final ranking ▶), the thumb and
+  zooming in on the phone with the real button (Let everyone in ▶, Start
+  quiz ▶, ▶ Choices, ▶ Answers, ▶ Solution, ▶ Final ranking), the thumb and
   its ripple, a tail to the phone in the teacher's hand while it is in the
   frame; the wall answers 0.25 s later. The bubble appears only once the
   camera holds.
@@ -157,9 +172,11 @@ wide, a factor of 0.224.
 
 - 46 units is about 10 CSS px there and reads (the typed ask); 36 to 40 units
   is the lower limit for anything that must be read.
-- The teacher code is shown twice: after the upload, zoomed 1.9 times and
-  pulsing, then typed on the laptop with the laptop's screen filling the
-  frame.
+- The teacher code is shown twice: on the lobby's check once Screen and
+  remote is tapped, zoomed 1.9 times and pulsing, then typed on the laptop
+  with the laptop's screen filling the frame.
+- The local check's cards are read by their names and buttons (40 and 30
+  units); their lines and quiet lines aren't meant to be read on a phone.
 - The vote counts on the wall barely read in the room's wide shot, so the
   camera moves in for the split.
 - The children's bubbles are drawn 1.35 times larger; smaller, they are dots
@@ -227,8 +244,10 @@ Only rendered pictures found them, so the film is checked by looking:
   an iPhone's Safari or on Android.
 - **Whether the timings read** when watched: the hold after the ask, the
   second ask (112 characters typed in about 2.3 s, in the frame about 4 s in
-  all before the chat shrinks away), the split's six seconds. Checked only as
-  stills.
+  all before the chat shrinks away), the split's six seconds, the local
+  check's three cards (about 1 s before the thumb takes Quizmaster) and the
+  lobby's check (about half a second of One screen before the tap on Screen
+  and remote). Checked only as stills.
 - **The pace for the teacher who has decided and now wants the steps.** The
   owner, watching: the default pace serves the first question, is this for
   me, and is too fast for learning the steps. Under consideration: calling the

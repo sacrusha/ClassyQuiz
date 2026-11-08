@@ -2,17 +2,20 @@
 
 ## Purpose
 
-The root page is the first thing a teacher meets, and the teacher may not be
-technical. If they don't see within seconds how to get a quiz and how to start
-one, nothing else on the site matters, however good the guidance below it is
+The root page is the first thing a visitor meets: first the example class's
+teacher (backlog, Project), who may not be technical, and also anyone else
+who wants a quiz to play, alone, with friends, or for a group they run
+(backlog v5 item 9). If they don't see within seconds how to get a quiz and
+how to start one, nothing else on the site matters, however good the guidance below it is
 (backlog v1 item 16). So the page does three jobs and no more:
 
 - **Build**: tell a first-time teacher how a quiz comes to exist. A first-timer
   faces two obstacles, "how do I ask?" and "what even is a quiz?", and one
   concrete instance answers both: what the AI hands over is what the class
   plays, and the words that produced it are the how-to-ask (backlog v4 item 1).
-- **Run**: take the `.zip` the teacher's AI made, and give the teacher who comes
-  back mid-lesson the way back to their quiz.
+- **Run**: take the `.zip` the teacher's AI made to the local check
+  (`local-check.md`), and give the teacher who comes back mid-lesson the way
+  back to their quiz.
 - **Be found by students**: a code box in the header, since the teacher tells
   the class the address and the class needs one box. Unobtrusive on the
   teachers' page, and easily found by whoever knows to look at the top and
@@ -42,7 +45,13 @@ Who arrives, and what each needs:
   to know whether they can rely on the site.
 - A student on a tablet, with the address the teacher called out. Needs the code
   box and nothing else.
-- The teacher's AI, with the site's name. Needs the guidance section.
+- Someone who isn't a teacher: a learner who wants to practise, friends for
+  a games night, whoever runs a quiz for a training session or a party.
+  Needs to see that the site is for them too, and how to ask; the asker who
+  will play needs the AI to keep the questions to itself (the asks, below;
+  the words, "Words for whoever comes").
+- The teacher's AI, with the site's name, or the AI of whoever else asks.
+  Needs the guidance section.
 
 The product's situation (the example class, the devices, which AI, the free
 plan) is the backlog's Project and Constraints sections. What the page has to
@@ -169,7 +178,11 @@ teacher with a `.zip` on the phone that took the photos, and the one coming back
 mid-lesson, whose way back is in Run, had to scroll for it. Run is short (the
 heading and the upload box), so Build's heading still shows below it on phones
 from 360×640 up. A first-timer meets the upload before the how-to; the film
-above tells the story and the button says "the quiz your AI made". A running
+above tells the story and the button says "Open the quiz your AI made".
+The heading is "Play a quiz" and the button "Open", not "Run" and
+"Upload": a Solo player runs nothing, and nothing goes to the site until a
+room opens on the local check ("Words for whoever comes"). German, French
+and Italian already said "start". A running
 quiz's card makes Run taller and can push Build off a small screen; that
 teacher came for Run. The order is visual only: the HTML, side by side on wider
 screens, and the order for keyboards and screen readers keep Build first.
@@ -188,13 +201,17 @@ Step 2 is the ask. It says "the AI" where a pronoun would do: in the owner's
 testing Build had too many "it"s to follow. The address shown in the bubbles
 and in Copy is the one the browser opened, so an own copy shows its own.
 
-Three example asks, each for something a teacher may bring: exercise sheets,
-an idea put in words, or nothing yet. They are tabs, one picture each (the two sheets,
+Six example asks: three for what a teacher may bring (exercise sheets, an
+idea put in words, nothing yet), and three for the other ways to play
+(practising alone, friends with the one who asks among them, a training
+session on a big screen). They are tabs, one picture each (the two sheets,
 a chess board, a question mark), the chosen one joined to its bubble, so the
 picture names the situation and no lead-in sentence is needed ("For example",
 "Or", "The AI then" were cut for it). Each tab's name in words is its
 accessible name and tooltip. The tabs are made by `home.ts`: without it, and
-for an AI's fetcher, the three asks stand one under the other, sheets first.
+for an AI's fetcher, the asks stand one under the other, sheets first. Six
+tabs share a phone's width: at 320 px each is 36 px wide, its picture
+shrinking with it.
 
 - **Sheets**: a chat bubble with five parts underlined and
   labelled under their words: this site, which exercises, your class, how many,
@@ -214,12 +231,23 @@ for an AI's fetcher, the three asks stand one under the other, sheets first.
   ends "What do you need?". A line under it names the AI, plan and date,
   Claude Opus 5.5 on a paid plan, 5 Nov 2026, since step 1 names a free model
   and this one isn't. Its bubble is the longest, on a phone about 350 px.
+- **Practising alone, friends, a training session** (backlog v5 item 9): the
+  other ways to play, in the words of someone who isn't a teacher, each with
+  what it brings (notes, a topic, slides) and where it will be played. The
+  two who play say so ("I'll play it myself, so please keep the questions and
+  answers to yourself", "I'm playing too, so don't show me the questions"):
+  the asker's side of what the guidance tells the AI (`guidance-page.md`,
+  "The user who plays"). They have had no run and need none: AIs make
+  another kind of quiz reliably (the owner). The line naming AI, plan and
+  date under an ask is for a verified run, so these, like the open ask, have
+  none, and what is verified stays told apart from what isn't. Their
+  pictures: one person, three people, a screen before an audience.
 - **Nothing decided**: "Read <address>. I need a classyQuiz. Help?". That the
   AI then asks what it still needs before it builds (the guidance's "Build
   with the teacher") is no longer said on the page; the chess ask's closing
   question shows the same turn. It is the owner's ask, translated.
 
-All three open with "Read <address>." and call the quiz "a classyQuiz". A
+All of them open with "Read <address>." and call the quiz "a classyQuiz". A
 Sonnet-class model told only "make me a quiz for <address>" read the address as
 a publishing target and fetched the page only when told to read it; "Read" makes
 the fetch the first act, and a failed fetch can't pass as a generic quiz (backlog
@@ -254,6 +282,48 @@ site's English screens after it ("The film", Words); its words are in
 `docs/film/build/film.js`, the page's own taken from `landing-text.ts` when it
 is built.
 
+### Words for whoever comes
+
+Purpose (backlog v5 item 9): a visitor who isn't a teacher, and an AI asked
+for a quiz that isn't a lesson's, recognise themselves on the page and in the
+guidance, while the example class's teacher is still served first (backlog,
+Project): the words widen who else is, they don't displace the teacher.
+
+What the words live with:
+
+- "Teacher" stood for two people that v5 tells apart: whoever asks the AI
+  for the quiz, and whoever runs it in the room. In Solo and Peers nobody
+  runs it, and the one who asked plays.
+- The owner: "host" is acceptable, not great, in English (in software,
+  participants connect to a host too), and a role noun is avoided where a
+  sentence does without one.
+- The block above About is in four languages, and the rest of the site is
+  queued for Localization (backlog, Later); a translation hits the meaning,
+  not the literal word. The guidance stays English (`guidance-page.md`).
+
+So, once for all entries:
+
+- **No role noun where the words are translated**, on the landing and the
+  screens: the landing says "you" (du, vous, tu), the screens use a sentence
+  ("Ask whoever runs it", `teacher-devices.md`, "Words for any crowd"). A
+  sentence translates by its meaning; a noun would need a word in each
+  language that suits a classroom and a pub alike, and the words for
+  someone receiving guests (Gastgeber, hôte, ospite) don't say who runs a
+  quiz.
+- **"Quizmaster"** for whoever runs a room, where English needs a noun (the
+  guidance, the README): it is the entry's own name, so the role and the
+  card picked on the local check agree, and the word for whoever runs a pub
+  quiz. "Host" stays the code's word (`peers.md`).
+- **"The user"** in the guidance for whoever is in the conversation with the
+  AI, the AI's own word for that person, whoever they are; **"players"** for
+  whoever answers.
+- **"Teacher", "class", "students", "lesson"** stay where the classroom is
+  meant: the film (the example class's story, `docs/film/`), the sheets and
+  chess asks, the classroom's lines in the guidance, and the design docs,
+  which speak of the example class. The network check (`/check`) says
+  "school or work" and "our network": it is reached from any room that
+  can't open.
+
 ### Run: the `.zip` and nothing else
 
 Run is one element: a dashed box with one button and "or drop it here". The
@@ -277,13 +347,15 @@ file's name is checked after choosing, and anything else gets the message below.
   your AI", which asks for a corrected `.zip`. When the problem is pictures that
   can't go up, the teacher may continue without them. The format and its
   validation are `design/quiz-format.md`.
-- A refused upload says which cap it hit, since the two come back differently:
+- A refused upload, at "Open the lobby" on the local check, says which cap it hit, since the two come back differently:
   the uploads of the day at the day's turn (00:00 UTC, said in Swiss time by
   `quotaResetAt`), the bytes stored as quizzes end or expire. A spent daily
   request allowance has its own message. Each is followed by "More quizzes: a site
   of your own or your school's ›" to `/own-copy`, which names what the link
   gives (the owner: "Your own copy" was too ambiguous). The caps are `design/hosting-and-limits.md`.
-- On success the tab becomes the projector, on the check screen
+- A quiz that reads goes to the local check (`local-check.md`), where
+  nothing has gone to the site yet; opening the lobby there uploads it, and
+  the tab becomes the projector on the lobby's check
   (`design/teacher-devices.md`).
 
 ### Upload attempts counted by format
@@ -312,8 +384,8 @@ back, and certainty it is the right quiz.
 
 So the card shows only the latest quiz this device started that is still on the
 site: its title, where it stands ("before the first question", "question
-4 of 10", "final ranking"), "Back to the quiz" (to the play page with the teacher code), the class
-code, and the way back from another device, the teacher code typed in the code
+4 of 10", "final ranking"), "Back to the quiz" (to the play page with the teacher code), the join
+code (the screens' word, for a class, a group or friends), and the way back from another device, the teacher code typed in the code
 box. It shows no closing time, no Delete, no older quizzes. A closing time read as
 if the server held a shared, public list, which it must not; and the owner found
 the first design's insistence on it pointed to "a rule that snuck in as a
@@ -407,20 +479,20 @@ connections, and what is blocked now. `/check` is not linked from the root page.
 
 The help reaches the teacher at:
 
-- the upload: no connection, or an answer that isn't the site's (a filter's page),
+- opening the lobby on the local check: no connection, or an answer that isn't the site's (a filter's page),
   names the school network as a possible cause, with "What to tell IT ›" to
   `/check#it`;
 - `/check#it`: "If the site doesn't open at school at all", readable without
   running anything (if the site is blocked, nothing runs), with the text for IT;
 - the wall's join screen, steering or not: after `NOBODY_MS` (90 s) with nobody
-  in, "Nobody in yet? If the tablets can't open <address>, the school network may
-  block it", with the IT link in a new tab so the wall stays; gone with the first
+  in, "Nobody in yet? If phones and tablets can't open <address>, their network
+  may block it", with the IT link in a new tab so the wall stays; gone with the first
   avatar, counted anew for each class. It shows in front of the class on a
   mirrored laptop: harmless text, at the moment the class watches the teacher
   wait;
 - a device that reaches the page but not the quiz: after `UNREACHED_MS` (15 s), at
-  joining or in the offline banner, "This device can't reach the quiz. Tell your
-  teacher." (a teacher device without the second sentence).
+  joining or in the offline banner, "This device can't reach the quiz. Tell whoever
+  runs it." (a teacher device without the second sentence).
 
 When only live connections are blocked, HTTP takes over by itself
 (`design/connections.md`); that costs the shared site more requests, which is not

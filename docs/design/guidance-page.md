@@ -3,11 +3,13 @@
 ## Purpose
 
 The guidance is the part of the root page (`src/public/index.html`, from the
-heading "About classyQuiz" on) that an AI reads. A teacher with material in
-hand and a lesson coming up names the site to their own AI, and that must be
-enough: the AI comes away understanding what the site is for, what its quizzes
-are for, how a quiz is built, and how to build one with a human
-(backlog v1 item 11). The page is the one address the teacher gives, so it
+heading "About classyQuiz" on) that an AI reads. Someone who wants a quiz
+names the site to their own AI, and that must be enough: the AI comes away
+understanding what the site is for, how its quizzes are played, how a quiz is
+built, and how to build one with a human (backlog v1 item 11). That someone is
+first the example class's teacher, with material in hand and a lesson coming
+up, and also a learner, friends, or whoever runs a quiz for another group
+(backlog v5 item 9; who arrives: `root-page.md`, Situation). The page is the one address the teacher gives, so it
 leads straight to everything the AI needs.
 
 It has a second reader. In the owner's words, it is the "manual for the AI, and
@@ -32,8 +34,21 @@ shaped as it is. The screens the page describes are in `docs/user-flow.md`.
   verified") is the backlog's Project and Constraints sections. The guidance
   puts the part of it the reading model can't know into its own words.
 - Plausible assumption: a capable model already knows teaching, question
-  design and how to talk to a teacher (what the cut to the site's facts rests
-  on). What it can't know is the site: what it does, how the screens and a
+  design and how to talk to a teacher or anyone else who asks (what the cut
+  to the site's facts rests on).
+- The quiz file is the same for every way it is played (Solo, Peers,
+  Quizmaster: `local-check.md`), and the user picks the way after opening it.
+  The ways differ in what shapes a question: where it is read and from how
+  far, whether it is read out with its choices hidden first, whether the
+  spread comes before the solution, and whether the person asking plays. An
+  AI that knows how its quiz will be played can specialise
+  (`playing-redefined-notes.md`, item 9).
+- Whoever asked the AI may play the quiz (backlog v5 item 5): a learner
+  alone, one of the friends. An AI shows its draft in the conversation: the
+  example's run did (`example-page.md`), and the page asks for a
+  presentation. Plausible assumption: an AI told "I'm playing too" doesn't
+  reliably infer that the questions and solutions must stay out of the
+  conversation, so the page says it (the working note's item 5). What it can't know is the site: what it does, how the screens and a
   lesson run, how long data lives, the format with examples, the limits, how a
   quiz reaches the site and what the upload shows.
 - Plausible assumption: fetched text that gives orders to the reader can trip
@@ -83,18 +98,23 @@ The page says only what the reading model can't already know: the site's
 facts. Left out is advice a capable model derives from them or already has:
 how to design wrong answers, short questions, when a fixed order fits, how
 long a countdown a kind of task needs, cropping of pictures,
-notes to the teacher outside the quiz text. The facts those rested on stay: the
-class reads from the back of the room, answers are shown spread before key,
-and answer pictures lie on tiles in four colours. How the parser treats a file
+notes to the teacher outside the quiz text. The facts those rested on stay, per
+way of playing: where the question is read (on the big screen from the back
+of the room, or on a device at arm's length), whether the spread comes before
+the solution, that a quiz carries no explanations, and that answer pictures
+lie on tiles in four colours. How the parser treats a file
 that doesn't follow the format (stray text, files beside the quiz) is left off:
 a file that doesn't follow the format doesn't work, and the published format
 is narrower than the real one on purpose (`quiz.txt`, UTF-8), so that the
 format can migrate later (`quiz-format.md`).
 
-The lesson is described as far as it shapes a quiz: the teacher's look over
-the questions at upload; the teacher code for a second device;
-each question first read with its choices hidden, then the choices, the
-class's answers without the solution, the solution, the ranking. What the site
+The ways to play are described as far as they shape a quiz: the check after
+opening, its questions folded for whoever plays; Solo's solution after each
+answer and the answers copied for the player's AI; the Peers room that moves
+on once everyone has answered, and its opener's fixes; a Quizmaster's
+question first read with its choices hidden, then the choices, the answers
+without the solution, the solution, the ranking, steered from the big screen
+or a second device. What the site
 reports at upload is not described: the AI's file should work the first time
 (owner: there must be no loop; a loop that iterates is a failure, and "fix
 it" should allow the obvious fix, by keeping the format simple). How the steering works (its buttons, a
@@ -120,11 +140,18 @@ JavaScript; the landing's language switch (`design/root-page.md`) is a script
 over an English block, so a fetcher reads English. The guidance runs from
 "About classyQuiz" through the manual (`#site`), what informs the shape of the
 quizzes (`#quizzes`), how quizzes are built (`#format`) and "Build with the
-teacher" (`#with-a-teacher`). The first two sections carry the FAQ-kind
-information (how a lesson runs, privacy, hosting), which doubles as context for building; the format section carries
-what building needs.
+user" (`#with-the-user`, with `#plays` and `#presenting`). The first two
+sections carry the FAQ-kind information (the ways to play, how a room runs,
+privacy, hosting), which doubles as context for building; the format section
+carries what building needs.
 
-The "Build with the teacher" stance is the owner's: the teacher knows what
+The guidance's nouns: "the user" for whoever is in the conversation with
+the AI, the AI's own word for them; "the quizmaster" for whoever runs a room,
+"players" for whoever answers; "teacher", "class" and "lesson" where the
+classroom is meant (`root-page.md`, "Words for whoever comes").
+
+The "Build with the user" stance is the owner's, said of the teacher and
+true of any user: the teacher knows what
 they need and is there to say it, so the AI doesn't guess; building takes
 minutes, long enough for the teacher's attention to drift, so asking early
 beats delivering something half right. The page gives three phases (establish
@@ -157,8 +184,30 @@ about a screen per question, which is the point where the picture is the
 question (the chess run, below). Which to use is the builder's call in its
 situation; the page gives what each costs and serves. Its home is the layout page
 (`/layout`), which stays as-built and complete, as HTML and CSS, because it is
-linked rather than inlined. On controversial subjects
-the teacher leads.
+linked rather than inlined. Presentation is for a user who won't play the
+quiz (below). On controversial subjects the user leads.
+
+### The user who plays
+
+Purpose (backlog v5 item 5, the guidance's side): whoever asked the AI for
+the quiz can play it without having seen it. The page says so plainly, under
+its own heading ("When the user will play the quiz", `#plays`), since here
+the instruction is the point and the AI doesn't derive it (Situation): when
+the person in the conversation will be among the players, the questions,
+their choices and their solutions stay out of the conversation and out of
+everything the AI shows; the AI reports what it can without giving a
+question away (how many, the topics and their spread, the difficulty, which
+have pictures, what of the material is covered) and hands over the `.zip`.
+What decides it is who plays, not the way it is played: a teacher making a
+quiz for a class's practice alone reviews it as usual. Nobody looks at the
+solutions before the game, so the page names where a wrong one is caught
+(the Peers opener's "Change the solution", Solo's answers copied for the
+player's AI), which also tells the AI that its own check is the only one
+before play. Phase 1 lists whether the user plays among what gets settled,
+so an AI that can't tell asks. The site's side is the local check's fold
+(`local-check.md`); the user's side, the example asks that say "I'll play it
+myself" and "I'm playing too" in the user's own words (`root-page.md`,
+"Build: two steps").
 
 ### Claims about what an AI can do
 
@@ -238,6 +287,11 @@ quoted; runs not recorded beyond the above):
 - Whether `Read <address>.` beats "for it", "with it" and "Have a look at" at
   getting the page fetched before the first build; the test waits until the
   landing and guidance settle, because of the fetch cache.
+- Whether AIs keep the questions out of the conversation when the user says
+  they'll play, whether they ask when it's unclear, and whether what they
+  report instead is enough to trust the zip; no run since the page says it.
+- Whether an AI told how the quiz will be played shapes it differently
+  (questions for a phone at arm's length, a length for friends); untested.
 - Whether AIs give answer pictures a ground of their own often enough: the
   page says the tile colour shows through a transparent picture,
   and a blueish-green mark once vanished on the blue tile (backlog v4 item 11).

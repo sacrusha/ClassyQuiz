@@ -17,14 +17,20 @@ const PER_PLAYER_RUN = 6;
 const PER_QUESTION_STEPS = 20;
 /** Roles taken, the speed switch, removals. */
 const FIXED = 50;
+/** Peers: a player done with a question's solution (docs/design/peers.md); the room's steps ride on the write that triggers them. */
+const PER_READY = 2;
 
-/** Letting the class in: the class isn't known yet, so the most players a class can have. */
-export function rowsAtLetIn(questions: number): number {
-  return FIXED + questions * PER_QUESTION_STEPS + MAX_PLAYERS * (PER_PLAYER_LOBBY + questions * PER_ANSWER);
+/** Letting the class in: the class isn't known yet, so the most players a class can have. peers: a Peers room. */
+export function rowsAtLetIn(questions: number, peers = false): number {
+  return FIXED + questions * PER_QUESTION_STEPS + MAX_PLAYERS * (PER_PLAYER_LOBBY + questions * perQuestion(peers));
 }
 
 /** From the start on: the looks are fixed, the class is there, and the door lets in a few more. */
-export function rowsFromStart(players: number, questions: number): number {
+export function rowsFromStart(players: number, questions: number, peers = false): number {
   const p = Math.min(MAX_PLAYERS, players + MAX_LATE_JOINERS);
-  return FIXED + questions * PER_QUESTION_STEPS + p * (PER_PLAYER_RUN + questions * PER_ANSWER);
+  return FIXED + questions * PER_QUESTION_STEPS + p * (PER_PLAYER_RUN + questions * perQuestion(peers));
+}
+
+function perQuestion(peers: boolean): number {
+  return PER_ANSWER + (peers ? PER_READY : 0);
 }

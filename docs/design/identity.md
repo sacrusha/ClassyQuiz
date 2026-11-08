@@ -24,11 +24,11 @@ for its own sake.
   whole class, every lesson), the landing page's header (where the tablets
   type the code) and the browser tab. Question screens belong to the quiz's
   content.
-- The avatars are animals on a colour, some with a hat; a child finds "the
+- The avatars are animals on a colour, some with a hat or a tool; a child finds "the
   frog on purple" across the room (`class-and-wall.md`). The mark comes from
   them, not from the answers.
 - The wall's type fits the question and the answers by measuring them
-  (`client/screen.ts`, `fitText`, `fitTiles`). A webfont that arrives after
+  (`client/stage.ts`, `fitText`, `fitTiles`). A webfont that arrives after
   the first measure would leave a wrong fit.
 - Quiz text is in any language and script; the site's own words are English,
   and the landing's block also German, French and Italian.
@@ -58,7 +58,7 @@ App screens are set at 1.45 line height, pages read top to bottom (the root,
 - **Paper and ink**: `--bg` `#fbf8f2`, `--fg` `#1d1d1b`, with muted text and
   rules from the same warm grey.
 - **Controls are ink** (`--control`): Play on the steering bar and the
-  Remote, Start, Let the class in, Upload, the code box's ▶, the on state of
+  Remote, Start, Let everyone in, Upload, the code box's ▶, the on state of
   a switch, a picked shape in the students' lobby, the countdown's bar, and
   the actions written as underlined words (Change the solution, Swap). Ink
   has no hue, so it can't be taken for red, blue, yellow or green, on a good

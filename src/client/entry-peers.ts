@@ -1,0 +1,42 @@
+// Peers (backlog v5 items 3 and 7; docs/design/peers.md): friends play the
+// quiz together, each on their own device, and nobody runs it, so whoever
+// opened it plays too. Opening it uploads the quiz as a room that runs on
+// its own; this tab comes in as the room's first player, on the player
+// page, where the code for the others is.
+
+import { esc, playerKey, store } from "./dom.ts";
+import type { Entry } from "./entries.ts";
+import { TEXT } from "./landing-text.ts";
+import { openRoom, roomRefusal, type RoomResult } from "./opening.ts";
+
+export const peers: Entry = {
+  name: "Peers",
+  line: "You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it.",
+  button: "Play together ▶",
+  note: "This puts the quiz on the site, with a code for the others. Until then it is only in this browser.",
+  plays: true,
+  async start(quiz, ctx) {
+    ctx.say(`<p class="muted">${esc(TEXT.en.sending)}</p>`);
+    let r: RoomResult;
+    try {
+      r = await openRoom(quiz, "peers");
+    } catch {
+      ctx.say(roomRefusal(null));
+      return;
+    }
+    if (!r.ok) {
+      ctx.say(roomRefusal(r));
+      return;
+    }
+    if (!r.player) {
+      // A site from before Peers took the quiz as a steered room.
+      ctx.say(roomRefusal({ ok: false, errors: [], warnings: [], error: "This site can't play a quiz this way yet." }));
+      return;
+    }
+    // The player page comes back as this player, as a reloaded device does.
+    store.set(playerKey(r.code), { instance: r.id, token: r.player });
+    // Replaced, not followed: Back from the room passes this page, where the
+    // same button would open a second room.
+    location.replace(`/play#${r.code}`);
+  },
+};

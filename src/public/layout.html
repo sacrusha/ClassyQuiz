@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>classyQuiz — a question on screen</title>
-<meta name="description" content="How the classyQuiz projector lays out a question and how a student's device shows the choices: the markup and the stylesheet rules, with the sizes the script sets as comments.">
+<meta name="description" content="How the classyQuiz projector lays out a question and how a player's device shows the choices: the markup and the stylesheet rules, with the sizes the script sets as comments.">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -24,7 +24,7 @@
 <body class="follows-dark">
 <main>
 <h1>A question on screen</h1>
-<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, with or without its picture, and how a student's device shows its choices: the markup, and the rules from the site's stylesheet. What the stylesheet doesn't carry is in comments: the type sizes and the picture's size and place, which a script sets from the length of the text and the picture's shape, and what the reveal adds.</p>
+<p class="lede">How the <a href="/">classyQuiz</a> projector lays out a question, with or without its picture, and how a player's device shows its choices in a room with a big screen: the markup, and the rules from the site's stylesheet. In Solo and Peers, with no big screen, each device lays out the question the projector's way in its own room, long choices in one column. What the stylesheet doesn't carry is in comments: the type sizes and the picture's size and place, which a script sets from the length of the text and the picture's shape, and what the reveal adds.</p>
 
 <h2>Markup</h2>
 <pre><code>&lt;!-- The projector, one question. Always the light theme: projectors wash out dark backgrounds. --&gt;
@@ -40,17 +40,17 @@
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/main&gt;&lt;/body&gt;
-&lt;!-- The bar has a fixed height (1.9em). While the class answers, the avatar of each student whose answer has
-     arrived pops into .strip, sized so the whole class fits, in one row or more.
+&lt;!-- The bar has a fixed height (1.9em). While the players answer, the avatar of each player whose answer has
+     arrived pops into .strip, sized so everyone fits, in one row or more.
      When answering closes: every tile&#x27;s .side becomes &lt;span class=&quot;n&quot;&gt;17&lt;/span&gt; (how many picked it), and each tile gets
      &lt;span class=&quot;fill&quot; style=&quot;width: 100 × its count ÷ the highest count %&quot;&gt;&lt;/span&gt;, growing from 0.
      At the solution: a tile that doesn&#x27;t count gets the class &quot;dim&quot;, and a tile that counts gets
      &lt;span class=&quot;mark&quot;&gt;✓&lt;/span&gt; before its count. The tiles are marked in place: nothing else is redrawn, so
      neither text nor picture moves. --&gt;
 
-&lt;!-- Every question first comes up with its choices hidden, while the teacher reads it out: the same layout, the
+&lt;!-- Every question first comes up with its choices hidden, while it is read out: the same layout, the
      tiles with the class &quot;veiled&quot; (their text hidden, colour and shape faded), laid out for their choices so
-     nothing moves when the teacher shows them. During Countdown a bar drains along the top edge of the screen
+     nothing moves when the quizmaster shows them. During Countdown a bar drains along the top edge of the screen
      for fifteen seconds, over everything and outside the layout:
      &lt;div id=&quot;clock&quot;&gt;&lt;div class=&quot;clockbar wall&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;. --&gt;
 
@@ -98,9 +98,9 @@
      other, upright ones side by side. With the question&#x27;s own picture (an Image: line), that picture goes into
      a band beside the question&#x27;s text, &lt;div class=&quot;qband&quot;&gt;&lt;div class=&quot;figure&quot;&gt;…&lt;/div&gt;&lt;h2 class=&quot;qtext&quot;&gt;…&lt;/h2&gt;&lt;/div&gt;,
      or between text and tiles at the full width, the room split so that it and the smallest picture choice come
-     out about alike. The class's answers and the solution fill .side and add .fill and .dim as for text tiles. --&gt;
+     out about alike. The players' answers and the solution fill .side and add .fill and .dim as for text tiles. --&gt;
 
-&lt;!-- A student&#x27;s phone or tablet: the choices as buttons, without the question&#x27;s picture; the question is on
+&lt;!-- A player&#x27;s phone or tablet in a room with a big screen: the choices as buttons, without the question&#x27;s picture; the question is on
      the projector. Picture choices show their pictures, in a smaller copy, on the buttons:
      &lt;button class=&quot;ansbtn pic a0 col&quot;&gt;&lt;svg class=&quot;shape&quot; …&gt;&lt;/svg&gt;&lt;span class=&quot;apic&quot;&gt;&lt;img …&gt;&lt;/span&gt;&lt;/button&gt;,
      arranged by the pictures&#x27; shape like the projector&#x27;s tiles, though not always the same way. --&gt;
@@ -113,7 +113,7 @@
   &lt;/div&gt;
 &lt;/main&gt;&lt;/body&gt;
 &lt;!-- .a0 to .a3 are places on screen, not places in the quiz text: the site shuffles each question&#x27;s choices at
-     upload, the same on the projector, every tablet and the teacher&#x27;s screens.
+     upload, the same on the projector, every player&#x27;s device and the steering screens (in Solo, anew for each run).
      A question with the line &quot;Order: fixed&quot; keeps the text&#x27;s order. --&gt;</code></pre>
 
 <h2>Stylesheet</h2>
@@ -168,7 +168,7 @@ body.screen { overflow: hidden; height: 100dvh; font-size: clamp(16px, 1.6vw, 40
 .has-backdrop .qtext { align-self: center; max-width: 100%; padding: .25em .7em; background: rgba(255, 255, 255, .9); border-radius: 18px; }
 body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-radius: 12px; padding: .2em .6em; }
 
-/* Student */
+/* Player's device */
 .play main { min-height: 100dvh; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
 .play .buttons { flex: 1; display: grid; gap: 12px; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
 .play .buttons.n2 { grid-template-columns: 1fr; }
@@ -186,7 +186,7 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .tile.pic .apic { grid-area: card; align-self: stretch; display: flex; align-items: center; justify-content: center; overflow: hidden; } /* no ground of its own: the tile's colour */
 .tile.pic .apic img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
-/* Pictures as choices, student */
+/* Pictures as choices, player's device */
 .ansbtn.pic { display: grid; gap: 6px; padding: 8px; }
 .ansbtn.pic .apic { overflow: hidden; } /* on the button's colour */</code></pre>
 </main>

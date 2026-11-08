@@ -22,7 +22,7 @@ How one question moves from the teacher reading it out to the key on the wall, h
 
 ### The states of a question
 
-No mode and no tempo: every question steps through the same states, each by the teacher's press (`server/game.ts`: `answering()`, `play()`).
+No mode and no tempo: every question steps through the same states, each by the teacher's press (`server/game.ts`: `answering()`, `play()`). A Peers room has nobody to press: it shows the choices with the question and steps on when everyone present is done (`peers.md`, "Nobody steers").
 
 1. **Question**: the answers are hidden while the teacher reads it out. The wall shows the question and its picture with the tiles veiled in their final places, so nothing moves when the answers appear; tablets show an eye. Taps are refused.
 2. **Answering**: the answers are open on every device; the time for speed starts here.

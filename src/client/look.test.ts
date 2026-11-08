@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ANIMAL_COUNT } from "../server/game.ts";
-import { BACKGROUND_COUNT, HAT_COUNT } from "../shared/looks.ts";
+import { BACKGROUND_COUNT, HAT_COUNT, TOOL_COUNT } from "../shared/looks.ts";
 import { JUMP, LOOK_DRAWINGS, avatarSvg, crowdHeight, crowdPlaces, finalSize, partySize } from "./look.ts";
 
 test("the winners' band: up to ten apart, more overlap, all inside the stage", () => {
@@ -36,10 +36,11 @@ test("the winners' band: up to ten apart, more overlap, all inside the stage", (
 });
 
 test("dressing: every look the menu offers has a drawing", () => {
-  assert.deepEqual(LOOK_DRAWINGS, { backgrounds: BACKGROUND_COUNT, hats: HAT_COUNT, seats: ANIMAL_COUNT, animals: ANIMAL_COUNT });
+  assert.deepEqual(LOOK_DRAWINGS, { backgrounds: BACKGROUND_COUNT, hats: HAT_COUNT, tools: TOOL_COUNT, seats: ANIMAL_COUNT, animals: ANIMAL_COUNT });
   for (let a = 0; a < ANIMAL_COUNT; a++)
     for (let b = 0; b < BACKGROUND_COUNT; b++)
-      for (let h = 0; h < HAT_COUNT; h++) assert.doesNotMatch(avatarSvg({ a, c: 0, b, h }), /undefined|NaN/, `animal ${a}, background ${b}, hat ${h}`);
+      for (let h = 0; h < HAT_COUNT; h++)
+        for (let t = 0; t < TOOL_COUNT; t++) assert.doesNotMatch(avatarSvg({ a, c: 0, b, h, t }), /undefined|NaN/, `animal ${a}, background ${b}, hat ${h}, tool ${t}`);
 });
 
 test("the final ranking: the crowd fits under the podium, whose avatars stay half again as large, and stands inside its box", () => {

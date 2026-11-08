@@ -41,7 +41,7 @@ function apply(l: Lang): void {
   const zip = $("#zip") as HTMLAnchorElement;
   zip.href = `/examples/${EXAMPLE_ZIP[l]}`;
   zip.textContent = EXAMPLE_ZIP[l];
-  ($("#start") as HTMLAnchorElement).href = `/?example=${l}`;
+  ($("#start") as HTMLAnchorElement).href = `/open?example=${l}`;
 }
 
 apply(lang);

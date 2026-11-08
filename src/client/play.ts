@@ -14,14 +14,15 @@
 
 import type { Auth, Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING } from "../shared/limits.ts";
-import { $, esc, findQuiz, keepAwake, lines, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
-import { ICON, avatarSvg, backgroundSvg, hatSvg, shapeSvg, wiggle } from "./look.ts";
-import { BACKGROUND_COUNT, HAT_COUNT, sameLook, type Look } from "../shared/looks.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED } from "../shared/limits.ts";
+import { $, esc, findQuiz, keepAwake, lines, playerKey, rolePage, savedQuizzes, siteHead, statusDot, store, tabRole } from "./dom.ts";
+import { ICON, avatarSvg, lookKey, pickerRows, shapeSvg, wiggle } from "./look.ts";
+import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { packPicture, picturesHere, wantPacks } from "./packs.ts";
+import { PeersRoom } from "./peers.ts";
 
 interface Saved {
   instance: string;
@@ -45,7 +46,7 @@ const savedHere = JOIN_CODE.test(code) ? (savedQuizzes().find((q) => q.code === 
 const teacher = !!digits || (oldAddress && !!savedHere);
 /** Opened by "open a second screen in a new window" or "open the projector window" from a teacher tab. */
 const fromWindow = params.get("win") === "1";
-const key = `cq.player.${code}`;
+const key = playerKey(code);
 
 let line: Line | null = null;
 let auth: Auth = { role: "guest" };
@@ -64,7 +65,7 @@ let unreachedTimer: number | undefined;
 // what is wrong. Gone once the line is back.
 
 const UNREACHED_MS = 15_000;
-const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell your teacher.");
+const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell whoever runs it.");
 const bannerWords = document.createElement("span");
 bannerWords.hidden = true;
 bannerWords.textContent = unreachedText();
@@ -103,10 +104,12 @@ let look: Required<Look> | null = null;
 let dressing = false;
 /** The server took no more changes of look (MAX_LOOK_CHANGES): the pictures stay, without effect. */
 let dressSpent = false;
+/** A Peers room draws its own screens (client/peers.ts); made with its first view. */
+let peers: PeersRoom | null = null;
 
 async function start(): Promise<void> {
   if (oldAddress && !teacher) {
-    showTeacherForm(JOIN_CODE.test(code) ? "This quiz now takes the teacher code." : "");
+    showTeacherForm(JOIN_CODE.test(code) ? "This quiz now takes its code and two more digits." : "");
     return;
   }
   if (!JOIN_CODE.test(code)) {
@@ -248,6 +251,10 @@ function onMessage(m: ServerMessage): void {
     tabRole.set(instanceId, { role: m.role, token: m.token, code, teacher: digits || findQuiz(instanceId)?.teacher });
     // A window opened to be dragged to the projector says so until it is full screen.
     location.replace(rolePage(instanceId, m.role) + (fromWindow && m.role === "screen" ? "&drag=1" : ""));
+  } else if (m.t === "state" && m.view.role === "player" && m.view.peers) {
+    view = m.view;
+    peers ??= new PeersRoom({ main, send: (cmd) => line!.send(cmd), dress: (into) => view?.me && renderDress(view.me.avatar, into) });
+    peers.show(m.view);
   } else if (m.t === "state" && m.view.role === "player") {
     // Every answer in the class bumps the version; only redraw when this
     // device's own view changed, or a tap could land on a button being
@@ -330,13 +337,13 @@ function showNoQuiz(): void {
  */
 function showTeacherForm(note: string): void {
   document.body.classList.add("follows-dark");
-  document.title = "classyQuiz · teacher";
+  document.title = "classyQuiz · show or steer";
   main.innerHTML = `${siteHead()}<div class="center teacher-entry">
     <h1>Show or steer a quiz from here</h1>
     ${note ? `<p class="muted">${esc(note)}</p>` : ""}
-    <p class="muted">The teacher code:</p>
+    <p class="muted">The quiz's code and two more digits:</p>
     ${codeForm(JOIN_CODE.test(code) ? code : "", "12345 67")}
-    <p class="muted">It is the class code and two more digits, as the quiz's own screen shows it.</p>
+    <p class="muted">The screen that runs the quiz shows them.</p>
   </div>`;
   wireCodeForm();
 }
@@ -378,7 +385,7 @@ let entered = false;
  * aside. Nothing the device senses decides it.
  */
 function enter(c: Choice): void {
-  document.title = `${c.title || "Quiz"} · teacher`;
+  document.title = `${c.title || "Quiz"} · show or steer`;
   const entry: Entry = c.entry;
   if (entry === "screen" || entry === "remote") {
     void takeRole(entry);
@@ -387,7 +394,7 @@ function enter(c: Choice): void {
   if (entry === "full") {
     main.innerHTML = `${siteHead()}<div class="center choice">
       <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
-      <p class="muted">This quiz already has a screen for the class and one that steers.</p>
+      <p class="muted">This quiz already has a screen that shows it and one that steers.</p>
       <p class="muted">If one of them was on this device a moment ago, try again in half a minute.</p>
       <button class="btn" data-retry>Try again</button>
     </div>`;
@@ -401,7 +408,7 @@ function enter(c: Choice): void {
   main.innerHTML = `${siteHead()}<div class="center choice">
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
     <div class="entry-roles">
-      <button class="btn role" data-role="screen">Show the quiz here<small>the class watches this screen</small></button>
+      <button class="btn role" data-role="screen">Show the quiz here<small>everyone watches this screen</small></button>
       <button class="btn role" data-role="remote">Steer it from here<small>Start, next, the solution</small></button>
     </div>
   </div>`;
@@ -436,7 +443,7 @@ function newPlayer(): void {
       busy = false;
       if (choice?.phase === "final") showFinished();
       else if (a.error === CLASS_WAITING) showRefused(CLASS_WAITING, false);
-      else if (a.error === CLASS_FULL || a.error === CLASS_STARTED) {
+      else if (a.error === CLASS_FULL || a.error === CLASS_STARTED || a.error === ROOM_FULL || a.error === ROOM_STARTED) {
         refused = { reason: a.error, phase: choice?.phase ?? "" };
         showRefused(a.error);
       }
@@ -671,29 +678,28 @@ function render(): void {
   }
 }
 
-// Dressing the animal, in the lobby: a background shape and a hat, the same
-// menu for everyone, no words. Built once and patched in place: a view
-// arriving (a classmate joining changes "of") must not replace a picture
-// under a finger.
+// Dressing the animal, in the lobby: a background shape, a hat and a tool,
+// the same menu for everyone, no words. Built once and patched in place: a
+// view arriving (a classmate joining changes "of") must not replace a
+// picture under a finger.
 
-function renderDress(stored: Avatar): void {
+/** into: where the menu is built the first time; a Peers lobby has it beside the code and Start (client/peers.ts). */
+function renderDress(stored: Avatar, into: HTMLElement = main): void {
   // The server's view has caught up with what the child picked.
   if (look && !dressing && sameLook(stored, look)) look = null;
   const shown = look ? { ...stored, ...look } : stored;
   let box = main.querySelector<HTMLElement>(".dress");
   if (!box) {
-    const backgrounds = Array.from({ length: BACKGROUND_COUNT }, (_, b) => `<button class="pick" data-b="${b}">${backgroundSvg(b, stored.c)}</button>`).join("");
-    const hats = Array.from({ length: HAT_COUNT - 1 }, (_, i) => `<button class="pick" data-h="${i + 1}">${hatSvg(i + 1)}</button>`).join("");
-    main.innerHTML = `<div class="dress">
+    into.innerHTML = `<div class="dress">
       <div class="hero"></div>
-      <div class="picker"><div class="prow">${backgrounds}</div><div class="prow">${hats}</div></div>
+      <div class="picker">${pickerRows(stored.c)}</div>
       <div class="look">${ICON.eye}</div>
     </div>`;
     box = main.querySelector<HTMLElement>(".dress")!;
     box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => btn.addEventListener("click", () => pick(btn)));
   }
   const hero = box.querySelector<HTMLElement>(".hero")!;
-  const key = `${shown.a}.${shown.c}.${shown.b ?? 0}.${shown.h ?? 0}`;
+  const key = lookKey(shown);
   if (hero.dataset.key !== key) {
     const changed = hero.dataset.key !== undefined;
     hero.dataset.key = key;
@@ -701,7 +707,7 @@ function renderDress(stored: Avatar): void {
     if (changed) wiggle(hero);
   }
   box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => {
-    const on = btn.dataset.b !== undefined ? Number(btn.dataset.b) === (shown.b ?? 0) : Number(btn.dataset.h) === (shown.h ?? 0);
+    const on = Number(btn.dataset.i) === (shown[btn.dataset.part as LookPart] ?? 0);
     btn.classList.toggle("on", on);
     btn.setAttribute("aria-pressed", String(on));
   });
@@ -711,9 +717,8 @@ function renderDress(stored: Avatar): void {
 function pick(btn: HTMLButtonElement): void {
   const me = view?.me;
   if (!me || view?.phase !== "lobby" || dressSpent) return;
-  const now: Required<Look> = look ?? { b: me.avatar.b ?? 0, h: me.avatar.h ?? 0 };
-  // A shape is always worn; the hat worn comes off with a second tap.
-  const next = btn.dataset.b !== undefined ? { ...now, b: Number(btn.dataset.b) } : { ...now, h: Number(btn.dataset.h) === now.h ? 0 : Number(btn.dataset.h) };
+  const now: Required<Look> = look ?? { b: me.avatar.b ?? 0, h: me.avatar.h ?? 0, t: me.avatar.t ?? 0 };
+  const next = pickLook(now, btn.dataset.part as LookPart, Number(btn.dataset.i));
   if (sameLook(next, now)) return;
   look = next;
   renderDress(me.avatar);
@@ -724,7 +729,7 @@ function sendLook(): void {
   if (dressing || !look || !line) return;
   const sent = look;
   dressing = true;
-  void line.send({ op: "dress", b: sent.b, h: sent.h }).then((a) => {
+  void line.send({ op: "dress", b: sent.b, h: sent.h, t: sent.t }).then((a) => {
     dressing = false;
     if (!a.ok) {
       // Not taken: the quiz started, or the changes are spent. The device

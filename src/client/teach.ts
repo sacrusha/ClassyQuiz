@@ -4,7 +4,7 @@
 // Play); everything else is in the ⋯ menu.
 
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
-import { $, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
+import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
 import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, roomNotice, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
 import { steeringButtons } from "./steps.ts";
@@ -24,6 +24,8 @@ let view: TeacherView | null = null;
 /** Panels the teacher opened from ⋯ during the quiz. */
 let showAll = false;
 let showPlayers = false;
+/** The lobby's question list, folded: the local check showed it before the upload. */
+let foldOpen = false;
 let lastButtons = "";
 const steer = new Steer(() => line, () => view, newUI(), () => render());
 
@@ -33,6 +35,9 @@ function start(): void {
     return;
   }
   keepAwake();
+  // This browser steers from a second device: a check it opens later says how
+  // (docs/design/teacher-devices.md, "How the screens are arranged").
+  arrangement.set("remote");
   line = new Line({
     instance,
     auth: () => ({ role: "remote", token: held.token }),
@@ -119,7 +124,8 @@ function lobby(v: TeacherView): string {
     v.screen === "present"
       ? `<p class="device"><span class="ok">Projector ✓</span> · <button class="link" data-act="swap">&#8644; Swap</button></p><p class="device">${secondDevice(v)}</p>`
       : projectorLine(v);
-  const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">Let the class in &#9654;</button></p>` : "";
+  const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">Let everyone in &#9654;</button></p>` : "";
+  const notes = v.warnings.length;
   return `${letIn}<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
@@ -128,7 +134,10 @@ function lobby(v: TeacherView): string {
       <p class="device">${speedSwitch(v)}</p>
     </section>
     ${projector}
-    ${questionList(v, steer.ui)}`;
+    <details class="open-fold"${foldOpen ? " open" : ""}>
+      <summary data-act="fold"><span class="open-fold-name">The questions and their solutions</span>${notes ? `<span class="open-fold-notes"> · ${notes} ${notes === 1 ? "note" : "notes"} from the site</span>` : ""}</summary>
+      ${foldOpen ? questionList(v, steer.ui) : ""}
+    </details>`;
 }
 
 /** The teacher code at rest, in the sentence the wall's check uses. */
@@ -184,8 +193,8 @@ function current(v: TeacherView): string {
 /** Where the question is, above the choices (Countdown drains in its slot: see renderClock). */
 function stepLine(v: TeacherView): string {
   if (v.phase !== "question") return "";
-  if (v.answering === "reading") return `<p class="hint">The choices are hidden: the class reads the question.</p>`;
-  if (v.votes) return `<p class="hint">Answering closed. The wall shows how the class answered, not yet the solution.</p>`;
+  if (v.answering === "reading") return `<p class="hint">The choices are hidden: everyone reads the question.</p>`;
+  if (v.votes) return `<p class="hint">Answering closed. The projector shows how everyone answered, not yet the solution.</p>`;
   return v.clock ? `<p class="hint lastcall-line">${ICON.timer} Countdown</p><div class="clockslot"></div>` : "";
 }
 
@@ -256,7 +265,14 @@ for (const area of [main, actions]) {
     if (el.dataset.act === "projector-window") {
       // A second monitor: the window takes the free Projector; this tab stays the Remote.
       const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
-      if (!w) toast("The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type the teacher code.", 8000);
+      if (!w) toast(`The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type ${teacherCode(held!.code, teacherDigits())}.`, 8000);
+      return;
+    }
+    if (el.dataset.act === "fold") {
+      // Drawn from foldOpen, not left to the browser: the lobby is redrawn on every view.
+      e.preventDefault();
+      foldOpen = !foldOpen;
+      render();
       return;
     }
     if (el.dataset.act === "swap") {

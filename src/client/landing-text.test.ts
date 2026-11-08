@@ -22,10 +22,10 @@ test("the language: a choice made here, else the browser's, else English", () =>
   assert.equal(chosenLang(undefined, []), "en");
 });
 
-test("every language's chess and open asks name the site's address, for the page to replace", () => {
+test("every language's other asks name the site's address, for the page to replace", () => {
   for (const { id } of LANGS) {
-    assert.ok(TEXT[id].askChess.includes("classyquiz.pages.dev"), id);
-    assert.ok(TEXT[id].ask2.includes("classyquiz.pages.dev"), id);
+    const t = TEXT[id];
+    for (const ask of [t.askChess, t.askSolo, t.askFriends, t.askGroup, t.ask2]) assert.ok(ask.includes("classyquiz.pages.dev"), `${id}: ${ask.slice(0, 40)}`);
   }
 });
 

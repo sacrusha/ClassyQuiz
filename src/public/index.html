@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>classyQuiz</title>
-<meta name="description" content="Live classroom quizzes made from a teacher's exercise sheets by the teacher's own AI assistant. This page describes the site, the quizzes, their text format, and how they are made with a teacher.">
+<meta name="description" content="Quizzes that a person's own AI assistant makes from exercise sheets, notes or an idea, played here: run for a class or a group on a big screen, with friends, or alone. This page describes the site, the quizzes, their text format, and how they are made with the user.">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -109,16 +109,16 @@
   .labels { color: var(--accent); font-size: .85rem; font-weight: 600; margin: .3rem 0 0; }
   .labels .nb { white-space: nowrap; }
   .bubble.inplace + .labels { display: none; }
-  /* The example asks as tabs: a picture each, the chosen one joined to its bubble (root-page.md, "Build: two steps"). Made by home.ts; without it the three asks stand one under the other. */
+  /* The example asks as tabs: a picture each, the chosen one joined to its bubble (root-page.md, "Build: two steps"). Made by home.ts; without it the asks stand one under the other. */
   .example + .example { margin-top: .9rem; }
   .asks.tabbed .example { margin-top: 0; }
   .ask-tabs { display: flex; gap: 6px; margin: .6rem 0 0 12px; }
-  .ask-tabs button { width: 52px; height: 46px; padding: 5px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+  .ask-tabs button { flex: 0 1 52px; min-width: 0; height: 46px; padding: 5px 3px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
   .ask-tabs button:hover { color: var(--fg); border-color: var(--accent); }
   .ask-tabs button[aria-selected="true"] { background: var(--bubble); border-color: var(--bubble); color: var(--fg); cursor: default; }
   .ask-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .ask-tabs svg { width: 34px; height: 34px; display: block; }
-  .ask-tabs .sheets { position: relative; width: 34px; height: 34px; }
+  .ask-tabs svg { width: min(34px, 100%); height: 34px; display: block; } /* six tabs share a phone's width: a tab narrower than its picture shrinks the picture */
+  .ask-tabs .sheets { position: relative; width: min(34px, 100%); height: 34px; }
   .ask-tabs .sheets img { position: absolute; height: 30px; width: auto; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
   .ask-tabs .sheets img:first-child { right: 1px; top: 0; transform: rotate(5deg); }
   .ask-tabs .sheets img:last-child { left: 2px; bottom: 0; transform: rotate(-4deg); }
@@ -185,6 +185,15 @@
           <blockquote class="bubble" id="bubble3">Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?</blockquote>
           <p class="who" data-t="chessWho">Claude Opus 5.5, paid plan, 5 Nov 2026</p>
         </div>
+        <div class="example" id="ask-solo">
+          <blockquote class="bubble" id="bubble-solo">Read classyquiz.pages.dev. My biology test on Friday is about the cell. Here are my notes. Can you make me a classyQuiz to practise with, about 20 questions? I'll play it myself, so please keep the questions and answers to yourself.</blockquote>
+        </div>
+        <div class="example" id="ask-friends">
+          <blockquote class="bubble" id="bubble-friends">Read classyquiz.pages.dev. Make us a classyQuiz for our games night: 15 questions on films from the 90s, some easy, some hard. I'm playing too, so don't show me the questions.</blockquote>
+        </div>
+        <div class="example" id="ask-group">
+          <blockquote class="bubble" id="bubble-group">Read classyquiz.pages.dev. Tomorrow I'm training 25 new colleagues on our safety rules. The slides are attached. Can you make me a classyQuiz for the end of the session, on the big screen, about 10 questions?</blockquote>
+        </div>
         <div class="example" id="ask-open">
           <blockquote class="bubble" id="bubble2">Read classyquiz.pages.dev. I need a classyQuiz. Help?</blockquote>
         </div>
@@ -193,10 +202,10 @@
 </section>
 
 <section class="run" aria-labelledby="run-h">
-  <h2 id="run-h" data-t="run">Run a quiz</h2>
+  <h2 id="run-h" data-t="run">Play a quiz</h2>
   <div id="resume"></div>
   <div class="runbox" id="runbox">
-    <button type="button" class="open" id="open" data-t="upload">Upload the quiz your AI made&nbsp;(.zip)</button>
+    <button type="button" class="open" id="open" data-t="upload">Open the quiz your AI made&nbsp;(.zip)</button>
     <p data-t="drop">or drop it here</p>
     <input id="file" type="file" hidden>
   </div>
@@ -209,31 +218,36 @@
 <main>
 <div class="guide">
 <h1>About classyQuiz</h1>
-<p class="lede">classyQuiz is an open-source site for live classroom quizzes. The quiz runs on the classroom's big screen, the teacher can steer it from a phone or another screen, and the students answer on their own small screens. It is designed for the teacher's own AI assistant, any capable one, to make the quiz from exercise sheets, so that the teacher's time goes into the lesson.</p>
+<p class="lede">classyQuiz is an open-source site for playing quizzes: run by a quizmaster for a class or another group on a big screen, played among friends on their own devices, or played alone. It is designed for its user's own AI assistant, any capable one, to make the quiz from what the user brings, such as exercise sheets, notes or just an idea, so that the user's time goes into playing it, or a teacher's into the lesson.</p>
 
 <h2 id="site">The manual, for AIs and for people who like to get their hands dirty</h2>
 
-<p>The teacher's AI assistant, usually given just this address by a teacher with material in hand and a lesson coming up, writes the quiz and packages it as a <code>.zip</code>; the teacher starts a quiz by uploading the zip here (assistants can't), and the class plays it. Another round requires another upload.</p>
+<p>The user's AI assistant, usually given just this address by someone with material in hand, often a teacher with a lesson coming up, writes the quiz and packages it as a <code>.zip</code>. The user opens the zip on this site (assistants can't), and it is played here. The zip is the same whichever way it is played; the user picks the way after opening it.</p>
 
-<p>Screens: the <strong>projector</strong> shows the question and its choices; each <strong>student</strong> answers on their own phone or tablet, which shows the choices only. The teacher steers. The projector supports a hybrid mode with integrated controls, or a second teacher device/tab connects with the quiz's teacher code, and one of them becomes the remote (teacher's choice).</p>
+<p>Opening the zip shows a check, in the browser, before anything goes to the site's server: the title, the number of questions, the ways to play it, and the questions with their solutions folded away, where a solution can be changed and a question skipped or left uncounted. Whoever will play leaves the questions closed. The ways to play:</p>
+<ul>
+  <li><strong>Solo.</strong> One person plays it on their own device, to learn or review: the question, its picture and the choices on that device, the solution right after each answer, the score at the end. Nothing goes to the server, and closing the tab ends it. At the end the player can copy their answers, with the solutions, for their own AI.</li>
+  <li><strong>Peers.</strong> Friends play it together, each on their own phone, tablet or laptop, at a table or on a call, and nobody runs it. Whoever opens the room plays too, and has the code for the others. The question and its choices show on every device; once everyone present has answered, the solution, with how many picked each choice; then the ranking; the next question comes once everyone has tapped on. The opener can go on without waiting for someone, change a solution once it shows, and end the quiz.</li>
+  <li><strong>Quizmaster.</strong> Someone runs the quiz for a group: a class, a training session, a party, a video call. The questions are on a big screen (a projector, a TV, a shared window), and the players answer on their own phones or tablets, which show the choices only. The quizmaster steers question by question, on the big screen itself or from a second device such as a phone. In a class, the quizmaster is the teacher.</li>
+</ul>
 
-<p>No accounts; students join with the lobby code. A quiz, with its class's answers and scores, is deleted when the teacher ends it, or three hours after the teacher last used it. The teacher's lasting copy is the <code>.zip</code>. The teacher's browser strips picture metadata before upload. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device, projector, remote and students', opens that copy's own address.</p>
+<p>No accounts; players join a room with its code, or its QR code. A room's quiz, with its players' answers and scores, is deleted when it is ended, or three hours after its last use. The user's lasting copy is the <code>.zip</code>. The browser strips picture metadata before anything goes to the server. For remaining privacy doubts the code is open and an own copy is possible (below); on one, every device opens that copy's own address.</p>
 
-<p>On upload, the teacher is presented with the questions for a quick review, a button to open the lobby, and the teacher code for an optional teacher device. The lobby gets the join code, a QR code as a shortcut, a display and count of joined avatars, some quick settings, and a start button. The teacher then clicks through the quiz, question after question: revealing the question, revealing the choices and opening voting, closing voting and possibly discussing the question, revealing the correct solutions, and the updated ranking. Then comes the next question.</p>
+<p>A Quizmaster room starts on its own check (how the screens are arranged, the code for a second device), then the lobby: the join code, a QR code as a shortcut, a display and count of joined avatars, some quick settings, and a start button. The quizmaster then steps through the quiz, question after question: the question with its choices hidden, the choices with answering open, how many picked each choice, perhaps a discussion, the solution, and the updated ranking. Then comes the next question.</p>
 
-<p>A quiz is the teacher's own material for their own class, and does not get shared outside the classroom by this site. It's both derivative work and teaching material. The site runs on a free plan meant for a few teachers. The code is public at <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a>; an advanced AI assistant can set up a copy on a free Cloudflare account; this site's page <a href="/own-copy">/own-copy</a> describes the process.</p>
+<p>A quiz is its user's own material, and this site shares it with nobody beyond the room it is played in. Made from a teacher's sheets for their class, it is both derivative work and teaching material. The site runs on a free plan meant for a few users. The code is public at <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a>; an advanced AI assistant can set up a copy on a free Cloudflare account; this site's page <a href="/own-copy">/own-copy</a> describes the process.</p>
 
 <h2 id="quizzes">What informs the shape of the quizzes</h2>
 
-<p><strong>Practice, not testing.</strong> Nobody is graded. The ranking at the end shows avatars, so a low place exposes nobody.</p>
+<p><strong>Practice, not testing.</strong> Nobody is graded. The rankings show avatars, so a low place exposes nobody.</p>
 
-<p><strong>A teaching moment.</strong> A question stays up as long as the teacher wants. The teacher first shows how many students picked each choice, without saying which is right, so the class can talk it over; then the solution.</p>
+<p><strong>Where the question is read.</strong> With a quizmaster, on the big screen, from the back of the room: in a class often by children who read slowly or don't read the language well, with the teacher there to read aloud, and each question first comes up with its choices hidden while it is read. In Solo and Peers, on each player's own device at arm's length, often a phone held upright: everyone reads for themselves, the choices come with the question, and long choices stand one under the other. Either way a choice is a button, not a paragraph.</p>
 
-<p><strong>Read from the back of the room.</strong> Questions and choices are read on the projector, often by students who read slowly or don't read the language well, with the teacher there to read aloud. A choice is a button, not a paragraph.</p>
+<p><strong>A teaching moment.</strong> With a quizmaster, a question stays up as long as they want, and how many picked each choice shows before the solution, so the group can talk it over. In Peers the spread comes with the solution, in Solo the solution right after each answer. A quiz carries no explanations: a player sees which choice was right, not why.</p>
 
-<p><strong>Used once.</strong> A quiz is usually made shortly before the lesson, often in the break, and played once, perhaps again in a parallel class.</p>
+<p><strong>Used once.</strong> A class's quiz is usually made shortly before the lesson, often in the break, and played once, perhaps again in a parallel class.</p>
 
-<p><strong>About fifteen minutes.</strong> With pauses to explain, often about fifteen questions. What the teacher asks for overrides this.</p>
+<p><strong>About fifteen minutes.</strong> In a lesson, with pauses to explain, often about fifteen questions. What the user asks for overrides this.</p>
 
 <h2 id="format">How quizzes are built</h2>
 
@@ -271,17 +285,17 @@ Image: timetable.jpg
 
 <h3>The parts</h3>
 <ul>
-  <li><strong>Title.</strong> The first line, <code>Title:</code> followed by the title. It is shown to the class at the start, and helps the teacher identify it's the right quiz.</li>
+  <li><strong>Title.</strong> The first line, <code>Title:</code> followed by the title. It is shown to the players at the start, and tells whoever opens the zip it's the right quiz.</li>
   <li><strong>Questions</strong> are numbered sequentially <code>1.</code>, <code>2.</code>, …, and may be empty.</li>
-  <li><strong>Choices</strong> follow their question, one per line, two to four of them. A right choice's line starts with <code>+ </code>, a wrong one's with <code>- </code>. At least one choice must be correct; a student who picks any correct choice scores. The choices are shuffled automatically, so putting the right one first is convenient, not required.</li>
+  <li><strong>Choices</strong> follow their question, one per line, two to four of them. A right choice's line starts with <code>+ </code>, a wrong one's with <code>- </code>. At least one choice must be correct; a player who picks any correct choice scores. The choices are shuffled automatically, so putting the right one first is convenient, not required.</li>
 </ul>
 
 <h3>Tags</h3>
 <p>After a question's text, before its choices.</p>
 <ul>
-  <li><strong><code>Image: q3.png</code></strong> shows one picture with the question, named by its file in the <code>.zip</code>, on the projector only. A wide one is placed between the question and the choices; a square or upright one to the left of the question and the choices.</li>
+  <li><strong><code>Image: q3.png</code></strong> shows one picture with the question, named by its file in the <code>.zip</code>, where the question is read: on the big screen only with a quizmaster, on each device in Solo and Peers. A wide one is placed between the question and the choices; a square or upright one to the left of a short question and the choices.</li>
   <li><strong><code>Order: fixed</code></strong> disables shuffling of choices.</li>
-  <li><strong><code>Background: forest.jpg</code></strong> is a picture behind the question, cropped to fill the projector's screen, typically for atmosphere or context. It lies under a 55% wash of the page colour, <code>rgba(251,248,242,.55)</code>, with the text on 90% white cards, so a busy or dark picture stays readable.</li>
+  <li><strong><code>Background: forest.jpg</code></strong> is a picture behind the question, cropped to fill the screen the question is read on, typically for atmosphere or context. It lies under a 55% wash of the page colour, <code>rgba(251,248,242,.55)</code>, with the text on 90% white cards, so a busy or dark picture stays readable.</li>
 </ul>
 
 <h3>Pictures as choices</h3>
@@ -308,20 +322,28 @@ Order: fixed
 
 <p>For convenience, python <code><a href="/verify.py">verify.py</a> quiz.zip</code> can check format compliance.</p>
 
-<h2 id="with-a-teacher">Build with the teacher</h2>
+<h2 id="with-the-user">Build with the user</h2>
 
-<p>The teacher knows what they need, the AI doesn't. Building a quiz takes a few minutes, just long enough for the teacher's attention to drift elsewhere. Better to ask for details early, while the teacher is there, ready to respond, than lose their attention while building something that's only half right.</p>
+<p>The user knows what they need, the AI doesn't. Building a quiz takes a few minutes, just long enough for the user's attention to drift elsewhere. Better to ask for details early, while the user is there, ready to respond, than lose their attention while building something that's only half right.</p>
 
 <p>There are 3 phases to building a quiz:</p>
 <ol>
-  <li>Defining what gets built. Topic, kind of questions, for whom, what language, what size. Information from the user's prompt, attachments, environment, and the AI interacting with the user in order to close gaps.</li>
+  <li>Defining what gets built. Topic, kind of questions, for whom, how it will be played and whether the user plays too, what language, what size. Information from the user's prompt, attachments, environment, and the AI interacting with the user in order to close gaps.</li>
   <li>Building a quiz, or a first draft. This takes 1–3 minutes, and some users will do something else in the meantime, then come back.</li>
-  <li>Presenting the quiz, and refining it on the teacher's feedback.</li>
+  <li>Presenting the quiz, and refining it on the user's feedback, unless the user will play it.</li>
 </ol>
 
-<p>Presenting the questions makes the session interactive and allows immediate feedback. Two kinds work well:</p>
+<h3 id="plays">When the user will play the quiz</h3>
+
+<p>A user who will play the quiz, alone to practise or with friends, plays it without having seen the questions. So the questions, their choices and their solutions stay out of the conversation, and out of anything the AI shows: no draft, no presentation, no preview picture, no question quoted in a summary. What the AI reports instead is what it can without giving a question away: how many questions, the topics and how they are spread, the difficulty, which questions have pictures, what of the material is covered and what was left out. Then it hands over the <code>.zip</code>.</p>
+
+<p>What decides it is whether the person in the conversation will be among the players, not the way it is played: a teacher making a quiz for their class to practise with alone reviews it as usual. Nobody looks at the solutions before the game, so the AI checks them itself; a wrong one is caught in play, among friends by whoever opened the room, who can change it once it shows, and alone in the answers the player copies to their AI at the end.</p>
+
+<h3 id="presenting">Presenting</h3>
+
+<p>For a user who won't play the quiz, presenting the questions makes the session interactive and allows immediate feedback. Two kinds work well:</p>
 <ul>
-  <li>High density. A dedicated file to visually show the content keeps the conversation focused on the interaction. Zoomed out the teacher sees by shape what kinds of questions there are, zoomed in they review correctness. Example layout (<code>G→[…]</code> columns sized in pixels or <code>1*</code>, a share of the rest, more children than columns wrapping into rows; <code>F↓</code>, <code>F→</code> a stack down or across; <code>?</code> only when present):
+  <li>High density. A dedicated file to visually show the content keeps the conversation focused on the interaction. Zoomed out the user sees by shape what kinds of questions there are, zoomed in they review correctness. Example layout (<code>G→[…]</code> columns sized in pixels or <code>1*</code>, a share of the rest, more children than columns wrapping into rows; <code>F↓</code>, <code>F→</code> a stack down or across; <code>?</code> only when present):
 <pre><code>Sheet    F↓(Title, G→[1*|1*|1*](Card…))   3000px wide, page #fbf8f2, gap 40, cards in quiz order
 Title    "Percentages, week 31 · 4 questions"   bold
 Card     F↓(Head, Pictures?, Choices, Tags?)   white, rounded, padding 28
@@ -330,15 +352,15 @@ Pictures F→(Image?, Background?)       300px high, the background washed out a
 Choices  G→[1*|1*](Choice…)            with a picture choice G→[1*|1*|1*|1*], 220px high
 Choice   F→(Mark, Text | Image)        right: ✓ and a thick #1f8a4c outline; wrong: a thin grey one
 Tags     "order fixed"                 small, grey</code></pre>
-  Colour can't mark the right choices: on the projector, red, blue, yellow and green are the choices' places after the shuffle, so their order on the sheet means nothing either. Optionally <code>python <a href="/preview.py">preview.py</a> quiz.zip</code> draws the sheet as <code>review.png</code> and names the characters its font can't draw.</li>
-  <li>High fidelity. The <a href="/layout">layout page</a> has the projector's layout for a question as HTML and CSS.</li>
+  Colour can't mark the right choices: on screen, red, blue, yellow and green are the choices' places after the shuffle, so their order on the sheet means nothing either. Optionally <code>python <a href="/preview.py">preview.py</a> quiz.zip</code> draws the sheet as <code>review.png</code> and names the characters its font can't draw.</li>
+  <li>High fidelity. The <a href="/layout">layout page</a> has the big screen's layout for a question as HTML and CSS.</li>
 </ul>
 
-<p>A teacher who puts all the details into the first prompt usually knows the process and wants step 2 straight away. Such a teacher may need nothing but the <code>.zip</code>, and is best asked up front whether they also want a presentation, so they can answer while the first version is being built.</p>
+<p>A user who puts all the details into the first prompt usually knows the process and wants step 2 straight away. Such a user may need nothing but the <code>.zip</code>; unless they will play it, they are best asked up front whether they also want a presentation, so they can answer while the first version is being built.</p>
 
-<p>For the questions themselves, what's valued is good questions for the class: easy to understand, with clear right and wrong answers, and pictures that work. A teacher who needs a sheet's exercises taken over one to one says so.</p>
+<p>For the questions themselves, what's valued is good questions for the players: easy to understand, with clear right and wrong answers, and pictures that work. A teacher who needs a sheet's exercises taken over one to one says so.</p>
 
-<p>On controversial questions, especially in politics and history — controversy not defined by being mainstream or not, but by the existence of genuine sound arguments pulling very different ways — it tends to work out better to let the teacher drive.</p>
+<p>On controversial questions, especially in politics and history — controversy not defined by being mainstream or not, but by the existence of genuine sound arguments pulling very different ways — it tends to work out better to let the user drive.</p>
 </div>
 
 </main>

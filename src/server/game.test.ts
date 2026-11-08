@@ -316,11 +316,18 @@ test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start"
   assert.equal(G.dress(g, ids[1], 2, 1), "stored");
   // A resend, or the same look again, stores nothing.
   assert.equal(G.dress(g, ids[0], 2, 1), "same");
+  // A tool is part of the look, set with it.
+  assert.equal(G.dress(g, ids[0], 2, 1, 4), "stored");
+  assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c, b: 2, h: 1, t: 4 });
+  // A page from before the tools sends none: the look without one.
+  assert.equal(G.dress(g, ids[0], 2, 1), "stored");
+  assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c, b: 2, h: 1 });
   // Back to the disc without a hat: the fields go.
   assert.equal(G.dress(g, ids[0], 0, 0), "stored");
   assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c });
   // Only what the menu has.
-  for (const [b, h] of [[6, 0], [0, 9], [-1, 0], [1.5, 0], ["1", 0], [null, 0]] as [unknown, unknown][]) assert.equal(G.dress(g, ids[0], b, h), "refused");
+  for (const [b, h, t] of [[6, 0, 0], [0, 9, 0], [0, 0, 7], [-1, 0, 0], [1.5, 0, 0], ["1", 0, 0], [0, 0, "1"], [null, 0, 0], [0, 0, null]] as [unknown, unknown, unknown][])
+    assert.equal(G.dress(g, ids[0], b, h, t), "refused");
   assert.equal(G.dress(g, "nobody", 1, 1), "refused");
   // Not for a removed avatar.
   G.removePlayer(g, ids[2]);
@@ -560,4 +567,102 @@ test("the class joins once the teacher lets it in, or once the quiz starts", () 
   G.begin(h, 0);
   assert.equal(h.run!.waiting, undefined, "Start lets the class in");
   G.addPlayer(h, "p0", "t0", 0, random);
+});
+
+test("fixes made before the upload are the quiz's from the start, checked like a teacher's; one that doesn't fit is left out", () => {
+  const g = G.newGame(quiz);
+  G.applyFixes(g, [
+    { counts: [false, true, false], void: false, skip: false },
+    { counts: [false, false], void: true, skip: false },
+    { counts: [true, true], void: false, skip: true, hidePicture: true },
+  ]);
+  assert.deepEqual(g.fixes[0].counts, [false, true, false], "a changed key");
+  assert.deepEqual(g.fixes[1].counts, [false, true], "no right choice is refused, as on the check");
+  assert.equal(g.fixes[1].void, true, "the rest of that question's fixes still apply");
+  assert.deepEqual(g.fixes[2], { counts: [true, true], void: false, skip: true, hidePicture: true });
+
+  const h = G.newGame(quiz);
+  G.applyFixes(h, [{ counts: [false, true, false] }]);
+  assert.deepEqual(h.fixes, G.newGame(quiz).fixes, "fixes for another quiz (another number of questions) change nothing");
+  G.applyFixes(h, "nonsense");
+  G.applyFixes(h, [{ counts: [true] }, null, { counts: ["yes", true] }]);
+  assert.deepEqual(h.fixes, G.newGame(quiz).fixes, "nor do values that don't fit");
+});
+
+/** A Peers room: the first player opened it; nobody steers (docs/design/peers.md). */
+function peersRoom(players = 3) {
+  const { g, ids } = setup(players);
+  g.run!.peers = { host: ids[0] };
+  G.begin(g, 0);
+  return { g, ids, all: new Set(ids) };
+}
+
+test("Peers: the choices come with the question; it closes once everyone present has answered", () => {
+  const { g, ids, all } = peersRoom();
+  assert.equal(G.answering(g), "open", "nobody reads it aloud first");
+  assert.equal(G.peersStep(g, 1, 10, all), false, "nobody has answered: it waits");
+  G.answer(g, ids[0], 0, 0, 1, 0, 2);
+  G.answer(g, ids[1], 0, 1, 1, 0, 3);
+  assert.deepEqual(G.waitingFor(g, all), [ids[2]]);
+  assert.equal(G.peersStep(g, 4, 10, all), false);
+  G.answer(g, ids[2], 0, 0, 1, 0, 5);
+  assert.equal(G.peersStep(g, 6, 10, all), true);
+  assert.equal(g.run!.phase, "reveal", "the solution, without a lock-in before it");
+  assert.equal(G.scores(g).get(ids[0]), 1);
+});
+
+test("Peers: a device that is away doesn't hold the room; nobody present done holds it", () => {
+  const { g, ids } = peersRoom();
+  const present = new Set([ids[0], ids[1]]);
+  G.answer(g, ids[0], 0, 0, 1, 0, 1);
+  G.answer(g, ids[1], 0, 0, 1, 0, 2);
+  assert.equal(G.peersStep(g, 3, 10, present), true, "the third phone sleeps");
+  assert.equal(G.peersStep(g, 4, 11, new Set()), false, "every phone asleep: nobody is done, nothing moves");
+});
+
+test("Peers: the next question comes once everyone present is done with the solution; after the last, the final ranking", () => {
+  const { g, ids, all } = peersRoom(2);
+  for (let q = 0; q < 3; q++) {
+    G.answer(g, ids[0], q, 0, q + 1, 0, 10 * q + 1);
+    G.answer(g, ids[1], q, 1, q + 1, 0, 10 * q + 2);
+    assert.equal(G.peersStep(g, 10 * q + 3, 10 * q + 3, all), true);
+    assert.equal(G.setReady(g, ids[0], q), "stored");
+    assert.equal(G.setReady(g, ids[0], q), "same", "a resend changes nothing");
+    assert.equal(G.peersStep(g, 10 * q + 4, 10 * q + 4, all), false);
+    assert.deepEqual(G.waitingFor(g, all), [ids[1]]);
+    G.setReady(g, ids[1], q);
+    assert.equal(G.peersStep(g, 10 * q + 5, 10 * q + 5, all), true);
+    if (q < 2) {
+      assert.equal(g.run!.phase, "question", "no ranking step between them");
+      assert.equal(g.run!.current, q + 1);
+      assert.equal(G.answering(g), "open");
+      assert.equal(G.isReady(g, ids[0]), false, "done with one solution is not done with the next");
+    }
+  }
+  assert.equal(g.run!.phase, "final");
+});
+
+test("Peers: done with a solution only while it shows; a removed avatar isn't waited for", () => {
+  const { g, ids, all } = peersRoom();
+  assert.equal(G.setReady(g, ids[0], 0), "refused", "the question is still open");
+  G.answer(g, ids[0], 0, 0, 1, 0, 1);
+  G.answer(g, ids[1], 0, 0, 1, 0, 1);
+  G.removePlayer(g, ids[2]);
+  assert.equal(G.peersStep(g, 2, 10, all), true);
+  assert.equal(G.setReady(g, ids[2], 0), "refused");
+  assert.equal(G.setReady(g, ids[0], 1), "refused", "another question");
+  G.setReady(g, ids[0], 0);
+  G.setReady(g, ids[1], 0);
+  assert.equal(G.peersStep(g, 3, 11, all), true);
+  assert.equal(g.run!.current, 1);
+});
+
+test("Peers: the host's go-on doesn't wait: the solution now, then the next question", () => {
+  const { g, ids, all } = peersRoom();
+  G.goOn(g, 1, 10);
+  assert.equal(g.run!.phase, "reveal", "nobody had answered");
+  G.setReady(g, ids[1], 0);
+  assert.deepEqual(G.waitingFor(g, all), [ids[0], ids[2]]);
+  G.goOn(g, 2, 11);
+  assert.equal(g.run!.phase, "question");
 });

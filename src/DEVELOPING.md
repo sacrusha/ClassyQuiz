@@ -21,7 +21,11 @@ All commands run in `src/` unless said otherwise.
   `server/images.ts`, `quiz/`, `shared/`). A school converts the server to its
   own with an AI, and converts again to take an update (README, "On your
   school's own server"); code that spreads the platform further makes every
-  conversion bigger.
+  conversion bigger. The local check (`client/open.ts`, `client/opening.ts`)
+  runs `quiz/`, `server/images.ts` (`matchImages`) and `server/game.ts` (the
+  fixes) in the browser, to check a quiz as the server will before anything
+  goes up, and Solo plays a quiz on `server/game.ts` there
+  (`client/solo.ts`); they stay free of platform code for that too.
 - `shared/`: the protocol types and the constants that are tuned (`limits.ts`,
   `tempo.ts`).
 - `client/`: the page scripts, plain DOM without a framework, bundled per page
@@ -84,6 +88,10 @@ way it finds them by script name when deployed.
 class of bad-Wi-Fi devices against a running site, local or deployed. Its header
 comment says what it exercises. It is the check that the whole flow holds; run
 it after changes to the game, the protocol or the transport.
+`node scripts/simulate-peers.mjs [base-url]` is the same for a Peers room
+(`docs/design/peers.md`): friends, nobody steering, a phone going silent;
+about a minute and a half, most of it waiting for that phone to count as
+away.
 
 Things that bite:
 
@@ -120,6 +128,12 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
   the AI app's name on the phone) or the player's (`play`, `pause`, `speed`,
   `seek`): the film shows them as they were at its build, and `npm test`
   fails until it is rebuilt;
+- a screen the film draws after the upload changes its words (the local
+  check and its entries, the lobby's check, the second device's question,
+  the wall before anyone is let in, the Remote's buttons): the film quotes
+  them in `SITE` in `docs/film/build/film.js`, and `client/film.test.ts`
+  fails until that and the build follow; a screen that changes its layout
+  or its sequence fails nothing, and the film shows the old one;
 - the film's length (`DUR`) changes: `public/index.html`'s time bar carries
   it too, and `sitebuild.py` refuses to build until both agree;
 - `client/look.ts` changes the avatars, which the film draws; no test
@@ -190,7 +204,7 @@ the repo; read a script before running it. Directories there:
   `bringToFront()` first.
 - `stacks/<name>/`: per-implementer scripts for starting and stopping a second
   local stack (`after-upload`, `fixc`, `flow`, `hard`, `identity`, `landing`,
-  `lp`, `lp3`, `owner5`, `pics`, `stack`, `tempo-bar`, `v3`, `winners`).
+  `lp`, `lp3`, `owner5`, `pics`, `solo`, `stack`, `tempo-bar`, `v3`, `winners`).
 - `identity/kit/`: the logo kit as it was made, with the boards and renders
   that `docs/brand/` leaves out; their mock-ups carry placeholder content.
 - `sim-diag/`: the instrumented simulation used to chase a score mismatch,

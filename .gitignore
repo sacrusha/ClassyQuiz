@@ -6,3 +6,5 @@ src/dist/
 # agent worktrees
 .worktrees/
 __pycache__/
+# Claude Code: local settings, agent worktrees, Erfahrungsberichte
+.claude/

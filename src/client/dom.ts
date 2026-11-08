@@ -49,6 +49,13 @@ export const store = {
   },
 };
 
+/**
+ * Where a device keeps its player in a quiz ({instance, token}): a reload,
+ * sleep or dropped line comes back as the same avatar. The device that
+ * opens a Peers room writes it before it joins (client/entry-peers.ts).
+ */
+export const playerKey = (code: string): string => `cq.player.${code}`;
+
 export interface SavedQuiz {
   id: string;
   /** Lets this device ask where the quiz stands (the resume card) and come back to it without the teacher code. */
@@ -145,6 +152,32 @@ export const tabLobby = {
       sessionStorage.setItem(`cq.lobby.${instance}`, screen);
     } catch {
       /* the tab shows the join screen after a reload */
+    }
+  },
+};
+
+/**
+ * How the screens are arranged, as the single tab's check asks it
+ * (docs/design/teacher-devices.md, "How the screens are arranged"): one
+ * screen that shows and steers, or a screen and a remote. It changes only
+ * which how-to the check shows; every device still comes in by the same
+ * code. Per browser, not per quiz: a host who steers from the phone does so
+ * each time. Without storage it is one screen.
+ */
+export type Arrangement = "one" | "remote";
+export const arrangement = {
+  get(): Arrangement {
+    try {
+      return localStorage.getItem("cq.screens") === "remote" ? "remote" : "one";
+    } catch {
+      return "one";
+    }
+  },
+  set(a: Arrangement): void {
+    try {
+      localStorage.setItem("cq.screens", a);
+    } catch {
+      /* the choice holds on this page until it reloads */
     }
   },
 };

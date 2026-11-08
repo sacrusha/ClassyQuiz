@@ -45,7 +45,7 @@ export function patch(el: HTMLElement, html: string): void {
   el.innerHTML = html;
 }
 
-function tags(q: TeacherQuestion, v: TeacherView): string {
+function tags(q: TeacherQuestion): string {
   const right = q.answers.filter((a) => a.counts).length;
   return [
     q.status === "current" ? `<span class="tag now">now</span>` : "",
@@ -108,13 +108,16 @@ function questionPictures(q: TeacherQuestion, quizBackground: ImageRef | null): 
   return parts.length ? `<div class="qpics">${parts.join("")}</div>` : "";
 }
 
-export function questionList(v: TeacherView, ui: ManageUI): string {
+/** The questions with their fixes; also the local check's, before the upload (client/open.ts), which has no run. */
+export type QuestionsView = Pick<TeacherView, "questions" | "background" | "warnings">;
+
+export function questionList(v: QuestionsView, ui: ManageUI): string {
   const items = v.questions
     .map((q, i) => {
       const open = ui.all || ui.open.has(i) || ui.fixing === i;
       return `<li class="q${open ? " open" : ""}">
         <button class="qhead" data-act="toggle-q" data-q="${i}" aria-expanded="${open}">
-          <span class="num">${i + 1}</span><span class="qt">${lines(q.text)}</span>${tags(q, v)}<span class="chev">›</span>
+          <span class="num">${i + 1}</span><span class="qt">${lines(q.text)}</span>${tags(q)}<span class="chev">›</span>
         </button>
         ${questionPictures(q, v.background)}
         ${open ? answersBlock(q, i, ui) : ""}
@@ -202,6 +205,7 @@ export class Steer {
     const a = el.dataset.act ?? "";
     const q = Number(el.dataset.q);
     if (!v || !line) return false;
+    if (viewAct(el, this.ui, this.redraw)) return true;
     const at = atOf(stepState(v));
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
@@ -241,25 +245,6 @@ export class Steer {
       case "skip-current":
         if (confirm("Skip this question? It won't count.")) await send({ op: "skipCurrent", at });
         return true;
-      case "toggle-q":
-        if (this.ui.open.has(q)) this.ui.open.delete(q);
-        else this.ui.open.add(q);
-        if (this.ui.fixing === q) this.ui.fixing = null;
-        this.redraw();
-        return true;
-      case "toggle-all":
-        this.ui.all = !this.ui.all;
-        if (!this.ui.all) this.ui.open.clear();
-        this.redraw();
-        return true;
-      case "fix-q":
-        this.ui.fixing = q;
-        this.redraw();
-        return true;
-      case "fix-done":
-        this.ui.fixing = null;
-        this.redraw();
-        return true;
       case "toggle-count": {
         const i = Number(el.dataset.i);
         const counts = v.questions[q].answers.map((x, j) => (j === i ? !x.counts : x.counts));
@@ -279,23 +264,55 @@ export class Steer {
       case "hide-pic":
         await send({ op: "setHidePicture", q, value: !v.questions[q].pictureHidden });
         return true;
-      case "lightbox":
-        lightbox(el.dataset.src!, Number(el.dataset.w), Number(el.dataset.h));
-        return true;
       case "zoom":
         await send({ op: "zoom", value: !v.zoom, at });
         return true;
       case "remove":
-        if (confirm("Remove this avatar? Its answers stop counting. For a double, or a device that isn't from this class.")) {
+        if (confirm("Remove this avatar? Its answers stop counting. For a double, or a device that doesn't belong here.")) {
           await send({ op: "remove", player: el.dataset.player! });
         }
         return true;
       case "delete":
-        if (confirm(`Delete “${v.title || "this quiz"}”? The class can't join it any more.`)) await send({ op: "endInstance" });
+        if (confirm(`Delete “${v.title || "this quiz"}”? Nobody can join it any more.`)) await send({ op: "endInstance" });
         return true;
       default:
         return false;
     }
+  }
+}
+
+/**
+ * What the question list does on this device alone: unfold, show the
+ * solutions, open a question's fixes, enlarge a picture. Returns false for
+ * anything else (a fix itself, which the caller applies).
+ */
+export function viewAct(el: HTMLElement, ui: ManageUI, redraw: () => void): boolean {
+  const q = Number(el.dataset.q);
+  switch (el.dataset.act) {
+    case "toggle-q":
+      if (ui.open.has(q)) ui.open.delete(q);
+      else ui.open.add(q);
+      if (ui.fixing === q) ui.fixing = null;
+      redraw();
+      return true;
+    case "toggle-all":
+      ui.all = !ui.all;
+      if (!ui.all) ui.open.clear();
+      redraw();
+      return true;
+    case "fix-q":
+      ui.fixing = q;
+      redraw();
+      return true;
+    case "fix-done":
+      ui.fixing = null;
+      redraw();
+      return true;
+    case "lightbox":
+      lightbox(el.dataset.src!, Number(el.dataset.w), Number(el.dataset.h));
+      return true;
+    default:
+      return false;
   }
 }
 
@@ -332,7 +349,7 @@ export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuIt
   const items: MenuItem[] = [];
   if (v.phase === "question") {
     items.push({ label: "Skip this question", run: () => open("skip-current") });
-    items.push({ label: onWall ? "Change the solution – the class sees it" : "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
+    items.push({ label: onWall ? "Change the solution – everyone sees it" : "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
   }
   if (v.phase === "reveal") items.push({ label: "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
   if (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") items.push({ label: `${ICON.trophy} End the quiz: final ranking`, run: () => open("finish") });
@@ -355,10 +372,11 @@ export function toast(msg: string, ms = 4000): void {
 
 /** "classyquiz.pages.dev · 63953"; on a phone-sized wall the address gives way to the code (app.css). */
 /**
- * Before the class is let in, on a day the free site is nearly or quite full:
- * what that means for this class, and the way to more quizzes
+ * Before the players are let in, on a day the free site is nearly or quite
+ * full: what that means for this quiz, and the way to more quizzes
  * (docs/design/hosting-and-limits.md, "Running classes finish"). It stays
- * while it holds; the page opens beside the quiz.
+ * while it holds; the page opens beside the quiz. The words are
+ * classesFullMessage's (shared/limits.ts), the refusal's.
  */
 export function roomNotice(v: TeacherView): string {
   const room = v.room;
@@ -366,8 +384,8 @@ export function roomNotice(v: TeacherView): string {
   const at = quotaResetAt();
   const says =
     room === 0
-      ? `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
-      : `The free site is nearly full today: room for ${room === 1 ? "one more class" : `about ${room} more classes`}.`;
+      ? `The free site can't take more players today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
+      : `The free site is nearly full today: room for ${room === 1 ? "one more group" : `about ${room} more groups`}.`;
   return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">More quizzes: a site of your own or your school's ›</a></p>`;
 }
 

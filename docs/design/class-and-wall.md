@@ -38,6 +38,9 @@ is in `backlog.md`, Project. What shapes this file:
   barely reads.
 - A disruptive child is handled by the teacher walking over (backlog, Project),
   so the teacher gets no moderation beyond Remove.
+- The crowd isn't always a class (backlog v5 item 4): a host may run the quiz
+  for adults at work, a training room or a team event, on the same screens
+  and with the same avatars.
 
 ## How the site meets it
 
@@ -113,7 +116,7 @@ quiz under way.
   out the tablets waits at the first question, because nobody answers. What
   tells a slow tablet from a stranger is when it comes.
 - After that, `MAX_LATE_JOINERS` (5) more get in, then the refusal "This quiz
-  has started and takes no more players. Ask your teacher." Only those who
+  has started and takes no more players. Ask whoever runs it." Only those who
   joined once the quiz was under way count towards the 5. A child returning to
   their own avatar is not a new player.
 - Remove is sticky: the removed device keeps its token and shows the cross,
@@ -196,6 +199,11 @@ belongs to a child. Random assignment does the first with no fights, since
 nothing can be grabbed and nobody chose the frog. The second is given to the
 child by dressing the animal in the lobby.
 
+The same avatars serve a crowd that isn't a class, a business audience among
+them (v5 item 4). The owner, 2026-11-08: the animals stay; expanding on the
+top hat is businessy enough; pulling the pickable tools back in (laptop,
+chart, calculator, …) might be one approach.
+
 Why this shape:
 
 - Fights come from something scarce that another child holds or could get, and
@@ -215,28 +223,52 @@ Why this shape:
   pick.
 - No words on the menu, and no new control for the teacher. Start ends the
   dressing. Late joiners get no menu and play plain.
+- One menu for every room, with no avatar set for a host to pick per upload
+  and none carried by the quiz, as the owner's words lean. The menu carries a
+  business register beside the classroom's instead: the top hat, and tools
+  that belong to an office and to a classroom alike (a calculator, a book).
+  Plausible assumption, unseen with either audience: adults at work find a
+  look that suits them in it, and children don't find the office things
+  dull. Should it fail, a set per room is the fallback, and its setting the
+  host's (backlog, Open).
 
 What it is (`shared/looks.ts`, `client/look.ts`):
 
 - Six shapes in the child's own colour (circle, which is the default, hexagon,
-  star, heart, flower, pond; `BACKGROUND_COUNT`) and eight hats (crown, top hat,
+  star, heart, flower, pond; `BACKGROUND_COUNT`), eight hats (crown, top hat,
   cap, wizard hat, party hat, flower, beanie, viking helmet; `HAT_COUNT` is 9
-  with "none"). Tapping a shape puts the animal on it; tapping a hat puts it
-  on; tapping the worn hat takes it off. One hat at a time.
+  with "none") and six tools held beside the animal (laptop, chart,
+  calculator, coffee, briefcase, book; `TOOL_COUNT` is 7 with "none"), a row
+  each in the picker. Tapping a shape puts the animal on it; tapping a hat or
+  a tool puts it on; tapping the worn one takes it off. One hat and one tool
+  at a time. Figure `../avatars/tools.png`: every animal with a tool, with and
+  without the top hat, at 80 px, and a class of 25 at the bar's 26 and 34 px.
 - Rejected shapes: rhombus, square and triangle, because the answer marks are
   a red triangle, blue diamond, yellow circle and green square, and the bar
   must never read as an answer's colour. A cloud reads as a disc at 26 px.
-  Tools held beside the animal are not built: the animals are heads without
-  paws, and at 21 to 34 px a staff or shovel is 1 to 2 px wide. The balloon and
-  lantern would survive as blobs. Tools remain the owner's call (v4 item 9).
-- The look is stored with the player as `b` and `h` beside the animal and
+- Tools are solid blobs, about two fifths of the avatar across: the animals are heads
+  without paws, and at 21 to 34 px a thin tool (a staff, a shovel, a wand) is 1
+  to 2 px wide and gone, while a blob shows as a patch on that side, as a hat
+  does on top. Each is held at the same place on every animal, low on the
+  right, over the cheek and past the disc's edge, so it changes the outline
+  there. Their colours are neutral (grey, white, brown, the site's rust) and
+  none is an answer's colour in an answer's shape.
+- Considered and not built: a bow tie or a necktie, the top hat's own
+  register, which would need a seat under each animal's chin and a fourth row
+  or a place in the tools' row; a necktie is a thin line at 26 px.
+- The look is stored with the player as `b`, `h` and `t` beside the animal and
   colour (`Avatar`); absent means the default. The command `dress` sets the
-  look whole, so a resend changes nothing. It is accepted only in the lobby,
+  look whole, so a resend changes nothing; a page from before the tools sends
+  no `t`, which means none. It is accepted only in the lobby,
   only for what the menu has, never for a removed avatar, and at most
   `MAX_LOOK_CHANGES` (30) changes per child, after which the pictures stop
-  responding. The animal and colour are never touched. The cap stops a child
+  responding: trying every picture once is 19. The animal and colour are
+  never touched. The cap stops a child
   who hammers the pictures from spending the site's daily allowance
   (`hosting-and-limits.md`).
+- On a phone narrower than 340 px the pictures shrink to 42 px, six to a line,
+  so the three rows fit on the screen with the avatar (`.dress` in
+  `app.css`).
 - The server writes the class's looks at most once per `LOOK_WRITE_MS` (1 s);
   views go out after the write, so nothing shows that is not stored. Each
   stored change is two rows, so the cost of a class is bounded whatever the
@@ -265,7 +297,7 @@ Purpose (v4 item 9, the students' own wish): winners only, after every
 question, jumping; ten easily told apart, crowding accepted beyond.
 
 - After every reveal, the avatars of everyone whose answer counts jump on the
-  wall for about four seconds (`PARTY_MS`, `client/screen.ts`); then the band
+  wall for about four seconds (`PARTY_MS`, `client/stage.ts`); then the band
   fades. It is a band over the top of the stage where the question was read,
   stopping above the first tile, so the tick and the counts stay in view: the
   key is the teaching moment. It is a layer, so nothing moves.
@@ -344,7 +376,10 @@ added, and some teachers want to photograph it. So it has its own screen
 - Whether the students' buttons need the answer text, or heads stay down (the
   owner has not said whether the colour-coded setup he saw had text on the
   devices).
-- Whether tools beside the animal are wanted (owner's open call).
+- Whether the top hat and the tools are businessy enough for a training room
+  or a team event (owner, on seeing them), and whether children take to the
+  office things; whether a tool at the bar's 26 px helps a child find their
+  avatar or only crowds it.
 - Pairs and teams: two children on one tablet already work as one player;
   whether "of 25" and the ranking read sensibly when twelve tablets stand for
   twenty-four children is unchecked, and team play is a mode of its own.

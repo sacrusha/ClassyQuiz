@@ -111,7 +111,7 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 #qbar .strip .av.still { animation: none; }
 #qbar .strip .av svg { width: 100%; height: 100%; display: block; }
 
-/* The winners jump (client/screen.ts, renderParty): a
+/* The winners jump (client/stage.ts, jump): a
    band over the top of the stage after the reveal, stopping above the
    tiles, so the key stays in view. Each avatar pops in, then jumps five
    times, crouching before and landing after each, up to half its size
@@ -140,7 +140,7 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
   #party .jumper > span { animation: none; }
 }
 
-/* A question's picture (client/screen.ts, layQuestion): between the question
+/* A question's picture (client/stage.ts, layQuestion): between the question
    and the tiles, or beside both. The script sets the figure's size in px from
    the picture's shape, so nothing moves when the file arrives. */
 .stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2vh; overflow: hidden; }
@@ -286,6 +286,10 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
   .dress .pick { width: 46px; height: 46px; padding: 4px; }
   .dress .prow { gap: 6px; }
 }
+/* Six to a line on the narrowest phones, so the three rows fit without scrolling. */
+@media (max-width: 340px) {
+  .dress .pick { width: 42px; height: 42px; padding: 3px; }
+}
 /* A changed look: the child sees which one on the wall is theirs. */
 @keyframes wiggle { 0% { transform: none; } 25% { transform: scale(1.12) rotate(-8deg); } 50% { transform: scale(1.12) rotate(8deg); } 75% { transform: scale(1.05) rotate(-4deg); } 100% { transform: none; } }
 .dress .hero.wiggle, .lobby .crowd .av.wiggle, .avatars > .wiggle { animation: wiggle .55s ease-out; }
@@ -385,6 +389,34 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .cstart .btn.big { width: auto; padding: 0 1.4em; }
 .roomnote { border-left: 3px solid var(--rule); padding: 4px 12px; margin: 14px 0 0; }
 .check .cline { text-align: left; font-size: 16px; margin: 6px 0; }
+/* How the screens are arranged (docs/design/teacher-devices.md, "How the screens are arranged"): a toggle of two, each
+   side saying what it means; the remote's how-to follows only under "Screen and remote". */
+.arrange-ask { font-size: 1em; margin: 1.2em 0 .5em; }
+.arrange { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 10px; }
+.arrange-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; font: inherit; color: var(--fg);
+  padding: 12px 14px; border-radius: var(--radius); border: 2px solid var(--rule); background: var(--card); cursor: pointer; touch-action: manipulation; }
+.arrange-opt small { font-size: .85em; color: var(--muted); }
+.arrange-opt[aria-pressed="true"] { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
+.arrange-call { color: var(--muted); font-size: 16px; margin: 6px 0; }
+
+/* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
+   play it as cards, each with its own button; the questions folded under them, closed by default, so whoever will play
+   gets to playing without passing them. */
+.open-check .ctitle + p, .open-check > p { margin: .6em 0; }
+.open-ask { font-size: 1em; margin: 1.4em 0 0; }
+.open-entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; margin: 16px 0 8px; }
+.open-entry { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; }
+.open-entry h2 { font-size: 1.1em; margin: 0 0 .2em; }
+.open-entry p { margin: .3em 0; }
+.open-entry .btn { margin-top: .4em; }
+.open-note { color: var(--muted); font-size: .85em; }
+.open-say:empty { display: none; }
+.open-problem { border-left: 3px solid var(--bad); padding: 2px 12px; margin: 12px 0; }
+.open-problem ul { margin: .3em 0; padding-left: 1.2em; }
+.open-fold { border-top: 1px solid var(--rule); margin-top: 20px; }
+.open-fold > summary { cursor: pointer; padding: 14px 2px; font-weight: 700; }
+.open-fold-notes { color: var(--muted); font-weight: 600; }
+.open-fold-hint { display: block; color: var(--muted); font-weight: 400; font-size: .85em; margin-left: 1.1em; }
 
 button.link { background: none; border: 0; padding: 0; color: var(--control); text-decoration: underline; font: inherit; cursor: pointer; }
 .hint { color: var(--muted); font-size: .9em; margin: .4em 0; }
@@ -597,7 +629,7 @@ body.teach { padding-bottom: 96px; }
 /* Its room is kept while off, so the switch doesn't move the screen. */
 .speed-switch[aria-checked="false"] + .speed-note { visibility: hidden; }
 
-/* Pictures as answers (docs/design/pictures.md; client/screen.ts,
+/* Pictures as answers (docs/design/pictures.md; client/stage.ts,
    layPictureAnswers). The picture sits on the tile's colour, which shows where
    it is transparent. Its shape and the room for the votes' count and tick sit
    beside the picture ("row") or above it ("col"), reserved from the start so
@@ -638,3 +670,116 @@ body.teach { padding-bottom: 96px; }
 .ans .thumb.ansthumb { background: var(--ans); }
 .ans .thumb.ansthumb img { border: 0; border-radius: 0; }
 .ans.right .t.pic img, .ans.right .thumb { outline: 3px solid var(--good); outline-offset: 1px; }
+
+/* The question on a player's own device (client/device.ts, its root
+   .dscreen): the wall's stage (client/stage.ts) with the tiles as buttons,
+   a bar at the top and the next step at the foot. Light, as the class's
+   screens are. A page of a screen's height has no site header. */
+body.screen > .site-head { display: none; }
+/* A pull to refresh would reload the page, and a Solo quiz is only in it. */
+html.solo-on, html.solo-on body { overscroll-behavior-y: none; }
+/* Text tiles in one column where two would break their words (client/stage.ts, the device option). */
+.tiles.onecol { grid-template-columns: minmax(0, 1fr); }
+button.tile { border: 0; margin: 0; font: inherit; font-weight: 700; text-align: left; color: var(--ans-ink); cursor: default; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.tiles.open button.tile { cursor: pointer; }
+.tiles.open button.tile:active { transform: scale(.98); }
+/* The answer chosen; with the key, still readable if it doesn't count. */
+.tile.mine { outline: 6px solid var(--fg); outline-offset: -6px; }
+.tile.mine.dim { opacity: .75; }
+/* Alone there is no count beside the mark: the tile keeps room for the mark only. A room that shows the spread passes it (dspread). */
+.dscreen:not(.dspread) .tile .side { width: 1.6em; }
+.dscreen:not(.dspread) .tile.pic.row, .dscreen:not(.dspread) .tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 1.6em; }
+#qbar .dme { width: 1.6em; height: 1.6em; flex: none; }
+#qbar .dme svg { width: 100%; height: 100%; display: block; }
+#qbar #dscore { flex: none; display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }
+.dverdict { display: inline-flex; color: #fff; border-radius: 50%; padding: .12em; }
+.dverdict.right { background: var(--good); }
+.dverdict.wrong { background: var(--bad); }
+.dbar .grow { color: var(--muted); }
+.dbar .btn.bar-play { margin-left: auto; }
+
+/* Solo (client/entry-solo.ts): the start with the dressing menu, then the
+   device's screen, then the result. */
+.solo-head { text-align: center; }
+.solo-head .cnum { margin: .2em 0 0; color: var(--muted); font-weight: 600; }
+/* The start fits a phone's screen with Start on it: the avatar smaller than in a room's lobby, where it is all there is. */
+/* The start and the result (body.play.solo): the page below the site's header, not a screen's height beside it. */
+body.play.solo { display: flex; flex-direction: column; }
+.play.solo main { min-height: 0; flex: 1; }
+.solo .dress { gap: 16px; width: 100%; max-width: 56rem; margin: 0 auto; }
+.solo .dress .hero { width: min(30vw, 44vh); height: min(30vw, 44vh); }
+.solo .dress .look { width: 100%; max-width: 22rem; }
+.solo-go { width: 100%; min-height: 56px; font-size: 1.25rem; }
+@media (orientation: portrait) {
+  .solo .dress { gap: 14px; }
+  .solo .dress .hero { width: min(50vw, 26vh); height: min(50vw, 26vh); }
+}
+.solo-end { --hero: min(30vh, 56vw); flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; }
+/* Room above the avatar for its jump (@keyframes cheer lifts it by half its size). */
+.solo-end .hero { width: var(--hero); height: var(--hero); flex: none; margin-top: calc(.45 * var(--hero)); }
+.solo-end .cheer { width: 100%; height: 100%; }
+.solo-score { font-family: var(--font-brand); font-size: 2.6em; font-weight: 700; display: inline-flex; align-items: center; gap: .25em; font-variant-numeric: tabular-nums; }
+.solo-end .classres .bars { height: 9vh; margin-top: 0; }
+.solo-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 18px; }
+.solo-ai { margin: 0; font-size: 16px; max-width: 34em; }
+.solo-text { white-space: pre-wrap; text-align: left; max-width: 44em; max-height: 30vh; overflow: auto; margin: 0; padding: 10px 12px; font-size: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; user-select: text; -webkit-user-select: text; }
+
+/* Peers (client/peers.ts): a room that runs on its own, on each player's
+   device. The lobby and the final ranking are pages under nothing (body.play.peers);
+   a question, its solution and the ranking between take a screen's height
+   with the device screen's foot (body.screen.steering.peers). */
+.tile.mine.sending { outline-style: dashed; animation: sending 1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .tile.mine.sending { animation: none; } }
+.dmenu { flex: none; border: 1px solid var(--rule); background: var(--card); color: var(--fg); border-radius: 10px; min-width: 2.2em; min-height: 2em; font-size: 1em; font-weight: 700; line-height: 1; padding: 0 .4em; }
+.pav { display: inline-block; width: 1.6em; height: 1.6em; vertical-align: middle; }
+.pav > svg, .pavs > span > svg { width: 100%; height: 100%; display: block; }
+.pwaiting { display: inline-flex; align-items: center; gap: .4em; color: var(--muted); font-weight: 600; }
+.pavs { display: inline-flex; gap: 2px; }
+.pavs > span { width: 1.8em; height: 1.8em; display: block; }
+.sheet .pav { width: 36px; height: 36px; margin-right: 8px; }
+
+.plobby { width: 100%; max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.plobby .ctitle { margin: 4px 0 0; font-size: 1.5rem; }
+.pjoin { display: flex; align-items: center; justify-content: center; gap: 16px; background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 14px 18px; text-align: left; }
+.pjoin[hidden] { display: none; }
+.pqr { width: 132px; height: 132px; background: #fff; padding: 6px; border-radius: 8px; flex: none; }
+.pqr svg { width: 100%; height: 100%; display: block; }
+.pcodebox p { margin: 0; }
+.pcode { font-family: var(--font-brand); font-size: 3.2rem; font-weight: 700; letter-spacing: .08em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) {
+  .pjoin { gap: 12px; padding: 12px; }
+  .pqr { width: 104px; height: 104px; }
+  .pcode { font-size: 2.4rem; }
+}
+.pcrowd { justify-content: center; min-height: 44px; }
+.pdress { width: 100%; }
+.peers .dress { gap: 14px; width: 100%; }
+.peers .dress .hero { width: min(30vw, 30vh); height: min(30vw, 30vh); }
+.plobby.host .dress .look { display: none; }
+.pstart { width: 100%; max-width: 22rem; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.pstart p { margin: 0; }
+.pwait { display: inline-flex; align-items: center; gap: .4em; }
+@media (orientation: portrait) {
+  .peers .dress .hero { width: min(40vw, 20vh); height: min(40vw, 20vh); }
+}
+
+.pranking { flex: 1; min-height: 0; overflow: auto; display: flex; align-items: center; justify-content: center; }
+.pranks { display: flex; flex-direction: column; gap: 1.2vh; width: min(100%, 26em); }
+.prank { display: grid; grid-template-columns: 2.4em 2.6em 1fr; align-items: center; gap: .6em; font-weight: 800; font-size: 1.3em; padding: .2em .5em; border-radius: 12px; }
+.prank .pav { width: 2.4em; height: 2.4em; }
+.prank .pplace { font-family: var(--font-brand); text-align: right; }
+.prank .pscore { display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }
+.prank.me { background: color-mix(in srgb, var(--control) 10%, var(--card)); }
+.prank.apart { margin-top: 1.5vh; }
+
+.pfinal { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; max-width: 36rem; margin: 0 auto; width: 100%; }
+.pfinal .ctitle { margin: 0; font-size: 1.5rem; }
+.ppodium { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 14px; margin-top: 8vh; }
+.ppodium > div { display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 800; }
+.ppodium .cheer { width: 18vmin; height: 18vmin; }
+.ppodium > div > span:last-child { display: inline-flex; align-items: center; gap: .3em; }
+.ppodium .p1 .cheer { width: 26vmin; height: 26vmin; }
+.pme { display: inline-flex; align-items: center; gap: .4em; font-size: 1.6rem; font-weight: 800; margin: 0; font-variant-numeric: tabular-nums; }
+.pme .pav { width: 2em; height: 2em; }
+.pfinal .solo-go { max-width: 22rem; }
+.pfinal p { margin: 0; }
