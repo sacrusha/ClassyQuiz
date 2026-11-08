@@ -63,6 +63,12 @@ above: the avatar that celebrates is the player's own. Alone nothing is
 scarce and nothing is spent, so the room's limit on changes doesn't apply.
 The look stays for Play again, within the page.
 
+The start comes up under the hand that pressed Play ▶ on the check, and
+on a short phone (360x640) a row of the dressing menu stands where Play ▶
+was. So its buttons, like the result's, take no tap for `SETTLE_MS`
+(400 ms) after the page comes: the tap was aimed at what was there before
+(`question-flow.md`, "Presses").
+
 ### A question, alone
 
 The run is the game's own (`server/game.ts`): a run with one player, the
@@ -136,8 +142,11 @@ and score), the stage, and a bar at the foot with one button.
 The avatar cheering, whatever the score (the closure the final ranking
 gives a class); ★ right / of; a bar per question, full or empty. Then Play
 again ▶ (a new order, the same avatar), Copy the answers for your AI, and
-← Back. The foot's bar is gone there, as Play's place is empty at the final
-ranking: a double tap on Result lands on nothing.
+← Back. The foot's bar is gone there, as at the final ranking, but the
+buttons stand where the page's height puts them, on a 360 px phone where
+▶ Result was. So they take no tap for `SETTLE_MS` after the result comes,
+and the second of a double tap on Result lands on nothing: it would
+otherwise copy the run, start it again, or end it.
 
 ### After the run: the player's AI
 

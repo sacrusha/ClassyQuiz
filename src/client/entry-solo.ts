@@ -16,6 +16,7 @@ import type { Entry, EntryContext } from "./entries.ts";
 import { ICON, avatarSvg, lookKey, pickerRows, wiggle } from "./look.ts";
 import type { OpenedQuiz } from "./opening.ts";
 import { newSoloRun, soloAnswer, soloAvatar, soloDress, soloForAi, soloKey, soloLast, soloMine, soloNext, soloQuestion, soloResult, soloStart } from "./solo.ts";
+import { SETTLE_MS } from "./steps.ts";
 
 export const solo: Entry = {
   name: "Solo",
@@ -39,6 +40,8 @@ class SoloRun {
   private game: G.Game;
   private screen: DeviceScreen | null = null;
   private done = false;
+  /** When one of the run's own pages (the start, the result) last came up under a hand. */
+  private shownAt = 0;
 
   constructor(quiz: OpenedQuiz, ctx: EntryContext) {
     this.quiz = quiz;
@@ -75,6 +78,7 @@ class SoloRun {
     // A pull to refresh on a phone would reload, and the quiz is only in this page.
     document.documentElement.classList.add("solo-on");
     window.scrollTo(0, 0);
+    this.shownAt = performance.now();
   }
 
   // The start: the avatar and the dressing menu, as in a room's lobby, and Start.
@@ -220,6 +224,10 @@ class SoloRun {
 
   private click = (e: MouseEvent): void => {
     if (this.done) return;
+    // A tap on a page that has just come was aimed at what was there before:
+    // the second of a double on ▶ Result, whose place a phone gives to the
+    // result's buttons, or on the check's Play ▶ (docs/design/question-flow.md, "Presses").
+    if (performance.now() - this.shownAt < SETTLE_MS) return;
     const t = e.target as HTMLElement;
     const pick = t.closest<HTMLElement>(".dress .pick");
     if (pick) {
