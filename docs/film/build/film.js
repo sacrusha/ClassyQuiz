@@ -44,8 +44,9 @@
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
      on the AI app's tile (its name under the tile is the chapter's, LANDING.capAi); ask2 is the teacher's
      second message, the real conversation's second ask, which changes the quiz; then the AI's status
-     lines, the .zip it makes (the chip's title and the file's name), the quiz's title, its question 1 and
-     its question 4 (the check's list shows 1-4).
+     lines, the .zip it makes (the chip's title and the file's name), the quiz's title and its question 1.
+     q4, question 4, is no longer shown (the checks keep the questions folded); docs/example/build.py
+     holds the example's words to it (docs/example/text.py, FILM).
      en is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
      to be replaced by the translators' (build.py and sitecheck.py name them). */
   const CONTENT = {
@@ -95,7 +96,7 @@
     },
   };
 
-  /** The words of the site's English-only screens, and the film's own, the same in every language. */
+  /** The film's own words and the example's figures, the same in every language. */
   const COMMON = {
     zipSub: 'ZIP',
     choices: ['646 000', '645 000', '644 000', '647 000'],
@@ -103,20 +104,43 @@
     codePh: '12345',
     photos: ['sheet-photo-1.jpg', 'sheet-photo-2.jpg'],
     nq: ' · 13 questions',
-    classCode: 'Class code ', code: '63953', teacherCode: '63953 47',
-    letIn: 'Let the class in ▶',
-    second: [['A second device, to steer from or to show the quiz on: on '], ['classyquiz.pages.dev', 'bold'], [', type '], ['63953 47', 'code'], ['.']],
-    listHead: '13 questions', showSol: 'Show the solutions',
-    showHere: 'Show the quiz here', showHereSub: 'the class watches this screen',
-    steerHere: 'Steer it from here', steerHereSub: 'Start, next, the solution',
-    wait: 'The class is let in in a moment.',
+    code: '63953', teacherCode: '63953 47',
     addr: 'classyquiz.pages.dev',
-    presses: ['Let the class in ▶', 'Start quiz ▶', 'Choices ▶', 'Answers ▶', 'Solution ▶', 'Final ranking ▶'],
     of: ' / 13',
     // the chapters' starts, marked on the time bar: [film time, the key of its name in landing-text.ts (LANDING)]
-    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [27.7, 'capWall'], [38.0, 'capTap']],
+    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [28.7, 'capWall'], [38.0, 'capTap']],
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
+  };
+  /** The words the film quotes from the site's own screens, English on the real site too (film-text.md 0.7): the local check, the
+      lobby's check, the second device's question, the wall before anyone is let in, the Remote's buttons. client/film.test.ts holds
+      them to the site's sources, so a screen that changes its words fails the tests until the film follows. A piece of the how-to
+      with a kind is the site's address or the teacher code, which the screen fills in. */
+  const SITE = {
+    // the local check (client/open.ts, the entries' words from client/entry-*.ts)
+    playedAsk: 'How will it be played?',
+    entries: [
+      { name: 'Solo', line: 'You play the quiz on your own, to learn or review: the solution after each answer.', button: 'Play ▶', note: 'Nothing goes to the site. A reload or closing the tab ends it.' },
+      { name: 'Peers', line: 'You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it.', button: 'Play together ▶', note: 'This puts the quiz on the site, with a code for the others. Until then it is only in this browser.' },
+      { name: 'Quizmaster', line: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device.", button: 'Open the lobby ▶', note: 'This puts the quiz on the site. Until then it is only in this browser.' },
+    ],
+    fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.',
+    // the lobby's check (client/screen.ts, renderCheck; on a phone, so without the line on a second screen in a new window)
+    joinCode: 'Join code ',
+    arrangeAsk: 'How are the screens arranged?',
+    arrange: [
+      { name: 'One screen', line: 'It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker.' },
+      { name: 'Screen and remote', line: 'One device shows the quiz, another steers it: a phone, say.' },
+    ],
+    howTo: [['On the second device, open '], ['classyquiz.pages.dev', 'bold'], [' and type '], ['63953 47', 'code'], ['.']],
+    call: 'In a video call, the window you share is the screen everyone sees.',
+    letIn: 'Let everyone in ▶', more: '⋯ More',
+    // the second device's question (client/play.ts)
+    showHere: 'Show the quiz here', showHereSub: 'everyone watches this screen',
+    steerHere: 'Steer it from here', steerHereSub: 'Start, next, the solution',
+    wait: 'Joining opens in a moment.',
+    // the Remote's button at each press: Start quiz's ▶ after, the steps' before (client/steps.ts)
+    presses: ['Let everyone in ▶', 'Start quiz ▶', '▶ Choices', '▶ Answers', '▶ Solution', '▶ Final ranking'],
   };
   const LANGS = Object.keys(CONTENT);
 
@@ -128,13 +152,12 @@
     if (!L || !Q) throw new Error(`no film words for "${lang}"`);
     const nb = (s) => s.replace(/ /g, ' ');
     const glue = (s) => s.replace(/ (?=[?!:;»])/g, ' ').replace(/« /g, '« ');
-    return Object.assign(JSON.parse(JSON.stringify(COMMON)), {
+    return Object.assign(JSON.parse(JSON.stringify(COMMON)), JSON.parse(JSON.stringify(SITE)), {
       ask1: L.ask.map((p) => (p.l === 0 ? [p.s, 'addr'] : p.l !== undefined ? [nb(p.s), 'part'] : [glue(p.s)])),
       ask2: [[glue(Q.ask2)]],
       ai: Q.ai, aiName: L.capAi,
       status1: Q.status1, status2: Q.status2,
       zipTitle: Q.zipTitle, title: Q.title, q1: Q.q1,
-      rows: [Q.q1, Q.q1, Q.q1, Q.q4],
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
       // [name, film time, key]; the player's names (play, pause, speed, the time bar) in the page's language
@@ -182,23 +205,23 @@
         the browser opened, by client/home.ts's rule, so an own copy shows its own; the standalone page keeps the demo's. */
     function siteAddress(h) {
       const swap = (v) => (typeof v === 'string' ? v.split(DEMO).join(h) : Array.isArray(v) ? v.map(swap) : v);
-      for (const k of ['ask1', 'status1', 'second', 'addr']) TX[k] = swap(TX[k]);
+      for (const k of ['ask1', 'status1', 'howTo', 'addr']) TX[k] = swap(TX[k]);
     }
 
     // ---------------------------------------------------------------- timeline
     // Every teacher press on the phone, and when its change lands on the wall.
-    const PRESS = [27.4, 35.0, 38.0, 44.0, 50.0, 56.3];
+    const PRESS = [28.4, 35.0, 38.0, 44.0, 50.0, 56.3];
     const LAG = 0.25;
     const T = {
       sheet1: 0.3, sheet2: 0.75, raise: [1.7, 2.4], flash1: 2.95, flash2: 3.75, home: 4.3,
       pulse: 5.55, open: 6.25, expand: [6.85, 7.3],
       attach: 7.45, type1: 7.85, send1: 13.5, status1: 13.85, bars1: [14.05, 14.85], zip1: 14.95,
       type2: 15.35, send2: 17.8, status2: 18.05, bars2: [18.2, 18.6], zip2: 18.75, tapZip: 19.45,
-      web: 19.7, tapUpload: 20.3, sheetUp: [20.5, 20.75], tapFile: 21.0, sheetDown: [21.1, 21.3], check: 21.7,
-      zoomCode: [22.05, 22.6], shrink: [23.0, 23.6],
-      lapOn: 24.0, typeCode: 24.5, codeStep: 0.11, enterClick: 25.55, enter: 25.75, showClick: 26.2,
-      kidsIn: 28.6, oneTap: 39.6, ots: [36.9, 41.3], ots2: [52.55, 54.4], flick: [55.4, 56.25], end: [58.5, 59.0],
-      cut: 26.6, walk: [28.2, 29.3],
+      web: 19.7, tapUpload: 20.3, sheetUp: [20.5, 20.75], tapFile: 21.0, sheetDown: [21.1, 21.3],
+      local: 21.55, tapLobby: 22.5, lobby: 22.75, tapRemote: 23.3, zoomCode: [23.6, 24.1], shrink: [24.45, 25.05],
+      lapOn: 25.4, typeCode: 25.75, codeStep: 0.11, enterClick: 26.75, enter: 26.95, showClick: 27.35,
+      kidsIn: 29.6, oneTap: 39.6, ots: [36.9, 41.3], ots2: [52.55, 54.4], flick: [55.4, 56.25], end: [58.5, 59.0],
+      cut: 27.7, walk: [29.2, 30.3],
     };
     // The asks type at whatever speed ends them this long before their send, however long they are in a language
     // or with an own copy's address: the first holds for the address to be read, the second barely.
@@ -386,7 +409,7 @@
         k.seated = k.enter + k.walk;
       });
       const byJoin = KIDS.slice().sort((a, b) => a.seated + a.jitter * 0.8 - (b.seated + b.jitter * 0.8));
-      byJoin.forEach((k, n) => { k.join = 30.6 + n * 0.205; });
+      byJoin.forEach((k, n) => { k.join = 31.6 + n * 0.16; });
       // Answers: a few before the shown child, the shown child at T.oneTap, the rest after the cut back.
       const others = KIDS.filter((k) => k !== ots).sort((a, b) => a.jitter - b.jitter);
       others.forEach((k, n) => { k.answer = n < 4 ? 38.95 + n * 0.17 : n < 7 ? 39.9 + (n - 4) * 0.4 : 41.45 + (n - 7) * 0.16; });
@@ -585,7 +608,7 @@
             vis(tl.n, showN); vis(tl.fill, showN);
             if (showN) { txt(tl.n, String(counts[i])); set(tl.fill, 'width', f1(tl.w * counts[i] / 20 * seg(t, PRESS[3] + LAG, PRESS[3] + LAG + 0.6))); }
             vis(tl.tick, ph === 'solution' && i === TX.right);
-            op(tl.g, ph === 'solution' && i !== TX.right ? 0.5 : 1);
+            op(tl.g, ph === 'reading' ? 0.55 : ph === 'solution' && i !== TX.right ? 0.5 : 1); // veiled tiles are faint (app.css .tiles.veiled)
           });
         }
         // winners jump in a band over the question for about 4 s
@@ -751,10 +774,12 @@
         <g class="ph-home"><g class="ph-tile"><rect x="-65" y="-65" width="130" height="130" rx="30" fill="#fff"/></g>
           ${T_(150, 380, TX.aiName, 30, { cls: 'ts ph-name', fill: '#e6e6e6', anchor: 'middle', fit: 250 })}
           <rect class="ph-open" rx="28" fill="#fff"/><g class="ph-ai">${T_(0, 25, TX.ai, 72, { cls: 'b', anchor: 'middle' })}</g></g>
-        <g class="ph-site"><rect x="14" y="22" width="272" height="556" rx="28" fill="${C.paper}"/><use href="#cq-fox" x="30" y="40" width="34" height="34"/>
-          <rect x="30" y="100" width="210" height="16" rx="5" fill="${C.ink}"/><rect x="30" y="126" width="120" height="10" rx="4" fill="${C.muted}"/>
-          <rect x="30" y="160" width="240" height="64" rx="12" fill="${C.ink}" class="ph-btn"/><rect x="30" y="250" width="240" height="10" rx="4" fill="#bdb8ae"/><rect x="30" y="270" width="200" height="10" rx="4" fill="#bdb8ae"/>
-          <rect x="30" y="310" width="240" height="1" fill="${C.rule}"/><rect x="30" y="330" width="230" height="10" rx="4" fill="#cfcac0"/><rect x="30" y="360" width="230" height="10" rx="4" fill="#cfcac0"/><rect x="30" y="390" width="230" height="10" rx="4" fill="#cfcac0"/></g>`;
+        <g class="ph-site"><rect x="14" y="22" width="272" height="556" rx="28" fill="${C.paper}"/>
+          <rect x="30" y="56" width="210" height="16" rx="5" fill="${C.ink}"/><rect x="30" y="82" width="110" height="10" rx="4" fill="${C.muted}"/><rect x="30" y="112" width="160" height="10" rx="4" fill="${C.ink}"/>
+          <rect x="30" y="134" width="240" height="52" rx="9" fill="#fff" stroke="${C.rule}" stroke-width="2"/><rect x="30" y="196" width="240" height="52" rx="9" fill="#ededed" stroke="${C.ink}" stroke-width="2.5"/>
+          <rect x="30" y="262" width="230" height="9" rx="4" fill="#bdb8ae"/><rect x="30" y="279" width="150" height="9" rx="4" fill="#bdb8ae"/><rect x="30" y="300" width="220" height="9" rx="4" fill="#cfcac0"/>
+          <rect x="120" y="324" width="150" height="46" rx="9" fill="${C.ink}" class="ph-btn"/>
+          <rect x="30" y="390" width="240" height="1" fill="${C.rule}"/><rect x="30" y="406" width="200" height="10" rx="4" fill="#cfcac0"/></g>`;
       const q = (s) => g.querySelector(s);
       const camG = q('.ph-cam'), home = q('.ph-home'), site = q('.ph-site'), sheet = q('.ph-sheet'), fl = q('.ph-flash'), th1 = q('.ph-th1'), th2 = q('.ph-th2');
       const tile = q('.ph-tile'), aiG = q('.ph-ai'), name = q('.ph-name'), openR = q('.ph-open');
@@ -1217,6 +1242,10 @@
     }
 
     // ---------------------------------------------------------------- the site on the phone (full frame)
+    // The root page's Run box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
+    // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check; there "Screen and
+    // remote" brings the how-to with the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
+    // window shows them (client/open.ts, client/screen.ts), scaled to the frame; what doesn't fit lies below it.
     let web;
     function makeWeb() {
       const F = mkFrame(svg, 'cq-clip-web');
@@ -1233,7 +1262,7 @@
         <g class="wb-upl"><rect x="330" y="330" width="940" height="120" rx="20" fill="${C.ink}"/>${T_(800, 405, TX.upload, 44, { cls: 'ts', fill: '#fff', anchor: 'middle', fit: 880 })}</g>
         ${T_(800, 530, TX.drop, 36, { fill: C.muted, anchor: 'middle', fit: 1000 })}
         <g class="wb-prog"><rect x="270" y="280" width="1060" height="310" rx="22" fill="${C.paper}"/>${T_(800, 455, TX.reading, 46, { fill: C.muted, anchor: 'middle', fit: 1000 })}</g>`);
-      const upl = root.querySelector('.wb-upl'), prog = root.querySelector('.wb-prog');
+      const prog = root.querySelector('.wb-prog');
       // the OS's file sheet: the .zip on top
       const fileRow = (i, name, y) => `<g><rect x="200" y="${y}" width="1200" height="120" rx="18" fill="${i === 0 ? '#eef3ff' : '#fff'}"/>
         <rect x="230" y="${y + 22}" width="76" height="76" rx="14" fill="${i === 0 ? '#e9e9e4' : '#d9cbb7'}"/>${i === 0 ? `<path d="M248 ${y + 40} h40 v40 h-40z M258 ${y + 40} v40 M266 ${y + 48} h6 M266 ${y + 58} h6 M266 ${y + 68} h6" fill="none" stroke="#6a6a66" stroke-width="3.5"/>` : ''}
@@ -1241,42 +1270,89 @@
       const sheet = G(g, `<rect x="0" y="0" width="${W}" height="${H}" fill="#000" opacity=".35"/><g class="wb-sheet"><rect x="140" y="330" width="1320" height="700" rx="40" fill="#fff"/><rect x="740" y="350" width="120" height="10" rx="5" fill="#ccc"/>
         ${TX.files.map((f, i) => fileRow(i, f, 400 + i * 132)).join('')}</g>`);
       const sheetIn = sheet.querySelector('.wb-sheet');
-      // the check, after the upload
-      const opts = { clsOf: (k) => (k === 'code' ? 'b' : k === 'bold' ? 'tb' : ''), fillOf: () => null, underline: () => null };
-      const check = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${header}
-        <text x="160" y="222" font-size="58" class="tb" data-fit="1280">${esc(TX.title)}<tspan class="" fill="${C.muted}" font-size="38" font-weight="400">${esc(TX.nq)}</tspan></text>
-        <g>${icon('person', 160, 258, 38, C.muted)}${T_(210, 290, TX.classCode, 38, { fill: C.muted })}</g>
-        <rect x="160" y="320" width="1280" height="116" rx="22" fill="${C.ink}"/>${T_(800, 394, TX.letIn, 46, { cls: 'ts', fill: '#fff', anchor: 'middle', fit: 1200 })}
-        <rect class="wb-hl" rx="12" fill="#f6dcc8"/>
-        <rect x="160" y="640" width="1280" height="2" fill="${C.rule}"/>${T_(160, 700, TX.listHead, 38, { cls: 'tb', fit: 880 })}
-        <rect x="1080" y="660" width="360" height="60" rx="14" fill="#fff" stroke="${C.rule}" stroke-width="3"/>${T_(1260, 701, TX.showSol, 30, { anchor: 'middle', fit: 330 })}
-        ${TX.rows.slice(0, 3).map((r, i) => `${T_(170, 780 + i * 70, String(i + 1), 34, { fill: C.muted })}${T_(220, 780 + i * 70, r, 34, { fit: 1150 })}${T_(1420, 780 + i * 70, '›', 40, { fill: C.muted, anchor: 'end' })}`).join('')}`);
-      const ccode = measure(TX.classCode, 38, '');
-      G(check, T_(210 + ccode, 290, TX.code, 40, { cls: 'b' }));
-      const sw = wrap(TX.second, 38, 1280, opts.clsOf);
-      const sent = drawLines(check, sw, 160, 520, 38, 54, opts);
-      sent.show(sw.total);
-      const codeO = sent.out.find((o) => o.p.kind === 'code');
-      const hl = check.querySelector('.wb-hl');
-      set(hl, 'x', f1(codeO.x - 14)); set(hl, 'y', f1(520 + codeO.li * 54 - 42)); set(hl, 'width', f1(codeO.w + 28)); set(hl, 'height', '58');
-      const codeC = [codeO.x + codeO.w / 2, 520 + codeO.li * 54 - 13];
+      const plain = { clsOf: () => '', fillOf: () => null, underline: () => null };
+      const titleLine = (y, fit = 1280) => `<text x="160" y="${y}" font-size="52" class="tb" data-fit="${fit}">${esc(TX.title)}<tspan fill="${C.muted}" font-size="36" font-weight="600">${esc(TX.nq)}</tspan></text>`;
+      const button = (x, y, w, h, label, size, primary) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${primary ? C.ink : '#fff'}" stroke="${primary ? C.ink : C.rule}" stroke-width="3"/>${T_(x + w / 2, y + h / 2 + size * 0.36, label, size, { cls: 'ts', fill: primary ? '#fff' : C.ink, anchor: 'middle', fit: w - 30 })}`;
+      // the local check: three cards side by side, each its name, its line, its button (the first the primary) and its quiet line
+      const local = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${header}${titleLine(196)}${T_(160, 262, TX.playedAsk, 32, { cls: 'b', fit: 1280 })}`);
+      const CW = 413, CG = 20, CY = 290, CP = 28;
+      const cards = TX.entries.map((e, i) => {
+        const x = 160 + i * (CW + CG);
+        const cg = G(local);
+        const line = wrap([[e.line]], 28, CW - 2 * CP, plain.clsOf);
+        const note = wrap([[e.note]], 22, CW - 2 * CP, plain.clsOf);
+        const bw = measure(e.button, 30, 'ts') + 64;
+        const lineY = CY + 112, btnY = lineY + line.lines.length * 38 - 6, noteY = btnY + 76 + 40;
+        return { x, cg, line, note, bw, lineY, btnY, noteY, e, i, bottom: noteY + (note.lines.length - 1) * 30 + 34 };
+      });
+      const CH = Math.max(...cards.map((c) => c.bottom)) - CY;
+      cards.forEach((c) => {
+        G(c.cg, `<rect x="${c.x}" y="${CY}" width="${CW}" height="${CH}" rx="22" fill="#fff" stroke="${C.rule}" stroke-width="3"/>${T_(c.x + CP, CY + 62, c.e.name, 40, { cls: 'b', fit: CW - 2 * CP })}
+          ${button(c.x + CP, c.btnY, c.bw, 76, c.e.button, 30, c.i === 0)}`);
+        drawLines(c.cg, c.line, c.x + CP, c.lineY, 28, 38, plain).show(c.line.total);
+        drawLines(c.cg, c.note, c.x + CP, c.noteY, 22, 30, Object.assign({ fill: C.muted }, plain)).show(c.note.total);
+      });
+      const qm = cards[2], lobbyBtn = [qm.x + CP + qm.bw / 2, qm.btnY + 38];
+      // under the cards, out of the frame: the questions, folded ("If you will play it yourself, leave this closed.")
+      G(local, `<rect x="160" y="${CY + CH + 30}" width="1280" height="2" fill="${C.rule}"/>`);
+      // the lobby's check: the join code small; how the screens are arranged, One screen until this browser knows better;
+      // "Screen and remote" brings the how-to with the teacher code, and what follows moves down to make room for it
+      const jc = measure(TX.code, 32, 'b') + 8, jl = measure(TX.joinCode.trim(), 30, '') + 12;
+      const lobby = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${titleLine(110, 1280 - jc - jl - 40)}`);
+      G(lobby, `${T_(1440 - jc - 12, 110, TX.joinCode.trim(), 30, { fill: C.muted, anchor: 'end' })}${T_(1440, 110, TX.code, 32, { cls: 'b', anchor: 'end', extra: ' letter-spacing="2"' })}
+        ${T_(160, 190, TX.arrangeAsk, 30, { cls: 'b', fit: 1280 })}`);
+      const TW = 630, TY = 214, TH = 170;
+      const toggles = TX.arrange.map((a, i) => {
+        const x = 160 + i * (TW + 20);
+        const tg = G(lobby);
+        const off = E('rect', { x, y: TY, width: TW, height: TH, rx: 18, fill: '#fff', stroke: C.rule, 'stroke-width': 3 }, tg);
+        const on = E('rect', { x, y: TY, width: TW, height: TH, rx: 18, fill: '#ededed', stroke: C.ink, 'stroke-width': 4 }, tg);
+        G(tg, T_(x + 28, TY + 56, a.name, 32, { cls: 'tb', fit: TW - 56 }));
+        const lw = wrap([[a.line]], 26, TW - 56, plain.clsOf);
+        drawLines(tg, lw, x + 28, TY + 100, 26, 36, Object.assign({ fill: C.muted }, plain)).show(lw.total);
+        return { on, off, c: [x + TW / 2, TY + TH / 2] };
+      });
+      const howOpts = { clsOf: (k) => (k === 'code' ? 'b' : k === 'bold' ? 'tb' : ''), fillOf: () => null, underline: () => null, fill: C.muted };
+      const hw = wrap(TX.howTo, 32, 1280, howOpts.clsOf);
+      const HY = TY + TH + 56;
+      const howG = G(lobby, `<rect class="wb-hl" rx="12" fill="#f6dcc8"/>`);
+      const how = drawLines(howG, hw, 160, HY, 32, 46, howOpts);
+      how.show(hw.total);
+      // the whole teacher code, both its pieces, on the line where it starts
+      const codeOs = how.out.filter((o) => o.p.kind === 'code' && !/^ +$/.test(o.p.text));
+      const codeO = { x: codeOs[0].x, li: codeOs[0].li };
+      codeO.w = Math.max(...codeOs.filter((o) => o.li === codeO.li).map((o) => o.x + o.w)) - codeO.x;
+      const hl = howG.querySelector('.wb-hl');
+      set(hl, 'x', f1(codeO.x - 12)); set(hl, 'y', f1(HY + codeO.li * 46 - 34)); set(hl, 'width', f1(codeO.w + 24)); set(hl, 'height', '48');
+      const codeC = [codeO.x + codeO.w / 2, HY + codeO.li * 46 - 10];
+      const rest = G(lobby);
+      const lw = measure(TX.letIn, 34, 'ts') + 90;
+      G(rest, `${T_(160, HY, TX.call, 28, { fill: C.muted, fit: 1280 })}${button(1440 - lw, HY + 32, lw, 104, TX.letIn, 34, true)}
+        <rect x="160" y="${HY + 170}" width="1280" height="2" fill="${C.rule}"/><path d="M164 ${HY + 208} L184 ${HY + 220} L164 ${HY + 232}Z" fill="${C.ink}"/>${T_(200, HY + 232, TX.fold, 30, { cls: 'tb', fit: 1200 })}
+        ${button(1440 - 180, HY + 280, 180, 76, TX.more, 28, false)}`);
+      const howH = hw.lines.length * 46 + 16;
       const thumb = makeThumb(g, 0.9, [210, 470]);
       function update(t) {
         // slides in from the right over the chat
         const k = eseg(t, T.web, T.web + 0.35);
         tf(page, tr((1 - k) * W, 0));
-        const isCheck = t >= T.check;
-        vis(root, !isCheck); vis(check, isCheck);
-        vis(prog, t >= T.sheetDown[1] && !isCheck);
+        const scr = t < T.local ? 'root' : t < T.lobby ? 'local' : 'lobby';
+        vis(root, scr === 'root'); vis(local, scr === 'local'); vis(lobby, scr === 'lobby');
+        vis(prog, t >= T.sheetDown[1] && scr === 'root');
         const sk = eseg(t, T.sheetUp[0], T.sheetUp[1]) * (1 - eseg(t, T.sheetDown[0], T.sheetDown[1]));
         op(sheet, sk > 0 ? 1 : 0);
         if (sk > 0) { set(sheet.firstChild, 'opacity', (0.35 * sk).toFixed(2)); tf(sheetIn, tr(0, (1 - sk) * 700)); }
+        // the arrangement: One screen, then Screen and remote once tapped, and the how-to with it
+        const remote = t >= T.tapRemote + 0.05;
+        toggles.forEach((tg, i) => { const pressed = (i === 1) === remote; vis(tg.on, pressed); vis(tg.off, !pressed); });
+        vis(howG, remote);
+        tf(rest, tr(0, remote ? howH : 0));
         // the teacher code: zoom and pulse
         const z = eseg(t, T.zoomCode[0], T.zoomCode[1]);
         const zs = lerp(1, 1.9, z);
         tf(zoomG, `translate(${f1(lerp(0, 800 - codeC[0] * zs, z))} ${f1(lerp(0, 450 - codeC[1] * zs, z))}) scale(${zs.toFixed(3)})`);
         op(hl, t > T.zoomCode[0] ? 0.55 + 0.45 * Math.sin((t - T.zoomCode[0]) * 7) : 0);
-        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462]]);
+        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462], [T.tapLobby, lobbyBtn[0], lobbyBtn[1]], [T.tapRemote, toggles[1].c[0], toggles[1].c[1]]]);
       }
       web = { F, update };
     }
@@ -1373,12 +1449,12 @@
     }
 
     // ---------------------------------------------------------------- camera and layers
-    // The room from "Let the class in" on: the wall, the class and the teacher; the mug and the sheets may leave the frame (owner).
+    // The room from "Let everyone in" on: the wall, the class and the teacher; the mug and the sheets may leave the frame (owner).
     const ROOM = [850, 455, 1.06], SPLIT = [840, 425, 1.15];
     // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
-    // ("Let the class in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
+    // ("Let everyone in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
     const CAM = [
-      [T.cut, [431, 537, 2.3]], [28.1, [431, 537, 2.3]], [29.5, ROOM],
+      [T.cut, [431, 537, 2.3]], [29.1, [431, 537, 2.3]], [30.4, ROOM],
       [44.3, ROOM], [45.6, SPLIT], [49.6, SPLIT], [50.3, ROOM],
       [54.6, ROOM], [55.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
     ];

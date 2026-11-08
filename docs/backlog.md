@@ -382,11 +382,9 @@ behind these items — options and what each would cost — is
    "Dressing the avatar"). `design/teacher-devices.md`, "How the screens
    are arranged" and "Words for any crowd". Not deployed. Devices only (no
    wall) is not offered; why, and what would make it cheap after Peers: same
-   file. Open: the landing's film draws the lobby with the classroom's words
-   ("Let the class in ▶", "Class code", "the class watches this screen",
-   "The class is let in in a moment.") and its check without the toggle
-   (`docs/film/build/film.js`, `COMMON`); the words before the check: item
-   9.
+   file. The landing's film shows the local check, the lobby's check with
+   the toggle and these words (`docs/film/`); the words before the check:
+   item 9.
 
 5. **Whoever asked the AI for the quiz plays it without having seen the
    questions** — what lets a quiz be played by its own maker, a trivia quiz
@@ -581,7 +579,7 @@ With the owner:
   browser chose or last had; devices only not offered; the questions
   folded on the lobby's check and the Remote's lobby; the words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
-  it", "‹ Back"); whether the film is redrawn for them now or with item 9.
+  it", "‹ Back"), which the landing's film now shows too.
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the

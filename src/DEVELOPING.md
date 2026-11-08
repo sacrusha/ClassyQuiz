@@ -128,6 +128,12 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
   the AI app's name on the phone) or the player's (`play`, `pause`, `speed`,
   `seek`): the film shows them as they were at its build, and `npm test`
   fails until it is rebuilt;
+- a screen the film draws after the upload changes its words (the local
+  check and its entries, the lobby's check, the second device's question,
+  the wall before anyone is let in, the Remote's buttons): the film quotes
+  them in `SITE` in `docs/film/build/film.js`, and `client/film.test.ts`
+  fails until that and the build follow; a screen that changes its layout
+  or its sequence fails nothing, and the film shows the old one;
 - the film's length (`DUR`) changes: `public/index.html`'s time bar carries
   it too, and `sitebuild.py` refuses to build until both agree;
 - `client/look.ts` changes the avatars, which the film draws; no test

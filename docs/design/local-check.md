@@ -144,8 +144,7 @@ element to play there, and give the check back as it was.
   "The single tab: check, then join").
 - Whether "Open the lobby" is the word a pub host or a teacher reaches for.
 - The Run box still says "Upload the quiz your AI made"; the file goes up
-  only when a room opens. Its words are also the film's (`docs/film/`), which shows
-  the lobby's check straight after the upload.
+  only when a room opens. Its words are also the film's (`docs/film/`).
 - Whether school browsers that block site data (IndexedDB) exist in the
   target schools; such a browser can't reach the check.
 - Pull-to-refresh on a phone reloads the check, which then holds nothing.
