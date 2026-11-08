@@ -192,7 +192,8 @@ export class PeersRoom {
   /** The foot's button: from the solution to the ranking (this device's own step), from the ranking "done". */
   private next(): void {
     const v = this.view;
-    if (!v || v.phase !== "reveal") return;
+    // A key under the open sheet would tap on, and let the room move under it.
+    if (!v || v.phase !== "reveal" || this.fixing !== null) return;
     if (this.ranked !== v.current) {
       this.ranked = v.current;
       this.redraw();
@@ -257,8 +258,9 @@ export class PeersRoom {
       const onto = v.phase === "question" ? "Solution" : p.last ? "Final ranking" : `Question ${(v.question?.n ?? 0) + 1}`;
       items.push({ label: `${esc(onto)} now, without waiting`, run: () => void this.run({ op: "goOn", at }) });
     }
-    if (v.phase === "reveal") items.push({ label: "Change the solution", run: () => ((this.fixing = v.current), this.renderFix()) });
-    const others = p.players.filter((x) => !(x.avatar.a === v.me?.avatar.a && x.avatar.c === v.me?.avatar.c));
+    // Until the opener taps on, the room waits for them, so it doesn't move under the sheet.
+    if (v.phase === "reveal" && !p.ready && this.readySent !== v.current) items.push({ label: "Change the solution", run: () => ((this.fixing = v.current), this.renderFix()) });
+    const others = p.players.filter((x) => x.id !== p.player);
     if (others.length > 0) items.push({ label: "Remove a player…", run: () => this.removeMenu(others) });
     items.push({ label: `${ICON.trophy} End the quiz: final ranking`, run: () => void this.run({ op: "finish", at }) });
     openMenu(items);
@@ -384,9 +386,8 @@ function waitingLine(p: PeersView): string {
 /** Places 1 to 3 (at most ten avatars, ties sharing a place), and this player's own place if it is further down. */
 function rankingList(p: PeersView, me: NonNullable<PlayerView["me"]>): string {
   const top = p.ranking?.top ?? [];
-  const isMe = (av: Avatar) => av.a === me.avatar.a && av.c === me.avatar.c;
   const row = (place: number, av: Avatar, score: number, cls = "") =>
-    `<div class="prank${isMe(av) ? " me" : ""}${cls}"><span class="pplace">${place}.</span><span class="pav">${avatarSvg(av)}</span><span class="pscore">${ICON.star} ${score}</span></div>`;
-  const mine = top.some((t) => isMe(t.avatar)) || me.place === 0 ? "" : row(me.place, me.avatar, me.score, " apart");
-  return `<div class="pranks">${top.map((t) => row(t.place, t.avatar, t.score)).join("")}${mine}</div>`;
+    `<div class="prank${cls}"><span class="pplace">${place}.</span><span class="pav">${avatarSvg(av)}</span><span class="pscore">${ICON.star} ${score}</span></div>`;
+  const mine = top.some((t) => t.id === p.player) || me.place === 0 ? "" : row(me.place, me.avatar, me.score, " me apart");
+  return `<div class="pranks">${top.map((t) => row(t.place, t.avatar, t.score, t.id === p.player ? " me" : "")).join("")}${mine}</div>`;
 }

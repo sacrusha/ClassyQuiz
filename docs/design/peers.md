@@ -129,11 +129,14 @@ On their device's top bar, during the quiz:
 - **Solution now, without waiting** (during a question), **Question 5 now,
   without waiting** or **Final ranking now, without waiting** (after the
   solution): for a friend who left a phone awake on the table.
-- **Change the solution**, at the solution: the open question's choices in
-  the steering screens' sheet ("Tap every right choice.", Don't count this
-  question, Done); the points, the spread's marks and the winners follow.
-  The solutions are seen only once everyone has seen them, so the opener
-  keeps playing blind.
+- **Change the solution**, at the solution, until the opener taps on from
+  it: the open question's choices in the steering screens' sheet ("Tap
+  every right choice.", Don't count this question, Done); the points, the
+  spread's marks and the winners follow. The room waits for the opener
+  until they tap on, so it doesn't move while the sheet is open, and a key
+  under the sheet doesn't tap on; once they have, the room may move at any
+  moment, so the menu no longer offers it. The solutions are seen only
+  once everyone has seen them, so the opener keeps playing blind.
 - **Remove a player…**: the avatars, each to remove; the room stops waiting
   for it. Remove is sticky, as in a class.
 - **End the quiz: final ranking.**

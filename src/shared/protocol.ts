@@ -390,6 +390,8 @@ export interface PlayerView {
  * the ranking. Every list of answers is in the order on screen.
  */
 export interface PeersView {
+  /** This device's player, as in `players` and the ranking. */
+  player?: string;
   title: string;
   /** The code friends join with, shown on the device of whoever opened the room. */
   code: string;

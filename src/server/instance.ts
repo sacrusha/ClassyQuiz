@@ -1807,7 +1807,7 @@ export class Instance extends DurableObject<Env> {
       winners: run.phase === "reveal" ? G.winners(game, run.current) : [],
       ranking: run.phase === "reveal" || run.phase === "final" ? this.ranking() : null,
     };
-    return (player: string): PeersView => ({ ...shared, host: player === run.peers!.host, ready: G.isReady(game, player) });
+    return (player: string): PeersView => ({ ...shared, player, host: player === run.peers!.host, ready: G.isReady(game, player) });
   }
 
   private viewFor(session: Session, cache: ViewCache = {}, exclude?: WebSocket): View | null {
