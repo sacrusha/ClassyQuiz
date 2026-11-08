@@ -560,6 +560,32 @@ export function setHidePicture(g: Game, q: number, hide: boolean): void {
   fix.hidePicture = hide;
 }
 
+/**
+ * The fixes made on the local check before the upload (docs/design/local-check.md,
+ * "Opening a room"), applied to a new game through the same rules as a
+ * teacher's fix: the browser isn't trusted. A value that doesn't fit its
+ * question is left as the quiz has it; the rest still apply.
+ */
+export function applyFixes(g: Game, fixes: unknown): void {
+  if (!Array.isArray(fixes) || fixes.length !== g.fixes.length) return;
+  fixes.forEach((f: unknown, q) => {
+    if (!f || typeof f !== "object") return;
+    const { counts, void: isVoid, skip, hidePicture } = f as Record<string, unknown>;
+    const tries: (() => void)[] = [];
+    if (Array.isArray(counts)) tries.push(() => setCounts(g, q, counts));
+    if (typeof isVoid === "boolean") tries.push(() => setVoid(g, q, isVoid));
+    if (typeof skip === "boolean") tries.push(() => setSkip(g, q, skip));
+    if (typeof hidePicture === "boolean") tries.push(() => setHidePicture(g, q, hidePicture));
+    for (const t of tries) {
+      try {
+        t();
+      } catch (e) {
+        if (!(e instanceof GameError)) throw e;
+      }
+    }
+  });
+}
+
 /** Whether the open question's picture fills the projector. */
 export function zoomed(g: Game): boolean {
   const run = g.run;

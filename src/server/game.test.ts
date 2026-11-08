@@ -561,3 +561,23 @@ test("the class joins once the teacher lets it in, or once the quiz starts", () 
   assert.equal(h.run!.waiting, undefined, "Start lets the class in");
   G.addPlayer(h, "p0", "t0", 0, random);
 });
+
+test("fixes made before the upload are the quiz's from the start, checked like a teacher's; one that doesn't fit is left out", () => {
+  const g = G.newGame(quiz);
+  G.applyFixes(g, [
+    { counts: [false, true, false], void: false, skip: false },
+    { counts: [false, false], void: true, skip: false },
+    { counts: [true, true], void: false, skip: true, hidePicture: true },
+  ]);
+  assert.deepEqual(g.fixes[0].counts, [false, true, false], "a changed key");
+  assert.deepEqual(g.fixes[1].counts, [false, true], "no right choice is refused, as on the check");
+  assert.equal(g.fixes[1].void, true, "the rest of that question's fixes still apply");
+  assert.deepEqual(g.fixes[2], { counts: [true, true], void: false, skip: true, hidePicture: true });
+
+  const h = G.newGame(quiz);
+  G.applyFixes(h, [{ counts: [false, true, false] }]);
+  assert.deepEqual(h.fixes, G.newGame(quiz).fixes, "fixes for another quiz (another number of questions) change nothing");
+  G.applyFixes(h, "nonsense");
+  G.applyFixes(h, [{ counts: [true] }, null, { counts: ["yes", true] }]);
+  assert.deepEqual(h.fixes, G.newGame(quiz).fixes, "nor do values that don't fit");
+});

@@ -235,6 +235,8 @@ export class Instance extends DurableObject<Env> {
     leaveOutMissing = false,
     /** The answer pictures' small copies, for the students' devices. */
     smalls: UploadedImage[] = [],
+    /** The fixes made on the local check before the upload, as the browser sent them (G.applyFixes checks them). */
+    fixes: unknown = null,
   ): Promise<
     | { ok: true; secret: string; code: string; teacher: string; token: string }
     | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull }
@@ -265,6 +267,7 @@ export class Instance extends DurableObject<Env> {
     // The pasting tab is about to open the Projector with it.
     this.lastPoll.set(`screen:${token}`, now);
     this.game = G.newGame(r.quiz);
+    G.applyFixes(this.game, fixes);
     G.startRun(this.game, code, randomToken(9), Math.random);
     // Teacher devices come in any time; the class once the teacher lets it in.
     this.game.run!.waiting = true;
@@ -283,7 +286,7 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * The upload with pictures, as multipart/form-data: "text", "leaveOut",
-   * and per picture an "image" file with its "imageName" (a text field: a
+   * "fixes" (JSON, the local check's), and per picture an "image" file with its "imageName" (a text field: a
    * non-ASCII file name in a multipart header isn't decoded reliably); per
    * answer picture also a "small" file with its "smallName".
    */
@@ -317,7 +320,7 @@ export class Instance extends DurableObject<Env> {
       Promise.all(list.map(async (f, i) => ({ name: names[i] as string, bytes: new Uint8Array(await (f as File).arrayBuffer()) })));
     const images = await read(files, names);
     const smalls = await read(smallFiles, smallNames);
-    const r = await this.create(text, images, form.get("leaveOut") === "missing", smalls);
+    const r = await this.create(text, images, form.get("leaveOut") === "missing", smalls, readFixes(form.get("fixes")));
     const body: UploadResult = r.ok ? { ok: true, id: this.ctx.id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token } : r;
     return json(body);
   }
@@ -1684,4 +1687,14 @@ function safeEqual(a: string, b: string): boolean {
   let d = 0;
   for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return d === 0;
+}
+
+/** The upload's "fixes" field (JSON text), or null when it isn't there or isn't JSON; G.applyFixes checks the rest. */
+function readFixes(field: unknown): unknown {
+  if (typeof field !== "string") return null;
+  try {
+    return JSON.parse(field);
+  } catch {
+    return null;
+  }
 }
