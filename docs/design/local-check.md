@@ -44,8 +44,8 @@ Solo learner mustn't be shown them.
 
 ### Reading on the root page
 
-The Run box ("Open the quiz your AI made", since nothing goes up there)
-reads the `.zip` as before, then checks it here instead of
+The Run box (under "Open the quiz your AI made", since nothing goes up
+there) reads the `.zip`, then checks it here instead of
 uploading it (`client/home.ts`; `readQuiz` in `client/opening.ts`): the text
 first (the parser's errors, with "Copy the message for your AI"), then the
 pictures the quiz names (with "Continue without these pictures"), then the

@@ -1,7 +1,7 @@
-// The root page's top (docs/design/root-page.md): code box, language, example
-// ask, Run a quiz. The guidance for AIs below reads without this script, in
-// English; this script puts the block above it in the visitor's language
-// (client/landing-text.ts).
+// The root page's top (docs/design/root-page.md): code box, language, the
+// three ways to play, example ask, and Run, which opens the AI's .zip. The
+// guidance for AIs below reads without this script, in English; this script
+// puts the block above it in the visitor's language (client/landing-text.ts).
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
@@ -166,6 +166,11 @@ function apply(l: Lang): void {
   for (const el of document.querySelectorAll<HTMLElement>("[data-t]")) {
     const v = t[el.dataset.t as keyof Text];
     if (typeof v === "string") el.textContent = v;
+  }
+  // Words with markup of the page's own (landing-text.ts), never anyone else's.
+  for (const el of document.querySelectorAll<HTMLElement>("[data-t-html]")) {
+    const v = t[el.dataset.tHtml as keyof Text];
+    if (typeof v === "string") el.innerHTML = v;
   }
   for (const el of document.querySelectorAll<HTMLElement>("[data-t-aria]")) {
     const v = t[el.dataset.tAria as keyof Text];

@@ -413,11 +413,17 @@ exploration behind these items — options and what each would cost — is
 9. A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
    lesson's, recognise themselves on the page, the example class's teacher
    still served first: the word decided once (`design/root-page.md`, "Words
-   for whoever comes"), the guidance describing the three ways and where each
-   reads a question (`design/guidance-page.md`), three more example asks with
+   for whoever comes"), the three ways named in one sentence above Build and
+   Run, in the visitor's language, by the names the check's cards carry
+   (`design/root-page.md`, "The three ways, named"), Run's words leaving
+   "play" to the check's cards so a child with a code isn't drawn into the
+   file picker ("Run first when stacked"), the guidance describing the three
+   ways and where each reads a question (`design/guidance-page.md`), three
+   more example asks with
    no line under them since no run is behind them, and the film showing the
    check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
-   (`translation-review.md`, "The other ways to play", E6); whether someone
+   (`translation-review.md`, "The other ways to play", "The words before
+   the check", E6); whether someone
    who isn't a teacher reads the page as theirs, which nobody outside the
    project has tried.
 

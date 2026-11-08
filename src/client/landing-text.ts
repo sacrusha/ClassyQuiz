@@ -54,6 +54,13 @@ export interface Text {
   /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
   full: string;
   see: string;
+  /**
+   * The three ways a quiz is played here, by the names the local check's
+   * cards carry (Solo, Peers, Quizmaster: client/entries.ts), each with what
+   * it is in the visitor's language: one sentence above Build and Run, as
+   * HTML, the names in <b> (docs/design/root-page.md, "The three ways, named").
+   */
+  ways: string;
   /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
   capSheet: string;
   capAi: string;
@@ -62,6 +69,10 @@ export interface Text {
   capWall: string;
   capTap: string;
   build: string;
+  /** Run's heading: for whoever has the quiz their AI made, which a child with a code hasn't (docs/design/root-page.md, "Run first when stacked"). */
+  run: string;
+  /** The button that opens the file picker: what it opens. */
+  upload: string;
   step1: string;
   step1detail: string;
   step2: string;
@@ -85,8 +96,6 @@ export interface Text {
   ask2: string;
   copy: string;
   copied: string;
-  run: string;
-  upload: string;
   drop: string;
   zipOnly: string;
   notText: string;
@@ -136,6 +145,7 @@ const en: Text = {
   again: "Play again",
   full: "Full screen",
   see: "The example, step by step ›",
+  ways: "A quiz is played here in three ways: <b>Solo</b>, on your own; <b>Peers</b>, with friends, each on their own device; <b>Quizmaster</b>, you run it for a group, on a big screen.",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
   capZip: "The .zip, opened here",
@@ -148,7 +158,7 @@ const en: Text = {
   tabSheets: "With photos of exercise sheets",
   tabChess: "From a description: a chess quiz",
   tabSolo: "To practise on your own",
-  tabFriends: "With friends, playing too",
+  tabFriends: "To play with friends",
   tabGroup: "For a group you lead: a training session",
   tabOpen: "With nothing decided yet",
   ask: [
@@ -173,8 +183,8 @@ const en: Text = {
   ask2: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
   copy: "Copy",
   copied: "Copied",
-  run: "Play a quiz",
-  upload: "Open the quiz your AI made (.zip)",
+  run: "Open the quiz your AI made",
+  upload: "Choose the .zip file",
   drop: "or drop it here",
   zipOnly: "Your AI can make the quiz as one .zip file, to download from the chat and open here.",
   notText: "The site takes the quiz as a .zip file, not as text.",
@@ -222,6 +232,7 @@ const de: Text = {
   again: "Nochmals abspielen",
   full: "Vollbild",
   see: "Das Beispiel Schritt für Schritt ›",
+  ways: "Gespielt wird ein Quiz hier auf drei Arten: <b>Solo</b>, für dich allein; <b>Peers</b>, mit Freunden, alle am eigenen Gerät; <b>Quizmaster</b>, du leitest es für eine Gruppe, am grossen Bildschirm.",
   capSheet: "Deine Aufgabenblätter",
   capAi: "Deine KI",
   capZip: "Die .zip, hier geöffnet",
@@ -234,7 +245,7 @@ const de: Text = {
   tabSheets: "Mit Fotos von Aufgabenblättern",
   tabChess: "Aus einer Beschreibung: ein Schach-Quiz",
   tabSolo: "Zum Üben für dich allein",
-  tabFriends: "Mit Freunden, du spielst mit",
+  tabFriends: "Zum Spielen mit Freunden",
   tabGroup: "Für eine Gruppe, die du leitest: eine Schulung",
   tabOpen: "Wenn noch nichts feststeht",
   ask: [
@@ -259,8 +270,8 @@ const de: Text = {
   ask2: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
   copy: "Kopieren",
   copied: "Kopiert",
-  run: "Ein Quiz starten",
-  upload: "Das Quiz deiner KI öffnen (.zip)",
+  run: "Das Quiz deiner KI öffnen",
+  upload: "Die .zip-Datei wählen",
   drop: "oder hier ablegen",
   zipOnly: "Deine KI kann das Quiz als eine .zip-Datei machen, zum Herunterladen aus dem Chat und Öffnen hier.",
   notText: "Die Seite nimmt das Quiz als .zip-Datei, nicht als Text.",
@@ -308,6 +319,7 @@ const fr: Text = {
   again: "Revoir",
   full: "Plein écran",
   see: "L'exemple pas à pas ›",
+  ways: "Ici, un quiz se joue de trois façons : <b>Solo</b>, de votre côté ; <b>Peers</b>, entre amis, chacun sur son appareil ; <b>Quizmaster</b>, vous l'animez pour un groupe, sur grand écran.",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
   capZip: "Le .zip, ouvert ici",
@@ -320,7 +332,7 @@ const fr: Text = {
   tabSheets: "Avec les photos de fiches",
   tabChess: "D'après une description : un quiz d'échecs",
   tabSolo: "Pour réviser en solo",
-  tabFriends: "Entre amis, en jouant aussi",
+  tabFriends: "Pour jouer entre amis",
   tabGroup: "Pour un groupe que vous animez : une formation",
   tabOpen: "Sans rien avoir décidé",
   ask: [
@@ -345,8 +357,8 @@ const fr: Text = {
   ask2: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   copy: "Copier",
   copied: "Copié",
-  run: "Lancer un quiz",
-  upload: "Ouvrir le quiz de votre IA (.zip)",
+  run: "Ouvrir le quiz de votre IA",
+  upload: "Choisir le fichier .zip",
   drop: "ou déposez-le ici",
   zipOnly: "Votre IA peut faire le quiz en un seul fichier .zip, à télécharger depuis le chat et à ouvrir ici.",
   notText: "Le site prend le quiz en fichier .zip, pas en texte.",
@@ -394,6 +406,7 @@ const it: Text = {
   again: "Rivedi",
   full: "Schermo intero",
   see: "L'esempio passo per passo ›",
+  ways: "Qui un quiz si gioca in tre modi: <b>Solo</b>, per conto tuo; <b>Peers</b>, con gli amici, ognuno sul proprio dispositivo; <b>Quizmaster</b>, lo guidi tu per un gruppo, sul grande schermo.",
   capSheet: "Le tue schede",
   capAi: "La tua IA",
   capZip: "Lo .zip, aperto qui",
@@ -406,7 +419,7 @@ const it: Text = {
   tabSheets: "Con le foto di schede",
   tabChess: "Da una descrizione: un quiz di scacchi",
   tabSolo: "Per esercitarti per conto tuo",
-  tabFriends: "Con gli amici, giocando anche tu",
+  tabFriends: "Per giocare con gli amici",
   tabGroup: "Per un gruppo che guidi: una formazione",
   tabOpen: "Senza aver ancora deciso nulla",
   ask: [
@@ -431,8 +444,8 @@ const it: Text = {
   ask2: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
   copy: "Copia",
   copied: "Copiato",
-  run: "Avvia un quiz",
-  upload: "Apri il quiz della tua IA (.zip)",
+  run: "Apri il quiz della tua IA",
+  upload: "Scegli il file .zip",
   drop: "o trascinalo qui",
   zipOnly: "La tua IA può fare il quiz come un unico file .zip, da scaricare dalla chat e aprire qui.",
   notText: "Il sito prende il quiz come file .zip, non come testo.",
