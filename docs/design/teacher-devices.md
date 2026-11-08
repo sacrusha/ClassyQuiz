@@ -85,8 +85,8 @@ What matters here:
   a role noun is avoided where a sentence does without one; translations
   come later and will hit meaning, not the literal word. The site's own
   screens are English (`local-check.md`, Situation). Which word stands where
-  "teacher" stands on the README, the landing and the guidance is v5 item
-  9's, decided once for all entries.
+  "teacher" stood on the README, the landing and the guidance is decided
+  once for all entries: `root-page.md`, "Words for whoever comes".
 - **A Quizmaster reaches the lobby having seen the questions:** the local
   check shows them before the upload, with their fixes, which go up with
   the quiz.
@@ -209,9 +209,9 @@ target: a child who reads slowly or no English shows the tablet to the
 teacher, as before. "Projector" and "Remote" stay, the roles' names, which
 the owner uses for any host ("use one as remote the other as a
 projector"). These docs keep "teacher", "class" and "teacher code": they
-speak of the example class. The words before the check (the root page, its
-resume card's "Class code", the guidance, the README) and the `/check` page
-for IT ("a site for classroom quizzes") are v5 item 9's. Screens and words:
+speak of the example class. The words before the check, the guidance's and
+the README's follow the same rule, decided once for all entries
+(`root-page.md`, "Words for whoever comes"). Screens and words:
 `user-flow.md` §3.2–3.5.
 
 ### A second device: one question, only when needed

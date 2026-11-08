@@ -255,6 +255,46 @@ site's English screens after it ("The film", Words); its words are in
 `docs/film/build/film.js`, the page's own taken from `landing-text.ts` when it
 is built.
 
+### Words for whoever comes
+
+Purpose (backlog v5 item 9): a visitor who isn't a teacher, and an AI asked
+for a quiz that isn't a lesson's, recognise themselves on the page and in the
+guidance, while the example class's teacher is still served first (backlog,
+Project): the words widen who else is, they don't displace the teacher.
+
+What the words live with:
+
+- "Teacher" stood for two people that v5 tells apart: whoever asks the AI
+  for the quiz, and whoever runs it in the room. In Solo and Peers nobody
+  runs it, and the one who asked plays.
+- The owner: "host" is acceptable, not great, in English (in software,
+  participants connect to a host too), and a role noun is avoided where a
+  sentence does without one.
+- The block above About is in four languages, and the rest of the site is
+  queued for Localization (backlog, Later); a translation hits the meaning,
+  not the literal word. The guidance stays English (`guidance-page.md`).
+
+So, once for all entries:
+
+- **No role noun where the words are translated**, on the landing and the
+  screens: the landing says "you" (du, vous, tu), the screens use a sentence
+  ("Ask whoever runs it", `teacher-devices.md`, "Words for any crowd"). A
+  sentence translates by its meaning; a noun would need a word in each
+  language that suits a classroom and a pub alike, and the words for
+  someone receiving guests (Gastgeber, hôte, ospite) don't say who runs a
+  quiz.
+- **"Quizmaster"** for whoever runs a room, where English needs a noun (the
+  guidance, the README): it is the entry's own name, so the role and the
+  card picked on the local check agree, and the word for whoever runs a pub
+  quiz. "Host" stays the code's word (`peers.md`).
+- **"The user"** in the guidance for whoever is in the conversation with the
+  AI, the AI's own word for that person, whoever they are; **"players"** for
+  whoever answers.
+- **"Teacher", "class", "students", "lesson"** stay where the classroom is
+  meant: the film (the example class's story, `docs/film/`), the sheets and
+  chess asks, the classroom's lines in the guidance, the network check's
+  "school", and the design docs, which speak of the example class.
+
 ### Run: the `.zip` and nothing else
 
 Run is one element: a dashed box with one button and "or drop it here". The
