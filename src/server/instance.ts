@@ -1164,7 +1164,7 @@ export class Instance extends DurableObject<Env> {
       return { direct: [ack(true)] };
     } catch (e) {
       if (e instanceof G.GameError) {
-        // A Peers room has nobody to ask: the class's refusals without "Ask your teacher".
+        // A Peers room has nobody to ask: the class's refusals without "Ask whoever runs it".
         const words = G.isPeers(game) ? ({ [CLASS_FULL]: ROOM_FULL, [CLASS_STARTED]: ROOM_STARTED }[e.message] ?? e.message) : e.message;
         return { direct: [ack(false, words)] };
       }

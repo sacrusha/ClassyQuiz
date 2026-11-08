@@ -557,6 +557,12 @@ With the owner:
   folded on the lobby's check and the Remote's lobby; the words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
   it", "‹ Back"), which the landing's film now shows too.
+- Peers (v5 items 3 and 7), the shapes as built, kept by the owner's
+  delegate and not yet seen by the owner (`design/peers.md`, its "Not
+  known" for each): who the room waits for, shown as avatars on every
+  device that is done; the spread showing with the key, no lock-in
+  before it; a ranking on each device while it waits; the opener's "…
+  now, without waiting"; no points for speed; no wall.
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the

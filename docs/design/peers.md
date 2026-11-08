@@ -61,7 +61,7 @@ reloaded device keeps it. The check is replaced in the tab's history, as
 Quizmaster's is.
 
 There is no Projector, no Remote and no teacher code: the teacher code is
-refused (`teacherCheck`, "That isn't this quiz's teacher code."), and the
+refused (`teacherCheck`, "The last two digits don't match this quiz."), and the
 start page's resume card brings the device that opened it back as its
 player. The others join at once, so the day's rows are booked at upload
 (in a steered room, when the class is let in), with a ready tap's rows
@@ -142,7 +142,7 @@ At the final ranking, Exit ends the quiz on every device; the others have
 ← to the start page. Should the opener's device die, its avatar can be
 picked back on another device, and the ⋯ comes with it.
 
-The others' refusals don't say "Ask your teacher": "This quiz is full: it
+The others' refusals don't say "Ask whoever runs it": "This quiz is full: it
 takes no more players." and "This quiz has started and takes no more
 players." The door is the class's (`class-and-wall.md`, "The door").
 
