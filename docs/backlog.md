@@ -4,7 +4,7 @@ Project → versions as goals → items that get picked, worked and delivered. E
 item names the problem it solves for the teacher or the class. Done items are one
 line with a pointer to the design file that holds their purpose and situation
 (`design/<file>.md`); what is still to do is in full, and in the one list at the
-end. Last settled: 2026-11-08.
+end. Last settled: 2026-11-09.
 
 ## Project
 
