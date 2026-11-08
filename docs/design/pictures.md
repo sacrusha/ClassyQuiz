@@ -156,6 +156,16 @@ redraws each on a canvas.
   arrives). The projector's question also carries `pics` for picture answers.
   The player view carries no question picture; it carries `packs` (in every
   view, the lobby included) and, once the answers are up, `pics` per answer.
+- A Peers room's device lays out the question as the wall does
+  (`peers.md`), so its view carries the question's `image`, `background`
+  and answer `pics` as the wall's, and its `packs` go on past the small
+  copies' with bundles of the questions' pictures and backgrounds:
+  `.../b<k>` with the picture secret, made at request from the stored
+  pictures, at most `PACK_BYTES` each, grouped by the stored quiz and not
+  by the fixes, so an address names the same pictures all along
+  (`bundles`, `src/server/images.ts`; each picture's size, `l`, is kept
+  with it at upload for this). The lobby's view says where each bundled
+  picture sits (`inPacks`), and lists one by one only what no pack holds.
 
 ### Loading
 
@@ -177,6 +187,13 @@ redraws each on a canvas.
   10 MB over the school Wi-Fi in the lobby.
 - A picture arriving after the buttons is filled in place, without a redraw
   that could swallow a tap.
+- A Peers device fetches its packs the same way, in the lobby, and draws
+  each picture cut from them under the address its view names it by
+  (`seed`, `src/client/pictures.ts`), so the layout neither waits nor
+  changes: an answer picture as its small copy, as a tablet does, a
+  question's picture and a background whole. A picture whose pack isn't
+  there yet when it shows (a device that reloaded mid-quiz) is fetched by
+  itself.
 
 ### The projector
 

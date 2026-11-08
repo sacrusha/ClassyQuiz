@@ -7,7 +7,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { imageKey, parseQuiz, type Quiz, type Problem } from "../quiz/format.ts";
 import * as G from "./game.ts";
-import { matchImages, type StoredImage, type UploadedImage } from "./images.ts";
+import { bundles, matchImages, type StoredImage, type UploadedImage } from "./images.ts";
 import type {
   AnswerAck,
   Auth,
@@ -160,10 +160,12 @@ export class Instance extends DurableObject<Env> {
    * What each student device was last sent. A student's view only changes
    * with their own answer or the teacher's steps, not with classmates'
    * answers; sending only changes keeps a polling class from waking 25
-   * devices per answer (the Free plan's request budget).
+   * devices per answer (the Free plan's request budget). A Peers view does
+   * change with everyone's answer (who the room waits for); a socket gets
+   * that at once, a poller with its poll's end (`pollKey`).
    */
   private sentToSocket = new WeakMap<WebSocket, string>();
-  private sentToPoller = new Map<string, { key: string; v: number }>();
+  private sentToPoller = new Map<string, Sent>();
   /**
    * The quiz was ended by a hand (Exit), and what a device that asks now is
    * told: go home, as the devices whose line was open were. For a device
@@ -371,10 +373,29 @@ export class Instance extends DurableObject<Env> {
   /**
    * GET …/img/<secret>/<n>: a picture, for a device that was sent a view
    * naming it; …/img/<packSecret>/p<k>: a pack of answer pictures' small
-   * copies, for the students' devices.
+   * copies, for the students' devices; …/img/<secret>/b<k>: a bundle of the
+   * questions' pictures and the backgrounds, for a Peers room's devices
+   * (`bundles`), one after another as the view's offsets say.
    */
   private async image(secret: string, n: string): Promise<Response> {
     const record = this.quizRecord;
+    const bundle = n.match(/^b(\d{1,3})$/);
+    if (bundle) {
+      const list = record && secret === record.imageSecret ? bundles(record.quiz, record.images)[Number(bundle[1])] : undefined;
+      if (!list) return new Response("not found", { status: 404 });
+      const got = await this.ctx.storage.get<Uint8Array>(list.map((k) => `img:${k}`));
+      const parts = list.map((k) => got.get(`img:${k}`));
+      if (parts.some((b) => !b)) return new Response("not found", { status: 404 });
+      const out = new Uint8Array(parts.reduce((s, b) => s + b!.byteLength, 0));
+      let o = 0;
+      for (const b of parts) {
+        out.set(b!, o);
+        o += b!.byteLength;
+      }
+      return new Response(out, {
+        headers: { "content-type": "application/octet-stream", "cache-control": "no-store", "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; sandbox" },
+      });
+    }
     const pack = n.match(/^p(\d{1,3})$/);
     if (pack) {
       const k = Number(pack[1]);
@@ -405,7 +426,11 @@ export class Instance extends DurableObject<Env> {
     const record = this.quizRecord;
     const info = name ? record?.images[imageKey(name)] : undefined;
     if (!info || !record) return null;
-    return { src: `/api/i/${this.ctx.id.toString()}/img/${record.imageSecret}/${info.n}`, w: info.w, h: info.h };
+    return { src: this.imageSrc(record, info.n), w: info.w, h: info.h };
+  }
+
+  private imageSrc(record: QuizRecord, n: number | string): string {
+    return `/api/i/${this.ctx.id.toString()}/img/${record.imageSecret}/${n}`;
   }
 
   /** The packs of answer pictures' small copies, for the students' devices; absent without picture answers. */
@@ -413,6 +438,30 @@ export class Instance extends DurableObject<Env> {
     const record = this.quizRecord;
     if (!record?.packs || !record.packSecret) return undefined;
     return Array.from({ length: record.packs }, (_, k) => `/api/i/${this.ctx.id.toString()}/img/${record.packSecret}/p${k}`);
+  }
+
+  /**
+   * A Peers device's packs (docs/design/peers.md, "The pictures"): the
+   * answer pictures' small copies as a tablet gets them, then the bundles
+   * of the questions' pictures and backgrounds. `inPacks`: where each
+   * bundled picture sits, under the address its views name it by.
+   */
+  private peersPacks(): { packs: string[]; inPacks: { src: string; pic: PackPic }[] } {
+    const record = this.quizRecord!;
+    const packs = this.packUrls() ?? [];
+    const byN = new Map(Object.values(record.images).map((i) => [i.n, i]));
+    const inPacks: { src: string; pic: PackPic }[] = [];
+    bundles(record.quiz, record.images).forEach((list, k) => {
+      const p = packs.length;
+      packs.push(this.imageSrc(record, `b${k}`));
+      let o = 0;
+      for (const n of list) {
+        const info = byN.get(n)!;
+        inPacks.push({ src: this.imageSrc(record, n), pic: { p, o, l: info.l!, type: info.type, w: info.w, h: info.h } });
+        o += info.l!;
+      }
+    });
+    return { packs, inPacks };
   }
 
   /** Question q's answer pictures in the order on screen, for the wall; absent when it has none. */
@@ -576,7 +625,7 @@ export class Instance extends DurableObject<Env> {
       if (next?.role === "player") {
         const view = this.viewFor(next) as PlayerView | null;
         if (view) {
-          this.sentToPoller.set(next.player, { key: viewKey(view), v: view.v });
+          this.sentToPoller.set(next.player, sent(view));
           return json({ messages: [...out, ...replies.direct, { t: "state", view }] });
         }
       }
@@ -598,16 +647,23 @@ export class Instance extends DurableObject<Env> {
       if (session.role === "player") {
         const pid = session.player;
         const view = this.viewFor(session) as PlayerView;
-        const sent = this.sentToPoller.get(pid);
+        const last = this.sentToPoller.get(pid);
         // Answer at once when the device's view changed, or when it didn't
         // get the last one (its version is older than what was sent).
-        if (!sent || known < sent.v || sent.key !== viewKey(view)) {
-          this.sentToPoller.set(pid, { key: viewKey(view), v: view.v });
+        if (!last || known < last.v || last.poll !== pollKey(view)) {
+          this.sentToPoller.set(pid, sent(view));
           return json({ messages: [...out, { t: "state", view }] });
         }
         const msgs = await this.hold(session);
         this.notePoll(session);
-        return json({ messages: msgs });
+        if (msgs.length > 0 || !this.live()) return json({ messages: msgs });
+        // The hold ran out: what changed without ending it (pollKey) comes
+        // with its end, which costs no request of its own.
+        const now = this.viewFor(session) as PlayerView | null;
+        const before = this.sentToPoller.get(pid);
+        if (!now || (before && before.key === viewKey(now))) return json({ messages: [] });
+        this.sentToPoller.set(pid, sent(now));
+        return json({ messages: [{ t: "state", view: now }] });
       }
       const view = this.viewFor(session);
       if (view && view.v > known) return json({ messages: [...out, { t: "state", view }] });
@@ -983,7 +1039,12 @@ export class Instance extends DurableObject<Env> {
         if (cmd.op === "ready") {
           // Peers: done with the solution; the room steps on once everyone present is.
           const outcome = G.setReady(game, session.player, cmd.q);
-          if (outcome === "stored") await this.peersStore();
+          // A tap that moves the room is written with its step at once; the
+          // others ride on the next write of the run, as the looks do (at
+          // most one per LOOK_WRITE_MS): friends tap on within seconds of
+          // each other (docs/design/hosting-and-limits.md, "What a Peers room costs").
+          if (outcome === "stored" && G.peersDue(game, this.connectedPlayers())) await this.peersStore();
+          else if (outcome === "stored") await this.storeLooks();
           return { direct: [ack(outcome !== "refused")] };
         }
         if (G.isHost(game, session.player) && cmd.op !== "answer") {
@@ -1285,7 +1346,7 @@ export class Instance extends DurableObject<Env> {
     for (const w of covered) w.resolve();
   }
 
-  /** Resolves once a write of the run has stored the looks changed so far; the views follow it. */
+  /** Resolves once a write of the run has stored the looks changed so far (and a Peers room's taps on); the views follow it. */
   private storeLooks(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.looksWaiting.push({ resolve, reject });
@@ -1726,9 +1787,12 @@ export class Instance extends DurableObject<Env> {
     const ans = G.answering(game) ?? "open";
     const votes = G.lockedIn(game);
     const peers = run?.peers ? this.peersViews() : null;
-    // A Peers device lays out the question itself, with the pictures the wall would show: not the small copies.
-    const packs = peers ? undefined : this.packUrls();
-    const smalls = !peers && run && run.current >= 0 && ans !== "reading" ? this.answerSmalls(run.current) : undefined;
+    // A Peers device lays out the question itself, as the wall would, and
+    // draws the answer pictures' small copies where it has them (`pics`
+    // here, the full pictures' addresses in `peers.question.pics`).
+    let packs = peers ? this.peersPacks().packs : this.packUrls();
+    if (packs?.length === 0) packs = undefined;
+    const smalls = run && run.current >= 0 && ans !== "reading" ? this.answerSmalls(run.current) : undefined;
     return (player: string): PlayerView => {
       const p = run ? G.playerById(run, player) : null;
       const phase = run ? run.phase : "idle";
@@ -1794,7 +1858,7 @@ export class Instance extends DurableObject<Env> {
       players: G.activePlayers(run).map((p) => ({ id: p.id, avatar: p.avatar, away: !present.has(p.id) })),
       waitingFor: G.waitingFor(game, present),
       last: G.lastQuestion(game),
-      ...(run.phase === "lobby" ? { pictures: this.allPictures() } : {}),
+      ...(run.phase === "lobby" ? this.peersAhead() : {}),
       question: q
         ? {
             text: q.text,
@@ -1808,6 +1872,21 @@ export class Instance extends DurableObject<Env> {
       ranking: run.phase === "reveal" || run.phase === "final" ? this.ranking() : null,
     };
     return (player: string): PeersView => ({ ...shared, player, host: player === run.peers!.host, ready: G.isReady(game, player) });
+  }
+
+  /**
+   * In a Peers lobby, what a device fetches ahead so no question waits on a
+   * picture: the packs (`peersPacks`, in the player view) and where their
+   * pictures sit, and one by one only what no pack carries (an answer
+   * picture without a small copy, a picture stored without its size).
+   */
+  private peersAhead(): Pick<PeersView, "pictures" | "inPacks"> {
+    const record = this.quizRecord!;
+    const { inPacks } = this.peersPacks();
+    const packed = new Set(inPacks.map((x) => x.src));
+    for (const info of Object.values(record.images)) if (info.small) packed.add(this.imageSrc(record, info.n));
+    const pictures = this.allPictures().filter((src) => !packed.has(src));
+    return { ...(pictures.length > 0 ? { pictures } : {}), ...(inPacks.length > 0 ? { inPacks } : {}) };
   }
 
   private viewFor(session: Session, cache: ViewCache = {}, exclude?: WebSocket): View | null {
@@ -1864,10 +1943,9 @@ export class Instance extends DurableObject<Env> {
       if (onlyStaff && w.session.role === "player") continue;
       const view = this.viewFor(w.session, cache, exclude);
       if (view && view.role === "player" && w.session.role === "player") {
-        const key = viewKey(view);
-        const sent = this.sentToPoller.get(w.session.player);
-        if (sent && sent.key === key) continue;
-        this.sentToPoller.set(w.session.player, { key, v: view.v });
+        const last = this.sentToPoller.get(w.session.player);
+        if (last && last.poll === pollKey(view)) continue;
+        this.sentToPoller.set(w.session.player, sent(view));
       }
       this.waiters.delete(w);
       w.resolve(view ? [{ t: "state", view }] : []);
@@ -1881,6 +1959,27 @@ export class Instance extends DurableObject<Env> {
 }
 
 type ViewCache = { screen?: ScreenView; teacher?: TeacherView; player?: (id: string) => PlayerView };
+
+/** What a polling device was last sent: the view's key, its pollKey, its version. */
+type Sent = { key: string; poll: string; v: number };
+
+function sent(view: PlayerView): Sent {
+  return { key: viewKey(view), poll: pollKey(view), v: view.v };
+}
+
+/**
+ * What ends a held poll: the view without who is in and who a Peers room
+ * waits for (docs/design/hosting-and-limits.md, "What a Peers room costs").
+ * Those change with every friend's answer, look and line; a poll answered
+ * for each would cost a Function and a Durable Object request per device
+ * and answer. They come with the poll's end instead, at most POLL_HOLD_MS
+ * late; the room's steps and the device's own changes end it at once. In a
+ * room someone steers it is the view's key.
+ */
+function pollKey(view: PlayerView): string {
+  if (!view.peers) return viewKey(view);
+  return viewKey({ ...view, peers: { ...view.peers, players: [], waitingFor: [] } });
+}
 
 function send(ws: WebSocket, msg: ServerMessage): void {
   try {

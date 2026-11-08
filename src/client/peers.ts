@@ -17,7 +17,8 @@ import { DeviceScreen, type DeviceView } from "./device.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { answersBlock, openMenu, toast, type MenuItem } from "./manage.ts";
-import { fillPictures, preload } from "./pictures.ts";
+import { packPicture, wantPacks } from "./packs.ts";
+import { fillPictures, preload, seed } from "./pictures.ts";
 
 type Ack = Extract<ServerMessage, { t: "ack" }>;
 
@@ -49,6 +50,8 @@ export class PeersRoom {
   private jumped = "";
   /** The question whose solution is being changed (⋯ → Change the solution), or null. */
   private fixing: number | null = null;
+  /** The questions' pictures and backgrounds in the packs, as the lobby said: drawn from there once a pack is here. */
+  private inPacks: NonNullable<PeersView["inPacks"]> = [];
 
   constructor(ctx: PeersContext) {
     this.ctx = ctx;
@@ -66,6 +69,9 @@ export class PeersRoom {
     const stored = v.reveal ? v.reveal.mine : (q?.mine ?? null);
     if (this.tap && (!q || q.q !== this.tap.q || stored === this.tap.choice)) this.tap = null;
     if (p.ready || v.phase !== "reveal" || v.current !== this.readySent) this.readySent = -1;
+    if (p.inPacks) this.inPacks = p.inPacks;
+    wantPacks(v.packs, () => this.packArrived());
+    this.fromPacks();
     if (v.removed || !v.me) this.removed();
     else if (v.phase === "lobby" || v.phase === "idle") this.lobby(p);
     else if (v.phase === "final") this.final(v, p);
@@ -76,6 +82,31 @@ export class PeersRoom {
 
   private redraw(): void {
     if (this.view) this.show(this.view);
+  }
+
+  // The pictures (docs/design/peers.md, "The pictures"): the packs carry
+  // the answer pictures' small copies and the questions' pictures and
+  // backgrounds, a few requests per device; each is drawn under the
+  // address the views name it by, so the layout doesn't wait or change. A
+  // picture whose pack isn't here when it shows is fetched by itself.
+
+  /** Gives the pictures whose packs are here to the page, under their addresses. */
+  private fromPacks(): void {
+    for (const x of this.inPacks) {
+      const url = packPicture(x.pic);
+      if (url) seed(x.src, url);
+    }
+    const v = this.view;
+    const full = v?.peers?.question?.pics;
+    v?.question?.pics?.forEach((small, i) => {
+      const url = small && full?.[i] ? packPicture(small) : null;
+      if (url) seed(full![i]!.src, url);
+    });
+  }
+
+  private packArrived(): void {
+    this.fromPacks();
+    fillPictures();
   }
 
   /** A page of the room's own in `main`: the device screen steps aside. */

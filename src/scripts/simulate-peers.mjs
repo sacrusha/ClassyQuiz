@@ -4,7 +4,9 @@
 //   node scripts/simulate-peers.mjs [base-url]
 //
 // Four friends: whoever uploads comes in as the room's first player, three
-// join with the code, one of them over HTTP long-polling. Nobody steers.
+// join with the code, one of them over HTTP long-polling, whose polls the
+// others' answers don't answer (who the room waits for comes with the
+// poll's end). Nobody steers.
 // Each question closes once everyone present has answered and the next
 // comes once everyone present is done with the solution; resends change
 // nothing. A phone goes silent with its socket open (a battery dying): after
@@ -13,7 +15,8 @@
 // is let go at once. Whoever opened the room changes a solution, removes an
 // avatar, and goes on without waiting; the others can't. At the end every
 // score must be what the answers and the fixes give, and Exit sends every
-// device home, a poll that comes after it too. Takes about a minute and a half (the silent phone).
+// device home, a poll that comes after it too. Takes about two minutes (the
+// silent phone, the poll's end).
 
 const BASE = (process.argv[2] ?? "http://127.0.0.1:8788").replace(/\/+$/, "");
 const WS_BASE = BASE.replace(/^http/, "ws");
@@ -99,8 +102,10 @@ class Device {
   }
 
   take(m) {
-    if (m.t === "state") this.view = m.view;
-    else if (m.t === "welcome") {
+    if (m.t === "state") {
+      this.view = m.view;
+      this.states = (this.states ?? 0) + 1;
+    } else if (m.t === "welcome") {
       this.auth = { role: "player", token: m.token };
       this.id = m.player;
     }
@@ -205,11 +210,20 @@ async function readyAll(devices, q) {
 }
 
 // --- Question 1: closes once all four answered; resends change nothing.
+//     The polling device isn't woken by the others' answers: who the room
+//     waits for comes with its poll's end (docs/design/hosting-and-limits.md,
+//     "What a Peers room costs").
 
-await answerAll([host, ann, ben], "a");
+await answerAll([ben], "a");
+await ben.until((v) => v.question?.mine !== null, "ben's answer stored, on his device");
 await sleep(500);
+const benStates = ben.states;
+await answerAll([host, ann], "a");
+await sleep(1500);
+check(ben.states === benStates, `the others' answers don't answer the polling device's poll (${ben.states - benStates} views)`);
 check(host.view.phase === "question", "three of four answered: the room waits");
-check(JSON.stringify(host.view.peers.waitingFor) !== "[]", "the room says who it waits for");
+check(JSON.stringify(host.view.peers.waitingFor) === JSON.stringify([cat.id]), "the room says who it waits for, on a socket at once");
+await ben.until((v) => JSON.stringify(v.peers.waitingFor) === JSON.stringify([cat.id]), "who the room waits for, on the polling device with its poll's end", 30_000);
 await answerAll([cat], "b");
 for (const d of all) await d.until((v) => v.phase === "reveal", "the solution once everyone answered");
 check(JSON.stringify(host.view.peers.dist) === JSON.stringify(host.view.question.answers.map((t) => (t === "a" ? 3 : t === "b" ? 1 : 0))), "the spread on each device");

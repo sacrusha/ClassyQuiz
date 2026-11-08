@@ -17,7 +17,8 @@ export interface UploadedImage {
 /** An answer picture's small copy, for the students' devices: `l` bytes from `o` in the pack stored as `pack:<p>`. */
 export type SmallPart = ImageInfo & { p: number; o: number; l: number };
 
-export type StoredImage = ImageInfo & { n: number; small?: SmallPart };
+/** `l`: its bytes, for a Peers room's bundles (`bundles`); a picture stored without it is fetched by itself. */
+export type StoredImage = ImageInfo & { n: number; l?: number; small?: SmallPart };
 
 /**
  * Two answer pictures of one question whose proportions differ more than
@@ -74,7 +75,7 @@ export function matchImages(
       errors.push({ message: `${ref.label}, which couldn't be read.` });
       continue;
     }
-    index[key] = { ...info, n };
+    index[key] = { ...info, n, l: file.bytes.byteLength };
     files[`img:${n}`] = file.bytes;
     n++;
   }
@@ -120,6 +121,35 @@ function packSmalls(quiz: Quiz, index: Record<string, StoredImage>, smalls: Uplo
     files[`pack:${p}`] = pack;
   });
   return parts.length;
+}
+
+/**
+ * Peers (docs/design/peers.md, "The pictures"): every device lays out the
+ * question itself, so each fetches the questions' pictures and the
+ * backgrounds. They are served in bundles of at most PACK_BYTES, one
+ * request per bundle and device, as the answer pictures' small copies come
+ * in packs. The grouping follows the stored quiz alone, not the fixes (a
+ * picture hidden mid-run moves no other), so a bundle's address names the
+ * same pictures for the quiz's whole life. Each bundle lists its pictures'
+ * numbers (`img:<n>`), in the quiz's order.
+ */
+export function bundles(quiz: Quiz, index: Record<string, StoredImage>): number[][] {
+  const out: number[][] = [];
+  const seen = new Set<number>();
+  let size = 0;
+  for (const ref of pictureRefs(quiz)) {
+    if (ref.kind === "answer") continue;
+    const stored = index[imageKey(ref.name)];
+    if (!stored || stored.l === undefined || seen.has(stored.n)) continue;
+    seen.add(stored.n);
+    if (out.length === 0 || size + stored.l > PACK_BYTES) {
+      out.push([]);
+      size = 0;
+    }
+    out[out.length - 1].push(stored.n);
+    size += stored.l;
+  }
+  return out;
 }
 
 /**
