@@ -141,6 +141,17 @@ export interface Run {
    * players and come in any time. Absent: let in.
    */
   waiting?: true;
+  /**
+   * Peers (docs/design/peers.md): nobody steers, everyone plays. A
+   * question's choices show with it, it closes once everyone present has
+   * answered, and the next comes once everyone present is done with its
+   * solution. `host`: the player who opened the room, who also starts it,
+   * ends it, fixes a solution and removes an avatar. Absent: a room someone
+   * steers.
+   */
+  peers?: { host: string };
+  /** Peers: player id → the question whose solution that player is done with (tapped on). */
+  ready?: Record<string, number>;
 }
 
 export interface Game {
@@ -309,6 +320,8 @@ function open(g: Game, run: Run, q: number, now: number): void {
   run.phase = "question";
   run.openedAt = now;
   run.opened = (run.opened ?? 0) + 1;
+  // Peers: nobody reads the question aloud first, so its choices come with it.
+  if (run.peers) (run.shown ??= {})[q] = now;
 }
 
 export function begin(g: Game, now: number): void {
@@ -586,6 +599,95 @@ export function applyFixes(g: Game, fixes: unknown): void {
       }
     }
   });
+}
+
+// Peers (docs/design/peers.md, "Nobody steers"): the room moves on when
+// everyone present is done, on the plausible assumption that a few friends
+// wait for each other. "Present" is the room's to say (its devices'
+// lines); here it is a set of player ids.
+
+/** The room runs on its own: nobody steers. */
+export function isPeers(g: Game): boolean {
+  return !!g.run?.peers;
+}
+
+/** The player who opened a Peers room. */
+export function isHost(g: Game, playerId: string): boolean {
+  return !!g.run?.peers && g.run.peers.host === playerId;
+}
+
+/**
+ * Peers: a player is done with the open question's solution (tapped on).
+ * "same": already done; "refused": not now (no solution showing, another
+ * question, a removed avatar).
+ */
+export function setReady(g: Game, playerId: string, q: number): "stored" | "same" | "refused" {
+  const run = g.run;
+  const p = run ? playerById(run, playerId) : null;
+  if (!run?.peers || !p || p.removed || run.phase !== "reveal" || run.current !== q) return "refused";
+  if (run.ready?.[playerId] === q) return "same";
+  (run.ready ??= {})[playerId] = q;
+  return "stored";
+}
+
+/** Peers: whether this player is done with the open question's solution. */
+export function isReady(g: Game, playerId: string): boolean {
+  const run = g.run;
+  return !!run?.peers && run.phase === "reveal" && run.ready?.[playerId] === run.current;
+}
+
+/** Peers: whether this player is done with the step the room is on: answered the open question, or done with its solution. */
+function done(g: Game, run: Run, playerId: string): boolean {
+  if (run.phase === "question") return Object.hasOwn(run.answers[run.current] ?? {}, playerId);
+  return run.ready?.[playerId] === run.current;
+}
+
+/** Peers: the present players the room waits for, in the lobby's order; none outside a question and its solution. */
+export function waitingFor(g: Game, present: Set<string>): string[] {
+  const run = g.run;
+  if (!run?.peers || (run.phase !== "question" && run.phase !== "reveal")) return [];
+  return activePlayers(run)
+    .filter((p) => present.has(p.id) && !done(g, run, p.id))
+    .map((p) => p.id);
+}
+
+/**
+ * Peers: whether the room moves on now. Someone is done, and nobody present
+ * isn't: a device away (a phone asleep, a battery dead) doesn't hold the
+ * room, but nobody being done holds it, so a room whose phones all slept
+ * doesn't run through its questions.
+ */
+export function peersDue(g: Game, present: Set<string>): boolean {
+  return anyoneDone(g) && waitingFor(g, present).length === 0;
+}
+
+/** Peers: someone has answered the open question, or is done with its solution. */
+export function anyoneDone(g: Game): boolean {
+  const run = g.run;
+  if (!run?.peers || (run.phase !== "question" && run.phase !== "reveal")) return false;
+  return activePlayers(run).some((p) => done(g, run, p.id));
+}
+
+/**
+ * Peers, one step on: the open question's solution, or after it the next
+ * question (the final ranking after the last). There is no ranking step
+ * between them: each device shows the ranking while it waits for the
+ * others. `view`: as in reveal.
+ */
+export function goOn(g: Game, now: number, view: number): void {
+  const run = needRun(g);
+  if (run.phase === "question") reveal(g, view);
+  else if (run.phase === "reveal") {
+    if (lastQuestion(g)) finish(g, now);
+    else next(g, now);
+  } else throw new GameError("Nothing to go on to.");
+}
+
+/** Peers: one step on if everyone present is done (peersDue). True when it stepped. */
+export function peersStep(g: Game, now: number, view: number, present: Set<string>): boolean {
+  if (!peersDue(g, present)) return false;
+  goOn(g, now, view);
+  return true;
 }
 
 /** Whether the open question's picture fills the projector. */

@@ -3,8 +3,8 @@
 // folder, so every page and script is a static file, which keeps the Free
 // plan's request budget for the quiz itself.
 //
-//   POST /api/quiz          {text, leaveOut?, fixes?} upload (opening a room): parse, create an instance
-//   POST /api/quiz          multipart         … with pictures: text, leaveOut?, fixes?, image files
+//   POST /api/quiz          {text, leaveOut?, fixes?, mode?} upload (opening a room): parse, create an instance
+//   POST /api/quiz          multipart         … with pictures: text, leaveOut?, fixes?, mode?, image files
 //   POST /api/join          {code, secret?}   the quiz's code → instance id; the teacher code (7 digits) checked too
 //   GET  /api/i/:id/img/:secret/:n            a picture of the quiz
 //   GET  /api/i/:id/ws                        WebSocket to the instance
@@ -69,9 +69,9 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null);
+  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null);
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error, full: r.full } satisfies UploadResult);
-  return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token } satisfies UploadResult);
+  return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token, ...(r.player ? { player: r.player } : {}) } satisfies UploadResult);
 }
 
 /**

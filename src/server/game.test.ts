@@ -588,3 +588,81 @@ test("fixes made before the upload are the quiz's from the start, checked like a
   G.applyFixes(h, [{ counts: [true] }, null, { counts: ["yes", true] }]);
   assert.deepEqual(h.fixes, G.newGame(quiz).fixes, "nor do values that don't fit");
 });
+
+/** A Peers room: the first player opened it; nobody steers (docs/design/peers.md). */
+function peersRoom(players = 3) {
+  const { g, ids } = setup(players);
+  g.run!.peers = { host: ids[0] };
+  G.begin(g, 0);
+  return { g, ids, all: new Set(ids) };
+}
+
+test("Peers: the choices come with the question; it closes once everyone present has answered", () => {
+  const { g, ids, all } = peersRoom();
+  assert.equal(G.answering(g), "open", "nobody reads it aloud first");
+  assert.equal(G.peersStep(g, 1, 10, all), false, "nobody has answered: it waits");
+  G.answer(g, ids[0], 0, 0, 1, 0, 2);
+  G.answer(g, ids[1], 0, 1, 1, 0, 3);
+  assert.deepEqual(G.waitingFor(g, all), [ids[2]]);
+  assert.equal(G.peersStep(g, 4, 10, all), false);
+  G.answer(g, ids[2], 0, 0, 1, 0, 5);
+  assert.equal(G.peersStep(g, 6, 10, all), true);
+  assert.equal(g.run!.phase, "reveal", "the solution, without a lock-in before it");
+  assert.equal(G.scores(g).get(ids[0]), 1);
+});
+
+test("Peers: a device that is away doesn't hold the room; nobody present done holds it", () => {
+  const { g, ids } = peersRoom();
+  const present = new Set([ids[0], ids[1]]);
+  G.answer(g, ids[0], 0, 0, 1, 0, 1);
+  G.answer(g, ids[1], 0, 0, 1, 0, 2);
+  assert.equal(G.peersStep(g, 3, 10, present), true, "the third phone sleeps");
+  assert.equal(G.peersStep(g, 4, 11, new Set()), false, "every phone asleep: nobody is done, nothing moves");
+});
+
+test("Peers: the next question comes once everyone present is done with the solution; after the last, the final ranking", () => {
+  const { g, ids, all } = peersRoom(2);
+  for (let q = 0; q < 3; q++) {
+    G.answer(g, ids[0], q, 0, q + 1, 0, 10 * q + 1);
+    G.answer(g, ids[1], q, 1, q + 1, 0, 10 * q + 2);
+    assert.equal(G.peersStep(g, 10 * q + 3, 10 * q + 3, all), true);
+    assert.equal(G.setReady(g, ids[0], q), "stored");
+    assert.equal(G.setReady(g, ids[0], q), "same", "a resend changes nothing");
+    assert.equal(G.peersStep(g, 10 * q + 4, 10 * q + 4, all), false);
+    assert.deepEqual(G.waitingFor(g, all), [ids[1]]);
+    G.setReady(g, ids[1], q);
+    assert.equal(G.peersStep(g, 10 * q + 5, 10 * q + 5, all), true);
+    if (q < 2) {
+      assert.equal(g.run!.phase, "question", "no ranking step between them");
+      assert.equal(g.run!.current, q + 1);
+      assert.equal(G.answering(g), "open");
+      assert.equal(G.isReady(g, ids[0]), false, "done with one solution is not done with the next");
+    }
+  }
+  assert.equal(g.run!.phase, "final");
+});
+
+test("Peers: done with a solution only while it shows; a removed avatar isn't waited for", () => {
+  const { g, ids, all } = peersRoom();
+  assert.equal(G.setReady(g, ids[0], 0), "refused", "the question is still open");
+  G.answer(g, ids[0], 0, 0, 1, 0, 1);
+  G.answer(g, ids[1], 0, 0, 1, 0, 1);
+  G.removePlayer(g, ids[2]);
+  assert.equal(G.peersStep(g, 2, 10, all), true);
+  assert.equal(G.setReady(g, ids[2], 0), "refused");
+  assert.equal(G.setReady(g, ids[0], 1), "refused", "another question");
+  G.setReady(g, ids[0], 0);
+  G.setReady(g, ids[1], 0);
+  assert.equal(G.peersStep(g, 3, 11, all), true);
+  assert.equal(g.run!.current, 1);
+});
+
+test("Peers: the host's go-on doesn't wait: the solution now, then the next question", () => {
+  const { g, ids, all } = peersRoom();
+  G.goOn(g, 1, 10);
+  assert.equal(g.run!.phase, "reveal", "nobody had answered");
+  G.setReady(g, ids[1], 0);
+  assert.deepEqual(G.waitingFor(g, all), [ids[0], ids[2]]);
+  G.goOn(g, 2, 11);
+  assert.equal(g.run!.phase, "question");
+});

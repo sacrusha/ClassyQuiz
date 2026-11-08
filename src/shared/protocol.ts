@@ -93,7 +93,15 @@ export type Command =
    */
   | { op: "answer"; q: number; choice: number; seq: number; v: number; ms?: number }
   /** In the lobby: the child's look, whole (shared/looks.ts); the latest one sent counts. t absent: no tool. */
-  | { op: "dress"; b: number; h: number; t?: number };
+  | { op: "dress"; b: number; h: number; t?: number }
+  /** Peers: done with question q's solution; the next comes once everyone present is (docs/design/peers.md). */
+  | { op: "ready"; q: number }
+  /**
+   * Peers, the player who opened the room: on without waiting for the
+   * others (the solution now, or the next question). The same player also
+   * sends begin, finish, setCounts, setVoid, remove and endInstance.
+   */
+  | { op: "goOn"; at: At };
 
 export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
 
@@ -372,6 +380,39 @@ export interface PlayerView {
   } | null;
   /** points: what the answer scored, with points for speed; null otherwise. */
   reveal: { counts: boolean[]; mine: number | null; void: boolean; points: number | null } | null;
+  /** A room that runs on its own: what a wall would show, on each device. Absent in a room someone steers. */
+  peers?: PeersView;
+}
+
+/**
+ * Peers (docs/design/peers.md): there is no wall, so each device gets the
+ * question itself, the code to join, who is in, the spread, the winners and
+ * the ranking. Every list of answers is in the order on screen.
+ */
+export interface PeersView {
+  title: string;
+  /** The code friends join with, shown on the device of whoever opened the room. */
+  code: string;
+  /** This device's player opened the room: it starts, ends, fixes a solution, removes an avatar. */
+  host: boolean;
+  /** Who opened the room: the others' lobby says whose Start it waits for. */
+  hostAvatar: Avatar | null;
+  /** Everyone in, in the lobby's order; away: not heard from for a while (it holds nobody up). */
+  players: { id: string; avatar: Avatar; away: boolean }[];
+  /** The players present that the room waits for: to answer, or to be done with the solution. */
+  waitingFor: string[];
+  /** This player is done with the open question's solution. */
+  ready: boolean;
+  /** No question comes after the open one: the final ranking does. */
+  last: boolean;
+  /** In the lobby: every picture the quiz will show, to fetch ahead. */
+  pictures?: string[];
+  /** The open question, as the device lays it out. */
+  question: { text: string; image: ImageRef | null; background: ImageRef | null; pics?: (ImageRef | null)[] } | null;
+  /** With the solution: how many picked each answer, and who got it right (they jump). */
+  dist: number[] | null;
+  winners: string[];
+  ranking: RankingView | null;
 }
 
 export type View = ScreenView | TeacherView | PlayerView;
@@ -427,7 +468,8 @@ export const MAX_UPLOAD_BYTES = 16_000_000;
  * for the teacher, not a problem with the quiz to hand back to the AI.
  */
 export type UploadResult =
-  | { ok: true; id: string; secret: string; code: string; teacher: string; token: string }
+  /** player: Peers, the token of the player who opened the room (this device); there is no Projector then. */
+  | { ok: true; id: string; secret: string; code: string; teacher: string; token: string; player?: string }
   | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull };
 
 /** Answer to POST /api/i/:id/info, for the device that pasted the quiz. */
@@ -443,4 +485,6 @@ export interface QuizInfo {
    * the first).
    */
   stands: { phase: Phase | "idle"; n: number; total: number };
+  /** A Peers room: the device comes back as its player, not as a teacher device. */
+  peers?: true;
 }

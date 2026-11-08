@@ -63,6 +63,9 @@ export const CLASS_FULL = "This class is full. Ask your teacher.";
 /** A student device before the teacher let the class in: it waits, and joins by itself once they do. */
 export const CLASS_WAITING = "Your teacher lets the class in in a moment.";
 export const CLASS_STARTED = "This quiz has started and takes no more players. Ask your teacher.";
+/** The same in a Peers room, where nobody is a teacher (docs/design/peers.md). */
+export const ROOM_FULL = "This quiz is full: it takes no more players.";
+export const ROOM_STARTED = "This quiz has started and takes no more players.";
 
 /**
  * Which site-wide cap refused an upload (server/budget.ts). They free up
@@ -86,6 +89,12 @@ export function quotaResetAt(now = new Date()): string | null {
 export function classesFullMessage(now = new Date()): string {
   const at = quotaResetAt(now);
   return `The free site can't take more classes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+}
+
+/** The same for a Peers room, refused as it opens: it is a quiz among friends, not a class. */
+export function roomsFullMessage(now = new Date()): string {
+  const at = quotaResetAt(now);
+  return `The free site can't take more quizzes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
