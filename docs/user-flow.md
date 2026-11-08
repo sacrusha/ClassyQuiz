@@ -84,7 +84,7 @@ tablets, and a quiz made in the break.
 |---|---|---|
 | Break | Phone or laptop: the AI chat, with the sheet photos and the site's address. The AI asks what it needs and hands over the quiz as a .zip file. | — |
 | Break | **Laptop:** opens `classyquiz.pages.dev` and chooses the AI's .zip there (or drops it). The local check: the right quiz, a spot fix, Open the lobby (§3.1). | — |
-| Break, optional | **Laptop:** on the check, Screen and remote, which shows the teacher code. **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
+| Break, optional | **Laptop:** on the check, Screen and remote (pressed unless this laptop has run a quiz without a remote), which shows the teacher code. **Phone:** `classyquiz.pages.dev`, types the teacher code "63953 47" in the box, Steer it from here. The wall says "Remote connected". Or, with two screens: "open a second screen in a new window", Show the quiz here, drag it across, F. | — |
 | Lesson starts | **Let everyone in ▶** (or on the wall already). "Type classyquiz.pages.dev and the number." Perhaps: "While we wait, dress your animal." | Tablets: address, code, ▶. Avatars pop up on the wall; a child who dresses theirs (a shape, a hat, a tool) sees it change there. |
 | Quiz | Start on whichever tab steers; Play: Choices → Answers → Solution → Ranking → Question 2, and Countdown when the class should hurry, there or with the clicker. | Tap a colour; their avatar pops up on the wall; ✓ or ✗ with the answer, and those right see their avatar jump on the wall. |
 | End | Final ranking: the podium, the class in front of it, the class's result; a photo if wanted. Exit, and every screen goes to the root page. | Their place on their tablet, then the root page. |
@@ -398,8 +398,11 @@ A question opened (or all of them, with Show the solutions / Hide the solutions)
 - **How the screens are arranged:** a toggle of two, One screen or Screen
   and remote, each saying what it means; under it, always, the line on a
   video call. The toggle changes what the screens say, nothing a device
-  can do. One screen until this browser has chosen otherwise or has had a
-  Remote (localStorage, `cq.screens`); a reload keeps it.
+  can do. Screen and remote on a first visit; One screen once this
+  browser's Projector has reached a final ranking with no Remote in the
+  quiz, or once One screen is tapped; Screen and remote again once a Remote
+  joins a quiz of this browser's, on either side (localStorage,
+  `cq.screens`). A reload keeps it.
 - **The join code is on the check, small,** with the count once someone
   has joined. Teacher devices use it with the teacher code at any time;
   student devices that arrive with it before the tap wait ("Joining opens

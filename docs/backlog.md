@@ -551,15 +551,18 @@ With the owner:
   host's settings on the check screen.
 - Quizmaster (v5 item 4), the implementer's calls, not yet seen by the
   owner (`design/teacher-devices.md`): the toggle on the lobby's check
-  rather than the local check's card (the how-to needs the teacher code,
-  made at upload); One screen as the first default, then whatever this
-  browser chose or last had; devices only not offered; the words ("Join
+  rather than the local check's card (there Screen and remote can show the
+  teacher code at once, made at upload); devices only not offered; the
+  words ("Join
   code", "Let everyone in", "Joining opens in a moment.", "Ask whoever runs
   it", "‹ Back"), which the landing's film now shows too. The
   delegate's decisions after the review of v5, likewise not yet seen by
   the owner: the lobby's check and the Remote's lobby list the questions
   open with the answers folded, as before v5, since the local check keeps
-  them closed for every entry.
+  them closed for every entry; Screen and remote as the first default, so
+  the example class's teacher finds the remote's how-to on a first visit,
+  and One screen once this browser has run a quiz to its end without a
+  Remote.
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the

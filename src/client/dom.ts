@@ -162,15 +162,17 @@ export const tabLobby = {
  * screen that shows and steers, or a screen and a remote. It changes only
  * which how-to the check shows; every device still comes in by the same
  * code. Per browser, not per quiz: a host who steers from the phone does so
- * each time. Without storage it is one screen.
+ * each time. A screen and a remote until the host taps One screen or this
+ * browser runs a quiz without a Remote, so the example class's teacher finds
+ * the remote's how-to on a first visit; without storage it stays so.
  */
 export type Arrangement = "one" | "remote";
 export const arrangement = {
   get(): Arrangement {
     try {
-      return localStorage.getItem("cq.screens") === "remote" ? "remote" : "one";
+      return localStorage.getItem("cq.screens") === "one" ? "one" : "remote";
     } catch {
-      return "one";
+      return "remote";
     }
   },
   set(a: Arrangement): void {
@@ -178,6 +180,28 @@ export const arrangement = {
       localStorage.setItem("cq.screens", a);
     } catch {
       /* the choice holds on this page until it reloads */
+    }
+  },
+};
+
+/**
+ * A Remote has been in this quiz, as this tab saw it: a run that reaches its
+ * final ranking without one sets the browser to One screen (arrangement).
+ * Per tab, so a Projector reloaded after its Remote left still knows.
+ */
+export const tabHadRemote = {
+  get(instance: string): boolean {
+    try {
+      return sessionStorage.getItem(`cq.hadremote.${instance}`) === "1";
+    } catch {
+      return false;
+    }
+  },
+  set(instance: string): void {
+    try {
+      sessionStorage.setItem(`cq.hadremote.${instance}`, "1");
+    } catch {
+      /* a reload then forgets it: at worst this browser starts on One screen next time */
     }
   },
 };

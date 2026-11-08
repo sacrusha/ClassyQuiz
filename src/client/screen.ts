@@ -7,7 +7,7 @@
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
-import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
+import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabHadRemote, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
@@ -35,6 +35,8 @@ let tickTimer: number | undefined;
 let lobbyScreen: "check" | "join" = instance ? tabLobby.get(instance) : "join";
 /** How the screens are arranged, the check's toggle: it decides which how-to the lobby shows, nothing else. */
 let arranged: Arrangement = arrangement.get();
+/** A Remote has been in this quiz (tabHadRemote): a run that ends without one teaches the browser One screen. */
+let hadRemote = instance ? tabHadRemote.get(instance) : false;
 const steer = new Steer(() => line, () => view?.steer ?? null, newUI(), () => render());
 
 function start(): void {
@@ -66,12 +68,21 @@ function onMessage(m: ServerMessage): void {
     // A wall that takes the steering back in the lobby (its steering tab left
     // or went away) keeps showing the class's screen, not the check.
     if (before && !before.steer && view.steer && view.phase === "lobby" && !view.waiting) setLobby("join", false);
+    // How the screens are arranged, learnt from what happens
+    // (docs/design/teacher-devices.md, "How the screens are arranged"). A
+    // Remote, whether it came before this tab or after it: this host steers
+    // from a second device, and the next check here says how. Only as it
+    // comes, so a tap on One screen while a Remote is away holds. A run that
+    // reached its end without one: this host has one screen.
+    const firstRemote = view.remote !== "none" && !hadRemote;
+    if (firstRemote) {
+      hadRemote = true;
+      tabHadRemote.set(instance);
+    }
+    if (firstRemote || (view.remote === "present" && before?.remote !== "present")) arrange("remote", false);
+    else if (view.phase === "final" && before?.phase !== "final" && !hadRemote) arrange("one", false);
     if (before && before.remote !== view.remote) {
-      if (view.remote === "present") {
-        toast("Remote connected");
-        // This host steers from a second device: the next check here says how.
-        arrange("remote", false);
-      }
+      if (view.remote === "present") toast("Remote connected");
       // On the wall: nothing here invites the class to the teacher's page.
       else if (before.remote === "present") toast("Remote gone – steering here", 8000);
     }
@@ -239,9 +250,10 @@ function renderManagedLobby(v: ScreenView): void {
 
 /** The check's toggle (docs/design/teacher-devices.md, "How the screens are arranged"); remembered in this browser. */
 function arrange(a: Arrangement, draw = true): void {
+  // Written even when this page already has it: another tab of the browser may have set the other.
+  arrangement.set(a);
   if (arranged === a) return;
   arranged = a;
-  arrangement.set(a);
   if (draw) render();
 }
 
