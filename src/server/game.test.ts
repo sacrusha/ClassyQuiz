@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";
 import * as G from "./game.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, SPEED_REFERENCE_MS, speedBonus } from "../shared/tempo.ts";
-import { MAX_LOOK_CHANGES } from "../shared/looks.ts";
+import { BACKGROUND_COUNT, HAT_COUNT, MAX_LOOK_CHANGES, TOOL_COUNT } from "../shared/looks.ts";
 
 const quiz = parseQuiz(`Title: T
 1. One?
@@ -326,7 +326,7 @@ test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start"
   assert.equal(G.dress(g, ids[0], 0, 0), "stored");
   assert.deepEqual(g.run!.players[ids[0]].avatar, { a: before.a, c: before.c });
   // Only what the menu has.
-  for (const [b, h, t] of [[6, 0, 0], [0, 9, 0], [0, 0, 7], [-1, 0, 0], [1.5, 0, 0], ["1", 0, 0], [0, 0, "1"], [null, 0, 0], [0, 0, null]] as [unknown, unknown, unknown][])
+  for (const [b, h, t] of [[BACKGROUND_COUNT, 0, 0], [0, HAT_COUNT, 0], [0, 0, TOOL_COUNT], [-1, 0, 0], [1.5, 0, 0], ["1", 0, 0], [0, 0, "1"], [null, 0, 0], [0, 0, null]] as [unknown, unknown, unknown][])
     assert.equal(G.dress(g, ids[0], b, h, t), "refused");
   assert.equal(G.dress(g, "nobody", 1, 1), "refused");
   // Not for a removed avatar.

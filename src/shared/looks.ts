@@ -1,16 +1,16 @@
-// How a child dresses their animal in the lobby
+// How a player dresses their animal in the lobby
 // (docs/design/class-and-wall.md, "Dressing the avatar"): a background shape,
-// a hat and a tool, from one menu that is the same for everybody and every
-// room. The animal and its colour stay assigned and tell the
-// children apart; the look is the child's own and is never scarce.
-// The drawings are in client/look.ts, in this order.
+// a hat and a thing beside it, from one menu that is the same for everybody
+// and every room, a class's or a training room's. The animal and its colour
+// stay assigned and tell the players apart; the look is the player's own and
+// is never scarce. The drawings are in client/look.ts, in this order.
 
 /** Background shapes: 0 is the plain disc, the default. */
 export const BACKGROUND_COUNT = 6;
 /** Hats: 0 is none, the default. */
-export const HAT_COUNT = 9;
-/** Tools held beside the animal: 0 is none, the default. */
-export const TOOL_COUNT = 7;
+export const HAT_COUNT = 10;
+/** The row beside the hats, held, worn at the neck or set before the animal ("tools"): 0 is none, the default. */
+export const TOOL_COUNT = 8;
 /**
  * Changes of look a child can store in one class. Generous for a child who
  * tries everything; it stops a child who makes a game of hammering the
