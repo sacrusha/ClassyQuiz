@@ -83,10 +83,12 @@ left out taken off the quiz with a warning each) and shows:
 - **The entries**, each a card with its name, one sentence on who it is for
   and how it plays, its own button, and an optional quiet line (what
   starting it costs). One button per entry: picking and starting is one
-  press, which is the frictionless way for the newcomer's Solo. The first
-  card's button is the primary one, so the order of the entries is a
-  decision (`client/entries.ts`). "How will it be played?" heads them once
-  there are two or more.
+  press, which is the frictionless way for the newcomer's Solo. The three
+  buttons look alike: whoever opens a quiz meaning to run it, a teacher in
+  a hurry before the lesson, would otherwise press the one that stands out,
+  and Solo plays the quiz in this tab instead of opening the lobby. The
+  order is still a decision, the reading order (`client/entries.ts`). "How
+  will it be played?" heads them once there are two or more.
 - **The questions folded away**, under "The questions and their solutions"
   (with how many notes the site has, the parser's and the pictures'
   warnings, which quote the quiz). Closed, the list isn't in the page at all.
@@ -123,9 +125,8 @@ open, and each picture as a blob URL on the page with its size. The context
 lets an entry say something under its button, take over the page's main
 element to play there, and give the check back as it was.
 
-- **Solo** (`client/entry-solo.ts`), first, so its button is the page's
-  primary one: "Play ▶" plays the quiz in this page, nothing uploaded, and
-  Back gives the check back (`solo.md`).
+- **Solo** (`client/entry-solo.ts`), first: "Play ▶" plays the quiz in
+  this page, nothing uploaded, and Back gives the check back (`solo.md`).
 - **Peers** (`client/entry-peers.ts`), second: "Play together ▶" opens a
   room that runs on its own (`mode`: `peers` beside the fixes), and this
   tab comes into it as its first player, on the player page

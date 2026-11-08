@@ -123,11 +123,16 @@ function renderCheck(): void {
   if (foldOpen) renderList();
 }
 
+/**
+ * An entry's card. No button is the primary one: a teacher in a hurry who
+ * means to run the quiz would press the one that stands out, and the first
+ * is Solo's (docs/design/local-check.md, "The check").
+ */
 function entryCard(e: Entry, i: number): string {
   return `<section class="open-entry">
     <h2>${esc(e.name)}</h2>
     <p>${esc(e.line)}</p>
-    <p><button class="btn${i === 0 ? " primary" : ""}" type="button" data-entry="${i}">${esc(e.button)}</button></p>
+    <p><button class="btn" type="button" data-entry="${i}">${esc(e.button)}</button></p>
     ${e.note ? `<p class="open-note">${esc(e.note)}</p>` : ""}
     <div class="open-say" data-say="${i}" role="status"></div>
   </section>`;

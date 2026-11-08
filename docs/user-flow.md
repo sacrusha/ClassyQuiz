@@ -249,9 +249,9 @@ Big numbers on the number line · 13 questions
                                   (while a way to play it yourself is offered)
 ```
 
-- **One card per way to play it**, each with its own button; the first
-  card's is the primary one. Only what is built is offered: today Solo,
-  Peers, then Quizmaster.
+- **One card per way to play it**, each with its own button, the three
+  alike: none is the page's primary one. Only what is built is offered:
+  today Solo, Peers, then Quizmaster.
 - **The questions are folded** under the cards, closed on arrival. Opened,
   they are the lobby's list (§3.3): thumbnails, answers folded, Show the
   solutions, the site's warnings, and Change the solution with its fixes

@@ -562,7 +562,8 @@ With the owner:
   them closed for every entry; Screen and remote as the first default, so
   the example class's teacher finds the remote's how-to on a first visit,
   and One screen once this browser has run a quiz to its end without a
-  Remote.
+  Remote; the local check's three buttons alike, none primary, so a teacher
+  in a hurry doesn't press Solo's for standing out (`design/local-check.md`).
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the
