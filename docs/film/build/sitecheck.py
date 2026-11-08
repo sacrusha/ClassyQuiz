@@ -395,12 +395,12 @@ def controls(b, url):
     r1 = rate()
     print(f'desk: animation frames a second while playing: {r0}; after five moves of the bar, each played: {r1}')
     if r1 > r0 * 1.3 + 5: bad(f'frames a second {r0} -> {r1} after moves of the bar')
-    # a drag: the chapter's name over the thumb while it is held, gone on release; the film paused where it was let go
+    # a drag to 40 s, in "What the class sees": the chapter's name over the thumb while it is held, gone on release; the film paused where it was let go
     box = pg.locator('.cqf-seek input').bounding_box(); y = box['y'] + box['height'] / 2
-    pg.mouse.move(box['x'] + 8, y); pg.mouse.down(); pg.mouse.move(box['x'] + 8 + (box['width'] - 16) * 30 / 60, y, steps=6); pg.wait_for_timeout(100)
+    pg.mouse.move(box['x'] + 8, y); pg.mouse.down(); pg.mouse.move(box['x'] + 8 + (box['width'] - 16) * 40 / DUR, y, steps=6); pg.wait_for_timeout(100)
     held = state(); pg.mouse.up(); pg.wait_for_timeout(100); let_go = state()
-    print(f'desk: a drag to the middle: held {held}; let go {let_go}')
-    if not (29 <= held['t'] <= 31) or held['tip'] != 'What the class sees' or held['playing'] or let_go['tip'] or let_go['playing']: bad(f'drag {held} {let_go}')
+    print(f'desk: a drag to 40 s: held {held}; let go {let_go}')
+    if not (39 <= held['t'] <= 41) or held['tip'] != 'What the class sees' or held['playing'] or let_go['tip'] or let_go['playing']: bad(f'drag {held} {let_go}')
     t0 = state()['t']
     # the page's own keys stay the page's
     tab0 = pg.evaluate("document.querySelector('.ask-tabs [aria-selected=true]').id")

@@ -1,4 +1,4 @@
-/* classyQuiz film (animatic): about 60 s, wordless, flat SVG.
+/* classyQuiz film (animatic): about 67 s, wordless, flat SVG.
 
    Purpose: a teacher who has never seen a classroom quiz sees what they would
    type to their AI, how the .zip reaches the site, and what the class does:
@@ -26,7 +26,7 @@
 
   const ASSETS = /*@ASSETS@*/ window.CQFILM_ASSETS || {};
   const NS = 'http://www.w3.org/2000/svg';
-  const W = 1600, H = 900, DUR = 60, POSTER = 47.3;
+  const W = 1600, H = 900, DUR = 67, POSTER = 54.3;
 
   // ---------------------------------------------------------------- words
   // The film's only words, all on screens, in the page's language (de en fr it) where the real
@@ -45,7 +45,7 @@
      on the AI app's tile (its name under the tile is the chapter's, LANDING.capAi); ask2 is the teacher's
      second message, the real conversation's second ask, which changes the quiz; then the AI's status
      lines, the .zip it makes (the chip's title and the file's name), the quiz's title and its question 1.
-     q4, question 4, is no longer shown (the checks keep the questions folded); docs/example/build.py
+     q4, question 4, is not shown (the lobby's list shows only question 1 in the frame); docs/example/build.py
      holds the example's words to it (docs/example/text.py, FILM).
      en is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
      to be replaced by the translators' (build.py and sitecheck.py name them). */
@@ -103,12 +103,12 @@
     right: 0,
     codePh: '12345',
     photos: ['sheet-photo-1.jpg', 'sheet-photo-2.jpg'],
-    nq: ' · 13 questions',
+    nq: ' · 13 questions', nqList: '13 questions',
     code: '63953', teacherCode: '63953 47',
     addr: 'classyquiz.pages.dev',
     of: ' / 13',
     // the chapters' starts, marked on the time bar: [film time, the key of its name in landing-text.ts (LANDING)]
-    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [28.7, 'capWall'], [38.0, 'capTap']],
+    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [34.7, 'capWall'], [45.0, 'capTap']],
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
@@ -124,7 +124,9 @@
       { name: 'Peers', line: 'You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it.', button: 'Play together ▶', note: 'This puts the quiz on the site, with a code for the others. Until then it is only in this browser.' },
       { name: 'Quizmaster', line: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device.", button: 'Open the lobby ▶', note: 'This puts the quiz on the site. Until then it is only in this browser.' },
     ],
-    fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.',
+    fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.', // under the cards, below the frame
+    // the question list, open on the lobby's check (client/manage.ts)
+    showSol: 'Show the solutions',
     // the lobby's check (client/screen.ts, renderCheck; on a phone, so without the line on a second screen in a new window)
     joinCode: 'Join code ',
     arrangeAsk: 'How are the screens arranged?',
@@ -210,18 +212,21 @@
 
     // ---------------------------------------------------------------- timeline
     // Every teacher press on the phone, and when its change lands on the wall.
-    const PRESS = [28.4, 35.0, 38.0, 44.0, 50.0, 56.3];
+    const PRESS = [34.4, 42.0, 45.0, 51.0, 57.0, 63.3];
     const LAG = 0.25;
+    // The upload carries the two choices a newcomer must follow (README, Purpose): which way to play, on the local check, and how
+    // the second device comes in, on the lobby's check. Each gets a hold at full width, then the camera moves in on what is read
+    // there (Quizmaster's card; the how-to with the teacher code), and the laptop then does what the how-to said.
     const T = {
       sheet1: 0.3, sheet2: 0.75, raise: [1.7, 2.4], flash1: 2.95, flash2: 3.75, home: 4.3,
       pulse: 5.55, open: 6.25, expand: [6.85, 7.3],
       attach: 7.45, type1: 7.85, send1: 13.5, status1: 13.85, bars1: [14.05, 14.85], zip1: 14.95,
       type2: 15.35, send2: 17.8, status2: 18.05, bars2: [18.2, 18.6], zip2: 18.75, tapZip: 19.45,
-      web: 19.7, tapUpload: 20.3, sheetUp: [20.5, 20.75], tapFile: 21.0, sheetDown: [21.1, 21.3],
-      local: 21.55, tapLobby: 22.5, lobby: 22.75, tapRemote: 23.3, zoomCode: [23.6, 24.1], shrink: [24.45, 25.05],
-      lapOn: 25.4, typeCode: 25.75, codeStep: 0.11, enterClick: 26.75, enter: 26.95, showClick: 27.35,
-      kidsIn: 29.6, oneTap: 39.6, ots: [36.9, 41.3], ots2: [52.55, 54.4], flick: [55.4, 56.25], end: [58.5, 59.0],
-      cut: 27.7, walk: [29.2, 30.3],
+      web: 19.7, tapUpload: 20.65, sheetUp: [20.85, 21.1], tapFile: 21.45, sheetDown: [21.55, 21.75],
+      local: 22.1, zoomQm: [23.3, 23.85], tapLobby: 25.5, lobby: 25.75, zoomCode: [26.7, 27.25], shrink: [29.2, 29.8],
+      lapOn: 30.15, typeCode: 30.55, codeStep: 0.11, enterClick: 31.6, enter: 31.8, showClick: 32.75, shown: 33.05,
+      kidsIn: 35.6, oneTap: 46.6, ots: [43.9, 48.3], ots2: [59.55, 61.4], flick: [62.4, 63.25], end: [65.5, 66.0],
+      cut: 33.7, walk: [35.2, 36.3],
     };
     // The asks type at whatever speed ends them this long before their send, however long they are in a language
     // or with an own copy's address: the first holds for the address to be read, the second barely.
@@ -409,10 +414,10 @@
         k.seated = k.enter + k.walk;
       });
       const byJoin = KIDS.slice().sort((a, b) => a.seated + a.jitter * 0.8 - (b.seated + b.jitter * 0.8));
-      byJoin.forEach((k, n) => { k.join = 31.6 + n * 0.16; });
+      byJoin.forEach((k, n) => { k.join = 37.6 + n * 0.205; });
       // Answers: a few before the shown child, the shown child at T.oneTap, the rest after the cut back.
       const others = KIDS.filter((k) => k !== ots).sort((a, b) => a.jitter - b.jitter);
-      others.forEach((k, n) => { k.answer = n < 4 ? 38.95 + n * 0.17 : n < 7 ? 39.9 + (n - 4) * 0.4 : 41.45 + (n - 7) * 0.16; });
+      others.forEach((k, n) => { k.answer = n < 4 ? 45.95 + n * 0.17 : n < 7 ? 46.9 + (n - 4) * 0.4 : 48.45 + (n - 7) * 0.16; });
       ots.answer = T.oneTap + 0.3; // stored a moment after the tap
       ots.tap = T.oneTap;
       KIDS.forEach((k) => { k.tap = k.tap || k.answer - 0.25; });
@@ -426,7 +431,7 @@
 
     // ---------------------------------------------------------------- state of the screens at t
     function wallMode(t) {
-      if (t < T.showClick + 0.1) return 'off';
+      if (t < T.shown) return 'off';
       if (t < PRESS[0] + LAG) return 'wait';
       if (t < PRESS[1] + LAG) return 'join';
       if (t < T.flick[0]) return 'q';
@@ -872,7 +877,7 @@
         const toArrow = [(ARROW[0] - nx) / s - SH[0], (ARROW[1] - ny) / s - SH[1]];
         const dl = Math.hypot(toArrow[0], toArrow[1]);
         const read = eseg(t, PRESS[1] + 0.4, PRESS[1] + 0.8) * (1 - eseg(t, PRESS[2] - 0.5, PRESS[2] - 0.2));
-        const point = eseg(t, 46.2, 46.7) * (1 - eseg(t, 49.4, 49.9));
+        const point = eseg(t, 53.2, 53.7) * (1 - eseg(t, 56.4, 56.9));
         const rx = SH[0] + toArrow[0] / dl * (L1 + L2) * 0.55, ry = SH[1] + toArrow[1] / dl * (L1 + L2) * 0.55 + 20;
         const qx = SH[0] + toArrow[0] / dl * (L1 + L2) * 0.97, qy = SH[1] + toArrow[1] / dl * (L1 + L2) * 0.97;
         tx = lerp(lerp(tx, rx, read), qx, point); ty = lerp(lerp(ty, ry, read), qy, point);
@@ -982,20 +987,22 @@
       const off = q('.lp-off'), home = q('.lp-home'), enter = q('.lp-enter'), wallG = q('.lp-wall'), code = q('.lp-code'), ph = q('.lp-ph'), cur = q('.lp-cursor'), click = q('.lp-click');
       const wall = makeWall(q('.lp-wallin'), 'laptop');
       function update(t) {
-        const m = t < T.lapOn ? 'off' : t < T.enter ? 'home' : t < T.showClick + 0.1 ? 'enter' : 'wall';
+        const m = t < T.lapOn ? 'off' : t < T.enter ? 'home' : t < T.shown ? 'enter' : 'wall';
         vis(off, m === 'off'); vis(home, m === 'home'); vis(enter, m === 'enter'); vis(wallG, m === 'wall');
         if (m === 'home') {
           const n = clamp(Math.floor((t - T.typeCode) / T.codeStep) + 1, 0, TX.teacherCode.length);
           txt(code, TX.teacherCode.slice(0, n)); vis(ph, n === 0);
         }
         if (m === 'wall') wall.update(t);
-        // the mouse: to ▶, then to "Show the quiz here"
-        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, 812, 40], [T.enter + 0.05, 812, 40], [T.showClick - 0.05, 360, 280], [T.showClick + 0.4, 360, 280], [T.showClick + 0.9, 900, 560]];
+        // the mouse: to ▶, then, once the question has been seen, to "Show the quiz here"; after that click it leaves for the corner
+        // before the screen changes, so "Joining opens in a moment." is clear, and its ring is gone by then too
+        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, 812, 40], [T.showClick - 0.55, 812, 40], [T.showClick - 0.05, 360, 280],
+          [T.showClick + 0.08, 360, 280], [T.shown - 0.02, 880, 540]];
         const p = keys(t, pts.map(([tt, x, y]) => [tt, [x, y]]));
-        vis(cur, t > T.lapOn && t < T.showClick + 0.9);
+        vis(cur, t > T.lapOn && t < T.shown + 0.3);
         tf(cur, tr(p[0], p[1]));
         let ck = -1, cx = 0, cy = 0;
-        for (const [tc, x, y] of [[T.enterClick, 812, 40], [T.showClick, 360, 280]]) if (t >= tc && t < tc + 0.4) { ck = seg(t, tc, tc + 0.4); cx = x; cy = y; }
+        for (const [tc, x, y, d] of [[T.enterClick, 812, 40, 0.4], [T.showClick, 360, 280, T.shown - T.showClick]]) if (t >= tc && t < tc + d) { ck = seg(t, tc, tc + d); cx = x; cy = y; }
         vis(click, ck >= 0);
         if (ck >= 0) { tf(click, tr(cx, cy, 0.5 + ck * 1.6)); set(click, 'opacity', (1 - ck).toFixed(2)); }
       }
@@ -1049,14 +1056,14 @@
         }
         tf(all, `${tr(x, y, k.s)} scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
         // head: turns to a neighbour at the split; nods while laughing
-        const turn = (k.turn || 0) * eseg(t, 44.75 + k.jitter * 0.4, 45.1 + k.jitter * 0.4) * (1 - eseg(t, 48.8, 49.2));
+        const turn = (k.turn || 0) * eseg(t, 51.75 + k.jitter * 0.4, 52.1 + k.jitter * 0.4) * (1 - eseg(t, 55.8, 56.2));
         const laugh = k.i === 9 && t > sol + 0.4 && t < sol + 2.6 ? Math.abs(Math.sin((t - sol) * 14)) * 4 : 0;
         const shr = k.ans !== TX.right ? Math.sin(Math.PI * seg(t, sol + 0.3 + k.jitter * 0.3, sol + 1.5 + k.jitter * 0.3)) : 0;
         tf(head, tr(turn * 4, laugh + shr * 6));
         tf(hair, tr(-turn * 9, 0));
         op(nose, Math.abs(turn));
         set(nose, 'cx', turn < 0 ? '-31' : '31');
-        vis(up, k.i === 5 && t > 45.6 && t < 49.6);
+        vis(up, k.i === 5 && t > 52.6 && t < 56.6);
         // the tablet
         const s = kidScreen(k, t);
         vis(S.code, s === 'code' || s === 'typing');
@@ -1079,10 +1086,10 @@
         : kind === 'ha' ? `<path d="M-22 -6 Q0 22 22 -6Z" fill="${C.ink}"/><path d="M-20 -18 q6 -6 12 0 M8 -18 q6 -6 12 0" fill="none" stroke="${C.ink}" stroke-width="4" stroke-linecap="round"/>`
           : `<text class="b" x="0" y="15" font-size="44" text-anchor="middle" fill="${kind === '!' ? C.accent : C.ink}">${kind}</text>`;
       const list = [
-        { at: [508, 374], t: [35.5, 36.85], kind: 'read', w: 90, tail: -1 },
-        { kid: 1, t: [45.0, 48.6], kind: '?' }, { kid: 4, t: [45.35, 48.9], kind: '!' }, { kid: 11, t: [45.6, 48.5], kind: '?' },
-        { kid: 15, t: [46.0, 49.0], kind: '!' }, { kid: 7, t: [46.4, 48.9], kind: '?' }, { kid: 18, t: [46.8, 49.1], kind: '?' },
-        { kid: 9, t: [50.75, 52.9], kind: 'ha' }, { kid: 13, t: [50.6, 52.6], kind: '!' },
+        { at: [508, 374], t: [42.5, 43.85], kind: 'read', w: 90, tail: -1 },
+        { kid: 1, t: [52.0, 55.6], kind: '?' }, { kid: 4, t: [52.35, 55.9], kind: '!' }, { kid: 11, t: [52.6, 55.5], kind: '?' },
+        { kid: 15, t: [53.0, 56.0], kind: '!' }, { kid: 7, t: [53.4, 55.9], kind: '?' }, { kid: 18, t: [53.8, 56.1], kind: '?' },
+        { kid: 9, t: [57.75, 59.9], kind: 'ha' }, { kid: 13, t: [57.6, 59.6], kind: '!' },
       ];
       const els = list.map((b) => {
         const w = b.w || 62;
@@ -1243,9 +1250,10 @@
 
     // ---------------------------------------------------------------- the site on the phone (full frame)
     // The root page's Run box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
-    // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check; there "Screen and
-    // remote" brings the how-to with the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
-    // window shows them (client/open.ts, client/screen.ts), scaled to the frame; what doesn't fit lies below it.
+    // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check, where Screen and remote
+    // is pressed and the how-to gives the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
+    // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too (film-text.md 0.8); what
+    // doesn't fit lies below it. On each check the camera moves in on what is read there.
     let web;
     function makeWeb() {
       const F = mkFrame(svg, 'cq-clip-web');
@@ -1273,7 +1281,7 @@
       const plain = { clsOf: () => '', fillOf: () => null, underline: () => null };
       const titleLine = (y, fit = 1280) => `<text x="160" y="${y}" font-size="52" class="tb" data-fit="${fit}">${esc(TX.title)}<tspan fill="${C.muted}" font-size="36" font-weight="600">${esc(TX.nq)}</tspan></text>`;
       const button = (x, y, w, h, label, size, primary) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${primary ? C.ink : '#fff'}" stroke="${primary ? C.ink : C.rule}" stroke-width="3"/>${T_(x + w / 2, y + h / 2 + size * 0.36, label, size, { cls: 'ts', fill: primary ? '#fff' : C.ink, anchor: 'middle', fit: w - 30 })}`;
-      // the local check: three cards side by side, each its name, its line, its button (the first the primary) and its quiet line
+      // the local check: three cards side by side, each its name, its line, its button (the three alike, none primary) and its quiet line
       const local = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${header}${titleLine(196)}${T_(160, 262, TX.playedAsk, 32, { cls: 'b', fit: 1280 })}`);
       const CW = 413, CG = 20, CY = 290, CP = 28;
       const cards = TX.entries.map((e, i) => {
@@ -1288,29 +1296,36 @@
       const CH = Math.max(...cards.map((c) => c.bottom)) - CY;
       cards.forEach((c) => {
         G(c.cg, `<rect x="${c.x}" y="${CY}" width="${CW}" height="${CH}" rx="22" fill="#fff" stroke="${C.rule}" stroke-width="3"/>${T_(c.x + CP, CY + 62, c.e.name, 40, { cls: 'b', fit: CW - 2 * CP })}
-          ${button(c.x + CP, c.btnY, c.bw, 76, c.e.button, 30, c.i === 0)}`);
+          ${button(c.x + CP, c.btnY, c.bw, 76, c.e.button, 30, false)}`);
         drawLines(c.cg, c.line, c.x + CP, c.lineY, 28, 38, plain).show(c.line.total);
         drawLines(c.cg, c.note, c.x + CP, c.noteY, 22, 30, Object.assign({ fill: C.muted }, plain)).show(c.note.total);
       });
       const qm = cards[2], lobbyBtn = [qm.x + CP + qm.bw / 2, qm.btnY + 38];
       // under the cards, out of the frame: the questions, folded ("If you will play it yourself, leave this closed.")
       G(local, `<rect x="160" y="${CY + CH + 30}" width="1280" height="2" fill="${C.rule}"/>`);
-      // the lobby's check: the join code small; how the screens are arranged, One screen until this browser knows better;
-      // "Screen and remote" brings the how-to with the teacher code, and what follows moves down to make room for it
+      // The camera on a page: [x, y, zoom], the page's point at the frame's top left and the scale. The whole width first, then in
+      // on Quizmaster's card, its line (28 units) and its button large enough to read on a phone; the page's right edge stays the
+      // frame's, so Peers is half in the frame, the card that is passed.
+      const ZQ = 1.8;
+      const qmView = [W - W / ZQ, CY - 70, ZQ];
+      const viewOf = (v, k) => [lerp(0, -v[0] * v[2], k), lerp(0, -v[1] * v[2], k), lerp(1, v[2], k)];
+      const inView = (v, x, y) => [(x - v[0]) * v[2], (y - v[1]) * v[2]];
+      // The lobby's check as it opens on a first visit: Screen and remote pressed, so the how-to with the teacher code is there,
+      // and the questions listed under it, no fold, each with its answers folded (teacher-devices.md, "How the screens are arranged"). The join
+      // code small; on a phone, so without the line on a second screen in a new window.
       const jc = measure(TX.code, 32, 'b') + 8, jl = measure(TX.joinCode.trim(), 30, '') + 12;
-      const lobby = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${titleLine(110, 1280 - jc - jl - 40)}`);
-      G(lobby, `${T_(1440 - jc - 12, 110, TX.joinCode.trim(), 30, { fill: C.muted, anchor: 'end' })}${T_(1440, 110, TX.code, 32, { cls: 'b', anchor: 'end', extra: ' letter-spacing="2"' })}
-        ${T_(160, 190, TX.arrangeAsk, 30, { cls: 'b', fit: 1280 })}`);
+      const lobby = G(page, `<rect y="-300" width="${W}" height="${H + 600}" fill="${C.paper}"/>`);
+      const dimmed = []; // what the camera leaves at the edges when it moves in on the how-to
+      dimmed.push(G(lobby, `${titleLine(110, 1280 - jc - jl - 40)}${T_(1440 - jc - 12, 110, TX.joinCode.trim(), 30, { fill: C.muted, anchor: 'end' })}${T_(1440, 110, TX.code, 32, { cls: 'b', anchor: 'end', extra: ' letter-spacing="2"' })}`));
+      G(lobby, T_(160, 190, TX.arrangeAsk, 30, { cls: 'b', fit: 1280 }));
       const TW = 630, TY = 214, TH = 170;
-      const toggles = TX.arrange.map((a, i) => {
+      TX.arrange.forEach((a, i) => {
         const x = 160 + i * (TW + 20);
         const tg = G(lobby);
-        const off = E('rect', { x, y: TY, width: TW, height: TH, rx: 18, fill: '#fff', stroke: C.rule, 'stroke-width': 3 }, tg);
-        const on = E('rect', { x, y: TY, width: TW, height: TH, rx: 18, fill: '#ededed', stroke: C.ink, 'stroke-width': 4 }, tg);
+        E('rect', i === 1 ? { x, y: TY, width: TW, height: TH, rx: 18, fill: '#ededed', stroke: C.ink, 'stroke-width': 4 } : { x, y: TY, width: TW, height: TH, rx: 18, fill: '#fff', stroke: C.rule, 'stroke-width': 3 }, tg);
         G(tg, T_(x + 28, TY + 56, a.name, 32, { cls: 'tb', fit: TW - 56 }));
         const lw = wrap([[a.line]], 26, TW - 56, plain.clsOf);
         drawLines(tg, lw, x + 28, TY + 100, 26, 36, Object.assign({ fill: C.muted }, plain)).show(lw.total);
-        return { on, off, c: [x + TW / 2, TY + TH / 2] };
       });
       const howOpts = { clsOf: (k) => (k === 'code' ? 'b' : k === 'bold' ? 'tb' : ''), fillOf: () => null, underline: () => null, fill: C.muted };
       const hw = wrap(TX.howTo, 32, 1280, howOpts.clsOf);
@@ -1324,14 +1339,23 @@
       codeO.w = Math.max(...codeOs.filter((o) => o.li === codeO.li).map((o) => o.x + o.w)) - codeO.x;
       const hl = howG.querySelector('.wb-hl');
       set(hl, 'x', f1(codeO.x - 12)); set(hl, 'y', f1(HY + codeO.li * 46 - 34)); set(hl, 'width', f1(codeO.w + 24)); set(hl, 'height', '48');
-      const codeC = [codeO.x + codeO.w / 2, HY + codeO.li * 46 - 10];
-      const rest = G(lobby);
-      const lw = measure(TX.letIn, 34, 'ts') + 90;
-      G(rest, `${T_(160, HY, TX.call, 28, { fill: C.muted, fit: 1280 })}${button(1440 - lw, HY + 32, lw, 104, TX.letIn, 34, true)}
-        <rect x="160" y="${HY + 170}" width="1280" height="2" fill="${C.rule}"/><path d="M164 ${HY + 208} L184 ${HY + 220} L164 ${HY + 232}Z" fill="${C.ink}"/>${T_(200, HY + 232, TX.fold, 30, { cls: 'tb', fit: 1200 })}
-        ${button(1440 - 180, HY + 280, 180, 76, TX.more, 28, false)}`);
-      const howH = hw.lines.length * 46 + 16;
+      const howW = Math.max(...hw.lines.map((l) => lineW(l, 32, howOpts.clsOf)));
+      // then the line on a call, Let everyone in, and the questions, open: each its number, its text and its picture, the answers folded
+      const CL = HY + (hw.lines.length - 1) * 46 + 62;
+      const lw = measure(TX.letIn, 34, 'ts') + 90, sw = measure(TX.showSol, 26, 'ts') + 50;
+      const q1W = 300, q1H = q1W * 340 / 1600;
+      dimmed.push(G(lobby, `${T_(160, CL, TX.call, 28, { fill: C.muted, fit: 1280 })}${button(1440 - lw, CL + 32, lw, 104, TX.letIn, 34, true)}
+        <rect x="160" y="${CL + 160}" width="1280" height="2" fill="${C.rule}"/>
+        ${T_(160, CL + 216, TX.nqList, 28, { cls: 'tb' })}${button(1440 - sw, CL + 176, sw, 60, TX.showSol, 26, false)}
+        <rect x="160" y="${CL + 252}" width="1280" height="2" fill="${C.rule}"/>${T_(176, CL + 298, '1', 28, { cls: 'b', fill: C.muted, anchor: 'middle' })}
+        ${T_(214, CL + 298, TX.q1, 30, { cls: 'ts', fit: 1150 })}${T_(1426, CL + 298, '›', 34, { fill: C.muted, anchor: 'middle' })}
+        <rect x="214" y="${CL + 322}" width="${q1W}" height="${f1(q1H)}" rx="6" fill="#fff" stroke="${C.rule}" stroke-width="2"/><use href="#cq-q1" x="214" y="${CL + 322}" width="${q1W}" height="${f1(q1H)}"/>`));
+      // in on the how-to: the whole sentence across the frame, Screen and remote above it, the frame's foot just under the line on a
+      // call, so Let everyone in, which is not what gets pressed here (the laptop comes in next), stays below it
+      const ZH = clamp(1520 / howW, 1.2, 1.6);
+      const howView = [clamp(160 + howW / 2 - W / ZH / 2, 0, W - W / ZH), CL + 24 - H / ZH, ZH];
       const thumb = makeThumb(g, 0.9, [210, 470]);
+      const tapLobbyAt = inView(qmView, lobbyBtn[0], lobbyBtn[1]);
       function update(t) {
         // slides in from the right over the chat
         const k = eseg(t, T.web, T.web + 0.35);
@@ -1342,18 +1366,15 @@
         const sk = eseg(t, T.sheetUp[0], T.sheetUp[1]) * (1 - eseg(t, T.sheetDown[0], T.sheetDown[1]));
         op(sheet, sk > 0 ? 1 : 0);
         if (sk > 0) { set(sheet.firstChild, 'opacity', (0.35 * sk).toFixed(2)); tf(sheetIn, tr(0, (1 - sk) * 700)); }
-        // the arrangement: One screen, then Screen and remote once tapped, and the how-to with it
-        const remote = t >= T.tapRemote + 0.05;
-        toggles.forEach((tg, i) => { const pressed = (i === 1) === remote; vis(tg.on, pressed); vis(tg.off, !pressed); });
-        vis(howG, remote);
-        tf(rest, tr(0, remote ? howH : 0));
-        // the teacher code: zoom and pulse
-        const z = eseg(t, T.zoomCode[0], T.zoomCode[1]);
-        const zs = lerp(1, 1.9, z);
-        tf(zoomG, `translate(${f1(lerp(0, 800 - codeC[0] * zs, z))} ${f1(lerp(0, 450 - codeC[1] * zs, z))}) scale(${zs.toFixed(3)})`);
+        // the camera: in on Quizmaster's card, then, on the lobby's check, in on the how-to, the teacher code pulsing
+        const z = scr === 'lobby' ? eseg(t, T.zoomCode[0], T.zoomCode[1]) : 0;
+        const v = scr === 'local' ? viewOf(qmView, eseg(t, T.zoomQm[0], T.zoomQm[1])) : scr === 'lobby' ? viewOf(howView, z) : [0, 0, 1];
+        tf(zoomG, `translate(${f1(v[0])} ${f1(v[1])}) scale(${v[2].toFixed(3)})`);
+        dimmed.forEach((d) => op(d, 1 - 0.5 * z));
         op(hl, t > T.zoomCode[0] ? 0.55 + 0.45 * Math.sin((t - T.zoomCode[0]) * 7) : 0);
-        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462], [T.tapLobby, lobbyBtn[0], lobbyBtn[1]], [T.tapRemote, toggles[1].c[0], toggles[1].c[1]]]);
+        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462], [T.tapLobby, tapLobbyAt[0], tapLobbyAt[1]]]);
       }
+      CHECK.views = { qm: qmView, how: howView, howW };
       web = { F, update };
     }
 
@@ -1454,9 +1475,9 @@
     // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
     // ("Let everyone in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
     const CAM = [
-      [T.cut, [431, 537, 2.3]], [29.1, [431, 537, 2.3]], [30.4, ROOM],
-      [44.3, ROOM], [45.6, SPLIT], [49.6, SPLIT], [50.3, ROOM],
-      [54.6, ROOM], [55.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
+      [T.cut, [431, 537, 2.3]], [35.1, [431, 537, 2.3]], [36.4, ROOM],
+      [51.3, ROOM], [52.6, SPLIT], [56.6, SPLIT], [57.3, ROOM],
+      [61.6, ROOM], [62.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
     ];
     function layers(t) {
       cam = keys(t, CAM, [false, false, true]);
