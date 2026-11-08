@@ -282,8 +282,8 @@ Students (`/play#63953`) get no screen of their own:
 - before the teacher lets the class in, a wait: "Joining opens in a
   moment.", joining by itself at the tap;
 - in the lobby, straight to their avatar, with three rows of pictures below
-  it to dress it until Start: six background shapes in its colour, eight
-  hats and six tools to hold (docs/design/class-and-wall.md);
+  it to dress it until Start: six background shapes in its colour, nine
+  hats and seven things to hold or wear (docs/design/class-and-wall.md);
 - once running, "Which one are you?" with the absent players' avatars and
   **+**, when there are any; a tablet whose avatar another device took
   back while it was away gets the same choice when it returns;

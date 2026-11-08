@@ -241,8 +241,13 @@ the open list at the end.
 9. Avatars: celebration, the lion's mane, tools — student feedback:
    celebrating avatars, winners only, after every question; at least ten
    winners easily distinguishable. Built (winners' band, lion's mane),
-   `design/class-and-wall.md`. Tools beside the animal: built with v5 item 4.
-   Open: whether four seconds is long enough for a child to find themselves;
+   `design/class-and-wall.md`. Open: tools beside the animal in the
+   children's own register. The row built with v5 item 4 is the office's,
+   for the adults, and doesn't answer this wish; the examples on record are
+   v2 item 5's, a lantern, a staff, a pitchfork and a shovel, of which only
+   a blob such as the lantern survives the bar's sizes
+   (`design/class-and-wall.md`, "Dressing the avatar"). Also open: whether
+   four seconds is long enough for a child to find themselves;
    the weak spot is a short question beside its picture, where ten winners come
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
@@ -372,8 +377,10 @@ exploration behind these items — options and what each would cost — is
 
 4. Quizmaster: a host runs a quiz for a class or any other crowd; the lobby
    asks how the screens are arranged, the remote's how-to shows only where a
-   remote is wanted, no screen names a role, and the avatars have tools
-   beside the animal for a business crowd — `design/teacher-devices.md`
+   remote is wanted, no screen names a role, and the avatars let a wider
+   audience use the site, a business or training room among them, through
+   each adult's own look: the bowler and the bow tie beside the top hat, and
+   the office's things, in the one menu — `design/teacher-devices.md`
    ("How the screens are arranged", "Words for any crowd"),
    `design/class-and-wall.md` ("Dressing the avatar"). Devices only, a room
    with no wall, isn't offered; why, and what would make it cheap now:
@@ -539,16 +546,19 @@ With the owner:
   read of the translations, the page's and the film's (v4 item 1), the
   personal line in step 1 if wanted.
 - Whether four seconds suits the winners' band (v4 item 9).
-- Business avatar styling (v5 item 4), built on the owner's direction of
-  2026-11-08 and not yet seen by the owner: the animals stay, and one menu
-  for every room gains a row of tools held beside the animal (laptop, chart,
-  calculator, coffee, briefcase, book) next to the top hat; no avatar set is
-  picked per upload or carried by the quiz (figure `avatars/tools.png`,
+- The avatars for a wider audience (v5 item 4), built on the owner's purpose
+  and direction of 2026-11-08 and not yet seen by the owner: the animals
+  stay, every look starts plain, and the one menu for every room carries two
+  registers for adults beside the children's. The owner's examples are the
+  top hat and the laptop, chart and calculator; the implementer's are the
+  bowler and the bow tie (the top hat expanded on; a monocle was rendered
+  and left out) and the coffee, briefcase and book. No look for a room, no
+  set per upload, none carried by the quiz (figure `avatars/tools.png`,
   `design/class-and-wall.md`, "Dressing the avatar"). To decide on seeing
-  it: whether that is businessy enough, and whether to add the top hat's
-  neckwear (a bow tie). Should one menu not serve both rooms, the fallback
-  is a set per upload, defaulted by the entry and changeable among the
-  host's settings on the check screen.
+  it: whether that serves a training room, and the implementer's items.
+  Should one menu not serve both rooms, the fallback is a set per upload,
+  defaulted by the entry and changeable among the host's settings on the
+  check screen.
 - Quizmaster (v5 item 4), the implementer's calls, not yet seen by the
   owner (`design/teacher-devices.md`): the toggle on the lobby's check
   rather than the local check's card (the how-to needs the teacher code,
