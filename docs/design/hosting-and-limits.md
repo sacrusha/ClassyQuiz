@@ -344,11 +344,13 @@ rest are the implementer's, to confirm.
   would let a test with a few devices, left in the lobby, hold its booking
   after all. The device already knows its
   latest quiz and its secret (`root-page.md`, "Coming back").
-- **The day's spending, for the owner:** `GET /api/site` answers, beside
-  `full`, `rows`: what is booked or spent now, of `DAY_ROWS_FOR_CLASSES`, and
-  per day (kept 31 days) the classes let in, the rows written by those that
-  finished, and the ledger's peak, so how close a day came to its limit is
-  a fact to look up. Nothing about a quiz or who made it.
+- **The day's spending, for the owner:** `GET /api/site/use`, behind the
+  owner's key, answers what is booked or spent now, of
+  `DAY_ROWS_FOR_CLASSES`, and per day (kept 31 days, then by the month) the
+  classes let in, the rows written by those that finished, and the ledger's
+  peak, so how close a day came to its limit is a fact to look up; with the
+  rest of the telemetry (`telemetry.md`). Nothing about a quiz or who made
+  it.
 - A booking made before midnight UTC and moved after it leaves the new
   day's ledger alone: the rare class across the turn writes some rows the
   new day doesn't count.

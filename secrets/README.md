@@ -25,6 +25,17 @@ wrangler and the build as environment variables. Nothing else reads it.
   No zone permissions are needed: the site uses its default `pages.dev`
   address. A TTL (expiry date) on the token is a good idea.
 
+- `OWNER_KEY` (optional) — the key for the owner's figures,
+  `GET /api/site/use` (`docs/design/telemetry.md`, "Who reads it"); any
+  long random string. Nothing reads it from here: it is set once on the
+  Pages project, from `src/`:
+
+      node --env-file=../secrets/cloudflare.env node_modules/wrangler/bin/wrangler.js pages secret put OWNER_KEY --project-name classyquiz
+
+  (it asks for the value), and takes effect with the next deploy. Kept here
+  so the owner has it for reading:
+  `curl -H "Authorization: Bearer <key>" https://classyquiz.pages.dev/api/site/use`.
+
 - `SITE_ADDRESS` (optional, not secret) — the site's address when it isn't
   `<name>.pages.dev` with the name in `src/wrangler.toml` (the name was
   taken, or an own domain); the build writes it into the start page.

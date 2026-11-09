@@ -89,6 +89,11 @@ http://127.0.0.1:8788. The site starts only after the state Worker reports
 Objects. The site finds the objects through wrangler's local dev registry, the
 way it finds them by script name when deployed.
 
+`GET /api/site/use`, the owner's figures (`docs/design/telemetry.md`),
+answers 404 unless the site has an `OWNER_KEY`; locally, put
+`OWNER_KEY=<any string>` in `src/.dev.vars` (git-ignored), which
+`wrangler pages dev` reads, and send it as `Authorization: Bearer <key>`.
+
 `node scripts/simulate.mjs [base-url] [players] [--all-poll] [--speed]` plays a
 class of bad-Wi-Fi devices against a running site, local or deployed. Its header
 comment says what it exercises. It is the check that the whole flow holds; run

@@ -14,6 +14,11 @@
 // today, so a class under way never meets a spent allowance its booking
 // didn't leave room for.
 //
+// Telemetry (docs/design/telemetry.md): the day's record also takes each
+// class's summary at its settle, the day's uploads and the most classes
+// booked at once, all on writes made anyway. A day leaving the 31 days is
+// folded into its month's record, kept MONTHS_KEPT months.
+//
 // It also keeps the days (UTC, as the count) on which it refused an upload,
 // for 31 days: the landing's own-copy line says on how many of the last 30
 // the site was full. Only these refusals are known here;
@@ -24,8 +29,9 @@ import { DurableObject } from "cloudflare:workers";
 import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type SiteFull } from "../shared/limits.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
+import { MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord } from "./telemetry.ts";
 
-/** One day's classes, for the owner (GET /api/site): kept FULL_KEEP_DAYS days. */
+/** One day's classes, for the owner (GET /api/site/use): kept FULL_KEEP_DAYS days, then folded into its month. */
 export interface RowsDay {
   day: string;
   /** Classes let in. */
@@ -34,6 +40,18 @@ export interface RowsDay {
   written: number;
   /** The most the ledger held at once: how close the day came to DAY_ROWS_FOR_CLASSES. */
   peak: number;
+  /** The most classes booked at once: let in and not yet settled. */
+  atOnce?: number;
+  /** The classes that settled, summed (docs/design/telemetry.md). */
+  use?: DayUse;
+}
+
+/** What GET /api/site/use answers the owner. */
+export interface OwnerView {
+  rows: { now: number; of: number };
+  /** Newest first. */
+  days: DayRecord[];
+  months: MonthRecord[];
 }
 
 interface Booking {
@@ -50,11 +68,11 @@ export class SiteBudget extends DurableObject<Env> {
   async reserve(instance: string, bytes: number, until: number): Promise<{ rows: number } | SiteFull> {
     const now = Date.now();
     const day = `d:${dayOf(now)}`;
-    const days = await this.ctx.storage.list<number>({ prefix: "d:" });
-    const today = days.get(day) ?? 0;
-    const stale = [...days.keys()].filter((k) => k !== day);
+    await this.rollUp(now);
+    const today = (await this.ctx.storage.get<number>(day)) ?? 0;
     if (today >= MAX_UPLOADS_PER_DAY) return await this.full(now, "uploads");
     const bookings = await this.ctx.storage.list<Booking>({ prefix: "i:" });
+    const stale: string[] = [];
     let live = 0;
     for (const [k, b] of bookings) {
       if (b.until > now) live += b.bytes;
@@ -78,6 +96,7 @@ export class SiteBudget extends DurableObject<Env> {
     const b = (await this.ctx.storage.get<Booking>(key)) ?? { bytes: 0, until };
     if (b.rows !== undefined) return { rows: await this.rowsToday() };
     const day = dayOf(now);
+    await this.rollUp(now);
     const ledger = await this.ctx.storage.list<number>({ prefix: "r:" });
     const booked = ledger.get(`r:${day}`) ?? 0;
     const stale = [...ledger.keys()].filter((k) => k !== `r:${day}`);
@@ -86,33 +105,77 @@ export class SiteBudget extends DurableObject<Env> {
       await this.full(now, "uploads");
       return "rows";
     }
-    const h = await this.history(day);
-    const record: RowsDay = { ...h, classes: h.classes + 1, peak: Math.max(h.peak, booked + rows) };
+    const h = (await this.ctx.storage.get<RowsDay>(`h:${day}`)) ?? { day, classes: 0, written: 0, peak: 0 };
+    // This class and the others let in and not yet settled.
+    const bookings = await this.ctx.storage.list<Booking>({ prefix: "i:" });
+    const atOnce = 1 + [...bookings].filter(([k, o]) => k !== key && o.rows !== undefined && o.until > now).length;
+    const record: RowsDay = { ...h, classes: h.classes + 1, peak: Math.max(h.peak, booked + rows), atOnce: Math.max(h.atOnce ?? 0, atOnce) };
     await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking, [`h:${day}`]: record });
     return { rows: booked + rows };
   }
 
-  /** A day's record, old ones pruned on the way. */
-  private async history(day: string): Promise<RowsDay> {
-    const all = await this.ctx.storage.list<RowsDay>({ prefix: "h:" });
-    const old = [...all.keys()].filter((k) => k < `h:${dayOf(Date.now() - FULL_KEEP_DAYS * DAY_MS)}`);
-    if (old.length > 0) await this.ctx.storage.delete(old.slice(0, 128));
-    return all.get(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 };
+  /**
+   * Days older than FULL_KEEP_DAYS leave: each is folded into its month's
+   * record and deleted in the same write (no await between the put and the
+   * deletes, so they are stored together or not at all). Months older than
+   * MONTHS_KEPT go too. Writes nothing on most calls.
+   */
+  private async rollUp(now: number): Promise<void> {
+    const storage = this.ctx.storage;
+    const [records, uploads, months] = await Promise.all([
+      storage.list<RowsDay>({ prefix: "h:" }),
+      storage.list<number>({ prefix: "d:" }),
+      storage.list<MonthRecord>({ prefix: "m:" }),
+    ]);
+    const keepFrom = dayOf(now - FULL_KEEP_DAYS * DAY_MS);
+    const monthFrom = `m:${monthOf(now, MONTHS_KEPT)}`;
+    const dayKeys = [...records.keys(), ...uploads.keys()];
+    const old = new Set(dayKeys.map((k) => k.slice(2)).filter((d) => d < keepFrom));
+    const gone = dayKeys.filter((k) => old.has(k.slice(2)));
+    gone.push(...[...months.keys()].filter((k) => k < monthFrom));
+    if (gone.length === 0) return;
+    const put: Record<string, MonthRecord> = {};
+    for (const day of [...old].sort()) {
+      const mk = `m:${day.slice(0, 7)}`;
+      if (mk < monthFrom) continue;
+      const h = records.get(`h:${day}`);
+      const record: DayRecord = { day, uploads: uploads.get(`d:${day}`) ?? 0, classes: h?.classes ?? 0, written: h?.written ?? 0, peak: h?.peak ?? 0, atOnce: h?.atOnce, use: h?.use };
+      put[mk] = foldDay(put[mk] ?? months.get(mk), record);
+    }
+    const writes: Promise<unknown>[] = [];
+    if (Object.keys(put).length > 0) writes.push(storage.put(put));
+    for (let i = 0; i < gone.length; i += 128) writes.push(storage.delete(gone.slice(i, i + 128)));
+    await Promise.all(writes);
   }
 
-  /** GET /api/site in one request: the full days, and the days' records, newest first, with what is booked or spent now. */
-  async site(): Promise<{ full: number; rows: { now: number; of: number; days: RowsDay[] } }> {
-    const all = await this.ctx.storage.list<RowsDay>({ prefix: "h:" });
-    return { full: await this.fullDays(), rows: { now: await this.rowsToday(), of: DAY_ROWS_FOR_CLASSES, days: [...all.values()].reverse() } };
+  /** GET /api/site, for the landing: on how many of the last 30 days the site was full. */
+  async site(): Promise<{ full: number }> {
+    return { full: await this.fullDays() };
+  }
+
+  /** GET /api/site/use, for the owner: the days' and the months' records, newest first, with what is booked or spent now. */
+  async owner(): Promise<OwnerView> {
+    const [records, uploads, months] = await Promise.all([
+      this.ctx.storage.list<RowsDay>({ prefix: "h:" }),
+      this.ctx.storage.list<number>({ prefix: "d:" }),
+      this.ctx.storage.list<MonthRecord>({ prefix: "m:" }),
+    ]);
+    const days = [...new Set([...records.keys(), ...uploads.keys()].map((k) => k.slice(2)))].sort().reverse();
+    return {
+      rows: { now: await this.rowsToday(), of: DAY_ROWS_FOR_CLASSES },
+      days: days.map((day) => ({ uploads: uploads.get(`d:${day}`) ?? 0, ...(records.get(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 }) })),
+      months: [...months.values()].reverse(),
+    };
   }
 
   /**
    * Moves a booking to `rows` (the start: shrinks to the class that came), or
    * settles it with `rows` written (the final ranking, the end): the ledger
    * keeps what was written and gets the rest back. A booking from an earlier
-   * day leaves today's ledger alone.
+   * day leaves today's ledger alone. use: the class's summary, added into
+   * its day's record with the settle.
    */
-  async moveRows(instance: string, rows: number, settle = false): Promise<void> {
+  async moveRows(instance: string, rows: number, settle = false, use?: ClassUse): Promise<void> {
     const key = `i:${instance}`;
     const b = await this.ctx.storage.get<Booking>(key);
     if (!b || b.rows === undefined) return;
@@ -127,7 +190,7 @@ export class SiteBudget extends DurableObject<Env> {
     entries[key] = settle ? rest : { ...b, rows };
     if (settle && b.day) {
       const h = (await this.ctx.storage.get<RowsDay>(`h:${b.day}`)) ?? { day: b.day, classes: 0, written: 0, peak: 0 };
-      entries[`h:${b.day}`] = { ...h, written: h.written + rows };
+      entries[`h:${b.day}`] = { ...h, written: h.written + rows, ...(use ? { use: addClass(h.use, use) } : {}) } satisfies RowsDay;
     }
     await this.ctx.storage.put(entries);
   }
@@ -164,9 +227,9 @@ export class SiteBudget extends DurableObject<Env> {
     if (b && b.until < until) await this.ctx.storage.put(key, { ...b, until });
   }
 
-  /** The quiz ended: its bytes come back, and its rows settle with `written` if they hadn't. */
-  async release(instance: string, written?: number): Promise<void> {
-    if (written !== undefined) await this.moveRows(instance, written, true);
+  /** The quiz ended: its bytes come back, and its rows settle with `written` (and its summary) if they hadn't. */
+  async release(instance: string, written?: number, use?: ClassUse): Promise<void> {
+    if (written !== undefined) await this.moveRows(instance, written, true, use);
     await this.ctx.storage.delete(`i:${instance}`);
   }
 }

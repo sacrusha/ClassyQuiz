@@ -11,4 +11,6 @@ export interface Env {
   STATS: DurableObjectNamespace<UploadStats>;
   /** The instances book their uploads; the site's functions read its full days (GET /api/site). */
   BUDGET: DurableObjectNamespace<SiteBudget>;
+  /** The Pages project's secret for GET /api/site/use (docs/design/telemetry.md, "Who reads it"); unset, that address answers 404. */
+  OWNER_KEY?: string;
 }

@@ -459,7 +459,7 @@ doesn't raise it on a first visit.
   before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
 - The site records, once a day, each day on which the budget refused an upload
-  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (and the days' classes for the owner, `hosting-and-limits.md`). The page asks
+  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (the days' classes are the owner's, `telemetry.md`). The page asks
   once per visit, and only from such a device.
 - A refused upload says the same at the moment it happens, with the link.
 - `/own-copy` (`src/public/own-copy.html`, static, no script) is the short guide:

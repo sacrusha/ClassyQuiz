@@ -16,8 +16,9 @@
 //   GET  /api/echo                            network check: WebSocket echo
 //   POST /api/attempt       {format}          count an upload attempt by format
 //   GET  /api/stats                           upload attempts by format
-//   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line),
-//                                             and the days' classes: let in, rows written, the ledger's peak
+//   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line)
+//   GET  /api/site/use                        the owner's, with Authorization: Bearer <OWNER_KEY>: the days' and the months'
+//                                             records (classes, rows, telemetry), docs/design/telemetry.md
 
 import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TEACHER_CODE, TOO_MANY_CODES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
@@ -37,8 +38,13 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (parts[0] === "echo") return echo(request);
     if (parts[0] === "stats" && request.method === "GET") return json(await stats(env).read());
     if (parts[0] === "site" && parts.length === 1 && request.method === "GET") {
-      // full: the landing's own-copy line; rows: the days' classes, for the owner (docs/design/hosting-and-limits.md, "Running classes finish").
+      // The landing's own-copy line (docs/design/root-page.md, "The own copy").
       return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).site());
+    }
+    if (parts[0] === "site" && parts.length === 2 && parts[1] === "use" && request.method === "GET") {
+      // The owner's figures (docs/design/telemetry.md, "Who reads it"): nothing without a key set and given.
+      if (!ownerKey(request, env)) return json({ error: "not found" }, 404);
+      return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).owner());
     }
     if (parts[0] === "i" && parts.length === 3) return await toInstance(request, env, parts[1], parts[2]);
     if (parts[0] === "i" && parts.length === 5 && parts[2] === "img" && request.method === "GET") return await toInstance(request, env, parts[1], "img");
@@ -159,6 +165,17 @@ async function readCapped(request: Request, max: number): Promise<string | null>
     at += c.byteLength;
   }
   return new TextDecoder().decode(all);
+}
+
+/** The request carries the Pages project's OWNER_KEY; false when none is set. */
+function ownerKey(request: Request, env: Env): boolean {
+  const key = env.OWNER_KEY;
+  if (!key) return false;
+  const given = (request.headers.get("authorization") ?? "").replace(/^Bearer /, "");
+  if (given.length !== key.length) return false;
+  let diff = 0;
+  for (let i = 0; i < key.length; i++) diff |= given.charCodeAt(i) ^ key.charCodeAt(i);
+  return diff === 0;
 }
 
 function stats(env: Env) {
