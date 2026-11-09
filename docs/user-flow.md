@@ -533,7 +533,7 @@ throughout, and the final ranking (below). While it steers, the bottom line is t
 - **A tablet shows its answer as accepted only on the server's word:** a
   tapped button is marked at once with a dashed, pulsing outline (on its
   way), and solid once the server's view has it stored. At the reveal a tap
-  still on its way shows as on its way, then ✓ or ✗ once it is stored.
+  still on its way shows as on its way, then ✓ or ✗ once the server holds it.
 - **Only students who have answered appear**, in the order the answers
   arrive, never with the colour of their answer. Nobody is shown as
   missing; the Remote shows the teacher the last few it waits for.

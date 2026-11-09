@@ -23,6 +23,9 @@ import { clockBar, localEnd } from "./clock.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { packPicture, picturesHere, wantPacks } from "./packs.ts";
 import { PeersRoom } from "./peers.ts";
+import { Latest } from "./latest.ts";
+
+type Ack = Extract<ServerMessage, { t: "ack" }>;
 
 interface Saved {
   instance: string;
@@ -101,7 +104,6 @@ let outTimer: number | undefined;
  * burst of taps sends the first and then the last.
  */
 let look: Required<Look> | null = null;
-let dressing = false;
 /** The server took no more changes of look (MAX_LOOK_CHANGES): the pictures stay, without effect. */
 let dressSpent = false;
 /** A Peers room draws its own screens (client/peers.ts); made with its first view. */
@@ -642,15 +644,7 @@ function render(): void {
         const tap = { q: q.q, choice };
         waiting = tap;
         markChosen();
-        void line!.send({ op: "answer", q: q.q, choice, seq: Date.now(), v: v.v, ms }).then((a) => {
-          if (waiting !== tap) return;
-          // Taken: its view says so (above). Not taken (too late, too many
-          // changes of mind): the device shows what is stored, as its view has it.
-          if (a.ok) return;
-          waiting = null;
-          if (main.querySelector(".buttons")) markChosen();
-          else render();
-        });
+        answers.put({ tap, seq: Date.now(), v: v.v, ms });
       }),
     );
     return;
@@ -688,7 +682,7 @@ function render(): void {
 /** into: where the menu is built the first time; a Peers lobby has it beside the code and Start (client/peers.ts). */
 function renderDress(stored: Avatar, into: HTMLElement = main): void {
   // The server's view has caught up with what the child picked.
-  if (look && !dressing && sameLook(stored, look)) look = null;
+  if (look && looks.idle() && sameLook(stored, look)) look = null;
   const shown = look ? { ...stored, ...look } : stored;
   let box = main.querySelector<HTMLElement>(".dress");
   if (!box) {
@@ -724,26 +718,38 @@ function pick(btn: HTMLButtonElement): void {
   if (sameLook(next, now)) return;
   look = next;
   renderDress(me.avatar);
-  sendLook();
+  looks.put(next);
 }
 
-function sendLook(): void {
-  if (dressing || !look || !line) return;
-  const sent = look;
-  dressing = true;
-  void line.send({ op: "dress", b: sent.b, h: sent.h, t: sent.t }).then((a) => {
-    dressing = false;
+/**
+ * Taps go out merged (client/latest.ts): the first of a burst, then the
+ * latest. The line resends each until the server answers.
+ */
+const answers = new Latest<{ tap: { q: number; choice: number }; seq: number; v: number; ms?: number }, Ack>(
+  (x) => line!.send({ op: "answer", q: x.tap.q, choice: x.tap.choice, seq: x.seq, v: x.v, ms: x.ms }),
+  (x, a) => {
+    if (waiting !== x.tap) return;
+    // Taken: its view says so (above). Not taken (too late, too many
+    // changes of mind): the device shows what is held, as its view has it.
+    if (a.ok) return;
+    waiting = null;
+    if (main.querySelector(".buttons")) markChosen();
+    else render();
+  },
+);
+
+const looks = new Latest<Required<Look>, Ack>(
+  (l) => line!.send({ op: "dress", b: l.b, h: l.h, t: l.t }),
+  (_, a) => {
     if (!a.ok) {
       // Not taken: the quiz started, or the changes are spent. The device
-      // shows the look that is stored, as the wall does.
+      // shows the look that is held, as the wall does.
       look = null;
+      looks.clear();
       if (view?.phase === "lobby" && a.error === undefined) dressSpent = true;
-    } else if (look && !sameLook(look, sent)) {
-      sendLook();
-      return;
     }
     if (view?.phase === "lobby" && view.me) renderDress(view.me.avatar);
-  });
-}
+  },
+);
 
 void start();

@@ -2,6 +2,8 @@
 node_modules/
 # build output and wrangler local state
 src/dist/
+# local secrets for wrangler pages dev (OWNER_KEY)
+.dev.vars
 .wrangler/
 # agent worktrees
 .worktrees/

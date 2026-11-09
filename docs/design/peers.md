@@ -39,8 +39,8 @@ on the device of whoever opened the room, the code for the others (v5 item
   class.
 - The free plan's day is the classes' (backlog, Constraints): a Peers room
   costs no more than a class does (`hosting-and-limits.md`, "What a Peers
-  room costs"). Every stored change is rows of the day ("Running classes
-  finish" there), and every poll and picture fetched is requests.
+  room costs"). Every write is rows of the day ("Running classes finish"
+  there), and every poll and picture fetched is requests.
 
 ## How the site meets it
 
@@ -133,7 +133,7 @@ some 10,000 requests, three polling classes' worth (`hosting-and-limits.md`,
 
 The answers follow the class's rules (`question-flow.md`, "When a tap
 counts"): a change of mind until the solution shows, a tap on its way
-outlined dashed until stored, the last stored tap the one that counts.
+outlined dashed until held, the last tap held the one that counts.
 Points for speed are not offered.
 
 A step of the room is its use, as a teacher's step is: the quiz goes 3 h

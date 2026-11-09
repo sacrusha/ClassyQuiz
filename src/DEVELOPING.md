@@ -89,6 +89,11 @@ http://127.0.0.1:8788. The site starts only after the state Worker reports
 Objects. The site finds the objects through wrangler's local dev registry, the
 way it finds them by script name when deployed.
 
+`GET /api/site/use`, the owner's figures (`docs/design/telemetry.md`),
+answers 404 unless the site has an `OWNER_KEY`; locally, put
+`OWNER_KEY=<any string>` in `src/.dev.vars` (git-ignored), which
+`wrangler pages dev` reads, and send it as `Authorization: Bearer <key>`.
+
 `node scripts/simulate.mjs [base-url] [players] [--all-poll] [--speed]` plays a
 class of bad-Wi-Fi devices against a running site, local or deployed. Its header
 comment says what it exercises. It is the check that the whole flow holds; run
@@ -97,6 +102,16 @@ it after changes to the game, the protocol or the transport.
 (`docs/design/peers.md`): friends, nobody steering, a phone going silent;
 about two minutes, most of it waiting for that phone to count as away and
 for a held poll's end.
+`node scripts/simulate-memory.mjs [base-url] --restart "<command>"` (or
+`--quiet <seconds>`) plays a small class whose instance loses its memory
+in the lobby and with each question open, by the command (one that
+restarts the local state Worker in place, keeping its `--persist-to`) or
+by going quiet long enough to hibernate (40 s does it locally); it fails
+when the memory wasn't in fact lost, as a quiet spell too short leaves it
+(3 s does). Run it after changes to what the instance holds in memory
+(`docs/design/open-period-in-memory.md`). A local stack restarted in place
+is the stop and start of "A second local stack" below, with the same
+persist directories.
 
 Things that bite:
 

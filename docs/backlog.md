@@ -315,11 +315,12 @@ the open list at the end.
     yellow run together — unchecked.
 
 15. **Running classes finish** — a teacher whose class stops mid-quiz because
-    the free plan ran out doesn't come back. Rows written are likely the first
-    limit to run out, during lessons, while the site's caps count quizzes and
-    let in four times what the rows carry. Built: students join once the
+    the free plan ran out doesn't come back. Which limit runs out first, and
+    what a class costs: `design/hosting-and-limits.md`, "What a class costs".
+    Built: students join once the
     teacher lets the class in (teacher devices any time); letting in books the
-    most rows the class can write (changes of mind capped at 2), refused on the
+    most rows the class can write (its taps held in memory, not counted:
+    "Room on the Free plan", item 1), refused on the
     teacher's screen when the day can't carry it; the booking shrinks at Start
     and settles at the final ranking; a device's next upload ends its previous
     quiz if that one never started; the days' classes, rows written and
@@ -444,6 +445,43 @@ in progress): playing at different times — each at home when they like, a
 leaderboard that waits — needs a quiz kept for days, which nobody has asked
 for. Named, not pursued: tests, in class or self-administered.
 
+## Room on the Free plan
+
+The owner, 2026-11-09: about 200 classes a day and about 60 at once
+describe what the site has with item 1, which allows a lot of uses; what
+real classes cost is for adoption and telemetry to show
+(`scaling-drawer.md`, "Purpose and threshold"). Beyond what the plan
+carries, donations could pay Cloudflare for more, rather than the code
+being made more complicated. A class's taps are held in memory
+(item 1), so rows written no longer bind first; requests are likely to
+(`design/hosting-and-limits.md`, "What a class costs"). Ideas for the
+limits that come after are in `scaling-drawer.md`, to take up when a figure
+shows one binding.
+
+1. **Answers and looks held in memory** — a class writes its input in
+   batches, so rows stop binding first and the looks stop being a third of
+   a let-in booking; a restart that the devices can recover from loses
+   nothing they show — `design/open-period-in-memory.md`, which also
+   settles the open points the baseline left (the stragglers, a device away
+   at the close). Built on the owner's and the assistant's baseline of
+   2026-11-09. A let-in booking is about 1,030 rows (77 lobbies at once); a
+   class of 25 over 15 questions writes about 250, most of them the
+   teacher's steps (estimated, not measured; the baseline estimated 100 to
+   150). Open: it is to run once against the deployed site, a deploy in the
+   middle of a run among it (`scripts/simulate-memory.mjs`).
+
+2. **What telemetry the project needs** — the limits, the capacity
+   sentence on the landing, the caps and the drawer's ideas rest on figures
+   nobody had measured; telemetry gives them without identifying anyone
+   and without costing rows or requests — `design/telemetry.md`. Built:
+   each device counts its own line and sends the count with what it sends
+   anyway; a class becomes one summary at its settle; the days' records
+   (31 days, then by the month for 24 months, problems by the day only)
+   for the owner at `GET /api/site/use`, behind `OWNER_KEY`. Open: the key
+   is to be set on the Pages project before the deploy that carries this
+   (`secrets/README.md`), or the figures can't be read; the deploy moves
+   the days' rows records off the public `GET /api/site`.
+
 ## Later — Paper and memory
 
 The quiz is already made; it can be more than one activity.
@@ -454,10 +492,6 @@ The quiz is already made; it can be more than one activity.
   be lost for the next variant. Not Solo's (owner: a review may edit, solo
   play doesn't).
 - **Results export** — a teacher who wants to look again.
-- **Rows by holding the open period on the teacher's device** — a design kept
-  ready for when the Free plan's rows bind: about a tenth of a class's
-  rows, a changed ack, a rebuild and an offline overlay
-  (`design/teacher-holds-the-open-period.md`).
 - **Localization**, one sub-item per language — teachers who don't read
   English, classes that should see the few labels there are in their own.
   The bar's labels are nouns so they translate without grammar and fit the
@@ -505,6 +539,30 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- Answers and looks held in memory ("Room on the Free plan", item 1), the
+  implementer's calls, not yet seen by the owner
+  (`design/open-period-in-memory.md`): the grace period for stragglers is
+  the existing rule for a late tap (until the class leaves the reveal), no
+  timer; a device away at the close has its input written when its line
+  ends and isn't back within a second, at most ten such writes a stage for
+  the class; the caps raised to
+  10 changes of mind and 100 changes of look; the device sends at most one
+  tap every 300 ms, the latest of a burst; an acknowledgement now means the
+  server holds the tap, not that it is stored. Seen as a consequence:
+  `ROOM_WARN`'s three classes are now the last 4% of the day, where they
+  were its last third.
+- Telemetry ("Room on the Free plan", item 2), the implementer's calls on
+  the owner's "balance straightforwardness of implementation, likely
+  usefulness of data, and general purpose", not yet seen by the owner
+  (`design/telemetry.md`): day sums and buckets, no record per class;
+  devices' script errors counted, the Function's errors not; the
+  simulators' and probes' classes kept apart by a mark they send with
+  their upload and no page sends (anyone's script could send it, hiding
+  its classes from the figures and nothing else);
+  classes turned away counted as a lower bound, at no row of their own; the
+  summary at the settle, so the after-lesson tail is the dashboard's; which
+  way a quiz was played on the local check not counted; month records kept
+  24 months, refusals among them.
 - Consumers beyond the classroom: settled as v5 (Solo, Peers, Quizmaster).
   Of what rested on it, the lede, the README's descriptor and the example
   asks are built with v5 item 9. Still open: team names against "nothing
@@ -569,12 +627,8 @@ With the owner:
   it: whether that serves a training room, and the implementer's items.
   Should one menu not serve both rooms, the fallback is a set per upload,
   defaulted by the entry and changeable among the host's settings on the
-  check screen. The look cap moves with the menu, now 38 (every picture
-  once and seventeen more), so a let-in booking is about 10,700 rows and
-  seven lobbies fit the day's ledger at once. Not designed: booking the
-  looks per class by writes rather than per player by changes, since the
-  run is written whole at most once a second (`design/hosting-and-limits.md`,
-  "Running classes finish").
+  check screen. The looks are held in memory and cost no rows, so the menu
+  can grow without moving a booking (`design/open-period-in-memory.md`).
 - Solo (v5 item 2) as built, kept by the owner's delegate and not yet seen
   by the owner (`design/solo.md`, Not known): a tap is the final answer;
   the avatar is dressed before the first question; the result's "Copy the

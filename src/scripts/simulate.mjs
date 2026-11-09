@@ -46,6 +46,11 @@
 // fifth from one device locks its teacher codes, the secret still gets in;
 // from ever new addresses, the quiz's allowance runs out within ten. The
 // quiz is deleted.
+//
+// With OWNER_KEY set (the site's, docs/design/telemetry.md), the day's
+// telemetry is read before and after: the class, uploaded as a probe,
+// counts once, among the probes and not the classes, with its devices'
+// lines.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -121,6 +126,25 @@ class Device {
     this.seq = 0;
     this.view = null;
     this.got = [];
+    /** Like client/net.ts: the player's input as the server last took it, sent with every hello and poll. */
+    this.held = null;
+    /** Like client/net.ts: the line's count of itself, sent with every hello, command and poll. */
+    this.line = { mode, opened: 0, failed: 0, http: 0, sent: 0, pings: 0, pollS: 0, quota: 0, slept: 0, errors: 0 };
+  }
+  lineNow() {
+    return this.auth.role === "guest" ? undefined : { ...this.line };
+  }
+  heldNow() {
+    const h = this.held;
+    return h && this.auth.role === "player" && this.auth.token === h.token && (h.look || h.answer) ? h : undefined;
+  }
+  took(cmd, result) {
+    if (this.auth.role !== "player") return;
+    let h = this.held?.token === this.auth.token ? this.held : { token: this.auth.token };
+    if (cmd.op === "dress") h = { ...h, look: { b: cmd.b, h: cmd.h, t: cmd.t ?? 0 } };
+    else if (cmd.op === "answer" && result?.record?.seq === cmd.seq) h = { ...h, answer: { q: cmd.q, choice: cmd.choice, seq: cmd.seq, v: cmd.v, ms: cmd.ms } };
+    else return;
+    this.held = h;
   }
   on(f) {
     this.handlers.push(f);
@@ -135,11 +159,19 @@ class Device {
     this.ws = ws;
     let pinger;
     ws.onopen = () => {
-      ws.send(JSON.stringify({ t: "hello", auth: this.auth }));
-      for (const [id, p] of this.pending) ws.send(JSON.stringify({ t: "cmd", id, cmd: p.cmd }));
+      this.line.opened++;
+      this.line.sent++;
+      ws.send(JSON.stringify({ t: "hello", auth: this.auth, held: this.heldNow(), line: this.lineNow() }));
+      for (const [id, p] of this.pending) {
+        this.line.sent++;
+        ws.send(JSON.stringify({ t: "cmd", id, cmd: p.cmd, line: this.lineNow() }));
+      }
       // Like client/net.ts: a ping every 20 s, answered by the runtime.
       pinger = setInterval(() => {
-        if (!this.frozen && ws.readyState === 1) ws.send("ping");
+        if (!this.frozen && ws.readyState === 1) {
+          this.line.pings++;
+          ws.send("ping");
+        }
       }, 20_000);
     };
     ws.onmessage = (e) => {
@@ -200,8 +232,9 @@ class Device {
   handle(m) {
     this.got.push(m.t);
     if (m.t === "ack" && this.pending.has(m.id)) {
-      const resolve = this.pending.get(m.id).resolve;
+      const { cmd, resolve } = this.pending.get(m.id);
       this.pending.delete(m.id);
+      if (m.ok) this.took(cmd, m.result);
       resolve(m);
     }
     if (m.t === "state") {
@@ -224,7 +257,10 @@ class Device {
       this.pending.set(id, { cmd, resolve });
       if (this.mode === "ws") {
         // A dead device sends nothing; its socket just stays open on the server's side.
-        if (this.ws && this.ws.readyState === 1 && this.online && !this.frozen) this.ws.send(JSON.stringify({ t: "cmd", id, cmd }));
+        if (this.ws && this.ws.readyState === 1 && this.online && !this.frozen) {
+          this.line.sent++;
+          this.ws.send(JSON.stringify({ t: "cmd", id, cmd, line: this.lineNow() }));
+        }
       } else void this.flushHttp();
     });
   }
@@ -238,7 +274,8 @@ class Device {
       }
       const [id, { cmd }] = this.pending.entries().next().value;
       try {
-        const r = await post(`/api/i/${this.instance}/cmd`, { auth: this.auth, cmd: { id, cmd } });
+        this.line.http++;
+        const r = await post(`/api/i/${this.instance}/cmd`, { auth: this.auth, cmd: { id, cmd }, line: this.lineNow() });
         for (const m of r.body.messages ?? []) this.handle(m);
         if (this.pending.has(id)) {
           const p = this.pending.get(id);
@@ -260,7 +297,8 @@ class Device {
       }
       try {
         this.pollAbort = new AbortController();
-        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v }, this.pollAbort.signal).catch((e) => {
+        this.line.http++;
+        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v, held: this.heldNow(), line: this.lineNow() }, this.pollAbort.signal).catch((e) => {
           // Like client/net.ts: let go on purpose, ask again at once.
           if (this.pollAbort?.signal.aborted) return { body: { messages: [] }, repolled: true };
           throw e;
@@ -292,7 +330,16 @@ const until = async (cond, ms, what) => {
   }
 };
 
-const up = await post("/api/quiz", { text: QUIZ });
+/** The day's telemetry, when the site's owner key is given. */
+const OWNER_KEY = process.env.OWNER_KEY;
+async function today() {
+  const res = await fetch(`${BASE}/api/site/use`, { headers: { authorization: `Bearer ${OWNER_KEY}` } });
+  const body = await res.json();
+  return body.days?.find((d) => d.day === new Date().toISOString().slice(0, 10)) ?? {};
+}
+const useBefore = OWNER_KEY ? await today() : null;
+
+const up = await post("/api/quiz", { text: QUIZ, probe: true });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
 const { id: instance, code, token: screenToken, teacher } = up.body;
 check(/^\d{5}$/.test(code), `the upload returns the quiz's code (${code})`);
@@ -514,7 +561,7 @@ log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} 
 // Dressing in the lobby (docs/design/class-and-wall.md). Like
 // client/play.ts: one `dress` in flight per device, the latest pick sent
 // next, so a burst of taps sends the first and the last. Every student
-// picks a few looks; the server stores the class's looks once a second.
+// picks a few looks; the server holds them and the screens hear of them once a second.
 const looks = new Map(); // player id → the look last acknowledged
 const sameLook = (x, y) => (x.b ?? 0) === (y.b ?? 0) && (x.h ?? 0) === (y.h ?? 0) && (x.t ?? 0) === (y.t ?? 0);
 function dresser(p) {
@@ -527,7 +574,7 @@ function dresser(p) {
     void p.d.send({ op: "dress", b: sent.b, h: sent.h, t: sent.t }).then((a) => {
       inFlight = false;
       if (a.ok) looks.set(p.id, sent);
-      else want = null; // refused: the device shows what is stored
+      else want = null; // refused: the device shows what is held
       if (want === sent) want = null;
       pump();
     });
@@ -569,18 +616,18 @@ for (const p of players) {
 log(`dressing: ${taps} taps by ${players.length} students in ${((Date.now() - dressStarted) / 1000).toFixed(1)} s${ALL_POLL ? `, ${dressSends} HTTP requests` : ""}`);
 
 // A device that doesn't wait for its answers (not our page): the server
-// stores MAX_LOOK_CHANGES (38) changes per student and refuses the rest.
+// takes MAX_LOOK_CHANGES (100) changes per student and refuses the rest.
 {
-  // Over a WebSocket, so the 40 arrive in order and each one is a change.
+  // Over a WebSocket, so the 102 arrive in order and each one is a change.
   const rogue = [...players].reverse().find((p) => p.d.mode === "ws") ?? players[players.length - 1];
   const before = looks.get(rogue.id) ?? { b: 0, h: 0 };
-  const flips = Array.from({ length: 40 }, (_, i) => ({ b: (before.b + 1 + (i % 2)) % 6, h: before.h }));
+  const flips = Array.from({ length: 102 }, (_, i) => ({ b: (before.b + 1 + (i % 2)) % 6, h: before.h }));
   const acks = await Promise.all(flips.map((l) => rogue.d.send({ op: "dress", ...l })));
   // Taken until the changes are spent; after that only the look already
   // stored is acknowledged (nothing to store), every change refused.
   const first = acks.findIndex((a) => !a.ok);
   const kept = first > 0 ? flips[first - 1] : null;
-  check(first > 0 && first <= 38, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 40)`);
+  check(first > 0 && first <= 100, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 102)`);
   check(!!kept && acks.every((a, i) => i < first || a.ok === sameLook(flips[i], kept)), "after that, every change is refused");
   // What counts is what is stored; the Remote's view says which.
   await sleep(1500);
@@ -688,8 +735,11 @@ for (;;) {
     await sleep(400);
     // A tablet taps while offline, the teacher locks in and reveals,
     // then the tap arrives while the reveal is still up. The tablet showed
-    // the question as open, so the tap counts.
-    const p = players.find(readyToTap) ?? players.find((x) => !x.dead && x.view?.question?.answering === "open");
+    // the question as open, so the tap counts. On long-poll the views may
+    // take a moment longer to arrive.
+    const showsOpen = (x) => !x.dead && x.view?.question?.answering === "open";
+    await until(() => players.some(showsOpen), 5000, "a tablet showing the answers");
+    const p = players.find(readyToTap) ?? players.find(showsOpen);
     void p.d.drop(3000);
     lateTap = tap(p, current, 0, 9).then((a) => check(a.ok, `${p.name}: a tap made before the lock-in and delivered during the reveal counts`));
     log(`${p.name} taps while offline; the lock-in and the reveal go out before the tap arrives`);
@@ -1012,6 +1062,18 @@ check((after.body.messages ?? []).some((m) => m.t === "gone"), "after the end, t
 const joinAfter = await post("/api/join", { code });
 check(joinAfter.status === 404, "after the end, the code opens nothing");
 anyone.d.kill();
+
+if (useBefore) {
+  // The class settled at its final ranking, with its summary (docs/design/telemetry.md).
+  const day = await today();
+  const before = useBefore.probeUse ?? { classes: 0, devices: 0, http: 0 };
+  const now = day.probeUse ?? { classes: 0, devices: 0, http: 0 };
+  check(now.classes === before.classes + 1, `the class counts once among the day's probes (${before.classes} → ${now.classes})`);
+  check((day.use?.classes ?? 0) === (useBefore.use?.classes ?? 0), "and not among the classes");
+  check(now.devices - before.devices >= N, `its devices' lines are in it (${now.devices - before.devices} devices for ${N} students)`);
+  check(now.http > before.http, "the polling devices' requests are in it");
+  log(`telemetry: ${now.devices - before.devices} devices, ${now.polled - (before.polled ?? 0)} on long-poll, ${now.reconnects - (before.reconnects ?? 0)} reconnects, ${now.http - before.http} HTTP requests`);
+}
 
 if (ALL_POLL) log(`HTTP requests by all devices: ${requests}`);
 if (failures.length) {

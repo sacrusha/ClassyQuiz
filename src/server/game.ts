@@ -12,6 +12,7 @@
 // docs/design/question-flow.md, "When a tap counts".
 
 import type { Quiz } from "../quiz/format.ts";
+import type { LineCounts } from "../shared/line.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, speedBonus } from "../shared/tempo.ts";
@@ -152,6 +153,19 @@ export interface Run {
   peers?: { host: string };
   /** Peers: player id → the question whose solution that player is done with (tapped on). */
   ready?: Record<string, number>;
+  /**
+   * Writes because a player's line ended with input held unwritten, in the
+   * stage `q` (the question index, -1 the lobby): the instance's, counted
+   * against MAX_LINE_WRITES (server/instance.ts, `lineEnded`).
+   */
+  lineWrites?: { q: number; n: number };
+  /**
+   * Each device's own count of its line, the newest it sent: "p:<player id>",
+   * "screen", "remote" (docs/design/telemetry.md). Stored with whatever
+   * write of the run comes next, never written for its own sake; reduced to
+   * the class's summary at the settle, and deleted with the quiz.
+   */
+  lines?: Record<string, LineCounts>;
 }
 
 export interface Game {
@@ -538,6 +552,66 @@ export function answerOutcome(
   const ms = typeof deviceMs === "number" && Number.isFinite(deviceMs) ? Math.round(Math.max(0, Math.min(deviceMs, serverMs))) : serverMs;
   byPlayer[playerId] = { choice, ms, seq, ...(changes > 0 ? { changes } : {}) };
   return "recorded";
+}
+
+/**
+ * A player's input to the stage that is open, as the server holds it
+ * (docs/design/open-period-in-memory.md): the look in the lobby, the answer
+ * to the question on screen, a Peers room's tap on its solution. The
+ * player's socket keeps a copy, so a hibernating instance rebuilds it.
+ */
+export interface Held {
+  look?: { b: number; h: number; t: number };
+  answer?: AnswerRecord & { q: number };
+  ready?: number;
+}
+
+/** What the server holds of this player's input to the open stage; null when there is none. */
+export function heldOf(g: Game, playerId: string): Held | null {
+  const run = g.run;
+  const p = run ? playerById(run, playerId) : null;
+  if (!run || !p || p.removed) return null;
+  if (run.phase === "lobby") return { look: { b: p.avatar.b ?? 0, h: p.avatar.h ?? 0, t: p.avatar.t ?? 0 } };
+  if (run.phase !== "question" && run.phase !== "reveal") return null;
+  const held: Held = {};
+  const a = run.answers[run.current]?.[playerId];
+  if (a) held.answer = { q: run.current, ...a };
+  if (run.peers && run.phase === "reveal" && run.ready?.[playerId] === run.current) held.ready = run.current;
+  return held.answer || held.ready !== undefined ? held : null;
+}
+
+/**
+ * Puts back a copy of a player's held input (`heldOf`, kept by the server
+ * itself) after the instance lost its memory. Only into the stage that is
+ * still open, and only where the copy is newer than what was stored (an
+ * answer's higher `seq`): it was taken once, so it isn't judged again (the
+ * time, the changes of mind). True when it changed something.
+ */
+export function restoreHeld(g: Game, playerId: string, held: unknown): boolean {
+  const run = g.run;
+  const p = run ? playerById(run, playerId) : null;
+  if (!run || !p || p.removed || !held || typeof held !== "object") return false;
+  const h = held as Held;
+  let changed = false;
+  if (h.look && run.phase === "lobby" && validLook(h.look.b, h.look.h, h.look.t) && !sameLook(p.avatar, h.look)) {
+    const { a, c } = p.avatar;
+    p.avatar = { a, c, ...(h.look.b ? { b: h.look.b } : {}), ...(h.look.h ? { h: h.look.h } : {}), ...(h.look.t ? { t: h.look.t } : {}) };
+    changed = true;
+  }
+  const a = h.answer;
+  const onScreen = run.phase === "question" || run.phase === "reveal";
+  if (a && onScreen && a.q === run.current && Number.isInteger(a.choice) && a.choice >= 0 && a.choice < (g.quiz.questions[a.q]?.answers.length ?? 0) && Number.isFinite(a.seq) && Number.isFinite(a.ms)) {
+    const prev = run.answers[a.q]?.[playerId];
+    if (!prev || prev.seq < a.seq) {
+      (run.answers[a.q] ??= {})[playerId] = { choice: a.choice, ms: a.ms, seq: a.seq, ...(a.changes ? { changes: a.changes } : {}) };
+      changed = true;
+    }
+  }
+  if (h.ready !== undefined && run.peers && run.phase === "reveal" && h.ready === run.current && run.ready?.[playerId] !== run.current) {
+    (run.ready ??= {})[playerId] = run.current;
+    changed = true;
+  }
+  return changed;
 }
 
 export function setCounts(g: Game, q: number, counts: boolean[]): void {

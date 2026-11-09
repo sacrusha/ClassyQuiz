@@ -13,6 +13,7 @@ import type {
   Auth,
   ClientMessage,
   Command,
+  DeviceHeld,
   Entry,
   ImageRef,
   PackPic,
@@ -30,9 +31,11 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { CLASS_FULL, CLASS_STARTED, DAY_ROWS_FOR_CLASSES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type SiteFull } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, DAY_ROWS_FOR_CLASSES, LINE_WRITE_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
-import { LOOK_WRITE_MS } from "../shared/looks.ts";
+import { readLine, type LineCounts } from "../shared/line.ts";
+import { summarize, type ClassUse, type RoomKind } from "./telemetry.ts";
+import { LOOK_SHOW_MS } from "../shared/looks.ts";
 
 /**
  * An instance ends this long after its last activity (upload, a teacher's
@@ -131,13 +134,17 @@ interface Meta {
   rows?: { written: number; settled?: true };
   /** The day's rows booked across the site, as last heard (at upload, at letting in): the check's warning. */
   dayRows?: number;
+  /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): its class is kept apart in the telemetry (docs/design/telemetry.md). */
+  probe?: true;
 }
 
 type Session =
   /** since: when this socket said hello (a tab that never pings is away after FRESH_MS). */
-  | { role: "screen"; token: string; since: number }
-  | { role: "remote"; token: string; since: number }
-  | { role: "player"; player: string; since?: number }
+  /** line: the device's newest count of its line (`takeLine`), back in memory at a wake. */
+  | { role: "screen"; token: string; since: number; line?: LineCounts }
+  | { role: "remote"; token: string; since: number; line?: LineCounts }
+  /** held: a copy of the player's input the server holds (G.heldOf), on the player's newest socket only (`mirror`). */
+  | { role: "player"; player: string; since?: number; held?: G.Held | null; line?: LineCounts }
   /** dev: the device, as counted for wrong teacher codes (GUESS_MAX). */
   | { role: "guest"; dev?: string }
   | { role: null; dev?: string };
@@ -181,14 +188,32 @@ export class Instance extends DurableObject<Env> {
    */
   private moved = new Map<string, ServerMessage>();
   /**
-   * Children who dressed their animal and wait for it to be stored: the
-   * class's looks are written at most every LOOK_WRITE_MS, one write for
-   * everyone who changed in between (docs/design/class-and-wall.md, "Dressing the avatar"). Any write of the
-   * run settles them.
+   * Players whose input (a look, an answer, a Peers tap on) the server holds
+   * and storage doesn't have yet (docs/design/open-period-in-memory.md). Any
+   * write of the run carries it; a line ending with input here writes it
+   * sooner (`lineEnded`).
    */
-  private looksWaiting: { resolve: () => void; reject: (e: unknown) => void }[] = [];
-  private looksTimer: ReturnType<typeof setTimeout> | null = null;
-  private looksStored = 0;
+  private unwritten = new Set<string>();
+  /**
+   * Players whose input this memory has taken, or put back from a socket's
+   * copy, since it was loaded: what it holds of them is newer than the copy
+   * their device sends with a hello or a poll, which can arrive after a
+   * newer tap (a look carries no sequence number). Lost with the memory,
+   * which is when the device's copy is wanted.
+   */
+  private takenHere = new Set<string>();
+  private lineTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Player id → when their line ended with input unwritten, for the line write (`lineEnded`). */
+  private lineEnds = new Map<string, number>();
+  /**
+   * New with each start of the object (after a hibernation, a restart, a
+   * deploy): told to the pasting device (QuizInfo.memory) so that
+   * scripts/simulate-memory.mjs knows the memory was in fact lost. Random,
+   * about no one.
+   */
+  private memory = randomToken();
+  /** The lobby's looks go out to the screens at most every LOOK_SHOW_MS (`showSoon`). */
+  private showTimer: ReturnType<typeof setTimeout> | null = null;
   /** Wrong teacher codes, as stored; a quiz without any keeps a salt in memory until its first. */
   private guesses: Guesses = { salt: randomToken(), devs: {}, left: QUIZ_GUESSES, at: 0 };
   /**
@@ -208,8 +233,32 @@ export class Instance extends DurableObject<Env> {
     ctx.blockConcurrencyWhile(() => this.load());
   }
 
-  /** The instance as stored; also after a write failed, so nothing shows that isn't stored. */
+  /**
+   * The instance as stored, with the input the players' sockets keep a copy
+   * of (a hibernating object loses its memory, not its sockets); also after
+   * a write failed, so nothing shows that isn't stored or held. A poller's
+   * input comes back with its next poll, any device's with its next hello
+   * (docs/design/open-period-in-memory.md).
+   */
   private async load(): Promise<void> {
+    await this.loadStored();
+    this.unwritten.clear();
+    this.takenHere.clear();
+    if (!this.game?.run) return;
+    for (const ws of this.ctx.getWebSockets()) {
+      const s = ws.deserializeAttachment() as Session | null;
+      const key = s ? lineKey(s) : null;
+      if (key && s && "line" in s && s.line) this.game.run.lines = { ...this.game.run.lines, [key]: s.line };
+    }
+    for (const ws of this.ctx.getWebSockets()) {
+      const s = ws.deserializeAttachment() as Session | null;
+      if (s?.role !== "player" || !s.held) continue;
+      this.takenHere.add(s.player);
+      if (G.restoreHeld(this.game, s.player, s.held)) this.unwritten.add(s.player);
+    }
+  }
+
+  private async loadStored(): Promise<void> {
     const storage = this.ctx.storage;
     const [meta, record, fixes, run, guesses] = await Promise.all([
       storage.get<Meta>("meta"),
@@ -249,6 +298,8 @@ export class Instance extends DurableObject<Env> {
     fixes: unknown = null,
     /** "peers": a room that runs on its own, its opener a player (docs/design/peers.md); anything else: a room someone steers. */
     mode: unknown = null,
+    /** The upload said it is a simulator's or a probe's; a page never says so. */
+    probe = false,
   ): Promise<
     | { ok: true; secret: string; code: string; teacher: string; token: string; player?: string }
     | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull }
@@ -272,7 +323,7 @@ export class Instance extends DurableObject<Env> {
     let rows: { rows: number } | "rows" | null = null;
     if (peers) {
       try {
-        rows = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(r.quiz.questions.length, true), codeUntil);
+        rows = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(r.quiz.questions.length), codeUntil, probe);
       } catch (e) {
         // The ledger can't be reached: the room opens unbooked rather than be stopped by the site's own bookkeeping.
         console.error("rows not booked:", e instanceof Error ? e.message : String(e));
@@ -291,7 +342,7 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
+    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows, ...(probe ? { probe: true as const } : {}) };
     this.endedBy = null;
     if (rows) {
       this.meta.dayRows = rows.rows;
@@ -596,7 +647,7 @@ export class Instance extends DurableObject<Env> {
       return new Response(null, { status: 101, webSocket: pair[0] });
     }
     if (req.method !== "POST") return new Response("not found", { status: 404 });
-    let body: { auth?: Auth; v?: number; cmd?: { id: string; cmd: Command }; secret?: string };
+    let body: { auth?: Auth; v?: number; cmd?: { id: string; cmd: Command }; secret?: string; held?: DeviceHeld; line?: unknown };
     try {
       body = await req.json();
     } catch {
@@ -612,6 +663,7 @@ export class Instance extends DurableObject<Env> {
     // The device's address, passed on by the API function (GUESS_MAX).
     if (session.role === "guest" && action === "cmd") session.dev = await this.deviceKey(req.headers.get("x-cq-ip"));
     this.notePoll(session);
+    this.takeLine(session, body.line);
     if (action === "cmd" && body.cmd && session.role !== null) {
       // A command over HTTP: the reply is its acknowledgement plus, for a
       // guest becoming a player or taking a role, who it is now.
@@ -646,6 +698,8 @@ export class Instance extends DurableObject<Env> {
       }
       if (session.role === "player") {
         const pid = session.player;
+        // The device's input, as it was last taken: back in memory if the instance lost it.
+        await this.fromDevice(pid, body.held);
         const view = this.viewFor(session) as PlayerView;
         const last = this.sentToPoller.get(pid);
         // Answer at once when the device's view changed, or when it didn't
@@ -657,6 +711,8 @@ export class Instance extends DurableObject<Env> {
         const msgs = await this.hold(session);
         this.notePoll(session);
         if (msgs.length > 0 || !this.live()) return json({ messages: msgs });
+        // A poll that ran out is all the server knows of a poller's line ending.
+        this.lineEnded(pid);
         // The hold ran out: what changed without ending it (pollKey) comes
         // with its end, which costs no request of its own.
         const now = this.viewFor(session) as PlayerView | null;
@@ -680,7 +736,7 @@ export class Instance extends DurableObject<Env> {
     const meta = this.meta!;
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
-    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, ...(game.run?.peers ? { peers: true as const } : {}) } satisfies QuizInfo);
+    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, ...(game.run?.peers ? { peers: true as const } : {}), memory: this.memory } satisfies QuizInfo);
   }
 
   /**
@@ -727,10 +783,18 @@ export class Instance extends DurableObject<Env> {
     if (msg.t === "hello") {
       const out: ServerMessage[] = [];
       let session = this.authenticate(msg.auth, out);
-      if (session.role === "player") session = { ...session, since: Date.now() };
+      if (session.role === "player") {
+        session = { ...session, since: Date.now() };
+        ws.serializeAttachment(session);
+        await this.fromDevice(session.player, msg.held, ws);
+        // This socket is the player's newest: it keeps the copy of their input.
+        this.mirror(session.player, ws);
+        session = ws.deserializeAttachment() as Session;
+      }
       // A guest keeps the device it connected from, for a teacher code it may send.
       if (session.role === "guest") session = { role: "guest", dev: (ws.deserializeAttachment() as { dev?: string } | null)?.dev };
       ws.serializeAttachment(session);
+      this.takeLine(session, msg.line, ws);
       for (const m of out) send(ws, m);
       if (session.role === null) {
         ws.close(4000, "gone");
@@ -749,6 +813,9 @@ export class Instance extends DurableObject<Env> {
       let next = replies.session;
       if (next && next.role === "player") next = { ...next, since: Date.now() };
       if (next) ws.serializeAttachment(next);
+      // A player who came in here (an avatar taken back may have held input): this socket keeps the copy.
+      if (next?.role === "player") this.mirror(next.player, ws);
+      this.takeLine(next ?? session, msg.line, ws);
       for (const m of replies.direct) send(ws, m);
       if (next && next.role === "player") {
         this.sendView(ws, next);
@@ -760,6 +827,14 @@ export class Instance extends DurableObject<Env> {
   async webSocketClose(ws: WebSocket): Promise<void> {
     const session = ws.deserializeAttachment() as Session | null;
     if (!session || session.role === null || session.role === "guest") return;
+    if (session.role === "player") {
+      // The object may have just woken for this close: the copy is put back first.
+      if (session.held && this.game) {
+        this.takenHere.add(session.player);
+        if (G.restoreHeld(this.game, session.player, session.held)) this.unwritten.add(session.player);
+      }
+      this.lineEnded(session.player, ws);
+    }
     // A Peers room doesn't wait for a device that closed its line (a tab closed).
     if (session.role === "player" && this.game?.run?.peers) {
       await this.peersCheck(ws);
@@ -1030,21 +1105,16 @@ export class Instance extends DurableObject<Env> {
       if (session.role === "player") {
         if (cmd.op === "tick") return { direct: [ack(true)] };
         if (cmd.op === "dress") {
-          // In the lobby: the child's look. Acknowledged once stored, with
-          // the class's other changes of the same second.
+          // In the lobby: the child's look, held until Start writes the class's
+          // looks (docs/design/open-period-in-memory.md).
           const outcome = G.dress(game, session.player, cmd.b, cmd.h, cmd.t);
-          if (outcome === "stored") await this.storeLooks();
+          if (outcome === "stored") await this.took(session.player, ws);
           return { direct: [ack(outcome !== "refused")] };
         }
         if (cmd.op === "ready") {
-          // Peers: done with the solution; the room steps on once everyone present is.
+          // Peers: done with the solution, held; the room steps on, and writes, once everyone present is.
           const outcome = G.setReady(game, session.player, cmd.q);
-          // A tap that moves the room is written with its step at once; the
-          // others ride on the next write of the run, as the looks do (at
-          // most one per LOOK_WRITE_MS): friends tap on within seconds of
-          // each other (docs/design/hosting-and-limits.md, "What a Peers room costs").
-          if (outcome === "stored" && G.peersDue(game, this.connectedPlayers())) await this.peersStore();
-          else if (outcome === "stored") await this.storeLooks();
+          if (outcome === "stored") await this.took(session.player, ws);
           return { direct: [ack(outcome !== "refused")] };
         }
         if (G.isHost(game, session.player) && cmd.op !== "answer") {
@@ -1090,23 +1160,11 @@ export class Instance extends DurableObject<Env> {
         const view = typeof cmd.v === "number" ? cmd.v : Infinity;
         // The tablet names the answer by its place on screen; it is stored by its place in the text.
         const choice = Number.isInteger(cmd.choice) ? (G.orderOf(game, cmd.q)[cmd.choice] ?? -1) : -1;
-        // Only a tap that changed the recorded answer is stored: a resend or
-        // the same button again isn't (children hammer buttons; each write
-        // comes out of the account's daily allowance).
+        // Held in memory, written with the lock-in or the next step
+        // (docs/design/open-period-in-memory.md).
         const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now, typeof cmd.ms === "number" ? cmd.ms : undefined);
-        // Peers: the last answer the room waited for shows the solution, in the same write.
-        if (outcome === "recorded" && G.isPeers(game)) await this.peersStore();
-        else if (outcome === "recorded") {
-          // Everyone present has answered during Last call: it locks in now
-          // rather than leaving the class to watch it run out.
-          if (G.runningClock(game) && this.allAnswered()) {
-            G.closeAnswers(game, this.nextView());
-            await this.persist(["run"]);
-            await this.scheduleAlarm();
-          } else await this.persist(["run"]);
-          this.broadcast();
-        }
-        // The acknowledgement carries what is stored for this question now,
+        if (outcome === "recorded") await this.took(session.player, ws);
+        // The acknowledgement carries what is held for this question now,
         // in screen order: the one fact the tablet shows as accepted and the
         // one that scores, whatever this tap's fate (docs/design/question-flow.md,
         // "When a tap counts"). Its own view says the same.
@@ -1258,7 +1316,7 @@ export class Instance extends DurableObject<Env> {
     if (!run?.waiting || meta.rows) return true;
     let booked: { rows: number } | "rows";
     try {
-      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil);
+      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil, !!meta.probe);
     } catch (e) {
       // The ledger can't be reached: the class goes in unbooked rather than
       // be stopped by the site's own bookkeeping.
@@ -1293,7 +1351,7 @@ export class Instance extends DurableObject<Env> {
     const rows = this.meta!.rows;
     const run = this.game!.run;
     if (!rows || rows.settled || !run) return;
-    const rest = rowsFromStart(G.activePlayers(run).length, this.game!.quiz.questions.length, G.isPeers(this.game!));
+    const rest = rowsFromStart(G.activePlayers(run).length, this.game!.quiz.questions.length);
     await this.budget().moveRows(this.ctx.id.toString(), rows.written + rest).catch(() => {});
   }
 
@@ -1302,13 +1360,56 @@ export class Instance extends DurableObject<Env> {
     const rows = this.meta!.rows;
     if (!rows || rows.settled) return;
     try {
-      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true);
+      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true, this.classUse());
     } catch {
       // Unsettled, the quiz's end settles it (endInstance).
       return;
     }
     rows.settled = true;
     await this.persist(["meta"]);
+  }
+
+  /**
+   * A device's count of its line (docs/design/telemetry.md, "What is
+   * counted, and by whom"): the newest replaces the one before, in memory
+   * and in the run, which stores it with its next write; on a socket also in
+   * the attachment, so a wake gets it back. Never a write of its own.
+   */
+  private takeLine(session: Session, raw: unknown, ws?: WebSocket): void {
+    const run = this.game?.run;
+    const key = lineKey(session);
+    if (!run || !key || raw === undefined) return;
+    const line = readLine(raw);
+    if (!line) return;
+    run.lines = { ...run.lines, [key]: line };
+    if (!ws) return;
+    const s = ws.deserializeAttachment() as Session | null;
+    if (s && lineKey(s) === key) ws.serializeAttachment({ ...s, line });
+  }
+
+  /** The class as one summary of numbers, for its settle (docs/design/telemetry.md, "What reaches storage"). */
+  private classUse(): ClassUse | undefined {
+    const game = this.game;
+    const run = game?.run;
+    const meta = this.meta;
+    if (!game || !run || !meta) return undefined;
+    const players = G.activePlayers(run);
+    const kind: RoomKind = run.peers ? "peers" : meta.roles.remote || run.lines?.remote ? "remote" : "wall";
+    const end = run.ended ?? meta.lastActivity;
+    return summarize(
+      {
+        kind,
+        players: players.length,
+        late: players.filter((p) => p.late).length,
+        questions: game.quiz.questions.length,
+        played: run.opened ?? 0,
+        final: run.phase === "final",
+        minutes: run.started ? Math.max(0, Math.round((end - run.started) / 60_000)) : 0,
+        rows: meta.rows?.written ?? 0,
+        ...(meta.probe ? { probe: true } : {}),
+      },
+      Object.values(run.lines ?? {}),
+    );
   }
 
   private async afterTeacherChange(changed: ("run" | "fixes" | "meta")[]): Promise<void> {
@@ -1324,7 +1425,7 @@ export class Instance extends DurableObject<Env> {
     return this.meta!.v + 1;
   }
 
-  /** Writes what changed; the quiz text itself was written once at upload. */
+  /** Writes what changed; the quiz text itself was written once at upload. A write of the run carries every input held so far. */
   private async persist(keys: ("run" | "fixes" | "meta")[]): Promise<void> {
     const meta = this.meta!;
     const game = this.game!;
@@ -1332,42 +1433,163 @@ export class Instance extends DurableObject<Env> {
     const entries: Record<string, unknown> = { meta };
     if (keys.includes("run")) entries.run = game.run;
     if (keys.includes("fixes")) entries.fixes = game.fixes;
-    // The run as written now carries every look changed so far; a look
-    // changed while the write is under way waits for the next one.
-    const covered = entries.run !== undefined ? this.looksWaiting.splice(0) : [];
+    const covered = entries.run !== undefined ? [...this.unwritten] : [];
+    for (const id of covered) this.unwritten.delete(id);
     // Each key is a row; what the class writes counts against its booking.
     if (meta.rows && !meta.rows.settled) meta.rows.written += Object.keys(entries).length;
     try {
       await this.ctx.storage.put(entries);
     } catch (e) {
-      for (const w of covered) w.reject(e);
+      for (const id of covered) this.unwritten.add(id);
       throw e;
     }
-    for (const w of covered) w.resolve();
   }
 
-  /** Resolves once a write of the run has stored the looks changed so far (and a Peers room's taps on); the views follow it. */
-  private storeLooks(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.looksWaiting.push({ resolve, reject });
-      if (this.looksTimer) return;
-      const wait = Math.max(0, this.looksStored + LOOK_WRITE_MS - Date.now());
-      this.looksTimer = setTimeout(() => void this.flushLooks(), wait);
+  /**
+   * A player's input changed what the server holds (docs/design/open-period-in-memory.md):
+   * the class sees it now, storage gets it with the run's next write, and
+   * the player's socket keeps a copy. on: the socket it came on. In a Peers
+   * room it may be the last the room waited for, and the room steps on; in
+   * Last call the last answer of everyone present locks in.
+   */
+  private async took(player: string, on?: WebSocket): Promise<void> {
+    const game = this.game!;
+    this.unwritten.add(player);
+    this.takenHere.add(player);
+    this.mirror(player, on);
+    if (game.run?.phase === "lobby") {
+      this.showSoon();
+      return;
+    }
+    if (G.isPeers(game)) {
+      await this.peersStore();
+      return;
+    }
+    if (G.runningClock(game) && this.allAnswered()) {
+      G.closeAnswers(game, this.nextView());
+      await this.persist(["run"]);
+      await this.scheduleAlarm();
+    }
+    this.broadcast();
+  }
+
+  /**
+   * A look changed: the screens hear of it within LOOK_SHOW_MS, one round
+   * for every look changed in between. A Projector or a Remote on long-poll
+   * would otherwise spend a request on each child's tap; the tablet shows
+   * its own pick at once anyway.
+   */
+  private showSoon(): void {
+    if (this.showTimer) return;
+    this.showTimer = setTimeout(() => {
+      this.showTimer = null;
+      this.broadcast();
+    }, LOOK_SHOW_MS);
+  }
+
+  /**
+   * A player device's input as it was last taken (DeviceHeld), sent with a
+   * hello or a poll. Wanted only when the instance lost it with its memory
+   * (`takenHere`); then it is taken as the commands again, by the same
+   * rules as a tap (a tap made on a view that showed answering open counts
+   * while its question is on screen).
+   */
+  private async fromDevice(player: string, held: unknown, on?: WebSocket): Promise<void> {
+    const game = this.game;
+    const run = game?.run;
+    const p = run ? G.playerById(run, player) : null;
+    if (!game || !p || !held || typeof held !== "object" || this.takenHere.has(player)) return;
+    const h = held as DeviceHeld;
+    if (typeof h.token !== "string" || !safeEqual(h.token, p.token)) return;
+    let changed = false;
+    const a = h.answer;
+    if (a && typeof a === "object" && Number.isInteger(a.q) && Number.isInteger(a.choice) && typeof a.seq === "number") {
+      const choice = G.orderOf(game, a.q)[a.choice] ?? -1;
+      const v = typeof a.v === "number" ? a.v : Infinity;
+      changed = G.answerOutcome(game, player, a.q, choice, a.seq, v, Date.now(), typeof a.ms === "number" ? a.ms : undefined) === "recorded";
+    }
+    const l = h.look;
+    if (l && typeof l === "object" && G.dress(game, player, l.b, l.h, l.t) === "stored") changed = true;
+    if (typeof h.ready === "number" && G.setReady(game, player, h.ready) === "stored") changed = true;
+    if (!changed) return;
+    // Never in the way of the hello or the poll it came with: at worst the copy isn't taken.
+    try {
+      await this.took(player, on);
+    } catch (e) {
+      if (isQuotaError(e)) await this.load().catch(() => {});
+      else console.error("device's input not taken:", e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  /**
+   * The player's input as the server holds it goes into the attachment of
+   * `on`, their newest socket, and out of their other sockets', so a copy
+   * put back (load) is never an older one. Without `on` (the input came
+   * over HTTP) no socket keeps one.
+   */
+  private mirror(player: string, on?: WebSocket): void {
+    const held = this.game ? G.heldOf(this.game, player) : null;
+    for (const ws of this.ctx.getWebSockets()) {
+      const s = ws.deserializeAttachment() as Session | null;
+      if (s?.role !== "player" || s.player !== player) continue;
+      if (ws === on) ws.serializeAttachment({ ...s, held });
+      else if (s.held) ws.serializeAttachment({ ...s, held: null });
+    }
+  }
+
+  /**
+   * A player's line ended (a socket closed, a held poll ran out) while the
+   * server held their input unwritten, and no other socket of theirs keeps
+   * a copy: were the instance to lose its memory before the stage's own
+   * write, the input would be lost unless the device came back with it. So
+   * it is written when the line isn't back within LINE_WRITE_MS (a poller
+   * polling again, a new socket that keeps the copy), one write for every
+   * line that ended in between, at most MAX_LINE_WRITES a stage for the
+   * class (`Run.lineWrites`); past those it waits for the stage's write.
+   */
+  private lineEnded(player: string, closing?: WebSocket): void {
+    if (!this.unwritten.has(player) || !this.live()) return;
+    if (this.copied(player, closing) || this.lineWritesLeft() < 1) return;
+    this.lineEnds.set(player, Date.now());
+    this.lineTimer ??= setTimeout(() => void this.writeLines(), LINE_WRITE_MS);
+  }
+
+  /** Whether an open socket of this player's, other than `closing`, keeps the copy of their input. */
+  private copied(player: string, closing?: WebSocket): boolean {
+    return this.ctx.getWebSockets().some((ws) => {
+      if (ws === closing || ws.readyState !== WebSocket.OPEN) return false;
+      const s = ws.deserializeAttachment() as Session | null;
+      return s?.role === "player" && s.player === player && !!s.held;
     });
   }
 
-  private async flushLooks(): Promise<void> {
-    this.looksTimer = null;
-    // Another write (a join, an answer, Start) may have taken them along.
-    if (this.looksWaiting.length === 0) return;
-    this.looksStored = Date.now();
+  /** A line that ended at `at` is back: a poll since, or a socket that keeps the copy. */
+  private lineBack(player: string, at: number): boolean {
+    return (this.lastPoll.get(player) ?? 0) > at || this.copied(player);
+  }
+
+  private lineWritesLeft(): number {
+    const run = this.game?.run;
+    if (!run) return 0;
+    const used = run.lineWrites && run.lineWrites.q === run.current ? run.lineWrites.n : 0;
+    return MAX_LINE_WRITES - used;
+  }
+
+  private async writeLines(): Promise<void> {
+    this.lineTimer = null;
+    const ends = [...this.lineEnds];
+    this.lineEnds.clear();
+    const run = this.game?.run;
+    // A step may have written it meanwhile; a line that is back needs no write.
+    if (!run || this.unwritten.size === 0 || this.lineWritesLeft() < 1) return;
+    if (!ends.some(([player, at]) => this.unwritten.has(player) && !this.lineBack(player, at))) return;
+    run.lineWrites = { q: run.current, n: MAX_LINE_WRITES - this.lineWritesLeft() + 1 };
     try {
       await this.persist(["run"]);
     } catch (e) {
-      for (const w of this.looksWaiting.splice(0)) w.reject(e);
-      return;
+      if (isQuotaError(e)) await this.load().catch(() => {});
+      else console.error("held input not written:", e instanceof Error ? e.message : String(e));
     }
-    this.broadcast();
   }
 
   private async claimCode(until: number): Promise<string> {
@@ -1411,7 +1633,14 @@ export class Instance extends DurableObject<Env> {
     // Peers: someone the room waits for may go away, and the room on without them.
     const recheck = this.peersRecheck();
     if (recheck != null) at = Math.min(at, recheck);
+    // Each setAlarm() writes a row (Cloudflare's Durable Objects pricing), so
+    // an alarm already due sooner stays: an alarm that comes early only looks
+    // and sets the next one. One that is past is running now, or about to.
+    const set = await this.ctx.storage.getAlarm();
+    if (set !== null && set > Date.now() && set <= at) return;
     await this.ctx.storage.setAlarm(at);
+    const rows = meta.rows;
+    if (rows && !rows.settled) rows.written++;
   }
 
   async alarm(): Promise<void> {
@@ -1438,10 +1667,10 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * Peers: a player's change is stored, and when everyone present is done
-   * the room steps on in the same write (docs/design/peers.md, "Nobody
-   * steers"). A step is the room's use, as a teacher's step is: it keeps
-   * the quiz alive.
+   * Peers: a player's change is held, and when everyone present is done the
+   * room steps on, the step's write carrying it (docs/design/peers.md,
+   * "Nobody steers"). A step is the room's use, as a teacher's step is: it
+   * keeps the quiz alive.
    */
   private async peersStore(): Promise<void> {
     const game = this.game!;
@@ -1450,7 +1679,7 @@ export class Instance extends DurableObject<Env> {
       if (game.run?.phase === "final") await this.settleRows();
       return;
     }
-    await this.persist(["run"]);
+    // Someone is done now: the alarm may look again for who went away.
     await this.scheduleAlarm();
     this.broadcast();
   }
@@ -1495,7 +1724,8 @@ export class Instance extends DurableObject<Env> {
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
     const rows = this.meta?.rows;
-    await this.budget().release(this.ctx.id.toString(), rows && !rows.settled ? rows.written : undefined).catch(() => {});
+    const unsettled = rows && !rows.settled;
+    await this.budget().release(this.ctx.id.toString(), unsettled ? rows.written : undefined, unsettled ? this.classUse() : undefined).catch(() => {});
     const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
     const host = this.game?.run?.peers?.host;
     for (const ws of this.ctx.getWebSockets()) {
@@ -1507,6 +1737,13 @@ export class Instance extends DurableObject<Env> {
     }
     for (const w of this.waiters) w.resolve([gone]);
     this.waiters.clear();
+    if (this.lineTimer) clearTimeout(this.lineTimer);
+    if (this.showTimer) clearTimeout(this.showTimer);
+    this.lineTimer = null;
+    this.showTimer = null;
+    this.lineEnds.clear();
+    this.unwritten.clear();
+    this.takenHere.clear();
     if (ackId) this.endedBy = gone;
     this.meta = null;
     this.game = null;
@@ -1979,6 +2216,13 @@ function sent(view: PlayerView): Sent {
 function pollKey(view: PlayerView): string {
   if (!view.peers) return viewKey(view);
   return viewKey({ ...view, peers: { ...view.peers, players: [], waitingFor: [] } });
+}
+
+/** Where a device's line is kept in the run: a player by id, a teacher's tab by its role; a guest's isn't. */
+function lineKey(s: Session): string | null {
+  if (s.role === "player") return `p:${s.player}`;
+  if (s.role === "screen" || s.role === "remote") return s.role;
+  return null;
 }
 
 function send(ws: WebSocket, msg: ServerMessage): void {

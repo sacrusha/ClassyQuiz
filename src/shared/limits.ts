@@ -19,16 +19,39 @@ export const DOOR_OPEN_MS = 5 * 60_000;
 /** New players once the quiz is under way (past DOOR_OPEN_MS and the first question): a latecomer gets in, a stream of strangers with the code doesn't. */
 export const MAX_LATE_JOINERS = 5;
 /**
- * Changes of mind per student and question, so three successive answers: a
- * mis-tap and one rethink. The last accepted tap counts. Kept low so that
- * what a class can write at most is small enough to book in full
- * (docs/design/hosting-and-limits.md, "Running classes finish").
+ * Changes of mind per student and question; the last accepted tap counts.
+ * Answers are held in memory and written with the teacher's steps
+ * (docs/design/open-period-in-memory.md), so a change costs no row: the cap
+ * is a generous backstop, never met by a child answering, and not part of
+ * what a class books.
  */
-export const MAX_ANSWER_CHANGES = 2;
+export const MAX_ANSWER_CHANGES = 10;
+/**
+ * Writes of the run per stage (the lobby, each question) because a
+ * player's line ended (a socket closed, a held poll ran out) while the
+ * server held their input unwritten: that input would be lost if the
+ * instance then lost its memory before the stage's own write. Beyond these
+ * the input waits for that write. Counted for the whole class, so a class
+ * books them per stage, not per player (server/rows.ts).
+ */
+export const MAX_LINE_WRITES = 10;
+/**
+ * A line's end is written this long after it, unless the line is back by
+ * then (a poller polling again, a new socket keeping the copy); one write
+ * for every line that ended in between.
+ */
+export const LINE_WRITE_MS = 1000;
+/**
+ * A player device sends its latest tap (an answer, a look) at most this
+ * often and one at a time; taps in between are merged into the latest. A
+ * child hammering a button on long-poll would otherwise cost a Function and
+ * a Durable Object request per tap, which no server-side cap can save.
+ */
+export const INPUT_GAP_MS = 300;
 /**
  * Uploads a day, across the site. The "room for a few dozen classes a day" on
  * the start page and in public/own-copy.html holds only while the caps here
- * (this one, MAX_PLAYERS, MAX_ANSWER_CHANGES) stay as they are: the arithmetic
+ * (this one, MAX_PLAYERS, MAX_LINE_WRITES) stay as they are: the arithmetic
  * is in docs/design/hosting-and-limits.md, Situation. A self-hoster who
  * changes them makes that sentence untrue.
  */

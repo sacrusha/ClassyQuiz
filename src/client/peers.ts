@@ -19,6 +19,7 @@ import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { answersBlock, openMenu, toast, type MenuItem } from "./manage.ts";
 import { packPicture, wantPacks } from "./packs.ts";
 import { fillPictures, preload, seed } from "./pictures.ts";
+import { Latest } from "./latest.ts";
 
 type Ack = Extract<ServerMessage, { t: "ack" }>;
 
@@ -212,13 +213,19 @@ export class PeersRoom {
     const tap = { q: q.q, choice: i };
     this.tap = tap;
     this.redraw();
-    void this.ctx.send({ op: "answer", q: q.q, choice: i, seq: Date.now(), v: v.v }).then((a) => {
-      // Not taken (too late, too many changes of mind): the device shows what is stored.
-      if (this.tap !== tap || a.ok) return;
+    this.answers.put({ tap, seq: Date.now(), v: v.v });
+  }
+
+  /** Taps go out merged (client/latest.ts): the first of a burst, then the latest. */
+  private answers = new Latest<{ tap: { q: number; choice: number }; seq: number; v: number }, Ack>(
+    (x) => this.ctx.send({ op: "answer", q: x.tap.q, choice: x.tap.choice, seq: x.seq, v: x.v }),
+    (x, a) => {
+      // Not taken (too late, too many changes of mind): the device shows what is held.
+      if (this.tap !== x.tap || a.ok) return;
       this.tap = null;
       this.redraw();
-    });
-  }
+    },
+  );
 
   /** The foot's button: from the solution to the ranking (this device's own step), from the ranking "done". */
   private next(): void {

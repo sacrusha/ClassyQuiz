@@ -407,9 +407,9 @@ describes the site, not a quiz or a person. No content, no identity, no time of
 day. `GET /api/stats` shows it, publicly: it says how much the site is used and
 nothing about anyone. The page sends the word to `POST /api/attempt` without
 waiting; a failed count never touches the upload. A quiz resent after the AI
-fixed it counts again: these are attempts, not quizzes. The server's JSON upload
-of plain text remains, for the simulator and probes; nothing on the page reaches
-it.
+fixed it counts again: these are attempts, not quizzes. The upload itself goes
+as JSON when the quiz has no pictures, as multipart with them; the simulators
+and probes use the JSON upload too and mark theirs (`telemetry.md`).
 
 ### Coming back: the resume card
 
@@ -459,7 +459,7 @@ doesn't raise it on a first visit.
   before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
 - The site records, once a day, each day on which the budget refused an upload
-  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (and the days' classes for the owner, `hosting-and-limits.md`). The page asks
+  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (the days' classes are the owner's, `telemetry.md`). The page asks
   once per visit, and only from such a device.
 - A refused upload says the same at the moment it happens, with the link.
 - `/own-copy` (`src/public/own-copy.html`, static, no script) is the short guide:

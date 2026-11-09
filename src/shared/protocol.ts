@@ -15,6 +15,7 @@
 // lifetime (sessionStorage). A teacher role takes the teacher code, the class
 // code plus two digits (docs/design/teacher-devices.md, "One entry: the teacher code"), or the quiz's secret.
 
+import type { LineCounts } from "./line.ts";
 import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
 import type { SiteFull } from "./limits.ts";
@@ -103,10 +104,32 @@ export type Command =
    */
   | { op: "goOn"; at: At };
 
-export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
+/**
+ * A player device's input as the server last took it (docs/design/open-period-in-memory.md):
+ * the look its `dress` was acknowledged with, the answer tap whose
+ * acknowledgement carried it as the record (the tap as sent: choice in
+ * screen order, its seq, view and time), and in a Peers room the question
+ * whose solution its `ready` was acknowledged for. Sent with every hello and poll; the
+ * server takes it as the commands again, which changes nothing unless the
+ * instance lost its memory. token: the player it was taken for; another
+ * player's isn't sent.
+ */
+export interface DeviceHeld {
+  token: string;
+  look?: { b: number; h: number; t: number };
+  answer?: { q: number; choice: number; seq: number; v: number; ms?: number };
+  ready?: number;
+}
 
 /**
- * The result of a tap's acknowledgement: what is stored for this player
+ * held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v.
+ * line: the device's own count of its line (docs/design/telemetry.md), with
+ * the hello, every command and every poll; the newest replaces the one before.
+ */
+export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld; line?: LineCounts } | { t: "cmd"; id: string; cmd: Command; line?: LineCounts };
+
+/**
+ * The result of a tap's acknowledgement: what the server holds for this player
  * and question now, the choice in the order on screen; null for nothing.
  * Whether this tap was taken or not, the tablet shows this as its accepted
  * answer, the same record that scores (docs/design/question-flow.md, "When a tap counts").
@@ -497,4 +520,10 @@ export interface QuizInfo {
   stands: { phase: Phase | "idle"; n: number; total: number };
   /** A Peers room: the device comes back as its player, not as a teacher device. */
   peers?: true;
+  /**
+   * New with each start of the instance's object (a hibernation, a restart,
+   * a deploy), random: scripts/simulate-memory.mjs compares it to know the
+   * memory was in fact lost (docs/design/open-period-in-memory.md).
+   */
+  memory?: string;
 }

@@ -3,7 +3,8 @@
 // folder, so every page and script is a static file, which keeps the Free
 // plan's request budget for the quiz itself.
 //
-//   POST /api/quiz          {text, leaveOut?, fixes?, mode?} upload (opening a room): parse, create an instance
+//   POST /api/quiz          {text, leaveOut?, fixes?, mode?, probe?} upload (opening a room): parse, create an instance;
+//                                             probe: true from a simulator or a probe, never from a page
 //   POST /api/quiz          multipart         … with pictures: text, leaveOut?, fixes?, mode?, image files
 //   POST /api/join          {code, secret?}   the quiz's code → instance id; the teacher code (7 digits) checked too
 //   GET  /api/i/:id/img/:secret/:n            a picture of the quiz
@@ -16,8 +17,9 @@
 //   GET  /api/echo                            network check: WebSocket echo
 //   POST /api/attempt       {format}          count an upload attempt by format
 //   GET  /api/stats                           upload attempts by format
-//   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line),
-//                                             and the days' classes: let in, rows written, the ledger's peak
+//   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line)
+//   GET  /api/site/use                        the owner's, with Authorization: Bearer <OWNER_KEY>: the days' and the months'
+//                                             records (classes, rows, telemetry), docs/design/telemetry.md
 
 import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TEACHER_CODE, TOO_MANY_CODES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
@@ -37,8 +39,13 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (parts[0] === "echo") return echo(request);
     if (parts[0] === "stats" && request.method === "GET") return json(await stats(env).read());
     if (parts[0] === "site" && parts.length === 1 && request.method === "GET") {
-      // full: the landing's own-copy line; rows: the days' classes, for the owner (docs/design/hosting-and-limits.md, "Running classes finish").
+      // The landing's own-copy line (docs/design/root-page.md, "The own copy").
       return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).site());
+    }
+    if (parts[0] === "site" && parts.length === 2 && parts[1] === "use" && request.method === "GET") {
+      // The owner's figures (docs/design/telemetry.md, "Who reads it"): nothing without a key set and given.
+      if (!ownerKey(request, env)) return json({ error: "not found" }, 404);
+      return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).owner());
     }
     if (parts[0] === "i" && parts.length === 3) return await toInstance(request, env, parts[1], parts[2]);
     if (parts[0] === "i" && parts.length === 5 && parts[2] === "img" && request.method === "GET") return await toInstance(request, env, parts[1], "img");
@@ -69,7 +76,10 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null);
+  // The simulators and probes say so, and their classes are kept apart
+  // (docs/design/telemetry.md). The route can't tell: the page uploads a
+  // quiz without pictures this way too.
+  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null, body.probe === true);
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error, full: r.full } satisfies UploadResult);
   return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token, ...(r.player ? { player: r.player } : {}) } satisfies UploadResult);
 }
@@ -159,6 +169,17 @@ async function readCapped(request: Request, max: number): Promise<string | null>
     at += c.byteLength;
   }
   return new TextDecoder().decode(all);
+}
+
+/** The request carries the Pages project's OWNER_KEY; false when none is set. */
+function ownerKey(request: Request, env: Env): boolean {
+  const key = env.OWNER_KEY;
+  if (!key) return false;
+  const given = (request.headers.get("authorization") ?? "").replace(/^Bearer /, "");
+  if (given.length !== key.length) return false;
+  let diff = 0;
+  for (let i = 0; i < key.length; i++) diff |= given.charCodeAt(i) ^ key.charCodeAt(i);
+  return diff === 0;
 }
 
 function stats(env: Env) {
