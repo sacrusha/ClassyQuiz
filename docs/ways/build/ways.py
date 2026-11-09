@@ -259,25 +259,27 @@ def quizmaster():
     sx, sy, sw = 196, 26, 414
     o += big_screen(sx, sy, sw, votes=[.6, .3, .1, 0])
     # the teacher at the left, pointing at the arrow in the picture
-    ts, tx, ty = .62, 112, 214
+    # the teacher at the left, pointing at the arrow in the picture: the one a quizmaster is, so big enough to be seen
+    ts, tx, ty = .76, 104, 196
     arrow = (sx + sw * (.03 + .94 * 520 / 1600), sy + sw * (.155 + .17 * .4))
     o += g(teacher_side(((arrow[0] - tx) / ts, (arrow[1] - ty) / ts)), tx, ty, ts)
-    # the class, from behind: a back row, a front row, and the child whose tablet we see over the shoulder
-    back = [(226, 300, 2, 4, 1, 0, 0), (282, 296, 4, 0, 3, 1, 1), (338, 302, 5, 2, 0, 4, 0), (394, 297, 0, 6, 4, 3, -1),
-            (450, 301, 6, 7, 2, 5, 0), (506, 296, 3, 3, 1, 6, 0), (562, 300, 1, 5, 4, 7, 0), (618, 297, 0, 1, 2, 9, 0)]
+    # the class, from behind: a back row, a front row, and the child whose tablet we see over the shoulder. The heads
+    # beside and behind the tablet are fair, so its dark frame stands apart from them at a phone's size.
+    back = [(232, 300, 2, 4, 1, 0, 0), (294, 296, 4, 0, 3, 1, 1), (356, 302, 5, 6, 0, 4, 0), (418, 297, 0, 3, 4, 3, -1),
+            (480, 301, 6, 6, 2, 5, 0), (542, 296, 3, 7, 1, 6, 0), (604, 300, 1, 5, 4, 7, 0)]
     for x, y, hc, hcol, sk, tp, turn in back:
         o += g(person_back(hc, HAIR[hcol], SKIN[sk], TOPS[tp], turn=turn), x, y, .5)
-    front = [(240, 352, 0, 4, 3, 1, 1), (330, 356, 3, 6, 1, 8, 0), (600, 352, 4, 0, 2, 0, -1)]
+    front = [(244, 354, 0, 4, 3, 1, 1), (604, 352, 4, 0, 2, 0, -1)]
     for x, y, hc, hcol, sk, tp, turn in front:
         o += g(person_back(hc, HAIR[hcol], SKIN[sk], TOPS[tp], turn=turn), x, y, .7)
-    o += g(bubble('?'), 296, 238, .56)
-    o += g(bubble('!'), 520, 236, .56)
+    o += g(bubble('?'), 262, 246, .52)
+    o += g(bubble('!'), 586, 246, .52)
     # the tablet held up in two hands, to the child's left, the choices only
     kid = dict(hair=1, hair_c='#a0432a', skin=SKIN[0], top=TOPS[2])
-    kx, ky, ks = 484, 330, 1.0
-    tab = g(tablet_choices(80), -96, 0, 1, -9)
-    hands = hand(-134, 62, kid['skin']) + hand(-56, 50, kid['skin'])
-    arms = sleeve([(-44, 60), (-62, 80), (-124, 80)], kid['top'], 22) + sleeve([(-20, 52), (-52, 60)], kid['top'], 22)
+    kx, ky, ks = 494, 334, 1.0
+    tab = g(tablet_choices(92), -100, -6, 1, -6)
+    hands = hand(-146, 64, kid['skin']) + hand(-54, 54, kid['skin'])
+    arms = sleeve([(-44, 60), (-66, 84), (-136, 84)], kid['top'], 22) + sleeve([(-20, 52), (-50, 62)], kid['top'], 22)
     o += g(person_back(kid['hair'], kid['hair_c'], kid['skin'], kid['top'], turn=0, extra=arms + tab + hands), kx, ky, ks)
     return o
 
@@ -302,7 +304,7 @@ def peers():
     ]
     for fr in friends:
         sd = fr['side']
-        ph = g(phone_question(60, fr['mark']), 84 * sd, 30, 1, 7 * sd)
+        ph = g(phone_question(68, fr['mark']), 88 * sd, 26, 1, 7 * sd)
         arm = sleeve([(34 * sd, 70), (66 * sd, 118), (76 * sd, 96)], fr['top'], 22)
         hd = hand(77 * sd, 86, fr['sk'], 12)
         o += g(person_back(fr['hair'], fr['hc'], fr['sk'], fr['top'], turn=fr['turn'], wide=1.12, extra=arm + ph + hd), fr['x'], fr['y'], fr['s'])

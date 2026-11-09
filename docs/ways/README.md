@@ -22,13 +22,15 @@ where they would be playing, with whom, and what their device would show.
   §3.9).
 - The owner, on the mockup's drawings (pictograms of people and devices on
   the page's paper): they look more corporate than the film's poster, which
-  is relatable. Plausible assumption: what makes the poster relatable is a
-  real room with people in it, doing something (the class at the wall, the
-  votes split, the murmur), drawn in one hand; so these pictures are drawn
-  in the film's.
-- A picture is about 113 px wide on a phone and about 225 px on a desktop,
-  as the mockup has it; the page may change that. At 113 px the mockup's
-  class had devices nobody could see.
+  is relatable. And: scaring off corporate visitors is less of a concern
+  than scaring off everybody else by looking too corporate. Plausible
+  assumption: what makes the poster relatable is a real room with people in
+  it, doing something (the class at the wall, the votes split, the murmur),
+  drawn in one hand; so these pictures are drawn in the film's.
+- The page shows them at 16:10, a third of its column: from 91 px wide on a
+  320 px phone to 227 px on a desktop (`docs/design/root-page.md`, "The
+  ways to play"). At a phone's size the mockup's class had devices nobody
+  could see.
 - The page is in four languages (`docs/design/root-page.md`, "Languages"),
   and an AI's fetcher reads it as text ("One page, two readers").
 - The page follows the device's dark mode; the film's poster is the same
@@ -48,10 +50,18 @@ where they would be playing, with whom, and what their device would show.
   Solo: someone alone at a desk with their notes, the phone showing the
   whole question with the answer just found right (`docs/design/solo.md`:
   practising or reviewing on one's own).
-- **The device is drawn big enough to read at 113 px.** Each picture has one
-  device near the viewer, over a shoulder, so the difference between a
-  tablet with four tiles and a phone with the question, its picture and the
-  choices one under the other holds on a phone.
+- **The setting first, the device as large as the setting leaves room
+  for.** A visitor recognises their case by where and with whom (the
+  Purpose); so at every width the room and its people read first: the
+  screen and the class, the sofa at night, the desk. The device is the
+  second thing: each picture has one near the viewer, over a shoulder, as
+  large as the scene allows, so the difference between a tablet with four
+  tiles and a phone with the question, its picture and the choices one
+  under the other holds at 390 px and up; narrower it may read only as "a
+  tablet" and "a phone". The local check and the film show the difference
+  in full. In the class, the heads beside the tablet are fair, so its dark
+  frame doesn't sink into dark hair; the teacher, who is the visitor in
+  this way, is drawn big enough to be seen at a phone's size.
 - **The film's hand.** The people are the film's children and teacher,
   drawn the way `docs/film/build/film.js` draws them (seen from behind or
   from the side, a head turned by shifting the hair), with its bubbles; the
@@ -83,7 +93,8 @@ where they would be playing, with whom, and what their device would show.
 
 - Whether a visitor recognises their own case from them; nobody outside the
   project has seen them.
-- Whether, at 113 px, a phone with the whole question reads as different
-  from a tablet with the choices only, or only as "a device".
+- Whether, on a phone, a phone with the whole question reads as different
+  from a tablet with the choices only, or only as "a device"; and whether
+  that matters to a visitor choosing among the three.
 - Whether the friends read as adults: they are the film's children's
   figures, with wider shoulders.
