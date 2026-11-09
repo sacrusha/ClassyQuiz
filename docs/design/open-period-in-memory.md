@@ -28,7 +28,9 @@ counts, the one that already existed; and no new kind of message.
   events, its WebSockets kept open), at a deploy (which closes its
   sockets), and when the platform restarts or evicts it, without notice.
   There is no hook before it goes. A request in flight, a held long-poll
-  among them, keeps it in memory.
+  among them, and a pending `setTimeout` keep it from hibernating; an
+  object that can't hibernate is evicted after 70 to 140 s without events
+  (Cloudflare's Durable Object lifecycle page).
 - A WebSocket's attachment (`serializeAttachment`) survives hibernation
   while its socket lives. It holds 16,384 bytes and is lost when either
   side closes (Cloudflare's WebSockets API). Writing one writes no rows
@@ -93,7 +95,10 @@ holder, and none of that is built.
   a newer dress. That is how a restart, which closes every socket, and a
   poller, which has none, get their input back. Taking it never stands in
   the way of the hello or the poll it came with: should it fail, the copy
-  is not taken and the device is served as it would be without one.
+  is not taken and the device is served as it would be without one. While
+  a `dress` is on its way the device leaves the look out: the dress is
+  newer, and a hello sent before the dress is resent would otherwise put
+  the older look back for a moment.
 
 ### Stragglers: the grace period is the tap rule
 
@@ -112,10 +117,14 @@ The other open point, the tap of a device away at the close and not back
 in time: it is written when its line ends, within bounds. When a player's
 socket closes, or their held poll runs out, while the server holds their
 input unwritten and no other socket of theirs keeps a copy, the run is
-written (`lineEnded`): one write for every line that ends within
-`LINE_WRITE_MS` (1 s), at most `MAX_LINE_WRITES` (10) in a stage for the
-whole class (`Run.lineWrites`, stored with the run); past those the input
-waits for the stage's own write.
+written (`lineEnded`) unless the line is back within `LINE_WRITE_MS`
+(1 s): a poll since, or a new socket that keeps the copy. A held poll's
+end is all the server knows of a poller's line, and a poller that is
+still there polls again within a fraction of a second, so the write is
+spent on one that stopped. One write covers every line that ended in
+between, at most `MAX_LINE_WRITES` (10) in a stage for the whole class
+(`Run.lineWrites`, stored with the run); past those the input waits for
+the stage's own write.
 
 Why not accept it as lost: hibernation is routine in a lesson (ten quiet
 seconds while the class reads), and a phone that locks closes its socket,
@@ -175,8 +184,11 @@ steps now bind, and requests and stored bytes bind next
 ## Not known
 
 - Whether a socket's attachment survives an actual eviction (Situation).
-  If it didn't, hibernation would lose what only memory held, and the line
-  writes would be all that keeps it.
+  If it didn't, every hibernation, ten quiet seconds, routine in a lesson,
+  would lose the input held for the devices whose sockets stay open: they
+  send no hello and their line doesn't end, so neither their own copy nor
+  a line write brings it back. That is most of a question's answers before
+  the lock-in, not a rare case.
 - How often a line ends with input unwritten in a stage, and so whether
   ten line writes a stage is right; how many devices come back with their
   own copy after a restart. Telemetry is to say.
@@ -185,7 +197,7 @@ steps now bind, and requests and stored bytes bind next
   deploy does, and against the local runtime hibernating the instance; the
   same run without the devices' copies loses every look and the open
   question's answers. Both ways are to run once against the deployed site,
-  a deploy in the middle of the run for the first.
-- Whether a pending timer keeps a hibernating object in memory: the line
-  write's timer is set by an event, and the object stays in memory about
-  10 s after one, so the 1 s timer is assumed to fire.
+  a deploy in the middle of the run for the first. The run fails unless
+  the memory was in fact lost each time (`QuizInfo.memory`, new with each
+  start of the object), so a pass can't come from a quiet spell in which
+  the object never hibernated.

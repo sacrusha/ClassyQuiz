@@ -520,4 +520,10 @@ export interface QuizInfo {
   stands: { phase: Phase | "idle"; n: number; total: number };
   /** A Peers room: the device comes back as its player, not as a teacher device. */
   peers?: true;
+  /**
+   * New with each start of the instance's object (a hibernation, a restart,
+   * a deploy), random: scripts/simulate-memory.mjs compares it to know the
+   * memory was in fact lost (docs/design/open-period-in-memory.md).
+   */
+  memory?: string;
 }
