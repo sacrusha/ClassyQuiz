@@ -35,7 +35,11 @@ export const MAX_ANSWER_CHANGES = 10;
  * books them per stage, not per player (server/rows.ts).
  */
 export const MAX_LINE_WRITES = 10;
-/** A line's end is written this long after it, one write for every line that ended in between. */
+/**
+ * A line's end is written this long after it, unless the line is back by
+ * then (a poller polling again, a new socket keeping the copy); one write
+ * for every line that ended in between.
+ */
 export const LINE_WRITE_MS = 1000;
 /**
  * A player device sends its latest tap (an answer, a look) at most this

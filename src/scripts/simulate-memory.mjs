@@ -9,8 +9,10 @@
 // every socket closes and the devices come back. --quiet: nothing but
 // pings for that long, as often, so the object can hibernate (Cloudflare:
 // about 10 s without events) with its sockets open; the poller is away
-// meanwhile, since a held poll keeps the object in memory. Whether the
-// runtime did is its own; the check is that nothing shown is lost either way.
+// meanwhile, since a held poll keeps the object in memory. Either way the
+// run fails unless the memory was in fact lost each time (the instance's
+// QuizInfo.memory, new with each start of its object), so a pass can't come
+// from a loss that didn't happen.
 //
 // Four students: two on WebSockets, one of them closing its socket after
 // each tap (a phone locked: its input is written when the line ends), one
@@ -86,7 +88,13 @@ class Device {
   }
   heldNow() {
     const h = this.held;
-    return h && this.auth.role === "player" && this.auth.token === h.token ? h : undefined;
+    if (!h || this.auth.role !== "player" || this.auth.token !== h.token) return undefined;
+    // Like client/net.ts: a dress on its way carries a newer look than the copy.
+    if (h.look && [...this.pending.values()].some((p) => p.cmd.op === "dress")) {
+      const { look, ...rest } = h;
+      return rest.answer ? rest : undefined;
+    }
+    return h;
   }
   took(cmd, result) {
     if (this.auth.role !== "player") return;
@@ -187,7 +195,23 @@ class Device {
   }
 }
 
+/** The instance's memory, new with each start of its object (QuizInfo.memory). */
+async function memoryNow() {
+  const r = await post(`/api/i/${instance}/info`, { secret: up.body.secret });
+  if (typeof r.body.memory !== "string") throw new Error("the site doesn't say which memory it is in: " + JSON.stringify(r.body));
+  return r.body.memory;
+}
+
+/** The memory goes, by the command or the quiet; a run in which it didn't has tested nothing, and fails. */
 async function loseMemory(when) {
+  const before = await memoryNow();
+  await loseMemoryBy(when);
+  const after = await memoryNow();
+  check(after !== before, `the memory was lost (${when}): it wasn't, so nothing was tested there${QUIET ? "; a longer --quiet may let the object hibernate" : ""}`);
+  log(after !== before ? `the memory was lost (${when})` : `the memory was NOT lost (${when})`);
+}
+
+async function loseMemoryBy(when) {
   if (RESTART) {
     log(`the memory goes (${when}): ${RESTART}`);
     const r = spawnSync(RESTART, { shell: true, stdio: "inherit" });

@@ -101,8 +101,9 @@ for a held poll's end.
 `--quiet <seconds>`) plays a small class whose instance loses its memory
 in the lobby and with each question open, by the command (one that
 restarts the local state Worker in place, keeping its `--persist-to`) or
-by going quiet long enough to hibernate (40 s does it locally); run it
-after changes to what the instance holds in memory
+by going quiet long enough to hibernate (40 s does it locally); it fails
+when the memory wasn't in fact lost, as a quiet spell too short leaves it
+(3 s does). Run it after changes to what the instance holds in memory
 (`docs/design/open-period-in-memory.md`). A local stack restarted in place
 is the stop and start of "A second local stack" below, with the same
 persist directories.

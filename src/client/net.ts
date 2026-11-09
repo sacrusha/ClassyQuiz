@@ -39,6 +39,8 @@ const PONG_WITHIN = 8_000;
 const FIRST_MESSAGE_WITHIN = 8_000;
 /** Polls never follow each other faster than this, whatever the server answers. */
 const MIN_POLL_GAP = 300;
+/** Commands whose acknowledgement means "held", not "stored": a tick, and a player's taps. */
+const HELD_OPS = new Set<Command["op"]>(["tick", "answer", "dress", "ready"]);
 /** Out of the daily allowance: ask again this often, not every few seconds. */
 const QUOTA_RETRY = 60_000;
 
@@ -328,8 +330,10 @@ export class Line {
       const i = this.pending.findIndex((p) => p.id === m.id);
       if (i >= 0) {
         const [p] = this.pending.splice(i, 1);
-        // Something was stored again: the allowance is back.
-        if (m.ok && p.cmd.op !== "tick" && this.quota === "write") this.setQuota(null);
+        // Something was stored again: the allowance is back. A player's tap
+        // is held in memory, not stored, so its acknowledgement doesn't say
+        // (docs/design/open-period-in-memory.md).
+        if (m.ok && !HELD_OPS.has(p.cmd.op) && this.quota === "write") this.setQuota(null);
         if (m.ok) this.took(p.cmd, m.result);
         p.resolve(m);
       }
@@ -361,11 +365,21 @@ export class Line {
     this.opts.onMessage(m);
   }
 
-  /** The input to send: only the player's whose token the tab holds now. */
+  /**
+   * The input to send: only the player's whose token the tab holds now. The
+   * look stays out while a dress is on its way: that one is newer, and a
+   * look carries no sequence number to tell the two apart, so a hello sent
+   * before the resent dress would put the older look back for a moment.
+   */
   private heldNow(): DeviceHeld | null {
     const auth = this.opts.auth();
-    const h = this.held;
-    return h && auth.role === "player" && auth.token === h.token && (h.look || h.answer || h.ready !== undefined) ? h : null;
+    let h = this.held;
+    if (!h || auth.role !== "player" || auth.token !== h.token) return null;
+    if (h.look && this.pending.some((p) => p.cmd.op === "dress")) {
+      const { look: _, ...rest } = h;
+      h = rest;
+    }
+    return h.look || h.answer || h.ready !== undefined ? h : null;
   }
 
   /** An acknowledged command: a look taken, the answer tap the acknowledgement names as the record, a Peers room's tap on. */

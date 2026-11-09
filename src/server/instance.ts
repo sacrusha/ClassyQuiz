@@ -198,6 +198,15 @@ export class Instance extends DurableObject<Env> {
    */
   private takenHere = new Set<string>();
   private lineTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Player id → when their line ended with input unwritten, for the line write (`lineEnded`). */
+  private lineEnds = new Map<string, number>();
+  /**
+   * New with each start of the object (after a hibernation, a restart, a
+   * deploy): told to the pasting device (QuizInfo.memory) so that
+   * scripts/simulate-memory.mjs knows the memory was in fact lost. Random,
+   * about no one.
+   */
+  private memory = randomToken();
   /** The lobby's looks go out to the screens at most every LOOK_SHOW_MS (`showSoon`). */
   private showTimer: ReturnType<typeof setTimeout> | null = null;
   /** Wrong teacher codes, as stored; a quiz without any keeps a salt in memory until its first. */
@@ -714,7 +723,7 @@ export class Instance extends DurableObject<Env> {
     const meta = this.meta!;
     const game = this.game!;
     const stands = { phase: game.run ? game.run.phase : ("idle" as const), ...G.progress(game) };
-    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, ...(game.run?.peers ? { peers: true as const } : {}) } satisfies QuizInfo);
+    return json({ title: game.quiz.title, code: meta.code, teacher: meta.teacher, stands, ...(game.run?.peers ? { peers: true as const } : {}), memory: this.memory } satisfies QuizInfo);
   }
 
   /**
@@ -1475,19 +1484,30 @@ export class Instance extends DurableObject<Env> {
    * server held their input unwritten, and no other socket of theirs keeps
    * a copy: were the instance to lose its memory before the stage's own
    * write, the input would be lost unless the device came back with it. So
-   * it is written, one write for every line ending within LINE_WRITE_MS, at
-   * most MAX_LINE_WRITES a stage for the class (`Run.lineWrites`); past
-   * those it waits for the stage's write.
+   * it is written when the line isn't back within LINE_WRITE_MS (a poller
+   * polling again, a new socket that keeps the copy), one write for every
+   * line that ended in between, at most MAX_LINE_WRITES a stage for the
+   * class (`Run.lineWrites`); past those it waits for the stage's write.
    */
   private lineEnded(player: string, closing?: WebSocket): void {
-    if (!this.unwritten.has(player) || this.lineTimer || !this.live()) return;
-    const copied = this.ctx.getWebSockets().some((ws) => {
+    if (!this.unwritten.has(player) || !this.live()) return;
+    if (this.copied(player, closing) || this.lineWritesLeft() < 1) return;
+    this.lineEnds.set(player, Date.now());
+    this.lineTimer ??= setTimeout(() => void this.writeLines(), LINE_WRITE_MS);
+  }
+
+  /** Whether an open socket of this player's, other than `closing`, keeps the copy of their input. */
+  private copied(player: string, closing?: WebSocket): boolean {
+    return this.ctx.getWebSockets().some((ws) => {
       if (ws === closing || ws.readyState !== WebSocket.OPEN) return false;
       const s = ws.deserializeAttachment() as Session | null;
       return s?.role === "player" && s.player === player && !!s.held;
     });
-    if (copied || this.lineWritesLeft() < 1) return;
-    this.lineTimer = setTimeout(() => void this.writeLines(), LINE_WRITE_MS);
+  }
+
+  /** A line that ended at `at` is back: a poll since, or a socket that keeps the copy. */
+  private lineBack(player: string, at: number): boolean {
+    return (this.lastPoll.get(player) ?? 0) > at || this.copied(player);
   }
 
   private lineWritesLeft(): number {
@@ -1499,9 +1519,12 @@ export class Instance extends DurableObject<Env> {
 
   private async writeLines(): Promise<void> {
     this.lineTimer = null;
+    const ends = [...this.lineEnds];
+    this.lineEnds.clear();
     const run = this.game?.run;
-    // A step may have written it meanwhile.
+    // A step may have written it meanwhile; a line that is back needs no write.
     if (!run || this.unwritten.size === 0 || this.lineWritesLeft() < 1) return;
+    if (!ends.some(([player, at]) => this.unwritten.has(player) && !this.lineBack(player, at))) return;
     run.lineWrites = { q: run.current, n: MAX_LINE_WRITES - this.lineWritesLeft() + 1 };
     try {
       await this.persist(["run"]);
@@ -1659,6 +1682,7 @@ export class Instance extends DurableObject<Env> {
     if (this.showTimer) clearTimeout(this.showTimer);
     this.lineTimer = null;
     this.showTimer = null;
+    this.lineEnds.clear();
     this.unwritten.clear();
     this.takenHere.clear();
     if (ackId) this.endedBy = gone;

@@ -315,11 +315,12 @@ the open list at the end.
     yellow run together — unchecked.
 
 15. **Running classes finish** — a teacher whose class stops mid-quiz because
-    the free plan ran out doesn't come back. Rows written are likely the first
-    limit to run out, during lessons, while the site's caps count quizzes and
-    let in four times what the rows carry. Built: students join once the
+    the free plan ran out doesn't come back. Which limit runs out first, and
+    what a class costs: `design/hosting-and-limits.md`, "What a class costs".
+    Built: students join once the
     teacher lets the class in (teacher devices any time); letting in books the
-    most rows the class can write (changes of mind capped at 2), refused on the
+    most rows the class can write (its taps held in memory, not counted:
+    "Room on the Free plan", item 1), refused on the
     teacher's screen when the day can't carry it; the booking shrinks at Start
     and settles at the final ranking; a device's next upload ends its previous
     quiz if that one never started; the days' classes, rows written and
@@ -546,7 +547,8 @@ With the owner:
   (`design/open-period-in-memory.md`): the grace period for stragglers is
   the existing rule for a late tap (until the class leaves the reveal), no
   timer; a device away at the close has its input written when its line
-  ends, at most ten such writes a stage for the class; the caps raised to
+  ends and isn't back within a second, at most ten such writes a stage for
+  the class; the caps raised to
   10 changes of mind and 100 changes of look; the device sends at most one
   tap every 300 ms, the latest of a burst; an acknowledgement now means the
   server holds the tap, not that it is stored. Seen as a consequence:
