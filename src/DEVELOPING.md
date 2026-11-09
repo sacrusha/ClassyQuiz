@@ -97,6 +97,15 @@ it after changes to the game, the protocol or the transport.
 (`docs/design/peers.md`): friends, nobody steering, a phone going silent;
 about two minutes, most of it waiting for that phone to count as away and
 for a held poll's end.
+`node scripts/simulate-memory.mjs [base-url] --restart "<command>"` (or
+`--quiet <seconds>`) plays a small class whose instance loses its memory
+in the lobby and with each question open, by the command (one that
+restarts the local state Worker in place, keeping its `--persist-to`) or
+by going quiet long enough to hibernate (40 s does it locally); run it
+after changes to what the instance holds in memory
+(`docs/design/open-period-in-memory.md`). A local stack restarted in place
+is the stop and start of "A second local stack" below, with the same
+persist directories.
 
 Things that bite:
 

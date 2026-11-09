@@ -448,66 +448,23 @@ for. Named, not pursued: tests, in class or self-administered.
 
 The owner, 2026-11-09: about 200 classes a day and about 60 at once is
 plenty. Beyond that, donations could pay Cloudflare for more, rather than
-the code being made more complicated. Today rows written bind first, at
-about 75 classes a day, and a let-in class books about 10,700 of them
-(`design/hosting-and-limits.md`, "Running classes finish"). Ideas for the
+the code being made more complicated. A class's taps are held in memory
+(item 1), so rows written no longer bind first; requests are likely to
+(`design/hosting-and-limits.md`, "What a class costs"). Ideas for the
 limits that come after are in `scaling-drawer.md`, to take up when a figure
 shows one binding.
 
-1. **Answers and looks held in memory** — a class writes about a tenth of
-   today's rows, so rows stop binding first and the looks stop being a
-   third of a let-in booking. A restart that the devices can recover from
-   loses nothing they show.
-
-   Situation:
-   - Every stored change writes the run and the meta: two rows
-     (`persist`, `server/rows.ts`). Answers are about 750 of a class's
-     ~1,300 rows. The looks (`MAX_LOOK_CHANGES`, 38) are most of the rest
-     of a let-in booking.
-   - The caps on changes (`MAX_LOOK_CHANGES`, `MAX_ANSWER_CHANGES`) exist
-     only for rows today (owner).
-   - Devices hold their own input: the look, the tap, the sequence number.
-   - A WebSocket's attachment (`serializeAttachment`) survives hibernation
-     while its socket lives. It holds 16,384 bytes and is lost when either
-     side closes (Cloudflare's WebSockets API).
-   - Cloudflare's pricing page doesn't mention attachments. Plausible
-     assumption: they write no rows. To check with one
-     `scripts/simulate.mjs` run against the deployed site, read from the
-     metrics.
-   - A student's socket is replaced several times a lesson: the screen
-     locks, a reload, a switch between cellular and Wi-Fi, a deploy.
-   - A device on long-poll has no socket.
-   - Each `setAlarm()` writes a row (pricing page).
-
-   Baseline (owner and assistant, 2026-11-09), for the design to match or
-   beat:
-   - The server holds the lobby's looks and an open question's taps in
-     memory, and each WebSocket student's copy in its socket's attachment,
-     so hibernation loses nothing.
-   - Devices send their current state, not events (look, tap, seq), in
-     every hello and every poll. Memory lost to a restart or an eviction is
-     rebuilt from them.
-   - Written in one batch when a stage closes: the looks at Start, a
-     question's taps at lock-in.
-   - A grace period for stragglers. Open: whether it covers taps in flight
-     at the close, devices away at the close that come back, or both, and
-     for how long.
-   - The tap of a device away at the close and not back within the grace
-     period is either accepted as lost or written when its socket closes
-     (batched). Open.
-   - The caps stay, set generously, as a backstop for memory and batch
-     size. Requests are guarded on the device: it merges taps and sends its
-     latest state at most every few hundred ms. A server-side cap can't save
-     a request that has already arrived: one child tapping 5 times a second
-     on long-poll costs about 300 requests a question.
-   - The booking in `server/rows.ts` shrinks to match.
-   - The Remote holds nothing. `design/teacher-holds-the-open-period.md`
-     cut the same rows by making the Remote the owner. This baseline is that
-     file's "competing variant", without its flush timer. The file is to be
-     rewritten for this item.
-
-   Estimate: about 100 to 150 rows a class. Requests and stored bytes then
-   bind (`scaling-drawer.md`).
+1. **Answers and looks held in memory** — a class writes its input in
+   batches, so rows stop binding first and the looks stop being a third of
+   a let-in booking; a restart that the devices can recover from loses
+   nothing they show — `design/open-period-in-memory.md`, which also
+   settles the open points the baseline left (the stragglers, a device away
+   at the close). Built on the owner's and the assistant's baseline of
+   2026-11-09. A let-in booking is about 1,030 rows (77 lobbies at once); a
+   class of 25 over 15 questions writes about 250, most of them the
+   teacher's steps (estimated, not measured; the baseline estimated 100 to
+   150). Open: it is to run once against the deployed site, a deploy in the
+   middle of a run among it (`scripts/simulate-memory.mjs`).
 
 2. **What telemetry the project needs** — a seed. The limits, the
    capacity sentence on the landing, the caps and the drawer's ideas rest
@@ -584,6 +541,17 @@ Actions and decisions only; where a design file's "Not known" describes the
 uncertainty, it is pointed to, not restated.
 
 With the owner:
+- Answers and looks held in memory ("Room on the Free plan", item 1), the
+  implementer's calls, not yet seen by the owner
+  (`design/open-period-in-memory.md`): the grace period for stragglers is
+  the existing rule for a late tap (until the class leaves the reveal), no
+  timer; a device away at the close has its input written when its line
+  ends, at most ten such writes a stage for the class; the caps raised to
+  10 changes of mind and 100 changes of look; the device sends at most one
+  tap every 300 ms, the latest of a burst; an acknowledgement now means the
+  server holds the tap, not that it is stored. Seen as a consequence:
+  `ROOM_WARN`'s three classes are now the last 4% of the day, where they
+  were its last third.
 - Consumers beyond the classroom: settled as v5 (Solo, Peers, Quizmaster).
   Of what rested on it, the lede, the README's descriptor and the example
   asks are built with v5 item 9. Still open: team names against "nothing
@@ -648,12 +616,8 @@ With the owner:
   it: whether that serves a training room, and the implementer's items.
   Should one menu not serve both rooms, the fallback is a set per upload,
   defaulted by the entry and changeable among the host's settings on the
-  check screen. The look cap moves with the menu, now 38 (every picture
-  once and seventeen more), so a let-in booking is about 10,700 rows and
-  seven lobbies fit the day's ledger at once. Not designed: booking the
-  looks per class by writes rather than per player by changes, since the
-  run is written whole at most once a second (`design/hosting-and-limits.md`,
-  "Running classes finish").
+  check screen. The looks are held in memory and cost no rows, so the menu
+  can grow without moving a booking (`design/open-period-in-memory.md`).
 - Solo (v5 item 2) as built, kept by the owner's delegate and not yet seen
   by the owner (`design/solo.md`, Not known): a tap is the final answer;
   the avatar is dressed before the first question; the result's "Copy the

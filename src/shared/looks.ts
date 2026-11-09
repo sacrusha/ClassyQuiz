@@ -11,19 +11,13 @@ export const BACKGROUND_COUNT = 6;
 export const HAT_COUNT = 10;
 /** The row beside the hats, held, worn at the neck or set before the animal ("tools"): 0 is none, the default. */
 export const TOOL_COUNT = 8;
-/** The menu's pictures a player can put on (the plain disc, no hat and nothing beside it are defaults). */
-export const LOOK_PICTURES = BACKGROUND_COUNT - 1 + HAT_COUNT - 1 + TOOL_COUNT - 1;
 /**
- * Changes of look a player can store in one class: every picture once and
- * seventeen more, the room to explore a child had before the menu grew, so
- * it moves with the menu. It stops a child who makes a game of hammering the
- * pictures from spending the site's daily allowance (docs/design/class-and-wall.md,
- * "Dressing the avatar": each stored change is two rows, booked for every
- * player a class may have when it is let in: server/rows.ts).
+ * Changes of look a player can make in one class. The looks are held in
+ * memory and written at Start (docs/design/open-period-in-memory.md), so a
+ * change costs no row: a generous backstop, far more than exploring the menu
+ * takes, and not part of what a class books.
  */
-export const MAX_LOOK_CHANGES = LOOK_PICTURES + 17;
-/** The server stores the class's looks at most this often: one write covers every child who changed in between. */
-export const LOOK_WRITE_MS = 1000;
+export const MAX_LOOK_CHANGES = 100;
 
 /** A look as the device and the server name it: absent fields are the defaults. */
 export interface Look {

@@ -38,9 +38,12 @@ twice, and that a flaky line never costs a question.
 ### State lives in one place, views are sent whole
 
 One Durable Object per quiz instance (`server/instance.ts`) holds the quiz,
-the teacher's fixes and the current run with its players and answers. Every
-change is written before it is acknowledged, so a restarted object loses
-nothing.
+the teacher's fixes and the current run with its players and answers. A
+teacher's step, a join and a fix are written before they are acknowledged.
+The input of an open stage (the lobby's looks, a question's answers) is
+held in memory and written with the stage's steps; what a restart or a
+hibernation takes from memory comes back from the copies the sockets and
+the devices keep (`open-period-in-memory.md`).
 
 The server sends each device the complete view for its role (projector,
 teacher, student), never a diff (`shared/protocol.ts`). A device that slept
@@ -145,7 +148,9 @@ with pictures already need a length.
 - Whether dead devices are common in real classes; if they are, losing the
   score of a student who does not pick their avatar back may not stay
   acceptable.
-- A deploy or Durable Object restart during a run has not been tested.
+- A deploy or Durable Object restart during a run has been checked only
+  against a local stack restarted in place (`open-period-in-memory.md`,
+  Not known).
 - Why a page on long-polling never tries WebSocket again: the behaviour is
   v1's (`client/net.ts`), its reason unrecorded.
 - The wording of the platform's spent-limit error is a best reading, matched

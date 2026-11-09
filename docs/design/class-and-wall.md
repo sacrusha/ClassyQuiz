@@ -291,12 +291,9 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   look whole, so a resend changes nothing; a page from before the tools sends
   no `t`, which means none. It is accepted only in the lobby,
   only for what the menu has, never for a removed avatar, and at most
-  `MAX_LOOK_CHANGES` (38) changes per player, after which the pictures stop
-  responding: every picture once (21, `LOOK_PICTURES`) and seventeen more,
-  the room to explore a child had before the menu grew, so the cap moves
-  with the menu. The animal and colour are never touched. The cap stops a child
-  who hammers the pictures from spending the site's daily allowance
-  (`hosting-and-limits.md`).
+  `MAX_LOOK_CHANGES` (100) changes per player, after which the pictures stop
+  responding: a backstop far beyond exploring the menu, since a change costs
+  no row (below). The animal and colour are never touched.
 - On a tablet the nine hats stay on one line: each picture is 60 px, or as
   little as 46 where the picker is narrower (53 px on a 1024 px tablet held
   sideways). Where the picker cannot hold them on one line they break into
@@ -306,13 +303,13 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   640 phone. At 320 px the tools break four and three, and the menu and the
   avatar still fit a 320 by 568 screen without scrolling (`.dress` in
   `app.css`, by the picker's own width).
-- The server writes the class's looks at most once per `LOOK_WRITE_MS` (1 s);
-  views go out after the write, so nothing shows that is not stored. Each
-  stored change is two rows, so the cost of a class is bounded whatever the
-  children do.
+- The server holds the class's looks in memory, shows them at once, and
+  writes them at Start (`open-period-in-memory.md`), so the cost of a
+  class is the same whatever the children do.
 - The tablet shows the pick at once and keeps showing it until its view shows
-  it back. One `dress` is in flight at a time, and the latest pick is sent
-  next, so a burst of taps sends the first and the last (`client/play.ts`).
+  it back. One `dress` is in flight at a time, at most every `INPUT_GAP_MS`,
+  and the latest pick is sent next, so a burst of taps sends the first and
+  the last (`client/latest.ts`).
 - The lobby rows on the wall (class and self-steering) and on the Remote are
   kept in place (`syncAvatars`, `client/look.ts`): newcomers pop in, a changed
   look wiggles, nothing else is replaced. Redrawing a lobby while a class

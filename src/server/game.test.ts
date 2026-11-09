@@ -666,3 +666,46 @@ test("Peers: the host's go-on doesn't wait: the solution now, then the next ques
   G.goOn(g, 2, 11);
   assert.equal(g.run!.phase, "question");
 });
+
+// docs/design/open-period-in-memory.md: an instance that lost its memory
+// puts back the copies its sockets kept, into the stage still open only,
+// never over something newer.
+test("held input: a copy put back restores the open stage, never an older one, never a settled one", () => {
+  const { g, ids } = setup(1);
+  const [p] = ids;
+  assert.equal(G.dress(g, p, 2, 3, 1), "stored");
+  const look = G.heldOf(g, p)!;
+  assert.deepEqual(look.look, { b: 2, h: 3, t: 1 });
+  // Memory lost before Start's write: the lobby as stored, then the copy.
+  const lost = structuredClone(g);
+  lost.run!.players[p].avatar = { a: lost.run!.players[p].avatar.a, c: lost.run!.players[p].avatar.c };
+  assert.equal(G.restoreHeld(lost, p, look), true);
+  assert.deepEqual(G.heldOf(lost, p)!.look, { b: 2, h: 3, t: 1 });
+  assert.equal(G.restoreHeld(lost, p, look), false, "put back twice changes nothing");
+
+  begin(g, 0);
+  assert.equal(G.restoreHeld(g, p, { look: { b: 4, h: 0, t: 0 } }), false, "a look after Start isn't put back");
+  G.answerOutcome(g, p, 0, 1, 5, 0, 10);
+  const held = G.heldOf(g, p)!;
+  assert.equal(held.answer?.choice, 1);
+  const before = structuredClone(g);
+  delete before.run!.answers[0][p];
+  assert.equal(G.restoreHeld(before, p, held), true);
+  assert.deepEqual(before.run!.answers[0][p], g.run!.answers[0][p], "the record comes back as it was taken");
+  // Put back after the lock-in: it was taken, so the close doesn't refuse it.
+  const locked = structuredClone(before);
+  delete locked.run!.answers[0][p];
+  G.lockIn(locked, 3);
+  assert.equal(G.restoreHeld(locked, p, held), true);
+  // An older copy never overwrites a newer record.
+  G.answerOutcome(g, p, 0, 2, 9, 0, 11);
+  assert.equal(G.restoreHeld(g, p, held), false);
+  assert.equal(g.run!.answers[0][p].choice, 2);
+  // A copy of question 0 once question 1 is up: the question is settled.
+  G.reveal(g, 4);
+  nextQ(g, 20);
+  const after = structuredClone(g);
+  delete after.run!.answers[0][p];
+  assert.equal(G.restoreHeld(after, p, held), false, "the class left the question: not put back");
+  assert.equal(G.heldOf(g, p), null, "nothing held of the new question yet");
+});

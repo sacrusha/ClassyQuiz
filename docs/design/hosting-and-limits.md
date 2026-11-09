@@ -22,13 +22,15 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
   operations of that type fail. One class that spends the day's allowance
   spends it for every class on the site. Only `/api/*` runs code; static pages
   and scripts don't count.
-- **What a class costs.** A class of 25 over 15 questions costs about 1,300
-  rows (answers 2 rows each, teacher steps about 4), a few hundred requests on
-  WebSockets, and about 3,000 Function and 3,000 Durable Object requests if
-  the whole class is on the HTTP long-poll fallback for 15 minutes. That is
-  some 75 classes a day on rows and 30 with every device polling. The
-  landing page's "room for a few dozen classes a day" rests on this
-  (`shared/limits.ts`, comment on `MAX_UPLOADS_PER_DAY`).
+- **What a class costs.** A class of 25 over 15 questions writes about 250
+  rows, most of them the teacher's steps: answers and looks are held in
+  memory and ride on those writes (`open-period-in-memory.md`, "Rows";
+  estimated, not measured). It costs a few hundred requests on WebSockets,
+  and about 3,000 Function and 3,000 Durable Object requests if the whole
+  class is on the HTTP long-poll fallback for 15 minutes. That is some 300
+  classes a day on rows and 30 with every device polling, so requests bind
+  first. The landing page's "room for a few dozen classes a day" rests on
+  this (`shared/limits.ts`, comment on `MAX_UPLOADS_PER_DAY`).
 - **What a Peers room costs** (`peers.md`) is held to what a class costs,
   since the day is the classes'. Its view changes with every friend's
   answer, look and line (who the room waits for, who is away), where a
@@ -41,12 +43,10 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
   change doesn't end a poll; it comes with the poll's end, at most 25 s
   later (`pollKey`, `server/instance.ts`), and a polling device costs what
   a class's tablet does: its polls, the room's steps, its own answers and
-  taps on, about 3,000 of each for 25 players. Rows: each answer 2, as in a
-  class, and the taps on from a solution ride on the run's next write, at
-  most one a second (`LOOK_WRITE_MS`), as the looks do, so 25 players over
-  15 questions write about 1,500 (plausible assumption: friends tap on
-  within some seconds of each other; each tap on its own would add 750).
-  The booking still counts every tap on (`server/rows.ts`). Pictures: each
+  taps on, about 3,000 of each for 25 players. Rows: the answers and the
+  taps on are held in memory as a class's are, and ride on the room's
+  steps (`open-period-in-memory.md`); the booking is a class's
+  (`server/rows.ts`). Pictures: each
   device lays out the question itself, so it fetches the questions'
   pictures and backgrounds as well as the answer pictures' small copies;
   both come in packs of at most 1.5 MB (`pictures.md`), a few requests per
@@ -200,15 +200,18 @@ The duration is a single constant in code.
 Numbers live in `shared/limits.ts` unless noted; a self-hoster raises any of
 them, and the README points self-hosters there.
 
-- **Hammered buttons.** Children hammer a button, and every stored tap is 2
-  rows, so one class making a game of it could spend the account's day. The
-  device doesn't send an answer it already shows as chosen; the server doesn't
-  store a tap that changes nothing (a resend, or the same answer again; the
-  newer sequence number is kept in memory, so a late older tap still loses);
-  changes of mind are capped at `MAX_ANSWER_CHANGES` (2) per student and
-  question, and past that the device shows the answer that counts.
+- **Hammered buttons.** Children hammer a button. A tap is held in memory
+  and costs no row (`open-period-in-memory.md`), but each one sent costs a
+  request on long-poll, which no server-side cap can save once it has
+  arrived. So the device sends the first tap of a burst and then its
+  latest, one at a time and at most every `INPUT_GAP_MS` (300 ms), and
+  doesn't send an answer it already shows as chosen; a tap that changes
+  nothing (a resend, or the same answer again) changes nothing held, the
+  newer sequence number kept so a late older tap still loses. Changes of
+  mind stop at `MAX_ANSWER_CHANGES` (10) per student and question, a
+  backstop; past it the device shows the answer that counts.
 - **Players per class: `MAX_PLAYERS` (60), removed avatars included.** The run
-  is one stored value rewritten with every answer and must stay under the 2 MB
+  is one stored value rewritten with every write and must stay under the 2 MB
   a value holds; the projector draws every avatar. A larger group is what an
   own copy is for.
 - **The door** after the start (`DOOR_OPEN_MS`, `MAX_LATE_JOINERS`) and
@@ -267,18 +270,18 @@ is let in, where the refusal and the ways to more quizzes are, and never on a
 class under way. "Failure in front of the class ends adoption" (backlog,
 Constraints).
 
-Situation: of the platform's daily limits, rows written are likely the first
-to run out on a busy day, and they run out in the middle of lessons: a class
-writes about 1,300 (Situation, "What a class costs"; about 1,000 is the
-owner's guess for a real one), so the day carries about 75 classes, while the
-upload cap lets 300 quizzes in. The upload and bytes caps count quizzes and
-bytes, not what a class writes. How many devices poll, and so whether
-requests run out first instead, is not known.
+Situation: rows written run out in the middle of lessons, since a class
+writes as it plays. A class writes about 250 (Situation, "What a class
+costs"), so rows carry some 300 classes a day, while the upload cap lets
+300 quizzes in; requests likely run out first, but how many devices poll is
+not known. The upload and bytes caps count quizzes and bytes, not what a
+class writes.
 
 The design is the owner's: quizzes book slots and release them when done,
-the booking shrinks at Start, a low cap on changes of mind instead of
-overbooking, students only once the class is let in, one stored quiz per
-device. The numbers and the rest are the implementer's, to confirm.
+the booking shrinks at Start, students only once the class is let in, one
+stored quiz per device, and a class's taps held in memory so that its
+booking is small (backlog, "Room on the Free plan"). The numbers and the
+rest are the implementer's, to confirm.
 
 - **Students join once the class is let in** (`teacher-devices.md`, "The
   single tab: check, then join"); teacher devices come in at any time. So a
@@ -287,11 +290,12 @@ device. The numbers and the rest are the implementer's, to confirm.
   upload, costs no upload either (`local-check.md`).
 - **Letting the class in books the most its class can write**
   (`server/rows.ts`), so nothing is overbooked and no margin is guessed. The
-  class isn't known yet, so it is `MAX_PLAYERS`: each joins (2 rows), changes
-  look up to `MAX_LOOK_CHANGES` (2 rows each), answers each question at most
-  three times (`MAX_ANSWER_CHANGES`, 2: a mis-tap and one rethink, the owner:
-  adequate; 2 rows each), plus the teacher's steps. For 15 questions that is
-  about 10,700 rows, the looks over two fifths of it. Start without letting in books
+  class isn't known yet, so it is `MAX_PLAYERS`, each joining and taking an
+  avatar back a few times (6 rows), plus the teacher's steps (20 rows a
+  question, the alarms among them) and the writes when a line ends with
+  input held (`MAX_LINE_WRITES` a stage, 2 rows each;
+  `open-period-in-memory.md`). Taps aren't counted: they ride on those
+  writes. For 15 questions that is about 1,030 rows. Start without letting in books
   the same. `SiteBudget` keeps the day's ledger (`r:` and the day, back at
   00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
   the rest is for uploads, whose quiz and pictures are rows, the site's small
@@ -308,24 +312,24 @@ device. The numbers and the rest are the implementer's, to confirm.
   school's or your company's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
   where a toast would be gone before a teacher who looked away saw it. The
   count is from the upload or the last tap, not live; three classes is
-  roughly the last third of the day. Days whose bookings reached
+  about the last 4% of the day. Days whose bookings reached
   `NEARLY_FULL` (half, the owner's: lower than 80%) count as busy on the
   landing's line beside the full days
   (`root-page.md`, "The own copy").
 - **At Start the booking shrinks** to what was written plus the most the rest
   can write: the class that came plus the latecomers the door lets in
-  (`MAX_LATE_JOINERS`), the looks fixed. A class of 25 then holds about
-  3,200.
+  (`MAX_LATE_JOINERS`), the lobby behind. A class of 25 then holds about
+  830.
 - **At the final ranking the booking settles**: the ledger keeps what was
   written (counted per key the instance stores) and gets the rest back; if
   that call fails, the quiz's end settles it instead. The
   quiz itself stays its three hours for photographs and rejoining. A quiz
   that ends or expires before its final ranking settles then.
-- So the ledger limits classes at the same time, not in the day: about 7
-  lobbies let in at once, or about 24 started classes of 25, while finished
+- So the ledger limits classes at the same time, not in the day: about 77
+  lobbies let in at once, or about 96 started classes of 25, while finished
   classes count only what they wrote. The last booking of a busy day leaves
   some of the day unused, which is accepted.
-- **A let-in lobby that is left holds its booking**, about 13% of the day,
+- **A let-in lobby that is left holds its booking**, about 1.3% of the day,
   until the quiz expires three hours after the teacher's last step. One
   quiz per device bounds that per device: a device's next upload ends its
   previous quiz if that one never started (`POST /api/i/:id/replaced` with
@@ -348,9 +352,6 @@ device. The numbers and the rest are the implementer's, to confirm.
 - A booking made before midnight UTC and moved after it leaves the new
   day's ledger alone: the rare class across the turn writes some rows the
   new day doesn't count.
-
-Cutting a class's rows to about a tenth, by holding answers and looks in
-memory: backlog, "Room on the Free plan", item 1.
 
 Not covered: requests. Counting each in an object would itself be a request;
 a class on WebSockets spends few, and a script hammering `/api` is the case

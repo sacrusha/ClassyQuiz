@@ -121,6 +121,20 @@ class Device {
     this.seq = 0;
     this.view = null;
     this.got = [];
+    /** Like client/net.ts: the player's input as the server last took it, sent with every hello and poll. */
+    this.held = null;
+  }
+  heldNow() {
+    const h = this.held;
+    return h && this.auth.role === "player" && this.auth.token === h.token && (h.look || h.answer) ? h : undefined;
+  }
+  took(cmd, result) {
+    if (this.auth.role !== "player") return;
+    let h = this.held?.token === this.auth.token ? this.held : { token: this.auth.token };
+    if (cmd.op === "dress") h = { ...h, look: { b: cmd.b, h: cmd.h, t: cmd.t ?? 0 } };
+    else if (cmd.op === "answer" && result?.record?.seq === cmd.seq) h = { ...h, answer: { q: cmd.q, choice: cmd.choice, seq: cmd.seq, v: cmd.v, ms: cmd.ms } };
+    else return;
+    this.held = h;
   }
   on(f) {
     this.handlers.push(f);
@@ -135,7 +149,7 @@ class Device {
     this.ws = ws;
     let pinger;
     ws.onopen = () => {
-      ws.send(JSON.stringify({ t: "hello", auth: this.auth }));
+      ws.send(JSON.stringify({ t: "hello", auth: this.auth, held: this.heldNow() }));
       for (const [id, p] of this.pending) ws.send(JSON.stringify({ t: "cmd", id, cmd: p.cmd }));
       // Like client/net.ts: a ping every 20 s, answered by the runtime.
       pinger = setInterval(() => {
@@ -200,8 +214,9 @@ class Device {
   handle(m) {
     this.got.push(m.t);
     if (m.t === "ack" && this.pending.has(m.id)) {
-      const resolve = this.pending.get(m.id).resolve;
+      const { cmd, resolve } = this.pending.get(m.id);
       this.pending.delete(m.id);
+      if (m.ok) this.took(cmd, m.result);
       resolve(m);
     }
     if (m.t === "state") {
@@ -260,7 +275,7 @@ class Device {
       }
       try {
         this.pollAbort = new AbortController();
-        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v }, this.pollAbort.signal).catch((e) => {
+        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v, held: this.heldNow() }, this.pollAbort.signal).catch((e) => {
           // Like client/net.ts: let go on purpose, ask again at once.
           if (this.pollAbort?.signal.aborted) return { body: { messages: [] }, repolled: true };
           throw e;
@@ -569,18 +584,18 @@ for (const p of players) {
 log(`dressing: ${taps} taps by ${players.length} students in ${((Date.now() - dressStarted) / 1000).toFixed(1)} s${ALL_POLL ? `, ${dressSends} HTTP requests` : ""}`);
 
 // A device that doesn't wait for its answers (not our page): the server
-// stores MAX_LOOK_CHANGES (38) changes per student and refuses the rest.
+// takes MAX_LOOK_CHANGES (100) changes per student and refuses the rest.
 {
-  // Over a WebSocket, so the 40 arrive in order and each one is a change.
+  // Over a WebSocket, so the 102 arrive in order and each one is a change.
   const rogue = [...players].reverse().find((p) => p.d.mode === "ws") ?? players[players.length - 1];
   const before = looks.get(rogue.id) ?? { b: 0, h: 0 };
-  const flips = Array.from({ length: 40 }, (_, i) => ({ b: (before.b + 1 + (i % 2)) % 6, h: before.h }));
+  const flips = Array.from({ length: 102 }, (_, i) => ({ b: (before.b + 1 + (i % 2)) % 6, h: before.h }));
   const acks = await Promise.all(flips.map((l) => rogue.d.send({ op: "dress", ...l })));
   // Taken until the changes are spent; after that only the look already
   // stored is acknowledged (nothing to store), every change refused.
   const first = acks.findIndex((a) => !a.ok);
   const kept = first > 0 ? flips[first - 1] : null;
-  check(first > 0 && first <= 38, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 40)`);
+  check(first > 0 && first <= 100, `a hammering device: changes taken until they are spent (the first refused: ${first + 1} of 102)`);
   check(!!kept && acks.every((a, i) => i < first || a.ok === sameLook(flips[i], kept)), "after that, every change is refused");
   // What counts is what is stored; the Remote's view says which.
   await sleep(1500);

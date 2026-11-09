@@ -103,10 +103,26 @@ export type Command =
    */
   | { op: "goOn"; at: At };
 
-export type ClientMessage = { t: "hello"; auth: Auth } | { t: "cmd"; id: string; cmd: Command };
+/**
+ * A player device's input as the server last took it (docs/design/open-period-in-memory.md):
+ * the look its `dress` was acknowledged with, and the answer tap whose
+ * acknowledgement carried it as the record (the tap as sent: choice in
+ * screen order, its seq, view and time). Sent with every hello and poll; the
+ * server takes it as the commands again, which changes nothing unless the
+ * instance lost its memory. token: the player it was taken for; another
+ * player's isn't sent.
+ */
+export interface DeviceHeld {
+  token: string;
+  look?: { b: number; h: number; t: number };
+  answer?: { q: number; choice: number; seq: number; v: number; ms?: number };
+}
+
+/** held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v. */
+export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld } | { t: "cmd"; id: string; cmd: Command };
 
 /**
- * The result of a tap's acknowledgement: what is stored for this player
+ * The result of a tap's acknowledgement: what the server holds for this player
  * and question now, the choice in the order on screen; null for nothing.
  * Whether this tap was taken or not, the tablet shows this as its accepted
  * answer, the same record that scores (docs/design/question-flow.md, "When a tap counts").

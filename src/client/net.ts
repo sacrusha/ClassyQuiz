@@ -6,8 +6,12 @@
 //   life. Same messages, same views.
 // - Commands are kept until the server acknowledges them and are resent after
 //   a reconnect; the server ignores repeats (shared/protocol.ts).
+// - A player's input as the server last took it (its look, its answer) is
+//   kept, across a reload too, and sent with every hello and poll: the
+//   server holds it in memory and rebuilds from it what an instance restart
+//   lost (docs/design/open-period-in-memory.md).
 
-import type { Auth, ClientMessage, Command, ServerMessage } from "../shared/protocol.ts";
+import type { AnswerAck, Auth, ClientMessage, Command, DeviceHeld, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
 import { SLEEP_AFTER_MS, quotaMessage } from "../shared/limits.ts";
 import { hideNotice, showNotice } from "./notice.ts";
@@ -64,11 +68,14 @@ export class Line {
   private quota: "http" | "write" | null = null;
   /** The poll being held, to let go of when the tab's identity changes. */
   private pollAbort: AbortController | null = null;
+  /** The player's input as the server last took it, for the player whose token it names. */
+  private held: DeviceHeld | null = null;
 
   private opts: LineOptions;
 
   constructor(opts: LineOptions) {
     this.opts = opts;
+    this.held = readHeld(opts.instance);
     const kick = () => {
       if (this.stopped) return;
       if (document.visibilityState !== "visible") return;
@@ -206,7 +213,8 @@ export class Line {
     let heard = false;
     let silence: number | undefined;
     ws.onopen = () => {
-      this.raw({ t: "hello", auth: this.opts.auth() });
+      const held = this.heldNow();
+      this.raw({ t: "hello", auth: this.opts.auth(), ...(held ? { held } : {}) });
       for (const p of this.pending) p.sent = false;
       this.flush();
       this.schedulePing();
@@ -322,6 +330,7 @@ export class Line {
         const [p] = this.pending.splice(i, 1);
         // Something was stored again: the allowance is back.
         if (m.ok && p.cmd.op !== "tick" && this.quota === "write") this.setQuota(null);
+        if (m.ok) this.took(p.cmd, m.result);
         p.resolve(m);
       }
     }
@@ -350,6 +359,28 @@ export class Line {
       this.pending = [];
     }
     this.opts.onMessage(m);
+  }
+
+  /** The input to send: only the player's whose token the tab holds now. */
+  private heldNow(): DeviceHeld | null {
+    const auth = this.opts.auth();
+    const h = this.held;
+    return h && auth.role === "player" && auth.token === h.token && (h.look || h.answer) ? h : null;
+  }
+
+  /** An acknowledged command: a look taken, or the answer tap the acknowledgement names as the record. */
+  private took(cmd: Command, result: unknown): void {
+    const auth = this.opts.auth();
+    if (auth.role !== "player") return;
+    let h = this.held && this.held.token === auth.token ? this.held : { token: auth.token };
+    if (cmd.op === "dress") h = { ...h, look: { b: cmd.b, h: cmd.h, t: cmd.t ?? 0 } };
+    else if (cmd.op === "answer") {
+      const r = (result as AnswerAck | undefined)?.record;
+      if (!r || r.seq !== cmd.seq) return;
+      h = { ...h, answer: { q: cmd.q, choice: cmd.choice, seq: cmd.seq, v: cmd.v, ...(typeof cmd.ms === "number" ? { ms: cmd.ms } : {}) } };
+    } else return;
+    this.held = h;
+    writeHeld(this.opts.instance, h);
   }
 
   private flush(): void {
@@ -407,7 +438,8 @@ export class Line {
         this.pollAbort = ctl;
         let res: { messages?: ServerMessage[] };
         try {
-          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v }, ctl.signal);
+          const held = this.heldNow();
+          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v, ...(held ? { held } : {}) }, ctl.signal);
         } catch (e) {
           // Let go on purpose (repoll): ask again at once, as whoever the tab is now.
           if (ctl.signal.aborted && !this.stopped) continue;
@@ -490,6 +522,24 @@ export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
   const quota = parsed ? parsed.error === "quota" : res.status === 429 || /\b1027\b/.test(text);
   if (quota) return { ...(parsed ?? ({} as T)), quota: true, error: quotaMessage() } as ApiBody<T>;
   return parsed ?? ({ json: false } as ApiBody<T>);
+}
+
+/** The tab's held input survives a reload (an iPad reloads a tab it put away); not another tab, nor the browser closed. */
+function readHeld(instance: string): DeviceHeld | null {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(`cq.held.${instance}`) ?? "null");
+    return v && typeof v === "object" && typeof v.token === "string" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeHeld(instance: string, h: DeviceHeld): void {
+  try {
+    sessionStorage.setItem(`cq.held.${instance}`, JSON.stringify(h));
+  } catch {
+    // Storage blocked: the line still holds it while the page lives.
+  }
 }
 
 function sleep(ms: number): Promise<void> {
