@@ -5,7 +5,7 @@
 // but the box for it.
 
 import { $, esc, store } from "./dom.ts";
-import { GB_S_PER_POLL_S, PLAN, THRESHOLD, bucketLabels, objectRequests, pollGbSeconds, realClasses, sumUse, turnedAway } from "./owner-figures.ts";
+import { GB_S_PER_POLL_S, PLAN, bucketLabels, objectRequests, pollGbSeconds, realClasses, sumUse, turnedAway } from "./owner-figures.ts";
 import type { DayRecord, DayUse, MonthRecord, OwnerView, Use } from "../server/telemetry.ts";
 
 const KEY = "cq.owner";
@@ -35,6 +35,11 @@ function awayText(r: DayRecord["refused"]): string {
   return [r.uploads && `uploads ${r.uploads}`, r.bytes && `bytes ${r.bytes}`, r.rows && `rows ${r.rows}`].filter(Boolean).join(" · ");
 }
 
+/** A figure with no limit to measure it against: what the site has, not what the plan allows. */
+function figure(name: string, value: number, note: string): string {
+  return `<div class="gauge"><div class="name">${esc(name)}</div><div class="val">${n(value)}</div><div class="of">${esc(note)}</div></div>`;
+}
+
 function gauge(name: string, value: number, of: number, note: string): string {
   const f = of > 0 ? value / of : 0;
   const level = f >= 0.8 ? "high" : f >= 0.5 ? "mid" : "";
@@ -51,11 +56,11 @@ function gauges(v: OwnerView): string {
   const u = d.use;
   const label = d.day === today() ? `today, ${d.day} UTC` : `${d.day} UTC, the latest day on record`;
   return (
-    `<h2>Against the Free plan</h2><p class="note">${esc(label)}. The plan's day starts at 00:00 UTC. The classes are the site's own: the project's own runs are left out, though they spend the plan's allowance too.</p>` +
+    `<h2>The latest day</h2><p class="note">${esc(label)}. The plan's day starts at 00:00 UTC. How many classes a day the site carries is for these figures to show; the plan's limits are the three gauges. The project's own runs are left out of the classes, though they spend the plan's allowance too.</p>` +
     `<div class="gauges">` +
-    gauge("Classes", realClasses(d), THRESHOLD.classesPerDay, "the owner's threshold") +
-    gauge("Most at once", d.atOnce ?? 0, THRESHOLD.atOnce, "the owner's threshold") +
-    gauge("Rows, ledger now", v.rows.now, v.rows.of, "written plus booked, all classes") +
+    figure("Classes", realClasses(d), "let in, the project's own runs left out") +
+    figure("Most at once", d.atOnce ?? 0, "classes booked and not yet settled") +
+    gauge("Rows, ledger now", v.rows.now, v.rows.of, "the classes' share of the plan's 100,000; written plus booked") +
     gauge("Requests, about", u ? objectRequests(u) : 0, PLAN.objectRequests, "Durable Object, classes only") +
     gauge("Duration, about", u ? pollGbSeconds(u) : 0, PLAN.gbSeconds, "GB-s, held polls only") +
     `</div>` +

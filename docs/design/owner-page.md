@@ -52,12 +52,15 @@ The key:
 
 The figures, as `telemetry.md`, "Reading it", gives them:
 
-- **Against the Free plan**: for the latest day, the classes (less the
-  project's own runs) and the most at once against the owner's threshold
-  (about 200 and 60), the rows ledger against its share of the plan, the
-  classes' Durable Object requests and held-poll duration against the
-  plan's 100,000 and 13,000 GB-s. The last two are from what devices
-  report: requests count sockets as one for each device not on long-poll
+- **The latest day**: the classes (less the project's own runs) and the
+  most at once as figures, with nothing to measure them against: how many
+  classes a day the site carries is for the figures to show, and the
+  owner's about 200 a day and 60 at once describe what the site has, not
+  a limit (`scaling-drawer.md`, "Purpose and threshold"). Beside them,
+  three gauges against the plan's real limits: the rows ledger against the
+  classes' share of the day's rows, the classes' Durable Object requests
+  against 100,000 and held-poll duration against 13,000 GB-s. The last two
+  are from what devices report: requests count sockets as one for each device not on long-poll
   plus its reconnects (the sums hold no count of sockets opened), and
   duration is `awakeS` at 0.128 GB-s a second. They leave out uploads,
   joins and pictures, and say so; the Cloudflare dashboard has the totals.
@@ -74,10 +77,12 @@ The page reads when it opens and again on "Read again"; nothing polls.
 
 ## Not known
 
-- Whether the Free plan's figures on the gauges (100,000 requests,
-  13,000 GB-s, the threshold's 200 and 60) are the plan's today: they are
-  written into `client/owner-figures.ts` from `hosting-and-limits.md` and
-  `scaling-drawer.md`.
+- Whether the plan's figures on the gauges (100,000 requests, 13,000 GB-s)
+  are the plan's today: they are written into `client/owner-figures.ts`
+  from `hosting-and-limits.md`.
+- Stored bytes against the plan's 5 GB and `MAX_LIVE_BYTES`: the figures
+  don't carry them (the day records hold the caps' refusals, "bytes"
+  among them), so there is no gauge for them.
 - Whether the requests estimate is near. It is the one derived figure that
   isn't a sum the site keeps.
 - Whether `localStorage` is the right place for a key the owner may

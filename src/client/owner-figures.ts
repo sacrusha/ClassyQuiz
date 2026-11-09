@@ -7,9 +7,6 @@ import type { DayRecord, MonthRecord, Use } from "../server/telemetry.ts";
 /** Cloudflare's Free plan, per UTC day (hosting-and-limits.md, Situation): the totals of the whole account, which this page can only partly see. */
 export const PLAN = { objectRequests: 100_000, gbSeconds: 13_000 };
 
-/** The owner's threshold, 2026-11-09 (scaling-drawer.md): classes a day, and at once. */
-export const THRESHOLD = { classesPerDay: 200, atOnce: 60 };
-
 /** What a held poll costs the object it keeps awake, per second (measured, scaling-drawer.md, "Duration"). */
 export const GB_S_PER_POLL_S = 0.128;
 
