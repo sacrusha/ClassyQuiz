@@ -53,9 +53,7 @@ names "the network of a school or a company" ("das Netz einer Schule oder Firma"
 ## The words before the check (after v5)
 
 Drafted by the words pass, not by a translator agent. Run's heading speaks to whoever has the AI's
-quiz and its button names the file, so neither says play or start: a child with a code who missed
-the box at the top would go to the largest words and the strongest button (`design/root-page.md`, "Run
-first when stacked"). One sentence above Build and Run names the three ways by the check's names,
+quiz and its button names the file (`design/root-page.md`, "Run first when stacked"). One sentence above Build and Run names the three ways by the check's names,
 which stay English in every language ("Peers" is a name), each with what it is (`design/root-page.md`,
 "The three ways, named"). The friends tab is named like the solo tab, as a purpose.
 

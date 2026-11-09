@@ -69,7 +69,7 @@ export interface Text {
   capWall: string;
   capTap: string;
   build: string;
-  /** Run's heading: for whoever has the quiz their AI made, which a child with a code hasn't (docs/design/root-page.md, "Run first when stacked"). */
+  /** Run's heading: for whoever has the quiz their AI made (docs/design/root-page.md, "Run first when stacked"). */
   run: string;
   /** The button that opens the file picker: what it opens. */
   upload: string;

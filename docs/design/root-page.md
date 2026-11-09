@@ -5,23 +5,36 @@
 The root page is the first thing a visitor meets: first the example class's
 teacher (backlog, Project), who may not be technical, and also anyone else
 who wants a quiz to play, alone, with friends, or for a group they run
-(backlog v5 item 9). If they don't see within seconds how to get a quiz and
-how to start one, nothing else on the site matters, however good the guidance below it is
-(backlog v1 item 16). So the page does three jobs and no more:
+(backlog v5 item 9). If they don't see within seconds what this is, how to
+get a quiz and how to start one, nothing else on the site matters, however
+good the guidance below it is (backlog v1 item 16).
 
-- **Build**: tell a first-time teacher how a quiz comes to exist. A first-timer
-  faces two obstacles, "how do I ask?" and "what even is a quiz?", and one
-  concrete instance answers both: what the AI hands over is what the class
-  plays, and the words that produced it are the how-to-ask (backlog v4 item 1).
-- **Run**: take the `.zip` the teacher's AI made to the local check
-  (`local-check.md`), and give the teacher who comes back mid-lesson the way
-  back to their quiz.
-- **Be found by students**: a code box in the header, since the teacher tells
-  the class the address and the class needs one box. Unobtrusive on the
-  teachers' page, and easily found by whoever knows to look at the top and
-  what the box looks like; the wall shows both until the first student is in
-  (`class-and-wall.md`, "Getting in"). Nothing larger on the page draws a
-  child into the file picker instead ("Run first when stacked").
+What a visitor gets from the page as it opens, without pressing or unfolding
+anything (owner):
+
+- **What this is, and whether it is for them.** A quiz here is something
+  played: run for a class or another group on a big screen, among friends, or
+  alone. A visitor recognises their own case among these (plausible
+  assumption, the owner's: people think in use cases, not capabilities;
+  backlog v5).
+- **That an AI's file becomes a played quiz.** A first-timer faces two
+  obstacles, "how do I ask?" and "what even is a quiz?", and one concrete
+  instance answers both: what the AI hands over is what gets played, and the
+  words that produced it are the how-to-ask (backlog v4 item 1).
+
+Two visitors get to what they came for with as little in their way as the
+page can manage (owner):
+
+- **Whoever comes back with a file**, to open it (`local-check.md`); with
+  them the teacher who comes back mid-lesson, to their quiz.
+- **A newcomer who wants to figure out what "a quiz" means here**, beyond
+  what the page shows as it opens.
+
+And **students get in**: the teacher tells the class the address, so the
+class needs one place for the code on this page, found at once by whoever
+knows where to look and what it looks like (the wall shows both until the
+first student is in: `class-and-wall.md`, "Getting in"), without taking the
+page from the visitors above.
 
 Two further jobs appear only when they apply, at the place where they apply:
 help for a school network that blocks the site, and the offer of an own copy to
@@ -45,9 +58,7 @@ Who arrives, and what each needs:
 - A regular teacher (plausible assumption: 20 to 30 quizzes a month) who wants
   to know whether they can rely on the site.
 - A student on a tablet, with the address the teacher called out. Needs the code
-  box and nothing else. Plausible assumption: a child who doesn't see the box
-  at once reads the largest words on the page and presses the strongest button
-  under them (what "Run first when stacked" rests on).
+  box and nothing else.
 - Someone who isn't a teacher: a learner who wants to practise, friends for
   a games night, whoever runs a quiz for a training session or a party.
   Needs to see that the site is for them too, and how to ask; the asker who
@@ -71,6 +82,17 @@ live with in particular:
   probe days ahead before the package works; a check can be part of what is
   presented. Plausible assumption: a teacher is rarely at school when they
   first read the page (so the network help sits where the failure shows).
+- The owner's finding from UX work: where there is any doubt whether a
+  reader can tell what "it", or a word like it, stands for, some readers
+  can't.
+- The owner, from a user test of anecdotal size: getting a quiz and opening
+  it set side by side worked worse than one above the other.
+- The owner: the same page for everyone is preferable to one that changes
+  with what a device remembers.
+- The owner, on the page's words: they speak from the visitor's side, what
+  someone came to do, not what the site technically provides. A neutral
+  name for a way to play is fine ("on your own"); a line that describes the
+  mechanism ("the solution after each question") is not a reason to play.
 
 ## How the site meets it
 
@@ -78,6 +100,13 @@ The screens and their wording are `user-flow.md §3.1`. This section says what
 each part is for and what it depends on. The page is `src/public/index.html`
 (static, English, what AIs read) and `src/client/home.ts` (which puts the
 visitor's language and the live parts into it).
+
+As built, the page doesn't give a visitor the Purpose's first two things as
+it opens. What the site is and how a file becomes a quiz are shown by the
+film, behind ▶, and whether visitors play it isn't known; the three ways are
+one sentence under it. On a 1280 × 900 desktop the first screen is the film,
+that sentence and the two headings. On a 390 × 844 phone Run's button is in
+the first screen and Build starts below it.
 
 ### One page, two readers
 
@@ -155,9 +184,8 @@ How the page meets it (the details: the comments on the film in
   screen's height, the bar under it and as wide. A phone held sideways gets
   the same layout as a desktop. A phone held upright differs where it has
   to: its film is about 358 px wide, and one row would leave the time bar
-  too short to drag, so the time bar takes a row of its own. What the site
-  is and how to use it is the film's to show, so Build and Run may start
-  below the first screen. Watching the film big is
+  too short to drag, so the time bar takes a row of its own. Watching the
+  film big is
   what the full screen button is for: the browser's full screen where it
   has one, else the film fixed over the viewport (iPhone Safari).
 - **The end card** shows the mark and the address. Once the film has played
@@ -184,9 +212,7 @@ for a group, on a big screen. The asks' tabs under Build can't carry that
 recognition: they are pictures of 34 px whose words are a tooltip, which a
 phone doesn't show. The names are the entries' own in every language, as
 the check's cards carry them (`local-check.md`), so the page and the check
-agree; "Peers" is a name, not a word to translate. The sentence is no
-heading and no button follows it, so it doesn't draw a child with a code
-(below).
+agree; "Peers" is a name, not a word to translate.
 
 ### Run first when stacked
 
@@ -205,15 +231,9 @@ the order for keyboards and screen readers keep Build first.
 
 Run's heading is "Open the quiz your AI made" and its button "Choose the
 .zip file": Run is for whoever has the quiz their AI made, and the words
-name what that person holds. On a phone they are the largest words after
-the film and the strongest button, which is where a child with a code who
-missed the box at the top would go (Situation). So neither says "play" or
-"start", the child's words for what they came to do, and both name what a
-child hasn't: the AI's quiz, a `.zip` file. "Play" is the local check's, on
-the cards that start a way to play (`local-check.md`), once the file is
-open. Not "Run" and "Upload" either: a Solo player runs nothing, and nothing
-goes to the site until a room opens on the local check ("Words for whoever
-comes").
+name what that person holds. Not "Run" and "Upload": a Solo player runs
+nothing, and nothing goes to the site until a room opens on the local check
+("Words for whoever comes").
 
 ### Build: two steps
 
