@@ -28,8 +28,10 @@ actually holds ("regardless of actual usage", Cloudflare's Durable Objects
 pricing). The Free plan allows 13,000 GB-s a day, about 29 hours of awake
 objects account-wide. The time is shared within an object: 25 devices in one
 class cost what one does. An object that is "idle in memory but unable to
-hibernate" is billed. Plausible assumption, not verified: an object holding a
-long-poll (`waiters`, `server/instance.ts`) is such an object. While any
+hibernate" is billed. An object holding a long-poll (`waiters`,
+`server/instance.ts`) is such an object: measured 2026-11-09 on a probe
+Worker, a request held 25 s accrued duration for the whole hold, about
+0.128 GB-s a second, with a timer or on a bare promise alike. While any
 device in a class polls, polls follow each other within 0.3 to 1.5 s, so the
 object stays awake for the whole lesson. On WebSockets alone, only handler
 time counts, which is negligible.
@@ -72,26 +74,22 @@ GB-s. Classes with at least one poller, from telemetry.
 ## Requests: the long-poll share and the pings
 
 **Situation.** Per class of 25 over 15 questions, estimated: on WebSockets
-about 200 Function and 250 to 430 Durable Object requests; on long-poll about
-3,000 of each. That is about 230 to 400 classes a day on WebSockets, about 33
-with every device polling, roughly 400 + f × 2,600 Durable Object requests
-for a class whose share f of devices polls. Incoming WebSocket messages count
-at 20 to a request. The client's `"ping"` every 20 s (`client/net.ts`) is a
-text message answered by `setWebSocketAutoResponse`, not a protocol ping. The
-pricing page says auto-responses add no wall-clock time but doesn't say
-whether they count as incoming messages. If they do, they are about 180 of
-those 430. Reconnects per device (about 4 assumed: the first plus lock,
-recess, network switch) are a guess.
+about 200 Function and 250 Durable Object requests; on long-poll about 3,000
+of each. That is about 400 classes a day on WebSockets, about 33 with every
+device polling, roughly 250 + f × 2,750 Durable Object requests for a class
+whose share f of devices polls. Incoming WebSocket messages count at 20 to a
+request. The client's `"ping"` every 20 s (`client/net.ts`), answered by
+`setWebSocketAutoResponse`, costs nothing: measured 2026-11-09 on a probe
+Worker, 4,000 pings left no invocation, where 4,000 handled messages left
+4,002 (the billed 20:1 figure isn't exposed in the metrics). Reconnects per
+device (about 4 assumed: the first plus lock, recess, network switch) are a
+guess.
 
 **How you'd know.** Daily requests in the dashboard. The long-poll share and
-reconnects per device, from telemetry. Whether pings count, from one
-`scripts/simulate.mjs` run against the deployed site, read from the metrics
-(they show actual counts, without the 20:1 ratio).
+reconnects per device, from telemetry.
 
 **Ideas:**
 
-- **If pings count:** a longer `PING_EVERY`, traded against how fast a dead
-  line is noticed (`PONG_WITHIN`, `FRESH_MS`).
 - **If the long-poll share is high:** why the devices fall back (the school's
   filter, a socket that never got a first message), and whether a page on
   long-poll should try WebSocket again. Today it never does, and the reason
