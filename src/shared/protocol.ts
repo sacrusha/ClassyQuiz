@@ -105,9 +105,10 @@ export type Command =
 
 /**
  * A player device's input as the server last took it (docs/design/open-period-in-memory.md):
- * the look its `dress` was acknowledged with, and the answer tap whose
+ * the look its `dress` was acknowledged with, the answer tap whose
  * acknowledgement carried it as the record (the tap as sent: choice in
- * screen order, its seq, view and time). Sent with every hello and poll; the
+ * screen order, its seq, view and time), and in a Peers room the question
+ * whose solution its `ready` was acknowledged for. Sent with every hello and poll; the
  * server takes it as the commands again, which changes nothing unless the
  * instance lost its memory. token: the player it was taken for; another
  * player's isn't sent.
@@ -116,6 +117,7 @@ export interface DeviceHeld {
   token: string;
   look?: { b: number; h: number; t: number };
   answer?: { q: number; choice: number; seq: number; v: number; ms?: number };
+  ready?: number;
 }
 
 /** held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v. */

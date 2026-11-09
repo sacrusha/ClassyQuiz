@@ -529,7 +529,7 @@ log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} 
 // Dressing in the lobby (docs/design/class-and-wall.md). Like
 // client/play.ts: one `dress` in flight per device, the latest pick sent
 // next, so a burst of taps sends the first and the last. Every student
-// picks a few looks; the server stores the class's looks once a second.
+// picks a few looks; the server holds them and the screens hear of them once a second.
 const looks = new Map(); // player id → the look last acknowledged
 const sameLook = (x, y) => (x.b ?? 0) === (y.b ?? 0) && (x.h ?? 0) === (y.h ?? 0) && (x.t ?? 0) === (y.t ?? 0);
 function dresser(p) {
@@ -542,7 +542,7 @@ function dresser(p) {
     void p.d.send({ op: "dress", b: sent.b, h: sent.h, t: sent.t }).then((a) => {
       inFlight = false;
       if (a.ok) looks.set(p.id, sent);
-      else want = null; // refused: the device shows what is stored
+      else want = null; // refused: the device shows what is held
       if (want === sent) want = null;
       pump();
     });
@@ -703,8 +703,11 @@ for (;;) {
     await sleep(400);
     // A tablet taps while offline, the teacher locks in and reveals,
     // then the tap arrives while the reveal is still up. The tablet showed
-    // the question as open, so the tap counts.
-    const p = players.find(readyToTap) ?? players.find((x) => !x.dead && x.view?.question?.answering === "open");
+    // the question as open, so the tap counts. On long-poll the views may
+    // take a moment longer to arrive.
+    const showsOpen = (x) => !x.dead && x.view?.question?.answering === "open";
+    await until(() => players.some(showsOpen), 5000, "a tablet showing the answers");
+    const p = players.find(readyToTap) ?? players.find(showsOpen);
     void p.d.drop(3000);
     lateTap = tap(p, current, 0, 9).then((a) => check(a.ok, `${p.name}: a tap made before the lock-in and delivered during the reveal counts`));
     log(`${p.name} taps while offline; the lock-in and the reveal go out before the tap arrives`);

@@ -33,6 +33,7 @@ import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
 import { CLASS_FULL, CLASS_STARTED, DAY_ROWS_FOR_CLASSES, LINE_WRITE_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
+import { LOOK_SHOW_MS } from "../shared/looks.ts";
 
 /**
  * An instance ends this long after its last activity (upload, a teacher's
@@ -197,6 +198,8 @@ export class Instance extends DurableObject<Env> {
    */
   private takenHere = new Set<string>();
   private lineTimer: ReturnType<typeof setTimeout> | null = null;
+  /** The lobby's looks go out to the screens at most every LOOK_SHOW_MS (`showSoon`). */
+  private showTimer: ReturnType<typeof setTimeout> | null = null;
   /** Wrong teacher codes, as stored; a quiz without any keeps a salt in memory until its first. */
   private guesses: Guesses = { salt: randomToken(), devs: {}, left: QUIZ_GUESSES, at: 0 };
   /**
@@ -1387,6 +1390,10 @@ export class Instance extends DurableObject<Env> {
     this.unwritten.add(player);
     this.takenHere.add(player);
     this.mirror(player, on);
+    if (game.run?.phase === "lobby") {
+      this.showSoon();
+      return;
+    }
     if (G.isPeers(game)) {
       await this.peersStore();
       return;
@@ -1397,6 +1404,20 @@ export class Instance extends DurableObject<Env> {
       await this.scheduleAlarm();
     }
     this.broadcast();
+  }
+
+  /**
+   * A look changed: the screens hear of it within LOOK_SHOW_MS, one round
+   * for every look changed in between. A Projector or a Remote on long-poll
+   * would otherwise spend a request on each child's tap; the tablet shows
+   * its own pick at once anyway.
+   */
+  private showSoon(): void {
+    if (this.showTimer) return;
+    this.showTimer = setTimeout(() => {
+      this.showTimer = null;
+      this.broadcast();
+    }, LOOK_SHOW_MS);
   }
 
   /**
@@ -1422,12 +1443,14 @@ export class Instance extends DurableObject<Env> {
     }
     const l = h.look;
     if (l && typeof l === "object" && G.dress(game, player, l.b, l.h, l.t) === "stored") changed = true;
+    if (typeof h.ready === "number" && G.setReady(game, player, h.ready) === "stored") changed = true;
     if (!changed) return;
+    // Never in the way of the hello or the poll it came with: at worst the copy isn't taken.
     try {
       await this.took(player, on);
     } catch (e) {
-      if (!isQuotaError(e)) throw e;
-      await this.load().catch(() => {});
+      if (isQuotaError(e)) await this.load().catch(() => {});
+      else console.error("device's input not taken:", e instanceof Error ? e.message : String(e));
     }
   }
 
@@ -1633,7 +1656,9 @@ export class Instance extends DurableObject<Env> {
     for (const w of this.waiters) w.resolve([gone]);
     this.waiters.clear();
     if (this.lineTimer) clearTimeout(this.lineTimer);
+    if (this.showTimer) clearTimeout(this.showTimer);
     this.lineTimer = null;
+    this.showTimer = null;
     this.unwritten.clear();
     this.takenHere.clear();
     if (ackId) this.endedBy = gone;

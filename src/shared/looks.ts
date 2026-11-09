@@ -18,6 +18,8 @@ export const TOOL_COUNT = 8;
  * takes, and not part of what a class books.
  */
 export const MAX_LOOK_CHANGES = 100;
+/** The screens hear of the class's changed looks at most this often: one round of views for every child who changed in between. */
+export const LOOK_SHOW_MS = 1000;
 
 /** A look as the device and the server name it: absent fields are the defaults. */
 export interface Look {

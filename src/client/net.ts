@@ -365,10 +365,10 @@ export class Line {
   private heldNow(): DeviceHeld | null {
     const auth = this.opts.auth();
     const h = this.held;
-    return h && auth.role === "player" && auth.token === h.token && (h.look || h.answer) ? h : null;
+    return h && auth.role === "player" && auth.token === h.token && (h.look || h.answer || h.ready !== undefined) ? h : null;
   }
 
-  /** An acknowledged command: a look taken, or the answer tap the acknowledgement names as the record. */
+  /** An acknowledged command: a look taken, the answer tap the acknowledgement names as the record, a Peers room's tap on. */
   private took(cmd: Command, result: unknown): void {
     const auth = this.opts.auth();
     if (auth.role !== "player") return;
@@ -378,7 +378,8 @@ export class Line {
       const r = (result as AnswerAck | undefined)?.record;
       if (!r || r.seq !== cmd.seq) return;
       h = { ...h, answer: { q: cmd.q, choice: cmd.choice, seq: cmd.seq, v: cmd.v, ...(typeof cmd.ms === "number" ? { ms: cmd.ms } : {}) } };
-    } else return;
+    } else if (cmd.op === "ready") h = { ...h, ready: cmd.q };
+    else return;
     this.held = h;
     writeHeld(this.opts.instance, h);
   }

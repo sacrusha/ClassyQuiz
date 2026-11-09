@@ -55,7 +55,10 @@ counts, the one that already existed; and no new kind of message.
 
 A dress in the lobby, an answer to the question on screen and, in a Peers
 room, a tap on from a solution change the game in the instance's memory
-(`took`). They are acknowledged and shown at once, and not written. Any
+(`took`). They are acknowledged and shown at once (the looks reach the
+screens within `LOOK_SHOW_MS`, 1 s, one round for every child who changed
+in between, so a Projector on long-poll doesn't spend a request on each
+tap), and not written. Any
 write of the run carries everything held so far: Start writes the looks,
 the lock-in (or the reveal, if nothing locked before it) a question's
 answers, and the step that leaves the reveal the stragglers' (below). A
@@ -79,15 +82,18 @@ holder, and none of that is built.
   stage still open, only where newer (an answer's higher `seq`), and not
   judged again, since it was taken once.
 - **On the device.** The device keeps its input as the server last took it
-  (`DeviceHeld`: the look its `dress` was acknowledged with, and the answer
-  tap the acknowledgement named as the record), in `client/net.ts`, across
+  (`DeviceHeld`: the look its `dress` was acknowledged with, the answer
+  tap the acknowledgement named as the record, and a Peers room's tap on),
+  in `client/net.ts`, across
   a reload too (sessionStorage; an iPad reloads a tab it put away), and
   sends it with every hello and every poll. The server takes it as the
   commands again, by the rules of a tap, but only for a player whose input
   this memory hasn't taken since it was loaded (`takenHere`): a look has
   no sequence number, and a poll carrying the look before can arrive after
   a newer dress. That is how a restart, which closes every socket, and a
-  poller, which has none, get their input back.
+  poller, which has none, get their input back. Taking it never stands in
+  the way of the hello or the poll it came with: should it fail, the copy
+  is not taken and the device is served as it would be without one.
 
 ### Stragglers: the grace period is the tap rule
 

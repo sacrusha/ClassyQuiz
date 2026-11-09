@@ -303,9 +303,10 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   640 phone. At 320 px the tools break four and three, and the menu and the
   avatar still fit a 320 by 568 screen without scrolling (`.dress` in
   `app.css`, by the picker's own width).
-- The server holds the class's looks in memory, shows them at once, and
-  writes them at Start (`open-period-in-memory.md`), so the cost of a
-  class is the same whatever the children do.
+- The server holds the class's looks in memory, sends the screens the
+  looks changed at most once per `LOOK_SHOW_MS` (1 s), and writes them at
+  Start (`open-period-in-memory.md`), so the cost of a class is the same
+  whatever the children do.
 - The tablet shows the pick at once and keeps showing it until its view shows
   it back. One `dress` is in flight at a time, at most every `INPUT_GAP_MS`,
   and the latest pick is sent next, so a burst of taps sends the first and
