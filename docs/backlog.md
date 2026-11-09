@@ -444,6 +444,89 @@ in progress): playing at different times — each at home when they like, a
 leaderboard that waits — needs a quiz kept for days, which nobody has asked
 for. Named, not pursued: tests, in class or self-administered.
 
+## Room on the Free plan
+
+The owner, 2026-11-09: about 200 classes a day and about 60 at once is
+plenty. Beyond that, donations could pay Cloudflare for more, rather than
+the code being made more complicated. Today rows written bind first, at
+about 75 classes a day, and a let-in class books about 10,700 of them
+(`design/hosting-and-limits.md`, "Running classes finish"). Ideas for the
+limits that come after are in `scaling-drawer.md`, to take up when a figure
+shows one binding.
+
+1. **Answers and looks held in memory** — a class writes about a tenth of
+   today's rows, so rows stop binding first and the looks stop being a
+   third of a let-in booking. A restart that the devices can recover from
+   loses nothing they show.
+
+   Situation:
+   - Every stored change writes the run and the meta: two rows
+     (`persist`, `server/rows.ts`). Answers are about 750 of a class's
+     ~1,300 rows. The looks (`MAX_LOOK_CHANGES`, 38) are most of the rest
+     of a let-in booking.
+   - The caps on changes (`MAX_LOOK_CHANGES`, `MAX_ANSWER_CHANGES`) exist
+     only for rows today (owner).
+   - Devices hold their own input: the look, the tap, the sequence number.
+   - A WebSocket's attachment (`serializeAttachment`) survives hibernation
+     while its socket lives. It holds 16,384 bytes and is lost when either
+     side closes (Cloudflare's WebSockets API).
+   - Cloudflare's pricing page doesn't mention attachments. Plausible
+     assumption: they write no rows. To check with one
+     `scripts/simulate.mjs` run against the deployed site, read from the
+     metrics.
+   - A student's socket is replaced several times a lesson: the screen
+     locks, a reload, a switch between cellular and Wi-Fi, a deploy.
+   - A device on long-poll has no socket.
+   - Each `setAlarm()` writes a row (pricing page).
+
+   Baseline (owner and assistant, 2026-11-09), for the design to match or
+   beat:
+   - The server holds the lobby's looks and an open question's taps in
+     memory, and each WebSocket student's copy in its socket's attachment,
+     so hibernation loses nothing.
+   - Devices send their current state, not events (look, tap, seq), in
+     every hello and every poll. Memory lost to a restart or an eviction is
+     rebuilt from them.
+   - Written in one batch when a stage closes: the looks at Start, a
+     question's taps at lock-in.
+   - A grace period for stragglers. Open: whether it covers taps in flight
+     at the close, devices away at the close that come back, or both, and
+     for how long.
+   - The tap of a device away at the close and not back within the grace
+     period is either accepted as lost or written when its socket closes
+     (batched). Open.
+   - The caps stay, set generously, as a backstop for memory and batch
+     size. Requests are guarded on the device: it merges taps and sends its
+     latest state at most every few hundred ms. A server-side cap can't save
+     a request that has already arrived: one child tapping 5 times a second
+     on long-poll costs about 300 requests a question.
+   - The booking in `server/rows.ts` shrinks to match.
+   - The Remote holds nothing. `design/teacher-holds-the-open-period.md`
+     cut the same rows by making the Remote the owner. This baseline is that
+     file's "competing variant", without its flush timer. The file is to be
+     rewritten for this item.
+
+   Estimate: about 100 to 150 rows a class. Requests and stored bytes then
+   bind (`scaling-drawer.md`).
+
+2. **What telemetry the project needs** — a seed. The limits, the
+   capacity sentence on the landing, the caps and the drawer's ideas rest
+   on figures nobody has measured. Telemetry is to give them without
+   identifying anyone and without costing rows.
+
+   Situation:
+   - Unknown so far: the share of devices on long-poll, classes with at
+     least one poller, reconnects per device, whether pings count, actual
+     rows and requests per class, duration per day.
+   - Cloudflare's metrics give account-wide daily counts.
+   - `SiteBudget` keeps per-day figures for 31 days, and `GET /api/site`
+     shows them.
+   - The settle at the final ranking already writes.
+
+   A first idea: count in the instance's memory and send the counts with
+   the settle. Open: everything else — which questions it must answer, who
+   reads it, how long it is kept, what would count as identifying.
+
 ## Later — Paper and memory
 
 The quiz is already made; it can be more than one activity.
@@ -454,10 +537,6 @@ The quiz is already made; it can be more than one activity.
   be lost for the next variant. Not Solo's (owner: a review may edit, solo
   play doesn't).
 - **Results export** — a teacher who wants to look again.
-- **Rows by holding the open period on the teacher's device** — a design kept
-  ready for when the Free plan's rows bind: about a tenth of a class's
-  rows, a changed ack, a rebuild and an offline overlay
-  (`design/teacher-holds-the-open-period.md`).
 - **Localization**, one sub-item per language — teachers who don't read
   English, classes that should see the few labels there are in their own.
   The bar's labels are nouns so they translate without grammar and fit the
