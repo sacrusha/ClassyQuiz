@@ -450,29 +450,19 @@ whether it is for them, and that an AI's file becomes a played quiz; and it
 has to leave little in the way of whoever comes with a file and of the
 newcomer who wants to find out more (`design/root-page.md`, Purpose). The
 deployed page doesn't: what it is sits behind the film's ▶ (same file,
-"How the site meets it"). Nothing of v6 is built.
-
-One direction exists as a static mockup, in English, light, one state,
-with drafted words: `.tmp/landing-directions/` (`refine.mjs` builds
-`c.html`, the page as it opens, and `c-open.html`, one example opened;
-machine-local, read before running). The owner on it, 2026-11-09: it works
-and is clearly better than the deployed page, with kinks. It shows that the
-purpose can be met and one way of meeting it; what it draws is not a
-specification, and its words are drafts. What the owner found while the
-directions were tried is in `design/root-page.md`, Situation.
+"How the site meets it"). The pictures of the ways to play are made
+(`docs/ways/`); the page is not. What the owner found while directions
+were tried is in `design/root-page.md`, Situation.
 
 1. **The page as a whole** — a visitor at a phone or a desktop gets the
    Purpose's first two things from the page as it opens, and whoever holds
    a quiz file opens it without hunting. Whoever takes this owns the page:
    its order and layout, how it holds at a phone's width and in the dark,
-   the states the mockup doesn't draw (a quiz to come back to, a quiz with
-   problems, a refused upload, the line about an own copy), the page as an
-   AI's fetcher reads it (`design/root-page.md`, "One page, two readers"),
-   and the design file and `user-flow.md` describing the page as it then
-   is. Measured on the mockup, where the button that opens a file starts:
-   at 1280 × 900, 757 px down; at 390 × 844, 860 px, just under the first
-   screen; with an example opened, 1251 px. The parts, each with a purpose
-   of its own:
+   its states (a quiz to come back to, a quiz with problems, a refused
+   upload, the line about an own copy), the page as an AI's fetcher reads
+   it (`design/root-page.md`, "One page, two readers"), and the design
+   file and `user-flow.md` describing the page as it then is. The parts,
+   each with a purpose of its own:
 
    a. **What this is, in words** — someone who reads one sentence knows
       what the site does for them. v4 item 14 left this open as a
@@ -481,14 +471,11 @@ directions were tried is in `design/root-page.md`, Situation.
    b. **Whether it is for me: the ways to play** — a visitor recognises
       their own case and a reason to play it, and later recognises the
       check's cards, which are named Solo, Peers and Quizmaster
-      (`design/local-check.md`). In words and in pictures. The owner on
-      the mockup's drawings: they look more corporate than the film's
-      poster, which is relatable. What the three differ in is the setting
+      (`design/local-check.md`). In words and in pictures; the pictures
+      are made (`docs/ways/`). What the three differ in is the setting
       and what a device shows: with a quizmaster the question is on the
       big screen and each player's device shows the choices; among friends
-      and alone each device shows the whole question. On a phone a picture
-      is about 113 px wide, and there the mockup's class has devices
-      nobody can see.
+      and alone each device shows the whole question.
 
    c. **Getting a quiz** — a visitor learns that the AI they already use
       makes the quiz, how to ask it, and that a file comes back; someone
@@ -496,21 +483,13 @@ directions were tried is in `design/root-page.md`, Situation.
       asks exist, six of them, with what each is for
       (`design/root-page.md`, "Build: two steps"); what the page may say
       about which AI manages it is what was verified
-      (`design/guidance-page.md`, "The AIs verified against"). The owner's
-      idea that brought opening a file up the page: the examples start
-      closed, and pressing one opens it. Not known: whether the words
-      alone, with every example closed, tell a first-timer that a file
-      comes back and is opened here.
+      (`design/guidance-page.md`, "The AIs verified against").
 
    d. **Opening a quiz** — whoever has the file opens it; whoever has
       none yet can play the example, which costs the site nothing until a
       room opens (`design/local-check.md`). A quiz to come back to and
       whatever goes wrong with a file show here
-      (`design/root-page.md`, "Run", "Coming back"). The owner on a small
-      control for it under the header, beside the code box: the code box
-      works against it, and once the eye is on the rest of the page it is
-      too unobtrusive to find; a quick way to start a quiz might be an
-      alternative of its own. Not designed.
+      (`design/root-page.md`, "Run", "Coming back").
 
    e. **Finding out more** — the newcomer who wants more than the page
       shows as it opens: what a room does over time, what playing is

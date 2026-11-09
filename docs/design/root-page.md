@@ -105,8 +105,7 @@ As built, the page doesn't give a visitor the Purpose's first two things as
 it opens. What the site is and how a file becomes a quiz are shown by the
 film, behind ▶, and whether visitors play it isn't known; the three ways are
 one sentence under it. On a 1280 × 900 desktop the first screen is the film,
-that sentence and the two headings. On a 390 × 844 phone Run's button is in
-the first screen and Build starts below it.
+that sentence and the two headings.
 
 ### One page, two readers
 
