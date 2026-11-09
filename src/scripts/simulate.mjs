@@ -44,8 +44,10 @@
 // just closed is taken at once with the teacher code; with nothing there, a
 // device takes the Projector and steers. Last, wrong teacher codes: the
 // fifth from one device locks its teacher codes, the secret still gets in;
-// from ever new addresses, the quiz's allowance runs out within ten. The
-// quiz is deleted.
+// from ever new addresses, the quiz's allowance runs out within ten, where
+// the site takes the address a request names (a local stack; Cloudflare
+// sets its own and refuses a request that names one, so against a deployed
+// site that sweep steps aside, saying so). The quiz is deleted.
 //
 // With OWNER_KEY set (the site's, docs/design/telemetry.md), the day's
 // telemetry is read before and after: the class, uploaded as a probe,
@@ -1017,6 +1019,7 @@ await until(() => anyone.d.view?.steer, 5000, "the new Projector to steer itself
 log("nothing was there; a device took the Projector and steers");
 
 // Wrong teacher codes: the fifth within a minute locks this device's teacher codes for the quiz.
+let sweptFromNew = false;
 {
   const wrongDigits = teacher === "00" ? "01" : "00";
   const statuses = [];
@@ -1033,7 +1036,18 @@ log("nothing was there; a device took the Projector and steers");
   check(students.status === 200, "the class code still opens the quiz for students");
   // A sweep from ever new addresses (an IPv6 /64, a botnet): the quiz's own
   // allowance, at most ten wrong endings and one more every six minutes,
-  // refuses it whatever the address.
+  // refuses it whatever the address. Only a site that takes the address a
+  // request names can be swept so; Cloudflare answers such a request with a
+  // 403 page. A class code (five digits) is no teacher code, so the question
+  // spends nothing of the quiz's allowance.
+  const fresh = (n) => `198.51.100.${n}`;
+  requests++;
+  const asked = await fetch(BASE + "/api/join", { method: "POST", headers: { "content-type": "application/json", "cf-connecting-ip": fresh(99) }, body: JSON.stringify({ code: "00000" }) });
+  await asked.arrayBuffer();
+  sweptFromNew = asked.status !== 403;
+}
+if (sweptFromNew) {
+  const wrongDigits = teacher === "00" ? "01" : "00";
   const fresh = (n) => `198.51.100.${n}`;
   let spent = 0;
   let refused = null;
@@ -1050,7 +1064,7 @@ log("nothing was there; a device took the Projector and steers");
   const studentsAgain = await post("/api/join", { code }, undefined, fresh(52));
   check(studentsAgain.status === 200, "with the allowance spent, the class code still opens the quiz");
 }
-log("wrong teacher codes: locked after five; the quiz's allowance holds against new addresses; the secret and the class code unaffected");
+log(`wrong teacher codes: locked after five; ${sweptFromNew ? "the quiz's allowance holds against new addresses" : "the sweep from new addresses stepped aside (the platform sets the address)"}; the secret and the class code unaffected`);
 
 // Exit: every device is sent to the root page.
 const homeSent = new Promise((res) => anyone.d.on((m) => m.t === "gone" && res(m.home === true)));

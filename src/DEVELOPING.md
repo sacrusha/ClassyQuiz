@@ -106,12 +106,19 @@ for a held poll's end.
 `--quiet <seconds>`) plays a small class whose instance loses its memory
 in the lobby and with each question open, by the command (one that
 restarts the local state Worker in place, keeping its `--persist-to`) or
-by going quiet long enough to hibernate (40 s does it locally); it fails
-when the memory wasn't in fact lost, as a quiet spell too short leaves it
-(3 s does). Run it after changes to what the instance holds in memory
+by going quiet long enough to hibernate (40 s does it locally, 90 s on
+Cloudflare, where 20 s didn't); it fails when the memory wasn't in fact
+lost, as a quiet spell too short leaves it (3 s does locally). Run it
+after changes to what the instance holds in memory
 (`docs/design/open-period-in-memory.md`). A local stack restarted in place
 is the stop and start of "A second local stack" below, with the same
-persist directories.
+persist directories. On Cloudflare a deploy is no such command: a running
+instance takes up new code when it next hibernates, or resets 300 s after
+the deploy if still active (`open-period-in-memory.md`, Situation), and
+the script stands still while its command runs, so the run fails as
+"nothing was tested there". A deploy's crossing is `--quiet 90` against a
+copy of the site, with the copy deployed during the first quiet spell;
+the reset at 300 s the script can't make there.
 
 Things that bite:
 
@@ -208,7 +215,13 @@ then refused. In that case deploy Pages first (the new pages no longer bind the
 class), then the Worker. A fresh instance is unaffected.
 
 Protocol additions are made optional so pages open in a class during a deploy
-keep working until reloaded.
+keep working until reloaded. The same holds between the Pages functions and
+the Durable Objects, and between the objects: the functions are the new ones
+at once, while a running object keeps its code until it hibernates, for up to
+300 s (`docs/design/open-period-in-memory.md`, Situation), so a call to a
+method or an argument the previous code lacks meets that code meanwhile. An
+object waking on the new code reads what the previous code stored and put on
+its sockets.
 
 `docs/deploy-log.md` records what is deployed.
 

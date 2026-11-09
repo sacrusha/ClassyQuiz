@@ -27,8 +27,11 @@ wrangler and the build as environment variables. Nothing else reads it.
 
 - `OWNER_KEY` (optional) — the key for the owner's figures,
   `GET /api/site/use` (`docs/design/telemetry.md`, "Who reads it"); any
-  long random string. Nothing reads it from here: it is set once on the
-  Pages project, from `src/`:
+  long random string of ASCII letters and digits. It travels in a
+  request's header, which carries other letters unreliably: with an `ö`
+  in the key, the figures answered 404 to it, sent as UTF-8 or as
+  Latin-1. Nothing reads it from here: it is set once on the Pages
+  project, from `src/`:
 
       node --env-file=../secrets/cloudflare.env node_modules/wrangler/bin/wrangler.js pages secret put OWNER_KEY --project-name classyquiz
 

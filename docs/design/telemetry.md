@@ -228,6 +228,13 @@ quiz. A day with one class shows that class's figures; it names nobody.
 - Whether a busy day's refusals reach its record: they ride on a later
   write of it, which a day full of rows may not have once its classes have
   settled.
+- How many classes of the day telemetry was deployed (2026-11-09) settled
+  without their summary. A deploy reaches a running object late
+  (`open-period-in-memory.md`, Situation), and the site's budget object on
+  the code from before takes a settle but leaves its summary out; an
+  instance on that code sends none, and doesn't know the probes' mark. So
+  that day's `classes` may hold classes missing from `use`, and probes
+  among them.
 - Whether the device's counts read as intended on a tablet and behind a
   real school filter. In headless Edge, with a refused upgrade and a
   socket that drops every frame imitated in the page and a reload, the

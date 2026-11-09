@@ -24,26 +24,42 @@ counts, the one that already existed; and no new kind of message.
 - Answers were about 750 of a class's ~1,300 rows, and the looks most of
   the rest of a let-in booking (`hosting-and-limits.md`, "Running classes
   finish").
-- A Durable Object loses its memory when it hibernates (about 10 s without
-  events, its WebSockets kept open), at a deploy (which closes its
-  sockets), and when the platform restarts or evicts it, without notice.
-  There is no hook before it goes. A request in flight, a held long-poll
-  among them, and a pending `setTimeout` keep it from hibernating; an
-  object that can't hibernate is evicted after 70 to 140 s without events
-  (Cloudflare's Durable Object lifecycle page).
+- A Durable Object loses its memory when it hibernates (its WebSockets
+  kept open), when it takes up new code, and when the platform restarts or
+  evicts it, without notice. There is no hook before it goes. A request in
+  flight, a held long-poll among them, and a pending `setTimeout` keep it
+  from hibernating; an object that can't hibernate is evicted after 70 to
+  140 s without events (Cloudflare's Durable Object lifecycle page).
+- Cloudflare's page has an object hibernate after 10 s without events. On
+  the deployed platform the quiet takes longer: on a copy of the site
+  (2026-11-09), no quiet spell of 20 s let an instance hibernate (three of
+  three), every one of 90 s did (nine of nine).
+- A deploy reaches a running instance late. The state Worker sets no code
+  update strategy, so Cloudflare's default holds (`deferred`, `max_delay`
+  300 s, its code updates page): an active object keeps the code it has
+  until it hibernates and wakes on the new code; one still active 300 s
+  after the deploy resets, which terminates its sockets. On the copy, an
+  instance kept busy kept its memory and its socket for four minutes after
+  a deploy that changed its code, and six deploys made during a run left
+  the instance's memory and sockets as they were. An instance uploaded on
+  the previous code, quiet through a deploy, woke on the new code with the
+  previous code's storage and socket attachments, and lost nothing it
+  held. Meanwhile the Pages functions are the new ones at once, so a call
+  from them, or from an instance on the new code, may reach an object on
+  the previous code.
 - A WebSocket's attachment (`serializeAttachment`) survives hibernation
   while its socket lives. It holds 16,384 bytes and is lost when either
   side closes (Cloudflare's WebSockets API). Writing one writes no rows
   and stores no bytes (measured on a probe Worker, 2026-11-09: 3,000
   writes of 1.9 KB on one socket, and 40 sockets with 1.9 KB each, 0 rows
-  written). It survives an eviction by hibernation in the local runtime
-  (workerd evicted the instance in each of three quiet 40 s spells of
-  `scripts/simulate-memory.mjs`, and the copies came back); on the
-  deployed platform that is Cloudflare's word, not measured: the probe's
-  objects weren't evicted in 45 s idle.
+  written). The copies came back after hibernation in the local runtime
+  (each of three quiet 40 s spells of `scripts/simulate-memory.mjs`) and on
+  the deployed platform (each of the nine 90 s spells on the copy: the
+  wall's and a steady device's sockets stayed open, sent no new hello, and
+  their looks and answers were there after the wake).
 - A student's socket is replaced several times a lesson: the screen locks,
-  a reload, a switch between cellular and Wi-Fi, a deploy. A device on
-  long-poll has no socket.
+  a reload, a switch between cellular and Wi-Fi, a deploy that resets the
+  instance. A device on long-poll has no socket.
 - When a tap counts is the device's view, not the arrival time: a tap made
   on a view that showed answering open counts while its question is on
   screen, until the class leaves its reveal (`question-flow.md`, "When a
@@ -126,9 +142,9 @@ between, at most `MAX_LINE_WRITES` (10) in a stage for the whole class
 (`Run.lineWrites`, stored with the run); past those the input waits for
 the stage's own write.
 
-Why not accept it as lost: hibernation is routine in a lesson (ten quiet
-seconds while the class reads), and a phone that locks closes its socket,
-so a child's tap would be lost whenever the object hibernated before the
+Why not accept it as lost: hibernation is routine in a lesson (a quiet
+spell while the class reads, Situation), and a phone that locks closes its
+socket, so a child's tap would be lost whenever the object hibernated before the
 lock-in and the phone wasn't back before the class left the reveal, with
 no restart at all. Why a cap for the class rather than per child: the
 booking must hold whatever a class does (below), and a cap per child
@@ -138,9 +154,9 @@ is rarely met.
 
 ### What can still be lost
 
-Input is lost only when all of these hold: the memory goes (a deploy, a
-restart, or hibernation after the stage's line writes are spent); no open
-socket keeps a copy; and the device doesn't come back with its own copy
+Input is lost only when all of these hold: the memory goes (a deploy's
+reset, a restart, or hibernation after the stage's line writes are
+spent); no open socket keeps a copy; and the device doesn't come back with its own copy
 before the stage settles (Start for a look; the class leaving the reveal
 for an answer). The device then shows what is stored: its look as before,
 its answer as not given. A device opened in another browser, or a page
@@ -183,21 +199,16 @@ steps now bind, and requests and stored bytes bind next
 
 ## Not known
 
-- Whether a socket's attachment survives an actual eviction (Situation).
-  If it didn't, every hibernation, ten quiet seconds, routine in a lesson,
-  would lose the input held for the devices whose sockets stay open: they
-  send no hello and their line doesn't end, so neither their own copy nor
-  a line write brings it back. That is most of a question's answers before
-  the lock-in, not a rare case.
 - How often a line ends with input unwritten in a stage, and so whether
   ten line writes a stage is right; how many devices come back with their
   own copy after a restart. Telemetry is to say.
-- How the deployed platform behaves: `scripts/simulate-memory.mjs` passes
-  against a local stack restarted in place, which closes the sockets as a
-  deploy does, and against the local runtime hibernating the instance; the
-  same run without the devices' copies loses every look and the open
-  question's answers. Both ways are to run once against the deployed site,
-  a deploy in the middle of the run for the first. The run fails unless
-  the memory was in fact lost each time (`QuizInfo.memory`, new with each
-  start of the object), so a pass can't come from a quiet spell in which
-  the object never hibernated.
+- The reset of an instance still active 300 s after a deploy, on the
+  deployed platform (Situation), which a class with a device on long-poll
+  meets at every deploy it is running through: the sockets end, so the
+  input comes back from the devices' own copies alone.
+  `scripts/simulate-memory.mjs --restart` passes against a local stack
+  restarted in place, which ends the sockets the same way, and the same
+  run without the devices' copies loses every look and the open
+  question's answers. On the deployed site the script can't make this
+  reset: it stands still while its command runs, so the instance either
+  hibernates (the crossing in Situation, covered) or keeps its memory.

@@ -148,9 +148,10 @@ with pictures already need a length.
 - Whether dead devices are common in real classes; if they are, losing the
   score of a student who does not pick their avatar back may not stay
   acceptable.
-- A deploy or Durable Object restart during a run has been checked only
-  against a local stack restarted in place (`open-period-in-memory.md`,
-  Not known).
+- A deploy's reset of a running instance, which ends its sockets, has
+  been checked only against a local stack restarted in place; a deploy
+  taken up at hibernation was checked on a copy of the deployed site
+  (`open-period-in-memory.md`, Situation and Not known).
 - Why a page on long-polling never tries WebSocket again: the behaviour is
   v1's (`client/net.ts`), its reason unrecorded.
 - The wording of the platform's spent-limit error is a best reading, matched

@@ -467,8 +467,12 @@ shows one binding.
    2026-11-09. A let-in booking is about 1,030 rows (77 lobbies at once); a
    class of 25 over 15 questions writes about 250, most of them the
    teacher's steps (estimated, not measured; the baseline estimated 100 to
-   150). Open: it is to run once against the deployed site, a deploy in the
-   middle of a run among it (`scripts/simulate-memory.mjs`).
+   150). Run on a copy of the deployed site: the sockets' copies came back
+   through hibernation, and an instance that started on the previous code
+   woke on the new one with nothing lost. Open: the reset of an instance
+   still active five minutes after a deploy, which ends its sockets, seen
+   only on a local stack (`design/open-period-in-memory.md`, Situation and
+   Not known).
 
 2. **What telemetry the project needs** — the limits, the capacity
    sentence on the landing, the caps and the drawer's ideas rest on figures
@@ -478,9 +482,10 @@ shows one binding.
    anyway; a class becomes one summary at its settle; the days' records
    (31 days, then by the month for 24 months, problems by the day only)
    for the owner at `GET /api/site/use`, behind `OWNER_KEY`. Open: the key
-   is to be set on the Pages project before the deploy that carries this
-   (`secrets/README.md`), or the figures can't be read; the deploy moves
-   the days' rows records off the public `GET /api/site`.
+   set on the Pages project holds a letter outside ASCII, which a request's
+   header carries unreliably, so the figures answer 404 to it until a key of
+   ASCII letters and digits is set and the site deployed again
+   (`secrets/README.md`).
 
 ## Later — Paper and memory
 
