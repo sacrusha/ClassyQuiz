@@ -553,7 +553,9 @@ With the owner:
   usefulness of data, and general purpose", not yet seen by the owner
   (`design/telemetry.md`): day sums and buckets, no record per class;
   devices' script errors counted, the Function's errors not; the
-  simulators' and probes' classes kept apart by the JSON upload they use;
+  simulators' and probes' classes kept apart by a mark they send with
+  their upload and no page sends (anyone's script could send it, hiding
+  its classes from the figures and nothing else);
   classes turned away counted as a lower bound, at no row of their own; the
   summary at the settle, so the after-lesson tail is the dashboard's; which
   way a quiz was played on the local check not counted; month records kept

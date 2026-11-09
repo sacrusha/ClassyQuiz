@@ -12,7 +12,7 @@ export type RoomKind = "peers" | "remote" | "wall";
 /** What only the instance knows of its class. */
 export interface ClassFacts {
   kind: RoomKind;
-  /** Players at the start (or in the lobby, for a class that never started). */
+  /** Players not removed, at the settle. */
   players: number;
   late: number;
   questions: number;
@@ -24,12 +24,13 @@ export interface ClassFacts {
   minutes: number;
   /** Rows the class wrote (Meta.rows.written). */
   rows: number;
-  /** Uploaded by a simulator or a probe (the JSON upload, which no page uses): kept apart from the classes. */
+  /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): kept apart from the classes. */
   probe?: boolean;
 }
 
 /** A class, as it reaches SiteBudget: the instance's facts and its devices' lines summed. */
 export interface ClassUse extends ClassFacts {
+  /** Devices that sent a line: removed players' too, whose requests were spent all the same. */
   devices: number;
   /** Devices on long-poll at their last count. */
   polled: number;

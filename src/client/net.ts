@@ -88,6 +88,9 @@ export class Line {
     this.held = readHeld(opts.instance);
     this.line = readCounts(opts.instance) ?? emptyLine();
     this.pollMs = this.line.pollS * 1000;
+    // Stored as the page goes too: a reload would otherwise lose what was
+    // counted since the last message (the socket that worked, its pings).
+    window.addEventListener("pagehide", () => void this.lineNow());
     // Counted, never described: an error's message can carry quiz text.
     const failed = () => {
       this.line.errors++;
@@ -237,7 +240,10 @@ export class Line {
     let silence: number | undefined;
     ws.onopen = () => {
       const held = this.heldNow();
-      this.raw({ t: "hello", auth: this.opts.auth(), ...(held ? { held } : {}), ...this.lineNow() });
+      // The hello counts its own socket as working: a tab that sends nothing
+      // after it (a Projector while a Remote steers) would otherwise never
+      // count it. If the socket proves silent, the next hello or poll says so.
+      this.raw({ t: "hello", auth: this.opts.auth(), ...(held ? { held } : {}), ...this.lineNow({ opened: 1, sent: 1 }) });
       for (const p of this.pending) p.sent = false;
       this.flush();
       this.schedulePing();
@@ -357,12 +363,14 @@ export class Line {
   /**
    * The line's count as sent: a teacher's tab's or a player's, not a guest's,
    * which the server keeps nowhere. Stored for a reload on the way.
+   * ahead: what the message carrying it adds once it is sent (itself, its
+   * socket), counted in what is sent and not in what is stored.
    */
-  private lineNow(): { line?: LineCounts } {
+  private lineNow(ahead: { opened?: number; sent?: number } = {}): { line?: LineCounts } {
     if (this.opts.auth().role === "guest") return {};
     const line: LineCounts = { ...this.line, mode: this.mode, pollS: Math.floor((this.pollMs + (this.pollSince !== null ? Date.now() - this.pollSince : 0)) / 1000) };
     writeCounts(this.opts.instance, line);
-    return { line };
+    return { line: { ...line, opened: line.opened + (ahead.opened ?? 0), sent: line.sent + (ahead.sent ?? 0) } };
   }
 
   private handle(m: ServerMessage): void {
@@ -442,7 +450,7 @@ export class Line {
     if (this.mode === "ws") {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
       for (const p of this.pending) {
-        if (!p.sent && this.raw({ t: "cmd", id: p.id, cmd: p.cmd, ...this.lineNow() })) p.sent = true;
+        if (!p.sent && this.raw({ t: "cmd", id: p.id, cmd: p.cmd, ...this.lineNow({ sent: 1 }) })) p.sent = true;
       }
       return;
     }

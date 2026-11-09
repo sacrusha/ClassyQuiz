@@ -80,9 +80,15 @@ The device sends its counts as `line`, beside `held` (not inside it: `held`
 is accepted input), with what it sends anyway: its hello, its polls and its
 commands. A WebSocket device's counts change while its socket lives and
 would otherwise reach the server only at the next hello; its taps and looks
-carry them on. The newest replaces the one before, so memory lost on the
-server is rebuilt from the next message and nothing is counted twice. No
-request of its own.
+carry them on. A hello counts its own socket as one that worked, so a tab
+that sends nothing after it (a Projector while a Remote steers) still
+counts it; if the socket proves silent, the next hello or poll corrects
+that. A poll carries the counts as they were when it went out, so a
+poller's seconds reach the server up to a held poll (25 s) short. The
+newest replaces the one before, so memory lost on the server is rebuilt
+from the next message and nothing is counted twice. No request of its own.
+The device keeps its counts across a reload of the page, stored with each
+message and as the page goes.
 
 The instance keeps each device's latest counts in memory, a WebSocket
 device's also in its newest socket's attachment beside `held`, and in the
@@ -92,7 +98,8 @@ Counts that arrive after the run's last write are in memory when the
 summary is made, or lost to a hibernation in between: accepted, the
 figures are for orders of magnitude. A teacher role taken by another tab,
 or an avatar picked back on another device, replaces the first device's
-counts.
+counts. A removed player's device stays among the class's devices: its
+requests were spent all the same.
 
 The instance adds what only it knows: the kind of room (Peers; steered with
 a Remote taken; steered from the wall alone), players not removed,
@@ -123,14 +130,17 @@ the day's record with that day's next write of it, which a busy day has
 (a class settling, one let in). Lost with the object's memory before that:
 a lower bound.
 
-The project's own runs are kept apart: the simulators and probes upload
-through the JSON upload, which no page uses (`root-page.md`), so the
-instance marks such a quiz, and its class counts among the day's `probes`
-and its summary in `probeUse`, not in `use`. That costs nothing, and
-matters because a simulator's class is a class of 25 that the size counts
-can't tell from a teacher's (one is to run against the deployed site,
-backlog Room item 1). Browser walks upload as a page does and count as
-classes; they are classes of one to four.
+The project's own runs are kept apart: the simulators and probes say so
+with their upload (`probe: true`), which no page sends, so the instance
+marks such a quiz, and its class counts among the day's `probes` and its
+summary in `probeUse`, not in `use`. That costs nothing, and matters
+because a simulator's class is a class of 25 that the size counts can't
+tell from a teacher's (one is to run against the deployed site, backlog
+Room item 1). The mark is the upload's, not the route's: the page uploads
+a quiz without pictures as JSON, as the simulators do. Anyone's script can
+send it too; that hides its classes from `use` and nothing else. Browser
+walks upload as a page does and count as classes; they are classes of one
+to four.
 
 A lobby never let in books no rows and sends no summary; uploads less
 classes counts those. The settle comes before the tail after the lesson
@@ -152,8 +162,9 @@ What the figures are for changes after a month, from what is happening now
 to how it moves. So a day's record lives 31 days, as the day records did;
 then it is folded into its month's record (sums added, the most at once and
 the busiest day kept) and the day is deleted, in one write. Month records
-live 24 months: two school years side by side, the shortest span that shows
-a trend through a school year's holidays.
+live 24 months back from the current one, which is still filling: two
+school years side by side, the shortest span that shows a trend through a
+school year's holidays.
 
 - **Use** — uploads, classes, probes, classes turned away, kinds, sizes,
   how far, minutes, the most at once, the busiest day: day and month. The
@@ -193,7 +204,7 @@ Reading it (each day: `classes`, `use`; each month: `use`):
   day's totals).
 - Duration: `use.awakeS` times about 0.128 GB-s is what classes' polls
   cost of the day's 13,000 GB-s, the lesson only (the settle comes before
-  the tail).
+  the tail), each poller's seconds up to a held poll short.
 - The buckets' edges are `edges` (lower edges: players, requests, rows).
   If they change, months before the change hold the old ones.
 - `refused`: classes turned away, a lower bound.
@@ -217,6 +228,11 @@ quiz. A day with one class shows that class's figures; it names nobody.
 - Whether a busy day's refusals reach its record: they ride on a later
   write of it, which a day full of rows may not have once its classes have
   settled.
-- Whether the device's counts read as intended on real devices: checked
-  with the simulators and one Peers walk in headless Edge, not on a
-  tablet.
+- Whether the device's counts read as intended on a tablet and behind a
+  real school filter. In headless Edge, with a refused upgrade and a
+  socket that drops every frame imitated in the page and a reload, the
+  class's figures (sockets that worked, failed and silent, requests,
+  poller and awake seconds, errors) were the devices' own counts as of
+  their last message; a real filter may fail in a way not imitated. The
+  simulators send lines of their own making, which test the server's
+  side, not the device's counting.

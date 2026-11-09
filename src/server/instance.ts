@@ -134,7 +134,7 @@ interface Meta {
   rows?: { written: number; settled?: true };
   /** The day's rows booked across the site, as last heard (at upload, at letting in): the check's warning. */
   dayRows?: number;
-  /** Uploaded by a simulator or a probe, through the JSON upload no page uses: its class is kept apart in the telemetry (docs/design/telemetry.md). */
+  /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): its class is kept apart in the telemetry (docs/design/telemetry.md). */
   probe?: true;
 }
 
@@ -298,7 +298,7 @@ export class Instance extends DurableObject<Env> {
     fixes: unknown = null,
     /** "peers": a room that runs on its own, its opener a player (docs/design/peers.md); anything else: a room someone steers. */
     mode: unknown = null,
-    /** The JSON upload, which only the simulators and probes use. */
+    /** The upload said it is a simulator's or a probe's; a page never says so. */
     probe = false,
   ): Promise<
     | { ok: true; secret: string; code: string; teacher: string; token: string; player?: string }

@@ -152,8 +152,8 @@ export class SiteBudget extends DurableObject<Env> {
     for (const day of [...old].sort()) {
       const mk = `m:${day.slice(0, 7)}`;
       if (mk < monthFrom) continue;
-      const h = records.get(`h:${day}`);
-      const record: DayRecord = { day, uploads: uploads.get(`d:${day}`) ?? 0, classes: h?.classes ?? 0, written: h?.written ?? 0, peak: h?.peak ?? 0, atOnce: h?.atOnce, use: h?.use };
+      // The whole record, so whatever foldDay keeps by the month (probes, refusals) reaches it.
+      const record: DayRecord = { ...(records.get(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 }), uploads: uploads.get(`d:${day}`) ?? 0 };
       put[mk] = foldDay(put[mk] ?? months.get(mk), record);
     }
     const writes: Promise<unknown>[] = [];

@@ -234,7 +234,7 @@ async function loseMemoryBy(when) {
 
 // ---------------------------------------------------------------------------
 
-const up = await post("/api/quiz", { text: QUIZ });
+const up = await post("/api/quiz", { text: QUIZ, probe: true });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
 const instance = up.body.id;
 const wall = new Device("wall", instance, { role: "screen", token: up.body.token }, "ws");

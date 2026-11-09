@@ -3,7 +3,8 @@
 // folder, so every page and script is a static file, which keeps the Free
 // plan's request budget for the quiz itself.
 //
-//   POST /api/quiz          {text, leaveOut?, fixes?, mode?} upload (opening a room): parse, create an instance
+//   POST /api/quiz          {text, leaveOut?, fixes?, mode?, probe?} upload (opening a room): parse, create an instance;
+//                                             probe: true from a simulator or a probe, never from a page
 //   POST /api/quiz          multipart         … with pictures: text, leaveOut?, fixes?, mode?, image files
 //   POST /api/join          {code, secret?}   the quiz's code → instance id; the teacher code (7 digits) checked too
 //   GET  /api/i/:id/img/:secret/:n            a picture of the quiz
@@ -75,8 +76,10 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  // Only the simulators and probes upload this way (docs/design/telemetry.md: their classes are kept apart).
-  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null, true);
+  // The simulators and probes say so, and their classes are kept apart
+  // (docs/design/telemetry.md). The route can't tell: the page uploads a
+  // quiz without pictures this way too.
+  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null, body.probe === true);
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error, full: r.full } satisfies UploadResult);
   return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token, ...(r.player ? { player: r.player } : {}) } satisfies UploadResult);
 }

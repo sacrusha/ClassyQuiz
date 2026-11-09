@@ -168,7 +168,7 @@ const at = (v) => ({ phase: v.phase, current: v.current });
 
 // --- The room opens: whoever uploads is its first player, there is no Projector.
 
-const up = await post("/api/quiz", { text: QUIZ, mode: "peers" });
+const up = await post("/api/quiz", { text: QUIZ, mode: "peers", probe: true });
 if (!up.body?.ok) {
   console.log("upload failed", up.status, up.body);
   process.exit(1);

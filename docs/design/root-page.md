@@ -407,9 +407,9 @@ describes the site, not a quiz or a person. No content, no identity, no time of
 day. `GET /api/stats` shows it, publicly: it says how much the site is used and
 nothing about anyone. The page sends the word to `POST /api/attempt` without
 waiting; a failed count never touches the upload. A quiz resent after the AI
-fixed it counts again: these are attempts, not quizzes. The server's JSON upload
-of plain text remains, for the simulator and probes; nothing on the page reaches
-it.
+fixed it counts again: these are attempts, not quizzes. The upload itself goes
+as JSON when the quiz has no pictures, as multipart with them; the simulators
+and probes use the JSON upload too and mark theirs (`telemetry.md`).
 
 ### Coming back: the resume card
 

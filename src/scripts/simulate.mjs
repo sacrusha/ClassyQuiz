@@ -48,8 +48,9 @@
 // quiz is deleted.
 //
 // With OWNER_KEY set (the site's, docs/design/telemetry.md), the day's
-// telemetry is read before and after: the class counts once, among the
-// probes and not the classes, with its devices' lines.
+// telemetry is read before and after: the class, uploaded as a probe,
+// counts once, among the probes and not the classes, with its devices'
+// lines.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -338,7 +339,7 @@ async function today() {
 }
 const useBefore = OWNER_KEY ? await today() : null;
 
-const up = await post("/api/quiz", { text: QUIZ });
+const up = await post("/api/quiz", { text: QUIZ, probe: true });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
 const { id: instance, code, token: screenToken, teacher } = up.body;
 check(/^\d{5}$/.test(code), `the upload returns the quiz's code (${code})`);
