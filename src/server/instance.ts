@@ -33,6 +33,8 @@ import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
 import { CLASS_FULL, CLASS_STARTED, DAY_ROWS_FOR_CLASSES, LINE_WRITE_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type SiteFull } from "../shared/limits.ts";
 import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
+import { readLine, type LineCounts } from "../shared/line.ts";
+import { summarize, type ClassUse, type RoomKind } from "./telemetry.ts";
 import { LOOK_SHOW_MS } from "../shared/looks.ts";
 
 /**
@@ -136,10 +138,11 @@ interface Meta {
 
 type Session =
   /** since: when this socket said hello (a tab that never pings is away after FRESH_MS). */
-  | { role: "screen"; token: string; since: number }
-  | { role: "remote"; token: string; since: number }
+  /** line: the device's newest count of its line (`takeLine`), back in memory at a wake. */
+  | { role: "screen"; token: string; since: number; line?: LineCounts }
+  | { role: "remote"; token: string; since: number; line?: LineCounts }
   /** held: a copy of the player's input the server holds (G.heldOf), on the player's newest socket only (`mirror`). */
-  | { role: "player"; player: string; since?: number; held?: G.Held | null }
+  | { role: "player"; player: string; since?: number; held?: G.Held | null; line?: LineCounts }
   /** dev: the device, as counted for wrong teacher codes (GUESS_MAX). */
   | { role: "guest"; dev?: string }
   | { role: null; dev?: string };
@@ -231,6 +234,11 @@ export class Instance extends DurableObject<Env> {
     this.unwritten.clear();
     this.takenHere.clear();
     if (!this.game?.run) return;
+    for (const ws of this.ctx.getWebSockets()) {
+      const s = ws.deserializeAttachment() as Session | null;
+      const key = s ? lineKey(s) : null;
+      if (key && s && "line" in s && s.line) this.game.run.lines = { ...this.game.run.lines, [key]: s.line };
+    }
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;
       if (s?.role !== "player" || !s.held) continue;
@@ -626,7 +634,7 @@ export class Instance extends DurableObject<Env> {
       return new Response(null, { status: 101, webSocket: pair[0] });
     }
     if (req.method !== "POST") return new Response("not found", { status: 404 });
-    let body: { auth?: Auth; v?: number; cmd?: { id: string; cmd: Command }; secret?: string; held?: DeviceHeld };
+    let body: { auth?: Auth; v?: number; cmd?: { id: string; cmd: Command }; secret?: string; held?: DeviceHeld; line?: unknown };
     try {
       body = await req.json();
     } catch {
@@ -642,6 +650,7 @@ export class Instance extends DurableObject<Env> {
     // The device's address, passed on by the API function (GUESS_MAX).
     if (session.role === "guest" && action === "cmd") session.dev = await this.deviceKey(req.headers.get("x-cq-ip"));
     this.notePoll(session);
+    this.takeLine(session, body.line);
     if (action === "cmd" && body.cmd && session.role !== null) {
       // A command over HTTP: the reply is its acknowledgement plus, for a
       // guest becoming a player or taking a role, who it is now.
@@ -772,6 +781,7 @@ export class Instance extends DurableObject<Env> {
       // A guest keeps the device it connected from, for a teacher code it may send.
       if (session.role === "guest") session = { role: "guest", dev: (ws.deserializeAttachment() as { dev?: string } | null)?.dev };
       ws.serializeAttachment(session);
+      this.takeLine(session, msg.line, ws);
       for (const m of out) send(ws, m);
       if (session.role === null) {
         ws.close(4000, "gone");
@@ -792,6 +802,7 @@ export class Instance extends DurableObject<Env> {
       if (next) ws.serializeAttachment(next);
       // A player who came in here (an avatar taken back may have held input): this socket keeps the copy.
       if (next?.role === "player") this.mirror(next.player, ws);
+      this.takeLine(next ?? session, msg.line, ws);
       for (const m of replies.direct) send(ws, m);
       if (next && next.role === "player") {
         this.sendView(ws, next);
@@ -1336,13 +1347,55 @@ export class Instance extends DurableObject<Env> {
     const rows = this.meta!.rows;
     if (!rows || rows.settled) return;
     try {
-      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true);
+      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true, this.classUse());
     } catch {
       // Unsettled, the quiz's end settles it (endInstance).
       return;
     }
     rows.settled = true;
     await this.persist(["meta"]);
+  }
+
+  /**
+   * A device's count of its line (docs/design/telemetry.md, "What is
+   * counted, and by whom"): the newest replaces the one before, in memory
+   * and in the run, which stores it with its next write; on a socket also in
+   * the attachment, so a wake gets it back. Never a write of its own.
+   */
+  private takeLine(session: Session, raw: unknown, ws?: WebSocket): void {
+    const run = this.game?.run;
+    const key = lineKey(session);
+    if (!run || !key || raw === undefined) return;
+    const line = readLine(raw);
+    if (!line) return;
+    run.lines = { ...run.lines, [key]: line };
+    if (!ws) return;
+    const s = ws.deserializeAttachment() as Session | null;
+    if (s && lineKey(s) === key) ws.serializeAttachment({ ...s, line });
+  }
+
+  /** The class as one summary of numbers, for its settle (docs/design/telemetry.md, "What reaches storage"). */
+  private classUse(): ClassUse | undefined {
+    const game = this.game;
+    const run = game?.run;
+    const meta = this.meta;
+    if (!game || !run || !meta) return undefined;
+    const players = G.activePlayers(run);
+    const kind: RoomKind = run.peers ? "peers" : meta.roles.remote || run.lines?.remote ? "remote" : "wall";
+    const end = run.ended ?? meta.lastActivity;
+    return summarize(
+      {
+        kind,
+        players: players.length,
+        late: players.filter((p) => p.late).length,
+        questions: game.quiz.questions.length,
+        played: run.opened ?? 0,
+        final: run.phase === "final",
+        minutes: run.started ? Math.max(0, Math.round((end - run.started) / 60_000)) : 0,
+        rows: meta.rows?.written ?? 0,
+      },
+      Object.values(run.lines ?? {}),
+    );
   }
 
   private async afterTeacherChange(changed: ("run" | "fixes" | "meta")[]): Promise<void> {
@@ -1643,7 +1696,8 @@ export class Instance extends DurableObject<Env> {
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
     const rows = this.meta?.rows;
-    await this.budget().release(this.ctx.id.toString(), rows && !rows.settled ? rows.written : undefined).catch(() => {});
+    const unsettled = rows && !rows.settled;
+    await this.budget().release(this.ctx.id.toString(), unsettled ? rows.written : undefined, unsettled ? this.classUse() : undefined).catch(() => {});
     const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
     const host = this.game?.run?.peers?.host;
     for (const ws of this.ctx.getWebSockets()) {
@@ -2133,6 +2187,13 @@ function sent(view: PlayerView): Sent {
 function pollKey(view: PlayerView): string {
   if (!view.peers) return viewKey(view);
   return viewKey({ ...view, peers: { ...view.peers, players: [], waitingFor: [] } });
+}
+
+/** Where a device's line is kept in the run: a player by id, a teacher's tab by its role; a guest's isn't. */
+function lineKey(s: Session): string | null {
+  if (s.role === "player") return `p:${s.player}`;
+  if (s.role === "screen" || s.role === "remote") return s.role;
+  return null;
 }
 
 function send(ws: WebSocket, msg: ServerMessage): void {

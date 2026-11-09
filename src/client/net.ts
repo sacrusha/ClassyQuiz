@@ -10,12 +10,15 @@
 //   kept, across a reload too, and sent with every hello and poll: the
 //   server holds it in memory and rebuilds from it what an instance restart
 //   lost (docs/design/open-period-in-memory.md).
+// - The line counts itself (docs/design/telemetry.md): numbers only, kept
+//   across a reload like the input, sent with every hello, command and poll.
 
 import type { AnswerAck, Auth, ClientMessage, Command, DeviceHeld, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
 import { SLEEP_AFTER_MS, quotaMessage } from "../shared/limits.ts";
 import { hideNotice, showNotice } from "./notice.ts";
 import { pauseAwake } from "./dom.ts";
+import { emptyLine, readLine, type LineCounts } from "../shared/line.ts";
 
 export type LineStatus = "connecting" | "live" | "offline";
 
@@ -70,12 +73,25 @@ export class Line {
   private pollAbort: AbortController | null = null;
   /** The player's input as the server last took it, for the player whose token it names. */
   private held: DeviceHeld | null = null;
+  /** The line's own count of itself; pollS is kept as pollMs and pollSince while the page lives. */
+  private line: LineCounts;
+  private pollMs = 0;
+  /** Since when the line has been polling, not asleep. */
+  private pollSince: number | null = null;
 
   private opts: LineOptions;
 
   constructor(opts: LineOptions) {
     this.opts = opts;
     this.held = readHeld(opts.instance);
+    this.line = readCounts(opts.instance) ?? emptyLine();
+    this.pollMs = this.line.pollS * 1000;
+    // Counted, never described: an error's message can carry quiz text.
+    const failed = () => {
+      this.line.errors++;
+    };
+    window.addEventListener("error", failed);
+    window.addEventListener("unhandledrejection", failed);
     const kick = () => {
       if (this.stopped) return;
       if (document.visibilityState !== "visible") return;
@@ -101,6 +117,9 @@ export class Line {
   /** Closes the line until a tap; the page underneath stays as it was. A tablet left on after the lesson doesn't keep its line, or its polling, all day. */
   private sleep(): void {
     this.asleep = true;
+    this.line.slept++;
+    if (this.pollSince !== null) this.pollMs += Date.now() - this.pollSince;
+    this.pollSince = null;
     clearTimeout(this.retryTimer);
     this.clearPing();
     const ws = this.ws;
@@ -119,6 +138,7 @@ export class Line {
     if (!this.asleep) return;
     this.asleep = false;
     this.lastChange = Date.now();
+    if (this.mode === "poll") this.pollSince = Date.now();
     hideNotice("sleep");
     pauseAwake(false);
     this.backoff = 500;
@@ -128,6 +148,7 @@ export class Line {
 
   private setQuota(q: "http" | "write" | null): void {
     if (q === this.quota) return;
+    if (q && !this.quota) this.line.quota++;
     this.quota = q;
     if (q) showNotice("quota", quotaMessage());
     else hideNotice("quota");
@@ -214,7 +235,7 @@ export class Line {
     let silence: number | undefined;
     ws.onopen = () => {
       const held = this.heldNow();
-      this.raw({ t: "hello", auth: this.opts.auth(), ...(held ? { held } : {}) });
+      this.raw({ t: "hello", auth: this.opts.auth(), ...(held ? { held } : {}), ...this.lineNow() });
       for (const p of this.pending) p.sent = false;
       this.flush();
       this.schedulePing();
@@ -234,6 +255,7 @@ export class Line {
     ws.onmessage = (e) => {
       if (!heard) {
         heard = true;
+        this.line.opened++;
         clearTimeout(silence);
         this.wsFailures = 0;
         this.backoff = 500;
@@ -268,9 +290,13 @@ export class Line {
   private onWsFail(worked: boolean): void {
     if (this.stopped || this.asleep) return;
     this.setStatus("offline");
-    if (!worked) this.wsFailures++;
+    if (!worked) {
+      this.wsFailures++;
+      this.line.failed++;
+    }
     if (this.wsFailures >= 3) {
       this.mode = "poll";
+      this.pollSince = Date.now();
       this.connect();
       return;
     }
@@ -291,6 +317,7 @@ export class Line {
     } catch {
       return;
     }
+    this.line.pings++;
     clearTimeout(this.pongTimer);
     this.pongTimer = window.setTimeout(() => {
       // No answer: the line is dead even though the socket thinks it's open.
@@ -317,10 +344,22 @@ export class Line {
     if (!ws || ws.readyState !== WebSocket.OPEN) return false;
     try {
       ws.send(JSON.stringify(m));
+      this.line.sent++;
       return true;
     } catch {
       return false;
     }
+  }
+
+  /**
+   * The line's count as sent: a teacher's tab's or a player's, not a guest's,
+   * which the server keeps nowhere. Stored for a reload on the way.
+   */
+  private lineNow(): { line?: LineCounts } {
+    if (this.opts.auth().role === "guest") return {};
+    const line: LineCounts = { ...this.line, mode: this.mode, pollS: Math.floor((this.pollMs + (this.pollSince !== null ? Date.now() - this.pollSince : 0)) / 1000) };
+    writeCounts(this.opts.instance, line);
+    return { line };
   }
 
   private handle(m: ServerMessage): void {
@@ -388,7 +427,7 @@ export class Line {
     if (this.mode === "ws") {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
       for (const p of this.pending) {
-        if (!p.sent && this.raw({ t: "cmd", id: p.id, cmd: p.cmd })) p.sent = true;
+        if (!p.sent && this.raw({ t: "cmd", id: p.id, cmd: p.cmd, ...this.lineNow() })) p.sent = true;
       }
       return;
     }
@@ -402,7 +441,8 @@ export class Line {
     while (this.pending.length > 0 && !this.stopped && !this.asleep) {
       const p = this.pending[0];
       try {
-        const res = await post(`/api/i/${this.opts.instance}/cmd`, { auth: this.opts.auth(), cmd: { id: p.id, cmd: p.cmd } });
+        this.line.http++;
+        const res = await post(`/api/i/${this.opts.instance}/cmd`, { auth: this.opts.auth(), cmd: { id: p.id, cmd: p.cmd }, ...this.lineNow() });
         this.setStatus("live");
         if (this.quota === "http") this.setQuota(null);
         delay = 500;
@@ -440,7 +480,8 @@ export class Line {
         let res: { messages?: ServerMessage[] };
         try {
           const held = this.heldNow();
-          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v, ...(held ? { held } : {}) }, ctl.signal);
+          this.line.http++;
+          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v, ...(held ? { held } : {}), ...this.lineNow() }, ctl.signal);
         } catch (e) {
           // Let go on purpose (repoll): ask again at once, as whoever the tab is now.
           if (ctl.signal.aborted && !this.stopped) continue;
@@ -540,6 +581,23 @@ function writeHeld(instance: string, h: DeviceHeld): void {
     sessionStorage.setItem(`cq.held.${instance}`, JSON.stringify(h));
   } catch {
     // Storage blocked: the line still holds it while the page lives.
+  }
+}
+
+/** The line's count survives a reload as the input does; numbers only (shared/line.ts). */
+function readCounts(instance: string): LineCounts | null {
+  try {
+    return readLine(JSON.parse(sessionStorage.getItem(`cq.line.${instance}`) ?? "null"));
+  } catch {
+    return null;
+  }
+}
+
+function writeCounts(instance: string, line: LineCounts): void {
+  try {
+    sessionStorage.setItem(`cq.line.${instance}`, JSON.stringify(line));
+  } catch {
+    // Storage blocked: the count starts again with a reload.
   }
 }
 

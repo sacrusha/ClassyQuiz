@@ -64,12 +64,11 @@ export function summarize(facts: ClassFacts, lines: LineCounts[]): ClassUse {
 /**
  * The class's Durable Object requests, as the plan counts them: each HTTP
  * request and each WebSocket upgrade one, incoming WebSocket messages twenty
- * to one (Cloudflare's Durable Objects pricing). Pings are counted as if
- * they were incoming messages, an upper bound, until item 1's probe says
- * whether auto-answered pings count.
+ * to one (Cloudflare's Durable Objects pricing). Pings are answered by the
+ * runtime without an invocation (item 1's probe), so they don't count.
  */
 export function objectRequests(u: ClassUse): number {
-  return u.http + u.opened + Math.ceil((u.sent + u.pings) / 20);
+  return u.http + u.opened + Math.ceil(u.sent / 20);
 }
 
 /** Lower edges of the buckets (the first is 0); from the estimates in scaling-drawer.md. */

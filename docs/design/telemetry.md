@@ -1,7 +1,9 @@
 # Telemetry
 
-Settled with the owner 2026-11-09 and being built (backlog, "Room on the
-Free plan", item 2); this file says what is built once it is.
+Backlog, "Room on the Free plan", item 2. Who reads it and how long it is
+kept are the owner's (2026-11-09); the rest is the implementer's, on the
+owner's "balance straightforwardness of implementation, likely usefulness of
+data, and general purpose".
 
 ## Purpose
 
@@ -41,9 +43,11 @@ without spending what it measures.
   rows and requests per class, duration per day, devices left on after the
   lesson; classes a day and at once (the owner's threshold, about 200 and
   60), the kind of room, class size, how far a quiz gets; the spent
-  allowance and errors as devices meet them. Whether pings count as
-  incoming messages and whether socket attachments write rows are measured
-  once by item 1's probe, not by telemetry.
+  allowance and errors as devices meet them. Measured once, not by
+  telemetry (item 1's probe on a Worker of its own): auto-answered pings
+  cause no invocation, socket attachments write no rows and store no
+  bytes, and a held poll accrues duration for its whole hold (about
+  0.128 GB-s a second).
 - An object hibernates between messages and loses what it holds in memory;
   a socket's attachment is lost when the socket closes. A count kept by the
   instance alone loses whatever came between two writes. Devices hold their
@@ -88,7 +92,7 @@ figures are for orders of magnitude. A teacher role taken by another tab
 replaces the first tab's counts.
 
 The instance adds what only it knows: the kind of room (Peers; steered with
-a Remote taken; steered from the wall alone), players at the start,
+a Remote taken; steered from the wall alone), players not removed,
 latecomers, questions played of the quiz's, whether it reached the final
 ranking, minutes from Start to the final ranking, rows written.
 
@@ -170,5 +174,8 @@ quiz. A day with one class shows that class's figures; it names nobody.
   hibernation between them and the settle.
 - Whether the buckets' edges fall where classes differ; they are from the
   estimates in `scaling-drawer.md` (a class on WebSockets some 250 to 430
-  Durable Object requests, a polling one some 3,000; item 1's 100 to 150
-  rows a class).
+  Durable Object requests, a polling one some 3,000; with item 1 a class
+  of 25 writes about 250 rows, before it about 1,300).
+- Whether the device's counts read as intended on real devices: checked
+  with the simulators and one Peers walk in headless Edge, not on a
+  tablet.

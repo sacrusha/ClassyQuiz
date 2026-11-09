@@ -46,6 +46,10 @@
 // fifth from one device locks its teacher codes, the secret still gets in;
 // from ever new addresses, the quiz's allowance runs out within ten. The
 // quiz is deleted.
+//
+// With OWNER_KEY set (the site's, docs/design/telemetry.md), the day's
+// telemetry is read before and after: the class counts once, with its
+// devices' lines.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -123,6 +127,11 @@ class Device {
     this.got = [];
     /** Like client/net.ts: the player's input as the server last took it, sent with every hello and poll. */
     this.held = null;
+    /** Like client/net.ts: the line's count of itself, sent with every hello, command and poll. */
+    this.line = { mode, opened: 0, failed: 0, http: 0, sent: 0, pings: 0, pollS: 0, quota: 0, slept: 0, errors: 0 };
+  }
+  lineNow() {
+    return this.auth.role === "guest" ? undefined : { ...this.line };
   }
   heldNow() {
     const h = this.held;
@@ -149,11 +158,19 @@ class Device {
     this.ws = ws;
     let pinger;
     ws.onopen = () => {
-      ws.send(JSON.stringify({ t: "hello", auth: this.auth, held: this.heldNow() }));
-      for (const [id, p] of this.pending) ws.send(JSON.stringify({ t: "cmd", id, cmd: p.cmd }));
+      this.line.opened++;
+      this.line.sent++;
+      ws.send(JSON.stringify({ t: "hello", auth: this.auth, held: this.heldNow(), line: this.lineNow() }));
+      for (const [id, p] of this.pending) {
+        this.line.sent++;
+        ws.send(JSON.stringify({ t: "cmd", id, cmd: p.cmd, line: this.lineNow() }));
+      }
       // Like client/net.ts: a ping every 20 s, answered by the runtime.
       pinger = setInterval(() => {
-        if (!this.frozen && ws.readyState === 1) ws.send("ping");
+        if (!this.frozen && ws.readyState === 1) {
+          this.line.pings++;
+          ws.send("ping");
+        }
       }, 20_000);
     };
     ws.onmessage = (e) => {
@@ -239,7 +256,10 @@ class Device {
       this.pending.set(id, { cmd, resolve });
       if (this.mode === "ws") {
         // A dead device sends nothing; its socket just stays open on the server's side.
-        if (this.ws && this.ws.readyState === 1 && this.online && !this.frozen) this.ws.send(JSON.stringify({ t: "cmd", id, cmd }));
+        if (this.ws && this.ws.readyState === 1 && this.online && !this.frozen) {
+          this.line.sent++;
+          this.ws.send(JSON.stringify({ t: "cmd", id, cmd, line: this.lineNow() }));
+        }
       } else void this.flushHttp();
     });
   }
@@ -253,7 +273,8 @@ class Device {
       }
       const [id, { cmd }] = this.pending.entries().next().value;
       try {
-        const r = await post(`/api/i/${this.instance}/cmd`, { auth: this.auth, cmd: { id, cmd } });
+        this.line.http++;
+        const r = await post(`/api/i/${this.instance}/cmd`, { auth: this.auth, cmd: { id, cmd }, line: this.lineNow() });
         for (const m of r.body.messages ?? []) this.handle(m);
         if (this.pending.has(id)) {
           const p = this.pending.get(id);
@@ -275,7 +296,8 @@ class Device {
       }
       try {
         this.pollAbort = new AbortController();
-        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v, held: this.heldNow() }, this.pollAbort.signal).catch((e) => {
+        this.line.http++;
+        const r = await post(`/api/i/${this.instance}/poll`, { auth: this.auth, v: this.v, held: this.heldNow(), line: this.lineNow() }, this.pollAbort.signal).catch((e) => {
           // Like client/net.ts: let go on purpose, ask again at once.
           if (this.pollAbort?.signal.aborted) return { body: { messages: [] }, repolled: true };
           throw e;
@@ -306,6 +328,15 @@ const until = async (cond, ms, what) => {
     await sleep(50);
   }
 };
+
+/** The day's telemetry, when the site's owner key is given. */
+const OWNER_KEY = process.env.OWNER_KEY;
+async function today() {
+  const res = await fetch(`${BASE}/api/site/use`, { headers: { authorization: `Bearer ${OWNER_KEY}` } });
+  const body = await res.json();
+  return body.days?.find((d) => d.day === new Date().toISOString().slice(0, 10)) ?? {};
+}
+const useBefore = OWNER_KEY ? await today() : null;
 
 const up = await post("/api/quiz", { text: QUIZ });
 if (!up.body.ok) throw new Error("upload failed: " + JSON.stringify(up.body));
@@ -1030,6 +1061,16 @@ check((after.body.messages ?? []).some((m) => m.t === "gone"), "after the end, t
 const joinAfter = await post("/api/join", { code });
 check(joinAfter.status === 404, "after the end, the code opens nothing");
 anyone.d.kill();
+
+if (useBefore) {
+  // The class settled at its final ranking, with its summary (docs/design/telemetry.md).
+  const before = useBefore.use ?? { classes: 0, devices: 0, http: 0 };
+  const now = (await today()).use ?? { classes: 0, devices: 0, http: 0 };
+  check(now.classes === before.classes + 1, `the class counts once in the day's telemetry (${before.classes} → ${now.classes})`);
+  check(now.devices - before.devices >= N, `its devices' lines are in it (${now.devices - before.devices} devices for ${N} students)`);
+  check(now.http > before.http, "the polling devices' requests are in it");
+  log(`telemetry: ${now.devices - before.devices} devices, ${now.polled - (before.polled ?? 0)} on long-poll, ${now.reconnects - (before.reconnects ?? 0)} reconnects, ${now.http - before.http} HTTP requests`);
+}
 
 if (ALL_POLL) log(`HTTP requests by all devices: ${requests}`);
 if (failures.length) {

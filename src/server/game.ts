@@ -12,6 +12,7 @@
 // docs/design/question-flow.md, "When a tap counts".
 
 import type { Quiz } from "../quiz/format.ts";
+import type { LineCounts } from "../shared/line.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, speedBonus } from "../shared/tempo.ts";
@@ -158,6 +159,13 @@ export interface Run {
    * against MAX_LINE_WRITES (server/instance.ts, `lineEnded`).
    */
   lineWrites?: { q: number; n: number };
+  /**
+   * Each device's own count of its line, the newest it sent: "p:<player id>",
+   * "screen", "remote" (docs/design/telemetry.md). Stored with whatever
+   * write of the run comes next, never written for its own sake; reduced to
+   * the class's summary at the settle, and deleted with the quiz.
+   */
+  lines?: Record<string, LineCounts>;
 }
 
 export interface Game {

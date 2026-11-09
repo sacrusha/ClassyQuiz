@@ -26,7 +26,7 @@ test("a class's summary sums its devices; a reconnect is a socket after the firs
   assert.equal(u.polled, 1);
   assert.equal(u.reconnects, 3);
   assert.equal(u.failed, 3);
-  assert.equal(objectRequests(u), 2900 + 4 + 10);
+  assert.equal(objectRequests(u), 2900 + 4 + 3, "pings are answered without an invocation");
 });
 
 test("a day adds its classes into buckets; a month keeps use and cost, and leaves the problems behind", () => {

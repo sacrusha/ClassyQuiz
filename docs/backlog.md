@@ -466,23 +466,17 @@ shows one binding.
    150). Open: it is to run once against the deployed site, a deploy in the
    middle of a run among it (`scripts/simulate-memory.mjs`).
 
-2. **What telemetry the project needs** — a seed. The limits, the
-   capacity sentence on the landing, the caps and the drawer's ideas rest
-   on figures nobody has measured. Telemetry is to give them without
-   identifying anyone and without costing rows.
-
-   Situation:
-   - Unknown so far: the share of devices on long-poll, classes with at
-     least one poller, reconnects per device, whether pings count, actual
-     rows and requests per class, duration per day.
-   - Cloudflare's metrics give account-wide daily counts.
-   - `SiteBudget` keeps per-day figures for 31 days, and `GET /api/site`
-     shows them.
-   - The settle at the final ranking already writes.
-
-   A first idea: count in the instance's memory and send the counts with
-   the settle. Open: everything else — which questions it must answer, who
-   reads it, how long it is kept, what would count as identifying.
+2. **What telemetry the project needs** — the limits, the capacity
+   sentence on the landing, the caps and the drawer's ideas rest on figures
+   nobody had measured; telemetry gives them without identifying anyone
+   and without costing rows or requests — `design/telemetry.md`. Built:
+   each device counts its own line and sends the count with what it sends
+   anyway; a class becomes one summary at its settle; the days' records
+   (31 days, then by the month for 24 months, problems by the day only)
+   for the owner at `GET /api/site/use`, behind `OWNER_KEY`. Open: the key
+   is to be set on the Pages project before the deploy that carries this
+   (`secrets/README.md`), or the figures can't be read; the deploy moves
+   the days' rows records off the public `GET /api/site`.
 
 ## Later — Paper and memory
 
@@ -552,6 +546,14 @@ With the owner:
   server holds the tap, not that it is stored. Seen as a consequence:
   `ROOM_WARN`'s three classes are now the last 4% of the day, where they
   were its last third.
+- Telemetry ("Room on the Free plan", item 2), the implementer's calls on
+  the owner's "balance straightforwardness of implementation, likely
+  usefulness of data, and general purpose", not yet seen by the owner
+  (`design/telemetry.md`): day sums and buckets, no record per class;
+  devices' script errors counted, the Function's errors not; the project's
+  own runs not marked; the summary at the settle, so the after-lesson tail
+  is the dashboard's; which way a quiz was played on the local check not
+  counted; month records kept 24 months.
 - Consumers beyond the classroom: settled as v5 (Solo, Peers, Quizmaster).
   Of what rested on it, the lede, the README's descriptor and the example
   asks are built with v5 item 9. Still open: team names against "nothing

@@ -15,6 +15,7 @@
 // lifetime (sessionStorage). A teacher role takes the teacher code, the class
 // code plus two digits (docs/design/teacher-devices.md, "One entry: the teacher code"), or the quiz's secret.
 
+import type { LineCounts } from "./line.ts";
 import type { Answering, Avatar, Phase } from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
 import type { SiteFull } from "./limits.ts";
@@ -120,8 +121,12 @@ export interface DeviceHeld {
   ready?: number;
 }
 
-/** held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v. */
-export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld } | { t: "cmd"; id: string; cmd: Command };
+/**
+ * held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v.
+ * line: the device's own count of its line (docs/design/telemetry.md), with
+ * the hello, every command and every poll; the newest replaces the one before.
+ */
+export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld; line?: LineCounts } | { t: "cmd"; id: string; cmd: Command; line?: LineCounts };
 
 /**
  * The result of a tap's acknowledgement: what the server holds for this player
