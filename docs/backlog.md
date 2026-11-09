@@ -447,9 +447,12 @@ for. Named, not pursued: tests, in class or self-administered.
 
 ## Room on the Free plan
 
-The owner, 2026-11-09: about 200 classes a day and about 60 at once is
-plenty. Beyond that, donations could pay Cloudflare for more, rather than
-the code being made more complicated. A class's taps are held in memory
+The owner, 2026-11-09: about 200 classes a day and about 60 at once
+describe what the site has with item 1, which allows a lot of uses; what
+real classes cost is for adoption and telemetry to show
+(`scaling-drawer.md`, "Purpose and threshold"). Beyond what the plan
+carries, donations could pay Cloudflare for more, rather than the code
+being made more complicated. A class's taps are held in memory
 (item 1), so rows written no longer bind first; requests are likely to
 (`design/hosting-and-limits.md`, "What a class costs"). Ideas for the
 limits that come after are in `scaling-drawer.md`, to take up when a figure
