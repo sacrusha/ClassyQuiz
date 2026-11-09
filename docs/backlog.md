@@ -550,10 +550,12 @@ With the owner:
   the owner's "balance straightforwardness of implementation, likely
   usefulness of data, and general purpose", not yet seen by the owner
   (`design/telemetry.md`): day sums and buckets, no record per class;
-  devices' script errors counted, the Function's errors not; the project's
-  own runs not marked; the summary at the settle, so the after-lesson tail
-  is the dashboard's; which way a quiz was played on the local check not
-  counted; month records kept 24 months.
+  devices' script errors counted, the Function's errors not; the
+  simulators' and probes' classes kept apart by the JSON upload they use;
+  classes turned away counted as a lower bound, at no row of their own; the
+  summary at the settle, so the after-lesson tail is the dashboard's; which
+  way a quiz was played on the local check not counted; month records kept
+  24 months, refusals among them.
 - Consumers beyond the classroom: settled as v5 (Solo, Peers, Quizmaster).
   Of what rested on it, the lede, the README's descriptor and the example
   asks are built with v5 item 9. Still open: team names against "nothing

@@ -20,13 +20,15 @@ test("a device's line keeps only the closed list's word and bounded whole number
 
 test("a class's summary sums its devices; a reconnect is a socket after the first", () => {
   const ws = { ...emptyLine(), opened: 4, sent: 60, pings: 140 };
-  const poll = { ...emptyLine(), mode: "poll" as const, opened: 0, failed: 3, http: 2900, pollS: 900 };
-  const u = summarize(facts, [ws, poll]);
-  assert.equal(u.devices, 2);
-  assert.equal(u.polled, 1);
+  const poll = { ...emptyLine(), mode: "poll" as const, opened: 0, failed: 3, silent: 3, http: 2900, pollS: 900 };
+  const wall = { ...emptyLine(), mode: "poll" as const, http: 400, pollS: 1200 };
+  const u = summarize(facts, [ws, poll, wall]);
+  assert.equal(u.devices, 3);
+  assert.equal(u.polled, 2);
   assert.equal(u.reconnects, 3);
-  assert.equal(u.failed, 3);
-  assert.equal(objectRequests(u), 2900 + 4 + 3, "pings are answered without an invocation");
+  assert.equal(u.silent, 3, "a socket that opened and carried nothing, apart");
+  assert.equal(u.awakeS, 1200, "pollers share one awake object: the longest of them, not their sum");
+  assert.equal(objectRequests(u), 3300 + 4 + 3, "pings are answered without an invocation");
 });
 
 test("a day adds its classes into buckets; a month keeps use and cost, and leaves the problems behind", () => {
@@ -38,18 +40,22 @@ test("a day adds its classes into buckets; a month keeps use and cost, and leave
   assert.deepEqual(day.size, [0, 1, 0, 1, 0], "the size counts set a class of three apart from one of 25");
   assert.equal(day.requests[3], 1, "a polling class of about 3,000 requests");
   assert.equal(day.withPoller, 1);
-  assert.deepEqual(day.problems, { failed: 0, quota: 1, errors: 2 });
+  assert.deepEqual(day.problems, { failed: 0, silent: 0, quota: 1, errors: 2 });
 
-  const one = foldDay(undefined, { day: "2026-11-09", uploads: 4, classes: 2, written: 200, peak: 9000, atOnce: 2, use: day });
+  const refused = { uploads: 0, bytes: 0, rows: 2 };
+  const one = foldDay(undefined, { day: "2026-11-09", uploads: 5, classes: 3, probes: 1, written: 200, peak: 9000, atOnce: 2, refused, use: day, probeUse: day });
   const two = foldDay(one, { day: "2026-11-10", uploads: 1, classes: 0, written: 0, peak: 0 });
   assert.equal(two.month, "2026-11");
   assert.equal(two.days, 2);
-  assert.equal(two.uploads, 5);
-  assert.equal(two.busiest, 2);
+  assert.equal(two.uploads, 6);
+  assert.equal(two.busiest, 2, "the busiest day in classes, the probes left out");
+  assert.equal(two.probes, 1);
+  assert.deepEqual(two.refused, refused, "refusals kept by the month: the case for more room");
   assert.equal(two.atOnce, 2);
   assert.equal(two.use.classes, 2);
   assert.equal(two.use.http, 3200);
   assert.ok(!("problems" in two.use), "problems are kept by the day only");
+  assert.ok(!("probeUse" in two), "the probes' figures too");
 });
 
 test("months are counted back across a year's turn", () => {

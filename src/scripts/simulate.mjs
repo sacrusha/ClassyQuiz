@@ -48,8 +48,8 @@
 // quiz is deleted.
 //
 // With OWNER_KEY set (the site's, docs/design/telemetry.md), the day's
-// telemetry is read before and after: the class counts once, with its
-// devices' lines.
+// telemetry is read before and after: the class counts once, among the
+// probes and not the classes, with its devices' lines.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -1064,9 +1064,11 @@ anyone.d.kill();
 
 if (useBefore) {
   // The class settled at its final ranking, with its summary (docs/design/telemetry.md).
-  const before = useBefore.use ?? { classes: 0, devices: 0, http: 0 };
-  const now = (await today()).use ?? { classes: 0, devices: 0, http: 0 };
-  check(now.classes === before.classes + 1, `the class counts once in the day's telemetry (${before.classes} → ${now.classes})`);
+  const day = await today();
+  const before = useBefore.probeUse ?? { classes: 0, devices: 0, http: 0 };
+  const now = day.probeUse ?? { classes: 0, devices: 0, http: 0 };
+  check(now.classes === before.classes + 1, `the class counts once among the day's probes (${before.classes} → ${now.classes})`);
+  check((day.use?.classes ?? 0) === (useBefore.use?.classes ?? 0), "and not among the classes");
   check(now.devices - before.devices >= N, `its devices' lines are in it (${now.devices - before.devices} devices for ${N} students)`);
   check(now.http > before.http, "the polling devices' requests are in it");
   log(`telemetry: ${now.devices - before.devices} devices, ${now.polled - (before.polled ?? 0)} on long-poll, ${now.reconnects - (before.reconnects ?? 0)} reconnects, ${now.http - before.http} HTTP requests`);

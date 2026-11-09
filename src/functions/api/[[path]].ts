@@ -75,7 +75,8 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null);
+  // Only the simulators and probes upload this way (docs/design/telemetry.md: their classes are kept apart).
+  const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null, true);
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error, full: r.full } satisfies UploadResult);
   return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token, ...(r.player ? { player: r.player } : {}) } satisfies UploadResult);
 }

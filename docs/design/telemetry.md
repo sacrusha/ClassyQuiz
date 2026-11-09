@@ -67,7 +67,9 @@ without spending what it measures.
 Each device counts its own line for the quiz it is in, since the page
 opened: whether it is on WebSocket or long-poll now; the sockets that
 worked (reconnects are that minus one) and the WebSocket attempts that
-failed; the HTTP requests it sent (polls, commands); the WebSocket
+failed, those that opened and carried nothing apart (a filter that takes
+the upgrade and drops the frames, against one that refuses it); the HTTP
+requests it sent (polls, commands); the WebSocket
 messages it sent, and its pings apart; the seconds it spent on long-poll;
 how often it was told the allowance was spent; whether it went to sleep;
 and its script errors, as a number. Integers and one word from a closed
@@ -88,13 +90,16 @@ run (players by their id, the teacher's tabs by role), so whatever write of
 the run comes next stores them. Counts never cause a write of their own.
 Counts that arrive after the run's last write are in memory when the
 summary is made, or lost to a hibernation in between: accepted, the
-figures are for orders of magnitude. A teacher role taken by another tab
-replaces the first tab's counts.
+figures are for orders of magnitude. A teacher role taken by another tab,
+or an avatar picked back on another device, replaces the first device's
+counts.
 
 The instance adds what only it knows: the kind of room (Peers; steered with
 a Remote taken; steered from the wall alone), players not removed,
-latecomers, questions played of the quiz's, whether it reached the final
-ranking, minutes from Start to the final ranking, rows written.
+latecomers, questions played and the quiz's questions, whether it reached
+the final ranking, minutes from Start to the final ranking, rows written,
+and the longest any device polled: pollers share one awake object, so that,
+not their sum, is about how long polls kept it awake.
 
 ### What reaches storage
 
@@ -110,6 +115,23 @@ uploads (the `d:` count, now kept as long as the day's record) and the
 most classes booked at once (let in and not yet settled), the owner's
 "at once".
 
+Classes turned away, by the cap (uploads a day, bytes stored, the day's
+rows), are the figure behind the owner's "beyond that, donations": a
+refusal writes nothing of its own, since a script's refused uploads would
+otherwise spend rows, so `SiteBudget` counts it in memory and adds it to
+the day's record with that day's next write of it, which a busy day has
+(a class settling, one let in). Lost with the object's memory before that:
+a lower bound.
+
+The project's own runs are kept apart: the simulators and probes upload
+through the JSON upload, which no page uses (`root-page.md`), so the
+instance marks such a quiz, and its class counts among the day's `probes`
+and its summary in `probeUse`, not in `use`. That costs nothing, and
+matters because a simulator's class is a class of 25 that the size counts
+can't tell from a teacher's (one is to run against the deployed site,
+backlog Room item 1). Browser walks upload as a page does and count as
+classes; they are classes of one to four.
+
 A lobby never let in books no rows and sends no summary; uploads less
 classes counts those. The settle comes before the tail after the lesson
 (devices left on the final ranking): nothing writes the run then, so a
@@ -122,9 +144,7 @@ request or a row each (Cloudflare's Analytics Engine could, at the price of
 Cloudflare-specific code a converting school carries); picture fetches;
 which way a quiz was played on the local check (Solo never reaches the
 server, by design, `local-check.md`; counting the choice costs a request
-and a row each); the project's own runs apart from teachers' (they are
-classes of one to four players, which the size counts set apart, and
-marking them would be a path every probe must follow).
+and a row each).
 
 ### How long, by kind
 
@@ -135,14 +155,14 @@ the busiest day kept) and the day is deleted, in one write. Month records
 live 24 months: two school years side by side, the shortest span that shows
 a trend through a school year's holidays.
 
-- **Use** — uploads, classes, kinds, sizes, how far, minutes, the most at
-  once, the busiest day: day and month. The owner's threshold is in
-  classes a day and at once.
-- **Cost** — rows, requests, devices on long-poll, poller seconds,
-  reconnects, sleeps: day and month. The drawer's ideas wait for a cost
-  per class to grow as well as a number of classes.
-- **Problems** — failed sockets, the spent allowance seen, script errors:
-  the day only. They are for noticing and fixing what fails now; a month
+- **Use** — uploads, classes, probes, classes turned away, kinds, sizes,
+  how far, minutes, the most at once, the busiest day: day and month. The
+  owner's threshold is in classes a day and at once.
+- **Cost** — rows, requests, devices on long-poll, poller seconds and the
+  awake seconds, reconnects, sleeps: day and month. The drawer's ideas wait
+  for a cost per class to grow as well as a number of classes.
+- **Problems** — failed and silent sockets, the spent allowance seen,
+  script errors, and the probes' figures: the day only. They are for noticing and fixing what fails now; a month
   later they describe a site that may have changed since.
 - The full days and the upload attempts by format keep their own spans,
   unchanged (the landing's own-copy line; `root-page.md`).
@@ -160,6 +180,24 @@ records and what is booked now. The key is the Pages project's secret
 answers `full` alone, for the landing. Nothing identifies anyone, but the
 figures are the owner's to read, not the public's.
 
+Reading it (each day: `classes`, `use`; each month: `use`):
+
+- Classes a day: `classes` less `probes`. At once: `atOnce`, which counts
+  bookings, so a lobby let in and left, or a quiz left before its final
+  ranking, counts until it expires three hours after its last step.
+- How far: `use.final` of `use.classes`, `use.played` of `use.questions`.
+- Requests: Durable Object requests per class in `use.requests`, counted
+  as HTTP requests plus sockets opened plus one per twenty messages; a
+  class's Function requests are about its HTTP requests plus its sockets.
+  Uploads, joins and pictures come on top (Cloudflare's dashboard has the
+  day's totals).
+- Duration: `use.awakeS` times about 0.128 GB-s is what classes' polls
+  cost of the day's 13,000 GB-s, the lesson only (the settle comes before
+  the tail).
+- The buckets' edges are `edges` (lower edges: players, requests, rows).
+  If they change, months before the change hold the old ones.
+- `refused`: classes turned away, a lower bound.
+
 ### What would count as identifying
 
 Anything that ties a figure to a person, a device, a quiz or an instance:
@@ -176,6 +214,9 @@ quiz. A day with one class shows that class's figures; it names nobody.
   estimates in `scaling-drawer.md` (a class on WebSockets some 250 to 430
   Durable Object requests, a polling one some 3,000; with item 1 a class
   of 25 writes about 250 rows, before it about 1,300).
+- Whether a busy day's refusals reach its record: they ride on a later
+  write of it, which a day full of rows may not have once its classes have
+  settled.
 - Whether the device's counts read as intended on real devices: checked
   with the simulators and one Peers walk in headless Edge, not on a
   tablet.

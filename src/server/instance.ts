@@ -134,6 +134,8 @@ interface Meta {
   rows?: { written: number; settled?: true };
   /** The day's rows booked across the site, as last heard (at upload, at letting in): the check's warning. */
   dayRows?: number;
+  /** Uploaded by a simulator or a probe, through the JSON upload no page uses: its class is kept apart in the telemetry (docs/design/telemetry.md). */
+  probe?: true;
 }
 
 type Session =
@@ -287,6 +289,8 @@ export class Instance extends DurableObject<Env> {
     fixes: unknown = null,
     /** "peers": a room that runs on its own, its opener a player (docs/design/peers.md); anything else: a room someone steers. */
     mode: unknown = null,
+    /** The JSON upload, which only the simulators and probes use. */
+    probe = false,
   ): Promise<
     | { ok: true; secret: string; code: string; teacher: string; token: string; player?: string }
     | { ok: false; errors: Problem[]; warnings: Problem[]; missingImages?: string[]; error?: string; full?: SiteFull }
@@ -310,7 +314,7 @@ export class Instance extends DurableObject<Env> {
     let rows: { rows: number } | "rows" | null = null;
     if (peers) {
       try {
-        rows = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(r.quiz.questions.length), codeUntil);
+        rows = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(r.quiz.questions.length), codeUntil, probe);
       } catch (e) {
         // The ledger can't be reached: the room opens unbooked rather than be stopped by the site's own bookkeeping.
         console.error("rows not booked:", e instanceof Error ? e.message : String(e));
@@ -329,7 +333,7 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows };
+    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows, ...(probe ? { probe: true as const } : {}) };
     this.endedBy = null;
     if (rows) {
       this.meta.dayRows = rows.rows;
@@ -1303,7 +1307,7 @@ export class Instance extends DurableObject<Env> {
     if (!run?.waiting || meta.rows) return true;
     let booked: { rows: number } | "rows";
     try {
-      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil);
+      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil, !!meta.probe);
     } catch (e) {
       // The ledger can't be reached: the class goes in unbooked rather than
       // be stopped by the site's own bookkeeping.
@@ -1393,6 +1397,7 @@ export class Instance extends DurableObject<Env> {
         final: run.phase === "final",
         minutes: run.started ? Math.max(0, Math.round((end - run.started) / 60_000)) : 0,
         rows: meta.rows?.written ?? 0,
+        ...(meta.probe ? { probe: true } : {}),
       },
       Object.values(run.lines ?? {}),
     );

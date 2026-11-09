@@ -12,8 +12,9 @@ export interface LineCounts {
   mode: LineMode;
   /** WebSockets that worked (a message came through); reconnects are this minus one. */
   opened: number;
-  /** WebSocket attempts that failed. */
+  /** WebSocket attempts that failed; of those, `silent` opened and then carried nothing (a filter that takes the upgrade and drops the frames). */
   failed: number;
+  silent: number;
   /** HTTP requests to the quiz: polls and commands. */
   http: number;
   /** WebSocket messages sent (hellos, commands), pings apart. */
@@ -29,13 +30,13 @@ export interface LineCounts {
   errors: number;
 }
 
-export const LINE_NUMBERS = ["opened", "failed", "http", "sent", "pings", "pollS", "quota", "slept", "errors"] as const satisfies readonly (keyof LineCounts)[];
+export const LINE_NUMBERS = ["opened", "failed", "silent", "http", "sent", "pings", "pollS", "quota", "slept", "errors"] as const satisfies readonly (keyof LineCounts)[];
 
 /** No device's count goes past this: a broken or hostile page can't swell a day's sums. */
 const LINE_MAX = 100_000;
 
 export function emptyLine(): LineCounts {
-  return { mode: "ws", opened: 0, failed: 0, http: 0, sent: 0, pings: 0, pollS: 0, quota: 0, slept: 0, errors: 0 };
+  return { mode: "ws", opened: 0, failed: 0, silent: 0, http: 0, sent: 0, pings: 0, pollS: 0, quota: 0, slept: 0, errors: 0 };
 }
 
 /** What a device sent as its line, as the server keeps it: the word from the list, each number a bounded integer; null when it isn't a line at all. */

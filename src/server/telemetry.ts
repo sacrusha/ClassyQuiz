@@ -24,6 +24,8 @@ export interface ClassFacts {
   minutes: number;
   /** Rows the class wrote (Meta.rows.written). */
   rows: number;
+  /** Uploaded by a simulator or a probe (the JSON upload, which no page uses): kept apart from the classes. */
+  probe?: boolean;
 }
 
 /** A class, as it reaches SiteBudget: the instance's facts and its devices' lines summed. */
@@ -34,26 +36,31 @@ export interface ClassUse extends ClassFacts {
   opened: number;
   reconnects: number;
   failed: number;
+  silent: number;
   http: number;
   sent: number;
   pings: number;
   pollS: number;
+  /** The longest any of its devices polled: about how long a poll kept the object awake (one awake object serves them all). */
+  awakeS: number;
   quota: number;
   slept: number;
   errors: number;
 }
 
 export function summarize(facts: ClassFacts, lines: LineCounts[]): ClassUse {
-  const u: ClassUse = { ...facts, devices: lines.length, polled: 0, opened: 0, reconnects: 0, failed: 0, http: 0, sent: 0, pings: 0, pollS: 0, quota: 0, slept: 0, errors: 0 };
+  const u: ClassUse = { ...facts, devices: lines.length, polled: 0, opened: 0, reconnects: 0, failed: 0, silent: 0, http: 0, sent: 0, pings: 0, pollS: 0, awakeS: 0, quota: 0, slept: 0, errors: 0 };
   for (const l of lines) {
     if (l.mode === "poll") u.polled++;
     u.opened += l.opened;
     u.reconnects += Math.max(0, l.opened - 1);
     u.failed += l.failed;
+    u.silent += l.silent;
     u.http += l.http;
     u.sent += l.sent;
     u.pings += l.pings;
     u.pollS += l.pollS;
+    u.awakeS = Math.max(u.awakeS, l.pollS);
     u.quota += l.quota;
     u.slept += l.slept;
     u.errors += l.errors;
@@ -75,6 +82,8 @@ export function objectRequests(u: ClassUse): number {
 export const SIZE_EDGES = [0, 2, 5, 15, 30];
 export const REQUEST_EDGES = [0, 250, 1000, 3000];
 export const ROW_EDGES = [0, 150, 500, 1500];
+/** The buckets' lower edges, as the owner's view gives them beside the counts. */
+export const EDGES = { size: SIZE_EDGES, requests: REQUEST_EDGES, rows: ROW_EDGES };
 
 function bucket(edges: number[], n: number): number {
   let i = 0;
@@ -95,6 +104,7 @@ export interface Use {
   final: number;
   players: number;
   late: number;
+  questions: number;
   played: number;
   minutes: number;
   devices: number;
@@ -104,12 +114,14 @@ export interface Use {
   sent: number;
   pings: number;
   pollS: number;
+  awakeS: number;
   slept: number;
 }
 
 /** Problems: kept by the day only (docs/design/telemetry.md, "How long, by kind"). */
 export interface Problems {
   failed: number;
+  silent: number;
   quota: number;
   errors: number;
 }
@@ -129,6 +141,7 @@ function emptyUse(): Use {
     final: 0,
     players: 0,
     late: 0,
+    questions: 0,
     played: 0,
     minutes: 0,
     devices: 0,
@@ -138,15 +151,16 @@ function emptyUse(): Use {
     sent: 0,
     pings: 0,
     pollS: 0,
+    awakeS: 0,
     slept: 0,
   };
 }
 
-const SUMMED = ["players", "late", "played", "minutes", "devices", "polled", "reconnects", "http", "sent", "pings", "pollS", "slept"] as const satisfies readonly (keyof Use & keyof ClassUse)[];
+const SUMMED = ["players", "late", "questions", "played", "minutes", "devices", "polled", "reconnects", "http", "sent", "pings", "pollS", "awakeS", "slept"] as const satisfies readonly (keyof Use & keyof ClassUse)[];
 
 /** The day's use with one more class added. */
 export function addClass(day: DayUse | undefined, u: ClassUse): DayUse {
-  const d: DayUse = day ? structuredClone(day) : { ...emptyUse(), problems: { failed: 0, quota: 0, errors: 0 } };
+  const d: DayUse = day ? structuredClone(day) : { ...emptyUse(), problems: { failed: 0, silent: 0, quota: 0, errors: 0 } };
   d.classes++;
   d.kinds[u.kind]++;
   d.size[bucket(SIZE_EDGES, u.players)]++;
@@ -154,22 +168,35 @@ export function addClass(day: DayUse | undefined, u: ClassUse): DayUse {
   d.rows[bucket(ROW_EDGES, u.rows)]++;
   if (u.polled > 0) d.withPoller++;
   if (u.final) d.final++;
-  for (const k of SUMMED) d[k] += u[k];
+  for (const k of SUMMED) d[k] = (d[k] ?? 0) + u[k];
   d.problems.failed += u.failed;
+  d.problems.silent = (d.problems.silent ?? 0) + u.silent;
   d.problems.quota += u.quota;
   d.problems.errors += u.errors;
   return d;
+}
+
+/** Classes turned away, by the cap that turned them: an upload (uploads a day, bytes stored) or letting the class in (rows). */
+export interface Refused {
+  uploads: number;
+  bytes: number;
+  rows: number;
 }
 
 /** A day as SiteBudget keeps it (RowsDay in server/budget.ts), with its uploads. */
 export interface DayRecord {
   day: string;
   uploads: number;
+  /** Let in, the probes among them. */
   classes: number;
+  probes?: number;
   written: number;
   peak: number;
   atOnce?: number;
+  refused?: Refused;
   use?: DayUse;
+  /** The probes' summaries, apart; the day only. */
+  probeUse?: DayUse;
 }
 
 export interface MonthRecord {
@@ -181,6 +208,8 @@ export interface MonthRecord {
   /** Classes let in, and the most in one day. */
   classes: number;
   busiest: number;
+  probes: number;
+  refused: Refused;
   written: number;
   /** The most the ledger held at once, and the most classes booked at once, on any day. */
   peak: number;
@@ -190,11 +219,13 @@ export interface MonthRecord {
 
 /** A day leaving the 31 days, folded into its month: sums added, the most kept; its problems stay behind. */
 export function foldDay(month: MonthRecord | undefined, day: DayRecord): MonthRecord {
-  const m: MonthRecord = month ? structuredClone(month) : { month: day.day.slice(0, 7), days: 0, uploads: 0, classes: 0, busiest: 0, written: 0, peak: 0, atOnce: 0, use: emptyUse() };
+  const m: MonthRecord = month ? structuredClone(month) : { month: day.day.slice(0, 7), days: 0, uploads: 0, classes: 0, busiest: 0, probes: 0, refused: { uploads: 0, bytes: 0, rows: 0 }, written: 0, peak: 0, atOnce: 0, use: emptyUse() };
   m.days++;
   m.uploads += day.uploads;
   m.classes += day.classes;
-  m.busiest = Math.max(m.busiest, day.classes);
+  m.busiest = Math.max(m.busiest, day.classes - (day.probes ?? 0));
+  m.probes += day.probes ?? 0;
+  for (const k of ["uploads", "bytes", "rows"] as const) m.refused[k] += day.refused?.[k] ?? 0;
   m.written += day.written;
   m.peak = Math.max(m.peak, day.peak);
   m.atOnce = Math.max(m.atOnce, day.atOnce ?? 0);
@@ -205,7 +236,7 @@ export function foldDay(month: MonthRecord | undefined, day: DayRecord): MonthRe
     for (const k of ["size", "requests", "rows"] as const) u[k].forEach((n, i) => (m.use[k][i] = (m.use[k][i] ?? 0) + n));
     m.use.withPoller += u.withPoller;
     m.use.final += u.final;
-    for (const k of SUMMED) m.use[k] += u[k];
+    for (const k of SUMMED) m.use[k] += u[k] ?? 0;
   }
   return m;
 }

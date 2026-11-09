@@ -241,6 +241,7 @@ export class Line {
       this.schedulePing();
       silence = window.setTimeout(() => {
         if (this.ws === ws && !heard) {
+          this.line.silent++;
           this.ws = null;
           this.clearPing();
           try {

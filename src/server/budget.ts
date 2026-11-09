@@ -29,26 +29,32 @@ import { DurableObject } from "cloudflare:workers";
 import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type SiteFull } from "../shared/limits.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
-import { MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord } from "./telemetry.ts";
+import { EDGES, MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord, type Refused } from "./telemetry.ts";
 
 /** One day's classes, for the owner (GET /api/site/use): kept FULL_KEEP_DAYS days, then folded into its month. */
 export interface RowsDay {
   day: string;
-  /** Classes let in. */
+  /** Classes let in; `probes` of them uploaded by a simulator or a probe. */
   classes: number;
+  probes?: number;
   /** Rows written by the classes that reached their final ranking or ended. */
   written: number;
   /** The most the ledger held at once: how close the day came to DAY_ROWS_FOR_CLASSES. */
   peak: number;
   /** The most classes booked at once: let in and not yet settled. */
   atOnce?: number;
-  /** The classes that settled, summed (docs/design/telemetry.md). */
+  /** Classes turned away, as counted in this object's memory: a lower bound. */
+  refused?: Refused;
+  /** The classes that settled, summed (docs/design/telemetry.md); the probes' apart. */
   use?: DayUse;
+  probeUse?: DayUse;
 }
 
 /** What GET /api/site/use answers the owner. */
 export interface OwnerView {
   rows: { now: number; of: number };
+  /** The buckets' lower edges (size in players, requests, rows). */
+  edges: typeof EDGES;
   /** Newest first. */
   days: DayRecord[];
   months: MonthRecord[];
@@ -64,13 +70,21 @@ interface Booking {
 }
 
 export class SiteBudget extends DurableObject<Env> {
+  /**
+   * Classes turned away today, not yet in the day's record: a refusal writes
+   * nothing of its own (a script's uploads, refused, would otherwise spend
+   * rows), so the count rides on the day's next write of its record, and is
+   * lost with this object's memory before that.
+   */
+  private refused: ({ day: string } & Refused) | null = null;
+
   /** Books a new quiz; says which cap is reached when the site is full (today's uploads, or bytes stored). */
   async reserve(instance: string, bytes: number, until: number): Promise<{ rows: number } | SiteFull> {
     const now = Date.now();
     const day = `d:${dayOf(now)}`;
     await this.rollUp(now);
     const today = (await this.ctx.storage.get<number>(day)) ?? 0;
-    if (today >= MAX_UPLOADS_PER_DAY) return await this.full(now, "uploads");
+    if (today >= MAX_UPLOADS_PER_DAY) return await this.full(now, "uploads", "uploads");
     const bookings = await this.ctx.storage.list<Booking>({ prefix: "i:" });
     const stale: string[] = [];
     let live = 0;
@@ -79,7 +93,7 @@ export class SiteBudget extends DurableObject<Env> {
       else stale.push(k);
     }
     if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
-    if (live + bytes > MAX_LIVE_BYTES) return await this.full(now, "bytes");
+    if (live + bytes > MAX_LIVE_BYTES) return await this.full(now, "bytes", "bytes");
     await this.ctx.storage.put({ [day]: today + 1, [`i:${instance}`]: { bytes, until } satisfies Booking });
     // The day's rows booked, so the check can say when the site is nearly full.
     return { rows: await this.rowsToday() };
@@ -90,7 +104,7 @@ export class SiteBudget extends DurableObject<Env> {
    * classes booked today leave no room; today counts as a full day. A quiz
    * that booked already is not booked again.
    */
-  async bookRows(instance: string, rows: number, until: number): Promise<{ rows: number } | "rows"> {
+  async bookRows(instance: string, rows: number, until: number, probe = false): Promise<{ rows: number } | "rows"> {
     const now = Date.now();
     const key = `i:${instance}`;
     const b = (await this.ctx.storage.get<Booking>(key)) ?? { bytes: 0, until };
@@ -102,14 +116,14 @@ export class SiteBudget extends DurableObject<Env> {
     const stale = [...ledger.keys()].filter((k) => k !== `r:${day}`);
     if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
     if (booked + rows > DAY_ROWS_FOR_CLASSES) {
-      await this.full(now, "uploads");
+      await this.full(now, "uploads", "rows");
       return "rows";
     }
     const h = (await this.ctx.storage.get<RowsDay>(`h:${day}`)) ?? { day, classes: 0, written: 0, peak: 0 };
     // This class and the others let in and not yet settled.
     const bookings = await this.ctx.storage.list<Booking>({ prefix: "i:" });
     const atOnce = 1 + [...bookings].filter(([k, o]) => k !== key && o.rows !== undefined && o.until > now).length;
-    const record: RowsDay = { ...h, classes: h.classes + 1, peak: Math.max(h.peak, booked + rows), atOnce: Math.max(h.atOnce ?? 0, atOnce) };
+    const record: RowsDay = this.withRefused({ ...h, classes: h.classes + 1, ...(probe ? { probes: (h.probes ?? 0) + 1 } : {}), peak: Math.max(h.peak, booked + rows), atOnce: Math.max(h.atOnce ?? 0, atOnce) });
     await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking, [`h:${day}`]: record });
     return { rows: booked + rows };
   }
@@ -163,6 +177,7 @@ export class SiteBudget extends DurableObject<Env> {
     const days = [...new Set([...records.keys(), ...uploads.keys()].map((k) => k.slice(2)))].sort().reverse();
     return {
       rows: { now: await this.rowsToday(), of: DAY_ROWS_FOR_CLASSES },
+      edges: EDGES,
       days: days.map((day) => ({ uploads: uploads.get(`d:${day}`) ?? 0, ...(records.get(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 }) })),
       months: [...months.values()].reverse(),
     };
@@ -190,7 +205,8 @@ export class SiteBudget extends DurableObject<Env> {
     entries[key] = settle ? rest : { ...b, rows };
     if (settle && b.day) {
       const h = (await this.ctx.storage.get<RowsDay>(`h:${b.day}`)) ?? { day: b.day, classes: 0, written: 0, peak: 0 };
-      entries[`h:${b.day}`] = { ...h, written: h.written + rows, ...(use ? { use: addClass(h.use, use) } : {}) } satisfies RowsDay;
+      const summary = use ? (use.probe ? { probeUse: addClass(h.probeUse, use) } : { use: addClass(h.use, use) }) : {};
+      entries[`h:${b.day}`] = this.withRefused({ ...h, written: h.written + rows, ...summary });
     }
     await this.ctx.storage.put(entries);
   }
@@ -200,8 +216,24 @@ export class SiteBudget extends DurableObject<Env> {
     return (await this.ctx.storage.get<number>(`r:${dayOf(Date.now())}`)) ?? 0;
   }
 
-  /** An upload refused: today is a full day. Written once a day; older full days than FULL_KEEP_DAYS go. Gives back the cap, for reserve. */
-  private async full(now: number, cap: SiteFull): Promise<SiteFull> {
+  /** A day's record with the refusals counted since its last write, when they are that day's. */
+  private withRefused(h: RowsDay): RowsDay {
+    const r = this.refused;
+    if (!r || r.day !== h.day) return h;
+    this.refused = null;
+    const was = h.refused ?? { uploads: 0, bytes: 0, rows: 0 };
+    return { ...h, refused: { uploads: was.uploads + r.uploads, bytes: was.bytes + r.bytes, rows: was.rows + r.rows } };
+  }
+
+  /**
+   * An upload or a class refused: today is a full day, and the refusal is
+   * counted (`refused`). Written once a day; older full days than
+   * FULL_KEEP_DAYS go. Gives back the cap, for reserve.
+   */
+  private async full(now: number, cap: SiteFull, by: keyof Refused): Promise<SiteFull> {
+    const day = dayOf(now);
+    if (this.refused?.day !== day) this.refused = { day, uploads: 0, bytes: 0, rows: 0 };
+    this.refused[by]++;
     const days = [...(await this.ctx.storage.list({ prefix: "f:" })).keys()];
     const key = `f:${dayOf(now)}`;
     const old = days.filter((k) => k < `f:${dayOf(now - FULL_KEEP_DAYS * DAY_MS)}`);
