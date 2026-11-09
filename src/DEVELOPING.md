@@ -92,7 +92,8 @@ way it finds them by script name when deployed.
 `GET /api/site/use`, the owner's figures (`docs/design/telemetry.md`),
 answers 404 unless the site has an `OWNER_KEY`; locally, put
 `OWNER_KEY=<any string>` in `src/.dev.vars` (git-ignored), which
-`wrangler pages dev` reads, and send it as `Authorization: Bearer <key>`.
+`wrangler pages dev` reads, and send it as `Authorization: Bearer <key>`,
+or open `/owner` and type the key (`docs/design/owner-page.md`).
 
 `node scripts/simulate.mjs [base-url] [players] [--all-poll] [--speed]` plays a
 class of bad-Wi-Fi devices against a running site, local or deployed. Its header

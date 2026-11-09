@@ -242,6 +242,16 @@ export function foldDay(month: MonthRecord | undefined, day: DayRecord): MonthRe
   return m;
 }
 
+/** What GET /api/site/use answers the owner. */
+export interface OwnerView {
+  rows: { now: number; of: number };
+  /** The buckets' lower edges (size in players, requests, rows). */
+  edges: typeof EDGES;
+  /** Newest first. */
+  days: DayRecord[];
+  months: MonthRecord[];
+}
+
 /** Month records are kept this many months back from the current one: two school years side by side. */
 export const MONTHS_KEPT = 24;
 

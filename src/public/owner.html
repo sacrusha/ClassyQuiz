@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>classyQuiz · owner</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/site.css">
+<style>
+  /* The colours and typefaces are site.css's. Everything below the key box is written by the script once the site has accepted the key (docs/design/owner-page.md). */
+  body { line-height: var(--leading); }
+  main { max-width: 64rem; margin: 0 auto; padding: 1rem 16px 4rem; }
+  h1 { font-size: var(--h1); margin: .5rem 0; }
+  h2 { font-size: var(--h2); margin: 2.2rem 0 .3rem; }
+  p { margin: .4rem 0; }
+  .muted { color: var(--muted); }
+  .note { color: var(--muted); font-size: .92rem; max-width: 46rem; }
+  [hidden] { display: none !important; }
+
+  #gate { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 1rem 0 .4rem; }
+  #gate label { font-weight: 600; }
+  #gate input { font: 1rem var(--font-mono); min-width: 0; flex: 1 1 14rem; max-width: 24rem; padding: 9px 10px; border: 2px solid var(--rule); border-radius: 10px; background: var(--card); color: var(--fg); }
+  button { font: inherit; font-weight: 600; padding: 9px 16px; border: 0; border-radius: 10px; background: var(--control); color: var(--control-ink); cursor: pointer; }
+  button.quiet { background: transparent; color: var(--fg); border: 1px solid var(--rule); }
+  #msg:empty { display: none; }
+  #msg.bad { color: var(--bad); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: .6rem 0 0; }
+  .bar .when { flex: 1 1 auto; }
+
+  .gauges { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; margin: .8rem 0 0; }
+  .gauge { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 12px 14px; }
+  .gauge .name { color: var(--muted); font-size: .92rem; }
+  .gauge .val { font: 700 1.5rem var(--font-brand); font-variant-numeric: tabular-nums; }
+  .gauge .of { color: var(--muted); font-size: .92rem; }
+  .meter { height: 8px; border-radius: 4px; background: var(--code-bg); margin-top: 6px; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--good); }
+  .meter i.mid { background: #c9a227; }
+  .meter i.high { background: var(--bad); }
+
+  .scroll { overflow-x: auto; margin: .6rem 0; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: .95rem; }
+  th, td { padding: 6px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--rule); }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--card); }
+  th { font-weight: 600; color: var(--muted); vertical-align: bottom; white-space: normal; min-width: 4.5rem; }
+  tr:last-child td { border-bottom: 0; }
+  td.zero { color: var(--muted); }
+
+  .mix { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; margin-top: .6rem; }
+  .mix section { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 14px; }
+  .mix h3 { font-size: var(--h3); margin: 0 0 .3rem; }
+  .row { display: grid; grid-template-columns: 5.5rem 1fr 3.5rem; gap: 8px; align-items: center; font-variant-numeric: tabular-nums; font-size: .95rem; }
+  .row .meter { margin: 0; }
+  .row .meter i { background: var(--accent); }
+  .row b { text-align: right; font-weight: 600; }
+  dl { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; margin: 0; font-variant-numeric: tabular-nums; font-size: .95rem; }
+  dd { margin: 0; text-align: right; font-weight: 600; }
+  dt { color: var(--muted); }
+  details { margin-top: 1.4rem; }
+  summary { cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body class="follows-dark">
+<header class="site-head" style="--page-w: 64rem"><div class="in"><a class="brand" href="/"><!--#brand classyquiz-horizontal-32-inline.svg--></a></div></header>
+<main>
+<h1>Owner</h1>
+<form id="gate" method="post" novalidate>
+  <label for="key">Key</label>
+  <input id="key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <button type="submit">Open</button>
+</form>
+<p id="msg" role="status" class="muted"></p>
+<div id="figures" hidden></div>
+</main>
+<script src="/js/owner.js" defer></script>
+</body>
+</html>

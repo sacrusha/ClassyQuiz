@@ -29,7 +29,7 @@ import { DurableObject } from "cloudflare:workers";
 import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type SiteFull } from "../shared/limits.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
-import { EDGES, MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord, type Refused } from "./telemetry.ts";
+import { EDGES, MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord, type OwnerView, type Refused } from "./telemetry.ts";
 
 /** One day's classes, for the owner (GET /api/site/use): kept FULL_KEEP_DAYS days, then folded into its month. */
 export interface RowsDay {
@@ -48,16 +48,6 @@ export interface RowsDay {
   /** The classes that settled, summed (docs/design/telemetry.md); the probes' apart. */
   use?: DayUse;
   probeUse?: DayUse;
-}
-
-/** What GET /api/site/use answers the owner. */
-export interface OwnerView {
-  rows: { now: number; of: number };
-  /** The buckets' lower edges (size in players, requests, rows). */
-  edges: typeof EDGES;
-  /** Newest first. */
-  days: DayRecord[];
-  months: MonthRecord[];
 }
 
 interface Booking {

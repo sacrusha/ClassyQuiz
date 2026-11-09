@@ -187,7 +187,8 @@ The owner, behind a key: `GET /api/site/use` with `Authorization: Bearer
 <key>` answers the day records (rows, use, cost, problems), the month
 records and what is booked now. The key is the Pages project's secret
 `OWNER_KEY`, compared in the Function; without it set the address answers
-404, so a copy shows nothing until its owner sets one. `GET /api/site`
+404, so a copy shows nothing until its owner sets one. A browser can't send
+the header: the owner's page, `/owner`, does (`owner-page.md`). `GET /api/site`
 answers `full` alone, for the landing. Nothing identifies anyone, but the
 figures are the owner's to read, not the public's.
 

@@ -481,7 +481,8 @@ shows one binding.
    each device counts its own line and sends the count with what it sends
    anyway; a class becomes one summary at its settle; the days' records
    (31 days, then by the month for 24 months, problems by the day only)
-   for the owner at `GET /api/site/use`, behind `OWNER_KEY`. Open: the key
+   for the owner at `GET /api/site/use`, behind `OWNER_KEY`, read in a browser
+   at `/owner` (`design/owner-page.md`). Open: the key
    set on the Pages project holds a letter outside ASCII, which a request's
    header carries unreliably, so the figures answer 404 to it until a key of
    ASCII letters and digits is set and the site deployed again
