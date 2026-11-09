@@ -124,3 +124,7 @@ Pages deployment e72805dd, state Worker version b2c876fb, no migration (`src/ser
 - `OWNER_KEY` as set in `secrets/cloudflare.env` holds a non-ASCII letter, and `/api/site/use` answered 404 to it on the copy, sent as UTF-8 or as Latin-1; an ASCII key worked. The live project's key is that one.
 
 Run by the personal-assistant session from the clean worktree with the main checkout's credentials file. Checked live: `/`, `/open`, `/open?example=de`, `/play`, `/layout`, `/example`, `/check`, `/own-copy`, `/api/site` 200; `/api/site` answers `{"full":0}`; `/api/site/use` 404 without a key and with the owner's; `play.js`, `screen.js`, `teach.js`, `open.js`, `film.js` byte-identical to the build. No run against the live site. Not tried live: anything with a class; the owner's figures, until the key is one an HTTP header carries.
+
+## 2026-11-09 — twenty-seventh deploy, cb7ba33
+
+Pages deployment 8a2dacd6, state Worker version c78cf5fe, no migration (nothing deployable changed since c2f9c32: the docs and `scripts/simulate.mjs` only). For the owner's new `OWNER_KEY`, of ASCII letters and digits, set on the Pages project before the deploy (`secrets/README.md`). Run by the personal-assistant session from the clean worktree with the main checkout's credentials file. Checked live: `/api/site/use` 200 with the key (the days' records since 2026-11-07, no month yet, no class settled with a summary yet), 404 without it and with a wrong one; `/`, `/open`, `/play`, `/api/site` 200; `play.js`, `screen.js`, `open.js` byte-identical to the build.
