@@ -7,6 +7,7 @@
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
+import { CLASS_WAITING } from "../shared/limits.ts";
 import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabHadRemote, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
@@ -16,9 +17,12 @@ import { finalHtml, fitFinal } from "./final.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
 import { backdrop, endJump, jump, layQuestion, markTiles } from "./stage.ts";
+import { LINE_WORDS, SITE, T, lang, said } from "./room-text.ts";
 
 const main = $("main");
 const sbar = $("#sbar");
+document.documentElement.lang = lang;
+document.title = `classyQuiz · ${T.projector}`;
 
 const params = new URLSearchParams(location.search);
 const instance = params.get("q") ?? "";
@@ -48,11 +52,12 @@ function start(): void {
   keepAwake();
   line = new Line({
     instance,
+    words: LINE_WORDS,
     auth: () => ({ role: "screen", token: held.token }),
     onMessage,
     onStatus: (s) => {
       const d = document.getElementById("dot");
-      if (d) statusDot(d, s);
+      if (d) statusDot(d, s, T.status);
     },
   });
   line.start();
@@ -82,9 +87,9 @@ function onMessage(m: ServerMessage): void {
     if (firstRemote || (view.remote === "present" && before?.remote !== "present")) arrange("remote", false);
     else if (view.phase === "final" && before?.phase !== "final" && !hadRemote) arrange("one", false);
     if (before && before.remote !== view.remote) {
-      if (view.remote === "present") toast("Remote connected");
+      if (view.remote === "present") toast(T.remoteConnected);
       // On the wall: nothing here invites the class to the teacher's page.
-      else if (before.remote === "present") toast("Remote gone – steering here", 8000);
+      else if (before.remote === "present") toast(T.remoteGoneHere, 8000);
     }
     // Whether the Remote's tab is still there, and during a question which
     // tablets are (the count's "of"), changes with time, not with an event:
@@ -115,7 +120,7 @@ function onMessage(m: ServerMessage): void {
     }
     document.body.className = "screen";
     sbar.innerHTML = "";
-    main.innerHTML = `<div class="center"><p style="font-size:1.6em">${esc(m.reason)}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
+    main.innerHTML = `<div class="center"><p style="font-size:1.6em">${esc(said(m.reason))}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
   }
 }
 
@@ -223,12 +228,12 @@ function comeBack(): string {
  * already named both needs (checkHowTo).
  */
 function secondDevice(v: ScreenView): string {
-  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open a second screen in a new window</button> with a click.</span>`;
+  return `${T.secondDevice(esc(siteAddress()), esc(teacherCode(v.code, v.teacher)))}<span class="twoscreens">${T.secondDeviceWindow(`<button class="link" data-act="projector-window">${T.newWindowLink}</button>`)}</span>`;
 }
 
 /** The how-to under the check's "Screen and remote". */
 function checkHowTo(v: ScreenView): string {
-  return `On the second device, open <strong>${esc(siteAddress())}</strong> and type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> With two screens on this computer: <button class="link" data-act="projector-window">open a second screen in a new window</button>.</span>`;
+  return `${T.checkHowTo(esc(siteAddress()), esc(teacherCode(v.code, v.teacher)))}<span class="twoscreens">${T.checkHowToWindow(`<button class="link" data-act="projector-window">${T.newWindowLink}</button>`)}</span>`;
 }
 
 /** The single tab's lobby screen; the class never sees the check unless the teacher shares it. */
@@ -279,23 +284,23 @@ function renderCheck(v: ScreenView): void {
   const nq = t.questions.length;
   // A Remote that was here and went: the how-to to bring it back, whatever the toggle says.
   const howTo = arranged === "remote" || t.remote === "away";
-  const gone = t.remote === "away" ? "Remote gone. " : "";
+  const gone = t.remote === "away" ? `${T.remoteGone}. ` : "";
   const html = `<div class="check">
     <div class="checkhead">
-      <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${nq} ${nq === 1 ? "question" : "questions"}</span></h1>
-      <p class="classcode">Join code <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
+      <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${T.questions(nq)}</span></h1>
+      <p class="classcode">${T.joinCode} <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
     ${roomNotice(t)}
-    <h2 class="arrange-ask">How are the screens arranged?</h2>
-    <div class="arrange" role="group" aria-label="How are the screens arranged?">
-      ${arrangeOption("one", "One screen", "It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker.")}
-      ${arrangeOption("remote", "Screen and remote", "One device shows the quiz, another steers it: a phone, say.")}
+    <h2 class="arrange-ask">${T.arrangeAsk}</h2>
+    <div class="arrange" role="group" aria-label="${T.arrangeAsk}">
+      ${arrangeOption("one", T.oneScreen, T.oneScreenLine)}
+      ${arrangeOption("remote", T.screenAndRemote, T.screenAndRemoteLine)}
     </div>
     ${howTo ? `<p class="device cline">${gone}${checkHowTo(v)}</p>` : ""}
-    <p class="arrange-call">In a video call, the window you share is the screen everyone sees.</p>
-    <p class="cstart"><button class="btn primary big" data-act="show-join">Let everyone in &#9654;</button></p>
+    <p class="arrange-call">${T.videoCall}</p>
+    <p class="cstart"><button class="btn primary big" data-act="show-join">${T.letIn}&nbsp;&#9654;</button></p>
     ${questionList(t, steer.ui)}
-    <p class="mfoot"><button class="btn" data-menu>⋯ More</button></p>
+    <p class="mfoot"><button class="btn" data-menu>${T.moreMenu}</button></p>
   </div>`;
   patch(main, html);
   fillPictures(main);
@@ -365,8 +370,7 @@ function joinAddress(): string {
 }
 
 function nobodyLine(): string {
-  const host = esc(siteAddress());
-  return `Nobody in yet? If phones and tablets can't open ${host}, their network may block it: <a href="/check#it" target="_blank" rel="noopener">what to tell IT ›</a>`;
+  return T.nobodyYet(esc(siteAddress()), `<a href="/check#it" target="_blank" rel="noopener">${esc(SITE.whatToTellIt)}</a>`);
 }
 
 /**
@@ -394,11 +398,11 @@ function renderJoin(v: ScreenView): void {
           ${nobodyYet(v) ? `<p class="nobody">${nobodyLine()}</p>` : ""}
         </div>
       </div>
-      <div class="mstart"><button class="btn primary big" data-act="begin">Start quiz &#9654;</button>
+      <div class="mstart"><button class="btn primary big" data-act="begin">${T.startQuiz}&nbsp;&#9654;</button>
         <p class="device">${speedSwitch(t)}</p>
-        <p class="joinnav"><button class="link" data-act="show-check">‹ Back</button>
-          ${arranged === "remote" || t.remote === "away" ? `<button class="link" data-act="second-device">${t.remote === "away" ? "Remote gone: a" : "A"} second device ›</button>` : ""}
-          <button class="link" data-menu aria-label="more">⋯</button></p>
+        <p class="joinnav"><button class="link" data-act="show-check">${T.backToCheck}</button>
+          ${arranged === "remote" || t.remote === "away" ? `<button class="link" data-act="second-device">${t.remote === "away" ? T.remoteGoneSecond : T.secondDeviceLink}</button>` : ""}
+          <button class="link" data-menu aria-label="${T.more}">⋯</button></p>
       </div>
     </div>
   </div>`;
@@ -415,7 +419,7 @@ function renderLobby(v: ScreenView): void {
     lobbyKey = "waiting";
     delete main.dataset.skeleton;
     main.innerHTML = `<div class="bar"><span class="grow">${esc(v.title)}</span></div>
-      <div class="center"><p class="muted">Joining opens in a moment.</p></div>`;
+      <div class="center"><p class="muted">${esc(said(CLASS_WAITING))}</p></div>`;
     return;
   }
   const key = `${v.code}`;
@@ -670,24 +674,24 @@ function renderBar(v: ScreenView, managing: boolean): void {
     html = "";
   } else if (v.steer) {
     html = `<div class="steerbar">
-      <button class="btn more" data-menu aria-label="more">⋯</button>
+      <button class="btn more" data-menu aria-label="${T.more}">⋯</button>
       <span class="grow codeline">${v.phase === "final" ? "" : addressAndCode(v.code)}</span><span class="dot" id="dot"></span>
-      ${v.steer.remote === "away" ? `<span class="joinchip">Remote gone</span>` : ""}
+      ${v.steer.remote === "away" ? `<span class="joinchip">${T.remoteGone}</span>` : ""}
       ${steeringButtons(v.steer)}
     </div>`;
   } else {
     html = `<div class="corner">
       ${v.phase === "lobby" ? "" : `<span class="codeline">${addressAndCode(v.code)}</span>`}
       <span class="grow"></span><span class="dot" id="dot"></span>
-      ${v.phase === "lobby" && v.remote === "present" ? `<button data-act="swap" type="button">&#8644; Swap screens</button>` : ""}
-      ${full ? "" : `<button data-full type="button">Full screen (F)</button>`}
-      <button data-menu type="button" aria-label="more">⋯</button>
+      ${v.phase === "lobby" && v.remote === "present" ? `<button data-act="swap" type="button">${T.swapScreens}</button>` : ""}
+      ${full ? "" : `<button data-full type="button">${T.fullScreen}</button>`}
+      <button data-menu type="button" aria-label="${T.more}">⋯</button>
     </div>`;
   }
   // Until the window has been full screen once (it is on the projector then).
   if (full) wasFull = true;
   if (dragHint && !full && !wasFull && !v.steer) {
-    html += `<div class="drag-hint">Drag this window to the projector screen, then press F for full screen.</div>`;
+    html += `<div class="drag-hint">${T.dragHint}</div>`;
   }
   if (html !== lastBar) {
     lastBar = html;
@@ -701,14 +705,14 @@ function renderBar(v: ScreenView, managing: boolean): void {
 function menu(v: ScreenView): void {
   const items: MenuItem[] = v.steer ? steerItems(v.steer, steer, true) : [];
   if (v.question?.image && (v.phase === "question" || v.phase === "reveal")) {
-    items.unshift({ label: v.zoom ? "Back to the question (Z)" : "Enlarge the picture (Z)", run: () => toggleZoom() });
+    items.unshift({ label: v.zoom ? T.zoomBack : T.zoomIn, run: () => toggleZoom() });
   }
-  if (v.steer) items.push({ label: "Players", run: () => showPlayers() });
+  if (v.steer) items.push({ label: T.players, run: () => showPlayers() });
   // ⇄ Swap while both tabs are there: this wall steers, the steering tab shows the quiz.
-  if (!v.steer && v.remote === "present") items.push({ label: "&#8644; Swap: steer here, show the quiz on the other device", run: () => void swap() });
-  if (v.steer) items.push({ label: "A second device…", run: () => showNote(secondDevice(v)) });
-  items.push({ label: "Stop showing the quiz here", run: () => void leave() });
-  if (v.steer && v.phase !== "final") items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
+  if (!v.steer && v.remote === "present") items.push({ label: T.swapHere, run: () => void swap() });
+  if (v.steer) items.push({ label: T.secondDeviceMenu, run: () => showNote(secondDevice(v)) });
+  items.push({ label: T.stopShowing, run: () => void leave() });
+  if (v.steer && v.phase !== "final") items.push({ label: T.deleteQuiz, danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }
 
@@ -718,8 +722,8 @@ function showPlayers(): void {
   document.querySelector(".sheet-back")?.remove();
   const back = document.createElement("div");
   back.className = "sheet-back";
-  back.innerHTML = `<div class="sheet players-sheet"><p class="hint">Faded ones are away; they come back by themselves. Tap one to remove it, e.g. a double.</p>
-    ${playersRow(t, true)}<button class="cancel" data-close>Close</button></div>`;
+  back.innerHTML = `<div class="sheet players-sheet"><p class="hint">${T.playersHint}</p>
+    ${playersRow(t, true)}<button class="cancel" data-close>${T.close}</button></div>`;
   back.addEventListener("click", (e) => {
     const el = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
     if (el) void steer.act(el);
@@ -732,7 +736,7 @@ function showNote(html: string): void {
   document.querySelector(".sheet-back")?.remove();
   const back = document.createElement("div");
   back.className = "sheet-back";
-  back.innerHTML = `<div class="sheet"><p>${html}</p><button class="cancel" data-close>Close</button></div>`;
+  back.innerHTML = `<div class="sheet"><p>${html}</p><button class="cancel" data-close>${T.close}</button></div>`;
   back.addEventListener("click", (e) => {
     const t = e.target as HTMLElement;
     if (t.closest("[data-act=projector-window]")) {
@@ -748,14 +752,13 @@ function showNote(html: string): void {
 /** ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): no confirmation, the same tap on either device undoes it. */
 async function swap(): Promise<void> {
   const r = await line?.send({ op: "swap" });
-  if (r && !r.ok && r.error) toast(r.error);
+  if (r && !r.ok && r.error) toast(said(r.error));
 }
 
 async function leave(): Promise<void> {
   // The single tab with the class in: nothing steers after this, until a device comes in with the teacher code.
   const last = !!view?.steer && view.players.length > 0;
-  const back = view ? `type ${teacherCode(view.code, view.teacher)} at ${siteAddress()}` : "";
-  if (!confirm(last ? `Stop showing the quiz on this screen? Nothing steers it until a device comes in: ${back}.` : "Stop showing the quiz on this screen?")) return;
+  if (!confirm(last && view ? T.confirmStopShowingLast(siteAddress(), teacherCode(view.code, view.teacher)) : T.confirmStopShowing)) return;
   await line?.send({ op: "leave" });
   line?.stop();
   tabRole.remove(instance);
@@ -765,7 +768,7 @@ async function leave(): Promise<void> {
 /** Two screens: a new window, which asks the same question as any other device. */
 function projectorWindow(): void {
   const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
-  if (!w) toast(`The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type ${teacherCode(held!.code, teacherDigits())}.`, 8000);
+  if (!w) toast(T.popupBlocked(teacherCode(held!.code, teacherDigits())), 8000);
 }
 
 for (const area of [main, sbar]) {
@@ -852,7 +855,7 @@ function toggleZoom(): void {
   const v = view;
   if (!v || !line || !v.question?.image || (v.phase !== "question" && v.phase !== "reveal")) return;
   void line.send({ op: "zoom", value: !v.zoom, at: { phase: v.phase, current: v.current } }).then((r) => {
-    if (!r.ok && r.error) toast(r.error);
+    if (!r.ok && r.error) toast(said(r.error));
   });
 }
 // The picture beside the question, or the enlarged one: a click toggles.

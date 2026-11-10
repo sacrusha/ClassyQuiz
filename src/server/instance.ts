@@ -1842,7 +1842,7 @@ export class Instance extends DurableObject<Env> {
     const rows = this.meta?.rows;
     const unsettled = rows && !rows.settled;
     await this.budget().release(this.ctx.id.toString(), unsettled ? this.spent() : undefined, unsettled ? this.classUse() : undefined).catch(() => {});
-    const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
+    const gone: ServerMessage = ackId ? { t: "gone", reason: "This quiz has been ended.", home: true } : { t: "gone", reason: "This quiz has ended." };
     const host = this.game?.run?.peers?.host;
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;

@@ -218,10 +218,15 @@ From the check on, the screens' words name no role where a sentence does
 without one, so they read as a class's and as a pub's: "Let everyone in",
 "Join code", "Joining opens in a moment.", "Ask whoever runs it.",
 "everyone watches this screen", "everyone reads the question", "The last
-two digits don't match this quiz." "Projector" and "Remote" stay, the roles' names, which
-the owner uses for any host ("use one as remote the other as a
-projector"). These docs keep "teacher", "class" and "teacher code": they
-speak of the example class. The words before the check, the guidance's and
+two digits don't match this quiz." The owner's example of a sentence that
+does without a role noun: "Join with this code to add an optional second
+quizmaster device, use one as remote the other as a projector." The device
+that steers is the "Remote"; the one that shows the quiz is "the big
+screen", the root page's word, on the Remote, in the tab's title and on the
+page for an address that isn't one, since a television, a touch board or a
+shared window shows a quiz as a projector does. These docs keep "teacher",
+"class", "teacher code" and "Projector" (the role `screen`): they speak of
+the example class. The words before the check, the guidance's and
 the README's follow the same rule, decided once for all entries
 (`root-page.md`, "Words for whoever comes").
 
@@ -320,7 +325,7 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
 ## Not known
 
 - Whether teachers read "63953 47" as theirs and "63953" as the class's.
-- Whether the words (Projector, Remote, Show the quiz here, Steer it from
+- Whether the words (Big screen, Remote, Show the quiz here, Steer it from
   here, A second device, Swap) are the ones teachers reach for.
 - Whether hosts read the toggle as a question about their setup, and
   whether a host at one screen, on a first visit, reads the how-to under

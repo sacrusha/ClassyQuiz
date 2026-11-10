@@ -15,7 +15,7 @@
 
 import type { AnswerAck, Auth, ClientMessage, Command, DeviceHeld, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
-import { SLEEP_AFTER_MS, quotaMessage } from "../shared/limits.ts";
+import { SLEEP_AFTER_MS } from "../shared/limits.ts";
 import { hideNotice, showNotice } from "./notice.ts";
 import { pauseAwake } from "./dom.ts";
 import { emptyLine, readLine, type LineCounts } from "../shared/line.ts";
@@ -27,6 +27,8 @@ export interface LineOptions {
   auth: () => Auth;
   onMessage: (m: ServerMessage) => void;
   onStatus?: (s: LineStatus) => void;
+  /** The notices' words, in the page's language: the tap that wakes a device asleep, and the day's allowance spent. */
+  words: { asleep: string; quota: () => string };
 }
 
 interface Pending {
@@ -136,7 +138,7 @@ export class Line {
     }
     pauseAwake(true);
     this.setStatus("offline");
-    showNotice("sleep", "Tap to continue", () => this.wake());
+    showNotice("sleep", this.opts.words.asleep, () => this.wake());
   }
 
   private wake(): void {
@@ -155,7 +157,7 @@ export class Line {
     if (q === this.quota) return;
     if (q && !this.quota) this.line.quota++;
     this.quota = q;
-    if (q) showNotice("quota", quotaMessage());
+    if (q) showNotice("quota", this.opts.words.quota());
     else hideNotice("quota");
   }
 
@@ -570,7 +572,7 @@ export async function api<T>(path: string, body: unknown): Promise<{ status: num
 /**
  * An API answer's body (`json: false` when it wasn't JSON, e.g. a school
  * filter's page). When the site's daily allowance is spent it comes back with
- * `quota` and the words to show in `error`: our functions say
+ * `quota`, which the page says in its own words: our functions say
  * `{error: "quota"}`; past the request allowance Cloudflare answers itself,
  * with its error 1027 (a best reading of its docs, unverified; a 429 counts
  * too).
@@ -585,7 +587,7 @@ export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
     parsed = null;
   }
   const quota = parsed ? parsed.error === "quota" : res.status === 429 || /\b1027\b/.test(text);
-  if (quota) return { ...(parsed ?? ({} as T)), quota: true, error: quotaMessage() } as ApiBody<T>;
+  if (quota) return { ...(parsed ?? ({} as T)), quota: true } as ApiBody<T>;
   return parsed ?? ({ json: false } as ApiBody<T>);
 }
 

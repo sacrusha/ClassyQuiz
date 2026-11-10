@@ -105,7 +105,7 @@ test("skipping: the open question goes unscored, a future one is never shown, a 
   assert.deepEqual(G.progress(g), { n: 1, total: 1 });
   G.showAnswers(g, 5);
   G.reveal(g, 10);
-  assert.throws(() => G.setSkip(g, 1, true), /can only be not counted/);
+  assert.throws(() => G.setSkip(g, 1, true), /only not counted/);
   nextQ(g, 10);
   assert.equal(g.run!.phase, "final", "question 3 was skipped, so the quiz ends");
   assert.equal(score(g, ids[0]), 0);

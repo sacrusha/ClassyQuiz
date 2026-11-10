@@ -22,9 +22,13 @@ test("every word the built film quotes from the site's screens is in the site's 
   };
   walk(site);
   assert.ok(quoted.length > 20, `only ${quoted.length} words in SITE`);
-  const dir = new URL("./", import.meta.url);
-  const names = (await readdir(dir)).filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"));
-  const code = (await Promise.all(names.map((f) => readFile(new URL(f, dir), "utf8")))).join("\n");
+  // the pages' code, and the shared words some of their screens show (the server's messages, shared/limits.ts)
+  const read = async (d: string): Promise<string> => {
+    const dir = new URL(d, import.meta.url);
+    const names = (await readdir(dir)).filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"));
+    return (await Promise.all(names.map((f) => readFile(new URL(f, dir), "utf8")))).join("\n");
+  };
+  const code = `${await read("./")}\n${await read("../shared/")}`;
   // ▶ is an icon or an entity in the code, beside the words
   const missing = quoted.map((s) => s.replace(/▶/g, "").trim()).filter((s) => s && !code.includes(s));
   assert.deepEqual(missing, [], "the film shows words the site no longer has: change docs/film/build/film.js (SITE) and run docs/film/build/sitebuild.py");

@@ -302,7 +302,7 @@ them, and the README points self-hosters there.
   after their last use (`INSTANCE_IDLE_MS`). Both point to the own-copy page
   as the self-hosting nudge, and show to the teacher as a message, not as a
   problem to copy for the AI. Wording on the screen is in
-  `client/landing-text.ts` (`siteFull`), shown in the visitor's language on
+  `client/site-text.ts` (`siteFull`), shown in the visitor's language on
   the local check, where the upload happens (`local-check.md`, "Opening a
   room").
 - **A request body without a length.** Every POST to an instance is read in
@@ -493,11 +493,11 @@ for a domain with a rate-limiting rule.
 
 ### When the allowance runs out anyway
 
-Devices say so instead of showing the offline dot: `quotaMessage`, "The free
-site has used up today's allowance. It works again at 01:00 Swiss time", the
-hour computed (02:00 in summer), with the own-copy pointer. Joining says
-the same, and so does opening a room on the local check, in the visitor's
-language. The mapping: the Function
+Devices say so instead of showing the offline dot, in their language: "The
+free site has used up today's allowance. It works again at 01:00 Swiss
+time", the hour computed (02:00 in summer), with the own-copy pointer
+(`quotaNotice`, `client/room-text.ts`). Joining says the same, and so does
+opening a room on the local check. The mapping: the Function
 turns a platform error that reads like a spent limit (`isQuotaError`, matched
 on "free tier", "daily limit", "quota") into `{error: "quota"}` (503); an
 instance whose write fails that way answers `{t: "quota"}` and reloads its

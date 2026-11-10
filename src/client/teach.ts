@@ -11,10 +11,16 @@ import { steeringButtons } from "./steps.ts";
 import { clockBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures } from "./pictures.ts";
+import { LINE_WORDS, T, lang, said } from "./room-text.ts";
 
 const main = $("#main");
 const actions = $("#actions");
 const dot = $("#dot");
+document.documentElement.lang = lang;
+document.title = `classyQuiz · ${T.remote}`;
+// Before the first view: the page's own English line, in this device's language.
+const connecting = main.querySelector("p.muted");
+if (connecting) connecting.textContent = `${T.connecting}…`;
 
 const instance = new URLSearchParams(location.search).get("q") ?? "";
 const held: HeldRole | null = instance ? tabRole.get(instance) : null;
@@ -38,9 +44,10 @@ function start(): void {
   arrangement.set("remote");
   line = new Line({
     instance,
+    words: LINE_WORDS,
     auth: () => ({ role: "remote", token: held.token }),
     onMessage,
-    onStatus: (s) => statusDot(dot, s),
+    onStatus: (s) => statusDot(dot, s, T.status),
   });
   line.start();
   // Whether the projector's tab is still there changes with time, not with
@@ -73,7 +80,7 @@ function onMessage(m: ServerMessage): void {
       return;
     }
     actions.innerHTML = "";
-    main.innerHTML = `<div class="card"><p>${esc(m.reason)}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
+    main.innerHTML = `<div class="card"><p>${esc(said(m.reason))}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
   }
 }
 
@@ -81,7 +88,7 @@ function render(): void {
   const v = view;
   if (!v) return;
   $("#title").textContent = v.title || "Quiz";
-  document.title = `${v.title || "Quiz"} · remote`;
+  document.title = `${v.title || "Quiz"} · ${T.remote}`;
   $("#code").textContent = v.code;
   $("#pos").textContent = v.run && (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") ? `${v.run.n}/${v.run.total}` : "";
 
@@ -100,7 +107,7 @@ function render(): void {
   renderClock(v);
 
   const buttons = `<div class="wrap steerbtns${v.phase === "final" ? " ending" : ""}">
-    <button class="btn more" data-menu aria-label="more">⋯</button>
+    <button class="btn more" data-menu aria-label="${T.more}">⋯</button>
     ${steeringButtons(v)}
   </div>`;
   if (buttons !== lastButtons) {
@@ -120,13 +127,13 @@ function lobby(v: TeacherView): string {
   const n = v.run?.players.length ?? 0;
   const projector =
     v.screen === "present"
-      ? `<p class="device"><span class="ok">Projector ✓</span> · <button class="link" data-act="swap">&#8644; Swap</button></p><p class="device">${secondDevice(v)}</p>`
+      ? `<p class="device"><span class="ok">${T.projector} ✓</span> · <button class="link" data-act="swap">${T.swap}</button></p><p class="device">${secondDevice(v)}</p>`
       : projectorLine(v);
-  const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">Let everyone in &#9654;</button></p>` : "";
+  const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">${T.letIn}&nbsp;&#9654;</button></p>` : "";
   return `${letIn}<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
-      <div class="joined">${live("joined", n)} joined</div>
+      <div class="joined">${T.joined(live("joined", n))}</div>
       <div class="avatars" data-crowd></div>
       <p class="device">${speedSwitch(v)}</p>
     </section>
@@ -136,7 +143,7 @@ function lobby(v: TeacherView): string {
 
 /** The teacher code at rest, in the sentence the wall's check uses. */
 function secondDevice(v: TeacherView): string {
-  return `A second device, to steer from or to show the quiz on: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.`;
+  return T.secondDevice(esc(siteAddress()), esc(teacherCode(v.code, v.teacher)));
 }
 
 /**
@@ -146,8 +153,8 @@ function secondDevice(v: TeacherView): string {
  * quiz it says the projector is gone.
  */
 function projectorLine(v: TeacherView): string {
-  const gone = v.phase === "lobby" ? "" : "Projector gone. ";
-  return `<p class="device">${gone}On the projector computer: on <strong>${esc(siteAddress())}</strong>, type <strong class="digits">${esc(teacherCode(v.code, v.teacher))}</strong>.<span class="twoscreens"> Or <button class="link" data-act="projector-window">open the projector window</button> here.</span></p>`;
+  const gone = v.phase === "lobby" ? "" : `${T.projectorGone} `;
+  return `<p class="device">${gone}${T.onProjector(esc(siteAddress()), esc(teacherCode(v.code, v.teacher)))}<span class="twoscreens">${T.onProjectorWindow(`<button class="link" data-act="projector-window">${T.projectorWindowLink}</button>`)}</span></p>`;
 }
 
 function current(v: TeacherView): string {
@@ -161,7 +168,7 @@ function current(v: TeacherView): string {
   const waiting = v.phase === "question" && v.answering === "open" ? counted.filter((p) => !p.answered) : [];
   const waitLine =
     waiting.length > 0 && waiting.length <= 6 && run.answered > 0
-      ? `<p class="waiting">Waiting for <span class="avatars">${waiting.map((p) => `<span>${avatarSvg(p.avatar)}</span>`).join("")}</span></p>`
+      ? `<p class="waiting">${T.waitingFor} <span class="avatars">${waiting.map((p) => `<span>${avatarSvg(p.avatar)}</span>`).join("")}</span></p>`
       : "";
   // The picture, so a teacher whose projector died can still show it around;
   // and the button that puts it over the whole projector screen.
@@ -169,17 +176,17 @@ function current(v: TeacherView): string {
     ? `<div class="curpic">${thumb(q.image, q.pictureHidden ? "hidden" : "")}
         ${
           q.pictureHidden
-            ? `<p class="hint">Hidden from the projector.</p>`
-            : `<button class="btn" data-act="zoom">${v.zoom ? "Back to the question on the projector" : "Enlarge on the projector"}</button>`
+            ? `<p class="hint">${T.hiddenOnProjector}</p>`
+            : `<button class="btn" data-act="zoom">${v.zoom ? T.zoomBackProjector : T.zoomInProjector}</button>`
         }</div>`
     : "";
   return `<section class="card current">
     <div class="qt">${lines(q.text)}</div>
     ${pic}
-    ${q.void ? `<p class="hint">This question doesn't count.</p>` : ""}
+    ${q.void ? `<p class="hint">${T.notCounted}</p>` : ""}
     ${stepLine(v)}
     ${answersBlock(q, v.current, steer.ui, run.dist)}
-    <p class="answered"><strong>${live("answered", run.answered)}</strong> of ${live("present", present)} answered${away ? ` · ${live("away", away)} away` : ""}</p>
+    <p class="answered">${T.answered(live("answered", run.answered), live("present", present), away ? live("away", away) : null)}</p>
     ${waitLine}
   </section>`;
 }
@@ -187,9 +194,9 @@ function current(v: TeacherView): string {
 /** Where the question is, above the choices (Countdown drains in its slot: see renderClock). */
 function stepLine(v: TeacherView): string {
   if (v.phase !== "question") return "";
-  if (v.answering === "reading") return `<p class="hint">The choices are hidden: everyone reads the question.</p>`;
-  if (v.votes) return `<p class="hint">Answering closed. The projector shows how everyone answered, not yet the solution.</p>`;
-  return v.clock ? `<p class="hint lastcall-line">${ICON.timer} Countdown</p><div class="clockslot"></div>` : "";
+  if (v.answering === "reading") return `<p class="hint">${T.reading}</p>`;
+  if (v.votes) return `<p class="hint">${T.locked}</p>`;
+  return v.clock ? `<p class="hint lastcall-line">${ICON.timer} ${T.countdown}</p><div class="clockslot"></div>` : "";
 }
 
 /** Last call in its slot, drawn again only when it starts: CSS drains it. */
@@ -207,40 +214,39 @@ function ranking(v: TeacherView): string {
   if (!r) return "";
   const pct = r.given ? Math.round((100 * r.right) / r.given) : 0;
   return `<section class="card">
-    <div class="stat">${pct}%</div><p class="muted">right · ${r.of} ${r.of === 1 ? "question" : "questions"}</p>
+    <div class="stat">${pct}%</div><p class="muted">${T.rightOf(r.of)}</p>
     <div class="avatars">${r.top.map((e) => `<span class="ranked">${avatarSvg(e.avatar)}<small>${e.place}.</small></span>`).join("")}</div>
   </section>`;
 }
 
 function playersPanel(v: TeacherView): string {
-  return `<section class="card"><div class="row spread"><strong>Players</strong><button class="link" data-act="close-players">Close</button></div>
-    <p class="hint">Faded ones are away; they come back by themselves. Tap one to remove it, e.g. a double.</p>
+  return `<section class="card"><div class="row spread"><strong>${T.players}</strong><button class="link" data-act="close-players">${T.close}</button></div>
+    <p class="hint">${T.playersHint}</p>
     ${playersRow(v, true)}</section>`;
 }
 
 function menu(v: TeacherView): void {
   const items: MenuItem[] = steerItems(v, steer);
   if (v.phase !== "lobby") {
-    items.push({ label: showAll ? "Hide the questions" : "All questions", run: () => ((showAll = !showAll), render()) });
-    items.push({ label: "Players", run: () => ((showPlayers = true), render()) });
+    items.push({ label: showAll ? T.hideQuestions : T.allQuestions, run: () => ((showAll = !showAll), render()) });
+    items.push({ label: T.players, run: () => ((showPlayers = true), render()) });
   }
   // ⇄ Swap is offered while the wall is there: a wrong choice on the second device's question is undone by the same tap on either.
-  if (v.screen === "present") items.push({ label: "&#8644; Swap: show the quiz here, steer from the other device", run: () => void swap() });
-  else items.push({ label: "A second device…", run: () => toast(`On ${siteAddress()}, type ${teacherCode(v.code, v.teacher)}.`, 8000) });
-  items.push({ label: "Stop steering from here", run: () => void leave() });
-  if (v.phase !== "final") items.push({ label: "Delete the quiz…", danger: true, run: () => void steer.run("delete") });
+  if (v.screen === "present") items.push({ label: T.swapSteerOther, run: () => void swap() });
+  else items.push({ label: T.secondDeviceMenu, run: () => toast(T.typeOn(siteAddress(), teacherCode(v.code, v.teacher)), 8000) });
+  items.push({ label: T.stopSteering, run: () => void leave() });
+  if (v.phase !== "final") items.push({ label: T.deleteQuiz, danger: true, run: () => void steer.run("delete") });
   openMenu(items);
 }
 
 /** ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): no confirmation, the same tap on either device undoes it. */
 async function swap(): Promise<void> {
   const r = await line?.send({ op: "swap" });
-  if (r && !r.ok && r.error) toast(r.error);
+  if (r && !r.ok && r.error) toast(said(r.error));
 }
 
 async function leave(): Promise<void> {
-  const back = view ? ` To steer again: on ${siteAddress()}, type ${teacherCode(view.code, view.teacher)}.` : "";
-  if (!confirm(`Stop steering from this device? The projector steers again.${back}`)) return;
+  if (view && !confirm(T.confirmStopSteering(siteAddress(), teacherCode(view.code, view.teacher)))) return;
   await line?.send({ op: "leave" });
   line?.stop();
   tabRole.remove(instance);
@@ -259,7 +265,7 @@ for (const area of [main, actions]) {
     if (el.dataset.act === "projector-window") {
       // A second monitor: the window takes the free Projector; this tab stays the Remote.
       const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
-      if (!w) toast(`The browser blocked the new window. Allow pop-ups for this site, or open it in another window and type ${teacherCode(held!.code, teacherDigits())}.`, 8000);
+      if (!w) toast(T.popupBlocked(teacherCode(held!.code, teacherDigits())), 8000);
       return;
     }
     if (el.dataset.act === "swap") {

@@ -477,14 +477,15 @@ The quiz is already made; it can be more than one activity.
   be lost for the next variant.
 - **Results export** — a teacher who wants to look again.
 - **Localization** — teachers who don't read English, classes that should
-  see the few labels there are in their own. The bar's labels, their room
-  and why they are nouns: `design/question-flow.md`, "The steering bar".
-  Known pitfalls: the words for choices and answers must stay apart (German
-  "Antwortmöglichkeiten" contains "Antwort"; "Auswahl" or "Optionen" don't);
-  "Schlussrangliste" and "Classement final" are at the limit; Countdown
-  needs a French word ("Décompte", or "Top chrono") and Italian may keep
-  "Countdown"; "⏱ 15 s" where no short word exists, the number from
-  `LAST_CALL_MS`.
+  see the few labels there are in their own. Built: the screens after the
+  root page speak the device's language, the root page's four
+  (`design/root-page.md`, "Languages"); the words are drafts the owner
+  hasn't read. Open: the film draws the site's screens with their English
+  words in every language (`docs/film/film-text.md` 0.7); languages beyond
+  the four. The bar's labels, their room and why they are nouns:
+  `design/question-flow.md`, "The steering bar"; the words for choices and
+  answers stay apart there (German "Antwortmöglichkeiten" contains
+  "Antwort").
 - **Formula rendering** — fractions, powers, equations on maths sheets; until
   then an image carries them.
 - **Pictures for a teacher whose AI can't make a zip** — free tiers and some
@@ -520,7 +521,9 @@ The quiz is already made; it can be more than one activity.
 
 With the owner, what only he can do:
 - The read of the German, French and Italian words
-  (`translation-review.md`); Italian has no native reader on the project.
+  (`translation-review.md`; the screens' words in `client/room-text.ts`,
+  `check-text.ts`, `own-copy.ts` and `notfound.ts`); Italian has no native
+  reader on the project.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
   script from spending the day's allowance; the free plan includes one such
   rule, and a name children can type beats pages.dev on the slowest step

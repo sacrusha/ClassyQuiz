@@ -9,6 +9,19 @@ export interface ZipEntry {
   read(): Promise<Uint8Array<ArrayBuffer>>;
 }
 
+/**
+ * Why a file can't be read as a quiz's archive; the page says it in its
+ * language (landing-text.ts, `zip`), the message is the English.
+ */
+export type ZipProblem = "notZip" | "damaged" | "noQuiz";
+export class ZipError extends Error {
+  readonly problem: ZipProblem;
+  constructor(problem: ZipProblem, message: string) {
+    super(message);
+    this.problem = problem;
+  }
+}
+
 export function listZip(buf: ArrayBuffer): ZipEntry[] {
   const dv = new DataView(buf);
   const bytes = new Uint8Array(buf);
@@ -21,13 +34,13 @@ export function listZip(buf: ArrayBuffer): ZipEntry[] {
       break;
     }
   }
-  if (eocd < 0) throw new Error("This file is not a readable .zip archive.");
+  if (eocd < 0) throw new ZipError("notZip", "This file is not a readable .zip archive.");
   const count = dv.getUint16(eocd + 10, true);
   let p = dv.getUint32(eocd + 16, true);
   const entries: ZipEntry[] = [];
   const dec = new TextDecoder();
   for (let n = 0; n < count; n++) {
-    if (dv.getUint32(p, true) !== 0x02014b50) throw new Error("The .zip archive is damaged.");
+    if (dv.getUint32(p, true) !== 0x02014b50) throw new ZipError("damaged", "The .zip archive is damaged.");
     const method = dv.getUint16(p + 10, true);
     const csize = dv.getUint32(p + 20, true);
     const nameLen = dv.getUint16(p + 28, true);
@@ -62,7 +75,7 @@ export function listZip(buf: ArrayBuffer): ZipEntry[] {
  */
 export async function quizTextFromEntries(entries: ZipEntry[]): Promise<string> {
   const texts = entries.filter((e) => /\.(md|txt|markdown)$/i.test(e.name) && !/(^|\/)(__MACOSX|\.)/.test(e.name));
-  if (texts.length === 0) throw new Error("The archive contains no .txt or .md file with the quiz.");
+  if (texts.length === 0) throw new ZipError("noQuiz", "The archive contains no .txt or .md file with the quiz.");
   texts.sort((a, b) => a.name.split("/").length - b.name.split("/").length || a.name.length - b.name.length);
   const dec = new TextDecoder();
   if (texts.length === 1) return dec.decode(await texts[0].read());

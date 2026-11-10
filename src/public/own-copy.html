@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your own classyQuiz</title>
+<title data-t="title">Your own classyQuiz</title>
 <meta name="description" content="How to get an own copy of classyQuiz: one you set up with an AI assistant on a free Cloudflare account, or one a school or company runs.">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -25,34 +25,35 @@
 <body class="follows-dark">
 <header class="site-head"><div class="in"><a class="brand" href="/"><!--#brand classyquiz-horizontal-32-inline.svg--></a></div></header>
 <main>
-<h1>Your own classyQuiz</h1>
-<p class="lede">This site is free and shared by everyone who uses it, with space for a few dozen quizzes a day. Your own copy is the same site at an address of your own, a few dozen quizzes a day just for you. You can set one up yourself, with an AI doing the work, or ask the IT of your school or company to run one.</p>
+<h1 data-t="h1">Your own classyQuiz</h1>
+<p class="lede" data-t="lede">This site is free and shared by everyone who uses it, with space for a few dozen quizzes a day. Your own copy is the same site at an address of your own, a few dozen quizzes a day just for you. You can set one up yourself, with an AI doing the work, or ask the IT of your school or company to run one.</p>
 
-<h2>Setting one up yourself</h2>
+<h2 data-t="selfH">Setting one up yourself</h2>
 
-<h3>What you need</h3>
+<h3 data-t="needH">What you need</h3>
 <ul>
-  <li>A computer to deploy through wrangler. On a paid subscription, an AI like Claude Code sets this up on its own virtual machine in minutes. Without one, you can have an AI talk you through setting it up on your own computer, which can take a while.</li>
-  <li>A free Cloudflare account.</li>
+  <li data-t="need1">A computer to deploy through wrangler. On a paid subscription, an AI like Claude Code sets this up on its own virtual machine in minutes. Without one, you can have an AI talk you through setting it up on your own computer, which can take a while.</li>
+  <li data-t="need2">A free Cloudflare account.</li>
 </ul>
 
-<h3>What to ask your AI</h3>
-<p class="prompt">Please deploy classyQuiz from https://github.com/sacrusha/ClassyQuiz on a free Cloudflare account. Let me know if there's another environment of yours that makes this easier.</p>
+<h3 data-t="askH">What to ask your AI</h3>
+<p class="prompt" data-t="ask">Please deploy classyQuiz from https://github.com/sacrusha/ClassyQuiz on a free Cloudflare account. Let me know if there's another environment of yours that makes this easier.</p>
 
-<h3>What you do yourself</h3>
+<h3 data-t="doH">What you do yourself</h3>
 <ol>
-  <li>Create a free account at <a href="https://dash.cloudflare.com/sign-up">dash.cloudflare.com</a>.</li>
-  <li>Create an access token: the AI walks you through where and how. It's trickier than you'd think. Don't paste it into the chat; ask the AI how to hand it over securely.</li>
-  <li>Choose a name for your site. It becomes the address: <strong>name</strong>.pages.dev.</li>
+  <li><span data-t="do1">Create a free account at</span> <a href="https://dash.cloudflare.com/sign-up">dash.cloudflare.com</a>.</li>
+  <li data-t="do2">Create an access token: the AI walks you through where and how. It's trickier than you'd think. Don't paste it into the chat; ask the AI how to hand it over securely.</li>
+  <li><span data-t="do3">Choose a name for your site. It becomes the address:</span> <strong data-t="name">name</strong>.pages.dev.</li>
 </ol>
 
-<h2>Or ask your school's or company's IT</h2>
-<p>People with an IT background and a developer AI can adjust the project to run on their own servers, or run it on a paid Cloudflare account to serve thousands of quizzes per day.</p>
+<h2 data-t="itH">Or ask your school's or company's IT</h2>
+<p data-t="it">People with an IT background and a developer AI can adjust the project to run on their own servers, or run it on a paid Cloudflare account to serve thousands of quizzes per day.</p>
 
-<h2>Afterwards</h2>
-<p>When you ask your AI for a quiz, use the address your copy's start page shows instead of classyquiz.pages.dev.</p>
-<p>A copy changes only when its owner updates it. Left as it is, it shows the same screens and buttons every time. Updated, it gets what is new and fixed, and its screens may change. To update a copy you set up yourself, ask your AI to update it from GitHub, the same way you set it up.</p>
+<h2 data-t="afterH">Afterwards</h2>
+<p data-t="after1">When you ask your AI for a quiz, use the address your copy's start page shows instead of classyquiz.pages.dev.</p>
+<p data-t="after2">A copy changes only when its owner updates it. Left as it is, it shows the same screens and buttons every time. Updated, it gets what is new and fixed, and its screens may change. To update a copy you set up yourself, ask your AI to update it from GitHub, the same way you set it up.</p>
 
 </main>
+<script src="/js/own-copy.js" defer></script>
 </body>
 </html>

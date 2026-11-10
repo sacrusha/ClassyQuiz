@@ -5,6 +5,11 @@
 
 import { $, esc } from "./dom.ts";
 import { ICON } from "./look.ts";
+import { CHECK_TEXT } from "./check-text.ts";
+import { deviceLang, speak } from "./device-lang.ts";
+
+const lang = deviceLang();
+const t = CHECK_TEXT[lang];
 
 const list = $("#results");
 
@@ -19,21 +24,21 @@ function result(id: string, ok: boolean, detail: string): void {
 }
 
 async function http(): Promise<boolean> {
-  row("http", "The site's server, over HTTP");
+  row("http", t.http);
   try {
     const t0 = performance.now();
     const r = await fetch("/api/ping", { cache: "no-store" });
     const ok = r.ok && (await r.json()).ok === true;
-    result("http", ok, ok ? `${Math.round(performance.now() - t0)} ms` : `answer ${r.status}`);
+    result("http", ok, ok ? t.ms(Math.round(performance.now() - t0)) : t.status(r.status));
     return ok;
   } catch {
-    result("http", false, "no answer");
+    result("http", false, t.noAnswer);
     return false;
   }
 }
 
 function ws(): Promise<boolean> {
-  row("ws", "Live connection (WebSocket)");
+  row("ws", t.ws);
   return new Promise((resolve) => {
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
     let done = false;
@@ -47,31 +52,29 @@ function ws(): Promise<boolean> {
     try {
       sock = new WebSocket(`${proto}//${location.host}/api/echo`);
     } catch {
-      finish(false, "blocked");
+      finish(false, t.blocked);
       return;
     }
     const t0 = performance.now();
     const timer = setTimeout(() => {
-      finish(false, "no answer within 8 s");
+      finish(false, t.noAnswerIn(8));
       sock.close();
     }, 8000);
     sock.onopen = () => sock.send("hello");
     sock.onmessage = (e) => {
       clearTimeout(timer);
-      finish(e.data === "hello", `${Math.round(performance.now() - t0)} ms`);
+      finish(e.data === "hello", t.ms(Math.round(performance.now() - t0)));
       sock.close();
     };
     sock.onerror = () => {
       clearTimeout(timer);
-      finish(false, "blocked by this network");
+      finish(false, t.blockedHere);
     };
   });
 }
 
 function forIt(now: string): string {
-  const host = location.host;
-  const text = `Please allow ${host} on our network. It is a quiz site: the players, a class or a group, answer on their own devices. It needs HTTPS and WebSocket connections to ${host}. ${now}`;
-  return `<p>What to send IT:</p><p class="it">${esc(text)}</p>`;
+  return `<p>${esc(t.sendIt)}</p><p class="it">${esc(t.forIt(location.host, now))}</p>`;
 }
 
 async function main(): Promise<void> {
@@ -80,14 +83,17 @@ async function main(): Promise<void> {
   const okHttp = await http();
   const okWs = okHttp ? await ws() : false;
   $("#verdict").innerHTML = !okHttp
-    ? `<p class="err">${ICON.cross} This device can't reach the quiz's server: the network blocks it.</p>${forIt("At the moment this network blocks it.")}`
+    ? `<p class="err">${ICON.cross} ${esc(t.unreachable)}</p>${forIt(t.nowBlocked)}`
     : okWs
-      ? `<p>${ICON.check} All good: the quiz runs live on this network.</p>`
-      : `<p>${ICON.check} The quiz runs on this network, a little slower: answers and screens follow a moment later, because live connections are blocked. That is fine for playing. To make it live:</p>${forIt("At the moment the WebSocket connections are blocked, and the quiz runs more slowly.")}`;
+      ? `<p>${ICON.check} ${esc(t.allGood)}</p>`
+      : `<p>${ICON.check} ${esc(t.slower)}</p>${forIt(t.nowSlow)}`;
 }
 
-// The part for a network that blocks the site entirely names this site's address.
-for (const el of document.querySelectorAll<HTMLElement>("[data-host]")) el.textContent = location.host;
+// The page in this device's language; the part for a network that blocks the
+// site entirely names this site's address.
+document.documentElement.lang = lang;
+speak(t as unknown as Record<string, unknown>);
+$("#forit").textContent = t.forIt(location.host, "");
 
 $("#again").addEventListener("click", () => void main());
 void main();

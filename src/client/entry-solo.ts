@@ -17,12 +17,13 @@ import { ICON, avatarSvg, lookKey, pickerRows, wiggle } from "./look.ts";
 import type { OpenedQuiz } from "./opening.ts";
 import { newSoloRun, soloAnswer, soloAvatar, soloDress, soloForAi, soloKey, soloLast, soloMine, soloNext, soloQuestion, soloResult, soloStart } from "./solo.ts";
 import { SETTLE_MS } from "./steps.ts";
+import { T } from "./room-text.ts";
 
 export const solo: Entry = {
   name: "Solo",
-  line: "On your own, to practise or review. Each answer shows the solution right away, and the score comes at the end.",
-  button: "Play ▶",
-  note: "Plays in this tab. Nothing is sent to the site. Reloading or closing the tab ends it.",
+  line: T.soloLine,
+  button: T.soloButton,
+  note: T.soloNote,
   plays: true,
   async start(quiz, ctx) {
     new SoloRun(quiz, ctx);
@@ -89,11 +90,11 @@ class SoloRun {
     const av = soloAvatar(this.game);
     this.page("play solo");
     this.main.innerHTML = `<div class="solo-head"><h1 class="ctitle">${lines(q.title || "Quiz")}</h1>
-        <p class="cnum">${n} ${n === 1 ? "question" : "questions"}</p></div>
+        <p class="cnum">${T.questions(n)}</p></div>
       <div class="dress">
         <div class="hero"></div>
         <div class="picker">${pickerRows(av.c)}</div>
-        <div class="look"><button class="btn primary solo-go" type="button" data-solo="start">Start ▶</button></div>
+        <div class="look"><button class="btn primary solo-go" type="button" data-solo="start">${T.start}</button></div>
       </div>`;
     this.drawLook();
   }
@@ -166,7 +167,7 @@ class SoloRun {
       counts: key ? key.counts : null,
       void: !!key?.void,
       me: { avatar: soloAvatar(g), score: soloResult(g).right },
-      next: key ? (soloLast(g) ? "Result" : `Question ${sq.n + 1}`) : null,
+      next: key ? (soloLast(g) ? T.result : T.question(sq.n + 1)) : null,
     };
     this.screen!.show(v);
   }
@@ -195,11 +196,11 @@ class SoloRun {
         <div class="solo-score">${ICON.star} ${r.right} / ${r.of}</div>
         ${r.of ? `<div class="classres"><div class="bars">${r.each.map((ok) => `<span><i style="height:${ok ? 100 : 0}%"></i></span>`).join("")}</div></div>` : ""}
         <div class="solo-actions">
-          <button class="btn primary" type="button" data-solo="again">Play again ▶</button>
-          <button class="btn" type="button" data-solo="copy">Copy the answers for your AI</button>
-          <button class="btn" type="button" data-solo="back">← Back</button>
+          <button class="btn primary" type="button" data-solo="again">${T.playAgain}</button>
+          <button class="btn" type="button" data-solo="copy">${T.copyAnswers}</button>
+          <button class="btn" type="button" data-solo="back">${T.backArrow}</button>
         </div>
-        <p class="solo-ai muted" role="status">Your AI can explain a mistake, or check a solution that looks wrong.</p>
+        <p class="solo-ai muted" role="status">${T.soloAi}</p>
       </div>`;
   }
 
@@ -208,7 +209,7 @@ class SoloRun {
     const say = this.main.querySelector<HTMLElement>(".solo-ai");
     try {
       await navigator.clipboard.writeText(text);
-      btn.textContent = "Copied: paste it into the chat with your AI";
+      btn.textContent = T.copiedAnswers;
     } catch {
       // No clipboard permission: show it for copying by hand.
       if (say && !this.main.querySelector(".solo-text")) say.insertAdjacentHTML("afterend", `<pre class="solo-text">${esc(text)}</pre>`);

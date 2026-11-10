@@ -20,6 +20,7 @@ import { answersBlock, openMenu, toast, type MenuItem } from "./manage.ts";
 import { packPicture, wantPacks } from "./packs.ts";
 import { fillPictures, preload, seed } from "./pictures.ts";
 import { Latest } from "./latest.ts";
+import { T, said } from "./room-text.ts";
 
 type Ack = Extract<ServerMessage, { t: "ack" }>;
 
@@ -153,8 +154,8 @@ export class PeersRoom {
     setHtml(
       root.querySelector<HTMLElement>(".pstart")!,
       p.host
-        ? `<button class="btn primary solo-go" type="button" data-peers="start">Start ${PLAY}</button><p class="muted">${n === 1 ? "Only you so far." : `${n} in, you among them.`} The quiz moves on once everyone has answered.</p>`
-        : `<p class="muted pwait">${p.hostAvatar ? `<span class="pav">${avatarSvg(p.hostAvatar)}</span>` : ""}starts the quiz once everyone is in.</p>`,
+        ? `<button class="btn primary solo-go" type="button" data-peers="start">${T.start}</button><p class="muted">${n === 1 ? T.onlyYou : T.inWithYou(n)} ${T.movesOn}</p>`
+        : `<p class="muted pwait">${p.hostAvatar ? `<span class="pav">${avatarSvg(p.hostAvatar)}</span>` : ""}${T.startsOnce}</p>`,
     );
   }
 
@@ -187,7 +188,7 @@ export class PeersRoom {
       void: !!reveal?.void,
       dist: reveal ? p.dist : null,
       me: { avatar: v.me!.avatar, score: v.me!.score },
-      next: reveal ? "Ranking" : null,
+      next: reveal ? T.ranking : null,
       // While this device waits for the others to answer: who.
       foot: !reveal && mine !== null ? waitingLine(p) : undefined,
       menu: p.host,
@@ -256,8 +257,8 @@ export class PeersRoom {
     const q = v.question;
     const me = v.me!;
     const done = p.ready || this.readySent === v.current;
-    const next = done ? null : p.last ? "Final ranking" : `Question ${(q?.n ?? 0) + 1}`;
-    const html = `<div class="bar" id="qbar"><span>${q ? `${q.n} / ${q.total}` : ""}</span><span class="grow"></span><span class="dme">${avatarSvg(me.avatar)}</span><span id="dscore">${ICON.star} ${me.score}</span>${p.host ? `<button class="dmenu" type="button" data-peers="menu" aria-label="menu">&#8943;</button>` : ""}</div>
+    const next = done ? null : p.last ? T.finalRanking : T.question((q?.n ?? 0) + 1);
+    const html = `<div class="bar" id="qbar"><span>${q ? `${q.n} / ${q.total}` : ""}</span><span class="grow"></span><span class="dme">${avatarSvg(me.avatar)}</span><span id="dscore">${ICON.star} ${me.score}</span>${p.host ? `<button class="dmenu" type="button" data-peers="menu" aria-label="${T.menu}">&#8943;</button>` : ""}</div>
       <div class="pranking">${rankingList(p, me)}</div>
       <div class="steerbar dbar"><span class="grow">${done ? waitingLine(p) : esc(p.title)}</span><button class="btn primary bar-play" type="button" data-peers="ready"${next ? "" : ` style="visibility:hidden" tabindex="-1"`}>${next ? `${PLAY}<span class="lbl"><span>${esc(next)}</span></span>` : ""}</button></div>`;
     if (!this.main.querySelector(".pranking")) this.page("screen steering peers");
@@ -276,8 +277,8 @@ export class PeersRoom {
         <p class="pme"><span class="pav">${avatarSvg(me.avatar)}</span><b>${me.place}.</b> <span class="muted">/ ${me.of}</span> ${ICON.star} ${me.score} ${ICON.trophy}</p>
         ${
           p.host
-            ? `<button class="btn primary solo-go" type="button" data-peers="exit">Exit</button><p class="muted">Exit ends the quiz on every device.</p>`
-            : `<a class="btn" href="/" aria-label="back">&#8592;</a>`
+            ? `<button class="btn primary solo-go" type="button" data-peers="exit">${T.exit}</button><p class="muted">${T.exitEverywhere}</p>`
+            : `<a class="btn" href="/" aria-label="${T.back}">&#8592;</a>`
         }
       </div>`;
     if (!this.main.querySelector(".pfinal")) this.page("play peers");
@@ -293,21 +294,21 @@ export class PeersRoom {
     const at = { phase: v.phase, current: v.current };
     const items: MenuItem[] = [];
     if (v.phase === "question" || v.phase === "reveal") {
-      const onto = v.phase === "question" ? "Solution" : p.last ? "Final ranking" : `Question ${(v.question?.n ?? 0) + 1}`;
-      items.push({ label: `${esc(onto)} now, without waiting`, run: () => void this.run({ op: "goOn", at }) });
+      const onto = v.phase === "question" ? T.solution : p.last ? T.finalRanking : T.question((v.question?.n ?? 0) + 1);
+      items.push({ label: esc(T.nowWithout(onto)), run: () => void this.run({ op: "goOn", at }) });
     }
     // Until the opener taps on, the room waits for them, so it doesn't move under the sheet.
-    if (v.phase === "reveal" && !p.ready && this.readySent !== v.current) items.push({ label: "Change the solution", run: () => ((this.fixing = v.current), this.renderFix()) });
+    if (v.phase === "reveal" && !p.ready && this.readySent !== v.current) items.push({ label: T.changeSolution, run: () => ((this.fixing = v.current), this.renderFix()) });
     const others = p.players.filter((x) => x.id !== p.player);
-    if (others.length > 0) items.push({ label: "Remove a player…", run: () => this.removeMenu(others) });
-    items.push({ label: `${ICON.trophy} End the quiz: final ranking`, run: () => void this.run({ op: "finish", at }) });
+    if (others.length > 0) items.push({ label: T.removeSomeone, run: () => this.removeMenu(others) });
+    items.push({ label: `${ICON.trophy} ${T.endQuiz}`, run: () => void this.run({ op: "finish", at }) });
     openMenu(items);
   }
 
   private removeMenu(others: PeersView["players"]): void {
     openMenu(
       others.map((x) => ({
-        label: `<span class="pav">${avatarSvg(x.avatar)}</span> Remove`,
+        label: `<span class="pav">${avatarSvg(x.avatar)}</span> ${T.remove}`,
         danger: true,
         run: () => void this.run({ op: "remove", player: x.id }),
       })),
@@ -316,7 +317,7 @@ export class PeersRoom {
 
   private async run(cmd: Command): Promise<void> {
     const a = await this.ctx.send(cmd);
-    if (!a.ok && a.error) toast(a.error);
+    if (!a.ok && a.error) toast(said(a.error));
   }
 
   /** "Change the solution": the open question's choices in a sheet, as the steering screens have it (client/manage.ts). */
@@ -408,7 +409,7 @@ function joinCard(code: string): string {
   qr.addData(`${location.origin}/play#${code}`);
   qr.make();
   return `<div class="pqr">${qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true })}</div>
-    <div class="pcodebox"><p>Friends join on <b>${esc(siteAddress())}</b> with the code</p><p class="pcode">${esc(code)}</p><p class="muted">or with the QR code.</p></div>`;
+    <div class="pcodebox"><p>${T.friendsJoin(esc(siteAddress()))}</p><p class="pcode">${esc(code)}</p><p class="muted">${T.orQr}</p></div>`;
 }
 
 /** Who the room waits for, as avatars; a number for those beyond WAITING_SHOWN. Empty when it waits for nobody present. */
@@ -418,7 +419,7 @@ function waitingLine(p: PeersView): string {
   if (avatars.length === 0) return "";
   const shown = avatars.slice(0, WAITING_SHOWN);
   const more = avatars.length - shown.length;
-  return `<span class="pwaiting">Waiting for <span class="pavs">${shown.map((a) => `<span>${avatarSvg(a)}</span>`).join("")}</span>${more > 0 ? ` +${more}` : ""}</span>`;
+  return `<span class="pwaiting">${T.waitingFor} <span class="pavs">${shown.map((a) => `<span>${avatarSvg(a)}</span>`).join("")}</span>${more > 0 ? ` +${more}` : ""}</span>`;
 }
 
 /** Places 1 to 3 (at most ten avatars, ties sharing a place), and this player's own place if it is further down. */

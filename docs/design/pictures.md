@@ -221,7 +221,7 @@ readable, chosen by the page, not by the AI or the teacher.
   and window size; the lock-in and the reveal only change the tiles' marks,
   counts and bars in place.
 - **Enlarging.** `Z`, a click on the picture, "Enlarge the picture (Z)" in
-  the projector's menu, or the Remote's "Enlarge on the projector": the
+  the projector's menu, or the Remote's "Enlarge on the big screen": the
   picture fills the screen above everything but the steering bar; the same
   action brings the question back. The state is on the server (`run.zoom`, op
   `zoom`) so Remote and projector agree, and is keyed to the step it was set

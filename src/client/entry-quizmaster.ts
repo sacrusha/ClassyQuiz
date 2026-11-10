@@ -7,16 +7,17 @@
 import { esc, tabLobby, tabRole } from "./dom.ts";
 import type { Entry } from "./entries.ts";
 import { TEXT } from "./landing-text.ts";
-import { openRoom, roomRefusal, visitorLang, type RoomResult } from "./opening.ts";
+import { openRoom, type RoomResult } from "./opening.ts";
+import { roomRefusal } from "./refusal.ts";
+import { T, lang } from "./room-text.ts";
 
 export const quizmaster: Entry = {
   name: "Quizmaster",
-  line: "For a class or a group: the questions on a big screen, the answers on everyone's own device. You run it and don't play.",
-  button: "Open the lobby ▶",
-  note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use.",
+  line: T.quizmasterLine,
+  button: T.quizmasterButton,
+  note: T.roomNote,
   plays: false,
   async start(quiz, ctx) {
-    const lang = visitorLang();
     ctx.say(`<p class="muted" lang="${lang}">${esc(TEXT[lang].sending)}</p>`);
     let r: RoomResult;
     try {

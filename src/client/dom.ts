@@ -254,7 +254,8 @@ export function siteAddress(): string {
   return location.host;
 }
 
-export function statusDot(el: HTMLElement, s: LineStatus): void {
+/** The line's state as the dot's colour, and as its title in the page's words. */
+export function statusDot(el: HTMLElement, s: LineStatus, words: Record<LineStatus, string>): void {
   el.dataset.status = s;
-  el.title = s === "live" ? "Connected" : s === "offline" ? "Connection lost — reconnecting" : "Connecting";
+  el.title = words[s];
 }

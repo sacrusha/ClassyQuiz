@@ -456,16 +456,29 @@ sheets. Why these four, in his reading: he can review three, may have access
 to someone who can review the fourth, and they are the likelier to see
 immediate use. About and below is the
 guidance, in English, which the AI reads; the static HTML is English for the
-same reader. The local check, the lobby, the wall, the Remote and the tablets
-are not translated yet (backlog, Later, Localization). The
+same reader. The
 visitor's choice is made with a switch top right, kept on the device
 (`cq.lang`); the header with the code box and the switch is shared with
 `/example` (`client/top.ts`), so the choice holds on both; otherwise the browser's first language among the four; otherwise
-English. The words are in `client/landing-text.ts`, one table per language, the
+English (`client/device-lang.ts`). The words are in `client/landing-text.ts`, one table per language, the
 messages of the box that opens a file included, also where opening a room moved them: the local check's
 "Sending the quiz…" and its refusals speak the language this page spoke
-(`local-check.md`, "Opening a room"). The quiz's own problems, the archive's messages and the text
-copied for the AI are not translated.
+(`local-check.md`, "Opening a room"); the ones the room pages say too (the
+site full, the allowance spent, the way to an own copy, what to tell IT)
+are in `client/site-text.ts`. The quiz's own problems and the text copied
+for the AI stay English: the AI reads them.
+
+The pages after this one have no switch and speak the language chosen here,
+on that device: the local check and Solo, the lobby, the Projector, the
+Remote, the players' devices and a Peers room (`client/room-text.ts`, with
+the server's messages, which come in English), `/check`
+(`client/check-text.ts`), `/own-copy` and the page for an address that
+isn't one (`client/own-copy.ts`, `client/notfound.ts`). So the Projector
+speaks the quizmaster's language and each player's device its own
+browser's. The owner: each device its own language for the site's words;
+a quiz's questions and answers show as they were written, on every device,
+and translating them would be a feature to design. Their static HTML is
+English; the page's script puts the device's language over it.
 
 Purpose (backlog v6 item 2): a visitor reading German, French or Italian gets
 the same page, said in that language's own sentences, not the English
@@ -515,9 +528,8 @@ What the words live with:
 - The owner: "host" is acceptable, not great, in English (in software,
   participants connect to a host too), and a role noun is avoided where a
   sentence does without one.
-- The part for people is in four languages, and the rest of the site is
-  not translated yet (backlog, Later, Localization); a translation hits the
-  meaning, not the literal word. The guidance is English, for the AI
+- The part for people is in four languages, and so are the screens after
+  it ("Languages"); a translation hits the meaning, not the literal word. The guidance is English, for the AI
   (`guidance-page.md`).
 
 So, once for all entries:

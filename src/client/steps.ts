@@ -2,8 +2,8 @@
 // (docs/design/question-flow.md, "The steering bar" and "Presses").
 
 import type { Answering, At, TeacherView } from "../shared/protocol.ts";
-import { LAST_CALL_MS } from "../shared/tempo.ts";
 import { ICON } from "./look.ts";
+import { T } from "./room-text.ts";
 
 export interface StepState {
   phase: TeacherView["phase"];
@@ -38,14 +38,14 @@ const PLAY = "&#9654;";
  */
 export function playStep(s: StepState): { label: string; note?: string; to: StepState } | null {
   const at = (to: Partial<StepState>): StepState => ({ ...s, answering: null, votes: false, lastCall: false, ...to });
-  if (s.phase === "question" && s.answering === "reading") return { label: "Choices", to: at({ answering: "open" }) };
-  if (s.phase === "question" && s.answering === "open") return { label: "Answers", note: "closes answering", to: at({ answering: "closed", votes: true }) };
-  if (s.phase === "question") return { label: "Solution", to: at({ phase: "reveal" }) };
-  if (s.phase === "reveal" && s.last) return { label: "Final ranking", to: at({ phase: "final" }) };
-  if (s.phase === "reveal") return { label: "Ranking", to: at({ phase: "ranking" }) };
+  if (s.phase === "question" && s.answering === "reading") return { label: T.choices, to: at({ answering: "open" }) };
+  if (s.phase === "question" && s.answering === "open") return { label: T.answers, note: T.closesAnswering, to: at({ answering: "closed", votes: true }) };
+  if (s.phase === "question") return { label: T.solution, to: at({ phase: "reveal" }) };
+  if (s.phase === "reveal" && s.last) return { label: T.finalRanking, to: at({ phase: "final" }) };
+  if (s.phase === "reveal") return { label: T.ranking, to: at({ phase: "ranking" }) };
   // The next question's index isn't needed: a double press never goes past a question's start (Presses).
   // Its number is: skipped questions aren't counted, as on the wall's "4 / 12".
-  if (s.phase === "ranking") return { label: `Question ${s.n + 1}`, to: at({ phase: "question", current: -1, answering: "reading", n: s.n + 1 }) };
+  if (s.phase === "ranking") return { label: T.question(s.n + 1), to: at({ phase: "question", current: -1, answering: "reading", n: s.n + 1 }) };
   return null;
 }
 
@@ -64,12 +64,12 @@ function lastCallState(s: StepState): "on" | "running" | "off" {
  */
 export function steeringButtons(v: TeacherView): string {
   const s = stepState(v);
-  if (v.phase === "lobby") return `<button class="btn primary bar-play" data-act="begin">Start quiz ${PLAY}</button>`;
-  if (v.phase === "final") return `<button class="btn bar-exit" data-act="exit"><span class="lbl"><span>Exit</span><small>ends the quiz for everyone</small></span></button>`;
+  if (v.phase === "lobby") return `<button class="btn primary bar-play" data-act="begin">${T.startQuiz}&nbsp;${PLAY}</button>`;
+  if (v.phase === "final") return `<button class="btn bar-exit" data-act="exit"><span class="lbl"><span>${T.exit}</span><small>${T.exitNote}</small></span></button>`;
   const lc = lastCallState(s);
   const play = playStep(s);
   const label = (text: string, note?: string) => `<span class="lbl"><span>${text}</span>${note ? `<small>${note}</small>` : ""}</span>`;
-  return `<button class="btn bar-last${lc === "running" ? " running" : ""}" data-act="last-call"${lc === "off" ? ' style="visibility:hidden" tabindex="-1" aria-hidden="true"' : ""}${lc === "running" ? " disabled" : ""}>${ICON.timer}${label("Countdown", `${Math.round(LAST_CALL_MS / 1000)} s, then closes`)}</button>
+  return `<button class="btn bar-last${lc === "running" ? " running" : ""}" data-act="last-call"${lc === "off" ? ' style="visibility:hidden" tabindex="-1" aria-hidden="true"' : ""}${lc === "running" ? " disabled" : ""}>${ICON.timer}${label(T.countdown, T.countdownNote)}</button>
     <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}${label(play ? play.label : "", play?.note)}</button>`;
 }
 

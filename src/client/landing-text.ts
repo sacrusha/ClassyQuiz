@@ -1,8 +1,8 @@
 // The landing block's words in the four languages it speaks (docs/design/root-page.md,
 // "Languages"): everything above About. The static HTML is English, so an AI's fetcher
 // reads English; home.ts swaps these in. About and below is English: it is
-// for the AI. The local check, the lobby, the wall, the Remote and the
-// tablets are not translated yet.
+// for the AI. The pages a quiz then plays on speak the language chosen here
+// (client/room-text.ts).
 //
 // German, French and Italian say the same as the English in their own
 // sentences, with a noun where a pronoun could point at two things
@@ -19,20 +19,17 @@
 // guidance's "Build with the user". The site's address in every ask is
 // replaced by the one the browser opened.
 
-import type { SiteFull } from "../shared/limits.ts";
+import { SITE_WORDS, type SiteWords } from "./site-text.ts";
+import type { ZipProblem } from "./unzip.ts";
 
-export type Lang = "de" | "en" | "fr" | "it";
-export const LANGS: { id: Lang; name: string }[] = [
-  { id: "de", name: "Deutsch" },
-  { id: "en", name: "English" },
-  { id: "fr", name: "Français" },
-  { id: "it", name: "Italiano" },
-];
+// The four languages and the device's choice among them live in device-lang.ts, which every page can load without these words.
+export { LANGS, LANG_KEY, chosenLang, isLang, type Lang } from "./device-lang.ts";
+import type { Lang } from "./device-lang.ts";
 
 /** A run of the example ask; `l` is the index of its label. */
 export type AskPart = { s: string; l?: number };
 
-export interface Text {
+export interface Text extends SiteWords {
   code: string;
   join: string;
   language: string;
@@ -125,6 +122,8 @@ export interface Text {
   notText: string;
   notFile: (what: "several" | "this" | string) => string;
   unreadable: string;
+  /** Why the file isn't a quiz's archive (client/unzip.ts). */
+  zip: Record<ZipProblem, string>;
   /** The quiz couldn't be passed to the local check: the browser keeps no site data (client/handoff.ts). */
   noHandoff: string;
   tooLong: (kb: number) => string;
@@ -136,15 +135,8 @@ export interface Text {
   aiFixes: string;
   copyForAi: string;
   without: string;
-  notTaken: string;
-  /** An upload refused: full is the cap reached (the uploads' rows a day: back at `at`; bytes stored: as quizzes end or expire). */
-  siteFull: (full: SiteFull, at: string | null) => string;
-  /** at: the time the allowance comes back, in Swiss time; null when the browser has no time zones (then 00:00 UTC). */
-  quota: (at: string | null) => string;
-  ownCopyLink: string;
   /** The upload's request failed: the network names itself as a possible cause (docs/design/root-page.md, "Network help, where failure shows"). */
   offline: string;
-  whatToTellIt: string;
   notStarted: string;
   question: (n: number, total: number) => string;
   finalRanking: string;
@@ -231,6 +223,7 @@ const en: Text = {
   notText: "The site takes the quiz as a .zip file, not as text.",
   notFile: (w) => `The site takes the quiz as a .zip file, not ${w === "several" ? "several files at once" : w === "this" ? "this file" : `a .${w} file`}.`,
   unreadable: "The file couldn't be read.",
+  zip: { notZip: "This file is not a readable .zip archive.", damaged: "The .zip archive is damaged.", noQuiz: "The archive contains no .txt or .md file with the quiz." },
   noHandoff: "This browser didn't let the site open the quiz (it may block site data). Try another browser.",
   tooLong: (kb) => `The quiz text is longer than the site takes (at most ${kb} KB).`,
   reading: "Reading the quiz…",
@@ -241,15 +234,8 @@ const en: Text = {
   aiFixes: "Your AI can fix this. Copy the message into the chat, and open the .zip it sends back.",
   copyForAi: "Copy the message for your AI",
   without: "Continue without these pictures",
-  notTaken: "The site couldn't take the quiz. Try again.",
-  siteFull: (full, at) =>
-    full === "bytes"
-      ? `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use).`
-      : `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
-  quota: (at) => `The free site has used up today's allowance. It works again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
-  ownCopyLink: "More quizzes: a site of your own, your school's or your company's ›",
+  ...SITE_WORDS.en,
   offline: "No connection to the site. Check the network and try again. If it stays like this, the network of a school or a company may block the site.",
-  whatToTellIt: "What to tell IT ›",
   notStarted: "before the first question",
   question: (n, t) => `question ${n} of ${t}`,
   finalRanking: "final ranking",
@@ -340,6 +326,7 @@ const de: Text = {
         ? "Die Seite braucht das Quiz als .zip-Datei, und diese Datei ist keine."
         : `Die Seite braucht das Quiz als .zip-Datei, nicht als .${w}-Datei.`,
   unreadable: "Die Datei liess sich nicht lesen.",
+  zip: { notZip: "Diese Datei ist kein lesbares .zip-Archiv.", damaged: "Das .zip-Archiv ist beschädigt.", noQuiz: "Im Archiv ist keine .txt- oder .md-Datei mit dem Quiz." },
   noHandoff: "Dieser Browser hat verhindert, dass die Seite das Quiz öffnet (vielleicht blockiert er Website-Daten). Versuch es mit einem anderen Browser.",
   tooLong: (kb) => `Der Quiztext ist zu lang: Die Seite nimmt höchstens ${kb} KB an.`,
   reading: "Das Quiz wird gelesen…",
@@ -350,15 +337,8 @@ const de: Text = {
   aiFixes: "Deine KI kann das beheben: Kopier die Nachricht in den Chat und öffne hier die neue .zip-Datei, die zurückkommt.",
   copyForAi: "Nachricht für deine KI kopieren",
   without: "Ohne diese Bilder fortfahren",
-  notTaken: "Die Seite konnte das Quiz nicht annehmen. Versuch es nochmals.",
-  siteFull: (full, at) =>
-    full === "bytes"
-      ? `Die Gratis-Seite hat im Moment keinen Platz für ein weiteres Quiz. Sie nimmt wieder eines an, sobald andere beendet oder abgelaufen sind (drei Stunden nach ihrer letzten Benutzung).`
-      : `Die Gratis-Seite kann heute kein weiteres Quiz annehmen. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} nimmt sie wieder eines an.`,
-  quota: (at) => `Die Gratis-Seite hat ihr Tageskontingent aufgebraucht. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} funktioniert sie wieder.`,
-  ownCopyLink: "Mehr Quiz: eine eigene Website für dich, deine Schule oder deine Firma ›",
+  ...SITE_WORDS.de,
   offline: "Keine Verbindung zur Seite. Prüf die Internetverbindung und versuch es nochmals. Klappt es weiterhin nicht, sperrt vielleicht das Netz einer Schule oder Firma die Seite.",
-  whatToTellIt: "Was du der IT sagen kannst ›",
   notStarted: "vor der ersten Frage",
   question: (n, t) => `Frage ${n} von ${t}`,
   finalRanking: "Schlussrangliste",
@@ -449,6 +429,7 @@ const fr: Text = {
         ? "Le site attend le quiz sous forme de fichier .zip, et ce fichier n'en est pas un."
         : `Le site attend le quiz sous forme de fichier .zip, et non de fichier .${w}.`,
   unreadable: "Impossible de lire le fichier.",
+  zip: { notZip: "Ce fichier n'est pas une archive .zip lisible.", damaged: "L'archive .zip est endommagée.", noQuiz: "L'archive ne contient aucun fichier .txt ou .md avec le quiz." },
   noHandoff: "Ce navigateur a empêché le site d'ouvrir le quiz (il bloque peut-être les données des sites). Essayez un autre navigateur.",
   tooLong: (kb) => `Le texte du quiz dépasse la limite du site (${kb} Ko au plus).`,
   reading: "Lecture du quiz…",
@@ -459,15 +440,8 @@ const fr: Text = {
   aiFixes: "Votre IA peut corriger cela. Copiez le message dans le chat, puis ouvrez ici le .zip qu'elle vous renvoie.",
   copyForAi: "Copier le message pour votre IA",
   without: "Continuer sans ces images",
-  notTaken: "Le site n'a pas pu recevoir le quiz. Réessayez.",
-  siteFull: (full, at) =>
-    full === "bytes"
-      ? `Le site gratuit n'a plus de place pour un nouveau quiz pour l'instant. De la place se libère dès que d'autres quiz sont terminés ou ont expiré (trois heures après leur dernière utilisation).`
-      : `Le site gratuit n'accepte plus de nouveaux quiz aujourd'hui. Il en acceptera de nouveau à partir de ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
-  quota: (at) => `Le site gratuit a épuisé son quota du jour. Il sera de nouveau disponible à partir de ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
-  ownCopyLink: "Davantage de quiz : un site à vous, à votre école ou à votre entreprise ›",
+  ...SITE_WORDS.fr,
   offline: "Impossible de se connecter au site. Vérifiez la connexion et réessayez. Si le problème persiste, le réseau d'une école ou d'une entreprise bloque peut-être le site.",
-  whatToTellIt: "Que dire au service informatique ›",
   notStarted: "avant la première question",
   question: (n, t) => `question ${n} sur ${t}`,
   finalRanking: "classement final",
@@ -558,6 +532,7 @@ const it: Text = {
         ? "Il sito accetta il quiz come file .zip, e questo file non lo è."
         : `Il sito accetta il quiz come file .zip, non come file .${w}.`,
   unreadable: "Non è stato possibile leggere il file.",
+  zip: { notZip: "Questo file non è un archivio .zip leggibile.", damaged: "L'archivio .zip è danneggiato.", noQuiz: "L'archivio non contiene nessun file .txt o .md con il quiz." },
   noHandoff: "Questo browser ha impedito al sito di aprire il quiz (forse blocca i dati dei siti). Prova con un altro browser.",
   tooLong: (kb) => `Il testo del quiz supera il limite del sito (al massimo ${kb} KB).`,
   reading: "Lettura del quiz…",
@@ -568,15 +543,8 @@ const it: Text = {
   aiFixes: "La tua IA può correggere il problema. Copia il messaggio nella chat e apri qui il file .zip che ti rimanda.",
   copyForAi: "Copia il messaggio per la tua IA",
   without: "Continua senza queste immagini",
-  notTaken: "Il sito non è riuscito a ricevere il quiz. Riprova.",
-  siteFull: (full, at) =>
-    full === "bytes"
-      ? `Al momento il sito gratuito non ha spazio per un altro quiz. Ne accetterà di nuovo quando altri quiz saranno terminati o scaduti (tre ore dopo il loro ultimo uso).`
-      : `Per oggi il sito gratuito non può accettare altri quiz. Ne accetta di nuovo dalle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
-  quota: (at) => `Il sito gratuito ha esaurito la quota giornaliera. Torna a funzionare dalle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
-  ownCopyLink: "Più quiz: un sito tuo, della tua scuola o della tua azienda ›",
+  ...SITE_WORDS.it,
   offline: "Impossibile collegarsi al sito. Controlla la connessione e riprova. Se il problema persiste, forse la rete di una scuola o di un'azienda blocca il sito.",
-  whatToTellIt: "Cosa dire al servizio informatico ›",
   notStarted: "in attesa della prima domanda",
   question: (n, t) => `domanda ${n} di ${t}`,
   finalRanking: "classifica finale",
@@ -593,20 +561,4 @@ export const TEXT: Record<Lang, Text> = { de, en, fr, it };
 /** The example asks as plain text, for checking the labelled parts and the address. */
 export function askText(t: Text): string {
   return t.ask.map((p) => p.s).join("");
-}
-
-export const LANG_KEY = "cq.lang";
-
-export function isLang(x: unknown): x is Lang {
-  return x === "de" || x === "en" || x === "fr" || x === "it";
-}
-
-/** A choice made on this device, else the browser's first language among the four, else English. */
-export function chosenLang(saved: unknown, browser: readonly string[]): Lang {
-  if (isLang(saved)) return saved;
-  for (const l of browser) {
-    const two = (l ?? "").slice(0, 2).toLowerCase();
-    if (isLang(two)) return two;
-  }
-  return "en";
 }

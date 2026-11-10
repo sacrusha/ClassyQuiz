@@ -178,12 +178,6 @@ export function siteFullMessage(full: SiteFull, now = new Date()): string {
   return `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
-/** Cloudflare's daily allowance is used up; it comes back at 00:00 UTC, said in Swiss time. */
-export function quotaMessage(now = new Date()): string {
-  const at = quotaResetAt(now);
-  return `The free site has used up today's allowance. It works again at ${at ? `${at} Swiss time` : "midnight UTC"}. ${OWN_COPY}`;
-}
-
 /**
  * An error from the platform saying a free-plan limit is spent. The wording
  * is undocumented, so the match is broad (docs/design/hosting-and-limits.md,

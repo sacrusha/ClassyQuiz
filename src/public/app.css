@@ -614,7 +614,7 @@ body.teach { padding-bottom: 96px; }
   .steerbar { gap: 5px; padding: 0 6px; font-size: 15px; }
   .steerbar .btn.more { width: 40px; }
   .steerbar .btn.bar-last { width: 7.6em; padding: .3em .3em; gap: .3em; }
-  .steerbar .btn.bar-play { width: 9.2em; padding: .3em .3em; gap: .3em; }
+  .steerbar .btn.bar-play { width: 9.5em; padding: .3em .3em; gap: .3em; }
   .steerbar .btn.bar-last .lbl > span { font-size: .9em; }
   .steerbar .joinchip { display: none; } /* in ⋯ on a phone */
   /* The code, not the address cut to "classyquiz.pa…" or the code cut to a

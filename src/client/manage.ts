@@ -3,10 +3,9 @@
 // docs/design/question-flow.md.
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
-import { POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
 import { ROOM_WARN, quotaResetAt } from "../shared/limits.ts";
 import { esc, lines, siteAddress } from "./dom.ts";
-import { TEXT } from "./landing-text.ts";
+import { SITE, T, said } from "./room-text.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import type { Line } from "./net.ts";
 import { fillPictures, picImg } from "./pictures.ts";
@@ -50,13 +49,13 @@ export function patch(el: HTMLElement, html: string): void {
 function tags(q: TeacherQuestion): string {
   const right = q.answers.filter((a) => a.counts).length;
   return [
-    q.status === "current" ? `<span class="tag now">now</span>` : "",
-    q.status === "revealed" ? `<span class="tag">done</span>` : "",
-    q.skip ? `<span class="tag">skipped</span>` : "",
-    q.void ? `<span class="tag">not counted</span>` : "",
-    q.image && q.pictureHidden ? `<span class="tag">picture hidden</span>` : "",
-    right > 1 ? `<span class="tag">${right} right</span>` : "",
-    q.answers.some((a) => a.counts !== a.marked) ? `<span class="tag">changed</span>` : "",
+    q.status === "current" ? `<span class="tag now">${T.tagNow}</span>` : "",
+    q.status === "revealed" ? `<span class="tag">${T.tagDone}</span>` : "",
+    q.skip ? `<span class="tag">${T.tagSkipped}</span>` : "",
+    q.void ? `<span class="tag">${T.tagVoid}</span>` : "",
+    q.image && q.pictureHidden ? `<span class="tag">${T.tagHidden}</span>` : "",
+    right > 1 ? `<span class="tag">${T.tagRight(right)}</span>` : "",
+    q.answers.some((a) => a.counts !== a.marked) ? `<span class="tag">${T.tagChanged}</span>` : "",
   ].join("");
 }
 
@@ -73,7 +72,7 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
         a.image !== undefined
           ? a.image
             ? `<span class="t pic">${fixing ? picImg(a.image.src, a.image.w, a.image.h) : thumb(a.image, "ansthumb")}</span>`
-            : `<span class="t muted">(picture left out)</span>`
+            : `<span class="t muted">${T.leftOut}</span>`
           : `<span class="t">${lines(a.text)}</span>`;
       return `<div class="ans a${j}${a.counts ? " right" : ""}${tap}">
         <span class="key">${a.counts ? ICON.check : ""}</span>${shapeSvg(j)}${body}
@@ -82,20 +81,20 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
     })
     .join("");
   const fix = fixing
-    ? `<p class="hint">Tap every right choice.</p>
+    ? `<p class="hint">${T.tapRight}</p>
        <div class="row">
-         <button class="btn" data-act="void" data-q="${i}">${ICON.void} ${q.void ? "Count it again" : "Don't count this question"}</button>
-         ${q.status === "upcoming" || q.status === "skipped" ? `<button class="btn" data-act="skip" data-q="${i}">${q.skip ? "Show it after all" : "Skip it"}</button>` : ""}
-         ${q.image ? `<button class="btn" data-act="hide-pic" data-q="${i}">${q.pictureHidden ? "Show the picture again" : "Hide the picture"}</button>` : ""}
-         <button class="btn primary" data-act="fix-done">Done</button>
+         <button class="btn" data-act="void" data-q="${i}">${ICON.void} ${q.void ? T.countAgain : T.dontCount}</button>
+         ${q.status === "upcoming" || q.status === "skipped" ? `<button class="btn" data-act="skip" data-q="${i}">${q.skip ? T.showAfterAll : T.skipIt}</button>` : ""}
+         ${q.image ? `<button class="btn" data-act="hide-pic" data-q="${i}">${q.pictureHidden ? T.showPicture : T.hidePicture}</button>` : ""}
+         <button class="btn primary" data-act="fix-done">${T.done}</button>
        </div>`
-    : `<button class="link" data-act="fix-q" data-q="${i}">Change the solution</button>`;
+    : `<button class="link" data-act="fix-q" data-q="${i}">${T.changeSolution}</button>`;
   return `<div class="answers">${rows}${fix}</div>`;
 }
 
 /** A picture small, tapped to see it full size on this device. */
 export function thumb(img: ImageRef, cls = "", label = ""): string {
-  return `<button class="thumb${cls ? ` ${cls}` : ""}" data-act="lightbox" data-src="${esc(img.src)}" data-w="${img.w}" data-h="${img.h}" aria-label="${label || "picture"}">${picImg(img.src, img.w, img.h)}${label ? `<span>${label}</span>` : ""}</button>`;
+  return `<button class="thumb${cls ? ` ${cls}` : ""}" data-act="lightbox" data-src="${esc(img.src)}" data-w="${img.w}" data-h="${img.h}" aria-label="${label || T.picture}">${picImg(img.src, img.w, img.h)}${label ? `<span>${label}</span>` : ""}</button>`;
 }
 
 /**
@@ -106,7 +105,7 @@ export function thumb(img: ImageRef, cls = "", label = ""): string {
 function questionPictures(q: TeacherQuestion, quizBackground: ImageRef | null): string {
   const parts: string[] = [];
   if (q.image) parts.push(thumb(q.image, q.pictureHidden ? "hidden" : ""));
-  if (q.background && q.background.src !== quizBackground?.src) parts.push(thumb(q.background, "bg", "background"));
+  if (q.background && q.background.src !== quizBackground?.src) parts.push(thumb(q.background, "bg", T.background));
   return parts.length ? `<div class="qpics">${parts.join("")}</div>` : "";
 }
 
@@ -127,9 +126,9 @@ export function questionList(v: QuestionsView, ui: ManageUI): string {
     })
     .join("");
   return `<section class="qlist">
-    <div class="qlist-head"><strong>${v.questions.length} questions</strong>
-      <button class="btn" data-act="toggle-all">${ui.all ? "Hide the solutions" : "Show the solutions"}</button></div>
-    ${v.background ? `<div class="qbg">${thumb(v.background, "bg", "background")}<span class="hint">behind every question</span></div>` : ""}
+    <div class="qlist-head"><strong>${T.questions(v.questions.length)}</strong>
+      <button class="btn" data-act="toggle-all">${ui.all ? T.hideSolutions : T.showSolutions}</button></div>
+    ${v.background ? `<div class="qbg">${thumb(v.background, "bg", T.background)}<span class="hint">${T.behindEvery}</span></div>` : ""}
     ${v.warnings.map((w) => `<p class="warning">${esc(w.message)}</p>`).join("")}
     <ol>${items}</ol>
   </section>`;
@@ -150,7 +149,7 @@ export function playersRow(v: TeacherView, removable: boolean): string {
   return `<div class="avatars">${players
     .map((p) =>
       removable
-        ? `<button data-act="remove" data-player="${esc(p.id)}" class="${p.connected ? "" : "away"}" aria-label="remove">${avatarSvg(p.avatar)}</button>`
+        ? `<button data-act="remove" data-player="${esc(p.id)}" class="${p.connected ? "" : "away"}" aria-label="${T.remove}">${avatarSvg(p.avatar)}</button>`
         : `<span class="${p.connected ? "" : "away"}">${avatarSvg(p.avatar)}</span>`,
     )
     .join("")}</div>`;
@@ -168,7 +167,7 @@ export function syncCrowd(root: HTMLElement, v: TeacherView): void {
   syncAvatars(box, v.run?.players ?? [], (p) => ({
     tag: "button",
     className: p.connected ? "" : "away",
-    attrs: { "data-act": "remove", "data-player": p.id, "aria-label": "remove" },
+    attrs: { "data-act": "remove", "data-player": p.id, "aria-label": T.remove },
   }));
 }
 
@@ -212,7 +211,10 @@ export class Steer {
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
       // A long message (the site full for today) stays long enough to read.
-      if (!r.ok && r.error) toast(r.error, r.error.length > 80 ? 12_000 : 4000);
+      if (!r.ok && r.error) {
+        const words = said(r.error);
+        toast(words, words.length > 80 ? 12_000 : 4000);
+      }
       return r;
     };
     switch (a) {
@@ -242,16 +244,16 @@ export class Steer {
         await send({ op: "speed", value: !v.speed });
         return true;
       case "finish":
-        if (confirm("Show the final ranking now? Questions not yet shown are left out.")) await send({ op: "finish", at });
+        if (confirm(T.confirmFinish)) await send({ op: "finish", at });
         return true;
       case "skip-current":
-        if (confirm("Skip this question? It won't count.")) await send({ op: "skipCurrent", at });
+        if (confirm(T.confirmSkip)) await send({ op: "skipCurrent", at });
         return true;
       case "toggle-count": {
         const i = Number(el.dataset.i);
         const counts = v.questions[q].answers.map((x, j) => (j === i ? !x.counts : x.counts));
         if (!counts.some(Boolean)) {
-          toast("At least one choice has to be right. For none, don't count the question.");
+          toast(said("At least one choice has to be right. For none, don't count the question."));
           return true;
         }
         await send({ op: "setCounts", q, counts });
@@ -270,12 +272,12 @@ export class Steer {
         await send({ op: "zoom", value: !v.zoom, at });
         return true;
       case "remove":
-        if (confirm("Remove this avatar? Its answers stop counting. For a double, or a device that doesn't belong here.")) {
+        if (confirm(T.confirmRemove)) {
           await send({ op: "remove", player: el.dataset.player! });
         }
         return true;
       case "delete":
-        if (confirm(`Delete “${v.title || "this quiz"}”? Nobody can join it any more.`)) await send({ op: "endInstance" });
+        if (confirm(T.confirmDelete(v.title || null))) await send({ op: "endInstance" });
         return true;
       default:
         return false;
@@ -330,7 +332,7 @@ export function openMenu(items: MenuItem[]): void {
   back.className = "sheet-back";
   back.innerHTML = `<div class="sheet" role="menu">${items
     .map((it, i) => `<button role="menuitem" class="${it.danger ? "danger" : ""}" data-i="${i}">${it.label}</button>`)
-    .join("")}<button class="cancel" data-i="-1">Close</button></div>`;
+    .join("")}<button class="cancel" data-i="-1">${T.close}</button></div>`;
   back.addEventListener("click", (e) => {
     const b = (e.target as HTMLElement).closest<HTMLElement>("button[data-i]");
     if (!b && e.target !== back) return;
@@ -350,11 +352,11 @@ export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuIt
   const open = (act: string, data: Record<string, string> = {}) => void steer.run(act, data);
   const items: MenuItem[] = [];
   if (v.phase === "question") {
-    items.push({ label: "Skip this question", run: () => open("skip-current") });
-    items.push({ label: onWall ? "Change the solution – everyone sees it" : "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
+    items.push({ label: T.skipQuestion, run: () => open("skip-current") });
+    items.push({ label: onWall ? T.changeSolutionSeen : T.changeSolution, run: () => open("fix-q", { q: String(v.current) }) });
   }
-  if (v.phase === "reveal") items.push({ label: "Change the solution", run: () => open("fix-q", { q: String(v.current) }) });
-  if (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") items.push({ label: `${ICON.trophy} End the quiz: final ranking`, run: () => open("finish") });
+  if (v.phase === "reveal") items.push({ label: T.changeSolution, run: () => open("fix-q", { q: String(v.current) }) });
+  if (v.phase === "question" || v.phase === "reveal" || v.phase === "ranking") items.push({ label: `${ICON.trophy} ${T.endQuiz}`, run: () => open("finish") });
   return items;
 }
 
@@ -384,11 +386,8 @@ export function roomNotice(v: TeacherView): string {
   const room = v.room;
   if (room === null || room >= ROOM_WARN) return "";
   const at = quotaResetAt();
-  const says =
-    room === 0
-      ? `The free site can't let another group in today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`
-      : `The free site is nearly full today: room for ${room === 1 ? "one more group" : `about ${room} more groups`}.`;
-  return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">${esc(TEXT.en.ownCopyLink)}</a></p>`;
+  const says = room === 0 ? T.classesFull(at) : T.nearlyFull(room);
+  return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">${esc(SITE.ownCopyLink)}</a></p>`;
 }
 
 export function addressAndCode(code: string): string {
@@ -400,5 +399,5 @@ export function addressAndCode(code: string): string {
  * lobby: off by default, fixed once the quiz starts.
  */
 export function speedSwitch(v: TeacherView): string {
-  return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>Points for speed</button><small class="speed-note">A right answer ${POINTS_RIGHT}, up to ${SPEED_BONUS} more the quicker it comes.</small>`;
+  return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>${T.speedSwitch}</button><small class="speed-note">${T.speedNote}</small>`;
 }

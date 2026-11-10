@@ -566,6 +566,20 @@ export function shapeSvg(i: number, fill = "currentColor"): string {
   return `<svg class="shape" viewBox="0 0 100 100" aria-label="${SHAPE_NAMES[i]}" role="img" fill="${fill}">${SHAPES[i]}</svg>`;
 }
 
+/**
+ * The accessible names in another language, in the drawings' order: the room
+ * pages give theirs (client/room-text.ts). Set here, below the part the film
+ * lifts as plain JavaScript (docs/film/build/build.py), which keeps the
+ * English ones.
+ */
+export function nameLooks(n: { animals: string[]; backgrounds: string[]; hats: string[]; tools: string[]; shapes: string[] }): void {
+  ANIMAL_NAMES.splice(0, ANIMAL_NAMES.length, ...n.animals);
+  BACKGROUND_NAMES.splice(0, BACKGROUND_NAMES.length, ...n.backgrounds);
+  HATS.forEach((x, i) => (x.name = n.hats[i] ?? x.name));
+  TOOLS.forEach((x, i) => (x.name = n.tools[i] ?? x.name));
+  SHAPE_NAMES.splice(0, SHAPE_NAMES.length, ...n.shapes);
+}
+
 export const ICON = {
   check: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   cross: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,

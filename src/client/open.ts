@@ -15,12 +15,16 @@ import { ENTRIES, type Entry, type EntryContext } from "./entries.ts";
 import { EXAMPLE_ZIP } from "./example-text.ts";
 import { sweepStale, takeOver } from "./handoff.ts";
 import { TEXT, isLang } from "./landing-text.ts";
+import { T, lang, said } from "./room-text.ts";
 import { newUI, patch, questionList, toast, viewAct, type QuestionsView } from "./manage.ts";
 import { openQuiz, readQuiz, type OpenedQuiz, type QuizFiles } from "./opening.ts";
 import { fillPictures } from "./pictures.ts";
 import { listZip, quizTextFromEntries } from "./unzip.ts";
 
 const main = $("#main");
+document.documentElement.lang = lang;
+/** The root page's words for what it shares with this page: reading the quiz, its problems, no connection. */
+const PAGE = TEXT[lang];
 const ui = newUI();
 let opened: OpenedQuiz | null = null;
 /** The fixes go through the game's own rules (server/game.ts), as the server applies them at upload. */
@@ -60,14 +64,14 @@ async function arrive(): Promise<void> {
 
 /** The worked example's .zip, read as a teacher's is (docs/design/example-page.md): one path, so it can't run differently. */
 async function exampleFiles(name: string): Promise<QuizFiles | null> {
-  main.innerHTML = `<p class="muted">${esc(TEXT.en.reading)}</p>`;
+  main.innerHTML = `<p class="muted">${esc(PAGE.reading)}</p>`;
   let buf: ArrayBuffer;
   try {
     const res = await fetch(`/examples/${name}`);
     if (!res.ok) throw new Error(String(res.status));
     buf = await res.arrayBuffer();
   } catch {
-    main.innerHTML = `<div class="open-problem"><p class="err">${esc(TEXT.en.offline)}</p><p><a href="/check#it">${esc(TEXT.en.whatToTellIt)}</a></p></div>`;
+    main.innerHTML = `<div class="open-problem"><p class="err">${esc(PAGE.offline)}</p><p><a href="/check#it">${esc(PAGE.whatToTellIt)}</a></p></div>`;
     return null;
   }
   try {
@@ -76,22 +80,22 @@ async function exampleFiles(name: string): Promise<QuizFiles | null> {
     if (r.ok) return r.files;
     cantRun(r.errors);
   } catch (e) {
-    cantRun([{ message: e instanceof Error ? e.message : TEXT.en.unreadable }]);
+    cantRun([{ message: e instanceof Error ? e.message : PAGE.unreadable }]);
   }
   return null;
 }
 
 function nothingOpen(): void {
   document.title = "classyQuiz";
-  main.innerHTML = `<h1 class="ctitle">No quiz open here</h1>
-    <p>A quiz opens from the .zip your AI made, on the start page. This page keeps nothing of it once it reloads or closes, so open the .zip there again.</p>
-    <p><a class="btn primary" href="/">To the start page</a></p>`;
+  main.innerHTML = `<h1 class="ctitle">${esc(T.nothingOpenH)}</h1>
+    <p>${esc(T.nothingOpen)}</p>
+    <p><a class="btn primary" href="/">${esc(T.toStart)}</a></p>`;
 }
 
 function cantRun(errors: Problem[]): void {
-  main.innerHTML = `<div class="open-problem"><p class="err">${esc(TEXT.en.quizHead)}</p>
-    <ul>${errors.map((e) => `<li>${esc(e.message)}</li>`).join("")}</ul></div>
-    <p><a class="btn" href="/">To the start page</a></p>`;
+  main.innerHTML = `<div class="open-problem"><p class="err">${esc(PAGE.quizHead)}</p>
+    <ul lang="en">${errors.map((e) => `<li>${esc(e.message)}</li>`).join("")}</ul></div>
+    <p><a class="btn" href="/">${esc(T.toStart)}</a></p>`;
 }
 
 /**
@@ -108,12 +112,12 @@ function renderCheck(): void {
   // An entry that played in this page (Solo) gives it back: the check's own page, as open.html has it.
   document.body.className = "follows-dark";
   main.className = "check open-check";
-  main.innerHTML = `<div class="checkhead"><h1 class="ctitle">${lines(q.quiz.title || "Quiz")} <span class="cnum">· ${n} ${n === 1 ? "question" : "questions"}</span></h1></div>
-    ${ENTRIES.length > 1 ? `<h2 class="open-ask">How will it be played?</h2>` : ""}
+  main.innerHTML = `<div class="checkhead"><h1 class="ctitle">${lines(q.quiz.title || "Quiz")} <span class="cnum">· ${T.questions(n)}</span></h1></div>
+    ${ENTRIES.length > 1 ? `<h2 class="open-ask">${esc(T.howPlayed)}</h2>` : ""}
     <div class="open-entries">${ENTRIES.map(entryCard).join("")}</div>
     <details class="open-fold"${foldOpen ? " open" : ""}>
-      <summary><span class="open-fold-name">The questions and their solutions</span>${notes ? `<span class="open-fold-notes"> · ${notes} ${notes === 1 ? "note" : "notes"} from the site</span>` : ""}${
-        plays ? `<span class="open-fold-hint">If you will play it yourself, leave this closed.</span>` : ""
+      <summary><span class="open-fold-name">${esc(T.foldName)}</span>${notes ? `<span class="open-fold-notes"> · ${esc(T.notes(notes))}</span>` : ""}${
+        plays ? `<span class="open-fold-hint">${esc(T.foldHint)}</span>` : ""
       }</summary>
       <div id="qs"></div>
     </details>`;
@@ -196,7 +200,7 @@ function fix(el: HTMLElement): void {
     }
   } catch (e) {
     if (!(e instanceof G.GameError)) throw e;
-    toast(e.message);
+    toast(said(e.message));
   }
   renderList();
 }

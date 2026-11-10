@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>classyQuiz · network check</title>
+<title data-t="title">classyQuiz · network check</title>
 <link rel="stylesheet" href="/site.css">
 <link rel="stylesheet" href="/app.css">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -15,15 +15,15 @@
 <body class="follows-dark">
 <header class="site-head" style="--page-w: 40rem"><div class="in"><a class="brand" href="/"><!--#brand classyquiz-horizontal-32-inline.svg--></a></div></header>
 <main class="wrap">
-<h1 style="font-size:var(--h1);line-height:1.2;margin:1rem 0 .5rem">Does the quiz get through this network?</h1>
-<p class="muted">Open this page on the computer that shows the quiz and on one player's device, on the network they will use. It takes a few seconds.</p>
+<h1 data-t="h1" style="font-size:var(--h1);line-height:1.2;margin:1rem 0 .5rem">Does the quiz get through this network?</h1>
+<p class="muted" data-t="lede">Open this page on the computer that shows the quiz and on one player's device, on the network they will use. It takes a few seconds.</p>
 <ul id="results" style="list-style:none;padding:0;display:grid;gap:10px"></ul>
 <div id="verdict"></div>
-<p><button class="btn" id="again" type="button">Check again</button> <a class="btn" href="/">Back</a></p>
+<p><button class="btn" id="again" type="button" data-t="again">Check again</button> <a class="btn" href="/" data-t="back">Back</a></p>
 <section id="it">
-<h2 style="font-size:var(--h2)">If the site doesn't open at school or at work at all</h2>
-<p>Some school and company networks block sites they don't know. Then nothing of the site opens there, this page included, and the check above can't run: read this at home or on a phone's mobile data. Whoever looks after the network can allow the site. What to send them:</p>
-<p class="it">Please allow <span data-host>classyquiz.pages.dev</span> on our network. It is a quiz site: the players, a class or a group, answer on their own devices. It needs HTTPS and WebSocket connections to <span data-host>classyquiz.pages.dev</span>.</p>
+<h2 data-t="itH" style="font-size:var(--h2)">If the site doesn't open at school or at work at all</h2>
+<p data-t="itLede">Some school and company networks block sites they don't know. Then nothing of the site opens there, this page included, and the check above can't run: read this at home or on a phone's mobile data. Whoever looks after the network can allow the site. What to send them:</p>
+<p class="it" id="forit">Please allow <span data-host>classyquiz.pages.dev</span> on our network. It is a quiz site: the players, a class or a group, answer on their own devices. It needs HTTPS and WebSocket connections to <span data-host>classyquiz.pages.dev</span>.</p>
 </section>
 </main>
 <script src="/js/check.js" defer></script>

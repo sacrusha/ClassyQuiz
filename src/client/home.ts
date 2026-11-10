@@ -9,7 +9,7 @@ import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
 import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
 import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, type SavedQuiz } from "./dom.ts";
 import { api, readApi } from "./net.ts";
-import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
+import { ZipError, listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, askText, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
 import { EXAMPLE_ZIP } from "./example-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
@@ -251,8 +251,8 @@ async function fromFiles(files: File[]): Promise<void> {
     const entries = listZip(await files[0].arrayBuffer());
     await toCheck(await quizTextFromEntries(entries), entries);
   } catch (e) {
-    // The archive's own messages (client/unzip.ts) are English, like the quiz's problems.
-    out.innerHTML = problem(e instanceof Error ? e.message : t.unreadable);
+    // The archive's problems in the page's language; anything else (the browser's decompression) as it came.
+    out.innerHTML = problem(e instanceof ZipError ? t.zip[e.problem] : e instanceof Error ? e.message : t.unreadable);
   }
 }
 

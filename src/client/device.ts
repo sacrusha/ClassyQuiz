@@ -17,6 +17,7 @@ import { ICON, avatarSvg } from "./look.ts";
 import { fillPictures, picImg } from "./pictures.ts";
 import { backdrop, endJump, jump, layQuestion, markTiles, type StageQuestion } from "./stage.ts";
 import { SETTLE_MS } from "./steps.ts";
+import { T } from "./room-text.ts";
 
 export interface DeviceQuestion extends StageQuestion {
   /** Tells questions apart: a new key is laid out afresh, the same one only marked. */
@@ -118,7 +119,7 @@ export class DeviceScreen {
     if (!this.root.querySelector("#stage")) {
       this.laid = "";
       this.root.classList.add("dscreen");
-      this.root.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="grow"></span><span id="qicons"></span><span class="dme" id="dme"></span><span id="dscore"></span><button class="dmenu" id="dmenu" type="button" aria-label="menu" hidden>&#8943;</button></div>
+      this.root.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="grow"></span><span id="qicons"></span><span class="dme" id="dme"></span><span id="dscore"></span><button class="dmenu" id="dmenu" type="button" aria-label="${T.menu}" hidden>&#8943;</button></div>
         <div class="stage" id="stage"></div>
         <div class="steerbar dbar"><span class="grow" id="dtitle"></span><button class="btn primary bar-play" type="button" id="dnext"></button></div>`;
     }

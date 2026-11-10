@@ -8,6 +8,7 @@
 // showed as open counts (docs/design/question-flow.md, "When a tap counts").
 
 import type { ClockView } from "../shared/protocol.ts";
+import { T } from "./room-text.ts";
 
 /** Per question and length, when Last call ends on this device (performance.now()). */
 const ends = new Map<string, number>();
@@ -33,5 +34,5 @@ export function localEnd(key: string, clock: ClockView): number {
 export function clockBar(ms: number, end: number, cls = ""): string {
   const left = Math.max(0, end - performance.now());
   const done = Math.max(0, ms - left);
-  return `<div class="clockbar${cls ? ` ${cls}` : ""}${left <= 0 ? " out" : ""}" role="timer" aria-label="Countdown"><span style="animation-duration:${ms}ms;animation-delay:-${Math.round(done)}ms"></span></div>`;
+  return `<div class="clockbar${cls ? ` ${cls}` : ""}${left <= 0 ? " out" : ""}" role="timer" aria-label="${T.countdown}"><span style="animation-duration:${ms}ms;animation-delay:-${Math.round(done)}ms"></span></div>`;
 }

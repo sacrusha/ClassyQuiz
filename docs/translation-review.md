@@ -137,6 +137,51 @@ A 360 × 640 window cuts the button that opens a file by 8 px in German and 12 i
 "The AI's answer:" and the example's file name don't share a line there (`design/root-page.md`,
 "One column"); the file's names are the example's (`client/example-text.ts`, `EXAMPLE_ZIP`).
 
+## The screens after the first page
+
+Drafts, unread by the owner: `src/client/room-text.ts` (the local check, Solo, the lobby, the
+screen everyone watches, the Remote, the players' devices, a Peers room, and the server's
+messages), `check-text.ts`, `own-copy.ts`, `notfound.ts`, `site-text.ts`. Each device speaks its
+own language (`design/root-page.md`, "Languages"). For the read:
+
+- **Register** as the first page's: "du", "vous", "tu", on the players' devices too. The message
+  for IT on `/check` is the visitor's to a third person: "Bitte geben Sie … frei", "Merci
+  d'autoriser", "Per favore autorizzate".
+- **The device that shows the quiz** is the first page's word on the Remote, in the tab's title
+  and on the 404 page: "Grossbildschirm", "grand écran", "schermo grande", English "big screen"
+  (`design/teacher-devices.md`, "Words for any crowd"). The lobby's check says "Bildschirm",
+  "écran", "schermo" where the device in hand may be the one ("Ein Bildschirm", "alle schauen auf
+  diesen Bildschirm"). The longest it makes: "das Fenster für den Grossbildschirm öffnen", "Am
+  Grossbildschirm zurück zur Frage", "Torna alla domanda sullo schermo grande", a link and
+  buttons on the Remote that may wrap.
+- **Steering**: "steuern", "piloter", "comandare"; the Remote "Fernbedienung", "Télécommande",
+  "Telecomando"; a clicker "Presenter", "pointeur de présentation", "puntatore per
+  presentazioni". Italian "comandare" follows "telecomando" and may read as giving orders.
+- **The lobby**: "Lobby öffnen ▶", "Apri la lobby ▶", French "Ouvrir le salon ▶". "Salon" is
+  recalled, not looked up, as the word French versions of games and chat apps have for a lobby;
+  "salle d'attente", a video call's word, has the "salle" the first page avoids for a room
+  (above, "What is kept").
+- **No word for a room**, as on the first page: the line under Peers and Quizmaster says the quiz
+  is sent, who can join and when it is deleted; the server's messages say "this quiz".
+- **Choices and answers** stay apart: "Optionen", "Propositions", "Opzioni" beside "Antworten",
+  "Réponses", "Risposte". Under that button the line for what it ends: "beendet das Antworten",
+  "clôt les réponses", "chiude le risposte"; the Remote then says "Niemand kann mehr antworten.",
+  "Réponses closes.", "Risposte chiuse." ("Abgabe" read as handing in schoolwork).
+- **The steering bar's longest labels**: "Schlussrangliste", "Classement final", "Classifica
+  finale". Countdown is "Countdown", "Décompte", "Countdown".
+- **"Players"** in the ⋯ menu and over the sheet is "Wer ist dabei" (beside the lobby's "n
+  dabei"), "Participants", "Partecipanti", as `/check` has them; "Spieler" carries a gender, and
+  the hint under it names the avatars.
+- **Exit** on the steering bar after the final ranking is one phrase with the line under it:
+  "Beenden" / "das Quiz für alle", "Terminer" / "le quiz pour tous", "Termina" / "il quiz per
+  tutti". "Quitter" and "Esci" could be taken as leaving alone.
+- **A device that went away**: "Fernbedienung weg", "Télécommande déconnectée", "Telecomando
+  assente".
+- **Swiss German**: "innert", "nochmals", ss for ß, as on the first page.
+- **Still English under a translated heading**: a quiz's problems and the site's notes on it
+  (the local check's fold says "3 Hinweise der Seite" and lists them in English).
+- **Italian** has no native reader on the project.
+
 ## The worked example (`/example`)
 
 Drafts: the page's words (`src/client/example-text.ts`), the conversation

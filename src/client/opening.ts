@@ -8,11 +8,9 @@ import { imageKey, parseQuiz, type Problem, type Quiz } from "../quiz/format.ts"
 import { matchImages, type StoredImage } from "../server/images.ts";
 import * as G from "../server/game.ts";
 import type { ImageRef } from "../shared/protocol.ts";
-import { quotaResetAt } from "../shared/limits.ts";
-import { esc, saveQuiz, savedQuizzes, store } from "./dom.ts";
+import { saveQuiz, savedQuizzes } from "./dom.ts";
 import { recordUploadDay } from "./history.ts";
 import { prepareImages, uploadQuiz, type PreparedImage } from "./images.ts";
-import { LANG_KEY, TEXT, chosenLang, type Lang } from "./landing-text.ts";
 import { own } from "./pictures.ts";
 import type { ZipEntry } from "./unzip.ts";
 
@@ -120,36 +118,4 @@ export async function openRoom(q: OpenedQuiz, mode?: "peers"): Promise<RoomResul
   saveQuiz({ id: r.id, secret: r.secret, code: r.code, teacher: r.teacher, title: "", at: Date.now() });
   recordUploadDay();
   return r;
-}
-
-/**
- * The language the root page speaks on this device (landing-text.ts,
- * chosenLang): a room's refusals and the line before them are the root
- * page's messages, moved to the check, so they speak its language; the
- * check's own words are not translated yet (docs/design/local-check.md,
- * "Opening a room").
- */
-export function visitorLang(): Lang {
-  return chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
-}
-
-/**
- * Why a room didn't open, as HTML: the quiz (the server's checks are the
- * last word), the site's day (with the way to more quizzes), or the network
- * (null: the site couldn't be reached), with what to tell IT. In the root
- * page's words and language (visitorLang); the quiz's own problems are not
- * translated, as on the root page.
- */
-export function roomRefusal(r: RoomResult | null): string {
-  const lang = visitorLang();
-  const t = TEXT[lang];
-  const box = (head: string, more = "") => `<div class="open-problem" lang="${lang}"><p class="err">${esc(head)}</p>${more}</div>`;
-  const ownCopy = `<p><a href="/own-copy">${esc(t.ownCopyLink)}</a></p>`;
-  if (!r || r.json === false) return box(t.offline, `<p><a href="/check#it">${esc(t.whatToTellIt)}</a></p>`);
-  if (r.ok) return "";
-  // A refusal that isn't about the quiz may come without errors (net.ts, readApi).
-  if ((r.errors?.length ?? 0) > 0) return box(t.quizHead, `<ul lang="en">${r.errors.map((e) => `<li>${esc(e.message)}</li>`).join("")}</ul>`);
-  if (r.quota) return box(t.quota(quotaResetAt()), ownCopy);
-  if (r.full) return box(t.siteFull(r.full, quotaResetAt()), ownCopy);
-  return box(r.error ?? t.notTaken);
 }

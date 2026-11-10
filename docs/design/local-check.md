@@ -27,9 +27,9 @@ Solo learner mustn't be shown them.
 - Nothing kept beyond its use (Constraints): the teacher's file on disk is
   the durable copy; a shared school laptop should keep nothing of a quiz once
   the page is closed (`pictures.md`, "Stored and served").
-- The check's own words are not translated yet (`root-page.md`,
-  "Languages"); the messages that opening a room moved here from the root
-  page are in the visitor's language (below, "Opening a room").
+- The check speaks the device's language, the one the root page speaks on
+  it (`root-page.md`, "Languages"); the quiz's own problems and warnings
+  stay English, since the AI reads them.
 - Pages allow pictures only from the site and as `blob:` URLs, scripts only
   from the site's files (`hosting-and-limits.md`, Content-Security-Policy).
 
@@ -110,12 +110,11 @@ bookkeeping comes with the upload: the previous unstarted quiz ends
 (`hosting-and-limits.md`, "Running classes finish"), the quiz is remembered
 for the resume card and the day for the own-copy line. Refusals (the day's
 caps, the allowance, no connection), and "Sending the quiz…" before them,
-show under the entry's button in the root page's words and language
-(`visitorLang`: the device's choice, else the browser's; `root-page.md`,
-"Languages"). They are the root page's messages, moved here with the
-upload, and they say what to do next (wait, an own copy, what to tell IT), which a visitor
-who doesn't read English needs as much on this page as on the root page;
-the card around them and the quiz's own problems are not translated yet.
+show under the entry's button in the root page's words (`client/refusal.ts`),
+in the device's language like the rest of the check. They are the root
+page's messages, moved here with the upload, and they say what to do next
+(wait, an own copy, what to tell IT); the quiz's own problems stay English,
+as on the root page.
 
 ### The entries
 

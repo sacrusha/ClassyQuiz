@@ -30,6 +30,15 @@ All commands run in `src/` unless said otherwise.
   `tempo.ts`).
 - `client/`: the page scripts, plain DOM without a framework, bundled per page
   by esbuild to ES2020 because school devices are not always current.
+- The pages' words, in the root page's four languages: `client/landing-text.ts`
+  (the root page), `client/room-text.ts` (the pages a quiz plays on),
+  `client/site-text.ts` (what both say), `client/check-text.ts`, and the
+  tables in `client/own-copy.ts` and `client/notfound.ts`
+  (`docs/design/root-page.md`, "Languages"). The server says its messages in
+  English; the pages show them through `said()` (`client/room-text.ts`),
+  which knows them by their English words, so a new or reworded one shows
+  in English until its words are there (`client/room-text.test.ts` lists
+  the ones missing).
 - `public/`: pages and stylesheet; `scripts/`: build, dev, deploy, simulate.
 - `public/brand/`: the mark, copies of `docs/brand/svg/` (the masters, their
   rules and the scripts that draw them). A page writes `<!--#brand file.svg-->`

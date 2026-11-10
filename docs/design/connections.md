@@ -119,8 +119,9 @@ left on after the lesson stops costing requests all day.
 
 When the account's daily allowance is spent, devices say so instead of showing
 the offline dot. The words, with the hour it comes back computed in Swiss time,
-are `quotaMessage` in `shared/limits.ts`; joining and uploading on the root
-page show the same words. The cap itself and what the budget is made of are in
+are the root page's (`quota`, `client/site-text.ts`) with the way to an own
+copy, in the device's language (`quotaNotice`, `client/room-text.ts`);
+joining and opening a room show the same words. The cap itself and what the budget is made of are in
 `hosting-and-limits.md`.
 
 - The Function maps a platform error whose message reads like a spent limit

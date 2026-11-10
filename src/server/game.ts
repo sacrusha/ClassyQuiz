@@ -216,7 +216,7 @@ export function orderOf(g: Game, q: number): number[] {
 }
 
 function needRun(g: Game): Run {
-  if (!g.run) throw new GameError("No class is playing this quiz right now.");
+  if (!g.run) throw new GameError("Nobody is playing this quiz right now.");
   return g.run;
 }
 
@@ -462,7 +462,7 @@ export function next(g: Game, now: number): void {
 
 export function showRanking(g: Game): void {
   const run = needRun(g);
-  if (run.phase !== "reveal") throw new GameError("The ranking comes after a reveal.");
+  if (run.phase !== "reveal") throw new GameError("The ranking comes after the solution.");
   run.phase = "ranking";
 }
 
@@ -618,7 +618,7 @@ export function setCounts(g: Game, q: number, counts: boolean[]): void {
   const fix = g.fixes[q];
   if (!fix) throw new GameError("No such question.");
   if (counts.length !== fix.counts.length || !counts.every((c) => typeof c === "boolean"))
-    throw new GameError("The answers don't match the question.");
+    throw new GameError("The choices don't match the question.");
   if (!counts.some(Boolean)) throw new GameError("At least one choice has to be right. For none, don't count the question.");
   fix.counts = counts.slice();
 }
@@ -635,11 +635,11 @@ export function setSkip(g: Game, q: number, skip: boolean): void {
   if (!fix) throw new GameError("No such question.");
   const run = g.run;
   if (run && (run.revealed.includes(q) || (run.current === q && run.phase === "question")) && skip)
-    throw new GameError("The class has already seen this question; it can only be not counted.");
+    throw new GameError("Everyone has seen this question already: it can't be skipped any more, only not counted.");
   // The run only moves forward: a question behind the current one would
   // count in "n / total" but never come up.
   if (run && run.phase !== "lobby" && q <= run.current && !skip)
-    throw new GameError("The class has moved past this question; it can't come back in this run.");
+    throw new GameError("The quiz has moved past this question; it can't come back in this run.");
   fix.skip = skip;
 }
 

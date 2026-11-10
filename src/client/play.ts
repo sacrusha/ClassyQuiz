@@ -24,6 +24,7 @@ import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { packPicture, picturesHere, wantPacks } from "./packs.ts";
 import { PeersRoom } from "./peers.ts";
 import { Latest } from "./latest.ts";
+import { LINE_WORDS, T, lang, quotaNotice, said } from "./room-text.ts";
 
 type Ack = Extract<ServerMessage, { t: "ack" }>;
 
@@ -35,6 +36,7 @@ interface Saved {
 type Choice = Extract<ServerMessage, { t: "choose" }>;
 
 const main = $("main");
+document.documentElement.lang = lang;
 const dot = $("#dot");
 const banner = $("#offline");
 const params = new URLSearchParams(location.search);
@@ -68,7 +70,7 @@ let unreachedTimer: number | undefined;
 // what is wrong. Gone once the line is back.
 
 const UNREACHED_MS = 15_000;
-const unreachedText = (): string => (teacher ? "This device can't reach the quiz." : "This device can't reach the quiz. Tell whoever runs it.");
+const unreachedText = (): string => (teacher ? T.unreached : T.unreachedTell);
 const bannerWords = document.createElement("span");
 bannerWords.hidden = true;
 bannerWords.textContent = unreachedText();
@@ -111,7 +113,7 @@ let peers: PeersRoom | null = null;
 
 async function start(): Promise<void> {
   if (oldAddress && !teacher) {
-    showTeacherForm(JOIN_CODE.test(code) ? "This quiz now takes its code and two more digits." : "");
+    showTeacherForm(JOIN_CODE.test(code) ? T.needsDigits : "");
     return;
   }
   if (!JOIN_CODE.test(code)) {
@@ -135,12 +137,12 @@ async function start(): Promise<void> {
         if (!teacher) showNoQuiz();
         else if (r.body.error === "locked") showTeacherForm(TOO_MANY_CODES);
         else if (r.body.error === "teacher") showTeacherForm(WRONG_TEACHER_CODE);
-        else showTeacherForm(`No quiz with the code ${code}.`);
+        else showTeacherForm(T.noQuizCode(code));
         return;
       }
       if (r.body.quota) {
         // The site's daily allowance is spent: say so, and ask again rarely.
-        main.innerHTML = `<div class="center"><p class="muted" style="max-width:36rem">${esc(r.body.error ?? "")}</p></div>`;
+        main.innerHTML = `<div class="center"><p class="muted" style="max-width:36rem">${esc(quotaNotice())}</p></div>`;
         await new Promise((res) => setTimeout(res, 60_000));
         continue;
       }
@@ -174,10 +176,11 @@ async function start(): Promise<void> {
   }
   line = new Line({
     instance,
+    words: LINE_WORDS,
     auth: () => auth,
     onMessage,
     onStatus: (s) => {
-      statusDot(dot, s);
+      statusDot(dot, s, T.status);
       clearTimeout(offlineTimer);
       clearTimeout(unreachedTimer);
       if (s === "live") {
@@ -291,7 +294,7 @@ function onMessage(m: ServerMessage): void {
       return;
     }
     main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.trophy}</div>
-      <p class="muted">${esc(m.reason)}</p><a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a></div>`;
+      <p class="muted">${esc(said(m.reason))}</p><a class="btn big" href="/" style="max-width:320px" aria-label="${T.back}">&#8592;</a></div>`;
   }
 }
 
@@ -301,7 +304,7 @@ function showWaiting(): void {
 
 /** The code box again, as on the root page: five digits for a student, seven for a teacher; it routes by length. */
 function codeForm(value = "", placeholder = "12345"): string {
-  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="${placeholder}" aria-label="Quiz code" value="${esc(value)}"><button class="btn primary" aria-label="go">&#9654;</button></form>`;
+  return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="${placeholder}" aria-label="${T.quizCode}" value="${esc(value)}"><button class="btn primary" aria-label="${T.go}">&#9654;</button></form>`;
 }
 
 function wireCodeForm(): void {
@@ -341,20 +344,20 @@ function showNoQuiz(): void {
  */
 function showTeacherForm(note: string): void {
   document.body.classList.add("follows-dark");
-  document.title = "classyQuiz · show or steer";
+  document.title = `classyQuiz · ${T.showOrSteer}`;
   main.innerHTML = `${siteHead()}<div class="center teacher-entry">
-    <h1>Show or steer a quiz from here</h1>
-    ${note ? `<p class="muted">${esc(note)}</p>` : ""}
-    <p class="muted">The quiz's code and two more digits:</p>
+    <h1>${T.showOrSteerH}</h1>
+    ${note ? `<p class="muted">${esc(said(note))}</p>` : ""}
+    <p class="muted">${T.codeAndDigits}</p>
     ${codeForm(JOIN_CODE.test(code) ? code : "", "12345 67")}
-    <p class="muted">The screen that runs the quiz shows them.</p>
+    <p class="muted">${T.digitsShown}</p>
   </div>`;
   wireCodeForm();
 }
 
 function showFinished(): void {
   main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.trophy}</div>
-    <a class="btn big" href="/" style="max-width:320px" aria-label="back">&#8592;</a></div>`;
+    <a class="btn big" href="/" style="max-width:320px" aria-label="${T.back}">&#8592;</a></div>`;
 }
 
 function showAvatars(): void {
@@ -362,7 +365,7 @@ function showAvatars(): void {
   main.innerHTML = `<div class="center">
     <div class="choose">
       ${c.avatars.map((a) => `<button data-id="${esc(a.id)}">${avatarSvg(a.avatar)}</button>`).join("")}
-      <button class="new" aria-label="new">${ICON.plus}</button>
+      <button class="new" aria-label="${T.newAvatar}">${ICON.plus}</button>
     </div>
   </div>`;
   main.querySelectorAll<HTMLButtonElement>(".choose button").forEach((b) =>
@@ -389,7 +392,7 @@ let entered = false;
  * aside. Nothing the device senses decides it.
  */
 function enter(c: Choice): void {
-  document.title = `${c.title || "Quiz"} · show or steer`;
+  document.title = `${c.title || "Quiz"} · ${T.showOrSteer}`;
   const entry: Entry = c.entry;
   if (entry === "screen" || entry === "remote") {
     void takeRole(entry);
@@ -398,9 +401,9 @@ function enter(c: Choice): void {
   if (entry === "full") {
     main.innerHTML = `${siteHead()}<div class="center choice">
       <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
-      <p class="muted">This quiz already has a screen that shows it and one that steers.</p>
-      <p class="muted">If one of them was on this device a moment ago, try again in half a minute.</p>
-      <button class="btn" data-retry>Try again</button>
+      <p class="muted">${T.entryFull}</p>
+      <p class="muted">${T.entryFullAgain}</p>
+      <button class="btn" data-retry>${T.tryAgain}</button>
     </div>`;
     main.querySelector("[data-retry]")!.addEventListener("click", () => {
       entered = false;
@@ -412,8 +415,8 @@ function enter(c: Choice): void {
   main.innerHTML = `${siteHead()}<div class="center choice">
     <h1 class="qtitle">${lines(c.title || "Quiz")}</h1>
     <div class="entry-roles">
-      <button class="btn role" data-role="screen">Show the quiz here<small>everyone watches this screen</small></button>
-      <button class="btn role" data-role="remote">Steer it from here<small>Start, next, the solution</small></button>
+      <button class="btn role" data-role="screen">${T.showHere}<small>${T.showHereSmall}</small></button>
+      <button class="btn role" data-role="remote">${T.steerHere}<small>${T.steerHereSmall}</small></button>
     </div>
   </div>`;
   main.querySelectorAll<HTMLButtonElement>("button[data-role]").forEach((b) =>
@@ -462,7 +465,7 @@ function showRefused(reason: string, final = true): void {
     ? `<div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>`
     : `<div class="dot" data-status="connecting" style="width:28px;height:28px"></div>`;
   main.innerHTML = `<div class="center">${mark}
-    <p class="muted">${esc(reason)}</p></div>`;
+    <p class="muted">${esc(said(reason))}</p></div>`;
 }
 
 function claim(id: string): void {
