@@ -96,12 +96,13 @@
 
   /* The ways to play, a picture each (root-page.md, "The ways to play"; the pictures: docs/ways/). Three across at every
      width, so the three are seen together and the two steps under them stay in the first screen of a phone; the gap
-     narrows there, which leaves each picture 91 px on a 320 px phone, the least they were drawn for. */
+     narrows there, which leaves each picture 91 px on a 320 px phone, the least they were drawn for. The names are set a
+     little smaller under about 335 px, where "Quizmaster" at 1rem is wider than its third and runs into "Peers". */
   .ways { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(8px, 2vw, 12px); padding: 0; margin: 0; }
   .ways li { margin: 0; }
   .ways img { display: block; width: 100%; height: auto; border-radius: 10px; }
   .ways p { margin: .3rem 0 0; font-size: .88rem; line-height: 1.3; color: var(--muted); text-wrap: pretty; }
-  .ways b { display: block; font: 700 1rem/1.3 var(--font-brand); color: var(--fg); }
+  .ways b { display: block; font: 700 min(1rem, 4.8vw)/1.3 var(--font-brand); color: var(--fg); }
 
   /* The two things to do, one above the other (root-page.md, "Two steps"): the number is drawn, not text, so a fetcher
      reads the heading alone. */

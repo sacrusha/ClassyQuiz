@@ -167,7 +167,10 @@ in the HTML: the Copy button (a fetcher's text conversion would read
 fetcher doesn't read four language names), the numbers of the two steps
 (drawn by the stylesheet, so a heading doesn't read "1Ask"), and the second
 showing of the sheets ask, with its labels ("How to ask"), so a fetcher reads
-that ask once.
+that ask once. The film's bar is in the HTML, since it works before the
+film's script is there, with the film's length, which the film's build
+checks (`docs/film/`); a fetcher reads it as "▶ 0:00 / 1:07 1×" under the film's
+heading, joined to no other word.
 
 The page has two first-level headings, the sentence for people and "About
 classyQuiz", one for each reader. The guidance's headings keep their levels
@@ -217,7 +220,8 @@ practise or review. What the pictures show and how they are made:
   height, where one under the other would take most of the first screen and
   push the two steps out of it. Each picture is a third of the column: 91 px
   wide on a 320 px phone, 114 on a 390 px one, 216 from a tablet up, the
-  range they were drawn for.
+  range they were drawn for. Under about 335 px the names are set a little
+  smaller, so "Quizmaster" stays within its third.
 - **A reason to play** (backlog v6 item 1b) is in the pictures: the class
   with its votes split, a friend laughing, the answer found right beside the
   notes. In words only Solo's is said ("to practise or review"): a third of
@@ -714,7 +718,12 @@ the teacher's concern.
 - Whether a visitor gets the Purpose's first two things from the first
   screen. The check proposed: show the page's top to two or three people, a
   teacher among them, for five seconds, then ask what one does here, whether
-  it is for them, and what they would type to their AI. Nobody has.
+  it is for them, and what they would type to their AI. Nobody has. Part
+  of it: the first screen shows the ask, the file and the box; the quiz
+  played shows only in the Quizmaster picture, whose wall carries the
+  example's question without saying so. Whether a visitor ties the file
+  to the pictures, and so takes in that what the AI hands over is what
+  gets played, is what the check would also show.
 - The first screen on real phones: the sizes in "One column" are Edge
   windows of a phone's size on a desktop, not devices; and whether a phone
   reports no pointer that drags, so that "or drop it here" is left out
