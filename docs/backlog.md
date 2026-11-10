@@ -247,7 +247,7 @@ the open list at the end.
     - "Make me a quiz for classyquiz.pages.dev" was read as a publish target
       and set aside; the model fetched the page only when told to read it.
       The examples now begin `Read <address>.` and say "a classyQuiz" (commit
-      ddededf); the README's
+      f55f897); the README's
       example says the same.
     - Transparent answer pictures: a blueish-green marker vanished on the blue
       tile. The guidance already says tiles are shuffled across four colours

@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 4348d10, deployed 2026-11-10: Pages deployment c5d801c4 of the
+- Commit 44ee213, deployed 2026-11-10: Pages deployment c5d801c4 of the
   project `classyquiz`, version 4b042678 of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 4348d10 -- src/`.
+  `git diff 44ee213 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -26,8 +26,8 @@ changed what it covered.
 
 - The Solo walk through the example quiz at desktop and phone sizes in
   headless Edge, nothing sent while playing, then Quizmaster to `/screen`
-  with one upload (2026-11-09, 1c2f190).
-- `scripts/simulate-peers.mjs`, a probe-marked room (2026-11-10, 4348d10).
+  with one upload (2026-11-09, dfdd557).
+- `scripts/simulate-peers.mjs`, a probe-marked room (2026-11-10, 44ee213).
 - `scripts/simulate.mjs` with 25 students, and headless-Edge walks of the
   WebSocket fallback and of going offline mid-question, at the first deploy
   only (2026-11-02). Since then on local stacks, and on 2026-11-09 on a copy
@@ -38,7 +38,7 @@ changed what it covered.
   on the owner's older test phone (2026-11-10; `docs/film/README.md`,
   "Text").
 - `/owner` with the key, by the owner (2026-11-09, before the ledger of
-  4348d10).
+  44ee213).
 
 ## Not tried live
 
@@ -58,7 +58,7 @@ changed what it covered.
 - A deploy resetting an instance still active 300 s after it
   (`design/open-period-in-memory.md`, Not known).
 - An own copy set up end to end by the routes on `/own-copy`.
-- Since 4348d10: the owner's page with the key, and on a phone; a lobby
+- Since 44ee213: the owner's page with the key, and on a phone; a lobby
   left to lapse (`LOBBY_WAIT_MS`).
 
 The questions these leave are in the design files' "Not known" and the
