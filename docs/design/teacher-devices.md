@@ -82,13 +82,10 @@ What matters here:
   at the TV and a trainer in a call need none.
 - **Words that name the classroom's roles** (teacher, class, students,
   "your teacher") tell a host who isn't a teacher that the screens are
-  someone else's. Owner: "host" is acceptable, not
-  great, in English (in software, participants connect to a host too), and
-  a role noun is avoided where a sentence does without one; translations
-  come later and will hit meaning, not the literal word. The site's own
-  screens are English (`local-check.md`, Situation). Which word stands where
-  "teacher" stood on the README, the landing and the guidance is decided
-  once for all entries: `root-page.md`, "Words for whoever comes".
+  someone else's. Which word stands where "teacher" stood, on the screens,
+  the README, the landing and the guidance, is decided once for all
+  entries, with what the words live with: `root-page.md`, "Words for
+  whoever comes".
 - **A Quizmaster reaches the lobby, as a rule, without having seen the
   questions:** the local check folds them for every entry, under a line
   telling whoever will play to leave them closed, since the page can't know
@@ -130,8 +127,9 @@ steering.
 ### The single tab: check, then join
 
 The tab that uploads is the Projector and steers itself. It opens on the
-**check**, the teacher's private screen: title and number of questions (the
-count is what most often tells two versions of a quiz apart), the join code
+**check**, the teacher's private screen: title and number of questions
+(plausible assumption: the count is what most often tells two versions of a
+quiz apart), the join code
 small (with a count once someone has joined), how the screens are arranged
 (below) with the teacher code where a remote is wanted, and the question
 list with its fixes, open, each question's answers folded: this is the
@@ -154,10 +152,6 @@ sessionStorage), so a reload stays; a wall that takes the steering back in the
 lobby shows the join screen, not the check. With two tabs the work splits: the
 wall shows only join; the steering tab shows the check with class code, count
 and Start.
-
-Start reads the same on every screen that steers: the mode is named where
-there is a choice, on the second device, since a single tab has no other mode
-to tell it from.
 
 The worked example's "Start the example quiz" (`example-page.md`) opens
 the local check; its "Open the lobby" is an upload like any, and leads to
@@ -215,8 +209,8 @@ one that shows it.
   one screen that steers and read the questions aloud, the players'
   devices showing the choices' text. What it would take: the room with the question on each
   device that Peers builds, steered by this site's Remote, with the join
-  code on the host's device; cheap once that room exists, if a host turns
-  out to want it.
+  code on the host's device; cheap now that Peers has that room, if a host
+  turns out to want it.
 
 ### Words for any crowd
 
@@ -224,8 +218,7 @@ From the check on, the screens' words name no role where a sentence does
 without one, so they read as a class's and as a pub's: "Let everyone in",
 "Join code", "Joining opens in a moment.", "Ask whoever runs it.",
 "everyone watches this screen", "everyone reads the question", "The last
-two digits don't match this quiz." For the example class: a child who reads slowly or no English shows the tablet to the
-teacher, as before. "Projector" and "Remote" stay, the roles' names, which
+two digits don't match this quiz." "Projector" and "Remote" stay, the roles' names, which
 the owner uses for any host ("use one as remote the other as a
 projector"). These docs keep "teacher", "class" and "teacher code": they
 speak of the example class. The words before the check, the guidance's and
@@ -333,11 +326,6 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
   whether a host at one screen, on a first visit, reads the how-to under
   Screen and remote as a step they have to take before letting everyone in.
 - Whether "‹ Back" says where it leads.
-- Whether a host who means to play along, as in backlog v5's "a crowd
-  where the host plays too", opens the lobby: its check lists the questions,
-  and only the answers are folded. The entry says it isn't played by whoever
-  starts it (`plays: false`); Peers is built for whoever asked for the quiz
-  playing among the others (backlog v5 item 3).
 - Whether "Join code", "Let everyone in" and "Ask whoever runs it" read
   naturally to a teacher, a child's helper and a pub host; no one outside
   the project has read them.

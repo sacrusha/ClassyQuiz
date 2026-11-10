@@ -5,9 +5,9 @@
 
 /**
  * Players in one class, removed ones included: the run is one stored value,
- * rewritten with every answer, and the projector draws every avatar. The
- * example class is about 25; a larger group is what an own copy
- * of the site is for.
+ * rewritten with every write, and the projector draws every avatar. A
+ * larger group is what an own copy of the site is for
+ * (docs/design/hosting-and-limits.md, "Protecting the day's allowance").
  */
 export const MAX_PLAYERS = 60;
 /**
@@ -22,8 +22,8 @@ export const MAX_LATE_JOINERS = 5;
  * Changes of mind per student and question; the last accepted tap counts.
  * Answers are held in memory and written with the teacher's steps
  * (docs/design/open-period-in-memory.md), so a change costs no row: the cap
- * is a generous backstop, never met by a child answering, and not part of
- * what a class books.
+ * guards nothing measured, is never met by a child answering, and is not
+ * part of what a class books.
  */
 export const MAX_ANSWER_CHANGES = 10;
 /**

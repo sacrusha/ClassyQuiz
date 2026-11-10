@@ -29,8 +29,8 @@ test("every language's other asks name the site's address, for the page to repla
   }
 });
 
-// The page names the ways to play as the local check's cards do, in every language: the names are written in the
-// page, not translated (docs/design/root-page.md, "The ways to play").
+// The page names the ways to play as the local check's cards do, in every language, so the page and the check
+// agree (docs/design/root-page.md, "The ways to play").
 test("the page names the three ways by the local check's names", async () => {
   const { readFile } = await import("node:fs/promises");
   const { ENTRIES } = await import("./entries.ts");

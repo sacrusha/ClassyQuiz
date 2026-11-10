@@ -1,8 +1,8 @@
 // The landing block's words in the four languages it speaks (docs/design/root-page.md,
 // "Languages"): everything above About. The static HTML is English, so an AI's fetcher
-// reads English; home.ts swaps these in. About and below stay English: they
-// are for the AI. The lobby, the wall, the Remote and the tablets stay
-// English too.
+// reads English; home.ts swaps these in. About and below is English: it is
+// for the AI. The local check, the lobby, the wall, the Remote and the
+// tablets are not translated yet.
 //
 // German, French and Italian say the same as the English in their own
 // sentences, with a noun where a pronoun could point at two things

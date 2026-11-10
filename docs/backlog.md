@@ -1,10 +1,10 @@
 # classyQuiz — Backlog
 
 Project → versions as goals → items that get picked, worked and delivered. Each
-item names the problem it solves for the teacher or the class. Done items are one
-line with a pointer to the design file that holds their purpose and situation
-(`design/<file>.md`); what is still to do is in full, and in the one list at the
-end. Last settled: 2026-11-09.
+item names the problem it solves. A built item points to the design file that
+holds its purpose and situation (`design/<file>.md`); what is still open stays
+in its item, and what needs the owner or the field is in the list at the end.
+What is deployed: `deploy-log.md`.
 
 ## Project
 
@@ -17,10 +17,10 @@ friends with nobody running it, or alone — and the measure is the asker's
 time. Plausible assumption: the quiz is often
 made in the ten-minute break before the lesson, with the teacher's own AI, and
 used once (so the format is checkable in seconds and the run is the review:
-`design/quiz-format.md`, `design/question-flow.md`). The material arrives as a
-few photos taken with a phone, or as a document or PDF uploaded from a laptop;
-the teacher may be on either device. Any age group, including settings beyond
-school with adult participants: the site offers the ways to play by name,
+`design/quiz-format.md`, `design/question-flow.md`). Plausible assumption: the
+material arrives as a few photos taken with a phone, or as a document or PDF
+on a laptop, and the teacher may be on either device. Any age group,
+including settings beyond school with adult participants: the site offers the ways to play by name,
 Solo, Peers and Quizmaster, and the classroom is a Quizmaster's quiz (v5).
 The design files' example class is a Swiss German-speaking
 primary class: a school-issued laptop on the projector, Android tablets for
@@ -29,8 +29,7 @@ students who may read slowly or not read English at all, and the teacher in
 the room; what the design files say of
 children and the room is said of it. The guidance to the AI is in English,
 which AIs are trained on; quizzes come out in whatever language the asker
-needs, and the AI asks when the sheet's language and the ask's differ. The
-failure mode to design against is a normal user who can't use it, not a
+needs. The failure mode to design against is a normal user who can't use it, not a
 malicious one: a disruptive student is handled by the teacher walking over to
 the tablet and taking care of the student. Children actively and openly
 sabotaging the class while in class is not a technical problem that needs a
@@ -45,9 +44,9 @@ Hold for every version; not picked as work.
 
 - **Nothing public, nothing kept beyond its use, nothing identified** — data
   protection, and the own-classroom copyright exception for quizzes derived
-  from published material. The packaged quiz lives on the server for the
-  lifetime of the quiz instance — what that lifetime is, is part of the work;
-  the teacher's file on disk is the durable copy.
+  from published material. A quiz sent to the site lives there for the
+  lifetime of its room (v4 item 3); the teacher's file on disk is the durable
+  copy.
 - **Survives school Wi-Fi** — connections drop, phones go to sleep, a device
   dies mid-quiz, and the lesson must go on. Failure in front of the class ends
   adoption. A deploy or a Durable Object restart in the middle of a run is the
@@ -57,20 +56,16 @@ Hold for every version; not picked as work.
   the project, so the shared site runs on the Free plan, designed to stay
   within its limits for a few users, and usage limits nudge heavy use toward
   self-hosting, on Cloudflare or another provider. The README promises that an
-  AI can set up one's own instance from the public repo. It has no domain of
-  its own today, a situation, not a rule; what a domain would change is in
-  `design/hosting-and-limits.md`.
+  AI can set up one's own instance from the public repo.
 
 ## v1 — One real teacher runs one real quiz their AI made in the break
 
-Text-only multiple choice, up to four answers, press the right one. Runner first
-so there is something to click early; authoring closes the loop.
+Text-only multiple choice, up to four answers, press the right one.
 
 1. Quiz format a teacher can check in seconds and an AI writes reliably, with a
    wrong key fixable in the text or by telling the AI — built, `design/quiz-format.md`.
-2. Getting the AI's quiz onto the site, as one archive — built (zip only; the
-   owner: "let's see if we can get away with zip only", the paste box and text
-   files invite typing questions to an AI), `design/root-page.md`.
+2. Getting the AI's quiz onto the site, as one archive — built,
+   `design/root-page.md` ("Opening: the `.zip` and nothing else").
 3. Three audiences in one session (class at the projector, teacher on a small
    screen, students on their own) — built, `design/teacher-devices.md`.
 4. Joining, 25 kids inside a minute on shared tablets with nothing installed —
@@ -88,8 +83,7 @@ so there is something to click early; authoring closes the loop.
     `design/hosting-and-limits.md`.
 11. Guidance page: an AI told only the site's name understands what the site is
     for, what quizzes are for, how they're built, how to build them with a
-    human — built, `design/guidance-page.md`. Whether a given AI does is a test,
-    not an assumption.
+    human — built, `design/guidance-page.md`.
 12. Preview as the class will see it — Solo on the projector's laptop lays
     every question out as the wall would (`design/solo.md`, "Preview and the
     projector alone"); whether that is the preview teachers want is unconfirmed.
@@ -122,12 +116,9 @@ garbage.
    replaced by the steering bar (v4 item 6), `design/question-flow.md`.
 3. Speed scoring — built as a switch, `design/question-flow.md`.
 4. Hardening an open public instance, including closing the door — built,
-   `design/hosting-and-limits.md`. Open: automated vandalism from outside the
-   class is realistic, and on the default pages.dev address nothing stops a
-   script from spending the account's daily allowance for every class — the
-   code can only bound what one quiz costs, which it does. The known remedy is
-   a domain in front of the site with a rate-limiting rule at the edge, which
-   the free plan includes; a domain is on the open list.
+   `design/hosting-and-limits.md`. The code bounds what one quiz costs; a
+   script spending the day's allowance for every class can be stopped only at
+   the edge, by a domain in front of the site (open list).
 5. Avatars the students find interesting, without wasting time or fights —
    built, `design/class-and-wall.md`.
 6. Spread, then key: the pause-and-discuss moment before the key is on the
@@ -150,78 +141,43 @@ garbage.
 ## v4 — Adoption: the first visit
 
 The deliverable holds; what makes or breaks adoption is the landing page,
-before anything else comes into play. Owner and product owner, 2026-11-03.
-
-What is deployed: `deploy-log.md`. What is still open is in each item and in
-the open list at the end.
+before anything else comes into play (owner and product owner).
 
 1. **One instance, rendered: sheet → two turns → quiz → the class playing it**
-   — between "Build a quiz" and "Run a quiz" a first-timer faces two obstacles,
-   "how do I ask?" and "what even is a quiz?", and one concrete instance
-   answers both: what the AI hands over *is* what the class plays, and the
-   words that produced it are the how-to-ask. The forms are renderings of that
-   one instance, so more than one can exist; not a closed list: a video; a
-   static display of the input leading into the playable quiz as its
-   deliverable; a carousel or slideshow. Built: a film of about a minute without
-   sound, from the owner's storyboard brief, fed the real screens and the
-   example ask in the page's four languages, never autoplaying; until it plays
-   its poster and a video player's bar stand in its place
-   (`design/root-page.md`, "The film"; `docs/film/`). Open: the German "du",
-   French "vous" and the translations of the page and the film, drafts
-   (proposals and the questions behind them:
-   `docs/translation-review.md`); whether the owner's daylight photographs of
-   the sheet are still to replace the rendered sheet pages the film and the
-   ask's tab show (Open: the sources don't say); the film's pace for the
-   teacher who has decided and wants the steps (`docs/film/README.md`, "Not
-   known"). One story must work on a desktop and on horizontal tablets as
-   well as on vertical phones: the sheet recognizable as a sheet, readability
-   on a phone may suffer, phone variants such as clickable or scrollable are
-   allowed.
-   Owner: both humans and AIs learn a format through a prototype — the txt
-   example in the manual for the AI, the example ask in Build for the teacher.
+   — between asking an AI and opening its quiz a first-timer faces two
+   obstacles, "how do I ask?" and "what even is a quiz?", and one concrete
+   instance answers both: what the AI hands over *is* what the class plays,
+   and the words that produced it are the how-to-ask. Owner: both humans and
+   AIs learn a format through a prototype — the txt example in the manual for
+   the AI, the example ask on the root page for the teacher. The forms are
+   renderings of that one instance, so more than one can exist; not a closed
+   list: a video; a static display of the input leading into the playable
+   quiz as its deliverable; a carousel or slideshow. Built: the film
+   (`design/root-page.md`, "The film"; `docs/film/`) and the worked example
+   (item 10). Open: the film's pace for the teacher who has decided and wants
+   the steps (`docs/film/README.md`, "Not known").
 2. Resume for the device that started the quiz, the way back and certainty it's
    the right quiz — built, `design/root-page.md`.
 3. **Upload is start** — owner: "uploaded the evening before" is not real;
    the parallel class's quiz is its own quiz, started by its own upload. A
    quiz is one class's lesson; the site is a runner, not a store of quizzes.
-   Built: one class per upload, the final ranking as its own screen (podium,
-   the class in front unordered, all jumping, the class's result kept for a
-   photograph), and Exit alone in the middle of its bar, without a
-   confirmation, sending every screen to the root page (`design/class-and-wall.md`,
-   "The final ranking"; `design/question-flow.md`, "The steering bar").
-   Ending early is ⋯ → End the quiz: final ranking, then Exit. The lifetime is decided and built: everything
-   goes 3 hours after the teacher's last use, or when the teacher ends it
-   (owner: the purpose of keeping is rejoining a quiz in progress; one
-   duration everywhere is sensible and easy to communicate). Lost until
-   "corrected quiz download" ships: a key fixed in class dies with the quiz.
-   Lifetime as built: `design/hosting-and-limits.md`.
+   Built: one class per upload, its final ranking and Exit
+   (`design/class-and-wall.md`, "The final ranking"; `design/question-flow.md`,
+   "The steering bar"), and the lifetime (`design/hosting-and-limits.md`,
+   "What lives, and for how long").
 4. The foot lines from the teacher's side — own copy for the teacher who will
    run 20–30 quizzes a month and asks "can I rely on this?", network help where
-   the failure shows — built, `design/root-page.md`. "Your AI does it" and
-   a number serve one purpose — it's not scary, you can do it — and are only
-   true if the AI a teacher has can do it. Owner, 5 Nov 2026: a cloud VM
-   (Claude Code on the web, paid Claude) is a route anyone can take; free
-   Sonnet in a chat can walk a patient teacher through it, which takes some
-   technical affinity. `/own-copy` offers two routes to more quizzes: setting one up
-   yourself, by one of those two AIs (one prompt for both, the token kept out
-   of the chat); and the school's IT, on its own servers or a paid Cloudflare
-   account; updating a
-   copy is a choice, an unchanging copy being what a teacher values before a
-   lesson. The conversion is the school's, not checked here (owner: the point of
-   telling them to convert is so we don't have to); `simulate.mjs` is their
-   check (`design/hosting-and-limits.md`, "A copy on a school's or company's
-   own server").
-   Open: the page says the VM route takes "minutes" and the walk-through "a
-   while" (owner), untimed on the current README; the VM's network access
-   (`root-page.md`, "Not known").
+   the failure shows — built, `design/root-page.md` ("The own copy", "Network
+   help, where failure shows"). "Your AI does it" and a number serve one
+   purpose — it's not scary, you can do it — and are only true if the AI a
+   teacher has can do it. The conversion to a school's own server is the
+   school's: `design/hosting-and-limits.md`, "A copy on a school's or
+   company's own server".
 5. The guidance, the owner's rewrite merged — built, `design/guidance-page.md`.
 6. Tempo in the instance, in the teacher's hand: a bar of two buttons (Play,
-   Countdown) stepping the question through its states — built and live,
-   `design/question-flow.md`. The owner on labels: "Reveal" and "Ranking" name
-   a thing the class sees; "Next question" and "Straight to answering" name a
-   motion. The teacher screens' words (choices, answers, solution; nouns on
-   Play), also in the guidance and the format's messages — built and live,
-   same file. Follow-ups are in the open list.
+   Countdown) stepping the question through its states, and the teacher
+   screens' words (choices, answers, solution; nouns on Play) — built,
+   `design/question-flow.md`. Follow-ups are in the open list.
 8. The flow from upload to Start: a private check screen, a teacher code, roles
    in plain words — built, `design/teacher-devices.md`.
 9. Avatars: celebration, the lion's mane, tools — student feedback:
@@ -238,29 +194,15 @@ the open list at the end.
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
     `/example`, "The example, step by step" from the link under the landing's
-    film, in the landing's four languages (item 12). Open:
-    - The run, its photographs and its picture: `design/example-page.md`.
-      Open: a run of the owner's may replace it; whether the quiz's growth
-      past the asked ten is worth leaving in the picture.
-11. **Findings from a Sonnet-at-medium test, 2026-11-04** (account tier not
-    recorded, so no tier claim)
-    - "Make me a quiz for classyquiz.pages.dev" was read as a publish target
-      and set aside; the model fetched the page only when told to read it.
-      The examples now begin `Read <address>.` and say "a classyQuiz" (commit
-      f55f897); the README's
-      example says the same.
-    - Transparent answer pictures: a blueish-green marker vanished on the blue
-      tile. The guidance already says tiles are shuffled across four colours
-      (`src/public/index.html`, "Pictures as choices"); what remains is to
-      tell the AI to draw each answer picture with a ground of its own, white
-      unless there's a reason, because a mark can vanish on a random tile
-      colour. Rides with the next delivery.
-    - Told the teacher "students can press Z or click a picture to enlarge
-      it" of answer pictures. Only the question's picture enlarges, by the
-      teacher (`design/pictures.md`, "Enlarging"). The guidance's "the teacher
-      can enlarge a picture" and "a smaller picture is enlarged on the wall"
-      allowed the reading; they now name the question's picture and say
-      "scaled up". Z, click and students aren't on the page.
+    film, in the landing's four languages (item 12). Open: whether a run of
+    the owner's replaces the example's run, and whether the quiz's growth
+    past the asked ten is worth leaving in the picture
+    (`design/example-page.md`).
+11. **What a Sonnet-at-medium test (2026-11-04) misread** — the address read
+    as a publish target, answer pictures lost on their tile's colour, every
+    picture taken as enlargeable — met in the asks and the guidance:
+    `design/root-page.md` ("How to ask"), `design/guidance-page.md` (Not
+    known), `design/pictures.md` ("Enlarging").
 12. **The worked example in the landing's other three languages** — built,
     `design/example-page.md`: the page, the conversation picture (light and
     dark) and the quiz in de, fr and it, the English run translated so the
@@ -292,29 +234,15 @@ the open list at the end.
     `docs/brand/web/touch-icon.svg`); a keyline on the raster icons for a dark
     tab strip, needed only by browsers that don't take the SVG icon; the
     kit's link-preview card, which no page names yet.
-    Open, from the teacher-view review and not acted on (the root's English
-    guidance on another left edge than the block above it is met by v6
-    item 1: one column, and a line that says where the manual for AIs
-    begins); the empty join screen's right half stays blank
-    until children join; on a real washed-out projector the pale states
-    (hidden answers, faded tiles at the reveal) may let pale red and pale
-    yellow run together — unchecked.
+    Open: the empty join screen's right half stays blank until children
+    join; on a real washed-out projector the pale states (hidden answers,
+    faded tiles at the reveal) may let pale red and pale yellow run
+    together — unchecked.
 
 15. **Running classes finish** — a teacher whose class stops mid-quiz because
-    the free plan ran out doesn't come back. Which limit runs out first, and
-    what a class costs: `design/hosting-and-limits.md`, "What a class costs".
-    Built: students join once the
-    teacher lets the class in (teacher devices any time); letting in books the
-    most rows the class can write (its taps held in memory, not counted:
-    "Room on the Free plan", item 1), refused on the
-    teacher's screen when the day can't carry it; the booking shrinks at Start
-    and settles at the final ranking; a device's next upload ends its previous
-    quiz if that one never started; the days' classes, rows written and
-    peak are in `GET /api/site/use` for the owner. The check warns while fewer
-    than three classes fit and keeps the refusal on screen, both with "More
-    quizzes: a site of your own, your school's or your company's ›" (the owner: "Your own
-    copy" too ambiguous); the landing's line counts busy days too (half the day's rows booked at once).
-    `design/hosting-and-limits.md`, "Running classes finish".
+    the free plan ran out doesn't come back. Built:
+    `design/hosting-and-limits.md`, "Running classes finish"; what the
+    booking now meets: "Room on the Free plan", item 3.
 
 16. **Quiz-building sessions more interactive**, on the models that make use
     of what the site provides (Opus 5.5 does: the chess run,
@@ -345,7 +273,6 @@ host running the quiz for a crowd), on the check a quiz opens into
 (`design/local-check.md`). Underneath, Solo is the browser alone, nothing
 uploaded; Peers and Quizmaster are the one room, running on its own or by a
 hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
-What is deployed: `deploy-log.md`.
 
 1. Looking at a quiz, or playing it alone, doesn't cost the shared site a
    class: the zip is read and checked in the browser, the entries are offered
@@ -397,8 +324,8 @@ What is deployed: `deploy-log.md`.
    elsewhere is Later, "Runs by itself", whose cadence design is still owed.
 
 8. **Players at their own pace** — a race: fast players don't wait, slow ones
-   don't hold the room. Not pursued in this delivery: it serves a classroom's
-   throughput, not the widening. Open: in a classroom,
+   don't hold the room. Not pursued: it serves a classroom's throughput, not
+   v5's widening. Open: in a classroom,
    whether the tail of the field is shown (`design/class-and-wall.md` shows
    winners only).
 
@@ -416,8 +343,8 @@ What is deployed: `deploy-log.md`.
    who isn't a teacher reads the page as theirs, which nobody outside the
    project has tried.
 
-Out under the lifetime as decided (v4 item 3: keeping serves rejoining a quiz
-in progress): playing at different times — each at home when they like, a
+Out under the lifetime as decided (keeping serves rejoining a quiz in
+progress: `design/hosting-and-limits.md`, "What lives, and for how long"): playing at different times — each at home when they like, a
 leaderboard that waits — needs a quiz kept for days, which nobody has asked
 for. Named, not pursued: tests, in class or self-administered.
 
@@ -428,18 +355,12 @@ whether it is for them, and that an AI's file becomes a played quiz; and it
 has to leave little in the way of whoever comes with a file and of the
 newcomer who wants to find out more (`design/root-page.md`, Purpose). The
 page built for item 1 does, in one column (`design/root-page.md`, "How the
-site meets it"). What is deployed: `deploy-log.md`. What the owner found
-while directions
-were tried is in `design/root-page.md`, Situation.
+site meets it"). What the owner found while directions were tried is in
+`design/root-page.md`, Situation.
 
 1. **The page as a whole** — a visitor at a phone or a desktop gets the
    Purpose's first two things from the page as it opens, and whoever holds
-   a quiz file opens it without hunting. Whoever takes this owns the page:
-   its order and layout, how it holds at a phone's width and in the dark,
-   its states (a quiz to come back to, a quiz with problems, a refused
-   upload, the line about an own copy), the page as an AI's fetcher reads
-   it (`design/root-page.md`, "One page, two readers"), and the design
-   file describing the page as it then is. Built: `design/root-page.md`, where
+   a quiz file opens it without hunting. Built: `design/root-page.md`, where
    "One column" says what shows as the page opens in which window. Open:
    on a phone's window of 360 × 640 the button that opens a file is cut by
    the screen's edge in German and French, and on a smaller one it is
@@ -448,9 +369,8 @@ were tried is in `design/root-page.md`, Situation.
    each with a purpose of its own:
 
    a. **What this is, in words** — someone who reads one sentence knows
-      what the site does for them. v4 item 14 left this open as a
-      descriptor by the logo, "what classyQuiz is, as a statement". Built
-      as the page's first heading ("What this is").
+      what the site does for them. Built as the page's first heading
+      ("What this is").
 
    b. **Whether it is for me: the ways to play** — a visitor recognises
       their own case and a reason to play it, and later recognises the
@@ -494,39 +414,26 @@ were tried is in `design/root-page.md`, Situation.
 
    f. **Where the page for people ends** — a person knows what they can
       rely on (free, open, no accounts, how long a quiz is kept) and that
-      what follows is the manual for AIs. v4 item 14 noted the guidance
-      reading as a second page joined on. Built ("Where the part for
+      what follows is the manual for AIs. Built ("Where the part for
       people ends").
 
 2. **The page in its four languages** — a visitor reading German, French
    or Italian gets the same page, not a translation of the English
    sentence structure: the owner's findings on pronouns and on the
    visitor's side of the words hold in each language
-   (`design/root-page.md`, Situation, "Languages"). Built: every word of the page and its states
-   in the three, in `client/landing-text.ts`; what holds in each language
-   is `design/root-page.md`, "Languages", and the choices behind the words,
-   `translation-review.md`, "The first
-   page in German, French and Italian". At 390 px and wider the first
-   screen holds in each what it holds in English. The film carries the
-   words it copies from the page, and draws the page in each language
-   (item 3).
+   (`design/root-page.md`, "Languages"). Built: every word of the page and
+   its states in the three, in `client/landing-text.ts`; the choices behind
+   the words, `translation-review.md`, "The first page in German, French and
+   Italian".
 
 3. **The film and the worked example show the page that exists** — the
    film types the ask and shows the root page with the box that opens a
    file, and `/example` walks the same path; once the page changes, a
    newcomer who watches or reads them sees the page they will then use
-   (`docs/film/`, `design/example-page.md`). Built: the film draws the page's first screen as it
-   opens, in the page's language, from the page's own sizes (the header,
-   the sentence, the ways' pictures, the two steps), on the phone whole and
-   then in on the two steps, and again on the laptop, in on the code box
-   while the teacher code is typed; the hold is a second of its own, so
-   the film is 68 s and every other hold keeps its length (`docs/film/README.md`,
-   Situation). Its words are
-   held to the page by `npm test`, its layout is not
-   (`src/DEVELOPING.md`, "The landing film"). The posters show the class
-   at the wall, nothing of the page. `/example` names nothing of the
-   page's layout. The film's check runs on the new page
-   (`docs/film/build/sitecheck.py`).
+   (`docs/film/`, `design/example-page.md`). Built: the film draws the
+   page's first screen in the page's language from the page's own sizes
+   (`docs/film/README.md`, Situation); its words are held to the page by
+   `npm test`, its layout is not (`src/DEVELOPING.md`, "The landing film").
 
 ## Room on the Free plan
 
@@ -539,18 +446,9 @@ donations could pay for hosting off it instead (`scaling-drawer.md`,
 1. **Answers and looks held in memory** — a class writes its input in
    batches, so rows stop binding first and the looks stop being a third of
    a let-in booking; a restart that the devices can recover from loses
-   nothing they show — `design/open-period-in-memory.md`, which also
-   settles the open points the baseline left (the stragglers, a device away
-   at the close). Built on the owner's and the assistant's baseline of
-   2026-11-09. A let-in booking is about 1,030 rows (77 lobbies at once); a
-   class of 25 over 15 questions writes about 250, most of them the
-   teacher's steps (estimated, not measured; the baseline estimated 100 to
-   150). Run on a copy of the deployed site: the sockets' copies came back
-   through hibernation, and an instance that started on the previous code
-   woke on the new one with nothing lost. Open: the reset of an instance
-   still active five minutes after a deploy, which ends its sockets, seen
-   only on a local stack (`design/open-period-in-memory.md`, Situation and
-   Not known).
+   nothing they show — built, `design/open-period-in-memory.md`. Open: the
+   reset of an instance still active five minutes after a deploy, which
+   ends its sockets, seen only on a local stack (same file, Not known).
 
 2. **What telemetry the project needs** — the limits, the capacity
    sentence on the landing, the caps and the drawer's ideas rest on figures
@@ -564,20 +462,13 @@ donations could pay for hosting off it instead (`scaling-drawer.md`,
 
 3. **What a class holds, in line with what binds now** — no class under way
    meets a spent allowance, and most of the day stays usable (the owner,
-   2026-11-10). The booking was built when rows bound first; it books rows
-   alone, holds them for lobbies no class joins, and settles before the
-   devices left on; the upload and bytes caps meet a wave of looks at the
-   room first. What the design rests on that no longer holds, and the
-   situation it now meets (the costs per transport, which devices poll, who
-   opens a lobby): `design/hosting-and-limits.md`, Situation and "Running
-   classes finish". Built and deployed (`deploy-log.md`): the ledger in rows, requests and
-   awake time, estimates where there is no most; the booking moving at
-   Start and as a class outgrows it; a let-in lobby nobody joins giving it
-   back after `LOBBY_WAIT_MS`, its first student booking again; the settle
-   keeping what devices left on will spend; the uploads' cap in rows
-   (`DAY_ROWS_FOR_UPLOADS`) instead of a count. Open: the lifetime of a
-   lobby left waiting, and the stored bytes against a wave of looks at the
-   room.
+   2026-11-10). The situation the booking meets (the costs per transport,
+   which devices poll, who opens a lobby): `design/hosting-and-limits.md`,
+   Situation. Built: the ledger in rows, requests and awake time, a lobby
+   nobody joins giving its booking back, the uploads' cap in rows
+   (`design/hosting-and-limits.md`, "Running classes finish"). Open: the
+   lifetime of a lobby left waiting, and the stored bytes against a wave of
+   looks at the room.
 
 ## Later — Paper and memory
 
@@ -590,16 +481,15 @@ The quiz is already made; it can be more than one activity.
 - **Corrected quiz downloadable after the run** — the in-class fixes shouldn't
   be lost for the next variant.
 - **Results export** — a teacher who wants to look again.
-- **Localization**, one sub-item per language — teachers who don't read
-  English, classes that should see the few labels there are in their own.
-  The bar's labels are nouns so they translate without grammar and fit the
-  wall's ~13–15 characters (`design/question-flow.md`, "The steering bar").
+- **Localization** — teachers who don't read English, classes that should
+  see the few labels there are in their own. The bar's labels, their room
+  and why they are nouns: `design/question-flow.md`, "The steering bar".
   Known pitfalls: the words for choices and answers must stay apart (German
   "Antwortmöglichkeiten" contains "Antwort"; "Auswahl" or "Optionen" don't);
   "Schlussrangliste" and "Classement final" are at the limit; Countdown
   needs a French word ("Décompte", or "Top chrono") and Italian may keep
   "Countdown"; "⏱ 15 s" where no short word exists, the number from
-  `LAST_CALL_MS`. A native-speaking teacher confirms each language.
+  `LAST_CALL_MS`.
 - **Formula rendering** — fractions, powers, equations on maths sheets; until
   then an image carries them.
 - **Pictures for a teacher whose AI can't make a zip** — free tiers and some
@@ -608,9 +498,8 @@ The quiz is already made; it can be more than one activity.
 - **Scripts and right-to-left text** — the guidance says "any language", but
   whether CJK, Arabic or Hebrew render correctly (font coverage on the
   projector and the students' buttons, RTL layout of question, tiles and
-  ranking) is untested. Check before the guidance implies it; a native-reading
-  teacher confirms.
-- **Sound** — some classes want it; off by default, a mute on the projector.
+  ranking) is untested.
+- **Sound** — some classes want it.
 - **Runs by itself** — the design kept for v5 item 7. Not core purpose, but
   value: the quiz carries on while
   the teacher's hands are elsewhere — a student who needs them, the next thing
@@ -630,18 +519,17 @@ The quiz is already made; it can be more than one activity.
 
 ## Open: with the owner, and in the field
 
-Actions and decisions only; where a design file's "Not known" describes the
-uncertainty, it is pointed to, not restated.
-
 With the owner, what only he can do:
 - The read of the German, French and Italian words
   (`translation-review.md`); Italian has no native reader on the project.
+- Whether his daylight photographs of the sheet are to replace the rendered
+  sheet pages the film and the sheets ask's tab show.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
   script from spending the day's allowance; the free plan includes one such
   rule, and a name children can type beats pages.dev on the slowest step
   (`design/hosting-and-limits.md`).
 
-Review E's follow-ups on the bar (`design/question-flow.md`):
+Follow-ups on the steering bar (`design/question-flow.md`):
 - An accidental Countdown can't be cancelled; the old bar had "Stop the
   countdown".
 - The stepper under Play (the question's states, the current one marked), so
@@ -651,8 +539,9 @@ Review E's follow-ups on the bar (`design/question-flow.md`):
   aside: it suggests majority voting).
 - A press blocked by the settle window gives no feedback; the 80/450/400 ms
   timings need a real hand, clicker and phone.
-- The capacity sentence ("a few dozen classes a day", landing and /own-copy)
-  is not re-derived now that a question has four or five steps.
+- The capacity sentence ("a few dozen", landing and /own-copy), derived
+  when a question had three steps (`design/hosting-and-limits.md`, Not
+  known).
 - A 320 px wall still clips the ranking.
 
 Needs a real classroom or real devices, nobody has run it:
@@ -666,7 +555,7 @@ Needs a real classroom or real devices, nobody has run it:
 - The platform's wording when the free allowance is spent
   (`design/hosting-and-limits.md`).
 
-## Housekeeping, for the next session
+## Housekeeping
 
 - The README is to be rebuilt (the owner). It is the public GitHub landing,
   and its paragraph for an AI setting up a copy for someone else has the

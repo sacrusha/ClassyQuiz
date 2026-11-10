@@ -21,9 +21,9 @@ The product's classroom (shared, school-managed tablets, a laptop on the
 projector, the teacher's phone, young and slow readers, a teacher in the room)
 is in `backlog.md`, Project. What shapes this file:
 
-- The users are the example class's children, who may not read English, or
-  at all. Everything a child sees or does is a picture, a colour, a shape or
-  a number. Labels are icons and numbers wherever possible.
+- The users are the example class's children, who may not read the site's
+  words, or not read at all, so a child's screens use icons and numbers in
+  place of labels where they can.
 - Tablets are shared and nothing is kept on them beyond the class. Nothing may
   identify a child: no names, no accounts.
 - Plausible assumption: reaching the site and typing the code is the slowest
@@ -47,8 +47,8 @@ is in `backlog.md`, Project. What shapes this file:
 ### Getting in
 
 - The projector shows the address, the join code and a QR code for
-  `/play#<code>`. Typing the address leads to the landing page, the teachers'
-  page, with the code box in its header (`root-page.md`). Without JavaScript
+  `/play#<code>`. Typing the address leads to the root page, with the code
+  box in its header (`root-page.md`). Without JavaScript
   the box still submits to `/play?c=...`.
 - In testing, people who typed the address didn't find that box. Until the first
   avatar, the wall shows where it is: a wordless picture of a tablet's top,
@@ -72,8 +72,6 @@ is in `backlog.md`, Project. What shapes this file:
 - Avatars are SVG (`client/look.ts`), not emoji: emoji look different on an
   Android tablet and a Windows laptop, and a child must recognise "the frog on
   purple" across the room.
-- The teacher does not see which child is which. This fits "grading unlikely"
-  (v1 item 5).
 
 ### Coming back
 
@@ -104,8 +102,9 @@ Purpose: slow tablets in a normal class are never stranded, with no control
 for the teacher to find, and a stranger with the code cannot wander into a
 quiz under way.
 
-- The cap is `MAX_PLAYERS` (60, removed avatars included), `shared/limits.ts`.
-  The example class is about 25; more is what an own copy is for.
+- The cap is `MAX_PLAYERS` (60, removed avatars included), `shared/limits.ts`;
+  why 60, and that a larger group is what an own copy is for:
+  `hosting-and-limits.md`.
 - The door is open in the lobby, for `DOOR_OPEN_MS` (5 minutes) after Start, and
   while the first question is up (its reveal and ranking included),
   `doorOpen` in `server/game.ts`. A teacher who presses Start before handing
@@ -221,18 +220,11 @@ Why this shape:
   pick.
 - No words on the menu, and no new control for the teacher. Start ends the
   dressing. Late joiners get no menu and play plain.
-- The wider audience is served by each adult's own look: one who finds an
-  animal on a disc out of place at work dresses it into something that fits,
-  from the same menu. The rulings above were written for children and hold
-  for adults as they stand: the same menu for everybody, nothing scarce or
-  earned, a plain start, dressing optional. So there is no look for a room,
-  no default against the plain start, no set for a host to pick per upload
-  and none carried by the quiz, and a training room where nobody dresses
-  looks as a class does: animals on discs. Plausible assumption, unseen with
-  either audience: an adult at work finds a fitting look in the menu, and
-  children don't find the office's things dull. Should one menu not serve
-  both, a set per room is the fallback, its setting the host's (backlog,
-  Open).
+- The wider audience is served by each adult's own look, from the same
+  menu: one who finds an animal on a disc out of place at work dresses it
+  into something that fits. Plausible assumption, unseen with either
+  audience: an adult at work finds a fitting look in the menu, and children
+  don't find the office's things dull.
 - Two registers for adults sit beside the children's. The dapper one is
   the implementer's reading of the owner's "expanding on the top hat": the
   bowler and the bow tie. The office's is the owner's examples, the laptop,
@@ -288,8 +280,9 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   no `t`, which means none. It is accepted only in the lobby,
   only for what the menu has, never for a removed avatar, and at most
   `MAX_LOOK_CHANGES` (100) changes per player, after which the pictures stop
-  responding: a backstop far beyond exploring the menu, since a change costs
-  no row (below). The animal and colour are never touched.
+  responding; a change costs no row (below), so the cap guards nothing
+  measured (`open-period-in-memory.md`, "Caps, taps and alarms"). The
+  animal and colour are never touched.
 - On a tablet the nine hats stay on one line: each picture is 60 px, or as
   little as 46 where the picker is narrower (53 px on a 1024 px tablet held
   sideways). Where the picker cannot hold them on one line they break into
@@ -404,15 +397,9 @@ added, and some teachers want to photograph it. So it has its own screen
   wide (checked at 600 px and wider only); whether a class of 40 to 60 should
   also stand under the class's result, where the width is unused, so its
   avatars and the podium stay larger.
-- Whether the students' buttons need the answer text, or heads stay down (the
-  owner has not said whether the colour-coded setup he saw had text on the
-  devices).
+- Whether the students' buttons need the answer text, or heads stay down.
 - Whether adults at work dress at all, and whether the dapper and the
-  office's registers give them a look that fits (the owner, on seeing them);
-  whether a training room of undressed animals keeps anyone from using the
-  site; whether children take to the office's things, and read the laptop
+  office's registers give them a look that fits; whether a training room
+  of undressed animals keeps anyone from using the site; whether children take to the office's things, and read the laptop
   seen from its lid as a laptop; whether a thing from the third row at the
   bar's 26 px helps a child find their avatar or only crowds it.
-- Pairs and teams: two children on one tablet already work as one player;
-  whether "of 25" and the ranking read sensibly when twelve tablets stand for
-  twenty-four children is unchecked, and team play is a mode of its own.

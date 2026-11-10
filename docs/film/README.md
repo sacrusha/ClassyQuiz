@@ -27,9 +27,9 @@ two things, in this order (owner):
 
 The owner, on the five stills: the last part, the class playing, works for
 people who know classroom quizzes and may be tricky for those who don't. So
-the classroom gets the most time, the AI half is brisk (Build's text below
-explains it too), and what a newcomer can't guess is shown as cause and
-effect:
+the classroom gets the most time, the AI half is brisk (the page's first
+screen, above the film, shows the ask and its file too), and what a
+newcomer can't guess is shown as cause and effect:
 
 - the question is on the big screen only; a tablet shows the four choices as
   colour, shape and their text, the same as on the wall (one child seen over
@@ -43,8 +43,8 @@ effect:
 - the solution comes to each tablet (✓ or ✗) and to the wall (avatars jump);
   the ranking shows avatars, so nobody is exposed.
 
-That the quiz was made in the break the viewer infers; the film doesn't say
-it.
+That the quiz was made in the break the film doesn't say. Plausible
+assumption it rests on: the viewer infers it.
 
 ## Situation
 
@@ -68,8 +68,8 @@ it.
   the cards the teacher passes, and the lobby's check is shown as a first
   visit finds it, since the phone steers. The check is drawn as a
   laptop-wide window shows it, on a phone too (`film-text.md` 0.8). Its
-  words for these screens are the site's, English (`SITE` in
-  `build/film.js`), and a test holds them to the site's code
+  words for these screens are the site's (`SITE` in `build/film.js`; their
+  language, `film-text.md` 0.7), and a test holds them to the site's code
   (`src/client/film.test.ts`), so a screen that changes its words fails the
   tests until the film follows.
 
@@ -87,9 +87,6 @@ it.
   be illegible (codes typed by children, the AI's prose).
 - **It never plays by itself**: until a press the page shows its poster frame
   (`docs/design/root-page.md`).
-- **The screens it shows have the language they have on the real site**:
-  the teacher's chat, the quiz and the root page in the page's language, the
-  site's screens after the upload in English (`film-text.md` §0.7).
 - **AIs read the root page.** None of the film's words may be in
   `index.html`: they are in the script and drawn at play time.
 - **The site's content-security policy** (`src/scripts/build.mjs`, sent as
@@ -107,11 +104,6 @@ it.
 - **The ask typed is the root page's own** (`film-text.md` 1), so the film
   shows the sentence a viewer finds on the page; it holds on the address,
   the one thing a teacher has to remember.
-- **The second ask, not the AI's preview** (owner: the ask that changes the
-  quiz is more relevant than the AI's drawing of it): what the chat should
-  leave behind is that the quiz is made, and changed, by asking.
-- **The upload is shown, step by step** (owner: "the step where the zip goes
-  to classyQuiz isn't obvious").
 - **The ranking comes after the whole quiz**: the wall's counter runs from
   1 / 13 to 13 / 13 first, since after one question twelve children would
   tie at ★ 1, where a ranking after the whole quiz has places. The end card
@@ -129,7 +121,7 @@ it.
   an AI on the app's tile, the teacher's second message, the AI's status
   lines, the `.zip`'s name, the quiz's title and questions; `draft: true`
   marks a language whose words are drafts pending the owner's review),
-  `SITE` (the words it quotes from the site's English screens) and `COMMON`
+  `SITE` (the words it quotes from the site's screens) and `COMMON`
   (its own: the example's figures, the chapters' starts).
 - `film.css`: the standalone page's player and the faces the film uses (on
   the site they come from `index.html` and `site.css`).
@@ -332,8 +324,8 @@ Only rendered pictures found them, so the film is checked by looking:
   sped up; the clock would then show the film as 2:14 or stay as it is; at
   half speed the classroom's motion floats, the chat and the upload read
   well), or a slower setting that halves only the chat, upload and laptop.
-  The other ways to the steps are on the page: Build's ask under the film,
-  and "The example, step by step ›".
+  The other ways to the steps are on the page: the two steps above the
+  film, "How to ask" below it, and "The example, step by step ›".
 - **Other fonts.** The fit of fixed texts is checked with one wider stand-in
   font. The poster picture carries the font of the machine that rendered it;
   on a device with another `system-ui` the live frame that replaces it shows

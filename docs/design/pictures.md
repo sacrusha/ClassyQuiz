@@ -9,13 +9,16 @@ other parts are in `quiz-format.md`.
 Most exercise sheets have pictures, and for many of them the figure is the
 exercise (backlog v2 item 1: "figures are the exercise"). The question on
 the big screen is what makes the quiz feel interactive, so the voting
-devices don't need the question's picture. A picture can also be the choice
+devices in a room with a big screen don't need the question's picture; where
+each device shows the whole question (Solo, Peers), it carries the picture
+too. A picture can also be the choice
 itself ("which of these shows ...", backlog v3 item 1), and then the
 students' devices need it.
 
 Three kinds of picture:
 
-- **A question's picture**: one per question, on the projector only.
+- **A question's picture**: one per question, on the projector, or on each
+  device where the device shows the whole question.
 - **A background**: atmosphere or context rather than content. It is a
   separate thing from the question's picture. Questions may share files,
   as picture or as background.
@@ -255,8 +258,7 @@ readable, chosen by the page, not by the AI or the teacher.
 
 ### The students' devices
 
-- A question's picture is not sent to them (backlog v2 item 1: they don't
-  need it).
+- A question's picture is not sent to them (Purpose).
 - A picture answer is the choice, so the buttons carry the picture on the
   button's colour with its shape, arranged by the same rule in a room fixed
   in px (a cached picture otherwise stretched the page when measured). Under
@@ -267,7 +269,8 @@ readable, chosen by the page, not by the AI or the teacher.
 
 ### The teacher's side
 
-- The question list (lobby, and "All questions" during the run) shows a
+- The question list (the local check's fold, the lobby, and "All
+  questions" during the run) shows a
   thumbnail, 72 px high, under each question with a picture: nine questions
   can read the same and the list can't tell them apart without it. A
   question's own background gets a smaller one labelled "background"; the
@@ -284,7 +287,6 @@ readable, chosen by the page, not by the AI or the teacher.
   can't be enlarged. The teacher's view keeps it faded, struck through and
   tagged "picture hidden", so it can be shown again. It works at any time,
   also on the open question.
-- The upload page doesn't preview pictures; the lobby list is the preview.
 
 ## Not known
 

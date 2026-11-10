@@ -124,9 +124,10 @@ export async function openRoom(q: OpenedQuiz, mode?: "peers"): Promise<RoomResul
 
 /**
  * The language the root page speaks on this device (landing-text.ts,
- * chosenLang): a room's refusals and the line before them are Run's
- * messages, moved to the check, so they stay in it while the check's own
- * screen is English (docs/design/root-page.md, "Languages").
+ * chosenLang): a room's refusals and the line before them are the root
+ * page's messages, moved to the check, so they speak its language; the
+ * check's own words are not translated yet (docs/design/local-check.md,
+ * "Opening a room").
  */
 export function visitorLang(): Lang {
   return chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
@@ -136,8 +137,8 @@ export function visitorLang(): Lang {
  * Why a room didn't open, as HTML: the quiz (the server's checks are the
  * last word), the site's day (with the way to more quizzes), or the network
  * (null: the site couldn't be reached), with what to tell IT. In the root
- * page's words and language (visitorLang); the quiz's own problems stay
- * English, as on the root page.
+ * page's words and language (visitorLang); the quiz's own problems are not
+ * translated, as on the root page.
  */
 export function roomRefusal(r: RoomResult | null): string {
   const lang = visitorLang();

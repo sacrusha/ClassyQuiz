@@ -142,10 +142,7 @@ sections carry the FAQ-kind information (the ways to play, how a room runs,
 privacy, hosting), which doubles as context for building; the format section
 carries what building needs.
 
-The guidance's nouns: "the user" for whoever is in the conversation with
-the AI, the AI's own word for them; "the quizmaster" for whoever runs a room,
-"players" for whoever answers; "teacher", "class" and "lesson" where the
-classroom is meant (`root-page.md`, "Words for whoever comes").
+The guidance's nouns are those of `root-page.md`, "Words for whoever comes".
 
 The "Build with the user" stance is the owner's, said of the teacher and
 true of any user: the teacher knows what

@@ -7,7 +7,7 @@ The quiz is the finished deliverable a teacher's AI hands over after talking wit
 - **A wrong key must be visible in seconds**, and fixable in the text or by telling the AI.
 - **An AI must be able to write it reliably.** The AI writes from exercise sheets, usually in a chat, and the teacher is not someone who debugs text.
 
-When the AI gets something wrong, the message the teacher sees must be one she can paste back to the AI (backlog v1 item 13, low priority, but it falls out of the parser at little cost). It is a fallback, not a loop to rely on: the owner's "there must be no loop; a loop that iterates is a failure, and 'fix it' should allow the obvious fix, by keeping the format simple".
+When the AI gets something wrong, the message the teacher sees must be one she can paste back to the AI (backlog v1 item 13). It is a fallback, not a loop to rely on: the owner's "there must be no loop; a loop that iterates is a failure, and 'fix it' should allow the obvious fix, by keeping the format simple".
 
 The format's specification is the "How quizzes are built" section of the guidance page, `src/public/index.html`, because that is where AIs and teachers read it. This file does not restate it. It says what the format is for and why it is shaped so. The parser is `src/quiz/format.ts`; where the page and the parser differ, the parser is what runs.
 

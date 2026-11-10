@@ -75,8 +75,8 @@ live with in particular:
   ".txt/.md invite users to type their AI questions into the textbox — people
   tend to be like that." Pasting the quiz text was itself a distractor.
 - The shared site runs on a free plan whose limits are the account's, shared by
-  everyone who uses it (the caps are in `design/hosting-and-limits.md`). A refused upload in front of a class ends
-  adoption.
+  everyone who uses it (the caps are in `design/hosting-and-limits.md`). Plausible assumption: a refused
+  upload in front of a class ends adoption (what "The own copy" rests on).
 - A school network may block the site, or only its live connection, or only the
   students' network may be stricter than the teacher's. Plausible assumption: a teacher is rarely at school when they
   first read the page (so the network help sits where the failure shows).
@@ -116,8 +116,8 @@ The part for people is one column of the guidance's width, 42rem, in one
 order at every width, and the header's bar is as wide. Nothing is rearranged
 between a phone and a desktop, so getting a quiz stands above opening one
 everywhere (Situation: side by side worked worse), and the guidance starts
-on the edge the part for people ends on (backlog v4 item 14 found the two
-edges reading as two pages joined).
+on the edge the part for people ends on (two edges read as two pages
+joined).
 
 What shows as the page opens depends on the browser's window, not on the
 device's screen: a phone's browser bars take part of it. Measured in Edge
@@ -202,9 +202,8 @@ practise or review. What the pictures show and how they are made:
   check lists its cards the other way round, Solo first, for a reason of its
   own (`local-check.md`, "The entries"); the names are what a visitor
   carries from this page to that one.
-- **The names are the entries' own in every language**, as the check's cards
-  carry them, written in the page and not translated: "Peers" is a name, not
-  a word to translate. The words after each name are in the page's language
+- **The names are the entries' own**, as the check's cards carry them, so
+  the page and the check agree. The words after each name are in the page's language
   and say the setting: with whom, and where the question is read. They don't
   say how a room runs (Situation: a line that describes the mechanism is not
   a reason to play).
@@ -296,9 +295,9 @@ What the film itself must get across, and how it is made: `docs/film/`.
 The film's player is one people already know from video: a poster with ▶,
 and under it a bar with play, a time bar to drag, the time and the length,
 the speed and full screen. Anything the player does that a video player
-doesn't takes attention away from the film. The five steps the strip
-showed are in the film itself (`docs/film/`). Their starts are ticks on the
-time bar, and dragging shows the step's name over the thumb.
+doesn't takes attention away from the film. The starts of the film's five
+chapters are ticks on the time bar, and dragging shows the chapter's name
+over the thumb.
 
 What it lives with, beyond the page's own situation:
 
@@ -339,11 +338,11 @@ How the page meets it (the details: the comments on the film in
   and its pictures, on the phone and then on the laptop, so a viewer who
   has scrolled past it recognises it (`docs/film/`). From the upload on,
   the site's screens (the check, the wall's chrome, the Remote, the tablets)
-  are English, as on the real site. Every language shows the same quiz, the
-  example's 646 000 number-line question, translated: wrong answers in
-  several different examples would linger. The German, French and Italian
-  words are drafts. A language switch takes the
-  film back to its poster in the new language.
+  are drawn as the site shows them (`docs/film/README.md`, Situation),
+  untranslated for now ("Languages"). Every language shows the same quiz, the
+  example's 646 000 number-line question, translated (owner: the safest,
+  since wrong answers in several different examples would linger). A
+  language switch takes the film back to its poster in the new language.
 - **Layout.** The film stands below the two steps, under its heading, as
   wide as the column (672 px on a desktop) and at most 62% of the screen's
   height, the bar under it and as wide; so on a phone held sideways the
@@ -359,7 +358,7 @@ How the page meets it (the details: the comments on the film in
 - The stage's accessible name says what it is, "a film without sound". It,
   ▶, the replay, play and pause, the time bar, the speed and full screen
   are named in the page's language. The time bar's spoken value is the time
-  and the step's name.
+  and the chapter's name.
 - Under the film, "The example, step by step ›" links `/example`, the worked
   example (`design/example-page.md`), named for what a teacher looks for (a
   walkthrough), not for what the page is to us ("how it was made").
@@ -455,9 +454,10 @@ purpose: to tell the visitor in passing that mixing languages in the
 instructions works, together with the example ask and the German example
 sheets. Why these four, in his reading: he can review three, may have access
 to someone who can review the fourth, and they are the likelier to see
-immediate use. About and the
-rest of the site stay English: the AI reads English, and the lobby, wall, Remote
-and tablets wait for the backlog's Localization. The static HTML is English. The
+immediate use. About and below is the
+guidance, in English, which the AI reads; the static HTML is English for the
+same reader. The local check, the lobby, the wall, the Remote and the tablets
+are not translated yet (backlog, Later, Localization). The
 visitor's choice is made with a switch top right, kept on the device
 (`cq.lang`); the header with the code box and the switch is shared with
 `/example` (`client/top.ts`), so the choice holds on both; otherwise the browser's first language among the four; otherwise
@@ -465,8 +465,7 @@ English. The words are in `client/landing-text.ts`, one table per language, the
 messages of the box that opens a file included, also where opening a room moved them: the local check's
 "Sending the quiz…" and its refusals speak the language this page spoke
 (`local-check.md`, "Opening a room"). The quiz's own problems, the archive's messages and the text
-copied for the AI stay English. Register: German "du", French "vous", Italian
-"tu".
+copied for the AI are not translated.
 
 Purpose (backlog v6 item 2): a visitor reading German, French or Italian gets
 the same page, said in that language's own sentences, not the English
@@ -496,8 +495,8 @@ sentence's structure, and the findings in Situation hold in each:
 
 The words in the three are the implementer's drafts, with the choices behind
 them in `docs/translation-review.md`.
-The film follows the same line: the page's language up to the upload, the
-site's English screens after it ("The film", Words); its words are in
+The film follows the site: the page's language up to the upload, the
+site's screens as they are after it ("The film", Words); its words are in
 `docs/film/build/film.js`, the page's own taken from `landing-text.ts` when it
 is built.
 
@@ -517,8 +516,9 @@ What the words live with:
   participants connect to a host too), and a role noun is avoided where a
   sentence does without one.
 - The part for people is in four languages, and the rest of the site is
-  queued for Localization (backlog, Later); a translation hits the meaning,
-  not the literal word. The guidance stays English (`guidance-page.md`).
+  not translated yet (backlog, Later, Localization); a translation hits the
+  meaning, not the literal word. The guidance is English, for the AI
+  (`guidance-page.md`).
 
 So, once for all entries:
 
@@ -640,7 +640,7 @@ long a quiz stays resumable follows the instance's lifetime
 
 Purpose (backlog v6 item 1f): a person knows what they can count on, and that
 what follows is the manual for AIs, so the guidance doesn't read as a second
-page joined on (backlog v4 item 14).
+page joined on.
 
 Under "What you can count on", three lines: free, without accounts or
 sign-up; played on one's own, a quiz never leaves the browser, and played in
@@ -670,14 +670,15 @@ doesn't raise it on a first visit.
   only on a device that has uploaded before and only if
   the site was full or busy on at least one of the last 30 days: it
   refused an upload or a class, or the classes' bookings reached
-  `NEARLY_FULL` (half; the owner: lower than 80%) of the day's rows. It states the fact: "On 3 of the last
+  `NEARLY_FULL` (half; the owner: lower than 80%) of the day's share in any
+  allowance (`hosting-and-limits.md`, "The teacher hears before it fails"). It states the fact: "On 3 of the last
   30 days this shared site was full or busy. For more quizzes, a site
   of your own, your school's or your company's:", then the link. Counting the busy
   days brings the way to more quizzes to the teacher who relies on the site
   before their first refusal. The device keeps the days it uploaded (`cq.days`,
   dates only, at most 60, never sent; `client/history.ts`).
 - The site records, once a day, each day on which the budget refused an upload
-  (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (the days' classes are the owner's, `telemetry.md`). The page asks
+  or a class (`SiteBudget`, kept 31 days); `GET /api/site` answers `{full: n}` (the days' classes are the owner's, `telemetry.md`). The page asks
   once per visit, and only from such a device.
 - A refused upload says the same at the moment it happens, with the link.
 - `/own-copy` (`src/public/own-copy.html`, static, no script) is the short guide:

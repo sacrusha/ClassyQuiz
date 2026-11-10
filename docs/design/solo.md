@@ -7,10 +7,10 @@ teacher's made, without having seen its answers (backlog v5 item 2).
 Nothing is uploaded and nothing counted; closing the tab ends it, which the
 owner finds fine and expected.
 
-Here the question, its picture and the tiles live on the player's own
-device for the first time, then the key (v5 item 6). A room without a
-wall stands on that screen too: Peers does (`peers.md`), a Quizmaster's
-devices-only room is to come.
+The question, its picture and the tiles on the player's own device, then
+the key, are Solo's device screen (v5 item 6), and a room without a wall
+stands on it too: Peers does (`peers.md`); a Quizmaster's devices-only room
+isn't offered (backlog v5 item 4).
 
 ## Situation
 
@@ -59,9 +59,8 @@ The avatar a room would give (an animal and a colour, assigned) and the
 lobby's dressing menu, the same for every room (`class-and-wall.md`,
 "Dressing the avatar"), with Start under it. It is the one step between
 the check and the first question; what it is for is the observation
-above: the avatar that celebrates is the player's own. Alone nothing is
-scarce and nothing is spent, so the room's limit on changes doesn't apply.
-The look stays for Play again, within the page.
+above: the avatar that celebrates is the player's own. The look stays for
+Play again, within the page.
 
 The start comes up under the hand that pressed Play ▶ on the check, and
 on a short phone (360x640) a row of the dressing menu stands where Play ▶
@@ -190,8 +189,8 @@ lean; neither use is confirmed.
 - Whether learners copy their answers to their AI, and whether the text is
   enough for it (pictures go only by file name; the AI that made the quiz
   has them).
-- Whether a teacher looking for a preview recognises it in "on your own,
-  to learn or review"; whether the result's single avatar reads for a
+- Whether a teacher looking for a preview recognises it in "On your own,
+  to practise or review"; whether the result's single avatar reads for a
   class at a projector.
 - Pull to refresh is asked off while Solo is on (`overscroll-behavior`);
   checked headless in Edge only, not on Android or iOS.

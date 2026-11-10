@@ -1,7 +1,7 @@
 """Builds the classyQuiz logo kit's vector files into ../ (svg/, web/) from fox.py, small.py, word.py, lockup.py.
 Run: python -I build_kit.py [out_dir]   (needs fontTools and Rubik Bold 1.100 as a TTF, see word.py)
 It renders no rasters: the site's favicon.ico and apple-touch-icon.png are renders of the sources in web/
-(guidelines.md, "Files")."""
+(guidelines.md, "Browser icons")."""
 import sys
 from contextlib import contextmanager
 from pathlib import Path

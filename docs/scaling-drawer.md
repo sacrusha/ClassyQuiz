@@ -3,8 +3,7 @@
 Ideas kept for when a specific limit of the Free plan starts to bind, so
 that whoever meets it doesn't start from zero. Nothing here is planned or
 decided. Each idea names the limit it answers and how you would know that
-limit has become real. Figures are estimates, from an exploration between the
-owner and the assistant on 2026-11-09, unless marked as measured.
+limit has become real. Figures are estimates unless marked as measured.
 
 ## Purpose
 
@@ -133,7 +132,7 @@ text-only ones. Each holds its bytes three hours after its last use.
 players, 3 to 4 times the ~250 a class writes. The ledger counts the day's
 settled writes plus the live bookings against the rows of `DAY_FOR_CLASSES`
 (80,000), so after 200 classes in one UTC day about 29 lobbies still fit at
-once. The reserve for line writes is the largest adjustable part, 320 of a
+once, counted in rows. The reserve for line writes is the largest adjustable part, 320 of a
 lobby's 1,030. The same ledger books requests and awake time as estimates
 (`design/hosting-and-limits.md`, "Running classes finish"); for classes on
 WebSockets rows are still what it fills first, at their most, so started

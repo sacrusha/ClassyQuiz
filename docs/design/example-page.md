@@ -78,4 +78,4 @@ camera's metadata.
   second turn. The owner may still replace them with a run of his own.
 - Whether a teacher on a phone reads the conversation: the preview is the
   picture scaled to the screen; the whole picture opens at full size.
-- The German, French and Italian words, pictures and quizzes are drafts (backlog item 12).
+- The German, French and Italian words, pictures and quizzes are drafts (backlog v4 item 12).

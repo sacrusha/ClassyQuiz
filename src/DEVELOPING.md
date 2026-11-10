@@ -40,11 +40,10 @@ All commands run in `src/` unless said otherwise.
 - `public/site.css`: the shared look. Every page links it first; in `dist/`
   it is the front of `app.css`, or written into a page without `app.css`
   (`build.mjs`), so there is no `dist/site.css`.
-- `public/app.css`: one namespace for every app page and `/example`. A new
-  class can pick up an old rule (`.device` is the network check's line), so
-  a new screen's names carry a prefix of their own: the device screen's a
-  `d` (`dscreen`, `dbar`, `dupright`). The usual remedies, deferred by the
-  owner: `docs/backlog.md`, Housekeeping.
+- `public/app.css`: one namespace for every app page and `/example`, so a
+  new class can pick up an old rule (`.device` is the network check's line)
+  and a bare new rule can land on another page (`docs/backlog.md`,
+  Housekeeping).
 
 The site is two Cloudflare deployables. The state Worker (`classyquiz-state`)
 holds the Durable Objects (`Instance`, `JoinCode`, `UploadStats`, `SiteBudget`).
@@ -189,15 +188,13 @@ needed); `sitecheck.py` also needs Node, npm and git. What they write goes to
 For a second developer or agent beside the main stack. Wrangler's dev registry
 is global (`%APPDATA%\xdg.config\.wrangler\registry`) and keyed by Worker name,
 so a second stack that keeps the name `classyquiz-state` overwrites the entry
-the first stack's site binds to. (Inferred from the registry's layout, then
-confirmed by collisions between stacks.)
+the first stack's site binds to.
 
 - Copy the deployables (`functions`, `server`, `shared`, `quiz`, `dist`, both
   `wrangler.toml`) to a scratch folder and rename the state Worker in both
   tomls, e.g. `classyquiz-state-images`, including `script_name` in the site's
   bindings. The site's name `classyquiz` can stay shared; nothing binds to it.
-- Use other ports (past ones: 8817/8818, 8827/8828, 8837/8838) and other
-  inspector ports.
+- Use other ports and other inspector ports.
 - Give the site and the state Worker different `--persist-to` directories. With
   the same one, every Durable Object call from the site fails with "Network
   connection lost".

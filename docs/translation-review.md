@@ -139,7 +139,7 @@ A 360 × 640 window cuts the button that opens a file by 8 px in German and 12 i
 
 ## The worked example (`/example`)
 
-Drafts, not in the tables above: the page's words (`src/client/example-text.ts`), the conversation
+Drafts: the page's words (`src/client/example-text.ts`), the conversation
 pictures' words (`docs/example/text.py`, four languages side by side; rebuild with
 `py -I docs/example/build.py`), the quizzes (`docs/example/quiz_zips.py`). Where they overlap with
 the film they are the film's words, so what is decided for the film applies to both; where the example would word a shared
@@ -173,38 +173,28 @@ moment means in the language, not the English words. Open for you:
   words pass, not a translator: "allein / en solo / per conto tuo" for on your own (it avoids
   "da solo", gendered), "Startseite / page d'accueil / pagina iniziale" for the start page.
 
-The quizzes (`quiz_zips.py`) are unchanged: questions 7–13 read as the sheets' own instructions
-in de and as the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
-
-Also flagged, no decision needed: film-text.md §2 note is stale (Opus/3 Nov → Sonnet/4 Nov); fixed with the docs pass.
+The quizzes (`quiz_zips.py`): questions 7–13 read as the sheets' own instructions in de and as
+the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
 
 ## The film's words
 
-| key | de | fr | it |
-|---|---|---|---|
-| ask1 | the page's `ask` | the page's `ask`, U+202F before "?" | the page's `ask` |
-| ask3 | danke. Kannst du eine visuelle Vorschau machen, nur eine pro Fragetyp? | merci. Tu peux faire un aperçu visuel, un seul par type de question ? | grazie. Mi fai un'anteprima visiva, solo una per tipo di domanda? |
-| status1 | Die Seite classyquiz.pages.dev wird jetzt abgerufen. | Je récupère la page classyquiz.pages.dev. | Recupero ora la pagina di classyquiz.pages.dev. |
-| status3 | Erstelle eine Mockup-Vorschau der Beamer-Ansichten | Préparation d'une maquette des écrans projetés | Preparo un mockup visivo delle schermate del proiettore |
-| zipTitle / file | Grosse Zahlen Quiz / grosse-zahlen-quiz.zip (literal, as the quiz is the translated big-numbers quiz) | Quiz grands nombres / quiz-grands-nombres.zip | Quiz sui grandi numeri / quiz-grandi-numeri.zip |
-| title | Grosse Zahlen am Zahlenstrahl | Les grands nombres sur la droite graduée | Grandi numeri sulla retta numerica |
-| q1, rows 1–3 | Welche Zahl zeigt der Pfeil? | Quel nombre la flèche montre-t-elle ? | Quale numero indica la freccia? |
-| row 4 | Auf welchem Zahlenstrahl zeigt der Pfeil auf 654 000? | Quelle droite graduée a une flèche à 654 000 ? | Su quale retta numerica la freccia indica 654 000? |
-| cardCaption | Pfeil ablesen (Fragen 1–3) | Lecture d'une flèche (questions 1 à 3) | Leggere la freccia (domande 1–3) |
+The film's own words in German, French and Italian are drafts, in `CONTENT`
+(`docs/film/build/film.js`); the example's chat and quizzes quote them (`docs/example/text.py`,
+`FILM`), so whatever you decide applies to film, pictures and zips together, and for q4 the
+quizzes' questions 5 and 6 follow its pattern (`quiz_zips.py`). Where a translator proposed other
+words:
 
-From the example's translator, for keys the film's `CONTENT` now has (the example's chat and quizzes
-quote them, so whatever you decide applies to film, pictures and zips together; for row 4, the quizzes'
-questions 5 and 6 follow its pattern in `quiz_zips.py`):
-
-| key | current | proposed | why |
-|---|---|---|---|
-| ask2 de | …bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen. | …bei denen die Zahl gegeben ist und sie den Zahlenstrahl auswählen müssen, auf dem sie markiert ist. | "passenden markierten" stacks two adjectives; "matching marked" means "the one it is marked on" |
-| ask2 fr | …choisir la droite graduée marquée qui correspond. | …choisir la droite graduée sur laquelle il est marqué. | "droite marquée" isn't said |
-| ask2 it | Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente. | Per favore aggiungi qualche domanda in cui è dato il numero e devono scegliere la retta numerica su cui è segnato. | same |
-| q1 fr | Quel nombre la flèche montre-t-elle ? | Quel nombre la flèche indique-t-elle ? | an arrow "indique" |
-| q4 fr | Quelle droite graduée a une flèche à 654 000 ? | Sur quelle droite graduée la flèche indique-t-elle 654 000 ? | as de/it's row-4 proposals above |
-
-The rows above for ask1, ask3, status3 and cardCaption name keys the film's `CONTENT` no longer has
-(it now has ask2 and status2); ask3, status3 and the captions are the example pictures' alone, in `text.py`.
-
-Choices 646 000 · 645 000 · 644 000 · 647 000 unchanged in all (each language's example quiz uses a space as thousands separator); right answer unchanged. Titles and q1 match each language's own example quiz wording. File names sheet-photo-1/2.jpg stay.
+| key | | in `CONTENT` | proposed | why |
+|---|---|---|---|---|
+| ask2 | de | …bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen. | …bei denen die Zahl gegeben ist und sie den Zahlenstrahl auswählen müssen, auf dem sie markiert ist. | "passenden markierten" stacks two adjectives; "matching marked" means "the one it is marked on" |
+| ask2 | fr | …choisir la droite graduée marquée qui correspond. | …choisir la droite graduée sur laquelle il est marqué. | "droite marquée" isn't said |
+| ask2 | it | Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente. | Per favore aggiungi qualche domanda in cui è dato il numero e devono scegliere la retta numerica su cui è segnato. | same |
+| status1 | de | Rufe jetzt die Seite classyquiz.pages.dev ab. | Die Seite classyquiz.pages.dev wird jetzt abgerufen. | |
+| status1 | fr | Je consulte la page classyquiz.pages.dev. | Je récupère la page classyquiz.pages.dev. | |
+| status1 | it | Sto leggendo la pagina classyquiz.pages.dev. | Recupero ora la pagina di classyquiz.pages.dev. | |
+| zipTitle | it | Quiz grandi numeri | Quiz sui grandi numeri | |
+| title | it | I grandi numeri sulla retta numerica | Grandi numeri sulla retta numerica | |
+| q1 | fr | Quel nombre la flèche montre-t-elle ? | Quel nombre la flèche indique-t-elle ? | an arrow "indique" |
+| q4 | de | Welcher Zahlenstrahl hat einen Pfeil bei 654 000? | Auf welchem Zahlenstrahl zeigt der Pfeil auf 654 000? | |
+| q4 | fr | Quelle droite graduée a une flèche à 654 000 ? | Sur quelle droite graduée la flèche indique-t-elle 654 000 ? | as the de and it proposals |
+| q4 | it | Quale retta numerica ha una freccia a 654 000? | Su quale retta numerica la freccia indica 654 000? | |

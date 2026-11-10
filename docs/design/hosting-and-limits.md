@@ -67,8 +67,9 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
     offering one would be a minor optimization. Plausibly they tap through
     to the join screen, maybe Start. Their quiz is the example (about
     40 KB) or one of their own, a few MB with pictures; a teacher's
-    homework quizzes are Solo and never uploaded. A forgotten tab on a
-    desktop keeps its socket; a phone or tablet suspends it.
+    homework quizzes, plausibly played Solo, are never uploaded. A
+    forgotten tab on a desktop keeps its socket; a phone or tablet
+    suspends it.
   - A teacher opening the lobby on one device before class, going into the
     quiz by the end of the class: 30 minutes, or several hours.
   - A teacher with a projector and a Remote, connections dropping now and
@@ -78,9 +79,10 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
     leaves; teacher B runs it from the projector later, with or without a
     Remote. File sharing between devices is poor or poorly understood, so
     the site is how the quiz gets there.
-  - After the upload no device holds the quiz: the check holds it in the
+  - After the upload no page holds the quiz: the check holds it in the
     page's memory only, and opening the room leaves that page for the lobby
-    (`client/entry-quizmaster.ts`). The server's copy is the only one.
+    (`client/entry-quizmaster.ts`). Besides the file, the server's copy is
+    the only one.
   - A student who joined the wrong quiz may want back into the one before,
     which is someone else's latest. A player joining another quiz says
     nothing about the first being done.
@@ -203,7 +205,8 @@ The README's "On a school's or company's own server" is what a school's or
 company's AI converts from: what changes, what a converted copy keeps (the lifetime, no logs, HTTPS),
 and the two checks it passes. `/own-copy` offers the route to teachers
 (`root-page.md`, "The own copy"). The conversion is theirs and is not
-checked here.
+checked here (owner: the point of telling them to convert is so we don't
+have to).
 
 A converted copy left as it is has one dependency on the live site: a
 teacher's AI reads guidance before writing a quiz, and the parser is tolerant
@@ -248,8 +251,6 @@ As built:
   `observability` off, and Pages Functions' logs are not stored (only streamed
   while someone tails them). Error logs carry the message only.
 
-The duration is a single constant in code.
-
 ### Protecting the day's allowance
 
 Numbers live in `shared/limits.ts` unless noted; a self-hoster raises any of
@@ -262,9 +263,7 @@ them, and the README points self-hosters there.
   latest, one at a time and at most every `INPUT_GAP_MS` (300 ms), and
   doesn't send an answer it already shows as chosen; a tap that changes
   nothing (a resend, or the same answer again) changes nothing held, the
-  newer sequence number kept so a late older tap still loses. Changes of
-  mind stop at `MAX_ANSWER_CHANGES` (10) per student and question, a
-  backstop; past it the device shows the answer that counts.
+  newer sequence number kept so a late older tap still loses.
 - **Players per class: `MAX_PLAYERS` (60), removed avatars included.** The run
   is one stored value rewritten with every write and must stay under the 2 MB
   a value holds; the projector draws every avatar. A larger group is what an
@@ -291,9 +290,8 @@ them, and the README points self-hosters there.
   the end of its code's claim, which is renewed alongside it, so a lost
   release can't fill the ledger for good. Per quiz it holds an id, a size and
   an expiry; per day a count and the uploads' rows; nothing about the quiz
-  or who made it. It also
-  keeps the UTC days on which it refused an upload for 31 days, for the
-  landing's own-copy line (backlog v4 item 4; the landing is `root-page.md`).
+  or who made it. It also keeps the UTC days on which it refused an upload
+  or a class for 31 days, for the landing's own-copy line (backlog v4 item 4; the landing is `root-page.md`).
 - **A refused upload says which cap it hit.** The two caps free up
   differently, so `SiteBudget.reserve` answers `true`, `"uploads"` or
   `"bytes"` and the failure carries it as `full`, beside `error`
@@ -304,8 +302,9 @@ them, and the README points self-hosters there.
   after their last use (`INSTANCE_IDLE_MS`). Both point to the own-copy page
   as the self-hosting nudge, and show to the teacher as a message, not as a
   problem to copy for the AI. Wording on the screen is in
-  `client/landing-text.ts` (`siteFull`), shown in English on the local
-  check, where the upload happens (`local-check.md`).
+  `client/landing-text.ts` (`siteFull`), shown in the visitor's language on
+  the local check, where the upload happens (`local-check.md`, "Opening a
+  room").
 - **A request body without a length.** Every POST to an instance is read in
   the Function and capped at 20 KB (`MAX_COMMAND_BYTES`,
   `functions/api/[[path]].ts`) whatever its Content-Length says, and forwarded
@@ -457,7 +456,7 @@ rest are the implementer's.
   leaves some of the day unused, which is accepted.
 - **One quiz per device.** A device's next upload ends its previous quiz if
   that one never started (`POST /api/i/:id/replaced` with the previous
-  quiz's secret, sent by the root page once the new upload is in; each
+  quiz's secret, sent by the local check once the new upload is in; each
   upload replaces the one before, so only the latest needs asking).
   A started quiz is never ended this way. A let-in lobby with children
   in it ends too, and their tablets say the quiz has ended: a new upload
@@ -465,13 +464,9 @@ rest are the implementer's.
   quiz after a wrong one). The device already knows its latest quiz and its
   secret (`root-page.md`, "Coming back"). A player joining another quiz ends
   nothing (Situation, "Who opens a lobby").
-- **The day's spending, for the owner:** `GET /api/site/use`, behind the
-  owner's key, answers the ledger now in each allowance, of
-  `DAY_FOR_CLASSES`, and per day (kept 31 days, then by the month) the
-  classes let in, the rows written by those that finished, and the ledger's
-  peak (rows, and the fullest allowance as a share), so how close a day came
-  to its limit is a fact to look up; with the rest of the telemetry
-  (`telemetry.md`). Nothing about a quiz or who made it.
+- **The day's spending, for the owner:** how close a day came to its
+  limit is a fact to look up, at `GET /api/site/use` behind the owner's key
+  (`telemetry.md`, "Who reads it"). Nothing about a quiz or who made it.
 - A booking made before midnight UTC and moved after it leaves the new
   day's ledger alone: the rare class across the turn spends some of the new
   day uncounted.
@@ -482,9 +477,9 @@ plan", item 3):
 - The lifetime runs from the last teacher step or role taken. A lobby that
   waits longer than three hours for its class ends: the teacher who opened
   it early, the walked quiz.
-- `MAX_LIVE_BYTES` is reached by lookers' own picture quizzes, some 300 at
-  a few MB each, held three hours, and then refuses uploads that a class
-  would have joined. An idea kept for it: `scaling-drawer.md`, "Stored
+- `MAX_LIVE_BYTES` would be reached by lookers' own picture quizzes, some
+  300 at a few MB each, held three hours, and then refuse uploads that a
+  class would have joined. An idea kept for it: `scaling-drawer.md`, "Stored
   data: pictures".
 
 Not covered: a lobby before its class is let in books nothing, so what its
@@ -500,8 +495,9 @@ for a domain with a rate-limiting rule.
 
 Devices say so instead of showing the offline dot: `quotaMessage`, "The free
 site has used up today's allowance. It works again at 01:00 Swiss time", the
-hour computed (02:00 in summer), with the own-copy pointer. Joining and
-uploading on the root page show the same words. The mapping: the Function
+hour computed (02:00 in summer), with the own-copy pointer. Joining says
+the same, and so does opening a room on the local check, in the visitor's
+language. The mapping: the Function
 turns a platform error that reads like a spent limit (`isQuotaError`, matched
 on "free tier", "daily limit", "quota") into `{error: "quota"}` (503); an
 instance whose write fails that way answers `{t: "quota"}` and reloads its
@@ -552,8 +548,8 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   3 hours) fit real use; no figures from real classes yet.
 - Whether teachers are seen with more than five latecomers, or re-uploading
   after the 3 hours.
-- German, French and Italian wording of the two caps' messages, by a native
-  reader; the caps' wording has not been seen in a browser.
+- Whether the German, French and Italian wording of the two caps' messages
+  reads right; it has not been seen in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.
 - Whether any school converts the server, and how its AI fares with the
   README section; and which outside address serves a converted copy's own

@@ -14,8 +14,8 @@ export const TOOL_COUNT = 8;
 /**
  * Changes of look a player can make in one class. The looks are held in
  * memory and written at Start (docs/design/open-period-in-memory.md), so a
- * change costs no row: a generous backstop, far more than exploring the menu
- * takes, and not part of what a class books.
+ * change costs no row: the cap guards nothing measured, is far more than
+ * exploring the menu takes, and is not part of what a class books.
  */
 export const MAX_LOOK_CHANGES = 100;
 /** The screens hear of the class's changed looks at most this often: one round of views for every child who changed in between. */

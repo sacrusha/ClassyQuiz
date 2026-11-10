@@ -52,8 +52,8 @@
 }
 
 /* Teacher-side pages follow the device's dark mode (class follows-dark on
-   body); the projector and the students' screens stay light: projectors wash
-   out dark backgrounds. */
+   body); the projector stays light, since projectors wash out dark
+   backgrounds, and the players' screens are light too. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body.follows-dark {
     --bg: #171716;

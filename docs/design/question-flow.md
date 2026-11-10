@@ -12,11 +12,11 @@ How one question moves from the teacher reading it out to the key on the wall, h
 
 ## Situation
 
-- Plausible assumptions: the teacher reads the question aloud while the class looks at the projector (the Question state, choices hidden), and a mis-tap is likelier than a tactic (the tap rules below trust the device). The answers on the tablets are colour-coded buttons.
+- Plausible assumptions: the teacher reads the question aloud while the class looks at the projector (the Question state, choices hidden), and a mis-tap is likelier than a tactic (the tap rules below trust the device).
 - The teacher steers from a phone (the Remote), from the projector page itself, or with a presentation clicker that has forward keys only. A hand in flow presses fast; clickers bounce; a double press may be a mistake or a deliberate fast-forward. What misleads a hand is the screen moving under it, not the time since the press (the owner's observation).
 - Device clocks are not synchronised, and on school Wi-Fi a delivery can take longer than any window that would still be fair. A tablet that is offline still shows the question as open.
 - The teacher is in the room and deals with a child who copies the key from the projector. The design is against the normal user, not a malicious one.
-- Free-plan cost: every state of a question is a view sent to every device, so a question with four or five steps costs noticeably more requests than one with three (budget in `hosting-and-limits.md`; see Not known).
+- Free-plan cost: the teacher's steps are most of the rows a class writes, and on the long-poll fallback every step is a request for each polling device (`hosting-and-limits.md`, "What a class costs").
 
 ## How the site meets it
 
@@ -30,7 +30,7 @@ No mode and no tempo: every question steps through the same states, each by the 
 4. **Revealed**: the key and the winners' band; tablets show right or wrong (and points).
 5. **Ranking**, then the next question; after the last question's reveal, the final ranking directly (no intermediate ranking right before it).
 
-The blank state before a question (the question shown alone, before its reading) is skipped to keep the default short: five states per question times twenty questions is a hundred presses, and expectation management, not count, is the problem. Showing the question together with its answers is left to a later configuration item with presets (backlog Later).
+The blank state before a question (the question shown alone, before its reading) is skipped to keep the default short: five states per question times twenty questions is a hundred presses, and expectation management, not count, is the problem.
 
 The final ranking can be called from any point (the bell rings at question 9). A question whose key was not revealed does not count. Late joiners and removing an avatar belong to `class-and-wall.md`.
 
@@ -44,12 +44,12 @@ Two buttons, the same size and in the same place in every state, on the Remote a
 - **answers**: what the class tapped;
 - **solution**: the key, one tile or several (German teachers say *Lösung*).
 
-The guidance, the `/layout` page and the format's errors and warnings use the same words, because the check shows those messages to the teacher and "Copy the message for your AI" hands them to the AI: one vocabulary for both readers. In the code, `answers` stays the name of a question's choices.
+The guidance, the `/layout` page and the format's errors and warnings use the same words, because the check shows those messages to the teacher and "Copy the message for your AI" hands them to the AI: one vocabulary for both readers. In the code, `answers` is the name of a question's choices.
 
 - **Play ▶** steps one slice and is labelled with a noun for what the class sees next: Choices, Answers, Solution, Ranking, Question 4 (its number among the questions shown, as on the wall's "4 / 12"); Final ranking after the last reveal. The ▶ is the verb. The owner on labels: "Reveal" and "Ranking" name a thing the class sees; "Next question" and "Straight to answering" name a motion, which is why a fast-forward button had no labels that worked. Solution is that thing for the reveal, and the number makes the next question a thing too, with information in it. A noun alone can read as where the teacher is rather than where Play goes; a stepper naming the question's states is the intended remedy (Not known).
 - **Nouns, not verbs**, because the labels must fit the wall's bar and translate: the bar's Play has room for about 13–15 characters, and a noun needs no verb form, gender or word order (*Lösung zeigen*, *Afficher la solution* would not fit; "Next: …" adds a gender in French and German). One label set serves every width, so the wall and the Remote say the same words, also after ⇄ Swap.
 - **A small line under the label** where the step has a consequence the noun doesn't name: "closes answering" under Answers, "15 s, then closes" under Countdown, the seconds from `LAST_CALL_MS`. The buttons keep one height whether or not it is there.
-- **Countdown** (`lastCall` in the code), in Question and Answering: from Question it shows the choices too; then `LAST_CALL_MS` (15 s, `shared/tempo.ts`) later answering closes by itself, with the answers on the wall, or sooner once everyone present has answered. Once per question. While it runs the button is greyed, and the bar drains with no digits (`client/clock.ts`); where it does not apply it stays in place, invisible, so Play never moves. Answers during Countdown ends it. An idiom such as "last call" is unknown to many German-speaking teachers; "Countdown" is a loanword in German and Italian, and French needs its own word ("Décompte", or "Top chrono") or "⏱ 15 s" where the word is long (backlog, Localization).
+- **Countdown** (`lastCall` in the code), in Question and Answering: from Question it shows the choices too; then `LAST_CALL_MS` (15 s, `shared/tempo.ts`) later answering closes by itself, with the answers on the wall, or sooner once everyone present has answered. Once per question. While it runs the button is greyed, and the bar drains with no digits (`client/clock.ts`); where it does not apply it stays in place, invisible, so Play never moves. Answers during Countdown ends it. An idiom such as "last call" is unknown to many German-speaking teachers; "Countdown" is a loanword in German and Italian (other languages: backlog, Localization).
 - **The solution stays the teacher's press.** Countdown says "we're done answering", never "show the key". The server's step at the deadline is the Durable Object alarm (`scheduleAlarm` takes the earliest of the lifetime alarms and the deadline).
 - "Everyone present" means the devices that are there plus any that answered and left; a tablet away 45 s (`FRESH_MS`, `server/instance.ts`) stops holding it open. The teacher tabs' ticks check it too (`closeIfAllIn`), so the last missing tablet going away does not leave Countdown running while the wall already reads "all in".
 - There is no fast-forward button. A deliberate double press of Play is the fast-forward (below); ⋯ → End the quiz: final ranking ends early.
@@ -93,7 +93,7 @@ Points are computed from the stored answers under the current fixes and never st
 
 ### When a tap counts
 
-A student can change their answer until answering closes; the last tap counts (`MAX_ANSWER_CHANGES`, `shared/limits.ts`, bounds the changes). The rule is the device's view, not the arrival time (`answerOutcome`):
+A student can change their answer until answering closes; the last tap counts (`MAX_ANSWER_CHANGES`, `shared/limits.ts`, caps the changes at 10, a cap that guards nothing measured: `open-period-in-memory.md`, "Caps, taps and alarms"). The rule is the device's view, not the arrival time (`answerOutcome`):
 
 - Every view carries a version; the server notes in `Run.closedView` the version of the first view that showed answering closed (the lock-in, or the reveal if nothing locked before it). A tap names the version it was made on. If that is older than the closing view's, the tablet still showed the question as open, so the tap counts whenever it arrives. Time would be the wrong basis for the reasons in Situation.
 - **The record settles when the class leaves the question's reveal** (the ranking, the next question, the final ranking). Until then a tap on an older view counts, including during the reveal, and the spread grows by one. After it, nothing changes what the question scored except the teacher's fixes, so a podium that was shown does not change. Nothing counts while the class is reading, for a skipped question, or for one not revealed before an early final ranking.
@@ -121,5 +121,3 @@ The wall's top bar shows only the avatars that have answered, popping in as answ
 - Whether 20 s as the speed reference suits questions much longer than that (every slow right answer scores 10).
 - Whether a hint on the Remote, when most of the class chose an answer not marked right, is wanted: the counts sit beside the key already.
 - A 320 px wall still clips the ranking.
-- Runs by itself (backlog Later): a quiz that carries on while the teacher's hands are elsewhere, for classes that read for themselves, would need a cadence with nobody pressing, a close rule per question (everyone present has answered, or some seconds after the last answer, with a cap) and a way back: any press makes it manual.
-- Per-question time hints ("needs more time") stay parked until a teacher asks; a length per question was rejected because every addition to the format is something an AI must write reliably.

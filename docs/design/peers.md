@@ -17,10 +17,10 @@ on the device of whoever opened the room, the code for the others (v5 item
 ## Situation
 
 - Friends at a table, on a call or on a sofa, each with a phone, a tablet
-  or a laptop. The question on the player's own device is built
-  (`solo.md`, "The device screen"), and so is the room: the code, joining,
-  the avatars and their dressing, the game's rules for answers, fixes and
-  scores (`server/game.ts`, `class-and-wall.md`, `question-flow.md`).
+  or a laptop. The question on the player's own device is Solo's
+  (`solo.md`, "The device screen"), and the room is a class's: the code,
+  joining, the avatars and their dressing, the game's rules for answers,
+  fixes and scores (`server/game.ts`, `class-and-wall.md`, `question-flow.md`).
 - Plausible assumption: a few friends wait for each other. The advance rests on it: everyone
   ready needs no cadence design, where a clock would (backlog Later, "Runs
   by itself").
@@ -61,10 +61,10 @@ Quizmaster's is.
 There is no Projector, no Remote and no teacher code: the teacher code is
 refused (`teacherCheck`, "The last two digits don't match this quiz."), and the
 start page's resume card brings the device that opened it back as its
-player. The others join at once, so the day's rows are booked at upload
-(in a steered room, when the class is let in), with a ready tap's rows
-besides each answer's (`server/rows.ts`); a day without room refuses under
-the card's button.
+player. The others join at once, so the room is booked at upload as a
+steered room's class is when it is let in (`atLetIn`, `server/rows.ts`;
+`hosting-and-limits.md`, "Running classes finish"); a day without room
+refuses under the card's button.
 
 ### The lobby
 

@@ -266,7 +266,6 @@ export class SiteBudget extends DurableObject<Env> {
     return cap;
   }
 
-  /** On how many of the last 30 days (today included) an upload was refused. */
   /** Full days, and days whose bookings came near the limit, of the last 30. */
   async fullDays(): Promise<number> {
     const full = [...(await this.ctx.storage.list({ prefix: "f:" })).keys()];

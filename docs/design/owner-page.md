@@ -24,7 +24,6 @@ history and anything shared.
   site's Content-Security-Policy allows scripts only from its own files
   (`hosting-and-limits.md`), which is what keeps another script from
   reading it.
-- The figures hold a few days now, and the months fill as days pass 31.
 
 ## How the site meets it
 

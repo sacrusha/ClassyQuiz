@@ -15,9 +15,9 @@ twice, and that a flaky line never costs a question.
 
 ## Situation
 
-- School networks are hostile to long-lived connections. Some filters block
-  the WebSocket upgrade; others accept it and then drop every frame. NAT
-  tables and proxies drop idle sockets.
+- A network may be hostile to long-lived connections: a filter may block
+  the WebSocket upgrade, or accept it and then drop every frame; NAT tables
+  and proxies drop idle sockets.
 - Phones and tablets sleep mid-lesson and come back minutes later. A battery
   can die with the socket still open, so the server sees silence rather than a
   close.
@@ -25,9 +25,9 @@ twice, and that a flaky line never costs a question.
   situation from the server's side.
 - A student whose device died joins again as a new player (or picks their
   avatar back, `class-and-wall.md`). When they do not pick it back, the earlier
-  score is lost: accepted on the plausible assumption that it is rare, and
-  because the ranking is "somewhat anonymous" (the owner's words) and grading
-  is unlikely.
+  score is lost: accepted on the plausible assumptions that it is rare and
+  that nobody grades by the ranking, and because the ranking is "somewhat
+  anonymous" (the owner's words).
 - Plausible assumption: a lesson is 45 minutes and tablets are often left on
   afterwards (`SLEEP_AFTER_MS`, "Devices left on").
 - The free plan has a daily allowance (`hosting-and-limits.md`). Every open
@@ -103,8 +103,8 @@ Taps that looked in time but arrived late, and answers settling, are in
 
 A tab whose view has not changed for 45 minutes (`SLEEP_AFTER_MS`,
 `shared/limits.ts`) goes to sleep: the line closes, the wake lock is released
-and "Tap to continue" covers the page. A lesson is 45 minutes and in a running
-quiz the view changes with every step, so a live class never sleeps; a tablet
+and "Tap to continue" covers the page. In a running quiz the view changes
+with every step, so a live class never sleeps; a tablet
 left on after the lesson stops costing requests all day.
 
 - The waking tap or key does not reach the page, so it presses nothing and

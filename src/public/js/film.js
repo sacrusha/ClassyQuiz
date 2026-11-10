@@ -1,5 +1,5 @@
 /* classyQuiz film, built by the film project's sitebuild.py from film.js; loaded by client/film-poster.ts on the first ▶. Edit the source, not this. */
-/* classyQuiz film (animatic): about 68 s, wordless, flat SVG.
+/* classyQuiz film (animatic): about 68 s, without sound, flat SVG.
 
    Purpose: a teacher who has never seen a classroom quiz sees what they would
    type to their AI, how the .zip reaches the site, and what the class does:
@@ -349,11 +349,11 @@ function avatarSvg(av, label = true) {
   const W = 1600, H = 900, DUR = 68, POSTER = 55.3;
 
   // ---------------------------------------------------------------- words
-  // The film's only words, all on screens, in the page's language (de en fr it) where the real
-  // screens are: the teacher's chat with their AI and the quiz it makes are in the teacher's
-  // language, and so is the root page; the site's own screens after the upload (the check, the
-  // second device's choice, the wall's chrome, the Remote, the tablets) exist in English only and
-  // stay English (film-text.md 0.7). One quiz in every language: the example's 646 000 arrow
+  // The words on the film's screens, each in the language the real screen has (film-text.md 0.7):
+  // the teacher's chat with their AI and the quiz it makes are in the teacher's language, the
+  // page's (de en fr it), and so is the root page; the site's own screens after the upload (the
+  // check, the second device's choice, the wall's chrome, the Remote, the tablets) are the site's
+  // words (SITE below). One quiz in every language: the example's 646 000 arrow
   // question, translated, so every language shows the same film.
 
   /** The root page's words from client/landing-text.ts, filled in by build.py: per language the example ask
@@ -433,7 +433,7 @@ function avatarSvg(av, label = true) {
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
-  /** The words the film quotes from the site's own screens, English on the real site too (film-text.md 0.7): the local check, the
+  /** The words the film quotes from the site's own screens, as the site has them (film-text.md 0.7): the local check, the
       lobby's check, the second device's question, the wall before anyone is let in, the Remote's buttons. client/film.test.ts holds
       them to the site's sources, so a screen that changes its words fails the tests until the film follows. A piece of the how-to
       with a kind is the site's address or the teacher code, which the screen fills in. */
@@ -2042,7 +2042,7 @@ function avatarSvg(av, label = true) {
       try {
         if (adopt) siteAddress(location.host || DEMO);
         makeClass();
-        // its accessible name is English; the words drawn in it are in TX's language, the site's own screens English
+        // its accessible name is English; the words drawn in it are in TX's language, the site's own screens' as the site has them
         svg = E('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', lang: 'en', 'aria-label': 'classyQuiz: from your sheets to the class, a film without sound' });
         stage.insertBefore(svg, stage.firstChild);
         meas = E('text', { x: -9999, y: -9999, visibility: 'hidden' }, svg);

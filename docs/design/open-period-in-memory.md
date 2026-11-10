@@ -5,24 +5,24 @@
 The site carries the classes that use it within the Free plan
 (`scaling-drawer.md`, Purpose), and the lesson goes on when connections
 drop, phones sleep or the instance restarts (backlog Constraints, "Survives
-school Wi-Fi"). Rows
-written ran out first, because every tap was a write. So the input that
-changes while a stage is open (the lobby's looks, a question's answers) is
-written in batches, and a restart that the devices can recover from loses
-nothing they show.
+school Wi-Fi"). Written as it came, every tap would be a write, and rows
+would run out first (Situation). So the input that changes while a stage
+is open (the lobby's looks, a question's answers) is written in batches,
+and a restart that the devices can recover from loses nothing they show.
 
 The owner on the losses this moves around: "resets are rare and difficult
 to test, the architectural design needs to be simple and reliable." So
 there is one owner of the input, the server; one rule for when a late tap
-counts, the one that already existed; and no new kind of message.
+counts, the rule for any tap; and no new kind of message.
 
 ## Situation
 
 - Every write of the instance stores its meta with what changed: two rows
   (`persist`, `server/instance.ts`). Each `setAlarm()` writes a row too
   (Cloudflare's Durable Objects pricing).
-- Answers were about 750 of a class's ~1,300 rows, and the looks most of
-  the rest of a let-in booking (`hosting-and-limits.md`, "Running classes
+- Written as they come, a class's answers would be about 750 of some 1,300
+  rows, and its looks most of the rest of a let-in booking, which is booked
+  at the most a class can write (`hosting-and-limits.md`, "Running classes
   finish").
 - A Durable Object loses its memory when it hibernates (its WebSockets
   kept open), when it takes up new code, and when the platform restarts or
@@ -84,10 +84,9 @@ join, a Peers room's step and the writes below carry it as well.
 `unwritten` names the players whose input storage doesn't have yet.
 
 Storage is a checkpoint and the server's memory the one owner, so an
-acknowledgement means "held", where it meant "stored". The Remote and the
-Projector hold nothing; the earlier design that made the steering tab the
-owner needed a relay, a window, a clock offset and a state without a
-holder, and none of that is built.
+acknowledgement means "held", not "stored". The Remote and the Projector
+hold nothing: the steering tab as the owner would need a relay, a window, a
+clock offset and a state without a holder.
 
 ### Copies the memory is rebuilt from
 
@@ -118,10 +117,9 @@ holder, and none of that is built.
 
 ### Stragglers: the grace period is the tap rule
 
-The open point on which stragglers the grace period covers is settled by
-the rule that already decided when a tap counts. A tap in flight at the
-lock-in and the input of a device away at the close that comes back are
-the same case: a tap made on a view older than the one that closed
+Which stragglers count is the rule for when a tap counts. A tap in flight
+at the lock-in and the input of a device away at the close that comes
+back are the same case: a tap made on a view older than the one that closed
 answering. It counts while the question is on screen, until the class
 leaves its reveal, and is written with that step at the latest; the wall's
 spread grows by one meanwhile, as it always has for a late tap. No timer.
@@ -129,9 +127,9 @@ For the looks the stage ends at Start.
 
 ### A line that ends writes what it held
 
-The other open point, the tap of a device away at the close and not back
-in time: it is written when its line ends, within bounds. When a player's
-socket closes, or their held poll runs out, while the server holds their
+The tap of a device away at the close and not back in time is written
+when its line ends, within bounds. When a player's socket closes, or
+their held poll runs out, while the server holds their
 input unwritten and no other socket of theirs keeps a copy, the run is
 written (`lineEnded`) unless the line is back within `LINE_WRITE_MS`
 (1 s): a poll since, or a new socket that keeps the copy. A held poll's
@@ -159,8 +157,8 @@ reset, a restart, or hibernation after the stage's line writes are
 spent); no open socket keeps a copy; and the device doesn't come back with its own copy
 before the stage settles (Start for a look; the class leaving the reveal
 for an answer). The device then shows what is stored: its look as before,
-its answer as not given. A device opened in another browser, or a page
-from before this design (until reloaded), has no copy of its own.
+its answer as not given. A device opened in another browser has no copy
+of its own.
 
 A write refused because the day's allowance is spent reloads the instance
 (`hosting-and-limits.md`, "When the allowance runs out anyway"), with the
@@ -168,34 +166,26 @@ sockets' copies put back; a poller's comes with its next poll.
 
 ### Caps, taps and alarms
 
-- `MAX_ANSWER_CHANGES` (10) and `MAX_LOOK_CHANGES` (100) stay as
-  backstops, set generously: a change costs no row, and what the server
-  holds per player doesn't grow with them, so they guard nothing measured
-  and aren't part of a booking.
-- A server-side cap can't save a request that has already arrived: a
-  child tapping five times a second on long-poll would cost about 300
-  requests a question. So the device sends the first tap of a burst, then
-  its latest, one at a time and at most every `INPUT_GAP_MS` (300 ms)
-  (`client/latest.ts`), the answers and the looks alike.
+- `MAX_ANSWER_CHANGES` (10) and `MAX_LOOK_CHANGES` (100) are still in the
+  code. A change costs no row, and what the server holds per player doesn't
+  grow with them, so they guard nothing measured and aren't part of a
+  booking.
+- What a burst of taps costs in requests, and how the device sends it:
+  `hosting-and-limits.md`, "Protecting the day's allowance" ("Hammered
+  buttons").
 - An alarm is set only when none is due sooner (`scheduleAlarm`): an alarm
-  that comes early only looks and sets the next, so a teacher's step no
-  longer writes a row for the alarm too.
+  that comes early only looks and sets the next, so a teacher's step
+  doesn't write a row for an alarm as well.
 
 ### Rows
-
-What a class books (`server/rows.ts`): the steps, 20 rows a question; the
-line writes, 20 a stage; a join and a few avatars taken back, 6 a player;
-50 for roles and switches. For 15 questions that is about 1,030 rows when
-the class is let in (77 lobbies at once in the rows of `DAY_FOR_CLASSES`) and 830
-from the start for a class of 25 (96 at once), against about 10,700 and
-3,200 before.
 
 What a class of 25 over 15 questions writes, estimated, not measured:
 about 250 rows. Most are the steps (five presses a question, two rows
 each: 150), then the joins (50), a line write now and then, and the
-alarms of Countdown. That is about a fifth of the ~1,300 before; the
-steps now bind, and requests and stored bytes bind next
-(`scaling-drawer.md`).
+alarms of Countdown. Where rows bind among the day's limits, and what a
+class books of them, the line writes among them: `hosting-and-limits.md`,
+Situation, "What a class costs", and "Running classes finish"
+(`server/rows.ts`).
 
 ## Not known
 

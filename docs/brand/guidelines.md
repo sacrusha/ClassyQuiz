@@ -3,9 +3,9 @@
 The mark serves the site's identity (`docs/design/identity.md`, which says
 which file the site uses where). It is the site's own top-hat fox avatar,
 taken off its disc and drawn as a mark, so the logo and the game share one
-character. This folder holds the drawings and the rules for using them:
-`svg/` every version, `web/` the sources of the browser icons, `build/` the
-Python that writes both.
+character; on a disc it would be the avatar again. This folder holds the
+drawings and which serves where: `svg/` every version, `web/` the sources of
+the browser icons, `build/` the Python that writes both.
 
 ## The drawing
 
@@ -71,10 +71,8 @@ Python that writes both.
   an opt-out such as `data-theme="light"`. An `<img>` or `<picture>` with a
   media query, and `favicon.svg`, follow only the browser's scheme.
 
-## Clear space and minimum size
+## Minimum size
 
-- **Clear space**: half the crown's width at its base, about 15 % of the
-  fox's height, on every side of the symbol or lockup.
 - **Colour master** (and lockups built on it): the fox at least 48 px tall
   on screen, or 12 mm in print.
 - **Smaller**: from 24 to 47 px, the 32-grid files (sharpest at exactly
@@ -99,25 +97,9 @@ Python that writes both.
 - **Answer colours** (red, blue, yellow, green) carry meaning on the wall,
   so none of them is in the mark. Don't add them: no red hat band as on
   the avatar, and no answer colour as a ground.
-- **Approved grounds**: the colour files on paper, white and light
-  neutrals; `-dark` files on the site's dark grounds (`#171716`,
-  `#161615`, `#222220`) and other near-blacks. Not on orange, mid-tones or
-  busy photos.
 
 ## Wordmark
 
 "classyQuiz" in Rubik Bold (SIL Open Font License 1.1) as outlines. It
 uses tracking −12/1000 and Rubik's own −21 kern on "sy", with no other
-changes. The outlines need no webfont. Don't retype the name as the
-lockup in another font.
-
-## Don'ts
-
-- Don't put the mark back on a disc or tile in the site: that's the
-  avatar. Tiles are only for app icons.
-- Don't recolour the hat beyond ink and night ink.
-- Don't let the white face follow the theme.
-- Don't use the black cut on dark, or the white cut on light.
-- Don't scale the colour master below 48 px instead of using the small
-  cuts.
-- Don't stretch, rotate, outline, shadow or rearrange the lockups.
+changes. The outlines need no webfont.

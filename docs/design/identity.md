@@ -11,14 +11,11 @@ for its own sake.
 ## Situation
 
 - The answer marks are Kahoot's set (red triangle, blue diamond, yellow
-  circle, green square, in that order), kept on purpose: children who know it
-  read it at once (`class-and-wall.md`). The
-  class knows the four answers by colour and shape on every screen, and the
-  teacher's Play stands beside them on the wall's bar and on the Remote.
-- For the who-answered bar, `class-and-wall.md` rules that it must never read
-  as an answer's colour (the avatars' shapes leave out the answers' shapes).
-  The site's colours below take that rule to every control and every colour
-  of the site's own: the implementer's call.
+  circle, green square, in that order; `class-and-wall.md`, "What each
+  screen shows"). Plausible assumption: children who know Kahoot read them
+  at once. The class knows the four answers by colour and shape on every
+  screen, and the teacher's Play stands beside them on the wall's bar and on
+  the Remote.
 - The places where people look together are the wall's join screen (the
   whole class, every lesson), the landing page's header (where the tablets
   type the code) and the browser tab. Question screens belong to the quiz's
@@ -29,8 +26,7 @@ for its own sake.
 - The wall's type fits the question and the answers by measuring them
   (`client/stage.ts`, `fitText`, `fitTiles`). A webfont that arrives after
   the first measure would leave a wrong fit.
-- Quiz text is in any language and script; the site's own words are English,
-  and the landing's block also German, French and Italian.
+- Quiz text is in any language and script.
 - School Wi-Fi is slow and filtered, so nothing on the site loads from a
   third party (the Content-Security-Policy in `hosting-and-limits.md`).
 
@@ -46,8 +42,8 @@ landing to `/check`. The build puts `site.css` in front of `app.css` for the
 app pages and writes it into the page for the others (`scripts/build.mjs`),
 so a page opened at lesson start (the root, `/play`, the wall) waits for one
 stylesheet at most. Pages for a teacher follow the device's dark mode (`follows-dark`
-on `body`); the wall and the students' screens stay light, because
-projectors wash dark backgrounds out.
+on `body`); the wall stays light, because projectors wash dark backgrounds
+out. The players' screens are light too; no reason is recorded for theirs.
 
 App screens are set at 1.45 line height, pages read top to bottom (the root,
 `/example`, `/own-copy`, `/layout`) at 1.55.
@@ -79,7 +75,8 @@ App screens are set at 1.45 line height, pages read top to bottom (the root,
   codes, headings, the wall's big numbers (the join code, the count, the
   ranking's percentage and places). It is the wordmark's lettering, so the
   name in the header and the headings beside it are one hand. Self-hosted in
-  `src/public/fonts/`, one weight, subset to Latin: 21 KB, kept a year by
+  `src/public/fonts/`, one weight, subset to Latin, which covers the
+  languages the site's own words are in now: 21 KB, kept a year by
   the browser (the file's name carries the font's version; `build.mjs`).
   Licence: SIL Open Font License, `fonts/OFL.txt`.
 - **The reading face** (the device's system font) for everything else, and
@@ -106,8 +103,8 @@ ground; the hat and the name take the ink, light in dark mode. The name is
 Rubik Bold as outlines, the headings' lettering. None of the four answer
 colours is in it.
 
-The drawings and the rules for using them (clear space, minimum sizes, which
-file on which ground, the don'ts) are `docs/brand/guidelines.md`, with every
+The drawings and which serves where (which file on which ground, the
+minimum sizes) are `docs/brand/guidelines.md`, with every
 version in `docs/brand/svg/` and the Python that draws them in
 `docs/brand/build/`. The site uses copies of these files, in
 `src/public/brand/`:
@@ -131,8 +128,6 @@ version in `docs/brand/svg/` and the Python that draws them in
   landing's header on a phone held upright. The lockup needs about 430 px
   beside the code box and the language; narrower, the fox stands alone and
   its label still names the site to a screen reader.
-- **The fox for 16 px, inline** (`classyquiz-symbol-16-inline.svg`) is
-  among the copies, and no page uses it.
 - **The landing film** (`docs/film/`) draws the header lockup
   (`classyquiz-horizontal-32-inline.svg`) in the site's headers it shows
   full frame and on the laptop, and the full fox
