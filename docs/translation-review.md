@@ -89,8 +89,9 @@ For the read:
   Blättern machen?". "Von", not "auf": "auf diesen zwei Blättern" stands before "machen" and could
   be taken with it, and the conversation on `/example` says "von diesen zwei Blättern" too. The
   film types this ask, so it follows a change to it at its build. Italian "una decina di domande",
-  as French "une dizaine". The defaults stay each region's: "5. Klasse", "CM2" (Romandie says 7H,
-  and the times on this page are "heure suisse"), "quinta elementare".
+  as French "une dizaine". The grade is the example run's, 4th (`design/root-page.md`, "Two
+  steps"), in each region's word: "4. Klasse", "CM1" (Romandie says 6H, and the times on this
+  page are "heure suisse"), "quarta elementare".
 - **The chess ask**: the choices are "Optionen", "propositions", "opzioni", apart from the answers
   (backlog, Later, Localization); the last question's positions "eine aussichtsreiche und eine
   gewonnene", "l'une prometteuse, l'autre gagnante", "una promettente e una vincente"; rated puzzles
@@ -112,7 +113,14 @@ For the read:
   Left as they are, correct and a little heavy: French "Ce sur quoi vous pouvez compter", Italian
   "servizio informatico".
 - **French spaces**: U+202F before ; : ? ! in everything, the asks included, so a "?" never starts
-  a line; the film types the sheets ask with it.
+  a line; the film types the sheets ask with it. A no-break space keeps a number with its word
+  in the sheets ask ("Nr. 1", "4. Klasse", "n° 1", "n. 1"; `design/root-page.md`, "Two steps").
+- **Apostrophes**: the keyboard's ' on the page and on `/example` alike ("l'IA", "L'exemple,
+  pas à pas"), since a visitor goes from one to the other by the link under the film, and the
+  page's asks are what a visitor copies and types. The conversation's pictures keep the app's ’.
+- **Step 1's detail** in German, French and Italian says the example was written in English and
+  is translated here ("auf Englisch, hier übersetzt", "en anglais (traduit ici)", "in inglese (qui
+  tradotto)"): the file above it is the translation (`design/root-page.md`, "How to ask").
 - **The box's messages** name what the site needs ("braucht", "attend", "accetta") and repeat the
   noun where a pronoun could point at another: German "öffne hier die neue .zip-Datei, die
   zurückkommt" where "die sie zurückschickt" could be the message. A quiz that is too long names
@@ -141,7 +149,7 @@ moment means in the language, not the English words. Open for you:
   seen in the app. The app's other lines: de as the screenshot ("Hat einen Befehl ausgeführt …"); fr
   and it as participles ("Commande exécutée, fichiers partagés", "Comando eseguito, file condivisi"),
   likewise inferred.
-- E3, regional choices: "4th grade" fr CM1 (Romandie would write 6H; follows the landing's CM2),
+- E3, regional choices: "4th grade" fr CM1 (Romandie would write 6H; as the landing's),
   de 4. Klasse, it quarta elementare. Students: de "die Kinder" (as the landing's capTap, also on the
   page's runNote), fr "les élèves", it "gli alunni". de "Beamer", "Lektion", "Handy", "Lehrervorschau",
   "Häuschenpapier"; fr "leçon" (Romand sense), "importer" for upload (as the landing; the page had
@@ -157,7 +165,7 @@ moment means in the language, not the English words. Open for you:
 
 - E6, the "Try it" step's words (`runP`, `runNote`), redrafted for the three ways to play by the
   words pass, not a translator: "allein / en solo / per conto tuo" for on your own (it avoids
-  "da solo", gendered), "Startseite / page d’accueil / pagina iniziale" for the start page.
+  "da solo", gendered), "Startseite / page d'accueil / pagina iniziale" for the start page.
 
 The quizzes (`quiz_zips.py`) are unchanged: questions 7–13 read as the sheets' own instructions
 in de and as the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.

@@ -251,7 +251,24 @@ so both are commands, in every language ("One page, two readers";
    there advice on how to ask. The file is the example's real `.zip` in the
    page's language (`example-page.md`), and a download link, as an
    attachment is in a chat: a visitor who presses it holds a file to open in
-   step 2.
+   step 2. A number stays on the line of the word it belongs to ("no. 1",
+   "Nr. 1", "4. Klasse", "n° 1", "n. 1", joined by a no-break space): a
+   line that ends "like no." or "Für meine 4." reads as the end of a
+   sentence.
+
+   The ask and the file are one run, said in one message (the implementer's
+   call, not yet seen by the owner). The file came from a conversation:
+   "Read … Can you make me a classyQuiz with exercises from these two
+   sheets? For my 4th grade class.", then the two answers the AI asked for
+   (about 10 questions, in English), then a second ask that added questions
+   (`/example` shows the three asks; the film types the second). The ask
+   here is that conversation's first ask with its two answers in it, and
+   "like no. 1, 3 and 4" for which exercises, which the labels of "How to
+   ask" advise saying; the grade is the run's. So it shows how to ask in one
+   message, which is what a first-timer needs from it, and nothing in it
+   contradicts the run. Its cost: whoever reads `/example` finds the file
+   took three asks rather than one, a quiz of 13 questions where the ask
+   says about 10, and no choice of exercises in the run's own words.
 2. **"Open the quiz your AI made"**, over the box that opens a file
    ("Opening: the `.zip` and nothing else"). Under the box, for whoever has
    no file: "No quiz yet? Play the example ›" opens the example on the local
@@ -280,7 +297,10 @@ motion and a teacher who doesn't know classroom quizzes can't guess: the
 tablet answering to the wall, the teacher's phone setting the pace, the votes
 splitting before the solution. It tells the classroom's story, and its
 heading says so: "From the exercise sheet to the class playing, in one
-minute".
+minute". The minute is a round figure for a film of 1:08, which the bar
+under it shows exactly (the implementer's call, not yet seen by the
+owner): a heading says the film's size, and a reader who checks finds
+eight seconds more.
 What the film itself must get across, and how it is made: `docs/film/`.
 
 The film's player is one people already know from video: a poster with ▶,
@@ -363,7 +383,10 @@ under the box leads to it.
 
 "Choose any good AI." Its detail states only what is verified, with tier and
 date: free Claude Sonnet wrote the example above (the first step's quiz, the
-film's and `/example`'s), 4 Nov 2026 (`design/example-page.md`), and is the
+film's and `/example`'s), 4 Nov 2026 (`design/example-page.md`); in German,
+French and Italian the line adds that it was written in English and is
+translated here, as `/example`'s closing note says, since the file above it
+is the translation; and it is the
 one free AI that does this reliably, the owner's finding of 5 Nov 2026
 against free ChatGPT, Gemini and Copilot (`design/guidance-page.md`, "The AIs
 verified against"). No claim about what an AI can do goes on the page without
@@ -426,13 +449,12 @@ a publishing target and fetched the page only when told to read it; "Read" makes
 the fetch the first act, and a failed fetch can't pass as a generic quiz (backlog
 v4 item 11).
 
-The sheets example is the same sheet and the same ask in four languages, each producing
-a quiz in its language: for a reader of another language the one barrier is the
-German ask, so the page cycles it. The asks are close to what the example runs
-were asked, not word for word. The run's second turn, where the teacher reshapes
-the quiz, is not shown: its payoff differs per language. The film types this
-ask in the page's language, then the run's short third ask, translated
-(`docs/film/film-text.md`).
+The sheets ask is the same sheet and the same ask in four languages, each in
+the page's language and asking for the quiz in it; the example was tested in
+each, and every page shows the English run translated (`design/example-page.md`).
+The other asks are close to what their runs were asked, not word for word. The
+film types the sheets ask in the page's language, then the run's second ask,
+which changes the quiz, translated (`docs/film/film-text.md`).
 
 ### Languages
 

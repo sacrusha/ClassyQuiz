@@ -21,17 +21,17 @@ Where a source disagrees with the film or with another source, it is marked
 
 Source: `src/public/index.html` `#ask-top` (EN, the first step's ask) and `src/client/landing-text.ts` `ask` in `en/de/fr/it`. Underlined parts (labelled on the page) in `[ ]`; `classyquiz.pages.dev` is the underlined address. The labels sit under the parts.
 
-- EN: Read [classyquiz.pages.dev]. Can you make me a classyQuiz with exercises [like no. 1, 3 and 4] from these two sheets? [For my 5th grade class], [about 10 questions], [in English].
+- EN: Read [classyquiz.pages.dev]. Can you make me a classyQuiz with exercises [like no. 1, 3 and 4] from these two sheets? [For my 4th grade class], [about 10 questions], [in English].
   labels: this site · which exercises · your class · how many · which language
-- DE: Lies [classyquiz.pages.dev]. Kannst du mir ein classyQuiz mit Aufgaben [wie Nr. 1, 3 und 4] von diesen zwei Blättern machen? [Für meine 5. Klasse], [etwa 10 Fragen], [auf Deutsch].
+- DE: Lies [classyquiz.pages.dev]. Kannst du mir ein classyQuiz mit Aufgaben [wie Nr. 1, 3 und 4] von diesen zwei Blättern machen? [Für meine 4. Klasse], [etwa 10 Fragen], [auf Deutsch].
   labels: diese Seite · welche Aufgaben · deine Klasse · wie viele · welche Sprache
-- FR: Lis [classyquiz.pages.dev]. Tu peux me faire un classyQuiz avec des exercices [comme les n° 1, 3 et 4] de ces deux fiches ? [Pour ma classe de CM2], [une dizaine de questions], [en français].
+- FR: Lis [classyquiz.pages.dev]. Tu peux me faire un classyQuiz avec des exercices [comme les n° 1, 3 et 4] de ces deux fiches ? [Pour ma classe de CM1], [une dizaine de questions], [en français].
   labels: ce site · quels exercices · votre classe · combien · quelle langue
-- IT: Leggi [classyquiz.pages.dev]. Mi puoi fare un classyQuiz con esercizi [come i n. 1, 3 e 4] di queste due schede? [Per la mia quinta elementare], [una decina di domande], [in italiano].
+- IT: Leggi [classyquiz.pages.dev]. Mi puoi fare un classyQuiz con esercizi [come i n. 1, 3 e 4] di queste due schede? [Per la mia quarta elementare], [una decina di domande], [in italiano].
   labels: questo sito · quali esercizi · la tua classe · quante · quale lingua
 - Open ask, not asked for in the film (landing "ask2"): EN "Read classyquiz.pages.dev. I need a classyQuiz. Help?" / DE "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?" / FR "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?" / IT "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?"
 
-**NOTE:** the *real conversation's* first ask differs from the landing ask (2.2): no "like no. 1, 3 and 4", "4th grade", no length, no language. The film types the landing one (the storyboard's table says why); the AI's reply bars then do not match "10 questions in English" by wording, which nobody reads.
+**NOTE:** the *real conversation's* first ask (2.1) is shorter than the landing ask: the same grade, no "like no. 1, 3 and 4", and the length and the language given only when the AI asked. The landing ask is that conversation in one message (`docs/design/root-page.md`, "Two steps"); the film types the landing one (the storyboard's table says why).
 
 ## 2. The chat (shot 3)
 

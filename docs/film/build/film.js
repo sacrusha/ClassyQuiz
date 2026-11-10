@@ -148,7 +148,7 @@
   const LANGS = Object.keys(CONTENT);
 
   /** The film's words in language `lang`, a fresh object (a build changes its own: the site's address).
-      The ask breaks into lines at ordinary spaces only: a labelled part ("Nr. 1", "5. Klasse") is one unbreakable
+      The ask breaks into lines at ordinary spaces only: a labelled part ("Nr. 1", "4. Klasse") is one unbreakable
       piece, and so is a space before ? ! : ; » or after « (French). */
   function words(lang) {
     const L = LANDING[lang], Q = CONTENT[lang];
@@ -1041,12 +1041,14 @@
         ${T_(31.2, lineOf(top, 24, 19.2), text, 19.2, { cls: 'b', fit: 640 })}`;
       const s1 = waysBottom + 14.4;
       G(g, heading(s1, '1', TX.getH));
-      // the ask as a chat message, the two sheets attached to it
-      const bTop = s1 + 31, ask = wrap(TX.askPlain, 15.68, 582, () => '');
+      // the ask as a chat message, the two sheets attached to it: they float at the bubble's top right, 27 x 38 each, so the lines
+      // beside them (every line the ask takes) end 10 px before them, 589 px into the text
+      const bTop = s1 + 31, ask = wrap(TX.askPlain, 15.68, 589, () => '');
+      const askRight = 14 + Math.max(...ask.lines.map((l) => measure(l.map((p) => p.text).join('').trimEnd(), 15.68, '')));
       const bH = ask.lines.length * 23.52 + 20, bBot = bTop + bH;
       G(g, `<path d="M16 ${f1(bTop)} H656 Q672 ${f1(bTop)} 672 ${f1(bTop + 16)} V${f1(bBot - 16)} Q672 ${f1(bBot)} 656 ${f1(bBot)} H4 Q0 ${f1(bBot)} 0 ${f1(bBot - 4)} V${f1(bTop + 16)} Q0 ${f1(bTop)} 16 ${f1(bTop)}Z" fill="#f4ebe1"/>`);
       drawLines(g, ask, 14, lineOf(bTop + 10, 23.52, 15.68), 15.68, 23.52, plain).show(ask.total);
-      [[608, -3, 'sheet1'], [628.5, 3, 'sheet2']].forEach(([x, r, k]) => G(g, `<g transform="rotate(${r} ${f1(x + 14.75)} ${f1(bTop + 32)})"><rect x="${f1(x + 0.5)}" y="${f1(bTop + 13.8)}" width="29.5" height="38" fill="#000" opacity=".18"/><rect x="${x}" y="${f1(bTop + 13)}" width="29.5" height="38" fill="#fff"/><image href="${ASSETS[k] || ''}" x="${x}" y="${f1(bTop + 13)}" width="29.5" height="38" preserveAspectRatio="none"/></g>`));
+      [[613, -3, 'sheet1'], [631.1, 3, 'sheet2']].forEach(([x, r, k]) => G(g, `<g transform="rotate(${r} ${f1(x + 13.45)} ${f1(bTop + 32)})"><rect x="${f1(x + 0.5)}" y="${f1(bTop + 13.8)}" width="26.9" height="38" fill="#000" opacity=".18"/><rect x="${x}" y="${f1(bTop + 13)}" width="26.9" height="38" fill="#fff"/><image href="${ASSETS[k] || ''}" x="${x}" y="${f1(bTop + 13)}" width="26.9" height="38" preserveAspectRatio="none"/></g>`));
       // the AI's answer: the example's file
       const rTop = bBot + 7.2, gw = measure(TX.gives, 15.2, ''), zw = measure(TX.zipFile, 14.72, 'ts');
       G(g, `${T_(0, rTop + 21.4, TX.gives, 15.2)}<rect x="${f1(gw + 10.5)}" y="${f1(rTop + 0.5)}" width="${f1(zw + 42)}" height="31.8" rx="10" fill="#fff" stroke="${C.rule}"/>
@@ -1069,7 +1071,7 @@
       function show(isReading) { vis(reading, isReading); tf(tryG, isReading ? 'translate(0 34.4)' : 'translate(0 0)'); }
       show(false);
       // below the line under the box the page goes on with the film's own section, which the film doesn't draw into itself
-      return { g, show, ph, code, step1: s1, tryBot, go: [577.3, 31], open: [bx + bw / 2, by + 27.2] };
+      return { g, show, ph, code, step1: s1, tryBot, askRight, go: [577.3, 31], open: [bx + bw / 2, by + 27.2] };
     }
 
     let lapN = 0;
@@ -1372,8 +1374,9 @@
       const root = G(page);
       const rp = makeRootPage(root);
       // [the page's point at the frame's centre, the scale]: the whole width, then from just above the first step to just under the
-      // line under the box; the centre moves straight while the scale grows evenly
-      const RS = Math.min(1.35, H / (rp.tryBot + 34)), RZ = clamp(H / (rp.tryBot + 16 - (rp.step1 - 8)), 1.6, 2.7);
+      // line under the box, and no further in than keeps the ask's longest line in the frame (in German it reaches nearly to the
+      // sheets); the centre moves straight while the scale grows evenly
+      const RS = Math.min(1.35, H / (rp.tryBot + 34)), RZ = clamp(Math.min(H / (rp.tryBot + 16 - (rp.step1 - 8)), W / (rp.askRight + 8 + 12)), 1.6, 2.7);
       const R0 = [336, H / 2 / RS, RS], R1 = [-8 + W / 2 / RZ, rp.step1 - 8 + H / 2 / RZ, RZ];
       const rootView = (k) => { const s = Math.exp(lerp(Math.log(R0[2]), Math.log(R1[2]), k)); return [W / 2 - lerp(R0[0], R1[0], k) * s, H / 2 - lerp(R0[1], R1[1], k) * s, s]; };
       const openAt = [(rp.open[0] + 8) * RZ, (rp.open[1] - (rp.step1 - 8)) * RZ];

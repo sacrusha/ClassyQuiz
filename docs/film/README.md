@@ -179,7 +179,10 @@ rebuild, and what the scripts need: `src/DEVELOPING.md`, "The landing film".
 
 - Text is measured, not estimated: a hidden `<text>` in the same SVG, once
   Rubik has loaded. Lines break at ordinary spaces only, so a labelled part of
-  the ask ("Nr. 1", "5. Klasse") stays whole; each piece keeps its place in
+  the ask ("wie Nr. 1, 3 und 4", "Für meine 4. Klasse") stays whole in the
+  chat; the page drawn in the film breaks the ask where the page does, which
+  keeps a number with its word by a no-break space ("Nr. 1", "4. Klasse",
+  `landing-text.ts`); each piece keeps its place in
   the whole sentence, from which the typing, the cursor and the growing
   underline follow. SVG drops a `<text>`'s trailing spaces, so the measuring
   element and the drawn lines keep them (`xml:space="preserve"`).
@@ -210,8 +213,11 @@ wide, a factor of 0.224.
 - The root page: about 0.9 s at the full width, where the sentence reads
   as about 36 units and the rest isn't meant to be read; then about twice
   in on the two steps, from the first one's heading to the line under the
-  box, the headings and the button about 50 units, the ask about 41, the
-  frame cutting the column's right edge.
+  box, the headings and the button about 50 units, the ask about 40, the
+  frame cutting the column's right edge just after the ask's longest line,
+  so the ask is whole in every language and the link at the right of the
+  line under the box is cut.
+  The ask wraps as on the page, beside the two sheets, 589 px wide.
 - The teacher code is shown twice: in the how-to, pulsing, then typed on
   the laptop, its screen filling the frame and the root page whole for
   about 0.4 s, then the camera 1.8 times in on the header while the code

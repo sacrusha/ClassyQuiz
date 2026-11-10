@@ -790,15 +790,25 @@ With the owner:
   the film below the first screen; the asks' tabs as words, without their
   pictures; "What you can count on" and the line that hands over to the
   manual for AIs; the page's two first-level headings.
+- The first step's ask and file (v6 items 1c and 3), the implementer's
+  calls, not yet seen by the owner (`design/root-page.md`, "Two steps",
+  "How to ask"): the ask is the example run's conversation said in one
+  message, with the run's grade (4th, 4. Klasse, CM1, quarta elementare)
+  and "like no. 1, 3 and 4" as the advice the labels give; what that costs
+  a reader of `/example` (three asks, 13 questions, no choice of exercises
+  in the run) is stated there. Step 1's detail in German, French and
+  Italian says the example is the English run translated.
+- The film's heading keeps "in one minute" over a bar that shows 1:08, the
+  implementer's call (`design/root-page.md`, "The film").
 - The film's picture of the first page (v6 item 3), the implementer's
   calls, not yet seen by the owner (`docs/film/`): the page drawn as a
   desktop's window shows it on the phone too, as the checks are
   (`film-text.md` 0.8), so "or drop it here" shows where a phone leaves it
   out; a second added for its hold rather than taken from the checks' holds;
   the camera in on the two steps, the frame cutting the column's right
-  edge; on the laptop a window about 1070 px wide and a push-in on the code
-  box, since at the page's own size the typed code is about 6 px on a
-  phone (a camera move on the laptop, where the owner found a pan and a
+  edge just after the ask, so "How to ask your AI ↓" is cut; on the laptop
+  a window about 1070 px wide and a push-in on the code box, since at the
+  page's own size the typed code is about 6 px on a phone (a camera move on the laptop, where the owner found a pan and a
   zoom busy for what they said, `docs/film/README.md`, "The film's
   shape").
 - The first page in German, French and Italian (v6 item 2), the
