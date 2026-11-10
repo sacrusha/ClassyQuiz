@@ -451,9 +451,9 @@ The page a visitor first meets has to tell them, as it opens, what this is,
 whether it is for them, and that an AI's file becomes a played quiz; and it
 has to leave little in the way of whoever comes with a file and of the
 newcomer who wants to find out more (`design/root-page.md`, Purpose). The
-deployed page doesn't: what it is sits behind the film's ▶. The page built
-for item 1 does, in one column (`design/root-page.md`, "How the site meets
-it"); it is not deployed. What the owner found while directions
+page built for item 1 does, in one column (`design/root-page.md`, "How the
+site meets it"). What is deployed: `deploy-log.md`. What the owner found
+while directions
 were tried is in `design/root-page.md`, Situation.
 
 1. **The page as a whole** — a visitor at a phone or a desktop gets the
@@ -528,8 +528,8 @@ were tried is in `design/root-page.md`, Situation.
    or Italian gets the same page, not a translation of the English
    sentence structure: the owner's findings on pronouns and on the
    visitor's side of the words hold in each language
-   (`design/root-page.md`, Situation, "Languages"). Built, not deployed,
-   and not yet read by the owner: every word of the page and its states
+   (`design/root-page.md`, Situation, "Languages"). Built, and not yet
+   read by the owner: every word of the page and its states
    in the three, in `client/landing-text.ts`; what holds in each language
    is `design/root-page.md`, "Languages", and the choices behind the words,
    as questions for the owner's read, `translation-review.md`, "The first
@@ -542,8 +542,8 @@ were tried is in `design/root-page.md`, Situation.
    film types the ask and shows the root page with the box that opens a
    file, and `/example` walks the same path; once the page changes, a
    newcomer who watches or reads them sees the page they will then use
-   (`docs/film/`, `design/example-page.md`). Built, not deployed, and not
-   yet seen by the owner: the film draws the page's first screen as it
+   (`docs/film/`, `design/example-page.md`). Built, and not yet seen by
+   the owner: the film draws the page's first screen as it
    opens, in the page's language, from the page's own sizes (the header,
    the sentence, the ways' pictures, the two steps), on the phone whole and
    then in on the two steps, and again on the laptop, in on the code box
