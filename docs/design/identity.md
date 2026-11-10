@@ -175,13 +175,14 @@ Where it is:
   the mark and the name, back to the landing.
 - **The browser tab**, everywhere.
 - **The README**, where `/own-copy` sends a teacher weighing their own copy:
-  the lockup as its title and a picture of the wall
-  (`landing/wall-en.webp`).
+  the lockup as its title, a picture of the wall beside one of a player's
+  tablet (`landing/wall-en.webp`, `landing/tablet-en.webp`), and the
+  pictures of the three ways to play (`landing/way-*.svg`).
 
 Not on the question screens, the rankings, the Remote or the students'
 answer screens: there the quiz and the class are the content, and the
-film's wall and tablets and the README's picture of the wall show them as
-they are.
+film's wall and tablets and the README's pictures of the wall and the
+tablet show them as they are.
 
 ## Not known
 

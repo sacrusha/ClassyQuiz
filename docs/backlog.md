@@ -557,10 +557,6 @@ Needs a real classroom or real devices, nobody has run it:
 
 ## Housekeeping
 
-- The README is to be rebuilt (the owner). It is the public GitHub landing,
-  and its paragraph for an AI setting up a copy for someone else has the
-  person run every step on their own computer, where the line above it
-  offers an AI that runs the commands there.
 - Nothing kept times the film's build (`sitecheck.py` doesn't); text over
   the steps (the owner's idea) would make it matter again. What it costs,
   and how the emulation compares with the owner's phone:
