@@ -514,9 +514,7 @@ The quiz is already made; it can be more than one activity.
 - **Dark mode** — a visitor whose device is dark gets every screen dark;
   the players' screens are light with no reason recorded, probably an
   oversight (the owner: models have dropped dark mode unnoticed before, in
-  other projects). Tolerable on Samsung Internet too. With it, a standing
-  note where whoever changes a screen reads it, that a change is looked at
-  in dark and in light.
+  other projects). Tolerable on Samsung Internet too.
 
 ## Open: with the owner, and in the field
 
