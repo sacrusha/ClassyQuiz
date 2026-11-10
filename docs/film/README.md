@@ -198,9 +198,9 @@ rebuild, and what the scripts need: `src/DEVELOPING.md`, "The landing film".
   line drawn without it throws when asked for part of its text), and the
   fitted texts are read together, then written (`fitAll`). The build is
   about 0.4 s on a desktop, and about 1.4 s in Edge emulating a phone at 3×
-  CPU slowdown. Plausible assumption: 3× stands for the owner's older test
-  phone, which took about 10 s before these savings, as the emulation then
-  did (9.6 s); not measured on the phone since. Presets measured at build
+  CPU slowdown. On the owner's older test phone, from the press to the
+  film, 0.5 to 1.0 s, varying (about 10 s before these savings); the
+  emulation, which matched that phone's 10 s then (9.6 s), now overstates it. Presets measured at build
   time don't stand in: the film's text face is the device's own
   (`system-ui`), so widths differ by device. More text, such as
   explanations over the steps, stays cheap only when drawn whole, without
