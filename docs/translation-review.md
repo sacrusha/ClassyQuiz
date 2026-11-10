@@ -33,11 +33,19 @@ For the read:
   carry no "any". With it ("egal welche", "quella che preferisci") the line reads as "any AI
   works", against its detail's "the one free AI that does this reliably", which is the owner's
   finding of 5 Nov 2026 against free ChatGPT, Gemini and Copilot (`design/guidance-page.md`, "The
-  AIs verified against"). The detail: "Das Beispiel oben stammt vom kostenlosen Claude Sonnet, 4.
-  Nov. 2026, der einzigen kostenlosen KI, die das zuverlässig kann." / "… écrit par la version
+  AIs verified against"). The detail: "Das Beispiel oben stammt vom kostenlosen Claude Sonnet (4.
+  Nov. 2026), der einzigen kostenlosen KI, die das zuverlässig kann." / "… écrit par la version
   gratuite de Claude Sonnet, le 4 nov. 2026⍽: la seule IA gratuite à le faire de façon fiable." /
   "… l'ha scritto la versione gratuita di Claude Sonnet, il 4 nov. 2026: l'unica IA gratuita che
-  ci riesce in modo affidabile."
+  ci riesce in modo affidabile." The German date is in brackets: between commas, "der einzigen
+  kostenlosen KI" seemed to belong to the date.
+- **"How to ask your AI"**, the heading and the link down to it: "So fragst du deine KI", "Que
+  dire à votre IA", "Come chiedere un quiz alla tua IA". "Demander" and "chiedere" want an object,
+  so "Comment demander à votre IA" and "Come chiedere alla tua IA" read as cut off. The French
+  with its object ("Comment demander un quiz à votre IA") took the heading to two lines at 390 px
+  and the link past the edge of a 320 px page; "Que dire à votre IA" has the form of "Que dire au
+  service informatique ›". Whether "what to say" is too narrow a name for a part that also says
+  which AI.
 - **Arbeitsblatt**, not Aufgabenblatt, in German: the film's heading, its chapter and its name,
   and the tab. It is a primary teacher's everyday word in Switzerland and Germany, and `/example`
   says it (E5); "Aufgabenblatt" reads like a university problem set.
@@ -47,25 +55,62 @@ For the read:
   "une vidéo sans son", "un video senza audio".
 - **The ways' words**: German "am Grossbildschirm" for on a big screen, and Italian "ognuno sul suo
   dispositivo", so the three stand in three lines on a 390 px phone ("am grossen Bildschirm" and
-  "sul proprio dispositivo" took four). French Solo "en solo, pour vous exercer ou réviser": "seul"
-  is gendered and "de votre côté" means "for your part"; the tab ("En solo") and the line on what
-  is kept ("En solo, …") say the same. German "zum Üben oder Wiederholen" and French "pour vous
-  exercer ou réviser" are untested against what a pupil would say.
+  "sul proprio dispositivo" took four). Italian "su schermo grande", the adjective after the noun,
+  here and in the picture's name and the training ask: "il grande schermo" is the cinema. Italian
+  "tra amici" (the tab too), the set phrase, as French "entre amis". French Solo is "pour vous
+  exercer ou réviser" alone: under the name "Solo", "en solo" repeated it, "seul" is gendered, "de
+  votre côté" means "for your part", and "en solitaire" took four lines at 360 px; the tab ("En
+  solo") and the line on what is kept ("En solo, …") keep the words (`design/root-page.md`,
+  "Languages"). German "zum Üben oder Wiederholen" and French "pour vous exercer ou réviser" are
+  untested against what a pupil would say.
+- **The sentence** keeps the shorter of two wordings where the longer costs a line: German "aus
+  deinen Blättern" (with "Arbeitsblättern", the page's word everywhere else, the sentence takes
+  four lines at 360 px) and French "vos fiches, notes ou idées" with one possessive (repeated, as
+  French usually does and the Italian line does, it takes four lines at 390 px and three on a
+  desktop). German "deine KI" and Italian "la tua IA" carry no "own": "deine eigene KI" reads as
+  an AI one owns.
+- **Code, Seite, plus**: a noun the page has for two things (`design/root-page.md`, "Languages").
+  "Der Quellcode ist offen:", "Le code source est ouvert⍽:", "Il codice sorgente è aperto:", since
+  "Code" is the header's box. "Eine eigene Website" for a site of one's own, in the link and the
+  line about busy days; everywhere else the site stays "die Seite", as people say it. "Davantage
+  de quiz⍽: …" and "Pour davantage de quiz, …". The English "The code is open:" stands under the
+  same "Code" box; it is not this item's.
 - **What is kept**: no word for a room, since Raum, salle and stanza read first as the room one
   sits in. "Spielst du allein, verlässt das Quiz deinen Browser nie. Spielen mehrere, wird das Quiz
   gelöscht, sobald es beendet ist, spätestens aber drei Stunden nach der letzten Benutzung." and
   the same in "En solo … À plusieurs …", "Se giochi per conto tuo … Se si gioca in gruppo …".
-  Whether "when several play" reads true to a quizmaster who runs the quiz and doesn't play.
+  Whether "when several play" reads true to a quizmaster who runs the quiz and doesn't play. The
+  lasting copy without a word-for-word "lasting": "Die .zip-Datei ist die Kopie, die dir bleibt.",
+  "Le fichier .zip reste votre copie.", "Il file .zip resta la tua copia." Italian "non esce mai
+  dal tuo browser", as Italian says it of data.
 - **The sheets ask**: "like no. 1, 3 and 4" is "wie", "comme", "come" in each, without "similar"
   (ähnlich, simili), so each language says what the English says. German puts "machen" last, where
   German puts it: "Kannst du mir ein classyQuiz mit Aufgaben wie Nr. 1, 3 und 4 auf diesen zwei
-  Blättern machen?". Italian "una decina di domande", as French "une dizaine". The defaults stay
-  each region's: "5. Klasse", "CM2" (Romandie says 7H), "quinta elementare".
+  Blättern machen?". "Auf diesen zwei Blättern" stands before "machen" and could be taken with
+  it; "von diesen zwei Blättern" couldn't. "Auf" stays: the film types this ask and `/example`'s
+  pictures show it, so a change to it is one they have to follow. Italian "una decina di domande",
+  as French "une dizaine". The defaults stay each region's: "5. Klasse", "CM2" (Romandie says 7H,
+  and the times on this page are "heure suisse"), "quinta elementare".
 - **The chess ask**: the choices are "Optionen", "propositions", "opzioni", apart from the answers
   (backlog, Later, Localization); the last question's positions "eine aussichtsreiche und eine
   gewonnene", "l'une prometteuse, l'autre gagnante", "una promettente e una vincente"; rated puzzles
   "Puzzles mit Elo-Wertung", "des problèmes avec un classement Elo", "dei problemi con un punteggio
-  Elo" ("bewertete Puzzles" and "puzzles notés" read as reviewed, not rated).
+  Elo" ("bewertete Puzzles" and "puzzles notés" read as reviewed, not rated). French "notation
+  algébrique", a player's name for chess notation. Italian "lascio loro" and "dai loro" are the
+  written form; a chat message would as soon say "gli".
+- **The other asks**: French "Voici mes notes de cours", since "mes notes" after "contrôle" is
+  also "my marks". Italian "Domani faccio formazione … a 25 nuovi colleghi" and the tab "Un corso
+  di formazione": "una formazione" as one event is Swiss Italian and office talk, and these read
+  the same in Ticino and in Italy (the judgement is a model's, like all of the Italian).
+- **Small words**: German "kostenpflichtiges Abo" under the chess ask; "Vom Arbeitsblatt zum Quiz
+  in der Klasse, in einer Minute" over the film ("zur spielenden Klasse" was the English
+  participle); "Die Seite kann dieses Quiz noch nicht starten:", the subject first, since "Dieses
+  Quiz kann die Seite …" doesn't show which of the two can't. French "Code pour participer" on
+  the card of a quiz to come back to ("rejoindre" wants an object); "et non de texte" in the
+  box's refusals, where "pas de texte" also reads "no text". The link after the line about busy
+  days: "So geht's ›", "comment faire ›", "ecco come ›". Italian "Non hai ancora un quiz?".
+  Left as they are, correct and a little heavy: French "Ce sur quoi vous pouvez compter", Italian
+  "servizio informatico".
 - **French spaces**: U+202F before ; : ? ! in everything, the asks included, so a "?" never starts
   a line; the film types the sheets ask with it.
 - **The box's messages** name what the site needs ("braucht", "attend", "accetta") and repeat the

@@ -469,6 +469,17 @@ sentence's structure, and the findings in Situation hold in each:
   on "it", the translation names the noun ("die neue .zip-Datei", "le
   quiz", "il quiz"); a French or Italian pronoun stands where its gender
   leaves one candidate.
+- **A noun the page has for two things is told apart where the two could be
+  confused** (Situation: the same finding, for a word like "it"). "Code" is
+  the header's box and the join code, so the code that is open is the
+  "Quellcode", "code source", "codice sorgente". German "Seite" is this page
+  and also the site, so a site of one's own is "eine eigene Website". French
+  "plus de quiz" is also "no more quizzes", and the way to more stands under
+  a refusal, so that line says "davantage".
+- **A way's words don't repeat its name.** "Solo" is French for the setting
+  already ("en solo"), so in French its words are the reason alone ("pour
+  vous exercer ou réviser"); the other two languages say the setting in
+  words of their own ("für dich allein", "per conto tuo").
 - **"Room" isn't translated as a noun**: Raum, salle and stanza read first
   as a room one sits in, so the line on what is kept says when several play
   ("spielen mehrere", "à plusieurs", "in gruppo").
