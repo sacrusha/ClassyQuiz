@@ -857,6 +857,20 @@ Needs a real classroom or real devices, nobody has run it:
 
 - What is deployed, and from where: `deploy-log.md`; how: `src/DEVELOPING.md`,
   "Deploying".
+- The film's build time is checked by nothing kept: `sitecheck.py` doesn't
+  time it. The probes that found its cost (`docs/film/README.md`, "Text")
+  were not kept; how they worked, for when text overlays on the steps (the
+  owner's idea) make it matter: Playwright in the installed Edge, the live
+  root page with `/js/film.js` swapped for a local file by a route, the CPU
+  slowed through CDP (`Emulation.setCPUThrottlingRate`), the time from the
+  press to `data-film`; the JS profile (CDP `Profiler`) for where it goes;
+  the drawing compared by hashing the stage's SVG after seeks to fixed
+  moments (the film plays on after a seek, so a moving element can differ
+  by a frame between runs); a screencast (CDP `Page.startScreencast`) for
+  what shows while the build holds the page, since `evaluate` and
+  screenshots wait for it. The page's CSP has no `unsafe-eval`, so no
+  `wait_for_function`. On the owner's older test phone the emulation at 3×
+  overstates the build now (`docs/film/README.md`, "Text").
 - `app.css` is one global namespace (about 340 top-level rules on short class
   names), linked by every app page and `/example`; a bare rule for one screen
   can land on another page, as the podium's `.steps` did on `/example`.
