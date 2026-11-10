@@ -601,6 +601,16 @@ shows one binding.
    ASCII letters and digits is set and the site deployed again
    (`secrets/README.md`).
 
+3. **What a class holds, in line with what binds now** — no class under way
+   meets a spent allowance, and most of the day stays usable (the owner,
+   2026-11-10). The booking was built when rows bound first; it books rows
+   alone, holds them for lobbies no class joins, and settles before the
+   devices left on; the upload and bytes caps meet a wave of looks at the
+   room first. What the design rests on that no longer holds, and the
+   situation it now meets (the costs per transport, which devices poll, who
+   opens a lobby): `design/hosting-and-limits.md`, Situation and "Running
+   classes finish". Open.
+
 ## Later — Paper and memory
 
 The quiz is already made; it can be more than one activity.

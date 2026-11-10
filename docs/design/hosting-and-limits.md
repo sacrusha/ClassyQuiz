@@ -18,19 +18,75 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
 
 - **The plan.** Cloudflare's Free limits are account-wide and reset at
   00:00 UTC: 100,000 Function requests, 100,000 Durable Object requests,
-  100,000 rows written, 5 GB stored in all. Past any of them, further
-  operations of that type fail. One class that spends the day's allowance
-  spends it for every class on the site. Only `/api/*` runs code; static pages
-  and scripts don't count.
-- **What a class costs.** A class of 25 over 15 questions writes about 250
-  rows, most of them the teacher's steps: answers and looks are held in
-  memory and ride on those writes (`open-period-in-memory.md`, "Rows";
-  estimated, not measured). It costs a few hundred requests on WebSockets,
-  and about 3,000 Function and 3,000 Durable Object requests if the whole
-  class is on the HTTP long-poll fallback for 15 minutes. That is some 300
-  classes a day on rows and 30 with every device polling, so requests bind
-  first. The landing page's "room for a few dozen classes a day" rests on
-  this (`shared/limits.ts`, comment on `MAX_UPLOADS_PER_DAY`).
+  100,000 rows written, 13,000 GB-s of Durable Object duration, 5 GB stored
+  in all. Past any of them, further operations of that type fail. One class
+  that spends the day's allowance spends it for every class on the site.
+  Only `/api/*` runs code; static pages and scripts don't count.
+- **What a class costs**, for 25 over 15 questions, estimated, nothing
+  measured yet (the figures come with telemetry, `telemetry.md`):
+  - Rows: about 250, most of them the teacher's steps. Answers and looks are
+    held in memory and ride on those writes (`open-period-in-memory.md`,
+    "Rows"). The same on any transport, and bounded: the caps give a class
+    a most it can write (`server/rows.ts`).
+  - Requests: on WebSockets about 200 Function and 250 Durable Object
+    requests; with every device on the HTTP long-poll fallback about 3,000
+    of each for a 15-minute run, growing with how long devices stay on
+    (`scaling-drawer.md`, "Requests").
+  - Duration: on WebSockets next to nothing. A single polling device keeps
+    the object awake: about 340 GB-s for a 45-minute lesson, about twice
+    that with a device left polling on the final ranking until it sleeps
+    (`scaling-drawer.md`, "Duration"). One poller costs a class nearly all
+    of it. Also growing with time, with no most a class can spend.
+  - So the day carries some 400 classes on rows and on WebSocket requests,
+    some 33 with every device polling, some 19 to 38 with a poller in every
+    class. What binds first turns on the share of classes with at least one
+    poller, which isn't known. The landing page's "room for a few dozen
+    classes a day" rests on this (`shared/limits.ts`, comment on
+    `MAX_UPLOADS_PER_DAY`).
+- **Which devices poll.** A device polls only after three WebSocket attempts
+  in a row failed or stayed silent, and then for the rest of its page's life
+  (`connections.md`). Plausible assumption: the first users come from
+  Kahoot, which runs in schools on a socket connection (reportedly CometD
+  over `wss://kahoot.it/cometd/…`, as its community clients connect; not
+  checked against Kahoot's own pages, and whether it falls back to
+  long-poll is not established). A school network that runs
+  Kahoot passes WebSockets, so blocking across a whole network is rare among
+  them. What that doesn't cover: a filter that treats `*.pages.dev` apart
+  from `kahoot.it`; the site's own fallback, which a crowded access point
+  can set off with no filter involved, a share the site makes itself; and
+  that duration turns on any poller in a class, so a small share of devices
+  can be a large share of classes (at 2% of devices independently, about
+  4 in 10 classes of 25 and a wall).
+- **Who opens a lobby.** Opening a Quizmaster or Peers room is the upload
+  (`local-check.md`); letting the class in is one tap from the lobby's check
+  (`user-flow.md`). At the server these lobbies look alike until a class
+  arrives:
+  - Someone looking to see what the room is and whether the site is for
+    them. Likely the most common once the site is advertised, a few
+    hundred a day plausibly. They have no reasonable way to close it, and
+    offering one would be a minor optimization. Plausibly they tap through
+    to the join screen, maybe Start. Their quiz is the example (about
+    40 KB) or one of their own, a few MB with pictures; a teacher's
+    homework quizzes are Solo and never uploaded. A forgotten tab on a
+    desktop keeps its socket; a phone or tablet suspends it.
+  - A teacher opening the lobby on one device before class, going into the
+    quiz by the end of the class: 30 minutes, or several hours.
+  - A teacher with a projector and a Remote, connections dropping now and
+    then, the Remote maybe changed later (`teacher-devices.md`).
+  - A quiz walked to another device: teacher A has the file on a phone,
+    opens the lobby, takes the school's projector in as the screen and
+    leaves; teacher B runs it from the projector later, with or without a
+    Remote. File sharing between devices is poor or poorly understood, so
+    the site is how the quiz gets there.
+  - After the upload no device holds the quiz: the check holds it in the
+    page's memory only, and opening the room leaves that page for the lobby
+    (`client/entry-quizmaster.ts`). The server's copy is the only one.
+  - A student who joined the wrong quiz may want back into the one before,
+    which is someone else's latest. A player joining another quiz says
+    nothing about the first being done.
+- **Breaks are shared.** Plausible assumption: a school's classes break at
+  the same times, so classes leaving and coming back in are correlated, and
+  so are lessons starting on the hour.
 - **What a Peers room costs** (`peers.md`) is held to what a class costs,
   since the day is the classes'. Its view changes with every friend's
   answer, look and line (who the room waits for, who is away), where a
@@ -268,14 +324,21 @@ them, and the README points self-hosters there.
 Purpose: when the free plan runs out, it runs out on a new class before it
 is let in, where the refusal and the ways to more quizzes are, and never on a
 class under way. "Failure in front of the class ends adoption" (backlog,
-Constraints).
+Constraints). And most of the day stays usable: what is held for classes and
+not spent is the price. The owner, 2026-11-10: avoid mid-quiz "out of
+resources for the day" events, while also allowing most resources of the day
+to be used. The same holds for stored bytes and the day's uploads: lobbies no
+class joins (Situation, "Who opens a lobby") are not to crowd out those a
+class does.
 
-Situation: rows written run out in the middle of lessons, since a class
-writes as it plays. A class writes about 250 (Situation, "What a class
-costs"), so rows carry some 300 classes a day, while the upload cap lets
-300 quizzes in; requests likely run out first, but how many devices poll is
-not known. The upload and bytes caps count quizzes and bytes, not what a
-class writes.
+Situation: every daily limit runs out in the middle of lessons, since a class
+spends as it plays; how each grows with a class, and which binds first, is
+in Situation, "What a class costs" and "Which devices poll". The upload and
+bytes caps count quizzes and bytes, not what a class spends. Who leaves
+lobbies behind, and why a lobby's devices or players can't say it is done:
+Situation, "Who opens a lobby". Refusing a teacher with no child in costs
+little, refusing a class in front of the children much, failing one under
+way most.
 
 The design is the owner's: quizzes book slots and release them when done,
 the booking shrinks at Start, students only once the class is let in, one
@@ -355,9 +418,37 @@ rest are the implementer's, to confirm.
   day's ledger alone: the rare class across the turn writes some rows the
   new day doesn't count.
 
-Not covered: requests. Counting each in an object would itself be a request;
-a class on WebSockets spends few, and a script hammering `/api` is the case
-for a domain with a rate-limiting rule.
+What the design above rests on that no longer holds (backlog, "Room on the
+Free plan", item 3):
+
+- It books rows alone, sized when rows bound first. With answers and looks
+  held in memory, requests and duration likely bind first (Situation, "What
+  a class costs"), and nothing books them. A day can run out of requests or
+  duration in the middle of lessons while the ledger shows room. The rows
+  booked (1,030 a lobby, 830 from Start) are 3 to 4 times the ~250 written.
+- Requests and duration have no most a class can spend; they grow with the
+  time devices stay on. "Nothing is overbooked and no margin is guessed"
+  holds for rows only.
+- The settle at the final ranking comes before devices left on it. For a
+  class with a poller that tail is about half its duration, and unbooked.
+- A let-in lobby no student joins holds its booking until the quiz expires.
+  One quiz per device doesn't reach the lobbies of someone looking from
+  several browsers, nor the devices of a walked quiz. A Start with nobody
+  in still holds about 680 rows: the questions' steps and line writes.
+- The lifetime runs from the last teacher step or role taken. A lobby that
+  waits longer than three hours for its class ends: the teacher who opened
+  it early, the walked quiz.
+- `MAX_UPLOADS_PER_DAY` (300) was derived from what a class wrote. Every
+  look at the room is an upload, so a few hundred of them spend the day's
+  uploads before anything else binds. `MAX_LIVE_BYTES` is reached by
+  lookers' own picture quizzes, some 300 at a few MB each, held three
+  hours.
+
+Not covered: requests and duration. Counting them costs no request: each
+device counts its own line and the instance sums the class at its settle
+(`telemetry.md`). What can't be done as for rows is bounding what a class
+will spend. A script hammering `/api` is the case for a domain with a
+rate-limiting rule.
 
 ### When the allowance runs out anyway
 
@@ -422,6 +513,12 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   README section; and which outside address serves a converted copy's own
   version of the guidance in a way the AIs read (the guidance page on GitHub
   at the converted commit is the obvious candidate, unread by any AI so far).
+- The share of classes with at least one poller, and how much of it the
+  site's own fallback makes; how long devices stay on after the final
+  ranking (telemetry: `polled`, classes with a poller, `awakeS`).
+- How many lobbies are looks at the room, how far they go (let in,
+  Start), and what they upload; how long a lobby opened early waits for its
+  class; how often a quiz is walked to another device, and to whom.
 - Whether the class cost above, and so the capacity sentence, still holds now
   that a question steps through four or five states, each a view to every
   device; it was derived when a question had three.

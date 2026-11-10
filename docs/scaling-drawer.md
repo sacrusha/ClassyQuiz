@@ -140,6 +140,11 @@ settled writes plus the live bookings against `DAY_ROWS_FOR_CLASSES`
 once. The reserve for line writes is the largest adjustable part, 320 of a
 lobby's 1,030.
 
+Rows no longer bind first, so this ledger now mostly holds room that requests
+and duration, unbooked, would run out of sooner; what that leaves open is
+backlog, "Room on the Free plan", item 3, and `design/hosting-and-limits.md`,
+"Running classes finish".
+
 **How you'd know.** Refusals by `"rows"` in `GET /api/site/use`.
 
 **Ideas:** book nearer to what classes actually write, once telemetry shows
