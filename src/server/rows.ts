@@ -177,7 +177,9 @@ export const NO_COST = NONE;
 /**
  * Rows an upload writes over its life: each picture and pack, the quiz, its
  * meta, fixes, run, guesses and first alarm; deleted again at its end, which
- * writes as many; and the code's claim and the site's booking of it.
+ * writes as many (plausible assumption: the plan counts a deleted row as a
+ * row written; not measured); and the code's claim and the site's booking
+ * of it.
  */
 export function uploadRows(files: number): number {
   return 2 * (files + 6) + 3;

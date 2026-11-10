@@ -124,6 +124,12 @@ text-only ones. Each holds its bytes three hours after its last use.
 
 **Ideas:**
 
+- **Eviction by need** (the owner, 2026-11-10): as stored bytes near the
+  cap, a quiz left unused goes earlier than its three hours, the sooner
+  the larger it is and the less room is left (for example 50 MB left, a
+  10 MB quiz unused for an hour: evicted). Who comes back to an evicted
+  lobby, and what they need then, is in `design/hosting-and-limits.md`,
+  Situation, "Who opens a lobby".
 - **A host device serves the pictures** (the owner's example): it stays
   connected and hands out each question's pictures when the question comes,
   so the server stores less per quiz, or nothing of the pictures.

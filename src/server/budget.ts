@@ -110,7 +110,9 @@ export class SiteBudget extends DurableObject<Env> {
    * `cost`. "rows": the classes booked today leave no room; today counts as
    * a full day.
    */
-  async bookRows(instance: string, cost: Cost, until: number, probe = false, reach: "letIn" | "join" = "letIn"): Promise<{ day: Cost } | "rows"> {
+  async bookRows(instance: string, booking: Cost | number, until: number, probe = false, reach: "letIn" | "join" = "letIn"): Promise<{ day: Cost } | "rows"> {
+    // A number: an instance still on the code from before requests and duration were booked (a deploy reaches a running object late).
+    const cost = asCost(booking);
     const now = Date.now();
     const key = `i:${instance}`;
     const b = (await this.ctx.storage.get<Booking>(key)) ?? { bytes: 0, until };
@@ -205,7 +207,8 @@ export class SiteBudget extends DurableObject<Env> {
    * day leaves today's ledger alone. use: the class's summary, added into
    * its day's record with the settle.
    */
-  async moveRows(instance: string, cost: Cost, settle = false, use?: ClassUse): Promise<void> {
+  async moveRows(instance: string, booking: Cost | number, settle = false, use?: ClassUse): Promise<void> {
+    const cost = asCost(booking);
     const key = `i:${instance}`;
     const b = await this.ctx.storage.get<Booking>(key);
     if (!b || b.rows === undefined) return;
@@ -281,7 +284,7 @@ export class SiteBudget extends DurableObject<Env> {
   }
 
   /** The quiz ended: its bytes come back, and its booking settles with what it spent (and its summary) if it hadn't. */
-  async release(instance: string, spent?: Cost, use?: ClassUse): Promise<void> {
+  async release(instance: string, spent?: Cost | number, use?: ClassUse): Promise<void> {
     if (spent !== undefined) await this.moveRows(instance, spent, true, use);
     await this.ctx.storage.delete(`i:${instance}`);
   }

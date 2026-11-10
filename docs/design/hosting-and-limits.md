@@ -490,10 +490,17 @@ plan", item 3):
   it early, the walked quiz.
 - `MAX_LIVE_BYTES` is reached by lookers' own picture quizzes, some 300 at
   a few MB each, held three hours, and then refuses uploads that a class
-  would have joined.
+  would have joined. An idea kept for it: `scaling-drawer.md`, "Stored
+  data: pictures".
 
-Not covered: a script hammering `/api`, which spends requests no class
-booked; that is the case for a domain with a rate-limiting rule.
+Not covered: a lobby before its class is let in books nothing, so what its
+teacher devices spend comes out of what the shares leave over; a projector
+on long-poll keeps its object awake until the page sleeps (`SLEEP_AFTER_MS`),
+some 345 GB-s, which a wave of looks at the room from behind a filter would
+make large. Plausible assumption: looks come from homes and offices whose
+networks pass WebSockets (Situation, "Which devices poll"). And a script
+hammering `/api`, which spends requests no class booked; that is the case
+for a domain with a rate-limiting rule.
 
 ### When the allowance runs out anyway
 
