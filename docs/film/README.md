@@ -1,6 +1,6 @@
 # The landing film
 
-A film of about 67 s, without sound, on the root page, below its first
+A film of about 68 s, without sound, on the root page, below its first
 screen, for whoever wants to find out more than that screen shows. What it
 does on the page (the poster, the
 player's bar, the layout, what loads when): `docs/design/root-page.md`, "The
@@ -50,27 +50,38 @@ it.
 ## Situation
 
 - **The film shows the site as built**, so a newcomer who has watched it
-  meets the screens it showed. After the upload a quiz opens in the browser
-  on the local check, with three ways to play it, Solo, Peers and
-  Quizmaster (`docs/design/local-check.md`); the classroom is a
+  meets the screens it showed. Before the upload it shows the root page as
+  it opens (`docs/design/root-page.md`, "One column"): the page the film
+  stands on, below its first screen, which a viewer has just scrolled past.
+  It is drawn from the page's own sizes at a desktop's width, on the phone
+  and again on the laptop, in the page's language; its words are
+  `landing-text.ts`'s, copied in at the build and held to it by a test
+  (`src/client/landing-text.test.ts`), its layout is copied by hand, so a
+  change to the page's layout fails nothing and the film shows the page as
+  it was (`src/DEVELOPING.md`, "The landing film"). After the upload a quiz
+  opens in the browser on the local check, with three ways to play it, Solo,
+  Peers and Quizmaster (`docs/design/local-check.md`); the classroom is a
   Quizmaster's quiz, and its lobby's check asks how the screens are
   arranged, with the teacher code only under Screen and remote, which a
   first visit finds pressed, and lists the questions, each one's answers
-  folded (`docs/design/teacher-devices.md`, "How the screens are
-  arranged"). The film follows the classroom, the purpose above: Solo and
-  Peers are only the cards the teacher passes, and the lobby's check is
-  shown as a first visit finds it, since the phone steers. The check is
-  drawn as a laptop-wide window shows it, on a phone too (`film-text.md`
-  0.8). Its words for these screens are the site's,
-  English (`SITE` in `build/film.js`), and a test holds them to the site's
-  code (`src/client/film.test.ts`), so a screen that changes its words fails
-  the tests until the film follows.
+  folded (`docs/design/teacher-devices.md`, "How the screens are arranged").
+  The film follows the classroom, the purpose above: Solo and Peers are only
+  the cards the teacher passes, and the lobby's check is shown as a first
+  visit finds it, since the phone steers. The check is drawn as a
+  laptop-wide window shows it, on a phone too (`film-text.md` 0.8). Its
+  words for these screens are the site's, English (`SITE` in
+  `build/film.js`), and a test holds them to the site's code
+  (`src/client/film.test.ts`), so a screen that changes its words fails the
+  tests until the film follows.
 
-- **Its length follows its beats**, about 67 s: the upload's two choices
-  (Purpose, 2) each get a hold and a close-up, and the class's joining
-  keeps its time, whatever that adds to a round minute (the product
-  owner's delegate). The length is in `index.html` too (The site's version,
-  below).
+- **Its length follows its beats**, about 68 s: the upload's two choices
+  (Purpose, 2) each get a hold and a close-up, and the class's joining keeps
+  its time, whatever that adds to a round minute (the product owner's
+  delegate). The root page gets a hold at the full width before the camera
+  moves in on its two steps, so that it is recognised as the page above the
+  film; that second is added, not taken from the checks (the implementer's
+  call, not yet seen by the owner). The length is in `index.html` too (The
+  site's version, below).
 
 - **A phone held upright** gives the 16:9 film about 358 × 201 CSS px. Text
   that must be read needs a close-up and time on screen; everything else may
@@ -102,15 +113,15 @@ it.
 `build/` holds the source:
 
 - `film.js`: the film and its player, one script. Its words: `LANDING` (the
-  root page's own words, the example ask, the Run box, the chapters' names and
-  the player's, filled in from `src/client/landing-text.ts` at build time; the
-  AI chapter's name is also the AI app's name on the phone), `CONTENT` (per
-  language: the letters for an AI on the app's tile, the teacher's second
-  message, the AI's status lines, the `.zip`'s name, the quiz's title and
-  questions; `draft: true` marks a language whose words are drafts pending
-  the owner's review), `SITE` (the words it quotes from the site's English
-  screens) and `COMMON` (its own: the example's figures, the chapters'
-  starts).
+  root page's own words, the example ask and the words of the page's first
+  screen, the chapters' names and the player's, filled in from
+  `src/client/landing-text.ts` at build time; the AI chapter's name is also
+  the AI app's name on the phone), `CONTENT` (per language: the letters for
+  an AI on the app's tile, the teacher's second message, the AI's status
+  lines, the `.zip`'s name, the quiz's title and questions; `draft: true`
+  marks a language whose words are drafts pending the owner's review),
+  `SITE` (the words it quotes from the site's English screens) and `COMMON`
+  (its own: the example's figures, the chapters' starts).
 - `film.css`: the standalone page's player and the faces the film uses (on
   the site they come from `index.html` and `site.css`).
 - `build.py`: the standalone page, `.tmp/film/index.html` at the repo root
@@ -196,8 +207,16 @@ wide, a factor of 0.224.
   under the line on a call, so "Let everyone in ▶", which isn't what gets
   pressed there, stays below the frame; the title and that line dim while
   the camera is in.
+- The root page: about 0.9 s at the full width, where the sentence reads
+  as about 36 units and the rest isn't meant to be read; then about twice
+  in on the two steps, from the first one's heading to the line under the
+  box, the headings and the button about 50 units, the ask about 41, the
+  frame cutting the column's right edge.
 - The teacher code is shown twice: in the how-to, pulsing, then typed on
-  the laptop with the laptop's screen filling the frame.
+  the laptop, its screen filling the frame and the root page whole for
+  about 0.4 s, then the camera 1.8 times in on the header while the code
+  is typed (about 50 units; at the page's own size it would be about 25),
+  and a cut back to the whole screen as it changes.
 - The vote counts on the wall barely read in the room's wide shot, so the
   camera moves in for the split.
 - The children's bubbles are drawn 1.35 times larger; smaller, they are dots
@@ -239,8 +258,10 @@ Only rendered pictures found them, so the film is checked by looking:
 
 - Assets are in one object, `ASSETS`: `build.py` fills it with `data:` URIs
   for the standalone page, `sitebuild.py` with the site's
-  `/landing/sheet-*.webp` and the brand SVGs as text; the font comes from
-  `site.css`. `sitebuild.py` refuses a `film.js` with a `data:` URI in it.
+  `/landing/sheet-*.webp`, the ways' pictures `/landing/way-*.svg` (which
+  the page above the film has already loaded) and the brand SVGs as text;
+  the font comes from `site.css`. `sitebuild.py` refuses a `film.js` with a
+  `data:` URI in it.
 - The avatars are `src/client/look.ts`'s own, read by `build.py` with the
   types stripped, not copied.
 - The chapters' names are in `landing-text.ts` (`capSheet` and so on), the
@@ -266,11 +287,13 @@ Only rendered pictures found them, so the film is checked by looking:
   an iPhone's Safari or on Android.
 - **Whether the timings read** when watched: the hold after the ask, the
   second ask (112 characters typed in about 2.3 s, in the frame about 4 s in
-  all before the chat shrinks away), the split's six seconds, the local
-  check (about 1.2 s at the full width, then 2.2 s in on Quizmaster before
-  the thumb takes it) and the lobby's check (about 1 s at the full width,
-  then 2.5 s on the how-to). Checked only as stills.
-- **Whether 67 s is watched through** by a first-time viewer who came for
+  all before the chat shrinks away), the root page (about 0.9 s at the full
+  width, then about 0.8 s in on its two steps before the thumb takes the
+  button), the laptop's push-in and its cut back out, the split's six
+  seconds, the local check (about 1.2 s at the full width, then 2.2 s in on
+  Quizmaster before the thumb takes it) and the lobby's check (about 1 s at
+  the full width, then 2.5 s on the how-to). Checked only as stills.
+- **Whether 68 s is watched through** by a first-time viewer who came for
   the first question, is this for me: nobody outside the project has
   watched it.
 - **The pace for the teacher who has decided and now wants the steps.** The

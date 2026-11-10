@@ -2,10 +2,10 @@
 Run: py -I build.py [out_file]   (default: .tmp/film/index.html at the repo root, which git ignores;
 the page is generated, ~230 KB, and not kept in the tree. shoot.py and sitebuild.py read it from there.)
 
-The page carries: film.css, the assets (the site's Rubik, the two sheets, the
+The page carries: film.css, the assets (the site's Rubik, the two sheets, the ways' pictures, the
 brand marks) as data: URIs in one JS object, the avatar drawings taken from
 the repo's client/look.ts, the root page's words the film shows (the example
-ask, the Run box, the chapters' and the player's names) taken from
+ask, the words of the page's first screen, the chapters' and the player's names) taken from
 client/landing-text.ts, and film.js. On the site
 the same film.js reads the assets from the site's own files instead (see the
 header of film.js). The page opens in English; page.html?lang=de (en, fr, it)
@@ -18,6 +18,10 @@ ROOT = HERE.parents[2]          # the repo root
 REPO = ROOT / 'src'             # the site
 PUB = REPO / 'public'
 PAGE = ROOT / '.tmp' / 'film' / 'index.html'   # default output, git-ignored
+
+
+# the ways to play, a picture each, on the root page the film shows (src/public/landing/way-*.svg)
+WAYS = {'wayQuizmaster': 'way-quizmaster.svg', 'wayPeers': 'way-peers.svg', 'waySolo': 'way-solo.svg'}
 
 
 def launch(p):
@@ -59,13 +63,13 @@ def look_js():
     return '/* From client/look.ts (types stripped by build.py). */\n' + s
 
 
-LANDING_KEYS = ('code', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
+LANDING_KEYS = ('code', 'what', 'wayQuizmaster', 'wayPeers', 'waySolo', 'getH', 'gives', 'run', 'upload', 'drop', 'noQuiz', 'tryIt', 'more', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
 
 
 def landing_text():
     """The root page's own words the film shows, per language, from client/landing-text.ts: the example ask
-    (its parts as { s, l }: l 0 is the site's address, other l a labelled part) and the header's and Run box's words,
-    so the film types the very sentence the page prints and its phone shows the root page as a visitor sees it; and the
+    (its parts as { s, l }: l 0 is the site's address, other l a labelled part) and the words of the page's first screen,
+    so the film types the very sentence the page prints and its phone and laptop show the root page as a visitor sees it; and the
     chapters' names and the player's, which the film shows on the page's time bar."""
     src = (REPO / 'client/landing-text.ts').read_text(encoding='utf-8')
     out = {}
@@ -111,6 +115,7 @@ def main(out=None):
         'rubik': data_uri(PUB / 'fonts/rubik-bold-1.100.woff2', 'font/woff2'),
         'sheet1': data_uri(PUB / 'landing/sheet-1.webp', 'image/webp'),
         'sheet2': data_uri(PUB / 'landing/sheet-2.webp', 'image/webp'),
+        **{k: data_uri(PUB / f'landing/{f}', 'image/svg+xml') for k, f in WAYS.items()},
         'lockup': (PUB / 'brand/classyquiz-horizontal-32-inline.svg').read_text(encoding='utf-8').strip(),
         'fox': (PUB / 'brand/classyquiz-symbol-colour.svg').read_text(encoding='utf-8').strip(),
     }

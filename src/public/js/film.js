@@ -1,5 +1,5 @@
 /* classyQuiz film, built by the film project's sitebuild.py from film.js; loaded by client/film-poster.ts on the first ▶. Edit the source, not this. */
-/* classyQuiz film (animatic): about 67 s, wordless, flat SVG.
+/* classyQuiz film (animatic): about 68 s, wordless, flat SVG.
 
    Purpose: a teacher who has never seen a classroom quiz sees what they would
    type to their AI, how the .zip reaches the site, and what the class does:
@@ -344,9 +344,9 @@ function avatarSvg(av, label = true) {
 
 
 
-  const ASSETS = {"sheet1": "/landing/sheet-1.webp", "sheet2": "/landing/sheet-2.webp", "lockup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 133.77 32\" width=\"133.77\" height=\"32\" role=\"img\" aria-label=\"classyQuiz\"><g transform=\"translate(-4 0)\"><path fill=\"#E26B22\" d=\"M5 17V3.5L9.62 11.5H22.38L27 3.5V17Q25.6 27.4 16 31Q6.4 27.4 5 17Z\"/><path fill=\"#FFFFFF\" d=\"M7 18.4Q9.8 15.4 14.2 16.6L15 25.4H17L17.8 16.6Q22.2 15.4 25 18.4Q23.8 26.6 16 29.6Q8.2 26.6 7 18.4Z\"/><g fill=\"#1D1D1B\"><circle cx=\"11.6\" cy=\"20\" r=\"1.75\"/><circle cx=\"20.4\" cy=\"20\" r=\"1.75\"/><rect x=\"14\" y=\"24.8\" width=\"4\" height=\"2.8\" rx=\"1.4\"/></g><path fill=\"currentColor\" d=\"M12 1.6Q12 1 12.6 1H19.4Q20 1 20 1.6V8H12ZM12 9H20V11.5H12ZM9 11H23A1 1 0 0 1 23 13H9A1 1 0 0 1 9 11Z\"/></g><g><path fill=\"currentColor\" d=\"M35.8 27.36Q36.4 27.36 36.75 27.18Q37.1 27.01 37.34 26.66Q37.45 26.46 37.58 26.36Q37.71 26.27 37.9 26.27H40.45Q40.67 26.27 40.82 26.41Q40.98 26.56 40.98 26.75Q40.98 27.32 40.49 28.17Q40.01 29.01 38.85 29.69Q37.69 30.38 35.8 30.38Q34.34 30.38 33.16 29.82Q31.98 29.27 31.27 28.25Q30.56 27.24 30.52 25.9L30.5 25.12L30.52 24.34Q30.56 22.99 31.27 21.98Q31.98 20.97 33.16 20.41Q34.34 19.86 35.8 19.86Q37.67 19.86 38.82 20.52Q39.97 21.18 40.45 22.02Q40.94 22.86 40.98 23.44Q41 23.66 40.83 23.81Q40.67 23.97 40.45 23.97H37.9Q37.71 23.97 37.58 23.87Q37.45 23.77 37.34 23.58Q37.1 23.23 36.75 23.05Q36.4 22.88 35.8 22.88Q35.04 22.88 34.56 23.31Q34.08 23.73 34.03 24.44Q34.01 24.63 34.01 25.12Q34.01 25.6 34.03 25.8Q34.08 26.5 34.56 26.93Q35.04 27.36 35.8 27.36ZM45.4 30.18H42.95Q42.73 30.18 42.58 30.03Q42.42 29.87 42.42 29.66V16.88Q42.42 16.66 42.58 16.51Q42.73 16.35 42.95 16.35H45.4Q45.62 16.35 45.77 16.51Q45.93 16.66 45.93 16.88V29.66Q45.93 29.87 45.77 30.03Q45.62 30.18 45.4 30.18ZM53.76 23.56Q53.76 22.49 52.63 22.49Q51.99 22.49 51.58 22.84Q51.42 22.99 51.27 23.03Q51.11 23.07 50.88 23.07H48.4Q48.21 23.07 48.08 22.95Q47.95 22.84 47.97 22.64Q48.03 22.04 48.65 21.39Q49.26 20.73 50.31 20.3Q51.36 19.86 52.63 19.86Q54.95 19.86 56.11 20.91Q57.27 21.96 57.27 23.75V29.66Q57.27 29.87 57.11 30.03Q56.95 30.18 56.74 30.18H54.29Q54.07 30.18 53.92 30.03Q53.76 29.87 53.76 29.66V29.11Q53.25 29.73 52.55 30.06Q51.85 30.38 50.78 30.38Q49.14 30.38 48.22 29.52Q47.29 28.66 47.29 27.3Q47.29 25.99 48.31 25.16Q49.32 24.32 51.48 23.95ZM51.97 26.15Q51.42 26.25 51.11 26.49Q50.8 26.73 50.8 27.08Q50.8 27.75 51.73 27.75Q52.59 27.75 53.18 27.2Q53.76 26.66 53.76 25.88ZM58.84 22.99Q58.84 22.12 59.42 21.41Q59.99 20.69 61.04 20.28Q62.08 19.86 63.4 19.86Q64.71 19.86 65.77 20.26Q66.83 20.66 67.45 21.28Q68.08 21.9 68.14 22.58Q68.16 22.8 67.99 22.95Q67.82 23.11 67.61 23.11H65.29Q65.08 23.11 64.79 22.9Q64.53 22.7 64.24 22.59Q63.95 22.49 63.4 22.49Q62.94 22.49 62.64 22.62Q62.35 22.76 62.35 23.03Q62.35 23.27 62.46 23.38Q62.56 23.5 62.85 23.56Q63.13 23.62 63.83 23.71L65.04 23.91Q66.73 24.18 67.58 25.07Q68.43 25.95 68.43 27.18Q68.43 28.06 67.83 28.79Q67.24 29.52 66.12 29.95Q65 30.38 63.48 30.38Q62.02 30.38 60.94 29.96Q59.86 29.54 59.28 28.9Q58.71 28.25 58.65 27.59Q58.63 27.38 58.8 27.22Q58.96 27.06 59.18 27.06H61.59Q61.73 27.06 61.81 27.11Q61.9 27.16 62.02 27.28Q62.25 27.49 62.55 27.62Q62.84 27.75 63.48 27.75Q64.08 27.75 64.5 27.58Q64.92 27.42 64.92 27.14Q64.92 26.83 64.62 26.72Q64.32 26.62 63.32 26.46L61.92 26.23Q60.44 25.95 59.64 25.13Q58.84 24.3 58.84 22.99ZM69.56 22.99Q69.56 22.12 70.13 21.41Q70.71 20.69 71.75 20.28Q72.79 19.86 74.12 19.86Q75.42 19.86 76.48 20.26Q77.55 20.66 78.17 21.28Q78.79 21.9 78.85 22.58Q78.87 22.8 78.7 22.95Q78.54 23.11 78.32 23.11H76.01Q75.79 23.11 75.5 22.9Q75.25 22.7 74.95 22.59Q74.66 22.49 74.12 22.49Q73.65 22.49 73.36 22.62Q73.06 22.76 73.06 23.03Q73.06 23.27 73.17 23.38Q73.28 23.5 73.56 23.56Q73.84 23.62 74.55 23.71L75.75 23.91Q77.45 24.18 78.3 25.07Q79.14 25.95 79.14 27.18Q79.14 28.06 78.55 28.79Q77.95 29.52 76.83 29.95Q75.71 30.38 74.19 30.38Q72.73 30.38 71.65 29.96Q70.57 29.54 70 28.9Q69.42 28.25 69.36 27.59Q69.34 27.38 69.51 27.22Q69.68 27.06 69.89 27.06H72.31Q72.44 27.06 72.53 27.11Q72.62 27.16 72.73 27.28Q72.97 27.49 73.26 27.62Q73.55 27.75 74.19 27.75Q74.8 27.75 75.22 27.58Q75.64 27.42 75.64 27.14Q75.64 26.83 75.33 26.72Q75.03 26.62 74.04 26.46L72.64 26.23Q71.16 25.95 70.36 25.13Q69.56 24.3 69.56 22.99ZM84.93 33.88H82.38Q82.18 33.88 82.05 33.75Q81.91 33.61 81.91 33.42Q81.91 33.34 81.93 33.28L83.41 29.79L79.47 20.66Q79.45 20.6 79.45 20.52Q79.45 20.32 79.59 20.19Q79.73 20.05 79.92 20.05H82.47Q82.86 20.05 83.04 20.52L85.2 25.58L87.34 20.52Q87.52 20.05 87.91 20.05H90.48Q90.68 20.05 90.81 20.19Q90.95 20.32 90.95 20.52Q90.95 20.6 90.93 20.66L85.49 33.42Q85.32 33.88 84.93 33.88ZM104.12 21.63Q104.16 22.18 104.16 23.38Q104.16 24.57 104.12 25.1Q104 27.22 102.68 28.62L104.21 30.84Q104.27 30.96 104.27 31.02V31.08Q104.27 31.23 104.16 31.34Q104.04 31.45 103.88 31.45H101.14Q100.82 31.45 100.64 31.32Q100.45 31.19 100.32 31L99.77 30.18Q98.86 30.38 98.04 30.38Q96.19 30.38 94.84 29.68Q93.5 28.97 92.77 27.78Q92.04 26.58 91.96 25.1Q91.92 24.05 91.92 23.38Q91.92 22.72 91.96 21.63Q92.04 20.15 92.77 18.95Q93.5 17.75 94.84 17.05Q96.19 16.35 98.04 16.35Q99.89 16.35 101.23 17.05Q102.58 17.75 103.31 18.95Q104.04 20.15 104.12 21.63ZM98.04 19.47Q96.89 19.47 96.28 20.08Q95.66 20.69 95.56 21.73Q95.51 22.37 95.51 23.34Q95.51 24.3 95.56 25Q95.66 26.03 96.28 26.65Q96.89 27.26 98.04 27.26Q99.19 27.26 99.8 26.65Q100.42 26.03 100.51 25Q100.57 24.3 100.57 23.34Q100.57 22.37 100.51 21.73Q100.42 20.69 99.8 20.08Q99.19 19.47 98.04 19.47ZM106.36 20.05H108.81Q109.03 20.05 109.18 20.21Q109.34 20.36 109.34 20.58V25.51Q109.34 26.38 109.73 26.87Q110.12 27.36 110.94 27.36Q112.51 27.36 112.51 25.51V20.58Q112.51 20.36 112.67 20.21Q112.82 20.05 113.04 20.05H115.49Q115.71 20.05 115.86 20.21Q116.02 20.36 116.02 20.58V29.66Q116.02 29.87 115.86 30.03Q115.71 30.18 115.49 30.18H113.23Q113.02 30.18 112.86 30.03Q112.71 29.87 112.71 29.66V29.21Q112.3 29.71 111.67 30.05Q111.03 30.38 109.96 30.38Q108.01 30.38 106.92 29.27Q105.83 28.16 105.83 25.94V20.58Q105.83 20.36 105.99 20.21Q106.14 20.05 106.36 20.05ZM121.03 18.98H118.57Q118.36 18.98 118.2 18.82Q118.05 18.67 118.05 18.45V16.49Q118.05 16.27 118.2 16.12Q118.36 15.96 118.57 15.96H121.03Q121.24 15.96 121.4 16.12Q121.55 16.27 121.55 16.49V18.45Q121.55 18.67 121.4 18.82Q121.24 18.98 121.03 18.98ZM121.03 30.18H118.57Q118.36 30.18 118.2 30.03Q118.05 29.87 118.05 29.66V20.58Q118.05 20.36 118.2 20.21Q118.36 20.05 118.57 20.05H121.03Q121.24 20.05 121.4 20.21Q121.55 20.36 121.55 20.58V29.66Q121.55 29.87 121.4 30.03Q121.24 30.18 121.03 30.18ZM132.77 27.69V29.66Q132.77 29.87 132.62 30.03Q132.46 30.18 132.25 30.18H123.75Q123.54 30.18 123.38 30.03Q123.23 29.87 123.23 29.66V27.77Q123.23 27.55 123.31 27.41Q123.38 27.26 123.54 27.08L127.4 23.07H123.95Q123.73 23.07 123.58 22.92Q123.42 22.76 123.42 22.55V20.58Q123.42 20.36 123.58 20.21Q123.73 20.05 123.95 20.05H131.86Q132.07 20.05 132.23 20.21Q132.38 20.36 132.38 20.58V22.47Q132.38 22.72 132.11 23.03L128.16 27.16H132.25Q132.46 27.16 132.62 27.32Q132.77 27.47 132.77 27.69Z\"/></g></svg>", "fox": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"256\" height=\"256\" role=\"img\" aria-labelledby=\"t\"><title id=\"t\">classyQuiz</title><g id=\"symbol\"><path fill=\"#E26B22\" d=\"M45.47 133.89L45.47 35.45L85.29 104.42L170.71 104.42L210.53 35.45L210.53 133.89Q198.74 216.42 128 240Q57.26 216.42 45.47 133.89Z\"/><path fill=\"#FFFFFF\" d=\"M61.98 147.45Q81.43 123.28 114.44 138.02Q117.39 181.05 119.1 209.47A13.85 10.61 0 1 0 136.9 209.47Q138.61 181.05 141.56 138.02Q174.57 123.28 194.02 147.45Q185.18 208.76 128 231.16Q70.82 208.76 61.98 147.45Z\"/><path fill=\"#1D1D1B\" fill-rule=\"evenodd\" d=\"M85.56 155.71A11.49 11.49 0 0 1 108.55 155.71A11.49 11.49 0 0 1 85.56 155.71ZM97.49 150.99A3.83 3.83 0 0 0 105.16 150.99A3.83 3.83 0 0 0 97.49 150.99ZM147.45 155.71A11.49 11.49 0 0 1 170.44 155.71A11.49 11.49 0 0 1 147.45 155.71ZM159.39 150.99A3.83 3.83 0 0 0 167.05 150.99A3.83 3.83 0 0 0 159.39 150.99ZM114.15 217.6A13.85 10.61 0 0 1 141.85 217.6A13.85 10.61 0 0 1 114.15 217.6Z\"/><path fill=\"#1D1D1B\" d=\"M93.77 79.66L88.2 21.31A5.31 5.31 0 0 1 93.51 16L162.49 16A5.31 5.31 0 0 1 167.8 21.31L162.23 79.66ZM94.24 84.97L161.76 84.97L160.42 100.29L95.58 100.29ZM72.29 94.11Q128 100.59 183.71 94.11A7.66 7.66 0 0 1 183.71 109.43Q128 115.92 72.29 109.43A7.66 7.66 0 0 1 72.29 94.11Z\"/></g></svg>"};
+  const ASSETS = {"sheet1": "/landing/sheet-1.webp", "sheet2": "/landing/sheet-2.webp", "wayQuizmaster": "/landing/way-quizmaster.svg", "wayPeers": "/landing/way-peers.svg", "waySolo": "/landing/way-solo.svg", "lockup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 133.77 32\" width=\"133.77\" height=\"32\" role=\"img\" aria-label=\"classyQuiz\"><g transform=\"translate(-4 0)\"><path fill=\"#E26B22\" d=\"M5 17V3.5L9.62 11.5H22.38L27 3.5V17Q25.6 27.4 16 31Q6.4 27.4 5 17Z\"/><path fill=\"#FFFFFF\" d=\"M7 18.4Q9.8 15.4 14.2 16.6L15 25.4H17L17.8 16.6Q22.2 15.4 25 18.4Q23.8 26.6 16 29.6Q8.2 26.6 7 18.4Z\"/><g fill=\"#1D1D1B\"><circle cx=\"11.6\" cy=\"20\" r=\"1.75\"/><circle cx=\"20.4\" cy=\"20\" r=\"1.75\"/><rect x=\"14\" y=\"24.8\" width=\"4\" height=\"2.8\" rx=\"1.4\"/></g><path fill=\"currentColor\" d=\"M12 1.6Q12 1 12.6 1H19.4Q20 1 20 1.6V8H12ZM12 9H20V11.5H12ZM9 11H23A1 1 0 0 1 23 13H9A1 1 0 0 1 9 11Z\"/></g><g><path fill=\"currentColor\" d=\"M35.8 27.36Q36.4 27.36 36.75 27.18Q37.1 27.01 37.34 26.66Q37.45 26.46 37.58 26.36Q37.71 26.27 37.9 26.27H40.45Q40.67 26.27 40.82 26.41Q40.98 26.56 40.98 26.75Q40.98 27.32 40.49 28.17Q40.01 29.01 38.85 29.69Q37.69 30.38 35.8 30.38Q34.34 30.38 33.16 29.82Q31.98 29.27 31.27 28.25Q30.56 27.24 30.52 25.9L30.5 25.12L30.52 24.34Q30.56 22.99 31.27 21.98Q31.98 20.97 33.16 20.41Q34.34 19.86 35.8 19.86Q37.67 19.86 38.82 20.52Q39.97 21.18 40.45 22.02Q40.94 22.86 40.98 23.44Q41 23.66 40.83 23.81Q40.67 23.97 40.45 23.97H37.9Q37.71 23.97 37.58 23.87Q37.45 23.77 37.34 23.58Q37.1 23.23 36.75 23.05Q36.4 22.88 35.8 22.88Q35.04 22.88 34.56 23.31Q34.08 23.73 34.03 24.44Q34.01 24.63 34.01 25.12Q34.01 25.6 34.03 25.8Q34.08 26.5 34.56 26.93Q35.04 27.36 35.8 27.36ZM45.4 30.18H42.95Q42.73 30.18 42.58 30.03Q42.42 29.87 42.42 29.66V16.88Q42.42 16.66 42.58 16.51Q42.73 16.35 42.95 16.35H45.4Q45.62 16.35 45.77 16.51Q45.93 16.66 45.93 16.88V29.66Q45.93 29.87 45.77 30.03Q45.62 30.18 45.4 30.18ZM53.76 23.56Q53.76 22.49 52.63 22.49Q51.99 22.49 51.58 22.84Q51.42 22.99 51.27 23.03Q51.11 23.07 50.88 23.07H48.4Q48.21 23.07 48.08 22.95Q47.95 22.84 47.97 22.64Q48.03 22.04 48.65 21.39Q49.26 20.73 50.31 20.3Q51.36 19.86 52.63 19.86Q54.95 19.86 56.11 20.91Q57.27 21.96 57.27 23.75V29.66Q57.27 29.87 57.11 30.03Q56.95 30.18 56.74 30.18H54.29Q54.07 30.18 53.92 30.03Q53.76 29.87 53.76 29.66V29.11Q53.25 29.73 52.55 30.06Q51.85 30.38 50.78 30.38Q49.14 30.38 48.22 29.52Q47.29 28.66 47.29 27.3Q47.29 25.99 48.31 25.16Q49.32 24.32 51.48 23.95ZM51.97 26.15Q51.42 26.25 51.11 26.49Q50.8 26.73 50.8 27.08Q50.8 27.75 51.73 27.75Q52.59 27.75 53.18 27.2Q53.76 26.66 53.76 25.88ZM58.84 22.99Q58.84 22.12 59.42 21.41Q59.99 20.69 61.04 20.28Q62.08 19.86 63.4 19.86Q64.71 19.86 65.77 20.26Q66.83 20.66 67.45 21.28Q68.08 21.9 68.14 22.58Q68.16 22.8 67.99 22.95Q67.82 23.11 67.61 23.11H65.29Q65.08 23.11 64.79 22.9Q64.53 22.7 64.24 22.59Q63.95 22.49 63.4 22.49Q62.94 22.49 62.64 22.62Q62.35 22.76 62.35 23.03Q62.35 23.27 62.46 23.38Q62.56 23.5 62.85 23.56Q63.13 23.62 63.83 23.71L65.04 23.91Q66.73 24.18 67.58 25.07Q68.43 25.95 68.43 27.18Q68.43 28.06 67.83 28.79Q67.24 29.52 66.12 29.95Q65 30.38 63.48 30.38Q62.02 30.38 60.94 29.96Q59.86 29.54 59.28 28.9Q58.71 28.25 58.65 27.59Q58.63 27.38 58.8 27.22Q58.96 27.06 59.18 27.06H61.59Q61.73 27.06 61.81 27.11Q61.9 27.16 62.02 27.28Q62.25 27.49 62.55 27.62Q62.84 27.75 63.48 27.75Q64.08 27.75 64.5 27.58Q64.92 27.42 64.92 27.14Q64.92 26.83 64.62 26.72Q64.32 26.62 63.32 26.46L61.92 26.23Q60.44 25.95 59.64 25.13Q58.84 24.3 58.84 22.99ZM69.56 22.99Q69.56 22.12 70.13 21.41Q70.71 20.69 71.75 20.28Q72.79 19.86 74.12 19.86Q75.42 19.86 76.48 20.26Q77.55 20.66 78.17 21.28Q78.79 21.9 78.85 22.58Q78.87 22.8 78.7 22.95Q78.54 23.11 78.32 23.11H76.01Q75.79 23.11 75.5 22.9Q75.25 22.7 74.95 22.59Q74.66 22.49 74.12 22.49Q73.65 22.49 73.36 22.62Q73.06 22.76 73.06 23.03Q73.06 23.27 73.17 23.38Q73.28 23.5 73.56 23.56Q73.84 23.62 74.55 23.71L75.75 23.91Q77.45 24.18 78.3 25.07Q79.14 25.95 79.14 27.18Q79.14 28.06 78.55 28.79Q77.95 29.52 76.83 29.95Q75.71 30.38 74.19 30.38Q72.73 30.38 71.65 29.96Q70.57 29.54 70 28.9Q69.42 28.25 69.36 27.59Q69.34 27.38 69.51 27.22Q69.68 27.06 69.89 27.06H72.31Q72.44 27.06 72.53 27.11Q72.62 27.16 72.73 27.28Q72.97 27.49 73.26 27.62Q73.55 27.75 74.19 27.75Q74.8 27.75 75.22 27.58Q75.64 27.42 75.64 27.14Q75.64 26.83 75.33 26.72Q75.03 26.62 74.04 26.46L72.64 26.23Q71.16 25.95 70.36 25.13Q69.56 24.3 69.56 22.99ZM84.93 33.88H82.38Q82.18 33.88 82.05 33.75Q81.91 33.61 81.91 33.42Q81.91 33.34 81.93 33.28L83.41 29.79L79.47 20.66Q79.45 20.6 79.45 20.52Q79.45 20.32 79.59 20.19Q79.73 20.05 79.92 20.05H82.47Q82.86 20.05 83.04 20.52L85.2 25.58L87.34 20.52Q87.52 20.05 87.91 20.05H90.48Q90.68 20.05 90.81 20.19Q90.95 20.32 90.95 20.52Q90.95 20.6 90.93 20.66L85.49 33.42Q85.32 33.88 84.93 33.88ZM104.12 21.63Q104.16 22.18 104.16 23.38Q104.16 24.57 104.12 25.1Q104 27.22 102.68 28.62L104.21 30.84Q104.27 30.96 104.27 31.02V31.08Q104.27 31.23 104.16 31.34Q104.04 31.45 103.88 31.45H101.14Q100.82 31.45 100.64 31.32Q100.45 31.19 100.32 31L99.77 30.18Q98.86 30.38 98.04 30.38Q96.19 30.38 94.84 29.68Q93.5 28.97 92.77 27.78Q92.04 26.58 91.96 25.1Q91.92 24.05 91.92 23.38Q91.92 22.72 91.96 21.63Q92.04 20.15 92.77 18.95Q93.5 17.75 94.84 17.05Q96.19 16.35 98.04 16.35Q99.89 16.35 101.23 17.05Q102.58 17.75 103.31 18.95Q104.04 20.15 104.12 21.63ZM98.04 19.47Q96.89 19.47 96.28 20.08Q95.66 20.69 95.56 21.73Q95.51 22.37 95.51 23.34Q95.51 24.3 95.56 25Q95.66 26.03 96.28 26.65Q96.89 27.26 98.04 27.26Q99.19 27.26 99.8 26.65Q100.42 26.03 100.51 25Q100.57 24.3 100.57 23.34Q100.57 22.37 100.51 21.73Q100.42 20.69 99.8 20.08Q99.19 19.47 98.04 19.47ZM106.36 20.05H108.81Q109.03 20.05 109.18 20.21Q109.34 20.36 109.34 20.58V25.51Q109.34 26.38 109.73 26.87Q110.12 27.36 110.94 27.36Q112.51 27.36 112.51 25.51V20.58Q112.51 20.36 112.67 20.21Q112.82 20.05 113.04 20.05H115.49Q115.71 20.05 115.86 20.21Q116.02 20.36 116.02 20.58V29.66Q116.02 29.87 115.86 30.03Q115.71 30.18 115.49 30.18H113.23Q113.02 30.18 112.86 30.03Q112.71 29.87 112.71 29.66V29.21Q112.3 29.71 111.67 30.05Q111.03 30.38 109.96 30.38Q108.01 30.38 106.92 29.27Q105.83 28.16 105.83 25.94V20.58Q105.83 20.36 105.99 20.21Q106.14 20.05 106.36 20.05ZM121.03 18.98H118.57Q118.36 18.98 118.2 18.82Q118.05 18.67 118.05 18.45V16.49Q118.05 16.27 118.2 16.12Q118.36 15.96 118.57 15.96H121.03Q121.24 15.96 121.4 16.12Q121.55 16.27 121.55 16.49V18.45Q121.55 18.67 121.4 18.82Q121.24 18.98 121.03 18.98ZM121.03 30.18H118.57Q118.36 30.18 118.2 30.03Q118.05 29.87 118.05 29.66V20.58Q118.05 20.36 118.2 20.21Q118.36 20.05 118.57 20.05H121.03Q121.24 20.05 121.4 20.21Q121.55 20.36 121.55 20.58V29.66Q121.55 29.87 121.4 30.03Q121.24 30.18 121.03 30.18ZM132.77 27.69V29.66Q132.77 29.87 132.62 30.03Q132.46 30.18 132.25 30.18H123.75Q123.54 30.18 123.38 30.03Q123.23 29.87 123.23 29.66V27.77Q123.23 27.55 123.31 27.41Q123.38 27.26 123.54 27.08L127.4 23.07H123.95Q123.73 23.07 123.58 22.92Q123.42 22.76 123.42 22.55V20.58Q123.42 20.36 123.58 20.21Q123.73 20.05 123.95 20.05H131.86Q132.07 20.05 132.23 20.21Q132.38 20.36 132.38 20.58V22.47Q132.38 22.72 132.11 23.03L128.16 27.16H132.25Q132.46 27.16 132.62 27.32Q132.77 27.47 132.77 27.69Z\"/></g></svg>", "fox": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"256\" height=\"256\" role=\"img\" aria-labelledby=\"t\"><title id=\"t\">classyQuiz</title><g id=\"symbol\"><path fill=\"#E26B22\" d=\"M45.47 133.89L45.47 35.45L85.29 104.42L170.71 104.42L210.53 35.45L210.53 133.89Q198.74 216.42 128 240Q57.26 216.42 45.47 133.89Z\"/><path fill=\"#FFFFFF\" d=\"M61.98 147.45Q81.43 123.28 114.44 138.02Q117.39 181.05 119.1 209.47A13.85 10.61 0 1 0 136.9 209.47Q138.61 181.05 141.56 138.02Q174.57 123.28 194.02 147.45Q185.18 208.76 128 231.16Q70.82 208.76 61.98 147.45Z\"/><path fill=\"#1D1D1B\" fill-rule=\"evenodd\" d=\"M85.56 155.71A11.49 11.49 0 0 1 108.55 155.71A11.49 11.49 0 0 1 85.56 155.71ZM97.49 150.99A3.83 3.83 0 0 0 105.16 150.99A3.83 3.83 0 0 0 97.49 150.99ZM147.45 155.71A11.49 11.49 0 0 1 170.44 155.71A11.49 11.49 0 0 1 147.45 155.71ZM159.39 150.99A3.83 3.83 0 0 0 167.05 150.99A3.83 3.83 0 0 0 159.39 150.99ZM114.15 217.6A13.85 10.61 0 0 1 141.85 217.6A13.85 10.61 0 0 1 114.15 217.6Z\"/><path fill=\"#1D1D1B\" d=\"M93.77 79.66L88.2 21.31A5.31 5.31 0 0 1 93.51 16L162.49 16A5.31 5.31 0 0 1 167.8 21.31L162.23 79.66ZM94.24 84.97L161.76 84.97L160.42 100.29L95.58 100.29ZM72.29 94.11Q128 100.59 183.71 94.11A7.66 7.66 0 0 1 183.71 109.43Q128 115.92 72.29 109.43A7.66 7.66 0 0 1 72.29 94.11Z\"/></g></svg>"};
   const NS = 'http://www.w3.org/2000/svg';
-  const W = 1600, H = 900, DUR = 67, POSTER = 54.3;
+  const W = 1600, H = 900, DUR = 68, POSTER = 55.3;
 
   // ---------------------------------------------------------------- words
   // The film's only words, all on screens, in the page's language (de en fr it) where the real
@@ -357,9 +357,10 @@ function avatarSvg(av, label = true) {
   // question, translated, so every language shows the same film.
 
   /** The root page's words from client/landing-text.ts, filled in by build.py: per language the example ask
-      ({ s, l }: l 0 the site's address, any other l a labelled part), code, run, upload, drop, reading, the chapters'
-      names (capSheet, capAi, capZip, capWall, capTap) and the player's (play, pause, speed, seek). */
-  const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz mit Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern machen? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "run": "Öffne das Quiz deiner KI", "upload": ".zip-Datei auswählen", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Arbeitsblätter", "capAi": "Deine KI", "capZip": "Die .zip-Datei, hier geöffnet", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "run": "Open the quiz your AI made", "upload": "Choose the .zip file", "drop": "or drop it here", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, opened here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "run": "Ouvrez le quiz de votre IA", "upload": "Choisir le fichier .zip", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, ouvert ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève répond", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans la vidéo"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "una decina di domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "run": "Apri il quiz della tua IA", "upload": "Scegli il file .zip", "drop": "o trascinalo qui", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Il file .zip, aperto qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno risponde", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel video"}};
+      ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what, the ways'
+      words, getH, gives, run, upload, drop, noQuiz, tryIt, more) and reading, the chapters' names (capSheet, capAi, capZip,
+      capWall, capTap) and the player's (play, pause, speed, seek). */
+  const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz mit Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " auf diesen zwei Blättern machen? "}, {"s": "Für meine 5. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 10 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": "."}], "code": "Code", "what": "Hier spielst du Quiz, die deine KI aus deinen Blättern, Notizen oder Ideen macht.", "wayQuizmaster": "für eine Klasse oder Gruppe, am Grossbildschirm", "wayPeers": "mit Freunden, alle am eigenen Gerät", "waySolo": "für dich allein, zum Üben oder Wiederholen", "getH": "Frag deine KI nach einem Quiz", "gives": "Die Antwort der KI:", "run": "Öffne das Quiz deiner KI", "upload": ".zip-Datei auswählen", "drop": "oder hier ablegen", "noQuiz": "Noch kein Quiz?", "tryIt": "Das Beispiel spielen ›", "more": "So fragst du deine KI ↓", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Arbeitsblätter", "capAi": "Deine KI", "capZip": "Die .zip-Datei, hier geöffnet", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 5th grade class", "l": 2}, {"s": ", "}, {"s": "about 10 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": "."}], "code": "Code", "what": "Here you play quizzes your own AI makes from your sheets, notes or ideas.", "wayQuizmaster": "for a class or a group, on a big screen", "wayPeers": "with friends, each on their own device", "waySolo": "on your own, to practise or review", "getH": "Ask your AI for a quiz", "gives": "The AI's answer:", "run": "Open the quiz your AI made", "upload": "Choose the .zip file", "drop": "or drop it here", "noQuiz": "No quiz yet?", "tryIt": "Play the example ›", "more": "How to ask your AI ↓", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, opened here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM2", "l": 2}, {"s": ", "}, {"s": "une dizaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": "."}], "code": "Code", "what": "Ici, vous jouez aux quiz que votre propre IA crée à partir de vos fiches, notes ou idées.", "wayQuizmaster": "pour une classe ou un groupe, sur grand écran", "wayPeers": "entre amis, chacun sur son appareil", "waySolo": "pour vous exercer ou réviser", "getH": "Demandez un quiz à votre IA", "gives": "La réponse de l'IA :", "run": "Ouvrez le quiz de votre IA", "upload": "Choisir le fichier .zip", "drop": "ou déposez-le ici", "noQuiz": "Pas encore de quiz ?", "tryIt": "Essayer l'exemple ›", "more": "Que dire à votre IA ↓", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, ouvert ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève répond", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans la vidéo"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quinta elementare", "l": 2}, {"s": ", "}, {"s": "una decina di domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": "."}], "code": "Codice", "what": "Qui giochi ai quiz che la tua IA crea dalle tue schede, dai tuoi appunti o dalle tue idee.", "wayQuizmaster": "per una classe o un gruppo, su schermo grande", "wayPeers": "tra amici, ognuno sul suo dispositivo", "waySolo": "per conto tuo, per esercitarti o ripassare", "getH": "Chiedi un quiz alla tua IA", "gives": "La risposta dell'IA:", "run": "Apri il quiz della tua IA", "upload": "Scegli il file .zip", "drop": "o trascinalo qui", "noQuiz": "Non hai ancora un quiz?", "tryIt": "Prova l'esempio ›", "more": "Come chiedere un quiz alla tua IA ↓", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Il file .zip, aperto qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno risponde", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel video"}};
 
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
      on the AI app's tile (its name under the tile is the chapter's, LANDING.capAi); ask2 is the teacher's
@@ -428,7 +429,7 @@ function avatarSvg(av, label = true) {
     addr: 'classyquiz.pages.dev',
     of: ' / 13',
     // the chapters' starts, marked on the time bar: [film time, the key of its name in landing-text.ts (LANDING)]
-    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [34.7, 'capWall'], [45.0, 'capTap']],
+    chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [35.7, 'capWall'], [46.0, 'capTap']],
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
@@ -482,6 +483,11 @@ function avatarSvg(av, label = true) {
       zipTitle: Q.zipTitle, title: Q.title, q1: Q.q1,
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
+      // the root page's first screen (client/landing-text.ts): the sentence, the ways (their names are the entries' own, in every
+      // language), the first step with the ask as the page prints it, plain, and the file it brought, the line under the box
+      what: L.what, ways: [['Quizmaster', L.wayQuizmaster, 'wayQuizmaster'], ['Peers', L.wayPeers, 'wayPeers'], ['Solo', L.waySolo, 'waySolo']],
+      getH: L.getH, gives: L.gives, noQuiz: L.noQuiz, tryIt: L.tryIt, more: L.more, zipFile: Q.zipFile,
+      askPlain: [[glue(L.ask.map((p) => p.s).join(''))]],
       // [name, film time, key]; the player's names (play, pause, speed, the time bar) in the page's language
       chapters: COMMON.chapters.map(([at, key]) => [L[key], at, key]),
       ui: Object.assign({}, COMMON.ui, { play: L.play, pause: L.pause, speed: L.speed, seek: L.seek }),
@@ -527,12 +533,12 @@ function avatarSvg(av, label = true) {
         the browser opened, by client/home.ts's rule, so an own copy shows its own; the standalone page keeps the demo's. */
     function siteAddress(h) {
       const swap = (v) => (typeof v === 'string' ? v.split(DEMO).join(h) : Array.isArray(v) ? v.map(swap) : v);
-      for (const k of ['ask1', 'status1', 'howTo', 'addr']) TX[k] = swap(TX[k]);
+      for (const k of ['ask1', 'askPlain', 'status1', 'howTo', 'addr']) TX[k] = swap(TX[k]);
     }
 
     // ---------------------------------------------------------------- timeline
     // Every teacher press on the phone, and when its change lands on the wall.
-    const PRESS = [34.4, 42.0, 45.0, 51.0, 57.0, 63.3];
+    const PRESS = [35.4, 43.0, 46.0, 52.0, 58.0, 64.3];
     const LAG = 0.25;
     // The upload carries the two choices a newcomer must follow (README, Purpose): which way to play, on the local check, and how
     // the second device comes in, on the lobby's check. Each gets a hold at full width, then the camera moves in on what is read
@@ -542,11 +548,11 @@ function avatarSvg(av, label = true) {
       pulse: 5.55, open: 6.25, expand: [6.85, 7.3],
       attach: 7.45, type1: 7.85, send1: 13.5, status1: 13.85, bars1: [14.05, 14.85], zip1: 14.95,
       type2: 15.35, send2: 17.8, status2: 18.05, bars2: [18.2, 18.6], zip2: 18.75, tapZip: 19.45,
-      web: 19.7, tapUpload: 20.65, sheetUp: [20.85, 21.1], tapFile: 21.45, sheetDown: [21.55, 21.75],
-      local: 22.1, zoomQm: [23.3, 23.85], tapLobby: 25.5, lobby: 25.75, zoomCode: [26.7, 27.25], shrink: [29.2, 29.8],
-      lapOn: 30.15, typeCode: 30.55, codeStep: 0.11, enterClick: 31.6, enter: 31.8, showClick: 32.75, shown: 33.05,
-      kidsIn: 35.6, oneTap: 46.6, ots: [43.9, 48.3], ots2: [59.55, 61.4], flick: [62.4, 63.25], end: [65.5, 66.0],
-      cut: 33.7, walk: [35.2, 36.3],
+      web: 19.7, zoomRoot: [20.85, 21.35], tapUpload: 21.65, sheetUp: [21.85, 22.1], tapFile: 22.45, sheetDown: [22.55, 22.75],
+      local: 23.1, zoomQm: [24.3, 24.85], tapLobby: 26.5, lobby: 26.75, zoomCode: [27.7, 28.25], shrink: [30.2, 30.8],
+      lapOn: 31.15, typeCode: 31.55, codeStep: 0.11, enterClick: 32.6, enter: 32.8, showClick: 33.75, shown: 34.05,
+      kidsIn: 36.6, oneTap: 47.6, ots: [44.9, 49.3], ots2: [60.55, 62.4], flick: [63.4, 64.25], end: [66.5, 67.0],
+      cut: 34.7, walk: [36.2, 37.3],
     };
     // The asks type at whatever speed ends them this long before their send, however long they are in a language
     // or with an own copy's address: the first holds for the address to be read, the second barely.
@@ -554,6 +560,9 @@ function avatarSvg(av, label = true) {
     const PH = [150, 512]; // the phone in the teacher's left hand, world coordinates
     const LAPTOP = { x: 425, y: 525, w: 140, s: 140 / 960 };
     const SCREEN = { x: 600, y: 70, w: 760, s: 760 / 960 };
+    // The root page on the laptop's screen (960 x 600), as a window about 1070 px wide shows it (a 1366 px screen at a little under
+    // 130%): the first screen down to the line under the box. x: where the column starts on the screen; s: screen units per CSS px.
+    const LAPPAGE = { s: 960 / 1066, x: ((1066 - 704) / 2 + 16) * 960 / 1066 };
 
     // ---------------------------------------------------------------- helpers
     const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
@@ -734,10 +743,10 @@ function avatarSvg(av, label = true) {
         k.seated = k.enter + k.walk;
       });
       const byJoin = KIDS.slice().sort((a, b) => a.seated + a.jitter * 0.8 - (b.seated + b.jitter * 0.8));
-      byJoin.forEach((k, n) => { k.join = 37.6 + n * 0.205; });
+      byJoin.forEach((k, n) => { k.join = 38.6 + n * 0.205; });
       // Answers: a few before the shown child, the shown child at T.oneTap, the rest after the cut back.
       const others = KIDS.filter((k) => k !== ots).sort((a, b) => a.jitter - b.jitter);
-      others.forEach((k, n) => { k.answer = n < 4 ? 45.95 + n * 0.17 : n < 7 ? 46.9 + (n - 4) * 0.4 : 48.45 + (n - 7) * 0.16; });
+      others.forEach((k, n) => { k.answer = n < 4 ? 46.95 + n * 0.17 : n < 7 ? 47.9 + (n - 4) * 0.4 : 49.45 + (n - 7) * 0.16; });
       ots.answer = T.oneTap + 0.3; // stored a moment after the tap
       ots.tap = T.oneTap;
       KIDS.forEach((k) => { k.tap = k.tap || k.answer - 0.25; });
@@ -1197,7 +1206,7 @@ function avatarSvg(av, label = true) {
         const toArrow = [(ARROW[0] - nx) / s - SH[0], (ARROW[1] - ny) / s - SH[1]];
         const dl = Math.hypot(toArrow[0], toArrow[1]);
         const read = eseg(t, PRESS[1] + 0.4, PRESS[1] + 0.8) * (1 - eseg(t, PRESS[2] - 0.5, PRESS[2] - 0.2));
-        const point = eseg(t, 53.2, 53.7) * (1 - eseg(t, 56.4, 56.9));
+        const point = eseg(t, 54.2, 54.7) * (1 - eseg(t, 57.4, 57.9));
         const rx = SH[0] + toArrow[0] / dl * (L1 + L2) * 0.55, ry = SH[1] + toArrow[1] / dl * (L1 + L2) * 0.55 + 20;
         const qx = SH[0] + toArrow[0] / dl * (L1 + L2) * 0.97, qy = SH[1] + toArrow[1] / dl * (L1 + L2) * 0.97;
         tx = lerp(lerp(tx, rx, read), qx, point); ty = lerp(lerp(ty, ry, read), qy, point);
@@ -1218,9 +1227,18 @@ function avatarSvg(av, label = true) {
     let opening, ocam = [800, 450, 1];
     // After the site has shrunk back into the phone, a cut to the laptop's screen (two keys at one time): the laptop is a
     // second device, and a pan across the desk to it only said so with a swoop (owner: unnecessary, too busy).
+    // On the laptop the root page shows whole, then the camera moves in on the header's code box for the teacher code to be read as
+    // it is typed (at the page's own size it would be about 6 px on a phone), and cuts back to the whole screen as the screen changes.
+    const OLAP_FULL = [OLAP.x + OLAP.w / 2, OLAP.y + OLAP.w * 600 / 1920, 1484 / OLAP.w];
+    const OLAP_CODE = (() => {
+      const z = OLAP_FULL[2] * 1.8, vw = W / z / OLAP.s, vh = H / z / OLAP.s; // the frame in the laptop's screen units
+      const cx = LAPPAGE.x + 500 * LAPPAGE.s; // between the code box's label and the language
+      return [OLAP.x + Math.min(cx, 960 - vw / 2) * OLAP.s, OLAP.y + (vh / 2 - 6) * OLAP.s, z];
+    })();
     const OCAM = [
       [0, [800, 450, 1]], [T.home + 0.1, [800, 450, 1]], [5.4, [PO.x, PO.y, 2.9]],
-      [T.lapOn, [PO.x, PO.y, 2.9]], [T.lapOn, [OLAP.x + OLAP.w / 2, OLAP.y + OLAP.w * 600 / 1920, 1484 / OLAP.w]],
+      [T.lapOn, [PO.x, PO.y, 2.9]], [T.lapOn, OLAP_FULL], [T.typeCode - 0.05, OLAP_FULL], [T.typeCode + 0.35, OLAP_CODE],
+      [T.enter, OLAP_CODE], [T.enter, OLAP_FULL],
     ];
     const O2F = (x, y) => [(x - ocam[0]) * ocam[2] + 800, (y - ocam[1]) * ocam[2] + 450];
     function makeOpening() {
@@ -1282,20 +1300,104 @@ function avatarSvg(av, label = true) {
       opening = { g, cg, update, phonePos };
     }
 
+    // ---------------------------------------------------------------- the root page, as it opens
+    // The page a visitor meets above the film (docs/design/root-page.md, "One column"), drawn once per screen that shows it (the
+    // phone's site, the laptop), in CSS px of a window wider than the column: x from the column's left edge (the header's bar
+    // runs 16 px beyond it on either side), y from the page's top. The sizes and spacings are the page's own (src/public/index.html,
+    // site.css) at a desktop's width, where the column is 672 px; the lines are wrapped here, so a language's longer sentence
+    // takes the lines it takes on the page. The caller scales it into its screen.
+    let rootN = 0;
+    function makeRootPage(parent) {
+      const n = rootN++;
+      const g = G(parent);
+      const plain = { clsOf: (k) => (k === 'b' ? 'b' : ''), fillOf: () => null, underline: () => null };
+      const lineOf = (top, lh, size) => top + lh / 2 + size * 0.35; // the baseline of a line box
+      /** Lines no wider than they need to be to keep their number (the page's text-wrap: balance). */
+      const balanced = (pieces, size, maxW, cls) => {
+        const clsOf = () => cls, n0 = wrap(pieces, size, maxW, clsOf).lines.length;
+        let lo = maxW / n0, hi = maxW;
+        for (let i = 0; i < 12 && n0 > 1; i++) { const mid = (lo + hi) / 2; if (wrap(pieces, size, mid, clsOf).lines.length > n0) lo = mid; else hi = mid; }
+        return wrap(pieces, size, hi, clsOf);
+      };
+      /** No word alone on the last line where the line before can give one up (the page's text-wrap: pretty, near enough). */
+      const pretty = (pieces, size, maxW) => {
+        const w = wrap(pieces, size, maxW, () => '');
+        const L = w.lines;
+        if (L.length > 1 && L[L.length - 1].filter((p) => !/^ +$/.test(p.text)).length === 1) {
+          const prev = L[L.length - 2], words = prev.filter((p) => !/^ +$/.test(p.text));
+          if (words.length > 2) { const i = prev.lastIndexOf(words[words.length - 1]); L[L.length - 1] = prev.splice(i).concat(L[L.length - 1]); }
+        }
+        return w;
+      };
+      // the paper, the header: the mark, the code box, the language
+      G(g, `<rect x="-1200" y="-200" width="3072" height="2000" fill="${C.paper}"/><rect x="-1200" y="62" width="3072" height="1" fill="${C.rule}"/>
+        <use href="#cq-lockup" x="0" y="11.8" width="133.8" height="32" color="${C.ink}"/>
+        ${T_(362.3, 36.3, TX.codeLabel, 15.2, { fill: C.muted, anchor: 'end' })}
+        <rect x="369.3" y="12" width="178" height="38" rx="9" fill="${C.paper}" stroke="${C.rule}" stroke-width="2"/>
+        <rect x="554.3" y="10" width="46" height="42" rx="10" fill="${C.ink}"/><path d="M571.8 25 L584.3 31 L571.8 37Z" fill="${C.paper}"/>
+        <rect x="616.8" y="12.7" width="54.7" height="36.6" rx="8" fill="none" stroke="${C.rule}" stroke-width="1"/>${T_(644.2, 36.3, TX.lang, 15.2, { cls: 'ts', fill: C.muted, anchor: 'middle', fit: 46 })}`);
+      const codeG = G(g, `<text class="b" x="459.8" y="38.2" font-size="20" text-anchor="middle" fill="#72716b" letter-spacing="3">${esc(TX.codePh)}</text>
+        <text class="b" x="459.8" y="38.2" font-size="20" text-anchor="middle" fill="${C.ink}" letter-spacing="3"></text>`);
+      const [ph, code] = codeG.querySelectorAll('text');
+      // the sentence, the page's first heading
+      const h1 = balanced([[TX.what]], 28.8, 672, 'b');
+      const h1Top = 75.8;
+      h1.lines.forEach((l, i) => G(g, T_(0, lineOf(h1Top + i * 33.98, 33.98, 28.8), l.map((p) => p.text).join('').trimEnd(), 28.8, { cls: 'b' })));
+      // the ways to play, a picture each, its name and the setting
+      const waysTop = h1Top + h1.lines.length * 33.98 + 11.2, nameTop = waysTop + 135 + 4.8;
+      let waysBottom = nameTop + 20.8;
+      TX.ways.forEach(([name, words, key], i) => {
+        const x = i * 228, id = `cq-way${n}-${i}`;
+        G(g, `<clipPath id="${id}"><rect x="${x}" y="${f1(waysTop)}" width="216" height="135" rx="10"/></clipPath>
+          <rect x="${x}" y="${f1(waysTop)}" width="216" height="135" rx="10" fill="#efe6d8"/>
+          <image href="${ASSETS[key] || ''}" x="${x}" y="${f1(waysTop)}" width="216" height="135" clip-path="url(#${id})" preserveAspectRatio="none"/>
+          ${T_(x, lineOf(nameTop, 20.8, 16), name, 16, { cls: 'b', fit: 216 })}`);
+        const w = pretty([[words]], 14.08, 216);
+        drawLines(g, w, x, lineOf(nameTop + 19.8, 18.3, 14.08), 14.08, 18.3, Object.assign({ fill: C.muted }, plain)).show(w.total);
+        waysBottom = Math.max(waysBottom, nameTop + 20.8 + w.lines.length * 18.3);
+      });
+      // the two steps, numbered by a disc
+      const heading = (top, num, text) => `<circle cx="11.6" cy="${f1(top + 13.4)}" r="11.6" fill="${C.accent}"/>${T_(11.6, top + 18.2, num, 13.6, { cls: 'tb', fill: '#fff', anchor: 'middle' })}
+        ${T_(31.2, lineOf(top, 24, 19.2), text, 19.2, { cls: 'b', fit: 640 })}`;
+      const s1 = waysBottom + 14.4;
+      G(g, heading(s1, '1', TX.getH));
+      // the ask as a chat message, the two sheets attached to it
+      const bTop = s1 + 31, ask = wrap(TX.askPlain, 15.68, 582, () => '');
+      const bH = ask.lines.length * 23.52 + 20, bBot = bTop + bH;
+      G(g, `<path d="M16 ${f1(bTop)} H656 Q672 ${f1(bTop)} 672 ${f1(bTop + 16)} V${f1(bBot - 16)} Q672 ${f1(bBot)} 656 ${f1(bBot)} H4 Q0 ${f1(bBot)} 0 ${f1(bBot - 4)} V${f1(bTop + 16)} Q0 ${f1(bTop)} 16 ${f1(bTop)}Z" fill="#f4ebe1"/>`);
+      drawLines(g, ask, 14, lineOf(bTop + 10, 23.52, 15.68), 15.68, 23.52, plain).show(ask.total);
+      [[608, -3, 'sheet1'], [628.5, 3, 'sheet2']].forEach(([x, r, k]) => G(g, `<g transform="rotate(${r} ${f1(x + 14.75)} ${f1(bTop + 32)})"><rect x="${f1(x + 0.5)}" y="${f1(bTop + 13.8)}" width="29.5" height="38" fill="#000" opacity=".18"/><rect x="${x}" y="${f1(bTop + 13)}" width="29.5" height="38" fill="#fff"/><image href="${ASSETS[k] || ''}" x="${x}" y="${f1(bTop + 13)}" width="29.5" height="38" preserveAspectRatio="none"/></g>`));
+      // the AI's answer: the example's file
+      const rTop = bBot + 7.2, gw = measure(TX.gives, 15.2, ''), zw = measure(TX.zipFile, 14.72, 'ts');
+      G(g, `${T_(0, rTop + 21.4, TX.gives, 15.2)}<rect x="${f1(gw + 10.5)}" y="${f1(rTop + 0.5)}" width="${f1(zw + 42)}" height="31.8" rx="10" fill="#fff" stroke="${C.rule}"/>
+        <path transform="translate(${f1(gw + 19)} ${f1(rTop + 6.9)})" d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="${C.accent}" stroke-width="1.6" stroke-linejoin="round"/>
+        ${T_(gw + 41, rTop + 21.6, TX.zipFile, 14.72, { cls: 'ts' })}`);
+      // the second step: the box that opens a file, the button and the line beside it
+      const s2 = rTop + 32.8 + 14.4, boxTop = s2 + 31;
+      const bw = measure(TX.upload, 18.4, 'tb') + 56, dw = measure(TX.drop, 17, ''), bx = (672 - (bw + 16 + dw)) / 2, by = boxTop + 12;
+      G(g, `${heading(s2, '2', TX.run)}<rect x="1" y="${f1(boxTop + 1)}" width="670" height="76.5" rx="15" fill="none" stroke="#b9b3a5" stroke-width="2" stroke-dasharray="6 5"/>
+        <rect x="${f1(bx)}" y="${f1(by)}" width="${f1(bw)}" height="54.5" rx="12" fill="${C.ink}"/>${T_(bx + bw / 2, by + 33.6, TX.upload, 18.4, { cls: 'tb', fill: C.paper, anchor: 'middle' })}
+        ${T_(bx + bw + 16, boxTop + 45.4, TX.drop, 17, { fill: C.muted })}`);
+      // under the box: the reading line while a file is read, and the line for whoever has none
+      const boxBot = boxTop + 78.5;
+      const reading = G(g, T_(0, boxBot + 26.7, TX.reading, 17, { fill: C.muted }));
+      // "How to ask" at the right, or on a line of its own where the three don't fit in one (the page's flex-wrap)
+      const nq = measure(TX.noQuiz, 17, ''), tw = measure(TX.tryIt, 17, 'ts'), mw = measure(TX.more, 17, 'ts');
+      const moreDown = nq + 6.8 + tw + 6.8 + mw > 672 ? 26.35 : 0;
+      const tryG = G(g, `${T_(0, boxBot + 26.7, TX.noQuiz, 17)}${T_(nq + 6.8, boxBot + 26.7, TX.tryIt, 17, { cls: 'ts', fill: C.accent })}${T_(672, boxBot + 26.7 + moreDown, TX.more, 17, { cls: 'ts', fill: C.accent, anchor: 'end' })}`);
+      const tryBot = boxBot + 8 + 26.3 + moreDown;
+      function show(isReading) { vis(reading, isReading); tf(tryG, isReading ? 'translate(0 34.4)' : 'translate(0 0)'); }
+      show(false);
+      // below the line under the box the page goes on with the film's own section, which the film doesn't draw into itself
+      return { g, show, ph, code, step1: s1, tryBot, go: [577.3, 31], open: [bx + bw / 2, by + 27.2] };
+    }
+
+    let lapN = 0;
     function makeLaptop(parent) {
       const g = G(parent);
+      lapN++;
       g.innerHTML = `<rect width="960" height="600" fill="#101012" class="lp-off"/>
-        <g class="lp-home"><rect width="960" height="600" fill="${C.paper}"/><rect y="78" width="960" height="1.5" fill="${C.rule}"/>
-          <use href="#cq-lockup" x="30" y="17" width="184" height="44" color="${C.ink}"/>
-          ${T_(536, 50, TX.codeLabel, 22, { fill: C.muted, anchor: 'end' })}
-          <rect x="548" y="16" width="230" height="48" rx="10" fill="#fff" stroke="${C.rule}" stroke-width="2"/>
-          <text class="b lp-ph" x="663" y="51" font-size="32" text-anchor="middle" fill="#72716b">${TX.codePh}</text>
-          <text class="b lp-code" x="663" y="51" font-size="32" text-anchor="middle" fill="${C.ink}" letter-spacing="1"></text>
-          <rect x="788" y="16" width="56" height="48" rx="10" fill="${C.ink}" class="lp-go"/><path d="M808 28 L828 40 L808 52Z" fill="#fff"/>
-          ${T_(900, 50, TX.lang, 20, { fill: C.muted, anchor: 'middle' })}
-          <rect x="60" y="120" width="840" height="200" rx="14" fill="none" stroke="${C.rule}" stroke-width="2"/>
-          <rect x="90" y="150" width="120" height="140" rx="6" fill="#e9e4da"/><rect x="250" y="150" width="120" height="140" rx="6" fill="#e9e4da"/><rect x="410" y="150" width="120" height="140" rx="6" fill="#e9e4da"/><rect x="570" y="150" width="140" height="140" rx="6" fill="#e9e4da"/><rect x="750" y="150" width="120" height="140" rx="6" fill="#e9e4da"/>
-          <rect x="60" y="360" width="400" height="18" rx="6" fill="#d5cfc4"/><rect x="500" y="360" width="400" height="18" rx="6" fill="#d5cfc4"/><rect x="60" y="400" width="360" height="12" rx="5" fill="#e2ddd2"/><rect x="500" y="400" width="360" height="12" rx="5" fill="#e2ddd2"/></g>
+        <g class="lp-home"><clipPath id="cq-lp${lapN}"><rect width="960" height="600"/></clipPath><g clip-path="url(#cq-lp${lapN})"><g class="lp-page"></g></g></g>
         <g class="lp-enter"><rect width="960" height="600" fill="${C.paper}"/><rect y="78" width="960" height="1.5" fill="${C.rule}"/><use href="#cq-lockup" x="30" y="17" width="184" height="44" color="${C.ink}"/>
           ${T_(80, 170, TX.title, 46, { cls: 'tb', fit: 820 })}
           <rect x="80" y="220" width="560" height="120" rx="16" fill="${C.ink}" class="lp-b1"/>${T_(110, 272, TX.showHere, 36, { cls: 'ts', fill: '#fff', fit: 500 })}${T_(110, 314, TX.showHereSub, 24, { fill: '#d8d4cc', fit: 500 })}
@@ -1304,7 +1406,10 @@ function avatarSvg(av, label = true) {
         <g class="lp-cursor"><path d="M0 0 L0 44 L11 33 L19 52 L27 48 L19 30 L34 30Z" fill="#111" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></g>
         <g class="lp-click"><circle r="20" fill="none" stroke="${C.ink}" stroke-width="4"/></g>`;
       const q = (s) => g.querySelector(s);
-      const off = q('.lp-off'), home = q('.lp-home'), enter = q('.lp-enter'), wallG = q('.lp-wall'), code = q('.lp-code'), ph = q('.lp-ph'), cur = q('.lp-cursor'), click = q('.lp-click');
+      const off = q('.lp-off'), home = q('.lp-home'), enter = q('.lp-enter'), wallG = q('.lp-wall'), cur = q('.lp-cursor'), click = q('.lp-click');
+      const rp = makeRootPage(q('.lp-page'));
+      tf(rp.g, tr(LAPPAGE.x, 0, LAPPAGE.s));
+      const { code, ph } = rp, goAt = [LAPPAGE.x + rp.go[0] * LAPPAGE.s, rp.go[1] * LAPPAGE.s];
       const wall = makeWall(q('.lp-wallin'), 'laptop');
       function update(t) {
         const m = t < T.lapOn ? 'off' : t < T.enter ? 'home' : t < T.shown ? 'enter' : 'wall';
@@ -1316,13 +1421,13 @@ function avatarSvg(av, label = true) {
         if (m === 'wall') wall.update(t);
         // the mouse: to ▶, then, once the question has been seen, to "Show the quiz here"; after that click it leaves for the corner
         // before the screen changes, so "Joining opens in a moment." is clear, and its ring is gone by then too
-        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, 812, 40], [T.showClick - 0.55, 812, 40], [T.showClick - 0.05, 360, 280],
+        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, goAt[0], goAt[1]], [T.showClick - 0.55, goAt[0], goAt[1]], [T.showClick - 0.05, 360, 280],
           [T.showClick + 0.08, 360, 280], [T.shown - 0.02, 880, 540]];
         const p = keys(t, pts.map(([tt, x, y]) => [tt, [x, y]]));
         vis(cur, t > T.lapOn && t < T.shown + 0.3);
         tf(cur, tr(p[0], p[1]));
         let ck = -1, cx = 0, cy = 0;
-        for (const [tc, x, y, d] of [[T.enterClick, 812, 40, 0.4], [T.showClick, 360, 280, T.shown - T.showClick]]) if (t >= tc && t < tc + d) { ck = seg(t, tc, tc + d); cx = x; cy = y; }
+        for (const [tc, x, y, d] of [[T.enterClick, goAt[0], goAt[1], 0.4], [T.showClick, 360, 280, T.shown - T.showClick]]) if (t >= tc && t < tc + d) { ck = seg(t, tc, tc + d); cx = x; cy = y; }
         vis(click, ck >= 0);
         if (ck >= 0) { tf(click, tr(cx, cy, 0.5 + ck * 1.6)); set(click, 'opacity', (1 - ck).toFixed(2)); }
       }
@@ -1376,14 +1481,14 @@ function avatarSvg(av, label = true) {
         }
         tf(all, `${tr(x, y, k.s)} scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
         // head: turns to a neighbour at the split; nods while laughing
-        const turn = (k.turn || 0) * eseg(t, 51.75 + k.jitter * 0.4, 52.1 + k.jitter * 0.4) * (1 - eseg(t, 55.8, 56.2));
+        const turn = (k.turn || 0) * eseg(t, 52.75 + k.jitter * 0.4, 53.1 + k.jitter * 0.4) * (1 - eseg(t, 56.8, 57.2));
         const laugh = k.i === 9 && t > sol + 0.4 && t < sol + 2.6 ? Math.abs(Math.sin((t - sol) * 14)) * 4 : 0;
         const shr = k.ans !== TX.right ? Math.sin(Math.PI * seg(t, sol + 0.3 + k.jitter * 0.3, sol + 1.5 + k.jitter * 0.3)) : 0;
         tf(head, tr(turn * 4, laugh + shr * 6));
         tf(hair, tr(-turn * 9, 0));
         op(nose, Math.abs(turn));
         set(nose, 'cx', turn < 0 ? '-31' : '31');
-        vis(up, k.i === 5 && t > 52.6 && t < 56.6);
+        vis(up, k.i === 5 && t > 53.6 && t < 57.6);
         // the tablet
         const s = kidScreen(k, t);
         vis(S.code, s === 'code' || s === 'typing');
@@ -1406,10 +1511,10 @@ function avatarSvg(av, label = true) {
         : kind === 'ha' ? `<path d="M-22 -6 Q0 22 22 -6Z" fill="${C.ink}"/><path d="M-20 -18 q6 -6 12 0 M8 -18 q6 -6 12 0" fill="none" stroke="${C.ink}" stroke-width="4" stroke-linecap="round"/>`
           : `<text class="b" x="0" y="15" font-size="44" text-anchor="middle" fill="${kind === '!' ? C.accent : C.ink}">${kind}</text>`;
       const list = [
-        { at: [508, 374], t: [42.5, 43.85], kind: 'read', w: 90, tail: -1 },
-        { kid: 1, t: [52.0, 55.6], kind: '?' }, { kid: 4, t: [52.35, 55.9], kind: '!' }, { kid: 11, t: [52.6, 55.5], kind: '?' },
-        { kid: 15, t: [53.0, 56.0], kind: '!' }, { kid: 7, t: [53.4, 55.9], kind: '?' }, { kid: 18, t: [53.8, 56.1], kind: '?' },
-        { kid: 9, t: [57.75, 59.9], kind: 'ha' }, { kid: 13, t: [57.6, 59.6], kind: '!' },
+        { at: [508, 374], t: [43.5, 44.85], kind: 'read', w: 90, tail: -1 },
+        { kid: 1, t: [53.0, 56.6], kind: '?' }, { kid: 4, t: [53.35, 56.9], kind: '!' }, { kid: 11, t: [53.6, 56.5], kind: '?' },
+        { kid: 15, t: [54.0, 57.0], kind: '!' }, { kid: 7, t: [54.4, 56.9], kind: '?' }, { kid: 18, t: [54.8, 57.1], kind: '?' },
+        { kid: 9, t: [58.75, 60.9], kind: 'ha' }, { kid: 13, t: [58.6, 60.6], kind: '!' },
       ];
       const els = list.map((b) => {
         const w = b.w || 62;
@@ -1569,7 +1674,7 @@ function avatarSvg(av, label = true) {
     }
 
     // ---------------------------------------------------------------- the site on the phone (full frame)
-    // The root page's Run box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
+    // The root page as it opens, in on its box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
     // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check, where Screen and remote
     // is pressed and the how-to gives the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
     // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too (film-text.md 0.8); what
@@ -1581,16 +1686,17 @@ function avatarSvg(av, label = true) {
       const zoomG = G(g);
       const page = G(zoomG);
       const header = `<rect width="${W}" height="112" fill="${C.paper}"/><rect y="111" width="${W}" height="2" fill="${C.rule}"/><use href="#cq-lockup" x="60" y="24" width="268" height="64" color="${C.ink}"/>`;
-      const root = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${header}
-        ${T_(1010, 70, TX.codeLabel, 32, { fill: C.muted, anchor: 'end' })}
-        <rect x="1028" y="26" width="270" height="62" rx="14" fill="#fff" stroke="${C.rule}" stroke-width="3"/>${T_(1163, 70, TX.codePh, 38, { cls: 'b', fill: '#72716b', anchor: 'middle' })}
-        <rect x="1312" y="26" width="72" height="62" rx="14" fill="${C.ink}"/><path d="M1338 42 L1362 57 L1338 72Z" fill="#fff"/>${T_(1460, 70, TX.lang, 30, { fill: C.muted, anchor: 'middle' })}
-        ${T_(260, 230, TX.run, 60, { cls: 'b', fit: 1080 })}
-        <rect x="260" y="270" width="1080" height="330" rx="26" fill="none" stroke="#b9b3a7" stroke-width="4" stroke-dasharray="18 12"/>
-        <g class="wb-upl"><rect x="330" y="330" width="940" height="120" rx="20" fill="${C.ink}"/>${T_(800, 405, TX.upload, 44, { cls: 'ts', fill: '#fff', anchor: 'middle', fit: 880 })}</g>
-        ${T_(800, 530, TX.drop, 36, { fill: C.muted, anchor: 'middle', fit: 1000 })}
-        <g class="wb-prog"><rect x="270" y="280" width="1060" height="310" rx="22" fill="${C.paper}"/>${T_(800, 455, TX.reading, 46, { fill: C.muted, anchor: 'middle', fit: 1000 })}</g>`);
-      const prog = root.querySelector('.wb-prog');
+      // The root page as it opens (makeRootPage): at the full width first, the first screen down to the line under the box, so
+      // the page above the film is the page the film shows; then in on the two steps, the ask and its file over the box that
+      // opens a file, large enough to read on a phone, the frame's foot where the next section starts.
+      const root = G(page);
+      const rp = makeRootPage(root);
+      // [the page's point at the frame's centre, the scale]: the whole width, then from just above the first step to just under the
+      // line under the box; the centre moves straight while the scale grows evenly
+      const RS = Math.min(1.35, H / (rp.tryBot + 34)), RZ = clamp(H / (rp.tryBot + 16 - (rp.step1 - 8)), 1.6, 2.7);
+      const R0 = [336, H / 2 / RS, RS], R1 = [-8 + W / 2 / RZ, rp.step1 - 8 + H / 2 / RZ, RZ];
+      const rootView = (k) => { const s = Math.exp(lerp(Math.log(R0[2]), Math.log(R1[2]), k)); return [W / 2 - lerp(R0[0], R1[0], k) * s, H / 2 - lerp(R0[1], R1[1], k) * s, s]; };
+      const openAt = [(rp.open[0] + 8) * RZ, (rp.open[1] - (rp.step1 - 8)) * RZ];
       // the OS's file sheet: the .zip on top
       const fileRow = (i, name, y) => `<g><rect x="200" y="${y}" width="1200" height="120" rx="18" fill="${i === 0 ? '#eef3ff' : '#fff'}"/>
         <rect x="230" y="${y + 22}" width="76" height="76" rx="14" fill="${i === 0 ? '#e9e9e4' : '#d9cbb7'}"/>${i === 0 ? `<path d="M248 ${y + 40} h40 v40 h-40z M258 ${y + 40} v40 M266 ${y + 48} h6 M266 ${y + 58} h6 M266 ${y + 68} h6" fill="none" stroke="#6a6a66" stroke-width="3.5"/>` : ''}
@@ -1682,7 +1788,8 @@ function avatarSvg(av, label = true) {
         tf(page, tr((1 - k) * W, 0));
         const scr = t < T.local ? 'root' : t < T.lobby ? 'local' : 'lobby';
         vis(root, scr === 'root'); vis(local, scr === 'local'); vis(lobby, scr === 'lobby');
-        vis(prog, t >= T.sheetDown[1] && scr === 'root');
+        rp.show(t >= T.sheetDown[1] && scr === 'root');
+        if (scr === 'root') { const rv = rootView(eseg(t, T.zoomRoot[0], T.zoomRoot[1])); tf(root, tr(rv[0], rv[1], rv[2])); }
         const sk = eseg(t, T.sheetUp[0], T.sheetUp[1]) * (1 - eseg(t, T.sheetDown[0], T.sheetDown[1]));
         op(sheet, sk > 0 ? 1 : 0);
         if (sk > 0) { set(sheet.firstChild, 'opacity', (0.35 * sk).toFixed(2)); tf(sheetIn, tr(0, (1 - sk) * 700)); }
@@ -1692,7 +1799,7 @@ function avatarSvg(av, label = true) {
         tf(zoomG, `translate(${f1(v[0])} ${f1(v[1])}) scale(${v[2].toFixed(3)})`);
         dimmed.forEach((d) => op(d, 1 - 0.5 * z));
         op(hl, t > T.zoomCode[0] ? 0.55 + 0.45 * Math.sin((t - T.zoomCode[0]) * 7) : 0);
-        thumb.update(t, [[T.tapUpload, 1140, 400], [T.tapFile, 1180, 462], [T.tapLobby, tapLobbyAt[0], tapLobbyAt[1]]]);
+        thumb.update(t, [[T.tapUpload, openAt[0], openAt[1]], [T.tapFile, 1180, 462], [T.tapLobby, tapLobbyAt[0], tapLobbyAt[1]]]);
       }
       CHECK.views = { qm: qmView, how: howView, howW };
       web = { F, update };
@@ -1795,9 +1902,9 @@ function avatarSvg(av, label = true) {
     // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
     // ("Let everyone in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
     const CAM = [
-      [T.cut, [431, 537, 2.3]], [35.1, [431, 537, 2.3]], [36.4, ROOM],
-      [51.3, ROOM], [52.6, SPLIT], [56.6, SPLIT], [57.3, ROOM],
-      [61.6, ROOM], [62.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
+      [T.cut, [431, 537, 2.3]], [36.1, [431, 537, 2.3]], [37.4, ROOM],
+      [52.3, ROOM], [53.6, SPLIT], [57.6, SPLIT], [58.3, ROOM],
+      [62.6, ROOM], [63.4, [SCREEN.x + SCREEN.w / 2, SCREEN.y + SCREEN.w * 9 / 32, W / SCREEN.w]],
     ];
     function layers(t) {
       cam = keys(t, CAM, [false, false, true]);

@@ -535,21 +535,28 @@ were tried is in `design/root-page.md`, Situation.
    as questions for the owner's read, `translation-review.md`, "The first
    page in German, French and Italian". At 390 px and wider the first
    screen holds in each what it holds in English. The film carries the
-   new words it copies from the page; its picture of the page is item 3's.
+   words it copies from the page, and draws the page in each language
+   (item 3).
 
 3. **The film and the worked example show the page that exists** — the
    film types the ask and shows the root page with the box that opens a
    file, and `/example` walks the same path; once the page changes, a
    newcomer who watches or reads them sees the page they will then use
-   (`docs/film/`, `design/example-page.md`). With item 1 built: the film
-   draws the header and, right under it, the heading and the box of the
-   second step, whose words are the page's still (`npm test` holds them
-   together); on the page the sentence, the ways and the first step now
-   stand between the two. `/example` names nothing of the page's layout.
-   The film's check runs on the new page
+   (`docs/film/`, `design/example-page.md`). Built, not deployed, and not
+   yet seen by the owner: the film draws the page's first screen as it
+   opens, in the page's language, from the page's own sizes (the header,
+   the sentence, the ways' pictures, the two steps), on the phone whole and
+   then in on the two steps, and again on the laptop, in on the code box
+   while the teacher code is typed; the hold is a second of its own, so
+   the film is 68 s and every other hold keeps its length (`docs/film/README.md`,
+   Situation; `storyboard-classyquiz.md`, shots 4 and 5). Its words are
+   held to the page by `npm test`, its layout is not
+   (`src/DEVELOPING.md`, "The landing film"). The posters show the class
+   at the wall, nothing of the page. `/example` names nothing of the
+   page's layout. The film's check runs on the new page
    (`docs/film/build/sitecheck.py`) and, until `main` carries that page,
    reports the page around the film as changed against `main`, which it
-   is.
+   is, and nothing else.
 
 ## Room on the Free plan
 
@@ -783,6 +790,17 @@ With the owner:
   the film below the first screen; the asks' tabs as words, without their
   pictures; "What you can count on" and the line that hands over to the
   manual for AIs; the page's two first-level headings.
+- The film's picture of the first page (v6 item 3), the implementer's
+  calls, not yet seen by the owner (`docs/film/`): the page drawn as a
+  desktop's window shows it on the phone too, as the checks are
+  (`film-text.md` 0.8), so "or drop it here" shows where a phone leaves it
+  out; a second added for its hold rather than taken from the checks' holds;
+  the camera in on the two steps, the frame cutting the column's right
+  edge; on the laptop a window about 1070 px wide and a push-in on the code
+  box, since at the page's own size the typed code is about 6 px on a
+  phone (a camera move on the laptop, where the owner found a pan and a
+  zoom busy for what they said, `docs/film/README.md`, "The film's
+  shape").
 - The first page in German, French and Italian (v6 item 2), the
   implementer's drafts, not yet read by the owner: the choices for the read
   are `translation-review.md`, "The first page in German, French and

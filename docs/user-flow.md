@@ -128,7 +128,7 @@ Purpose and reasons: docs/design/root-page.md.
 │ │ poster: the class at the wall, the votes split,        │    │
 │ │ no solution yet                            [▶]         │    │
 │ └────────────────────────────────────────────────────────┘    │
-│ [▶] ──●──'───'─'──'────── 0:00 / 1:07 [1×] [full screen]      │
+│ [▶] ──●──'───'─'──'────── 0:00 / 1:08 [1×] [full screen]      │
 │                              The example, step by step ›      │
 ├───────────────────────────────────────────────────────────────┤
 │ How to ask your AI                                            │
@@ -182,15 +182,15 @@ opens: docs/design/root-page.md, "One column".
   file" and, where a pointer drags, "or drop it here". Under it "No quiz
   yet? Play the example ›" (the example on the local check, below) and "How
   to ask your AI ↓" (down the page).
-- **The film**, under its heading, 67 s without sound, follows the workflow:
-  the sheets, the AI, the .zip going up to the site, the wall, a student's
-  tablet. Until ▶ is pressed or the time bar moved it is its poster, a
-  picture: the class at the wall, the votes split. Under it a video player's
-  bar: play, the time bar with ticks where the five steps start (dragging
-  shows the step's name), the time and the length, the speed, full screen;
-  on a phone held upright the time bar has a row of its own. At the end a
-  replay icon on the end card. Under it, "The example, step by step ›" links
-  `/example` (the worked example).
+- **The film**, under its heading, 68 s without sound, follows the workflow:
+  the sheets, the AI, this page and the .zip going up to the site, the wall,
+  a student's tablet. Until ▶ is pressed or the time bar moved it is its
+  poster, a picture: the class at the wall, the votes split. Under it a
+  video player's bar: play, the time bar with ticks where the five steps
+  start (dragging shows the step's name), the time and the length, the
+  speed, full screen; on a phone held upright the time bar has a row of its
+  own. At the end a replay icon on the end card. Under it, "The example,
+  step by step ›" links `/example` (the worked example).
 - **How to ask your AI**: "Choose any good AI." with what is verified ("Free
   Claude Sonnet wrote the example above, 4 Nov 2026: the one free AI that
   does this reliably."); "Ask the AI to build you a quiz for" the address,

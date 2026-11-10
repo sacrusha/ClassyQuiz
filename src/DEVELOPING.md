@@ -150,12 +150,17 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
 `--no-poster` writes `film.js` only, without the pictures) when:
 
 - `docs/film/build/film.js` changes;
-- `client/landing-text.ts` changes the example ask, the words of the
-  header's code box and the Run box (`ask`, `code`, `run`, `upload`, `drop`,
-  `reading`), the chapters' names (`capSheet` … `capTap`; `capAi` is also
-  the AI app's name on the phone) or the player's (`play`, `pause`, `speed`,
+- `client/landing-text.ts` changes the example ask or the words of the
+  root page's first screen, which the film draws (`ask`, `code`, `what`,
+  `wayQuizmaster`, `wayPeers`, `waySolo`, `getH`, `gives`, `run`,
+  `upload`, `drop`, `noQuiz`, `tryIt`, `more`, `reading`), the chapters'
+  names (`capSheet` … `capTap`; `capAi` is also the AI app's name on the
+  phone) or the player's (`play`, `pause`, `speed`,
   `seek`): the film shows them as they were at its build, and `npm test`
   fails until it is rebuilt;
+- the root page's first screen changes its layout or its sizes: the film
+  draws it from them (`makeRootPage` in `docs/film/build/film.js`), by
+  hand, and nothing fails; the film shows the page as it was;
 - a screen the film draws after the upload changes its words (the local
   check and its entries, the lobby's check, the second device's question,
   the wall before anyone is let in, the Remote's buttons): the film quotes

@@ -19,13 +19,14 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.dont_write_bytecode = True  # no __pycache__ in the tree
 sys.path.insert(0, str(HERE))
 import build  # noqa: E402
-from build import film_length, film_source, PUB, REPO, PAGE, launch  # noqa: E402
+from build import film_length, film_source, PUB, REPO, PAGE, WAYS, launch  # noqa: E402
 
 
 def film_js():
     assets = {
         'sheet1': '/landing/sheet-1.webp',
         'sheet2': '/landing/sheet-2.webp',
+        **{k: f'/landing/{f}' for k, f in WAYS.items()},
         'lockup': (PUB / 'brand/classyquiz-horizontal-32-inline.svg').read_text(encoding='utf-8').strip(),
         'fox': (PUB / 'brand/classyquiz-symbol-colour.svg').read_text(encoding='utf-8').strip(),
     }

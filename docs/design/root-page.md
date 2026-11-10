@@ -169,7 +169,7 @@ fetcher doesn't read four language names), the numbers of the two steps
 showing of the sheets ask, with its labels ("How to ask"), so a fetcher reads
 that ask once. The film's bar is in the HTML, since it works before the
 film's script is there, with the film's length, which the film's build
-checks (`docs/film/`); a fetcher reads it as "▶ 0:00 / 1:07 1×" under the film's
+checks (`docs/film/`); a fetcher reads it as "▶ 0:00 / 1:08 1×" under the film's
 heading, joined to no other word.
 
 The page has two first-level headings, the sentence for people and "About
@@ -314,7 +314,7 @@ How the page meets it (the details: the comments on the film in
   English one in the static HTML is for a browser without scripts
   (`<noscript>`).
 - **The bar works before the film is there.** The film's script, about
-  140 KB, loads on the first press of ▶ or the picture, or on the first move
+  170 KB, loads on the first press of ▶ or the picture, or on the first move
   of the time bar. It paints the same frame over the picture, then plays
   from the start or shows the moment the bar was moved to. The bar shows
   that time while the script loads. The speed works without loading
@@ -323,9 +323,9 @@ How the page meets it (the details: the comments on the film in
   next press tries again.
 - **Words.** The film speaks the page's language up to the upload: the ask
   typed to the AI (the sheets ask, word for word), the teacher's second
-  message, the quiz, and the root page's header with the box that opens a
-  file, whose heading and button it quotes; whether its picture of the page
-  matches the page as it is, is backlog v6 item 3's. From the upload on,
+  message, the quiz, and this page's first screen as it opens, its words
+  and its pictures, on the phone and then on the laptop, so a viewer who
+  has scrolled past it recognises it (`docs/film/`). From the upload on,
   the site's screens (the check, the wall's chrome, the Remote, the tablets)
   are English, as on the real site. Every language shows the same quiz, the
   example's 646 000 number-line question, translated: wrong answers in
