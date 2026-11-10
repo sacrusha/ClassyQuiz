@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 44ee213, deployed 2026-11-10: Pages deployment c5d801c4 of the
-  project `classyquiz`, version 4b042678 of the state Worker
+- Commit 874e708, deployed 2026-11-10: Pages deployment fc6a7fe1 of the
+  project `classyquiz`, version a03d3812 of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 44ee213 -- src/`.
+  `git diff 874e708 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
