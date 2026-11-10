@@ -44,11 +44,11 @@ screen), `client/stage.ts` (the question's layout, shared with the wall).
 
 ### The entry
 
-On the check, the first card: "You play the quiz on your own, to learn or
-review: the solution after each answer." [Play ▶], and under it "Nothing
-goes to the site. A reload or closing the tab ends it.", since the reload
-is the one way to lose a run that a hand makes without meaning to. It
-plays the quiz itself (`plays`), so the fold of questions says that whoever
+On the check, the first card: "On your own, to practise or review. Each
+answer shows the solution right away, and the score comes at the end."
+[Play ▶], and under it "Plays in this tab. Nothing is sent to the site.
+Reloading or closing the tab ends it.", since the reload is the one way to
+lose a run that a hand makes without meaning to. It plays the quiz itself (`plays`), so the fold of questions says that whoever
 will play leaves it closed. One press starts it; it takes over the check's
 page and pushes a step into the tab's history, so Back from any of Solo's
 screens gives the check back as it was, its fold and fixes kept; it ends

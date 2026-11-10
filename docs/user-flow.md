@@ -277,26 +277,28 @@ the site; English. Purpose and reasons: docs/design/local-check.md.
 Big numbers on the number line · 13 questions
   How will it be played?               (only with two or more ways)
 ┌ Solo ─────────────────────────────────────────────────────┐
-│ You play the quiz on your own, to learn or review: the    │
-│ solution after each answer.                               │
+│ On your own, to practise or review. Each answer shows the │
+│ solution right away, and the score comes at the end.      │
 │ [ Play ▶ ]                                                │
-│ Nothing goes to the site. A reload or closing the tab     │
-│ ends it.                                                  │
+│ Plays in this tab. Nothing is sent to the site. Reloading │
+│ or closing the tab ends it.                               │
 └───────────────────────────────────────────────────────────┘
 ┌ Peers ────────────────────────────────────────────────────┐
-│ You play the quiz with friends, each on your own device.  │
-│ It moves on once everyone has answered, so nobody has to  │
-│ run it.                                                   │
+│ With friends, each on their own device. Nobody runs it:   │
+│ the quiz moves on once everyone has answered.             │
 │ [ Play together ▶ ]                                       │
-│ This puts the quiz on the site, with a code for the       │
-│ others. Until then it is only in this browser.            │
+│ Sends the quiz to the site, into a room that only people  │
+│ with its code can join. The room is deleted when you end  │
+│ it, or three hours after its last use.                    │
 └───────────────────────────────────────────────────────────┘
 ┌ Quizmaster ───────────────────────────────────────────────┐
-│ You run the quiz for a class or a group: the questions on │
-│ a big screen, the answers on everyone's own device.       │
+│ For a class or a group: the questions on a big screen,    │
+│ the answers on everyone's own device. You run it and      │
+│ don't play.                                               │
 │ [ Open the lobby ▶ ]                                      │
-│ This puts the quiz on the site. Until then it is only in  │
-│ this browser.                                             │
+│ Sends the quiz to the site, into a room that only people  │
+│ with its code can join. The room is deleted when you end  │
+│ it, or three hours after its last use.                    │
 └───────────────────────────────────────────────────────────┘
 ─────────────────────────────────────────────────────────────
 ▸ The questions and their solutions · 2 notes from the site

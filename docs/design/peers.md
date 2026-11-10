@@ -53,8 +53,8 @@ question), the game's rules in `server/game.ts` (`peersStep`, `goOn`,
 ### Opening the room
 
 On the local check, the card after Solo (`local-check.md`, "The entries"):
-"You play the quiz with friends, each on your own device. It moves on once
-everyone has answered, so nobody has to run it." [Play together ▶]. It
+"With friends, each on their own device. Nobody runs it: the quiz moves on
+once everyone has answered." [Play together ▶]. It
 plays the quiz itself (`plays`), so the fold of questions says to leave it
 closed. Its press is the upload with the mode `peers`; the room's first
 player is made at upload, and this tab comes in as that player on

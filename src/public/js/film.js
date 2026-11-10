@@ -441,9 +441,9 @@ function avatarSvg(av, label = true) {
     // the local check (client/open.ts, the entries' words from client/entry-*.ts)
     playedAsk: 'How will it be played?',
     entries: [
-      { name: 'Solo', line: 'You play the quiz on your own, to learn or review: the solution after each answer.', button: 'Play ▶', note: 'Nothing goes to the site. A reload or closing the tab ends it.' },
-      { name: 'Peers', line: 'You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it.', button: 'Play together ▶', note: 'This puts the quiz on the site, with a code for the others. Until then it is only in this browser.' },
-      { name: 'Quizmaster', line: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device.", button: 'Open the lobby ▶', note: 'This puts the quiz on the site. Until then it is only in this browser.' },
+      { name: 'Solo', line: "On your own, to practise or review. Each answer shows the solution right away, and the score comes at the end.", button: 'Play ▶', note: "Plays in this tab. Nothing is sent to the site. Reloading or closing the tab ends it." },
+      { name: 'Peers', line: "With friends, each on their own device. Nobody runs it: the quiz moves on once everyone has answered.", button: 'Play together ▶', note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use." },
+      { name: 'Quizmaster', line: "For a class or a group: the questions on a big screen, the answers on everyone's own device. You run it and don't play.", button: 'Open the lobby ▶', note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use." },
     ],
     fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.', // under the cards, below the frame
     // the question list, open on the lobby's check (client/manage.ts)

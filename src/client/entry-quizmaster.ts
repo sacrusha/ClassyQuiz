@@ -11,9 +11,9 @@ import { openRoom, roomRefusal, visitorLang, type RoomResult } from "./opening.t
 
 export const quizmaster: Entry = {
   name: "Quizmaster",
-  line: "You run the quiz for a class or a group: the questions on a big screen, the answers on everyone's own device.",
+  line: "For a class or a group: the questions on a big screen, the answers on everyone's own device. You run it and don't play.",
   button: "Open the lobby ▶",
-  note: "This puts the quiz on the site. Until then it is only in this browser.",
+  note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use.",
   plays: false,
   async start(quiz, ctx) {
     const lang = visitorLang();

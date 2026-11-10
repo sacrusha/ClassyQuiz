@@ -11,9 +11,9 @@ import { openRoom, roomRefusal, visitorLang, type RoomResult } from "./opening.t
 
 export const peers: Entry = {
   name: "Peers",
-  line: "You play the quiz with friends, each on your own device. It moves on once everyone has answered, so nobody has to run it.",
+  line: "With friends, each on their own device. Nobody runs it: the quiz moves on once everyone has answered.",
   button: "Play together ▶",
-  note: "This puts the quiz on the site, with a code for the others. Until then it is only in this browser.",
+  note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use.",
   plays: true,
   async start(quiz, ctx) {
     const lang = visitorLang();

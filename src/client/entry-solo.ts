@@ -20,9 +20,9 @@ import { SETTLE_MS } from "./steps.ts";
 
 export const solo: Entry = {
   name: "Solo",
-  line: "You play the quiz on your own, to learn or review: the solution after each answer.",
+  line: "On your own, to practise or review. Each answer shows the solution right away, and the score comes at the end.",
   button: "Play ▶",
-  note: "Nothing goes to the site. A reload or closing the tab ends it.",
+  note: "Plays in this tab. Nothing is sent to the site. Reloading or closing the tab ends it.",
   plays: true,
   async start(quiz, ctx) {
     new SoloRun(quiz, ctx);
