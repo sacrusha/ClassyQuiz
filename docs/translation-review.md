@@ -85,10 +85,10 @@ For the read:
   dal tuo browser", as Italian says it of data.
 - **The sheets ask**: "like no. 1, 3 and 4" is "wie", "comme", "come" in each, without "similar"
   (ähnlich, simili), so each language says what the English says. German puts "machen" last, where
-  German puts it: "Kannst du mir ein classyQuiz mit Aufgaben wie Nr. 1, 3 und 4 auf diesen zwei
-  Blättern machen?". "Auf diesen zwei Blättern" stands before "machen" and could be taken with
-  it; "von diesen zwei Blättern" couldn't. "Auf" stays: the film types this ask and `/example`'s
-  pictures show it, so a change to it is one they have to follow. Italian "una decina di domande",
+  German puts it: "Kannst du mir ein classyQuiz mit Aufgaben wie Nr. 1, 3 und 4 von diesen zwei
+  Blättern machen?". "Von", not "auf": "auf diesen zwei Blättern" stands before "machen" and could
+  be taken with it, and the conversation on `/example` says "von diesen zwei Blättern" too. The
+  film types this ask, so it follows a change to it at its build. Italian "una decina di domande",
   as French "une dizaine". The defaults stay each region's: "5. Klasse", "CM2" (Romandie says 7H,
   and the times on this page are "heure suisse"), "quinta elementare".
 - **The chess ask**: the choices are "Optionen", "propositions", "opzioni", apart from the answers

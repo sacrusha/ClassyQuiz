@@ -317,7 +317,7 @@ const de: Text = {
     { s: "classyquiz.pages.dev", l: 0 },
     { s: ". Kannst du mir ein classyQuiz mit Aufgaben " },
     { s: "wie Nr. 1, 3 und 4", l: 1 },
-    { s: " auf diesen zwei Blättern machen? " },
+    { s: " von diesen zwei Blättern machen? " },
     { s: "Für meine 5. Klasse", l: 2 },
     { s: ", " },
     { s: "etwa 10 Fragen", l: 3 },

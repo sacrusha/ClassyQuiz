@@ -23,7 +23,7 @@ Source: `src/public/index.html` `#ask-top` (EN, the first step's ask) and `src/c
 
 - EN: Read [classyquiz.pages.dev]. Can you make me a classyQuiz with exercises [like no. 1, 3 and 4] from these two sheets? [For my 5th grade class], [about 10 questions], [in English].
   labels: this site · which exercises · your class · how many · which language
-- DE: Lies [classyquiz.pages.dev]. Kannst du mir ein classyQuiz mit Aufgaben [wie Nr. 1, 3 und 4] auf diesen zwei Blättern machen? [Für meine 5. Klasse], [etwa 10 Fragen], [auf Deutsch].
+- DE: Lies [classyquiz.pages.dev]. Kannst du mir ein classyQuiz mit Aufgaben [wie Nr. 1, 3 und 4] von diesen zwei Blättern machen? [Für meine 5. Klasse], [etwa 10 Fragen], [auf Deutsch].
   labels: diese Seite · welche Aufgaben · deine Klasse · wie viele · welche Sprache
 - FR: Lis [classyquiz.pages.dev]. Tu peux me faire un classyQuiz avec des exercices [comme les n° 1, 3 et 4] de ces deux fiches ? [Pour ma classe de CM2], [une dizaine de questions], [en français].
   labels: ce site · quels exercices · votre classe · combien · quelle langue
