@@ -25,6 +25,14 @@ two things, in this order (owner):
    product owner's delegate); the class plays it on the big screen and their
    tablets.
 
+Where the film stands now, below the first screen, the page above it covers
+the first of these, and teaching how the site is used carries more of the
+film's purpose (the owner). Two things he found a viewer doesn't see
+without being shown belong to that teaching: that the quiz is changed by
+asking again, and how the `.zip` gets from the AI to the site. What else
+follows for the film is open; its on-screen description and its playback
+speed are where he sees it might show.
+
 The owner, on the five stills: the last part, the class playing, works for
 people who know classroom quizzes and may be tricky for those who don't. So
 the classroom gets the most time, the AI half is brisk (the page's first

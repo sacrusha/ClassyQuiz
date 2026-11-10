@@ -166,10 +166,13 @@ sockets' copies put back; a poller's comes with its next poll.
 
 ### Caps, taps and alarms
 
-- `MAX_ANSWER_CHANGES` (10) and `MAX_LOOK_CHANGES` (100) are still in the
-  code. A change costs no row, and what the server holds per player doesn't
-  grow with them, so they guard nothing measured and aren't part of a
-  booking.
+- `MAX_ANSWER_CHANGES` (10) and `MAX_LOOK_CHANGES` (100) were made for
+  rows (the owner), and a change costs no row now; neither is part of a
+  booking. The look cap bounds nothing else. The answer cap still bounds
+  requests: in a steered class every recorded answer, a change of mind
+  among them, ends the held long-polls of the Projector and the Remote
+  (`broadcast`, `server/instance.ts`), a request each on a polling teacher
+  device. How many that would be without the cap is not measured.
 - What a burst of taps costs in requests, and how the device sends it:
   `hosting-and-limits.md`, "Protecting the day's allowance" ("Hammered
   buttons").

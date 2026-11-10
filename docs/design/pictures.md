@@ -7,9 +7,10 @@ other parts are in `quiz-format.md`.
 ## Purpose
 
 Most exercise sheets have pictures, and for many of them the figure is the
-exercise (backlog v2 item 1: "figures are the exercise"). The question on
-the big screen is what makes the quiz feel interactive, so the voting
-devices in a room with a big screen don't need the question's picture; where
+exercise (backlog v2 item 1: "figures are the exercise"). A Quizmaster's
+quiz is to feel like a shared group activity (the owner): the question, its
+picture with it, is on the big screen everyone looks at, and the voting
+devices in that room don't carry the picture; where
 each device shows the whole question (Solo, Peers), it carries the picture
 too. A picture can also be the choice
 itself ("which of these shows ...", backlog v3 item 1), and then the

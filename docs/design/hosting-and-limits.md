@@ -530,8 +530,8 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   iOS 15 and other Safari before 16 (see "Protecting the day's allowance"),
   which the target schools' stock of old iPads keeps in use; a static header
   can't target a version, so every browser gets the wider rule. Reassess when
-  the schools' iPads have moved past iOS 15, when the example class is no
-  longer a school's, or by November 2028; then try `'self'` alone on a real
+  the schools' iPads have moved past iOS 15 or the example class is no
+  longer a school's; then try `'self'` alone on a real
   iOS 15 device through `/check`, and drop the two schemes if the WebSocket
   connects or iOS 15 no longer matters.
 - Whether the AIs' user-triggered fetchers read a page on `pages.dev`, and

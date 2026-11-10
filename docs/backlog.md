@@ -155,7 +155,9 @@ before anything else comes into play (owner and product owner).
    quiz as its deliverable; a carousel or slideshow. Built: the film
    (`design/root-page.md`, "The film"; `docs/film/`) and the worked example
    (item 10). Open: the film's pace for the teacher who has decided and wants
-   the steps (`docs/film/README.md`, "Not known").
+   the steps (`docs/film/README.md`, "Not known"); the root page's ask and
+   the film still show the rendered sheet pages (`landing/sheet-*.webp`),
+   where `/example` shows the owner's photographs of the printed sheet.
 2. Resume for the device that started the quiz, the way back and certainty it's
    the right quiz — built, `design/root-page.md`.
 3. **Upload is start** — owner: "uploaded the evening before" is not real;
@@ -211,13 +213,6 @@ before anything else comes into play (owner and product owner).
     words in `client/example-text.ts`, the quizzes in
     `docs/example/quiz_zips.py`); the choices are
     `docs/translation-review.md` E1–E5.
-13. **The example's upload as a special case**, e.g. not booked against the
-    free site's caps, or kept ready instead of uploaded per click. Only with a
-    test set that runs the same `.zip` through the special path and the normal
-    upload and fails when they differ, so the example can't drift from what a
-    teacher's upload does. Looking at the example costs nothing
-    (`design/local-check.md`); opening its lobby is a normal upload, counted
-    as one.
 14. **One product, made on purpose** — the teacher deciding whether to rely
     on the site in front of a class meets the same name, mark, paper, ink and
     type on every page.
@@ -516,14 +511,18 @@ The quiz is already made; it can be more than one activity.
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
   own.
+- **Dark mode** — a visitor whose device is dark gets every screen dark;
+  the players' screens are light with no reason recorded, probably an
+  oversight (the owner: models have dropped dark mode unnoticed before, in
+  other projects). Tolerable on Samsung Internet too. With it, a standing
+  note where whoever changes a screen reads it, that a change is looked at
+  in dark and in light.
 
 ## Open: with the owner, and in the field
 
 With the owner, what only he can do:
 - The read of the German, French and Italian words
   (`translation-review.md`); Italian has no native reader on the project.
-- Whether his daylight photographs of the sheet are to replace the rendered
-  sheet pages the film and the sheets ask's tab show.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
   script from spending the day's allowance; the free plan includes one such
   rule, and a name children can type beats pages.dev on the slowest step

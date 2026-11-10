@@ -179,7 +179,10 @@ question (the chess run, below). Which to use is the builder's call in its
 situation; the page gives what each costs and serves. Its home is the layout page
 (`/layout`), which stays as-built and complete, as HTML and CSS, because it is
 linked rather than inlined. Presentation is for a user who won't play the
-quiz (below). On controversial subjects the user leads.
+quiz (below). On controversial subjects the user leads (the owner): an AI may bring in
+propaganda it was trained on, or guess the user's political leaning, or
+read it from memory, and build on that, which is a problem where the quiz is
+for an audience and not for the user.
 
 ### The user who plays
 
