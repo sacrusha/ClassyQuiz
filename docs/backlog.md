@@ -435,8 +435,8 @@ exploration behind these items — options and what each would cost — is
    more example asks with
    no line under them since no run is behind them, and the film showing the
    check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
-   (`translation-review.md`, "The other ways to play", "The words before
-   the check", E6); whether someone
+   (`translation-review.md`, "The first page in German, French and
+   Italian", E6); whether someone
    who isn't a teacher reads the page as theirs, which nobody outside the
    project has tried.
 
@@ -528,10 +528,14 @@ were tried is in `design/root-page.md`, Situation.
    or Italian gets the same page, not a translation of the English
    sentence structure: the owner's findings on pronouns and on the
    visitor's side of the words hold in each language
-   (`design/root-page.md`, Situation, "Languages"). The existing drafts
-   and the questions behind them: `translation-review.md`, where "The
-   first page (v6 item 1)" has the words item 1 wrote in the three, drafts
-   by its implementer with the choices each rests on.
+   (`design/root-page.md`, Situation, "Languages"). Built, not deployed,
+   and not yet read by the owner: every word of the page and its states
+   in the three, in `client/landing-text.ts`; what holds in each language
+   is `design/root-page.md`, "Languages", and the choices behind the words,
+   as questions for the owner's read, `translation-review.md`, "The first
+   page in German, French and Italian". At 390 px and wider the first
+   screen holds in each what it holds in English. The film carries the
+   new words it copies from the page; its picture of the page is item 3's.
 
 3. **The film and the worked example show the page that exists** — the
    film types the ask and shows the root page with the box that opens a
@@ -779,6 +783,10 @@ With the owner:
   the film below the first screen; the asks' tabs as words, without their
   pictures; "What you can count on" and the line that hands over to the
   manual for AIs; the page's two first-level headings.
+- The first page in German, French and Italian (v6 item 2), the
+  implementer's drafts, not yet read by the owner: the choices for the read
+  are `translation-review.md`, "The first page in German, French and
+  Italian"; Italian has no native reader on the project.
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a

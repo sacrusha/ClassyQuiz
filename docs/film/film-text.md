@@ -23,13 +23,13 @@ Source: `src/public/index.html` `#ask-top` (EN, the first step's ask) and `src/c
 
 - EN: Read [classyquiz.pages.dev]. Can you make me a classyQuiz with exercises [like no. 1, 3 and 4] from these two sheets? [For my 5th grade class], [about 10 questions], [in English].
   labels: this site · which exercises · your class · how many · which language
-- DE: Lies [classyquiz.pages.dev]. Kannst du mir ein classyQuiz machen, mit ähnlichen Aufgaben [wie Nr. 1, 3 und 4] auf diesen zwei Blättern? [Für meine 5. Klasse], [etwa 10 Fragen], [auf Deutsch].
+- DE: Lies [classyquiz.pages.dev]. Kannst du mir ein classyQuiz mit Aufgaben [wie Nr. 1, 3 und 4] auf diesen zwei Blättern machen? [Für meine 5. Klasse], [etwa 10 Fragen], [auf Deutsch].
   labels: diese Seite · welche Aufgaben · deine Klasse · wie viele · welche Sprache
-- FR: Lis [classyquiz.pages.dev]. Tu peux me faire un classyQuiz avec des exercices [comme les n° 1, 3 et 4] de ces deux fiches ? [Pour ma classe de CM2], [une dizaine de questions], [en français].
+- FR: Lis [classyquiz.pages.dev]. Tu peux me faire un classyQuiz avec des exercices [comme les n° 1, 3 et 4] de ces deux fiches ? [Pour ma classe de CM2], [une dizaine de questions], [en français].
   labels: ce site · quels exercices · votre classe · combien · quelle langue
-- IT: Leggi [classyquiz.pages.dev]. Mi puoi fare un classyQuiz con esercizi [come i n. 1, 3 e 4] di queste due schede? [Per la mia quinta elementare], [circa 10 domande], [in italiano].
+- IT: Leggi [classyquiz.pages.dev]. Mi puoi fare un classyQuiz con esercizi [come i n. 1, 3 e 4] di queste due schede? [Per la mia quinta elementare], [una decina di domande], [in italiano].
   labels: questo sito · quali esercizi · la tua classe · quante · quale lingua
-- Open ask, not asked for in the film (landing "ask2"): EN "Read classyquiz.pages.dev. I need a classyQuiz. Help?" / DE "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?" / FR "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?" / IT "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?"
+- Open ask, not asked for in the film (landing "ask2"): EN "Read classyquiz.pages.dev. I need a classyQuiz. Help?" / DE "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?" / FR "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?" / IT "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?"
 
 **NOTE:** the *real conversation's* first ask differs from the landing ask (2.2): no "like no. 1, 3 and 4", "4th grade", no length, no language. The film types the landing one (the storyboard's table says why); the AI's reply bars then do not match "10 questions in English" by wording, which nobody reads.
 
@@ -73,9 +73,9 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
 - Below the header the page has, in one column: the sentence that says what the site is, the three ways to play, and two steps, the second headed "Open the quiz your AI made" (`docs/design/root-page.md`). The film draws the header and the box of 3.2 only; whether its picture of the page still matches is backlog v6 item 3's.
 
 ### 3.2 Run box (root page, before upload)
-Heading **Open the quiz your AI made** (DE Das Quiz deiner KI öffnen, FR Ouvrir le quiz de votre IA, IT Apri il quiz della tua IA; `landing-text.ts` `run`). Dashed box with button and a line under it (`upload`, `drop`):
+Heading **Open the quiz your AI made** (DE Öffne das Quiz deiner KI, FR Ouvrez le quiz de votre IA, IT Apri il quiz della tua IA; `landing-text.ts` `run`). Dashed box with button and a line under it (`upload`, `drop`):
 - EN: button "Choose the .zip file", line "or drop it here"
-- DE: "Die .zip-Datei wählen" / "oder hier ablegen"
+- DE: ".zip-Datei auswählen" / "oder hier ablegen"
 - FR: "Choisir le fichier .zip" / "ou déposez-le ici"
 - IT: "Scegli il file .zip" / "o trascinalo qui"
 Progress after the pick (EN): "Reading the quiz…", "Preparing the pictures… 3 of 12", "Sending the quiz…" (DE "Das Quiz wird gelesen…", FR "Lecture du quiz…", IT "Lettura del quiz…"). Then the local check (3.3), in this tab. The file sheet (the .zip on top) is the OS's, no site text.

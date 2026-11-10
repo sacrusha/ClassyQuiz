@@ -130,8 +130,8 @@ windows of these sizes, in the four languages:
 | 1024 × 690 and larger (laptops, desktops, a tablet) | whole | whole |
 | 412 × 730 (a phone) | whole | whole |
 | 390 × 664 | whole | whole |
-| 360 × 640 | whole | whole in English and Italian; in German and French cut by the screen's edge |
-| 360 × 560 | whole; in German the file cut by the edge | below the edge, by 6 to 56 px |
+| 360 × 640 | whole | whole in English and Italian; in German and French cut by the screen's edge, by 8 and 12 px |
+| 360 × 560 | whole | below the edge, by 10 to 37 px |
 | 320 × 470 | the sentence and the ways; the ask whole in English, cut in the others | below |
 
 On a 1366 × 650 laptop the line under the button, with the example, is cut
@@ -241,7 +241,8 @@ and the place where a file is opened. And whoever holds a file opens it
 there.
 
 Two headings, numbered, one above the other. Both are things someone must do,
-so both are commands ("One page, two readers").
+so both are commands, in every language ("One page, two readers";
+"Languages").
 
 1. **"Ask your AI for a quiz"**, over the sheets ask as a chat message, the
    two sheets it speaks of attached as small pictures; under it "The AI's
@@ -451,7 +452,33 @@ messages of the box that opens a file included, also where opening a room moved 
 "Sending the quiz…" and its refusals speak the language this page spoke
 (`local-check.md`, "Opening a room"). The quiz's own problems, the archive's messages and the text
 copied for the AI stay English. Register: German "du", French "vous", Italian
-"tu". The film follows the same line: the page's language up to the upload, the
+"tu".
+
+Purpose (backlog v6 item 2): a visitor reading German, French or Italian gets
+the same page, said in that language's own sentences, not the English
+sentence's structure, and the findings in Situation hold in each:
+
+- **Commands only for what must be done**, in each language's form. The two
+  steps' headings and choosing an AI are imperatives in all three (an
+  outside reader found step 2's heading an infinitive in German and French
+  under step 1's command). Buttons and links that offer something keep the
+  form each language's interfaces give an action: the infinitive in German
+  and French (".zip-Datei auswählen", "Choisir le fichier .zip", "Das
+  Beispiel spielen ›"), the imperative in Italian.
+- **No pronoun whose referent a reader must find.** Where the English leans
+  on "it", the translation names the noun ("die neue .zip-Datei", "le
+  quiz", "il quiz"); a French or Italian pronoun stands where its gender
+  leaves one candidate.
+- **"Room" isn't translated as a noun**: Raum, salle and stanza read first
+  as a room one sits in, so the line on what is kept says when several play
+  ("spielen mehrere", "à plusieurs", "in gruppo").
+- **The first screen holds the same in each language** at 390 px and wider
+  ("One column"), so where two wordings say the same the shorter is taken:
+  the ways' words stand in three lines there.
+
+The words in the three are the implementer's drafts, with the choices behind
+them and the questions for the owner's read in `docs/translation-review.md`.
+The film follows the same line: the page's language up to the upload, the
 site's English screens after it ("The film", Words); its words are in
 `docs/film/build/film.js`, the page's own taken from `landing-text.ts` when it
 is built.
