@@ -186,7 +186,7 @@ sockets' copies put back; a poller's comes with its next poll.
 What a class books (`server/rows.ts`): the steps, 20 rows a question; the
 line writes, 20 a stage; a join and a few avatars taken back, 6 a player;
 50 for roles and switches. For 15 questions that is about 1,030 rows when
-the class is let in (77 lobbies at once in `DAY_ROWS_FOR_CLASSES`) and 830
+the class is let in (77 lobbies at once in the rows of `DAY_FOR_CLASSES`) and 830
 from the start for a class of 25 (96 at once), against about 10,700 and
 3,200 before.
 

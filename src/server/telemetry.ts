@@ -5,6 +5,7 @@
 // Nothing here holds an id, a token, a name or a time finer than the day.
 
 import type { LineCounts } from "../shared/line.ts";
+import type { Cost } from "../shared/limits.ts";
 
 /** Peers; steered with a Remote taken; steered from the wall alone. */
 export type RoomKind = "peers" | "remote" | "wall";
@@ -244,7 +245,8 @@ export function foldDay(month: MonthRecord | undefined, day: DayRecord): MonthRe
 
 /** What GET /api/site/use answers the owner. */
 export interface OwnerView {
-  rows: { now: number; of: number };
+  /** The day's ledger now (rows, requests, awake seconds: booked or spent by the classes), and the classes' share of each. */
+  ledger: { now: Cost; of: Cost };
   /** The buckets' lower edges (size in players, requests, rows). */
   edges: typeof EDGES;
   /** Newest first. */

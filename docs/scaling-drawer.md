@@ -135,15 +135,13 @@ text-only ones. Each holds its bytes three hours after its last use.
 **Situation.** Letting a class in books the most it can write
 (`server/rows.ts`): about 1,030 rows a lobby and 830 from Start for 25
 players, 3 to 4 times the ~250 a class writes. The ledger counts the day's
-settled writes plus the live bookings against `DAY_ROWS_FOR_CLASSES`
+settled writes plus the live bookings against the rows of `DAY_FOR_CLASSES`
 (80,000), so after 200 classes in one UTC day about 29 lobbies still fit at
 once. The reserve for line writes is the largest adjustable part, 320 of a
-lobby's 1,030.
-
-Rows no longer bind first, so this ledger now mostly holds room that requests
-and duration, unbooked, would run out of sooner; what that leaves open is
-backlog, "Room on the Free plan", item 3, and `design/hosting-and-limits.md`,
-"Running classes finish".
+lobby's 1,030. The same ledger books requests and awake time as estimates
+(`design/hosting-and-limits.md`, "Running classes finish"); for classes on
+WebSockets rows are still what it fills first, at their most, so started
+classes of 25 fit some 96 at once on rows and some 230 on requests.
 
 **How you'd know.** Refusals by `"rows"` in `GET /api/site/use`.
 

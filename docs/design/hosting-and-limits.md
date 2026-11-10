@@ -340,9 +340,9 @@ Situation, "Who opens a lobby". Refusing a teacher with no child in costs
 little, refusing a class in front of the children much, failing one under
 way most.
 
-The design is the owner's: quizzes book slots and release them when done,
-the booking shrinks at Start, students only once the class is let in, one
-stored quiz per device, and a class's taps held in memory so that its
+The design's frame is the owner's: quizzes book slots and release them when
+done, the booking shrinks at Start, students only once the class is let in,
+one stored quiz per device, and a class's taps held in memory so that its
 booking is small (backlog, "Room on the Free plan"). The numbers and the
 rest are the implementer's, to confirm.
 
@@ -351,90 +351,130 @@ rest are the implementer's, to confirm.
   quiz uploaded only to look it over (for tomorrow, say) writes nothing for
   a class and books nothing; looking it over on the local check, before any
   upload, costs no upload either (`local-check.md`).
-- **Letting the class in books the most its class can write**
-  (`server/rows.ts`), so nothing is overbooked and no margin is guessed. The
-  class isn't known yet, so it is `MAX_PLAYERS`, each joining and taking an
-  avatar back a few times (6 rows), plus the teacher's steps (20 rows a
-  question, the alarms among them) and the writes when a line ends with
-  input held (`MAX_LINE_WRITES` a stage, 2 rows each;
-  `open-period-in-memory.md`). Taps aren't counted: they ride on those
-  writes. For 15 questions that is about 1,030 rows. Start without letting in books
-  the same. `SiteBudget` keeps the day's ledger (`r:` and the day, back at
-  00:00 UTC) against `DAY_ROWS_FOR_CLASSES` (80,000 of the plan's 100,000;
-  the rest is for uploads, whose quiz and pictures are rows, the site's small
-  objects and what a booking doesn't cover). A class the ledger can't carry is
-  refused at the tap, on the teacher's screen with no child in yet; the day
-  counts as full. If the ledger can't be reached, the class goes in unbooked
-  rather than be stopped by the site's own bookkeeping.
+- **What a class books, and in what.** `SiteBudget` keeps the day's ledger
+  (`r:` and the day, back at 00:00 UTC) in the three allowances a class can
+  run out of mid-lesson: rows, Durable Object requests (a class's Function
+  requests are about the same) and the seconds its object is awake
+  (Situation, "What a class costs"). Each has the classes' share,
+  `DAY_FOR_CLASSES`: 80,000 rows, 75,000 requests, 80,000 awake seconds of
+  the plan's 100,000, 100,000 and about 101,000. What is left over is for
+  what no class books (uploads, whose quiz and pictures are rows; picture
+  fetches, joins and the landing; the site's small objects) and for
+  estimates that come out low; requests leave more, since more of them come
+  from outside a class. If the plan's limits change, or what comes from
+  outside a class, the shares are what to revisit.
+- **Rows are booked at the most, requests and duration as an estimate**
+  (`server/rows.ts`). Rows have a most a class can write, so their booking
+  leaves no margin to guess: at letting in `MAX_PLAYERS`, each joining and
+  taking an avatar back a few times (6 rows), plus the teacher's steps (20
+  rows a question, the alarms among them) and the writes when a line ends
+  with input held (`MAX_LINE_WRITES` a stage, 2 rows each;
+  `open-period-in-memory.md`), about 1,030 rows for 15 questions. Requests
+  and duration have no most, so the booking is what is spent plus an
+  estimate of what is ahead, from the scaling drawer's figures (a WebSocket
+  device about half a request a question plus its sockets, a poller about
+  8 a question; a question about 3 minutes of a lesson). The estimates are
+  the drawer's, not measured; telemetry's figures per class are what to
+  replace them with (`telemetry.md`).
+- **Letting the class in books an estimate for a class not yet there**: 25
+  students (the design target) and two teacher devices, a tenth of them
+  polling, and the object awake for four classes in ten of the lesson's
+  time. Plausible assumptions, kept pessimistic against "Which devices
+  poll": if telemetry shows the share of pollers or of classes with one
+  lower or higher, these are what moves. Start without letting in books the
+  same first. A class the ledger can't carry is refused at the tap, on the
+  teacher's screen with no child in yet; the day counts as full. If the
+  ledger can't be reached, the class goes in unbooked rather than be
+  stopped by the site's own bookkeeping.
 - **The teacher hears before it fails.** The upload's booking answers with
-  the day's rows booked, kept with the quiz (`Meta.dayRows`, also after a
-  refused tap), and the check (and a Remote's lobby) shows, while fewer than
-  `ROOM_WARN` (3) classes like this one fit: "nearly full today: room for
-  about n more groups", or at none "can't let another group in today … again at
-  01:00 Swiss time", both with "More quizzes: a site of your own, your
-  school's or your company's ›" (`roomNotice`, `client/manage.ts`). It lasts while it holds,
-  where a toast would be gone before a teacher who looked away saw it. The
-  count is from the upload or the last tap, not live; three classes is
-  about the last 4% of the day. Days whose bookings reached
-  `NEARLY_FULL` (half, the owner's: lower than 80%) count as busy on the
-  landing's line beside the full days
-  (`root-page.md`, "The own copy").
-- **At Start the booking shrinks** to what was written plus the most the rest
-  can write: the class that came plus the latecomers the door lets in
-  (`MAX_LATE_JOINERS`), the lobby behind. A class of 25 then holds about
-  830.
+  the day's ledger, kept with the quiz (`Meta.day`, also after a refused
+  tap), and the check (and a Remote's lobby) shows, while fewer than
+  `ROOM_WARN` (3) classes like this one fit in the fullest allowance:
+  "nearly full today: room for about n more groups", or at none "can't let
+  another group in today … again at 01:00 Swiss time", both with "More
+  quizzes: a site of your own, your school's or your company's ›"
+  (`roomNotice`, `client/manage.ts`). It lasts while it holds, where a toast
+  would be gone before a teacher who looked away saw it. The count is from
+  the upload or the last tap, not live. Days whose ledger reached
+  `NEARLY_FULL` (half, the owner's: lower than 80%) in any allowance count
+  as busy on the landing's line beside the full days (`root-page.md`, "The
+  own copy").
+- **At Start the class is there, so the booking moves to what was spent plus
+  what is ahead of the class that came**: its players and the latecomers
+  the door lets in (`MAX_LATE_JOINERS`), its devices as their lines say
+  (WebSocket or long-poll), the lobby behind. Awake time is booked only
+  with a poller among them, for the questions ahead. A class of 25 on
+  WebSockets then holds about 830 rows, 320 requests and no awake time; with
+  one poller about 2,700 awake seconds for 15 questions. Rests on: a device's
+  line says how it is connected (`telemetry.md`), and one poller keeps the
+  object awake for all.
+- **Under way, a class that outgrows its booking books more**, never
+  refused: a device fell back to long-poll, or the class spends faster than
+  estimated. Checked with each teacher step against what the devices'
+  lines say; the site's ledger is asked only when the need passes the
+  booking by a margin (a tenth of the requests, a question's awake time), a
+  request and a few rows each time. Rests on: a fallback mid-lesson is the
+  site's own (a crowded access point), so it shows one device at a time,
+  and the shares' margin carries it until the next step.
+- **A let-in lobby that no student joins within `LOBBY_WAIT_MS` (20
+  minutes) gives its booking back** to what it spent; the quiz stays. Its
+  first student books it again, and may reach further, to `DAY_FOR_JOINS`
+  (90,000 rows, 87,000 requests, 92,000 awake seconds), since the children
+  are there and refusing them costs more than refusing the teacher at
+  letting in, less than a class under way failing. Past that the join is
+  refused, with the same words as at letting in. A Start with no student
+  there books only what was spent, and its first student books it the same
+  way. Rests on: looks at the room are likely the most common lobbies
+  (Situation, "Who opens a lobby"), and look like a class until a student
+  comes; a teacher lets the class in when it is there or about to come in,
+  within a break's length (plausible assumption: Swiss breaks run 5 to 20
+  minutes). If teachers turn out to let in long before, more first
+  students reach into the joins' share; if lobbies are rarely looks, the
+  wait matters less.
+- **A class that has had students keeps its booking until its final
+  ranking**, whether or not its devices are there. Rests on: breaks are
+  shared across a school (Situation), so bookings that shrank at recess
+  would come back at once, into a margin that might not hold them all.
 - **At the final ranking the booking settles**: the ledger keeps what was
-  written (counted per key the instance stores) and gets the rest back; if
-  that call fails, the quiz's end settles it instead. The
-  quiz itself stays its three hours for photographs and rejoining. A quiz
-  that ends or expires before its final ranking settles then.
-- So the ledger limits classes at the same time, not in the day: about 77
-  lobbies let in at once, or about 96 started classes of 25, while finished
-  classes count only what they wrote. The last booking of a busy day leaves
-  some of the day unused, which is accepted.
-- **A let-in lobby that is left holds its booking**, about 1.3% of the day,
-  until the quiz expires three hours after the teacher's last step. One
-  quiz per device bounds that per device: a device's next upload ends its
-  previous quiz if that one never started (`POST /api/i/:id/replaced` with
-  the previous quiz's secret, sent by the root page once the new upload is
-  in; each upload replaces the one before, so only the latest needs asking), so a lobby opened at the
-  end of a look-over and left, or a test with a few devices, doesn't pile up.
+  spent (rows counted per key the instance stores, requests and awake time
+  as the devices' lines say) plus what devices left polling on the ranking
+  will spend until they sleep (`SLEEP_AFTER_MS`), and gets the rest back; if
+  that call fails, the quiz's end settles it instead, with what was spent.
+  The quiz itself stays its three hours for photographs and rejoining. A
+  quiz that ends or expires before its final ranking settles then. Rests on:
+  nothing writes after the final ranking, and a device left polling keeps
+  the object awake as long as during the lesson.
+- So the ledger limits classes at the same time, not in the day: some 74
+  lobbies let in at once (awake time binds), some 96 started classes of 25
+  on WebSockets (rows, booked at their most), some 30 with a poller (awake time), while
+  finished classes count what they spent. The last booking of a busy day
+  leaves some of the day unused, which is accepted.
+- **One quiz per device.** A device's next upload ends its previous quiz if
+  that one never started (`POST /api/i/:id/replaced` with the previous
+  quiz's secret, sent by the root page once the new upload is in; each
+  upload replaces the one before, so only the latest needs asking), so a
+  lobby opened at the end of a look-over and left doesn't hold its quiz.
   A started quiz is never ended this way, so a quiz paused over lunch
   survives a new zip tried on the same laptop. A let-in lobby with children
   in it ends too, and their tablets say the quiz has ended: a new upload
   from the device that steers is taken as the teacher moving on (the right
-  quiz after a wrong one), and a lobby whose children count as keeping it
-  would let a test with a few devices, left in the lobby, hold its booking
-  after all. The device already knows its
-  latest quiz and its secret (`root-page.md`, "Coming back").
+  quiz after a wrong one). The device already knows its latest quiz and its
+  secret (`root-page.md`, "Coming back"). A player joining another quiz ends
+  nothing (Situation, "Who opens a lobby").
 - **The day's spending, for the owner:** `GET /api/site/use`, behind the
-  owner's key, answers what is booked or spent now, of
-  `DAY_ROWS_FOR_CLASSES`, and per day (kept 31 days, then by the month) the
+  owner's key, answers the ledger now in each allowance, of
+  `DAY_FOR_CLASSES`, and per day (kept 31 days, then by the month) the
   classes let in, the rows written by those that finished, and the ledger's
-  peak, so how close a day came to its limit is a fact to look up; with the
-  rest of the telemetry (`telemetry.md`). Nothing about a quiz or who made
-  it.
+  peak (rows, and the fullest allowance as a share), so how close a day came
+  to its limit is a fact to look up; with the rest of the telemetry
+  (`telemetry.md`). Nothing about a quiz or who made it.
 - A booking made before midnight UTC and moved after it leaves the new
-  day's ledger alone: the rare class across the turn writes some rows the
-  new day doesn't count.
+  day's ledger alone: the rare class across the turn spends some of the new
+  day uncounted.
 
-What the design above rests on that no longer holds (backlog, "Room on the
-Free plan", item 3):
+What the design rests on that no longer holds (backlog, "Room on the Free
+plan", item 3):
 
-- It books rows alone, sized when rows bound first. With answers and looks
-  held in memory, requests and duration likely bind first (Situation, "What
-  a class costs"), and nothing books them. A day can run out of requests or
-  duration in the middle of lessons while the ledger shows room. The rows
-  booked (1,030 a lobby, 830 from Start) are 3 to 4 times the ~250 written.
-- Requests and duration have no most a class can spend; they grow with the
-  time devices stay on. "Nothing is overbooked and no margin is guessed"
-  holds for rows only.
-- The settle at the final ranking comes before devices left on it. For a
-  class with a poller that tail is about half its duration, and unbooked.
-- A let-in lobby no student joins holds its booking until the quiz expires.
-  One quiz per device doesn't reach the lobbies of someone looking from
-  several browsers, nor the devices of a walked quiz. A Start with nobody
-  in still holds about 680 rows: the questions' steps and line writes.
 - The lifetime runs from the last teacher step or role taken. A lobby that
   waits longer than three hours for its class ends: the teacher who opened
   it early, the walked quiz.
@@ -444,11 +484,8 @@ Free plan", item 3):
   lookers' own picture quizzes, some 300 at a few MB each, held three
   hours.
 
-Not covered: requests and duration. Counting them costs no request: each
-device counts its own line and the instance sums the class at its settle
-(`telemetry.md`). What can't be done as for rows is bounding what a class
-will spend. A script hammering `/api` is the case for a domain with a
-rate-limiting rule.
+Not covered: a script hammering `/api`, which spends requests no class
+booked; that is the case for a domain with a rate-limiting rule.
 
 ### When the allowance runs out anyway
 

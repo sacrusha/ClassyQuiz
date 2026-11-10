@@ -7,12 +7,13 @@
 // Holds nothing about a quiz or who made it: an id, a size and an expiry per
 // quiz, a count per day.
 //
-// The day's rows (docs/design/hosting-and-limits.md, "Running classes
-// finish"): a quiz books the most rows its class can write when the class is
-// let in, shrinks the booking at the start, and settles it at the final
-// ranking with what it wrote. The day's ledger holds what is booked or spent
-// today, so a class under way never meets a spent allowance its booking
-// didn't leave room for.
+// The day's ledger (docs/design/hosting-and-limits.md, "Running classes
+// finish"): rows, requests and awake seconds (server/rows.ts). A quiz books
+// its class when the class is let in, moves the booking as the class shows
+// what it needs, and settles it at the final ranking with what it spent and
+// what devices left on will. The ledger holds what is booked or spent today,
+// so a class under way never meets a spent allowance its booking didn't
+// leave room for, as far as the estimates hold.
 //
 // Telemetry (docs/design/telemetry.md): the day's record also takes each
 // class's summary at its settle, the day's uploads and the most classes
@@ -26,7 +27,8 @@
 // site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
 
 import { DurableObject } from "cloudflare:workers";
-import { DAY_ROWS_FOR_CLASSES, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type SiteFull } from "../shared/limits.ts";
+import { DAY_FOR_CLASSES, DAY_FOR_JOINS, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type Cost, type SiteFull } from "../shared/limits.ts";
+import { asCost, fullness, moved, within } from "./rows.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
 import { EDGES, MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord, type OwnerView, type Refused } from "./telemetry.ts";
@@ -39,8 +41,10 @@ export interface RowsDay {
   probes?: number;
   /** Rows written by the classes that reached their final ranking or ended. */
   written: number;
-  /** The most the ledger held at once: how close the day came to DAY_ROWS_FOR_CLASSES. */
+  /** The most rows the ledger held at once. */
   peak: number;
+  /** The most the ledger held at once in its fullest allowance, as a share of DAY_FOR_CLASSES: how close the day came. */
+  peakShare?: number;
   /** The most classes booked at once: let in and not yet settled. */
   atOnce?: number;
   /** Classes turned away, as counted in this object's memory: a lower bound. */
@@ -54,8 +58,8 @@ interface Booking {
   bytes: number;
   /** The quiz renews this while it lives; a booking past it is gone, whether or not its release arrived. */
   until: number;
-  /** Rows booked against `day`'s ledger, from letting the class in until it settles. */
-  rows?: number;
+  /** What is booked against `day`'s ledger, from letting the class in until it settles; a number is rows, from before requests and duration were booked. */
+  rows?: Cost | number;
   day?: string;
 }
 
@@ -69,7 +73,7 @@ export class SiteBudget extends DurableObject<Env> {
   private refused: ({ day: string } & Refused) | null = null;
 
   /** Books a new quiz; says which cap is reached when the site is full (today's uploads, or bytes stored). */
-  async reserve(instance: string, bytes: number, until: number): Promise<{ rows: number } | SiteFull> {
+  async reserve(instance: string, bytes: number, until: number): Promise<{ day: Cost } | SiteFull> {
     const now = Date.now();
     const day = `d:${dayOf(now)}`;
     await this.rollUp(now);
@@ -85,37 +89,47 @@ export class SiteBudget extends DurableObject<Env> {
     if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
     if (live + bytes > MAX_LIVE_BYTES) return await this.full(now, "bytes", "bytes");
     await this.ctx.storage.put({ [day]: today + 1, [`i:${instance}`]: { bytes, until } satisfies Booking });
-    // The day's rows booked, so the check can say when the site is nearly full.
-    return { rows: await this.rowsToday() };
+    // The day's ledger, so the check can say when the site is nearly full.
+    return { day: await this.ledgerToday() };
   }
 
   /**
-   * Letting a class in: books `rows` against today's ledger. "rows": the
-   * classes booked today leave no room; today counts as a full day. A quiz
-   * that booked already is not booked again.
+   * Books `cost` for the quiz's class against today's ledger: letting a class
+   * in, or its first student after its booking lapsed (`reach` "join", which
+   * may reach further: DAY_FOR_JOINS). A booking already there moves to
+   * `cost`. "rows": the classes booked today leave no room; today counts as
+   * a full day.
    */
-  async bookRows(instance: string, rows: number, until: number, probe = false): Promise<{ rows: number } | "rows"> {
+  async bookRows(instance: string, cost: Cost, until: number, probe = false, reach: "letIn" | "join" = "letIn"): Promise<{ day: Cost } | "rows"> {
     const now = Date.now();
     const key = `i:${instance}`;
     const b = (await this.ctx.storage.get<Booking>(key)) ?? { bytes: 0, until };
-    if (b.rows !== undefined) return { rows: await this.rowsToday() };
     const day = dayOf(now);
     await this.rollUp(now);
-    const ledger = await this.ctx.storage.list<number>({ prefix: "r:" });
-    const booked = ledger.get(`r:${day}`) ?? 0;
+    const ledger = await this.ctx.storage.list<Cost | number>({ prefix: "r:" });
+    const booked = asCost(ledger.get(`r:${day}`));
     const stale = [...ledger.keys()].filter((k) => k !== `r:${day}`);
     if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
-    if (booked + rows > DAY_ROWS_FOR_CLASSES) {
+    // A booking of today's moves; one from an earlier day leaves today's ledger alone, as moveRows does.
+    const again = b.rows !== undefined && b.day === day;
+    const after = moved(booked, again ? asCost(b.rows) : asCost(0), cost);
+    if (!within(after, reach === "join" ? DAY_FOR_JOINS : DAY_FOR_CLASSES)) {
       await this.full(now, "uploads", "rows");
       return "rows";
     }
     const h = (await this.ctx.storage.get<RowsDay>(`h:${day}`)) ?? { day, classes: 0, written: 0, peak: 0 };
+    const counted = b.rows !== undefined;
     // This class and the others let in and not yet settled.
     const bookings = await this.ctx.storage.list<Booking>({ prefix: "i:" });
     const atOnce = 1 + [...bookings].filter(([k, o]) => k !== key && o.rows !== undefined && o.until > now).length;
-    const record: RowsDay = this.withRefused({ ...h, classes: h.classes + 1, ...(probe ? { probes: (h.probes ?? 0) + 1 } : {}), peak: Math.max(h.peak, booked + rows), atOnce: Math.max(h.atOnce ?? 0, atOnce) });
-    await this.ctx.storage.put({ [`r:${day}`]: booked + rows, [key]: { ...b, rows, day } satisfies Booking, [`h:${day}`]: record });
-    return { rows: booked + rows };
+    const record: RowsDay = this.withRefused({
+      ...h,
+      ...(counted ? {} : { classes: h.classes + 1, ...(probe ? { probes: (h.probes ?? 0) + 1 } : {}) }),
+      ...peaks(h, after),
+      atOnce: Math.max(h.atOnce ?? 0, atOnce),
+    });
+    await this.ctx.storage.put({ [`r:${day}`]: after, [key]: { ...b, rows: cost, day } satisfies Booking, [`h:${day}`]: record });
+    return { day: after };
   }
 
   /**
@@ -166,7 +180,7 @@ export class SiteBudget extends DurableObject<Env> {
     ]);
     const days = [...new Set([...records.keys(), ...uploads.keys()].map((k) => k.slice(2)))].sort().reverse();
     return {
-      rows: { now: await this.rowsToday(), of: DAY_ROWS_FOR_CLASSES },
+      ledger: { now: await this.ledgerToday(), of: DAY_FOR_CLASSES },
       edges: EDGES,
       days: days.map((day) => ({ uploads: uploads.get(`d:${day}`) ?? 0, ...(records.get(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 }) })),
       months: [...months.values()].reverse(),
@@ -174,36 +188,43 @@ export class SiteBudget extends DurableObject<Env> {
   }
 
   /**
-   * Moves a booking to `rows` (the start: shrinks to the class that came), or
-   * settles it with `rows` written (the final ranking, the end): the ledger
-   * keeps what was written and gets the rest back. A booking from an earlier
+   * Moves a booking to `cost`, never refused: the class is under way, or the
+   * booking shrinks (the start, a lobby nobody joined). settle: the class is
+   * done (the final ranking, the end); `cost` is what it spent and what its
+   * devices left on will, which the ledger keeps. A booking from an earlier
    * day leaves today's ledger alone. use: the class's summary, added into
    * its day's record with the settle.
    */
-  async moveRows(instance: string, rows: number, settle = false, use?: ClassUse): Promise<void> {
+  async moveRows(instance: string, cost: Cost, settle = false, use?: ClassUse): Promise<void> {
     const key = `i:${instance}`;
     const b = await this.ctx.storage.get<Booking>(key);
     if (!b || b.rows === undefined) return;
     const now = Date.now();
     const entries: Record<string, unknown> = {};
+    let h: RowsDay | null = null;
     if (b.day === dayOf(now)) {
       const lk = `r:${b.day}`;
-      const booked = (await this.ctx.storage.get<number>(lk)) ?? 0;
-      entries[lk] = Math.max(0, booked + rows - b.rows);
+      const after = moved(asCost(await this.ctx.storage.get<Cost | number>(lk)), asCost(b.rows), cost);
+      entries[lk] = after;
+      const was = (await this.ctx.storage.get<RowsDay>(`h:${b.day}`)) ?? { day: b.day, classes: 0, written: 0, peak: 0 };
+      const p = peaks(was, after);
+      // The record is written only when a peak moved or the class settles: a shrink leaves it as it was.
+      if (settle || p.peak !== was.peak || p.peakShare !== was.peakShare) h = { ...was, ...p };
     }
     const { rows: _r, day: _d, ...rest } = b;
-    entries[key] = settle ? rest : { ...b, rows };
+    entries[key] = settle ? rest : { ...b, rows: cost };
     if (settle && b.day) {
-      const h = (await this.ctx.storage.get<RowsDay>(`h:${b.day}`)) ?? { day: b.day, classes: 0, written: 0, peak: 0 };
+      h ??= (await this.ctx.storage.get<RowsDay>(`h:${b.day}`)) ?? { day: b.day, classes: 0, written: 0, peak: 0 };
       const summary = use ? (use.probe ? { probeUse: addClass(h.probeUse, use) } : { use: addClass(h.use, use) }) : {};
-      entries[`h:${b.day}`] = this.withRefused({ ...h, written: h.written + rows, ...summary });
+      h = { ...h, written: h.written + cost.rows, ...summary };
     }
+    if (h) entries[`h:${h.day}`] = this.withRefused(h);
     await this.ctx.storage.put(entries);
   }
 
-  /** Rows booked or spent today by the classes, of DAY_ROWS_FOR_CLASSES. */
-  async rowsToday(): Promise<number> {
-    return (await this.ctx.storage.get<number>(`r:${dayOf(Date.now())}`)) ?? 0;
+  /** What the classes booked or spent today, of DAY_FOR_CLASSES. */
+  async ledgerToday(): Promise<Cost> {
+    return asCost(await this.ctx.storage.get<Cost | number>(`r:${dayOf(Date.now())}`));
   }
 
   /** A day's record with the refusals counted since its last write, when they are that day's. */
@@ -237,7 +258,7 @@ export class SiteBudget extends DurableObject<Env> {
   async fullDays(): Promise<number> {
     const full = [...(await this.ctx.storage.list({ prefix: "f:" })).keys()];
     const near = [...(await this.ctx.storage.list<RowsDay>({ prefix: "h:" })).values()]
-      .filter((h) => h.peak >= NEARLY_FULL * DAY_ROWS_FOR_CLASSES)
+      .filter((h) => (h.peakShare ?? h.peak / DAY_FOR_CLASSES.rows) >= NEARLY_FULL)
       .map((h) => `f:${h.day}`);
     return countFull([...new Set([...full, ...near])], Date.now());
   }
@@ -249,9 +270,14 @@ export class SiteBudget extends DurableObject<Env> {
     if (b && b.until < until) await this.ctx.storage.put(key, { ...b, until });
   }
 
-  /** The quiz ended: its bytes come back, and its rows settle with `written` (and its summary) if they hadn't. */
-  async release(instance: string, written?: number, use?: ClassUse): Promise<void> {
-    if (written !== undefined) await this.moveRows(instance, written, true, use);
+  /** The quiz ended: its bytes come back, and its booking settles with what it spent (and its summary) if it hadn't. */
+  async release(instance: string, spent?: Cost, use?: ClassUse): Promise<void> {
+    if (spent !== undefined) await this.moveRows(instance, spent, true, use);
     await this.ctx.storage.delete(`i:${instance}`);
   }
+}
+
+/** The day's peaks with the ledger at `after`. */
+function peaks(h: RowsDay, after: Cost): Pick<RowsDay, "peak" | "peakShare"> {
+  return { peak: Math.max(h.peak, after.rows), peakShare: Math.max(h.peakShare ?? 0, fullness(after, DAY_FOR_CLASSES)) };
 }

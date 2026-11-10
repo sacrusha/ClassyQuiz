@@ -57,16 +57,50 @@ export const INPUT_GAP_MS = 300;
  */
 export const MAX_UPLOADS_PER_DAY = 300;
 /**
- * Rows a day the classes may book (docs/design/hosting-and-limits.md, "Running
- * classes finish"): the Free plan writes 100,000 a day across the account;
- * the rest is for uploads (the quiz and each picture are rows), the site's
- * small objects and what a booking doesn't cover. Back at 00:00 UTC.
+ * What a class spends of the day's allowances that a class can run out of
+ * mid-lesson (docs/design/hosting-and-limits.md, Situation, "What a class
+ * costs"): rows written, Durable Object requests (a class's Function requests
+ * are about the same), and seconds its object is kept awake (duration, at
+ * about 0.128 GB-s a second).
  */
-export const DAY_ROWS_FOR_CLASSES = 80_000;
+export interface Cost {
+  rows: number;
+  requests: number;
+  awakeS: number;
+}
+
+/**
+ * What the classes may book of each allowance a day (docs/design/hosting-and-limits.md,
+ * "Running classes finish"); letting a class in is refused past it, with no
+ * child in yet. The Free plan's day is 100,000 rows, 100,000 requests and
+ * 13,000 GB-s (about 101,000 awake seconds), account-wide, back at 00:00 UTC.
+ * What is left over is for what no class books (uploads, whose quiz and each
+ * picture are rows; picture fetches, joins and the landing's requests; the
+ * site's small objects) and for estimates that come out low: requests and
+ * duration have no most a class can spend, so a class books an estimate.
+ * Requests leave more over, since more of them come from outside a class.
+ */
+export const DAY_FOR_CLASSES: Cost = { rows: 80_000, requests: 75_000, awakeS: 80_000 };
+/**
+ * How far a class may reach when its first student comes after its booking
+ * lapsed (LOBBY_WAIT_MS): the children are at the tablets then, so refusing
+ * them costs more than refusing the teacher at letting in, and less than a
+ * class under way failing. Past this the join is refused.
+ */
+export const DAY_FOR_JOINS: Cost = { rows: 90_000, requests: 87_000, awakeS: 92_000 };
+/**
+ * A let-in lobby that no student has joined holds its booking this long
+ * (docs/design/hosting-and-limits.md, "Running classes finish"). Plausible
+ * assumption: a teacher lets the class in when it is there or about to come
+ * in, within a break's length (Swiss breaks run 5 to 20 minutes); a lobby
+ * still empty after that is a look at the room, or a teacher who let in
+ * early, whose first student books again (DAY_FOR_JOINS).
+ */
+export const LOBBY_WAIT_MS = 20 * 60_000;
 /**
  * The check warns that the site is nearly full when fewer classes than this
  * still fit today (this one included), with the way to more quizzes; a day
- * whose bookings reached NEARLY_FULL of DAY_ROWS_FOR_CLASSES counts as busy
+ * whose bookings reached NEARLY_FULL of DAY_FOR_CLASSES (in any allowance) counts as busy
  * on the landing's line beside the full days (docs/design/hosting-and-limits.md,
  * "Running classes finish").
  */

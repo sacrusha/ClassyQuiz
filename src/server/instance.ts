@@ -31,8 +31,8 @@ import type {
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { CLASS_FULL, CLASS_STARTED, DAY_ROWS_FOR_CLASSES, LINE_WRITE_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type SiteFull } from "../shared/limits.ts";
-import { rowsAtLetIn, rowsFromStart } from "./rows.ts";
+import { CLASS_FULL, CLASS_STARTED, DAY_FOR_CLASSES, LINE_WRITE_MS, LOBBY_WAIT_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type Cost, type SiteFull } from "../shared/limits.ts";
+import { add, ahead, asCost, atLetIn, grown, room, spent, tail, type ClassNow } from "./rows.ts";
 import { readLine, type LineCounts } from "../shared/line.ts";
 import { summarize, type ClassUse, type RoomKind } from "./telemetry.ts";
 import { LOOK_SHOW_MS } from "../shared/looks.ts";
@@ -127,13 +127,17 @@ interface Meta {
   lastActivity: number;
   v: number;
   /**
-   * The day's rows this quiz booked when the class was let in
-   * (docs/design/hosting-and-limits.md, "Running classes finish"), and what
-   * it wrote since. settled: given back at the final ranking.
+   * The class's booking of the day's allowances, from letting it in
+   * (docs/design/hosting-and-limits.md, "Running classes finish"), and the
+   * rows it wrote since. booked: what the site's ledger holds for it (absent
+   * on a booking from before requests and duration were booked); at: when it
+   * was booked; lapsed: no student came within LOBBY_WAIT_MS, or none was
+   * there at the start, and the booking holds only what was spent until a
+   * student comes; settled: done at the final ranking.
    */
-  rows?: { written: number; settled?: true };
-  /** The day's rows booked across the site, as last heard (at upload, at letting in): the check's warning. */
-  dayRows?: number;
+  rows?: { written: number; booked?: Cost; at?: number; lapsed?: true; settled?: true };
+  /** The day's ledger across the site, as last heard (at upload, at letting in): the check's warning. */
+  day?: Cost;
   /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): its class is kept apart in the telemetry (docs/design/telemetry.md). */
   probe?: true;
 }
@@ -318,12 +322,13 @@ export class Instance extends DurableObject<Env> {
     const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil);
     if (typeof booked === "string") return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
     const peers = mode === "peers";
-    // Peers: the others join with the code at once, so the day's rows are
-    // booked now; a steered room books them when the class is let in.
-    let rows: { rows: number } | "rows" | null = null;
+    // Peers: the others join with the code at once, so the class is booked
+    // now; a steered room books it when the class is let in.
+    let rows: { day: Cost } | "rows" | null = null;
+    const cost = atLetIn(r.quiz.questions.length);
     if (peers) {
       try {
-        rows = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(r.quiz.questions.length), codeUntil, probe);
+        rows = await this.budget().bookRows(this.ctx.id.toString(), cost, codeUntil, probe);
       } catch (e) {
         // The ledger can't be reached: the room opens unbooked rather than be stopped by the site's own bookkeeping.
         console.error("rows not booked:", e instanceof Error ? e.message : String(e));
@@ -342,11 +347,11 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, dayRows: booked.rows, ...(probe ? { probe: true as const } : {}) };
+    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, day: booked.day, ...(probe ? { probe: true as const } : {}) };
     this.endedBy = null;
     if (rows) {
-      this.meta.dayRows = rows.rows;
-      this.meta.rows = { written: 0 };
+      this.meta.day = rows.day;
+      this.meta.rows = { written: 0, booked: cost, at: now };
     }
     // The pasting tab is about to open the Projector with it.
     if (!peers) this.lastPoll.set(`screen:${token}`, now);
@@ -1086,6 +1091,8 @@ export class Instance extends DurableObject<Env> {
           if (earlier && !earlier.removed) {
             return { direct: [ack(true), { t: "welcome", player: earlier.id, token: earlier.token }], session: { role: "player", player: earlier.id } };
           }
+          // The first student after the booking lapsed: the class is coming after all.
+          if (!(await this.bookAgain())) return { direct: [ack(false, G.isPeers(game) ? roomsFullMessage() : classesFullMessage()), this.chooseMessage()] };
           const p = G.addPlayer(game, randomToken(12), randomToken(), now, Math.random);
           const joins = (run.joins ??= {});
           joins[id] = p.id;
@@ -1128,7 +1135,7 @@ export class Instance extends DurableObject<Env> {
               if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
               if (cmd.op === "begin") {
                 G.begin(game, now);
-                await this.shrinkRows();
+                await this.bookAhead();
               } else if (cmd.op === "goOn") G.goOn(game, now, this.nextView());
               else G.finish(game, now);
               break;
@@ -1232,7 +1239,7 @@ export class Instance extends DurableObject<Env> {
           if (cmd.op === "begin" && !(await this.bookRows())) return { direct: [ack(false, classesFullMessage())] };
           if (cmd.op === "begin") {
             G.begin(game, now);
-            await this.shrinkRows();
+            await this.bookAhead();
           }
           else if (cmd.op === "play") G.play(game, now, this.nextView());
           else if (cmd.op === "lastCall") G.lastCall(game, now);
@@ -1307,60 +1314,160 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * Letting the class in books the most rows the class can write today; a
-   * quiz whose class waits outside books nothing. False: the day has no room.
+   * Letting the class in books it against the day's ledger (rows at the most
+   * it can write, requests and awake time estimated: server/rows.ts); a quiz
+   * whose class waits outside books nothing. False: the day has no room.
    */
   private async bookRows(): Promise<boolean> {
     const meta = this.meta!;
     const run = this.game!.run;
     if (!run?.waiting || meta.rows) return true;
-    let booked: { rows: number } | "rows";
+    const cost = atLetIn(this.game!.quiz.questions.length);
+    let booked: { day: Cost } | "rows";
     try {
-      booked = await this.budget().bookRows(this.ctx.id.toString(), rowsAtLetIn(this.game!.quiz.questions.length), meta.codeUntil, !!meta.probe);
+      booked = await this.budget().bookRows(this.ctx.id.toString(), cost, meta.codeUntil, !!meta.probe);
     } catch (e) {
       // The ledger can't be reached: the class goes in unbooked rather than
       // be stopped by the site's own bookkeeping.
-      console.error("rows not booked:", e instanceof Error ? e.message : String(e));
+      console.error("class not booked:", e instanceof Error ? e.message : String(e));
       return true;
     }
     if (booked === "rows") {
       // Kept for the check's notice, which lasts until the teacher tries again.
-      meta.dayRows = DAY_ROWS_FOR_CLASSES;
+      meta.day = DAY_FOR_CLASSES;
       await this.persist(["meta"]);
       this.broadcastStaff();
       return false;
     }
-    meta.dayRows = booked.rows;
-    meta.rows = { written: 0 };
+    meta.day = booked.day;
+    meta.rows = { written: 0, booked: cost, at: Date.now() };
+    return true;
+  }
+
+  /**
+   * The first student after the class's booking lapsed books it again, as at
+   * letting in or, once under way, for the class it will be; it may reach
+   * further than letting in (DAY_FOR_JOINS), since the children are there.
+   * False: not even that is left. The ledger out of reach: the student comes in.
+   */
+  private async bookAgain(): Promise<boolean> {
+    const meta = this.meta!;
+    const rows = meta.rows;
+    const run = this.game!.run;
+    if (!rows?.lapsed || rows.settled || !run) return true;
+    const cost = run.phase === "lobby" ? atLetIn(this.game!.quiz.questions.length) : add(this.spent(), ahead(this.classNow(1)));
+    let booked: { day: Cost } | "rows";
+    try {
+      booked = await this.budget().bookRows(this.ctx.id.toString(), cost, meta.codeUntil, !!meta.probe, "join");
+    } catch (e) {
+      console.error("class not booked again:", e instanceof Error ? e.message : String(e));
+      return true;
+    }
+    if (booked === "rows") return false;
+    meta.day = booked.day;
+    meta.rows = { written: rows.written, booked: cost, at: Date.now() };
     return true;
   }
 
   /**
    * How many classes like this one still fit today, for the check's warning
-   * (ROOM_WARN); null when the class is let in, or the day's booking isn't
+   * (ROOM_WARN); null when the class is let in, or the day's ledger isn't
    * known in this object's memory.
    */
   private room(): number | null {
-    const booked = this.meta?.dayRows;
-    if (!this.game?.run?.waiting || booked === undefined) return null;
-    return Math.max(0, Math.floor((DAY_ROWS_FOR_CLASSES - booked) / rowsAtLetIn(this.game.quiz.questions.length)));
+    const day = this.meta?.day;
+    if (!this.game?.run?.waiting || day === undefined) return null;
+    return room(asCost(day), atLetIn(this.game.quiz.questions.length), DAY_FOR_CLASSES);
   }
 
-  /** At the start the class is there and the looks are fixed: the booking shrinks to what was written plus the most the rest can write. */
-  private async shrinkRows(): Promise<void> {
+  /** The class as it is now, for what is ahead of it. extra: a student about to join. */
+  private classNow(extra = 0): ClassNow {
+    const game = this.game!;
+    const run = game.run!;
+    const players = G.activePlayers(run);
+    const lines = run.lines ?? {};
+    const mine = [...players.map((p) => lines[`p:${p.id}`]), lines.screen, lines.remote].filter((l): l is LineCounts => !!l);
+    const teachers = (lines.screen ? 1 : 0) + (lines.remote ? 1 : 0);
+    const opened = run.opened ?? 0;
+    return {
+      players: players.length + extra,
+      devices: players.length + teachers + extra,
+      pollers: mine.filter((l) => l.mode === "poll").length,
+      questionsLeft: Math.max(1, game.quiz.questions.length - Math.max(0, opened - 1)),
+    };
+  }
+
+  /** What the class has spent so far, by its devices' counts and its rows written. */
+  private spent(): Cost {
+    return spent(Object.values(this.game?.run?.lines ?? {}), this.meta?.rows?.written ?? 0);
+  }
+
+  /** Students in the class: its players but a Peers room's opener, who opened it. */
+  private students(): number {
+    const run = this.game?.run;
+    if (!run) return 0;
+    return G.activePlayers(run).filter((p) => p.id !== run.peers?.host).length;
+  }
+
+  /** Moves the class's booking to `cost`; kept in meta only once the ledger took it. */
+  private async moveBooking(cost: Cost): Promise<boolean> {
+    const rows = this.meta!.rows!;
+    try {
+      await this.budget().moveRows(this.ctx.id.toString(), cost);
+    } catch {
+      return false;
+    }
+    rows.booked = cost;
+    return true;
+  }
+
+  /**
+   * At the start the class is there, its devices' lines known and the looks
+   * fixed: the booking moves to what was spent plus what is ahead. With no
+   * student there it is a look at the room or a teacher alone, and holds
+   * only what was spent until one comes (`bookAgain`).
+   */
+  private async bookAhead(): Promise<void> {
     const rows = this.meta!.rows;
     const run = this.game!.run;
     if (!rows || rows.settled || !run) return;
-    const rest = rowsFromStart(G.activePlayers(run).length, this.game!.quiz.questions.length);
-    await this.budget().moveRows(this.ctx.id.toString(), rows.written + rest).catch(() => {});
+    if (this.students() === 0) {
+      if (await this.moveBooking(this.spent())) rows.lapsed = true;
+      return;
+    }
+    await this.moveBooking(add(this.spent(), ahead(this.classNow())));
   }
 
-  /** The final ranking: nothing more is written for the class, so the booking settles with what was. */
+  /**
+   * Under way: a device that fell back to long-poll, or a class spending
+   * faster than estimated, books more, never refused (server/rows.ts, `grown`).
+   */
+  private async bookGrowth(): Promise<void> {
+    const rows = this.meta?.rows;
+    const run = this.game?.run;
+    if (!rows?.booked || rows.settled || rows.lapsed || !run?.started || run.phase === "final") return;
+    const more = grown(rows.booked, add(this.spent(), ahead(this.classNow())));
+    if (more) await this.moveBooking(more);
+  }
+
+  /**
+   * A let-in lobby that no student joined within LOBBY_WAIT_MS: the booking
+   * holds only what was spent until a student comes (`bookAgain`). For the
+   * alarm: when that is due, or null.
+   */
+  private lapseAt(): number | null {
+    const rows = this.meta?.rows;
+    if (!rows?.at || rows.lapsed || rows.settled || this.game?.run?.phase !== "lobby" || this.students() > 0) return null;
+    return rows.at + LOBBY_WAIT_MS;
+  }
+
+  /** The final ranking: nothing more is written for the class, so the booking settles with what was spent and what devices left polling on it will. */
   private async settleRows(): Promise<void> {
     const rows = this.meta!.rows;
     if (!rows || rows.settled) return;
+    const pollers = this.classNow().pollers;
     try {
-      await this.budget().moveRows(this.ctx.id.toString(), rows.written, true, this.classUse());
+      await this.budget().moveRows(this.ctx.id.toString(), add(this.spent(), tail(pollers)), true, this.classUse());
     } catch {
       // Unsettled, the quiz's end settles it (endInstance).
       return;
@@ -1415,6 +1522,7 @@ export class Instance extends DurableObject<Env> {
   private async afterTeacherChange(changed: ("run" | "fixes" | "meta")[]): Promise<void> {
     this.meta!.lastActivity = Date.now();
     await this.refreshCode();
+    await this.bookGrowth();
     await this.persist([...new Set([...changed, "meta" as const])]);
     await this.scheduleAlarm();
     this.broadcast();
@@ -1633,6 +1741,9 @@ export class Instance extends DurableObject<Env> {
     // Peers: someone the room waits for may go away, and the room on without them.
     const recheck = this.peersRecheck();
     if (recheck != null) at = Math.min(at, recheck);
+    // A let-in lobby nobody joined gives its booking back.
+    const lapse = this.lapseAt();
+    if (lapse != null) at = Math.min(at, Math.max(Date.now() + 1000, lapse));
     // Each setAlarm() writes a row (Cloudflare's Durable Objects pricing), so
     // an alarm already due sooner stays: an alarm that comes early only looks
     // and sets the next one. One that is past is running now, or about to.
@@ -1655,6 +1766,11 @@ export class Instance extends DurableObject<Env> {
       return;
     }
     if (this.pruneGuesses(now)) await this.ctx.storage.put("guesses", this.guesses);
+    const lapse = this.lapseAt();
+    if (lapse != null && now >= lapse && (await this.moveBooking(this.spent()))) {
+      this.meta!.rows!.lapsed = true;
+      await this.persist(["meta"]);
+    }
     const deadline = G.deadline(this.game!);
     if (deadline != null && now >= deadline) {
       // Time's up: answering closes; the reveal waits for the teacher.
@@ -1725,7 +1841,7 @@ export class Instance extends DurableObject<Env> {
     await this.releaseCode().catch(() => {});
     const rows = this.meta?.rows;
     const unsettled = rows && !rows.settled;
-    await this.budget().release(this.ctx.id.toString(), unsettled ? rows.written : undefined, unsettled ? this.classUse() : undefined).catch(() => {});
+    await this.budget().release(this.ctx.id.toString(), unsettled ? this.spent() : undefined, unsettled ? this.classUse() : undefined).catch(() => {});
     const gone: ServerMessage = ackId ? { t: "gone", reason: "The teacher has ended this quiz.", home: true } : { t: "gone", reason: "This quiz has ended." };
     const host = this.game?.run?.peers?.host;
     for (const ws of this.ctx.getWebSockets()) {

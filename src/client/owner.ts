@@ -56,11 +56,13 @@ function gauges(v: OwnerView): string {
   const u = d.use;
   const label = d.day === today() ? `today, ${d.day} UTC` : `${d.day} UTC, the latest day on record`;
   return (
-    `<h2>The latest day</h2><p class="note">${esc(label)}. The plan's day starts at 00:00 UTC. How many classes a day the site carries is for these figures to show; the plan's limits are the three gauges. The project's own runs are left out of the classes, though they spend the plan's allowance too.</p>` +
+    `<h2>The latest day</h2><p class="note">${esc(label)}. The plan's day starts at 00:00 UTC. How many classes a day the site carries is for these figures to show; the plan's limits are the gauges: the ledger's, what classes booked or spent, refused at their share; and below them what the settled classes' devices reported. The project's own runs are left out of the classes, though they spend the plan's allowance too.</p>` +
     `<div class="gauges">` +
     figure("Classes", realClasses(d), "let in, the project's own runs left out") +
     figure("Most at once", d.atOnce ?? 0, "classes booked and not yet settled") +
-    gauge("Rows, ledger now", v.rows.now, v.rows.of, "the classes' share of the plan's 100,000; written plus booked") +
+    gauge("Ledger now: rows", v.ledger.now.rows, v.ledger.of.rows, "the classes' share of the plan's 100,000; booked or spent") +
+    gauge("Ledger now: requests", v.ledger.now.requests, v.ledger.of.requests, "the classes' share of the plan's 100,000; booked or spent") +
+    gauge("Ledger now: awake s", v.ledger.now.awakeS, v.ledger.of.awakeS, "the classes' share of the plan's duration, at 0.128 GB-s a second") +
     gauge("Requests, about", u ? objectRequests(u) : 0, PLAN.objectRequests, "Durable Object, classes only") +
     gauge("Duration, about", u ? pollGbSeconds(u) : 0, PLAN.gbSeconds, "GB-s, held polls only") +
     `</div>` +

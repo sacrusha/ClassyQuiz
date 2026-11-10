@@ -57,10 +57,11 @@ The figures, as `telemetry.md`, "Reading it", gives them:
   classes a day the site carries is for the figures to show, and the
   owner's about 200 a day and 60 at once describe what the site has, not
   a limit (`scaling-drawer.md`, "Purpose and threshold"). Beside them,
-  three gauges against the plan's real limits: the rows ledger against the
-  classes' share of the day's rows, the classes' Durable Object requests
-  against 100,000 and held-poll duration against 13,000 GB-s. The last two
-  are from what devices report: requests count sockets as one for each device not on long-poll
+  gauges against the plan's real limits: the ledger in each of its three
+  allowances (rows, requests, awake seconds) against the classes' share,
+  which is what letting a class in is refused by; then the settled classes'
+  Durable Object requests against 100,000 and held-poll duration against
+  13,000 GB-s. The last two are from what devices report: requests count sockets as one for each device not on long-poll
   plus its reconnects (the sums hold no count of sockets opened), and
   duration is `awakeS` at 0.128 GB-s a second. They leave out uploads,
   joins and pictures, and say so; the Cloudflare dashboard has the totals.
