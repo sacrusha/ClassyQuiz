@@ -122,7 +122,7 @@ uploads (the `d:` count, now kept as long as the day's record) and the
 most classes booked at once (let in and not yet settled), the owner's
 "at once".
 
-Classes turned away, by the cap (uploads a day, bytes stored, the day's
+Classes turned away, by the cap (the uploads' rows a day, bytes stored, the day's
 rows), are the figure behind the owner's "beyond that, donations": a
 refusal writes nothing of its own, since a script's refused uploads would
 otherwise spend rows, so `SiteBudget` counts it in memory and adds it to

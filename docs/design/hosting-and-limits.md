@@ -42,7 +42,7 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
     class. What binds first turns on the share of classes with at least one
     poller, which isn't known. The landing page's "room for a few dozen
     classes a day" rests on this (`shared/limits.ts`, comment on
-    `MAX_UPLOADS_PER_DAY`).
+    `DAY_ROWS_FOR_UPLOADS`).
 - **Which devices poll.** A device polls only after three WebSocket attempts
   in a row failed or stayed silent, and then for the rest of its page's life
   (`connections.md`). Plausible assumption: the first users come from
@@ -275,14 +275,24 @@ them, and the README points self-hosters there.
   "The door".
 - **The site's share, booked.** `SiteBudget` (`server/budget.ts`), one Durable
   Object for the whole site, books every quiz that parses against two caps:
-  `MAX_UPLOADS_PER_DAY` (300, back at 00:00 UTC) and `MAX_LIVE_BYTES` (1 GB of
-  quiz text plus pictures stored at once, back as quizzes end or expire).
+  `DAY_ROWS_FOR_UPLOADS` (15,000 rows a day, back at 00:00 UTC) and
+  `MAX_LIVE_BYTES` (1 GB of quiz text plus pictures stored at once, back as
+  quizzes end or expire). The uploads' cap is in rows, what an upload
+  spends of the plan (its quiz, each picture and its small records, and as
+  many again at its deletion: `uploadRows`, `server/rows.ts`), out of what
+  the classes' share leaves; a text quiz is some 15 rows, so about 1,000
+  uploads a day, one with 15 pictures some 45, about 330. Rests on: looks
+  at the room are likely the most common uploads and no class (Situation,
+  "Who opens a lobby"), so a count of uploads, sized on what classes spent,
+  would let them spend the day before any class's allowance binds; what a
+  class spends is booked apart ("Running classes finish").
   Storage is the limit that doesn't reset at midnight: filled, every write on
   the account fails, answers in running classes included. A quiz with errors
   books nothing. Ending a quiz releases its booking; a booking also lapses at
   the end of its code's claim, which is renewed alongside it, so a lost
   release can't fill the ledger for good. Per quiz it holds an id, a size and
-  an expiry; per day a count; nothing about the quiz or who made it. It also
+  an expiry; per day a count and the uploads' rows; nothing about the quiz
+  or who made it. It also
   keeps the UTC days on which it refused an upload for 31 days, for the
   landing's own-copy line (backlog v4 item 4; the landing is `root-page.md`).
 - **A refused upload says which cap it hit.** The two caps free up
@@ -478,11 +488,9 @@ plan", item 3):
 - The lifetime runs from the last teacher step or role taken. A lobby that
   waits longer than three hours for its class ends: the teacher who opened
   it early, the walked quiz.
-- `MAX_UPLOADS_PER_DAY` (300) was derived from what a class wrote. Every
-  look at the room is an upload, so a few hundred of them spend the day's
-  uploads before anything else binds. `MAX_LIVE_BYTES` is reached by
-  lookers' own picture quizzes, some 300 at a few MB each, held three
-  hours.
+- `MAX_LIVE_BYTES` is reached by lookers' own picture quizzes, some 300 at
+  a few MB each, held three hours, and then refuses uploads that a class
+  would have joined.
 
 Not covered: a script hammering `/api`, which spends requests no class
 booked; that is the case for a domain with a rate-limiting rule.
@@ -539,7 +547,7 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   Cloudflare returns once Pages Functions pass their requests (the Workers
   docs say error 1027; status and Pages behaviour aren't documented).
   `isQuotaError` is a best reading.
-- Whether the numbers (300 uploads, 1 GB, 60 players, 5 late joiners,
+- Whether the numbers (15,000 upload rows, 1 GB, 60 players, 5 late joiners,
   3 hours) fit real use; no deploy log or dashboard figures yet.
 - Whether teachers are seen with more than five latecomers, or re-uploading
   after the 3 hours.

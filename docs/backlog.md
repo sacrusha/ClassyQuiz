@@ -613,9 +613,10 @@ shows one binding.
    awake time, estimates where there is no most; the booking moving at
    Start and as a class outgrows it; a let-in lobby nobody joins giving it
    back after `LOBBY_WAIT_MS`, its first student booking again; the settle
-   keeping what devices left on will spend. Open: the lifetime of a lobby
-   left waiting, the uploads cap and the stored bytes against a wave of
-   looks at the room.
+   keeping what devices left on will spend; the uploads' cap in rows
+   (`DAY_ROWS_FOR_UPLOADS`) instead of a count. Open: the lifetime of a
+   lobby left waiting, and the stored bytes against a wave of looks at the
+   room.
 
 ## Later — Paper and memory
 

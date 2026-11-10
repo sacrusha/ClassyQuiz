@@ -1,6 +1,6 @@
 // The site's share of the free plan (docs/design/hosting-and-limits.md, "Protecting the day's allowance"): one
 // tiny Durable Object for the whole site that books every upload against two
-// caps, uploads a day and bytes stored at once. Storage is the one limit that
+// caps, the uploads' rows a day and bytes stored at once. Storage is the one limit that
 // doesn't come back at midnight: filled, every write on the account fails,
 // answers in running classes included, until quizzes expire.
 //
@@ -27,7 +27,7 @@
 // site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
 
 import { DurableObject } from "cloudflare:workers";
-import { DAY_FOR_CLASSES, DAY_FOR_JOINS, MAX_LIVE_BYTES, MAX_UPLOADS_PER_DAY, NEARLY_FULL, type Cost, type SiteFull } from "../shared/limits.ts";
+import { DAY_FOR_CLASSES, DAY_FOR_JOINS, DAY_ROWS_FOR_UPLOADS, MAX_LIVE_BYTES, NEARLY_FULL, type Cost, type SiteFull } from "../shared/limits.ts";
 import { asCost, fullness, moved, within } from "./rows.ts";
 import type { Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
@@ -72,13 +72,23 @@ export class SiteBudget extends DurableObject<Env> {
    */
   private refused: ({ day: string } & Refused) | null = null;
 
-  /** Books a new quiz; says which cap is reached when the site is full (today's uploads, or bytes stored). */
-  async reserve(instance: string, bytes: number, until: number): Promise<{ day: Cost } | SiteFull> {
+  /**
+   * Books a new quiz: its rows against the uploads' rows today, its bytes
+   * against those stored at once; says which cap is reached when the site
+   * is full (today's uploads, or bytes stored). `d:` counts the day's
+   * uploads, for the telemetry.
+   */
+  async reserve(instance: string, bytes: number, until: number, rows = 0): Promise<{ day: Cost } | SiteFull> {
     const now = Date.now();
     const day = `d:${dayOf(now)}`;
+    const rowsKey = `u:${dayOf(now)}`;
     await this.rollUp(now);
     const today = (await this.ctx.storage.get<number>(day)) ?? 0;
-    if (today >= MAX_UPLOADS_PER_DAY) return await this.full(now, "uploads", "uploads");
+    const written = await this.ctx.storage.list<number>({ prefix: "u:" });
+    const rowsToday = written.get(rowsKey) ?? 0;
+    const old = [...written.keys()].filter((k) => k !== rowsKey);
+    if (old.length > 0) await this.ctx.storage.delete(old.slice(0, 128));
+    if (rowsToday + rows > DAY_ROWS_FOR_UPLOADS) return await this.full(now, "uploads", "uploads");
     const bookings = await this.ctx.storage.list<Booking>({ prefix: "i:" });
     const stale: string[] = [];
     let live = 0;
@@ -88,7 +98,7 @@ export class SiteBudget extends DurableObject<Env> {
     }
     if (stale.length > 0) await this.ctx.storage.delete(stale.slice(0, 128));
     if (live + bytes > MAX_LIVE_BYTES) return await this.full(now, "bytes", "bytes");
-    await this.ctx.storage.put({ [day]: today + 1, [`i:${instance}`]: { bytes, until } satisfies Booking });
+    await this.ctx.storage.put({ [day]: today + 1, [rowsKey]: rowsToday + rows, [`i:${instance}`]: { bytes, until } satisfies Booking });
     // The day's ledger, so the check can say when the site is nearly full.
     return { day: await this.ledgerToday() };
   }

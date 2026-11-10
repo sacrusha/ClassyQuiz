@@ -49,13 +49,22 @@ export const LINE_WRITE_MS = 1000;
  */
 export const INPUT_GAP_MS = 300;
 /**
- * Uploads a day, across the site. The "room for a few dozen classes a day" on
- * the start page and in public/own-copy.html holds only while the caps here
- * (this one, MAX_PLAYERS, MAX_LINE_WRITES) stay as they are: the arithmetic
- * is in docs/design/hosting-and-limits.md, Situation. A self-hoster who
- * changes them makes that sentence untrue.
+ * Rows a day the uploads may write, across the site (docs/design/hosting-and-limits.md,
+ * "Protecting the day's allowance"): an upload writes its quiz, each
+ * picture and its small records, and as many again when the quiz is
+ * deleted (`uploadRows`, server/rows.ts). Out of what the classes' share
+ * leaves of the plan's 100,000 (DAY_FOR_CLASSES), with some left for the
+ * site's small objects. A text quiz is some 15 rows, so about 1,000 uploads a
+ * day; one with 15 pictures some 45, about 330. Counted in rows rather than
+ * uploads because looks at the room, likely the most common uploads, are
+ * no class, and an upload count would let them spend the day's uploads
+ * before the classes' allowances bind. The "room for a few dozen classes a
+ * day" on the start page and in public/own-copy.html holds only while the
+ * caps here (DAY_FOR_CLASSES, MAX_PLAYERS, MAX_LINE_WRITES) stay as they
+ * are: the arithmetic is in hosting-and-limits.md, Situation. A self-hoster
+ * who changes them makes that sentence untrue.
  */
-export const MAX_UPLOADS_PER_DAY = 300;
+export const DAY_ROWS_FOR_UPLOADS = 15_000;
 /**
  * What a class spends of the day's allowances that a class can run out of
  * mid-lesson (docs/design/hosting-and-limits.md, Situation, "What a class

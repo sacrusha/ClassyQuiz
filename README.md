@@ -32,7 +32,7 @@ By hand:
 
 To try it on your own computer first: `npm run dev` in `src/`, then open http://127.0.0.1:8788.
 
-The demo's limits for a few users (players per room, uploads a day, storage, the rows a day its rooms may book) are constants in `src/shared/limits.ts`; raise them for your own copy. Countdown's length and the points for speed are in `src/shared/tempo.ts`.
+The demo's limits for a few users (players per room, the rows a day its uploads may write, storage, what its rooms may book of the day's rows, requests and duration) are constants in `src/shared/limits.ts`; raise them for your own copy. Countdown's length and the points for speed are in `src/shared/tempo.ts`.
 
 ### On a school's or company's own server
 

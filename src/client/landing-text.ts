@@ -143,7 +143,7 @@ export interface Text {
   copyForAi: string;
   without: string;
   notTaken: string;
-  /** An upload refused: full is the cap reached (uploads a day: back at `at`; bytes stored: as quizzes end or expire). */
+  /** An upload refused: full is the cap reached (the uploads' rows a day: back at `at`; bytes stored: as quizzes end or expire). */
   siteFull: (full: SiteFull, at: string | null) => string;
   /** at: the time the allowance comes back, in Swiss time; null when the browser has no time zones (then 00:00 UTC). */
   quota: (at: string | null) => string;

@@ -32,7 +32,7 @@ import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEA
 import type { Env } from "./env.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
 import { CLASS_FULL, CLASS_STARTED, DAY_FOR_CLASSES, LINE_WRITE_MS, LOBBY_WAIT_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type Cost, type SiteFull } from "../shared/limits.ts";
-import { add, ahead, asCost, atLetIn, grown, room, spent, tail, type ClassNow } from "./rows.ts";
+import { add, ahead, asCost, atLetIn, grown, room, spent, tail, uploadRows, type ClassNow } from "./rows.ts";
 import { readLine, type LineCounts } from "../shared/line.ts";
 import { summarize, type ClassUse, type RoomKind } from "./telemetry.ts";
 import { LOOK_SHOW_MS } from "../shared/looks.ts";
@@ -319,7 +319,7 @@ export class Instance extends DurableObject<Env> {
     const codeUntil = now + INSTANCE_IDLE_MS + CODE_SLACK_MS;
     // The site's share of the free plan: uploads today, bytes stored at once.
     const bytes = new TextEncoder().encode(text).byteLength + Object.values(pictures.files).reduce((s, f) => s + f.byteLength, 0);
-    const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil);
+    const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil, uploadRows(Object.keys(pictures.files).length));
     if (typeof booked === "string") return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
     const peers = mode === "peers";
     // Peers: the others join with the code at once, so the class is booked
