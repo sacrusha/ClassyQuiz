@@ -22,8 +22,9 @@ export const MAX_LATE_JOINERS = 5;
  * Changes of mind per student and question; the last accepted tap counts.
  * Answers are held in memory and written with the teacher's steps
  * (docs/design/open-period-in-memory.md), so a change costs no row, and the cap is
- * not part of what a class books. It still bounds requests: each recorded
- * answer ends the teacher devices' held long-polls (instance.ts, broadcast).
+ * not part of what a class books. It discourages an accidental flood of
+ * requests: each recorded answer ends the teacher devices' held long-polls
+ * (instance.ts, broadcast).
  */
 export const MAX_ANSWER_CHANGES = 10;
 /**

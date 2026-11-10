@@ -93,7 +93,7 @@ Points are computed from the stored answers under the current fixes and never st
 
 ### When a tap counts
 
-A student can change their answer until answering closes; the last tap counts (`MAX_ANSWER_CHANGES`, `shared/limits.ts`, caps the changes at 10; what that cap still bounds: `open-period-in-memory.md`, "Caps, taps and alarms"). The rule is the device's view, not the arrival time (`answerOutcome`):
+A student can change their answer until answering closes; the last tap counts (`MAX_ANSWER_CHANGES`, `shared/limits.ts`, caps the changes at 10; what the cap is for: `open-period-in-memory.md`, "Caps, taps and alarms"). The rule is the device's view, not the arrival time (`answerOutcome`):
 
 - Every view carries a version; the server notes in `Run.closedView` the version of the first view that showed answering closed (the lock-in, or the reveal if nothing locked before it). A tap names the version it was made on. If that is older than the closing view's, the tablet still showed the question as open, so the tap counts whenever it arrives. Time would be the wrong basis for the reasons in Situation.
 - **The record settles when the class leaves the question's reveal** (the ranking, the next question, the final ranking). Until then a tap on an older view counts, including during the reveal, and the spread grows by one. After it, nothing changes what the question scored except the teacher's fixes, so a podium that was shown does not change. Nothing counts while the class is reading, for a skipped question, or for one not revealed before an early final ranking.

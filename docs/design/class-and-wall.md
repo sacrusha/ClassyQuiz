@@ -280,8 +280,8 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   no `t`, which means none. It is accepted only in the lobby,
   only for what the menu has, never for a removed avatar, and at most
   `MAX_LOOK_CHANGES` (100) changes per player, after which the pictures stop
-  responding; a change costs no row (below), so the cap guards nothing
-  measured (`open-period-in-memory.md`, "Caps, taps and alarms"). The
+  responding (what the cap is for: `open-period-in-memory.md`, "Caps, taps
+  and alarms"). The
   animal and colour are never touched.
 - On a tablet the nine hats stay on one line: each picture is 60 px, or as
   little as 46 where the picker is narrower (53 px on a 1024 px tablet held
