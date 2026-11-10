@@ -2,10 +2,10 @@
 
 ## Purpose
 
-The shared site is to carry about 200 classes a day and about 60 at once
-on the Free plan (the owner, 2026-11-09; backlog, "Room on the Free
-plan"), and the lesson goes on when connections drop, phones sleep or the
-instance restarts (backlog Constraints, "Survives school Wi-Fi"). Rows
+The site carries the classes that use it within the Free plan
+(`scaling-drawer.md`, Purpose), and the lesson goes on when connections
+drop, phones sleep or the instance restarts (backlog Constraints, "Survives
+school Wi-Fi"). Rows
 written ran out first, because every tap was a write. So the input that
 changes while a stage is open (the lobby's looks, a question's answers) is
 written in batches, and a restart that the devices can recover from loses

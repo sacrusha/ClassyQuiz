@@ -33,7 +33,7 @@ const PER_STAGE_LINES = 2 * MAX_LINE_WRITES;
 const FIXED = 50;
 
 /**
- * Requests are estimated for the design target's class when the class isn't
+ * Requests are estimated for the example class when the class isn't
  * there yet (backlog, Project): a larger one books more once it is, at Start.
  * The teacher's devices: a wall, and a Remote often enough to count it.
  */

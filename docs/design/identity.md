@@ -12,14 +12,13 @@ for its own sake.
 
 - The answer marks are Kahoot's set (red triangle, blue diamond, yellow
   circle, green square, in that order), kept on purpose: children who know it
-  read it at once (`room-workflow-landscape.md`, `class-and-wall.md`). The
+  read it at once (`class-and-wall.md`). The
   class knows the four answers by colour and shape on every screen, and the
   teacher's Play stands beside them on the wall's bar and on the Remote.
 - For the who-answered bar, `class-and-wall.md` rules that it must never read
   as an answer's colour (the avatars' shapes leave out the answers' shapes).
   The site's colours below take that rule to every control and every colour
-  of the site's own: the implementer's call, not yet the owner's (backlog,
-  "With the owner").
+  of the site's own: the implementer's call.
 - The places where people look together are the wall's join screen (the
   whole class, every lesson), the landing page's header (where the tablets
   type the code) and the browser tab. Question screens belong to the quiz's

@@ -59,7 +59,7 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
   4 in 10 classes of 25 and a wall).
 - **Who opens a lobby.** Opening a Quizmaster or Peers room is the upload
   (`local-check.md`); letting the class in is one tap from the lobby's check
-  (`user-flow.md`). At the server these lobbies look alike until a class
+  (`teacher-devices.md`, "The single tab: check, then join"). At the server these lobbies look alike until a class
   arrives:
   - Someone looking to see what the room is and whether the site is for
     them. Likely the most common once the site is advertised, a few
@@ -113,12 +113,11 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
   rejected or not. A determined script can spend the day's requests and
   nothing on this plan prevents it. The remedy is self-hosting, or a domain
   with a rate-limiting rule at the edge (the Free plan includes one such
-  rule); whether to take one is an open question with the owner (backlog, open
-  list).
+  rule).
 - **The threat is accident, not malice.** The Project's "a normal user who
   can't use it, not a malicious one" (backlog): children hammer buttons, a
-  tablet is left on over the weekend, a class is bigger than the design
-  target of about 25. Automated vandalism from outside the class is the
+  tablet is left on over the weekend, a class is bigger than the example
+  class's about 25. Automated vandalism from outside the class is the
   realistic exception and the open one (v2 item 4).
 - **School filters.** Shared subdomains such as `*.pages.dev` are sometimes
   blocked by school web filters because of phishing abuse. Whether the target
@@ -149,7 +148,7 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
 
 The address is `classyquiz.pages.dev`; children may type it, and the
 guidance an AI reads has to contain the full address, since "told the site's
-name" means the whole address. The owner prefers `pages.dev`.
+name" means the whole address.
 
 Two things are deployed (`npm run deploy` does both, the state Worker first,
 which is the order a new Durable Object migration needs):
@@ -353,14 +352,11 @@ way most.
 The design's frame is the owner's: quizzes book slots and release them when
 done, the booking shrinks at Start, students only once the class is let in,
 one stored quiz per device, and a class's taps held in memory so that its
-booking is small (backlog, "Room on the Free plan"). The numbers and the
-rest are the implementer's, to confirm.
+booking is small. The numbers and the
+rest are the implementer's.
 
 - **Students join once the class is let in** (`teacher-devices.md`, "The
-  single tab: check, then join"); teacher devices come in at any time. So a
-  quiz uploaded only to look it over (for tomorrow, say) writes nothing for
-  a class and books nothing; looking it over on the local check, before any
-  upload, costs no upload either (`local-check.md`).
+  single tab: check, then join"); teacher devices come in at any time.
 - **What a class books, and in what.** `SiteBudget` keeps the day's ledger
   (`r:` and the day, back at 00:00 UTC) in the three allowances a class can
   run out of mid-lesson: rows, Durable Object requests (a class's Function
@@ -387,7 +383,7 @@ rest are the implementer's, to confirm.
   the drawer's, not measured; telemetry's figures per class are what to
   replace them with (`telemetry.md`).
 - **Letting the class in books an estimate for a class not yet there**: 25
-  students (the design target) and two teacher devices, a tenth of them
+  students (the example class) and two teacher devices, a tenth of them
   polling, and the object awake for four classes in ten of the lesson's
   time. Plausible assumptions, kept pessimistic against "Which devices
   poll": if telemetry shows the share of pollers or of classes with one
@@ -462,10 +458,8 @@ rest are the implementer's, to confirm.
 - **One quiz per device.** A device's next upload ends its previous quiz if
   that one never started (`POST /api/i/:id/replaced` with the previous
   quiz's secret, sent by the root page once the new upload is in; each
-  upload replaces the one before, so only the latest needs asking), so a
-  lobby opened at the end of a look-over and left doesn't hold its quiz.
-  A started quiz is never ended this way, so a quiz paused over lunch
-  survives a new zip tried on the same laptop. A let-in lobby with children
+  upload replaces the one before, so only the latest needs asking).
+  A started quiz is never ended this way. A let-in lobby with children
   in it ends too, and their tablets say the quiz has ended: a new upload
   from the device that steers is taken as the teacher moving on (the right
   quiz after a wrong one). The device already knows its latest quiz and its
@@ -540,8 +534,8 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   iOS 15 and other Safari before 16 (see "Protecting the day's allowance"),
   which the target schools' stock of old iPads keeps in use; a static header
   can't target a version, so every browser gets the wider rule. Reassess when
-  the schools' iPads have moved past iOS 15, when the design target is no
-  longer a school, or by November 2028; then try `'self'` alone on a real
+  the schools' iPads have moved past iOS 15, when the example class is no
+  longer a school's, or by November 2028; then try `'self'` alone on a real
   iOS 15 device through `/check`, and drop the two schemes if the WebSocket
   connects or iOS 15 no longer matters.
 - Whether the AIs' user-triggered fetchers read a page on `pages.dev`, and
@@ -555,7 +549,7 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   docs say error 1027; status and Pages behaviour aren't documented).
   `isQuotaError` is a best reading.
 - Whether the numbers (15,000 upload rows, 1 GB, 60 players, 5 late joiners,
-  3 hours) fit real use; no deploy log or dashboard figures yet.
+  3 hours) fit real use; no figures from real classes yet.
 - Whether teachers are seen with more than five latecomers, or re-uploading
   after the 3 hours.
 - German, French and Italian wording of the two caps' messages, by a native

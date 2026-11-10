@@ -5,7 +5,7 @@ computer, how a change reaches Cloudflare, and the traps that cost earlier
 implementers time. Setting up your own instance (account, token, name, first
 deploy) is in the README, "Your own instance"; it is not repeated here. What the
 site is for and what it must withstand is in `docs/backlog.md` (Project,
-Constraints); the screens are in `docs/user-flow.md`.
+Constraints); what each part of the site is for, in `docs/design/`.
 
 All commands run in `src/` unless said otherwise.
 
@@ -229,33 +229,21 @@ method or an argument the previous code lacks meets that code meanwhile. An
 object waking on the new code reads what the previous code stored and put on
 its sockets.
 
-`docs/deploy-log.md` records what is deployed.
+A file removed from `dist/` is still served on the production address from
+Cloudflare's edge cache for up to a week (`s-maxage` 7 days, seen on removed
+pictures); the deployment's own address answers 404 for it, so that is where
+a removal is checked.
+
+`docs/deploy-log.md` is the present, what is live and what of it has been
+tried there; each deploy's record is git's. So whoever deploys updates it
+in the same session ("Live" replaced, what the deploy's checks ran live
+under "Tried live", what it brought that nothing ran live under "Not tried
+live") and writes what the deploy carried and what was checked in that
+commit's message.
 
 ## Tooling kept on disk, outside the repo
 
-`E:\Projects\classyQuiz\.tmp\` on the owner's machine is git-ignored and
-survives sessions (the session scratchpad does not). None of it is reviewed for
-the repo; read a script before running it. Directories there:
-
-- `shots-tool/`: headless-browser (Edge, puppeteer) walks that earlier
-  implementers built on, scripts only, no screenshots. Puppeteer hangs when
-  evaluating in a tab whose window has another tab in front; call
-  `bringToFront()` first.
-- `first-page/`: the root page's probes (`docs/backlog.md`, Housekeeping).
-- `stacks/<name>/`: per-implementer scripts for starting and stopping a second
-  local stack (`after-upload`, `fixc`, `flow`, `hard`, `identity`, `landing`,
-  `lp`, `lp3`, `owner5`, `pics`, `solo`, `stack`, `tempo-bar`, `v3`, `winners`).
-- `identity/kit/`: the logo kit as it was made, with the boards and renders
-  that `docs/brand/` leaves out; their mock-ups carry placeholder content.
-- `sim-diag/`: the instrumented simulation used to chase a score mismatch,
-  since designed out (`docs/design/question-flow.md`, "When a tap counts").
-- `picture-answers/`: the generated test zip and its generator.
-- `samples/`: the owner's number-line zip.
-- `example/conversation/`: the worked example's conversation as HTML and
-  `render.mjs`, which renders it to the light and dark pictures in
-  `public/examples/`; `fake_photos.py`, the stand-in photographs
-  (`docs/design/example-page.md`). `example/sheet/` makes the sheet.
-- `avatars-prototype/`, `avatars-pass/`.
-- Other working folders from past sessions: `ExampleSheets`, `ai-tests`,
-  `dryrun`, `example`, `fnb3`, `fnbuild`, `guidance-runs`, `mock`, `review-d`,
-  `session-2026-11-03`, `spike`, `winners-jump`, plus loose logs and probes.
+`.tmp/` at the repo root on the owner's machine is git-ignored and survives
+sessions (the session scratchpad does not); earlier implementers' walks,
+probes and second-stack scripts lie there. None of it is reviewed; read a
+script before running it.

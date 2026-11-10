@@ -6,7 +6,7 @@
    the question on the wall only, the choices on every tablet, a tap that shows
    up on the wall, the teacher's phone setting the pace, the split before the
    solution as the moment to talk, avatars instead of names.
-   (storyboard-classyquiz.md; screen words from the repo, film-text.md.)
+   (docs/film/README.md; screen words from the repo, film-text.md.)
 
    Built to port: one script, no outside fonts or libraries; every word the
    film shows is in "words" below (the root page's own from landing-text.ts,

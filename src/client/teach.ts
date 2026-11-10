@@ -1,6 +1,6 @@
 // The Remote: the teacher's own view for steering, usually on the phone, or
 // the laptop's screen when the projector is a second window
-// (docs/user-flow.md §3.3, §3.5). One card and the steering bar (Last call,
+// (docs/design/teacher-devices.md). One card and the steering bar (Last call,
 // Play); everything else is in the ⋯ menu.
 
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";

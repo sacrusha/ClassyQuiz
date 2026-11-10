@@ -20,7 +20,7 @@ It need not read easily for them.
 The page is the home of what the AI reads. This file says what the page is for
 and the situation it is written into, and does not repeat it. The format's
 specification is on the page; `design/quiz-format.md` says why the format is
-shaped as it is. The screens the page describes are in `docs/user-flow.md`.
+shaped as it is.
 
 ## Situation
 
@@ -30,8 +30,7 @@ shaped as it is. The screens the page describes are in `docs/user-flow.md`.
   Whether a given AI understands the site from its address alone is a fact to
   test, not to assume.
 - The product's situation (teacher time as the measure, the example class, the
-  AI that may be a free one, "Designed for Claude; other mainstream AIs
-  verified") is the backlog's Project and Constraints sections. The guidance
+  AI that may be a free one) is the backlog's Project and Constraints sections. The guidance
   puts the part of it the reading model can't know into its own words.
 - Plausible assumption: a capable model already knows teaching, question
   design and how to talk to a teacher or anyone else who asks (what the cut
@@ -40,15 +39,15 @@ shaped as it is. The screens the page describes are in `docs/user-flow.md`.
   Quizmaster: `local-check.md`), and the user picks the way after opening it.
   The ways differ in what shapes a question: where it is read and from how
   far, whether it is read out with its choices hidden first, whether the
-  spread comes before the solution, and whether the person asking plays. An
-  AI that knows how its quiz will be played can specialise
-  (`playing-redefined-notes.md`, item 9).
+  spread comes before the solution, and whether the person asking plays.
+  Plausible assumption: an AI that knows how its quiz will be played
+  specialises it (untested, "Not known").
 - Whoever asked the AI may play the quiz (backlog v5 item 5): a learner
   alone, one of the friends. An AI shows its draft in the conversation: the
   example's run did (`example-page.md`), and the page asks for a
   presentation. Plausible assumption: an AI told "I'm playing too" doesn't
   reliably infer that the questions and solutions must stay out of the
-  conversation, so the page says it (the working note's item 5). What it can't know is the site: what it does, how the screens and a
+  conversation, so the page says it. What it can't know is the site: what it does, how the screens and a
   lesson run, how long data lives, the format with examples, the limits, how a
   quiz reaches the site and what the upload shows.
 - Plausible assumption: fetched text that gives orders to the reader can trip
@@ -73,9 +72,8 @@ teacher, so that the AI's behaviour follows from understanding, the way an
 implementer's follows from the backlog. The quiz format is presented as a
 specification ("a quiz looks like this"), not as commands.
 
-Rules can't adapt and they block better solutions. The purposes behind this
-are two: not tripping injection guards, and not ordering the reader about for
-things nobody must do. Where an instruction is the point, a plain, well-marked
+Rules can't adapt and they block better solutions, and commands in a fetched
+page can trip injection guards. Where an instruction is the point, a plain, well-marked
 one is right.
 
 Wide terms work like an abstract interface in OOP (owner, from Telic
@@ -119,8 +117,7 @@ reports at upload is not described: the AI's file should work the first time
 (owner: there must be no loop; a loop that iterates is a failure, and "fix
 it" should allow the obvious fix, by keeping the format simple). How the steering works (its buttons, a
 clicker, a double press, which device takes which job, what happens when a
-phone goes quiet) shapes no quiz, is `user-flow.md`'s, and on the page only
-goes stale. The page uses the teacher screens' words, choices, answers and
+phone goes quiet) shapes no quiz, and on the page only goes stale. The page uses the teacher screens' words, choices, answers and
 solution (`question-flow.md`, "The steering bar"), as the format's messages
 do.
 
@@ -214,8 +211,7 @@ myself" and "I'm playing too" in the user's own words (`root-page.md`,
 A quizmaster doesn't play. Their screens, the big screen and a second
 device that steers, take no answers; they set when the choices come and
 when the solution shows; and a second device shows the current question's
-solution while the players answer (`teacher-devices.md`; `user-flow.md`
-§3.5). The page says so under Quizmaster, and under `#plays` the AI asks a
+solution while the players answer (`teacher-devices.md`). The page says so under Quizmaster, and under `#plays` the AI asks a
 user who says they will host and play too which they mean: to play among
 the others with nobody running it (Peers), the questions kept out of the
 conversation, or to run it for the group (Quizmaster), reviewed as usual.
@@ -223,25 +219,15 @@ Plausible assumption: without it, an AI told "I'm hosting and playing too"
 makes a Quizmaster quiz and keeps it from the user, who then runs a quiz
 nobody checked and can't play it.
 
-### Claims about what an AI can do
-
-Any claim about what an AI can do carries the tier and the date it was tested,
-for instance "free Claude Sonnet, tested 4 Nov 2026": a qualifier and a trust
-signal at once, never "the free version works". Such claims stay off the page
-until a test has timed them; the owner's example of the eventual form is the
-time to make an own copy.
-
 ### The AIs verified against
 
-- Claude is the design target.
-- Verified against the AIs teachers actually use: ChatGPT, Gemini and
+- The AIs teachers actually use, beside Claude: ChatGPT, Gemini and
   Microsoft Copilot, including Microsoft 365 Copilot Chat, which schools often
   provide through education accounts. Mistral Le Chat is an optional addition
   for European teachers.
 - Free tiers are tested as well as paid ones, because they decide whether an AI
-  can fetch a page or produce a file at all. The design target is a teacher on
-  a free account, so free-tier Claude (claude.ai) is the first verification;
-  there is no specific real teacher yet.
+  can fetch a page or produce a file at all. A teacher may be on a free account
+  (backlog, Project).
 - A run checks three things: the AI understands the site from its address
   alone; it handles the authoring situations (a full brief, no brief, a
   handwritten note among the scans, contradictory material) sensibly; it
@@ -301,8 +287,7 @@ quoted; runs not recorded beyond the above):
   than a quiz at once; samples have gone both ways.
 - Whether the drawn number-line quizzes' pictures match their keys.
 - Whether `Read <address>.` beats "for it", "with it" and "Have a look at" at
-  getting the page fetched before the first build; the test waits until the
-  landing and guidance settle, because of the fetch cache.
+  getting the page fetched before the first build.
 - Whether AIs keep the questions out of the conversation when the user says
   they'll play, whether they ask when it's unclear or when the user will
   host and play, and whether what they report instead is enough to trust

@@ -1,5 +1,5 @@
 // One uploaded quiz and its class (docs/design/hosting-and-limits.md, "What lives, and
-// for how long"; docs/user-flow.md for the roles). Holds the game state and the
+// for how long"; docs/design/teacher-devices.md for the roles). Holds the game state and the
 // quiz's code, talks to every tab of the class over WebSockets (hibernating,
 // so an idle instance costs nothing) or long-polling, and deletes everything
 // when the instance ends.
@@ -52,7 +52,7 @@ const POLL_HOLD_MS = 25_000;
  * A tab not heard from for this long is away: the device died or slept
  * without its socket closing (clients ping every 20 s; the runtime answers
  * without waking the object and notes the time). A role whose tab is away is
- * free for another tab (user flow, rule 5).
+ * free for another tab (docs/design/teacher-devices.md, "When a device is gone").
  */
 const FRESH_MS = 45_000;
 /**
@@ -289,7 +289,7 @@ export class Instance extends DurableObject<Env> {
    * Object has far more CPU time per request than a Function on the Free
    * plan. Nothing is stored when the quiz has errors. On success the quiz
    * has its code and its first class's lobby, and the tab that pasted it
-   * holds the Projector (user flow, rule 3).
+   * holds the Projector (docs/design/teacher-devices.md, "The single tab: check, then join").
    */
   async create(
     text: string,
@@ -933,7 +933,7 @@ export class Instance extends DurableObject<Env> {
     return p === "quiet" ? "present" : p;
   }
 
-  /** The Projector steers while no Remote is there (rule 4). */
+  /** The Projector steers while no Remote is there (docs/design/teacher-devices.md, "When a device is gone"). */
   private steering(exclude?: WebSocket): boolean {
     const p = this.presence("remote", exclude);
     return p === "none" || p === "away";
@@ -1835,7 +1835,7 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * Everything goes: quiz, class, players, answers, pictures (docs/design/hosting-and-limits.md, "What lives, and for how long").
-   * ackId: the teacher ended it, and every device goes to the root page (docs/user-flow.md, "End").
+   * ackId: the teacher ended it, and every device goes to the root page (docs/design/question-flow.md, "The steering bar": Exit).
    */
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});

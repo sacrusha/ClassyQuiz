@@ -5,10 +5,9 @@ screen, for whoever wants to find out more than that screen shows. What it
 does on the page (the poster, the
 player's bar, the layout, what loads when): `docs/design/root-page.md`, "The
 film". This folder is the film itself: this file (what it is for, what it
-lives with, how it is made and checked), `storyboard-classyquiz.md` (the
-shots, and how they depart from the owner's brief), `film-text.md` (the
-words its screens show, and where in the repo each comes from), and `build/`
-(the source and the scripts).
+lives with, how it is made and checked), `film-text.md` (the words its
+screens show, and where in the repo each comes from), and `build/` (the
+source and the scripts; the shots and their times are `build/film.js`'s).
 
 ## Purpose
 
@@ -80,7 +79,7 @@ it.
   delegate). The root page gets a hold at the full width before the camera
   moves in on its two steps, so that it is recognised as the page above the
   film; that second is added, not taken from the checks (the implementer's
-  call, not yet seen by the owner). The length is in `index.html` too (The
+  call). The length is in `index.html` too (The
   site's version, below).
 
 - **A phone held upright** gives the 16:9 film about 358 × 201 CSS px. Text
@@ -88,25 +87,35 @@ it.
   be illegible (codes typed by children, the AI's prose).
 - **It never plays by itself**: until a press the page shows its poster frame
   (`docs/design/root-page.md`).
-- **No sound, no words of its own.** Text appears only on the screens it
-  shows, in the language those screens have on the real site: the teacher's
-  chat, the quiz and the root page in the page's language, the site's screens
-  after the upload in English (`film-text.md` §0.7). Wordless bubbles carry
-  the murmur and the cheer.
+- **The screens it shows have the language they have on the real site**:
+  the teacher's chat, the quiz and the root page in the page's language, the
+  site's screens after the upload in English (`film-text.md` §0.7).
 - **AIs read the root page.** None of the film's words may be in
   `index.html`: they are in the script and drawn at play time.
 - **The site's content-security policy** (`src/scripts/build.mjs`, sent as
   headers from `dist/_headers`): scripts only from the site's own files,
   pictures from them or `blob:`, fonts from them (`default-src 'self'`). So
   no `data:` pictures or fonts, no inline script, no outside font or library.
-- **The site claims nothing it hasn't tested** (no durations, no tiers). The
-  film doesn't claim them by picture either: no clock, since the AI's minutes
-  of building are sped up.
 - **Devices' fonts differ.** The film's text is in the site's faces, Rubik
   and `system-ui`; `system-ui` is another font, of another width, on each
   device.
 
 ## How it is made
+
+### What it shows, and why
+
+- **The ask typed is the root page's own** (`film-text.md` 1), so the film
+  shows the sentence a viewer finds on the page; it holds on the address,
+  the one thing a teacher has to remember.
+- **The second ask, not the AI's preview** (owner: the ask that changes the
+  quiz is more relevant than the AI's drawing of it): what the chat should
+  leave behind is that the quiz is made, and changed, by asking.
+- **The upload is shown, step by step** (owner: "the step where the zip goes
+  to classyQuiz isn't obvious").
+- **The ranking comes after the whole quiz**: the wall's counter runs from
+  1 / 13 to 13 / 13 first, since after one question twelve children would
+  tie at ★ 1, where a ranking after the whole quiz has places. The end card
+  gives the address once more.
 
 ### The source and what is built from it
 
@@ -302,7 +311,7 @@ Only rendered pictures found them, so the film is checked by looking:
 
 - **Real phones.** A frame costs 0.4 to 3.6 ms in desktop Chromium; in
   emulation at 4× CPU slowdown about 30 to 130 ms, which on a slow phone would
-  be a jerky film. No real phone, iPhone or Android, has been measured. The
+  be a jerky film. A frame's cost has been measured on no real phone, iPhone or Android. The
   full screen, the browser's and the fallback, is checked in Edge only, not on
   an iPhone's Safari or on Android.
 - **Whether the timings read** when watched: the hold after the ask, the
@@ -331,9 +340,10 @@ Only rendered pictures found them, so the film is checked by looking:
   slightly different text.
 - **The German, French and Italian words** of the film are drafts pending the
   owner's review (`CONTENT`, `draft: true`; `sitecheck.py` names them).
-- The site's version on Cloudflare Pages only in headless Edge
-  (`docs/deploy-log.md`), and as `sitecheck.py` serves it: not looked at in
-  the page's dark mode, not with a screen reader.
+- The site's version on Cloudflare Pages only in headless Edge and, for its
+  build, on the owner's older test phone (`docs/deploy-log.md`), and as
+  `sitecheck.py` serves it: not looked at in the page's dark mode, not with
+  a screen reader.
 - What the poster tells a teacher who doesn't play the film:
   `docs/design/root-page.md`, "Not known".
 - Dragging the time bar on a slow phone: the film then draws at most one frame

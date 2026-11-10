@@ -3,11 +3,8 @@
 ## Purpose
 
 A quiz file opens into the site without costing the shared site a class
-(backlog v5 item 1). Every upload books one of the day's quizzes and the
-quiz's bytes, which are the classes' (Constraints; `hosting-and-limits.md`),
-yet many who open a file only want to look at it, or to play it alone. So the
-`.zip` is read and checked in the browser, and only opening a room uploads
-it (the owner's ruling). The worked example's "Start the example quiz" and
+(backlog v5 item 1). The `.zip` is read and checked in the browser, and
+only opening a room uploads it (the owner's ruling). The worked example's "Start the example quiz" and
 the root page's "Play the example ›" land here too, so a visitor who only
 looks costs nothing (v4 item 13).
 
@@ -38,9 +35,6 @@ Solo learner mustn't be shown them.
   (below, "Opening a room").
 - Pages allow pictures only from the site and as `blob:` URLs, scripts only
   from the site's files (`hosting-and-limits.md`, Content-Security-Policy).
-- Only what is built is offered: the site never promises what isn't (v5).
-  Solo (`solo.md`), Peers (`peers.md`) and Quizmaster (the classroom's
-  lobby) are built.
 
 ## How the site meets it
 
@@ -81,8 +75,7 @@ The example's start isn't an upload attempt, and isn't counted as one
 
 ### The check
 
-`src/public/open.html`, `client/open.ts`; screens and words:
-`user-flow.md §3.1`, "The local check". The page checks the files as the
+`src/public/open.html`, `client/open.ts`. The page checks the files as the
 server will (`openQuiz`: the same parse and picture matching, the pictures
 left out taken off the quiz with a warning each) and shows:
 

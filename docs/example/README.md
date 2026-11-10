@@ -10,7 +10,7 @@ The pictures are `src/public/examples/conversation-<lang>-<light|dark>.webp`
 
 ## What the pictures are
 
-- The real run (a free Claude Sonnet, 4 Nov 2026; its screenshot
+- A reproduction of the run (a free Claude Sonnet, 4 Nov 2026; its screenshot
   `conversation-original.webp` in this folder, English, light), all three teacher
   turns: the first ask with the two photographs and the answer with the `.zip`,
   the second ask and the updated `.zip`, and the third ask with the AI's four
@@ -20,7 +20,7 @@ The pictures are `src/public/examples/conversation-<lang>-<light|dark>.webp`
   are drafts pending the owner's review (`docs/translation-review.md`).
 - Light follows the screenshot. Dark is drawn here as that app's dark theme,
   without a reference: colours are estimates.
-- The photographs are the real ones (`sheet-photo-1.jpg`, `-2.jpg`).
+- The photographs: `sheet-photo-1.jpg`, `-2.jpg`.
 
 ## Files
 

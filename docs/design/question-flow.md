@@ -1,10 +1,10 @@
 # Question flow
 
-How one question moves from the teacher reading it out to the key on the wall, how the teacher steers it, what counts as a right answer and how it scores, and when a student's tap counts. Screens and wording are in `user-flow.md` (§3.3–3.7); this file is about the states and the rules behind them.
+How one question moves from the teacher reading it out to the key on the wall, how the teacher steers it, what counts as a right answer and how it scores, and when a student's tap counts.
 
 ## Purpose
 
-- **The quiz is a teaching moment.** The teacher sets the tempo, stops to explain, shows the answer; "no clock pressures the teacher" (backlog v1 item 6). Nothing moves on by itself.
+- **The quiz is a teaching moment.** The teacher sets the tempo, stops to explain, shows the answer; "no clock pressures the teacher" (backlog v1 item 6).
 - **Closure for the whole class, slow readers included** (v1 item 8). A child who needed longer to read must not be out of the ranking for it.
 - **A broken question is seen before the key is on the wall.** Showing how the class answered first gives the pause-and-discuss moment, and lets the teacher see a bad question before the key (v2 item 6). AI-made keys are wrong now and then; with break-time authoring, the run is the review (v1 item 9).
 - **What a tablet shows and what the server counts are one fact.** A student who tapped in time, as far as their tablet showed, and then finds it did not count is disappointed, and the fun is dented for the whole class (v1 item 15).
@@ -53,9 +53,7 @@ The guidance, the `/layout` page and the format's errors and warnings use the sa
 - **The solution stays the teacher's press.** Countdown says "we're done answering", never "show the key". The server's step at the deadline is the Durable Object alarm (`scheduleAlarm` takes the earliest of the lifetime alarms and the deadline).
 - "Everyone present" means the devices that are there plus any that answered and left; a tablet away 45 s (`FRESH_MS`, `server/instance.ts`) stops holding it open. The teacher tabs' ticks check it too (`closeIfAllIn`), so the last missing tablet going away does not leave Countdown running while the wall already reads "all in".
 - There is no fast-forward button. A deliberate double press of Play is the fast-forward (below); ⋯ → End the quiz: final ranking ends early.
-- **Exit**, at the final ranking, is the bar's only button, in its middle; Play's place is empty. Ending is one click from the final ranking, without a confirmation (owner), so it must not sit where the presses of the quiz land: a stray press, the second half of a double press on Final ranking, or a clicker would end the lesson. No key presses it, and like Start it is not taken within 0.4 s of the screen moving. Exit deletes the quiz and sends every screen to the root page (`endInstance`, the `gone` message with `home`).
-
-Sizes, labels at narrow widths and the wall's layout are `user-flow.md` §3.4–3.5.
+- **Exit**, at the final ranking, is the bar's only button, in its middle; Play's place is empty. Ending is one click from the final ranking and is not asked back about, for a low-friction experience (the owner): what was asked for is done, and misclicks are kept unlikely by where the button stands, away from where the presses of the quiz land, where a stray press, the second half of a double press on Final ranking, or a clicker would end the lesson. No key presses it, and like Start it is not taken within 0.4 s of the screen moving. Exit deletes the quiz and sends every screen to the root page (`endInstance`, the `gone` message with `home`).
 
 **Keys.** Space, Enter, →, ↓, PageDown and N are Play. There is no key for Countdown: a clicker has forward only, and a stray key must not start a clock. No key starts the quiz: Start is one deliberate press on the steering screen while the class is still joining. A key held with Ctrl, Alt or Windows/Cmd does nothing (F, full screen, and Z, picture zoom, otherwise). While a Remote steers, only a clicker's keys (PageDown, →, ↓) move on from the wall: the teacher is on the phone, and Space, Enter and N are the keys a lean on the laptop hits. While the wall steers itself all Play keys work, and a single stray Space then still reveals: that keyboard is the teacher's steering.
 
@@ -91,7 +89,7 @@ Points are computed from the stored answers under the current fixes and never st
 - **The switch** is on the join screen under Start and in the Remote's lobby (the check has none), off by default, fixed at Start (`setSpeed` refuses after it). It can't change mid-quiz, so earlier questions are never rescaled. It says "A right answer 10, up to 5 more the quicker it comes." (`client/manage.ts`).
 - **Whose time it is**: the device measures from the answers appearing on its own screen to the tap, so a slow line or a reconnect costs no speed (on school Wi-Fi the podium would otherwise go to the best line). Views carry `sinceMs` so a reloaded tablet still measures from the answers' appearing. The server caps the device's figure at its own count (which includes both trips) and never goes below zero; a page that sends none gets the server's count. This trusts the client, which fits "a normal user, not a malicious one". The last tap counts, with its own time: a change of mind costs speed.
 - A key changed afterwards moves the points with their speed. Only revealed questions that are neither void nor skipped score.
-- How the tablet and the ranking display scores is `class-and-wall.md` and `user-flow.md` §3.6–3.7.
+- How the tablet and the ranking display scores is `class-and-wall.md`.
 
 ### When a tap counts
 
@@ -123,5 +121,5 @@ The wall's top bar shows only the avatars that have answered, popping in as answ
 - Whether 20 s as the speed reference suits questions much longer than that (every slow right answer scores 10).
 - Whether a hint on the Remote, when most of the class chose an answer not marked right, is wanted: the counts sit beside the key already.
 - A 320 px wall still clips the ranking.
-- Runs by itself (backlog Later): a quiz that carries on while the teacher's hands are elsewhere, for classes that read for themselves, would need a cadence with nobody pressing, a close rule per question (everyone present has answered, or some seconds after the last answer, with a cap) and a way back: any press makes it manual. It is an option, never the default; it would share the clock machinery with Countdown.
+- Runs by itself (backlog Later): a quiz that carries on while the teacher's hands are elsewhere, for classes that read for themselves, would need a cadence with nobody pressing, a close rule per question (everyone present has answered, or some seconds after the last answer, with a cap) and a way back: any press makes it manual.
 - Per-question time hints ("needs more time") stay parked until a teacher asks; a length per question was rejected because every addition to the format is something an AI must write reliably.

@@ -78,17 +78,15 @@ live with in particular:
   everyone who uses it (the caps are in `design/hosting-and-limits.md`). A refused upload in front of a class ends
   adoption.
 - A school network may block the site, or only its live connection, or only the
-  students' network may be stricter than the teacher's. The owner's frame: no
-  probe days ahead before the package works; a check can be part of what is
-  presented. Plausible assumption: a teacher is rarely at school when they
+  students' network may be stricter than the teacher's. Plausible assumption: a teacher is rarely at school when they
   first read the page (so the network help sits where the failure shows).
 - The owner's finding from UX work: where there is any doubt whether a
   reader can tell what "it", or a word like it, stands for, some readers
   can't.
 - The owner, from a user test of anecdotal size: getting a quiz and opening
   it set side by side worked worse than one above the other.
-- The owner: the same page for everyone is preferable to one that changes
-  with what a device remembers.
+- The owner: least surprise. The page stays predictable for its visitor,
+  which a page that changes with what a device remembers works against.
 - The owner, on the page's words: they speak from the visitor's side, what
   someone came to do, not what the site technically provides. A neutral
   name for a way to play is fine ("on your own"); a line that describes the
@@ -96,7 +94,7 @@ live with in particular:
 
 ## How the site meets it
 
-The screens and their wording are `user-flow.md §3.1`. This section says what
+This section says what
 each part is for and what it depends on. The page is `src/public/index.html`
 (static, English, what AIs read) and `src/client/home.ts` (which puts the
 visitor's language and the live parts into it).
@@ -146,7 +144,7 @@ box, which is why each of them is kept short, and a phone's page is set a
 little tighter than a desktop's. Opening before asking would lift the box by
 the first step's height (about 190 px on a phone) and put the place for a
 file before the words that say where a file comes from; the implementer's
-call, not yet seen by the owner.
+call.
 
 The page follows the device's dark mode. The pictures of the ways carry their
 own room, so they stand the same on both grounds (`docs/ways/README.md`).
@@ -154,12 +152,7 @@ own room, so they stand the same on both grounds (`docs/ways/README.md`).
 ### One page, two readers
 
 The part for people is above "About classyQuiz"; About and below is the
-guidance. An AI told the site's name fetches the whole page, so the part for
-people is written as information to a reader, with commands only for what
-must be done (asking an AI, opening its file, choosing an AI). The owner's
-purpose: the page doesn't order its reader about for things nobody must do.
-The teacher's own sentence to their AI, the example ask, is outside that:
-"Read ..." is fine there.
+guidance. An AI told the site's name fetches the whole page.
 
 Parts that must not read as text for an AI are made by the script, not written
 in the HTML: the Copy button (a fetcher's text conversion would read
@@ -189,7 +182,7 @@ visitor already uses, not one the site brings), and from what (the visitor's
 own material, named by the three things the example asks start from). It has
 no pronoun whose referent a reader must find (Situation). On a phone of
 360 px or more it takes three lines in each of the four languages. The
-wording is the implementer's, not yet seen by the owner.
+wording is the implementer's.
 
 ### The ways to play
 
@@ -240,9 +233,7 @@ instance, the example class's: the words to the AI, the file that came back,
 and the place where a file is opened. And whoever holds a file opens it
 there.
 
-Two headings, numbered, one above the other. Both are things someone must do,
-so both are commands, in every language ("One page, two readers";
-"Languages").
+Two headings, numbered, one above the other.
 
 1. **"Ask your AI for a quiz"**, over the sheets ask as a chat message, the
    two sheets it speaks of attached as small pictures; under it "The AI's
@@ -257,7 +248,7 @@ so both are commands, in every language ("One page, two readers";
    sentence.
 
    The ask and the file are one run, said in one message (the implementer's
-   call, not yet seen by the owner). The file came from a conversation:
+   call). The file came from a conversation:
    "Read … Can you make me a classyQuiz with exercises from these two
    sheets? For my 4th grade class.", then the two answers the AI asked for
    (about 10 questions, in English), then a second ask that added questions
@@ -298,8 +289,7 @@ tablet answering to the wall, the teacher's phone setting the pace, the votes
 splitting before the solution. It tells the classroom's story, and its
 heading says so: "From the exercise sheet to the class playing, in one
 minute". The minute is a round figure for a film of 1:08, which the bar
-under it shows exactly (the implementer's call, not yet seen by the
-owner): a heading says the film's size, and a reader who checks finds
+under it shows exactly (the implementer's call): a heading says the film's size, and a reader who checks finds
 eight seconds more.
 What the film itself must get across, and how it is made: `docs/film/`.
 
@@ -315,8 +305,6 @@ What it lives with, beyond the page's own situation:
 - The page is what AIs read, so the film's words can't be in the HTML.
 - A phone held upright gives the film about 358 × 201 px; a phone held
   sideways has little height.
-- The film has no sound and no words of its own: text appears only on the
-  screens it shows, as on the real ones.
 - The story must work on a desktop and on horizontal tablets as well as on
   vertical phones.
 
@@ -354,7 +342,7 @@ How the page meets it (the details: the comments on the film in
   are English, as on the real site. Every language shows the same quiz, the
   example's 646 000 number-line question, translated: wrong answers in
   several different examples would linger. The German, French and Italian
-  words are drafts pending the owner's review. A language switch takes the
+  words are drafts. A language switch takes the
   film back to its poster in the new language.
 - **Layout.** The film stands below the two steps, under its heading, as
   wide as the column (672 px on a desktop) and at most 62% of the screen's
@@ -366,8 +354,7 @@ How the page meets it (the details: the comments on the film in
   what the full screen button is for: the browser's full screen where it
   has one, else the film fixed over the viewport (iPhone Safari).
 - **The end card** shows the mark and the address. Once the film has played
-  to the end, a replay icon stands on it: an icon, not "Play again", so the
-  wordless film carries no words to translate; its accessible name is the
+  to the end, a replay icon stands on it; its accessible name is the
   page's.
 - The stage's accessible name says what it is, "a film without sound". It,
   ▶, the replay, play and pause, the time bar, the speed and full screen
@@ -400,10 +387,7 @@ against"); free Claude Sonnet wrote the example above (the first step's quiz,
 the film's and `/example`'s), 4 Nov 2026 (`design/example-page.md`). In
 German, French and Italian the line adds that it was written in English and
 is translated here, as `/example`'s closing note says, since the file above
-it is the translation. A run the page names carries its tier and date (the
-pattern in backlog v4, owned by design/guidance-page.md), so what was run
-stays told apart from advice resting on what a plan offers; nothing gives a
-duration.
+it is the translation.
 
 "Ask the AI to build you a quiz for" the site's address, with Copy. The line
 says "the AI" where a pronoun would do: in the owner's testing this part had
@@ -436,9 +420,7 @@ it, and for an AI's fetcher, the other five asks stand one under the other.
   (`design/guidance-page.md`), tidied; it asks for the quiz in the page's
   language, where the run asked for German. It shows a brief that says how the
   teacher will run the quiz (time to look before the choices, whose turn), and
-  ends "What do you need?". A line under it names the AI, plan and date,
-  Claude Opus 5.5 on a paid plan, 5 Nov 2026, since the line above names a
-  free model and this one isn't. Its bubble is the longest, on a phone about
+  ends "What do you need?". Its bubble is the longest, on a phone about
   250 px.
 - **A training session, With friends, On your own** (backlog v5 item 9): the
   other ways to play, in the words of someone who isn't a teacher, each with
@@ -447,9 +429,7 @@ it, and for an AI's fetcher, the other five asks stand one under the other.
   answers to yourself", "I'm playing too, so don't show me the questions"):
   the asker's side of what the guidance tells the AI (`guidance-page.md`,
   "The user who plays"). They have had no run and need none: AIs make
-  another kind of quiz reliably (the owner). The line naming AI, plan and
-  date under an ask is for a verified run, so these, like the open ask, have
-  none, and what is verified stays told apart from what isn't.
+  another kind of quiz reliably (the owner).
 - **Nothing decided yet**: "Read <address>. I need a classyQuiz. Help?". That
   the AI then asks what it still needs before it builds (the guidance's "Build
   with the user") isn't said on the page; the chess ask's closing
@@ -492,13 +472,6 @@ Purpose (backlog v6 item 2): a visitor reading German, French or Italian gets
 the same page, said in that language's own sentences, not the English
 sentence's structure, and the findings in Situation hold in each:
 
-- **Commands only for what must be done**, in each language's form. The two
-  steps' headings and choosing an AI are imperatives in all three (an
-  outside reader found step 2's heading an infinitive in German and French
-  under step 1's command). Buttons and links that offer something keep the
-  form each language's interfaces give an action: the infinitive in German
-  and French (".zip-Datei auswählen", "Choisir le fichier .zip", "Das
-  Beispiel spielen ›"), the imperative in Italian.
 - **No pronoun whose referent a reader must find.** Where the English leans
   on "it", the translation names the noun ("die neue .zip-Datei", "le
   quiz", "il quiz"); a French or Italian pronoun stands where its gender
@@ -522,7 +495,7 @@ sentence's structure, and the findings in Situation hold in each:
   the ways' words stand in three lines there.
 
 The words in the three are the implementer's drafts, with the choices behind
-them and the questions for the owner's read in `docs/translation-review.md`.
+them in `docs/translation-review.md`.
 The film follows the same line: the page's language up to the upload, the
 site's English screens after it ("The film", Words); its words are in
 `docs/film/build/film.js`, the page's own taken from `landing-text.ts` when it
@@ -649,8 +622,7 @@ The card stands above everything else on the page, under the header: an open
 quiz on this device means a lesson in progress or interrupted, where coming
 back is likelier than anything else the page offers, and a teacher in front
 of a class shouldn't have to look for it. It is the one part that differs by
-what the device remembers (Situation: the same page for everyone is
-preferable); the rest of the page is the same below it. It appears once the
+what the device remembers (Situation: least surprise); the rest of the page is the same below it. It appears once the
 site has answered for the quiz, so on that device the page moves down under
 it a moment after it opens. A quiz
 at its final ranking is on the site only until the teacher's Exit, so one still
@@ -822,11 +794,8 @@ the teacher's concern.
   reaches api.cloudflare.com without a change to the environment's network
   access. A GitHub repository is its convenient way to get work out (owner);
   the page leaves accounts beyond Cloudflare's to the AI.
-- Whether a spent request allowance can be recorded: the own-copy line counts only
-  days the upload cap refused, so it understates a site that runs out of requests
-  first.
 - The German, French and Italian wording, by a native reader (Italian, by anyone).
-  The page's and the film's in these three are drafts pending the owner's review.
+  The page's and the film's in these three are drafts.
 - How a fetcher's text conversion reads the labelled ask.
 - Whether one own copy per school, set up once by a colleague or IT, should be said
   on `/own-copy`: many teachers have neither an AI that runs programs nor a

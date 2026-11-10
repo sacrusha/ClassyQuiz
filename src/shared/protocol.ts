@@ -8,7 +8,7 @@
 // were given in and are ignored when it has moved on; answers carry a sequence
 // number; fixes set a value rather than toggle one.
 //
-// Roles (docs/user-flow.md §1): one code per quiz. A tab with the code is a
+// Roles (docs/design/teacher-devices.md): one code per quiz. A tab with the code is a
 // guest until it plays (a player) or takes one of the two teacher roles, the
 // Projector ("screen", the wall) or the Remote (the steering tab). Each role
 // is held by one tab at a time, named by a token the tab keeps for its

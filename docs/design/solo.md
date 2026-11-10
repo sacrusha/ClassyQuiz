@@ -21,8 +21,7 @@ devices-only room is to come.
 - Alone, nobody disputes a wrong key, and the learner can't tell a wrong
   solution from their own mistake. The quiz carries no notes
   (`quiz-format.md`); the learner's AI, after the run, is where a doubt
-  can go. Editing the quiz isn't Solo's (owner: a review may edit, solo
-  play doesn't).
+  can go.
 - Observed in the owner's user testing: preteens got excited about seeing
   their avatar celebrate (jump) in solo runs.
 - Plausible assumption (the owner's): Solo is a newcomer's first use of the
@@ -38,7 +37,7 @@ devices-only room is to come.
 
 ## How the site meets it
 
-Screens and words: `user-flow.md` §3.8. Code: `client/entry-solo.ts` (the
+Code: `client/entry-solo.ts` (the
 pages), `client/solo.ts` (the run, no DOM), `client/device.ts` (the device
 screen), `client/stage.ts` (the question's layout, shared with the wall).
 
@@ -113,8 +112,8 @@ and score), the stage, and a bar at the foot with one button.
   than on a wall (0.7 of the wall's share), text tiles that two columns
   would break or set small stand in one column, and alone the tiles keep
   room for the mark only, without the count. The wall itself, on a phone
-  (the "phone only" variant), is laid out as a wall: its tiles stay two by
-  two.
+  (a host with no big screen: `teacher-devices.md`, "How the screens are
+  arranged"), is laid out as a wall: its tiles stay two by two.
 - **The foot's button** is the steering bar's Play in another hand: a noun
   for what comes next, in the same place on every question, kept there
   invisible while there is none, so a double tap never lands on something
@@ -173,7 +172,7 @@ lean; neither use is confirmed.
   answered, the spread) isn't the quiz's look. A wall steered from the
   Remote has no foot's bar, so its stage is 30 px taller than the
   preview's in the same window.
-- **A projector and no student devices** (backlog, Open): Solo on the
+- **A projector and no student devices**: Solo on the
   projector shows the question as the wall does; the class answers by hand
   or with coloured cards, and whoever taps puts the key up. Nothing scores
   the class, and the one avatar and its result stand for the room. Whether

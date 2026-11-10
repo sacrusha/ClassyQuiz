@@ -6,24 +6,14 @@ decided. Each idea names the limit it answers and how you would know that
 limit has become real. Figures are estimates, from an exploration between the
 owner and the assistant on 2026-11-09, unless marked as measured.
 
-## Purpose and threshold
+## Purpose
 
-Purpose: the site carries the classes that use it within the Free plan, and
-it doesn't take on complexity for a load nobody has.
-
-The owner, 2026-11-09: about 200 classes a day and about 60 at once describe
-what the site has once answers and looks are held in memory (backlog, "Room
-on the Free plan", item 1), and that allows a lot of uses. What a real class
-costs depends on who uses the site: classes may average 20 pupils, quizzes
-may have more or fewer than 15 questions, so the day may come out at 100 or
-at 400 classes; only adoption and telemetry tell. The 60 at once is the
-pessimistic reading of the stored bytes (1 GB of live quizzes at the 16 MB
-upload cap). If the site becomes popular in one time zone, as a quiz before
-lunch, say, the classes at once may become the bottleneck to fix. Beyond
-what the plan carries, donations could pay Cloudflare for more, rather than
-the code being made more complicated. An idea here is taken up when a figure
-shows its limit binding for the use the site actually gets; the figures are
-the telemetry item's (same section, item 2).
+The site carries the classes that use it within the Free plan, and it
+doesn't take on complexity for a load nobody has. Near what the plan
+carries there are other ways than more complicated code, donations paying
+for hosting off the Free plan among them (the owner). An idea here is taken
+up when a figure shows its limit binding for the use the site actually gets
+(`design/telemetry.md`).
 
 The plan's day starts at 00:00 UTC (01:00 Swiss time in winter, 02:00 in
 summer). A Swiss before-lunch peak, about 10:00 UTC, meets a day whose

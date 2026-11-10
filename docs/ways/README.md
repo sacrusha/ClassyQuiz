@@ -18,8 +18,8 @@ where they would be playing, with whom, and what their device would show.
 - What the three differ in is the setting and what a device shows: with a
   quizmaster the question is on the big screen and each player's device
   shows the choices; among friends and alone each device shows the whole
-  question (backlog v6 item 1b; the screens: `user-flow.md` §3.6, §3.8,
-  §3.9).
+  question (backlog v6 item 1b; `docs/design/class-and-wall.md`, "What each
+  screen shows"; `docs/design/solo.md`, "The device screen").
 - The owner, on the mockup's drawings (pictograms of people and devices on
   the page's paper): they look more corporate than the film's poster, which
   is relatable. And: scaring off corporate visitors is less of a concern

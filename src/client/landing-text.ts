@@ -4,23 +4,17 @@
 // are for the AI. The lobby, the wall, the Remote and the tablets stay
 // English too.
 //
-// How the page addresses teachers: commands only for what must be done (choosing an AI, asking it), advice as
-// advice, and no claim that isn't true. That is the page's voice to its
-// reader; the example ask is the teacher's own sentence to their AI, where an
-// imperative is fine (docs/design/guidance-page.md, "Information in place of
-// rules"). Step 1's detail names what is
-// verified, with its tier and date. German, French and Italian say the same
-// in their own sentences, the commands in each language's form and a noun
-// where a pronoun could point at two things (docs/design/root-page.md,
-// "Languages"; the choices: docs/translation-review.md).
+// German, French and Italian say the same as the English in their own
+// sentences, with a noun where a pronoun could point at two things
+// (docs/design/root-page.md, "Languages"; the choices:
+// docs/translation-review.md).
 //
 // The example asks are each language's version of the same ask; the marked
 // parts carry the labels. The chess ask is a description with no sheets, close
 // to the words of its run. The asks to practise alone, with friends and for a
 // training session are the other ways to play, in the words of whoever asks;
 // the two who play say so, which the guidance's "When the user will play the
-// quiz" answers. They have had no run, so no line names an AI under them
-// (docs/design/root-page.md, "Build: two steps"). The open ask has nothing
+// quiz" answers. They have had no run, so no line names an AI under them. The open ask has nothing
 // decided: the open request; that the AI then asks what it needs is the
 // guidance's "Build with the user". The site's address in every ask is
 // replaced by the one the browser opened.

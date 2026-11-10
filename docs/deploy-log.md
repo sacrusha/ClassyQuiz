@@ -1,154 +1,65 @@
-# Deploy log
-
-## 2026-11-02 — first deploy, https://classyquiz.pages.dev
-
-From commit 356d2ae, Pages deployment 718effa0. Implementer's report, verbatim where it states facts:
-
-- Account held only another project and another Worker; neither was touched. `npm run deploy` created the Worker `classyquiz-state` (no public address) and the Pages project `classyquiz`; the name was free, so the address has no suffix.
-- Functions run only on `/api/*` (generated from the functions folder; deployment reports `uses_functions: true`), so pages, scripts and CSS don't count against the Free plan's request budget.
-- No log push or observability on the Pages project; the state Worker's observability reads `false` through the API. A live `wrangler tail` could still be attached by someone with account access.
-- Durable Object bindings `INSTANCE`, `JOIN`, `PAIR` resolve to `classyquiz-state` in production.
-- Security headers present (nosniff, no-referrer, DENY framing, camera/mic/location off). Served from the Zurich edge. `/check`: HTTP 24 ms, WebSocket 72 ms.
-- 25-student simulation passed twice against production; a silent device death was detected after 47 s, matching local.
-- Headless Edge: fallback with WebSockets broken, offline mid-question, and the nine review-fix checks all pass.
-- Root page fetched in full by the implementer's web fetch tool — one data point, not claude.ai's or other AIs' fetchers.
-- Difference from local: an unknown path returns 200 with the root page (Pages falls back to root without a `404.html`); harmless, since the root is the join page.
-- Left behind: one test quiz that expires on its own; roughly 2,000–3,000 of the day's 100,000 requests used.
-
-Still open after this deploy: school web filters on `*.pages.dev` (check with `/check` on the school network); claude.ai's free tier and the other AIs reading the page; real Android tablets.
-
-## 2026-11-02 — second deploy, 7a0fd6d
-
-Pages deployment b3d103da, state Worker version b05cbebe (migration v2 adds the UploadStats Durable Object). Carries the review fixes, the pruning, the projector tile fix, in-time taps and the upload-attempt counter. Run by the owner from a clean worktree at 7a0fd6d, since the session's permission mode blocks deploys from the assistant.
-
-## 2026-11-02 — third deploy, 984806a
-
-Pages deployment 6dfdcde0, state Worker version 6eb4679a (migration v3 deletes the Pairing class). The redesigned teacher flow. Run by the owner from the clean worktree. Lesson: `npm run deploy` deploys the Worker first, which fails when a migration deletes a class the live Pages project still binds to — deploy Pages first in that case, then the Worker. A fresh self-hoster is unaffected.
-
-## 2026-11-02 — fourth deploy, b244980
-
-Pages deployment fc1f647f, state Worker version 28ec17c1, no migration. Pictures on the screens, answers shuffled at upload, Order: fixed, the as-built /layout.html, and the owner's landing-page copy. Run by the owner from the clean worktree.
-
-## 2026-11-02 — fifth deploy, 5c536d6
-
-Pages deployment 659be631, state Worker version 5ef3adb4 (migration v4 adds the SiteBudget Durable Object). Hardening merged with the picture screens. Run by the owner from the clean worktree. Unverified until the platform refuses: the wording of the allowance-spent state.
-
-## 2026-11-03 — sixth deploy, 844df97
-
-Pages deployment 2fb91b32, state Worker version d59ad472, no migration. Countdown with points for speed and the quiz carrying its tempo; tempo offset with −5/+5; pictures section of the guidance; landing page by attention budget, zip only, /own-copy; the lobby's Start naming the mode; review C fixes. Run by the owner from the clean worktree.
-
-## 2026-11-03 — seventh deploy, 3601d2b
-
-Pages deployment fac1734a, state Worker version 513efd47, no migration. A second teacher device once the class is in; the landing page's third look (one line per quiz, upload wording, foot lines); the guidance says upload. Run by the owner from the clean worktree.
-
-## 2026-11-03 — eighth deploy, c82b402
-
-Pages deployment 0f832b7c, state Worker version e54cd788, no migration. Votes before the answer; answered avatars on the wall. Run by the owner from the clean worktree.
-
-## 2026-11-03 — ninth deploy, 61e8db0
-
-Pages deployment 27590770, state Worker version 2d877175, no migration. Avatars the children dress; pictures as answers. Run by the owner from the clean worktree. Production and main level at 61e8db0 at the close of the session.
-
-## 2026-11-04 — tenth deploy, 56ebf87
-
-Pages deployment 5c49186b, state Worker version 5d6d3cd5, no migration; the Pages project gains the BUDGET binding to SiteBudget. Delivery A — the guidance rewrite cut to the facts, the after-upload flow with the teacher code, the landing page with the strip, two asks and four languages, review D's fixes — plus the avatars' winners band and the steering bar (Play, Last call, the double press; review E). Run by the product-owner session from the clean worktree with the main checkout's credentials file. Untested on a real hand, clicker or phone: the bar's timings, the dashed "on its way" tap.
-
-## 2026-11-04 — eleventh deploy, 3089468
-
-Pages deployment d895b857, state Worker version 5238c33c, no migration (the Worker's toml changed in comments only). The landing's strip as a card to the worked example, Build's wording, Run first when stacked, the labels under their words on phones, `/example` with its stand-in photos and mock conversation (v4 items 10–13), the guidance's enlarge sentences (v4 item 11), and the teacher screens' words: choices, answers and solution on the bar, the check, the menus, the guidance, `/layout` and the format's messages, Countdown for Last call, the guidance's lesson without the steering's mechanics (v1 item 6). Run by the product-owner session from the clean worktree with the main checkout's credentials file. Checked live: the guidance's new lesson paragraph, the bar's labels in the teacher bundle, `/api/site`; one probe upload, deleted at once, counts in the day's upload statistics.
-
-## 2026-11-04 — twelfth deploy, 9f50079
-
-Pages deployment 84080180, state Worker version 51faab5b, no migration (no change under `src/server/` since 3089468). The identity (v4 item 14): the top-hat fox and favicon set on every page, the shared header, one stylesheet for the look, Rubik for the site's own words, ink controls and rust links, the ranking's bars on tracks, a number kept with its word, readable placeholders, the join code kept off the wall's edges, the logo kit in `docs/brand/`. Tested locally by the owner before the deploy. Run by the product-owner session from the clean worktree with the main checkout's credentials file. Checked live: the root page with the drawings after the guidance (43.1 KB), `/favicon.ico` as an icon rather than the root's fallback, the favicon SVG, the header lockup, the Rubik font, `app.css`, the students' `js/play.js` at 40.7 KB, `/api/site`.
-
-## 2026-11-04 — thirteenth deploy, c0d7480
-
-Pages deployment f4182d88, state Worker version 78228a8d, no migration (no change under `src/server/`). The About guidance: "Build with the teacher" rewritten (phases, the first reply in a few lines, presentation through the layout page), the published format narrowed to `quiz.txt` in UTF-8, FAQ-kind information gathered in the first two sections, layout arithmetic and resolution figures dropped. Run by the personal-assistant session from the main checkout. Checked live: the root page (42.8 KB) carries "Build with the teacher" and `quiz.txt`.
-
-## 2026-11-04 — fourteenth deploy, 7d41265
-
-Pages deployment 254580c4, state Worker not changed in `src/server/` (no migration). `/example` shows the owner's real free Claude Sonnet run (one light screenshot) and offers `big-numbers-quiz.zip`, which is also the English example behind "Start the example quiz"; the mock conversation, its light and dark renders and `number-line-quiz.zip` are gone, as is `client/example.ts`. Before the deploy: `npm run check`, `npm test` (97 pass), and the zip's `quiz.txt` through the site's parser (13 questions, no errors or warnings, every picture present). Run by the personal-assistant session from the main checkout. Checked live: `/example`, the picture, the zip byte-identical to the source, `home.js` naming the new zip, the old zip no longer served. The example upload itself was not run live (it books an upload).
-
-## 2026-11-05 — fifteenth deploy, 4bdb527
-
-Pages deployment 939c1743, state Worker version 41ac93b2, no migration. Everything on the server goes 3 hours after the teacher's last use (the instance's 48 hours and the hour after the final ranking become 3 hours; the site-full message in four languages). A real `robots.txt` and a `404.html`: unknown and miscased paths are 404s, no longer the root page with a 200. Questions may have no text (a number alone on its line), with the empty heading hidden on the projector. The owner's rework of the About guidance and the example screenshot. Before the deploy: `npm run check`, `npm test` (99 pass), the build under `wrangler pages dev`. Run by the personal-assistant session from the main checkout. Checked live: `/robots.txt` as `text/plain`, also under a mixed-case host; `/Own-Copy`, `/nonexistent` and `/llms.txt` 404; `/`, `/own-copy`, `/play`, `/layout`, `/example`, `/api/site` 200; the page's three-hour sentence and `home.js`'s site-full wording. Quizzes uploaded before the deploy keep their old alarm and end at it, or at their next activity past three hours. The no-text question was not seen on a projector.
-
-## 2026-11-05 — sixteenth deploy, cd90b96
-
-Pages deployment 629bd05b, state Worker version f6dfd54a, no migration (no change under `src/server/`). The guidance's presentation: the whole quiz dense, in the check's form, beside the layout page for a question type as the class will see it. Before the deploy: `npm run check`, `npm test` (99 pass). Run by the personal-assistant session from the main checkout. Checked live: the root page (40.3 KB) carries the dense presentation; `/layout`, `/api/site` 200. The new guidance was not tried with an AI.
-
-## 2026-11-05 — seventeenth deploy, c69f077
-
-Pages deployment 5cf3a2fb, state Worker version be165885, no migration. Upload is start (backlog v4 item 3): one class per quiz, "Again with another class" and what served it gone (the `again` command, the lobby reopening, the speed carry-over, the earlier-class token check, `/api/i/:id/end` and the landing's closing time). The final ranking as its own screen: podium, the rest of the class in front as a crowd sized to the room, all jumping, the class's result beside it. Exit alone in the middle of the final ranking's bar, no confirmation, sending every screen to the root page; the resume card shows a quiz at its final ranking. Before the deploy: `npm run check`, `npm test` (101 pass), the 25-student simulation against the local stack, headless-Edge screenshots of the final screen from mock data (10 to 60 students, 600 to 1600 px wide). Run by the personal-assistant session from the main checkout. Checked live: `/`, `/play`, `/layout`, `/api/site` 200; `screen.js` and `teach.js` carry Exit and the crowd, nothing says "Again"; the end endpoint 404s. Not seen live: a real class at the final ranking, Exit on real devices, the Remote's final screen, walls under 500 px wide.
-
-## 2026-11-05 — eighteenth deploy, e764ffd
-
-Pages deployment b495e431, state Worker version cc7b3c9f, no migration. The final ranking's podium classes renamed `.podium` and `.place`: its bare `.steps` in `app.css` had laid `/example`'s four steps out in the podium's three-column grid. `/example` shows the owner's photographs of the sheets, cut to the paper at top and bottom. Before the deploy: `npm run check`, `npm test` (101 pass) on the podium change; the photographs looked at as crops. Run by the personal-assistant session from the main checkout. Checked live: `/example` carries the new photographs' sizes, `app.css` the `.podium` rules. Not seen live: `/example` and the final ranking rendered, on a phone or otherwise.
-
-## 2026-11-05 — nineteenth deploy, f542069
-
-Pages deployment 91fb2930, state Worker version 7bbd4932, no migration (no change under `src/server/`). The guidance's presentation as two kinds for the builder to choose from, high density (a layout in a short notation, and `/preview.py`, which draws it from the zip as one picture) and high fidelity (`/layout`) (backlog v4 item 16); the big-numbers example on the narrow spec; the upload's file input without an accept filter (47d34de). Before the deploy: `npm run check`, `npm test` (103 pass), the build; `preview.py` run on the four example zips and a test zip with raster pictures. Run by the personal-assistant session from the main checkout. Checked live: `/`, `/layout`, `/api/site` 200; the root page carries the new presentation and no longer the "slipped through" sentence; `/preview.py` is byte-identical to the repo's; the live big-numbers zip passes `verify.py`. Not tried: `preview.py`'s SVG path, which needs cairosvg or rsvg-convert, and the new guidance with an AI.
-
-## 2026-11-06 — twentieth deploy, 1c33cd9
-
-Pages deployment b9ccf8fa, state Worker version f085abef, no migration (no change under `src/server/`). The landing's Build step 2 as three picture tabs (sheets, the chess ask with its AI, plan and date, nothing decided), the lead-in lines gone; step 1 naming free Claude Sonnet as the one free AI that does this reliably; `/own-copy` rewritten by the owner (a cloud VM or an AI talking the teacher through it, the token kept out of the chat, the school's IT). Before the deploy: `npm run check`, `npm test` (103 pass), the build; headless Edge on the local build, each tab at 360 px (German, light) and 1280 px (English, light), no sideways scroll, no page errors. Run by the personal-assistant session from the main checkout. Checked live: `/`, `/own-copy`, `/api/site` 200; the root carries the tabs' panels and the new step 1, `/own-copy` the new text; the three tabs clicked at 360 px in French, dark, no page errors. Not tried: the tabs with a screen reader, and the own-copy routes end to end.
-
-## 2026-11-06 — twenty-first deploy, 42ca177
-
-Pages deployment 9f7238d1, state Worker version 44c9578a, no migration (no change under `src/server/`). The root page's strip of five stills replaced by the film (backlog v4 item 1, `docs/film/`): poster and five chapters with stills until a press, `/js/film.js` on the first; the film in the page's language up to the upload (de/fr/it words drafts pending the owner's review), English after it; chips under the film on an upright phone, beside it otherwise; full screen; a replay icon at the end. Before the deploy: `npm run check`, `npm test` (104 pass), `docs/film/build/sitecheck.py` ("no problems": the site in Edge against the previous main, desk and phone, layouts at six viewports, full screen on both paths, language switch, blocked and failing script, no CSP or page errors). Run by the personal-assistant session from the main checkout. Checked live: `/`, `/example`, `/api/site` 200; `/js/film.js` byte-identical to the repo's; posters and stills served as WebP; ▶ pressed in headless Edge at 1300 px (English) and 390 px (German): the film builds in the page's language, no page errors. Not tried: a real phone (frame cost, iPhone full screen fallback), a screen reader.
-
-## 2026-11-07 — twenty-second deploy, 6e1b284
-
-Pages deployment eba79d71, state Worker version 973d08f1, no migration (no change under `src/server/`). The landing film's chapter cards replaced by a video player's bar (`design/root-page.md`, "The film"): play, a time bar with chapter ticks and the chapter's name while dragging, the time and length, speed, full screen, named in the page's language; the bar works before `/js/film.js` loads (a move of the time bar loads it and shows that moment); a phone held sideways gets the desktop layout; the chapters' stills removed. Before the deploy: `npm run check`, `npm test` (104 pass), `docs/film/build/sitecheck.py` ("no problems"). Run by the personal-assistant session from the main checkout. Checked live: `/`, `/example`, `/api/site` 200; `/js/film.js` byte-identical to the repo's; in headless Edge at 1300 × 900 (English), 390 × 844 (German) and 844 × 390 (French) a drag on the time bar before the film loaded: the film loads, shows 0:31 with the chapter's name over the thumb, plays on ▶, no page errors. The removed stills still come from Cloudflare's edge cache on the production address (`s-maxage` 7 days; the deployment's own address gives 404); nothing links them. Not tried: a real phone, a screen reader.
-
-## 2026-11-07 — twenty-third deploy, 4e844eb
-
-Pages deployment bd561ae0, state Worker version 4c397a02, no migration (no change under `src/server/`). `/example` in the landing's four languages (backlog items 10 and 12, `design/example-page.md`): the landing's header with code box and language switch (`client/top.ts`, shared with the root page), the page's words, the conversation picture rendered per language and light/dark from the run's screenshot with all three turns (`docs/example/`), and the German, French and Italian quizzes as the English one translated, the quiz the film shows; a note under the steps that the run is shown translated (de/fr/it drafts pending the owner's review, `translation-review.md` E1–E5). The earlier runs' three different `.zip`s removed. Before the deploy: `npm run check`, `npm test` (104 pass), `docs/film/build/sitecheck.py` ("no problems"). Run by the personal-assistant session from the main checkout. Checked live: `/`, `/example`, `/api/site` 200; `/js/example.js` and `quiz-grandi-numeri.zip` byte-identical to the repo's; in headless Edge `/example?lang=it` at 390 × 844 dark (Italian words, the Italian dark picture loaded and linked, the Italian zip and `/?example=it`), `/example` at 1300 × 900 with a de-CH browser (German), `/` at 390 × 844 with the switch; no page errors, no sideways scroll. The removed `.zip`s and `conversation.webp` still come from Cloudflare's edge cache on the production address (the deployment's own address gives 404); nothing links them. Not tried: "Start the example quiz" (a real upload), a real phone, a screen reader.
-
-## 2026-11-08 — twenty-fourth deploy, d918113
-
-Pages deployment beb08521, state Worker version 2044aaf4, no migration (`src/server/wrangler.toml` unchanged; `server/` changed for the Peers room, the protocol's additions optional). v5, playing the quiz redefined (backlog v5): a quiz opens in the browser on the local check `/open` with Solo, Peers and Quizmaster, and only opening a room uploads it; the example's start lands there. Solo plays alone, the solution after each answer, the run copied for the player's AI. Peers runs on its own, a question closing once everyone present has answered, whoever opened it a player with a ⋯ menu. Quizmaster's lobby asks how the screens are arranged and shows the remote's how-to only under Screen and remote; from the check on no screen names a role; tools beside the avatar in the one dressing menu. The guidance's "When the user will play the quiz" and three more example asks; the README, lede, Run box ("Play a quiz", "Open the quiz your AI made"), `/layout`, `/check` and `/own-copy` reworded; the film rebuilt to show the local check and the lobby as built. Before the deploy: `npm run check`, `npm test` (115 pass); the implementers' browser walks run once more on the merged tree (the local check, Solo on three quizzes, Peers on two, the arrangement toggle, the bar's labels, the classroom and Peers simulations: all pass; two 360 px wall issues that predate v5 are in `bugs.md`); `docs/film/build/sitecheck.py` (the film without problems; its one flag, the landing's six ask tabs against main's three, is the intended change). Run by the personal-assistant session from the main checkout. Checked live: `/`, `/open`, `/open?example=de`, `/play`, `/layout`, `/example`, `/check`, `/api/site` 200; `/js/open.js` and `/js/film.js` byte-identical to the repo's build; the root carries "Play a quiz", "Open the quiz your AI made" and "played alone"; the Solo walk run against the live site in headless Edge at its desktop and phone sizes: the example quiz through all thirteen questions with nothing sent to the site while playing, Play again, Back to the check, then Quizmaster to `/screen` with one upload (the day's first; its instance expires on its own). Not tried live: Peers with real phones, a Quizmaster run with a real second device, an AI against the new guidance, a real phone's pull-to-refresh on `/open`, a screen reader.
-
-## 2026-11-09 — twenty-fifth deploy, 1c2f190
-
-Pages deployment 8c0efe54, state Worker version a9aa4126, no migration (`src/server/wrangler.toml` unchanged; `server/` changed for Peers' sends, its picture bundles and Exit). The review round after v5 — the builders of the local check, Solo and Peers reviewing their own work after the breakpoint, fresh readers reviewing Quizmaster, the words, the avatars and the film — and its fixes: the lobby's check lists the questions again, answers folded; Screen and remote the first default, One screen learned after a run without a Remote; the local check's three buttons alike; the handoff's leftovers swept and said. Peers: a view no longer answers a held poll on every answer, pictures come as packs and bundles, the opener's fix sheet only until they tap on, "me" by id, Exit reaching a device between polls in any room, the costs written. Solo: the phone layout only when the stage is upright, so a laptop shows the wall's layout and the preview claim holds; start and result take no tap as they appear. The landing: "Open the quiz your AI made" / "Choose the .zip file", a sentence naming the three ways in the visitor's language, the guidance saying a quizmaster doesn't play and the AI's report coarser than the questions, the check's refusals back in the visitor's language, README, `/check` and own copy widened. The film at 67 s, the two decisions given their beat, the how-to framed whole. The avatars: a bowler and a bow tie, the white tools recoloured for the cream, the look cap a formula (38), the purpose written first; the picker's rows breaking into halves so the tools stand on one line at 360 px. Before the deploy: `npm run check`, `npm test` (117 pass); every implementer's walk run again on the merged tree by a walker, the seams probed (the new looks in three rooms, the Run box in four languages, the picker at six sizes); `docs/film/build/sitecheck.py` (the film without problems; its one flag, the landing against main, intended). Run by the personal-assistant session from the main checkout. Checked live: `/`, `/open`, `/open?example=de`, `/play`, `/layout`, `/example`, `/check`, `/own-copy`, `/api/site` 200; `open.js`, `film.js`, `play.js`, `screen.js` byte-identical to the build; the root carries the new Run words, the three-ways sentence and 1:07; the Solo walk against the live site, 184 checks OK — run twice by mistake, so two Quizmaster uploads were made (the day's first two; their instances expire on their own). Not tried live: Peers with real phones, a Quizmaster run with a real second device, an AI against the new guidance, the film watched through by a person.
-
-## 2026-11-09 — twenty-sixth deploy, c2f9c32
-
-Pages deployment e72805dd, state Worker version b2c876fb, no migration (`src/server/wrangler.toml` unchanged). Room on the Free plan (backlog, items 1 and 2): answers and looks held in the instance's memory and written in batches, with copies on the players' sockets and devices to rebuild it from (`design/open-period-in-memory.md`); telemetry, the devices' counts of their line and a summary per class in the day's record, probes kept apart, the figures at `GET /api/site/use` behind `OWNER_KEY` and off the public `GET /api/site` (`design/telemetry.md`). Before the deploy: `npm run check`, `npm test` (123 pass) on the merged tree; then a copy on the same account under names of its own (`classyquiz-roomcheck`, `classyquiz-roomcheck-state`), deleted afterwards, showed:
-
-- Hibernation with sockets open: no quiet spell of 20 s let an instance hibernate (three of three); every one of 90 s did (nine of nine, over three runs). Through each, the wall's and a steady device's sockets stayed open with no new hello, and `scripts/simulate-memory.mjs --quiet 90` passed: the socket copies survive an actual eviction on the deployed platform.
-- A deploy doesn't reset a running instance: with `--restart` set to a full deploy, of the same code or of a changed Worker bundle, the memory was the same after each of six deploys and no socket closed, so the script fails ("nothing was tested there"); an instance kept busy kept its memory and its socket for four minutes after a code-changing deploy. New code reaches an instance when it next hibernates, or, by Cloudflare’s default code update strategy (`deferred`, `max_delay` 300 s), when it resets 300 s after the deploy if still active, which ends its sockets: that reset was not seen (`design/open-period-in-memory.md`, Not known).
-- So the deploy in the middle of a run is the crossing at that moment: an instance uploaded on the previous code (`main` at 044c19a), its class dressed, then this code deployed during a 90 s quiet spell, woke on this code with the earlier code's storage and socket attachments, and `simulate-memory.mjs` passed through it and two more losses.
-- `scripts/simulate.mjs` (25 students) passed, with the client-set `cf-connecting-ip` taken out: the platform answers a request carrying it with a 403 page, which ended the unmodified run in its teacher-code sweep (that part's checks then pass trivially, all from one address). `scripts/simulate-peers.mjs` passed. `/api/site/use` read the copy's day: the probes apart, the one class uploaded on the earlier code counted as use.
-- `OWNER_KEY` as set in `secrets/cloudflare.env` holds a non-ASCII letter, and `/api/site/use` answered 404 to it on the copy, sent as UTF-8 or as Latin-1; an ASCII key worked. The live project's key is that one.
-
-Run by the personal-assistant session from the clean worktree with the main checkout's credentials file. Checked live: `/`, `/open`, `/open?example=de`, `/play`, `/layout`, `/example`, `/check`, `/own-copy`, `/api/site` 200; `/api/site` answers `{"full":0}`; `/api/site/use` 404 without a key and with the owner's; `play.js`, `screen.js`, `teach.js`, `open.js`, `film.js` byte-identical to the build. No run against the live site. Not tried live: anything with a class; the owner's figures, until the key is one an HTTP header carries.
-
-## 2026-11-09 — twenty-seventh deploy, cb7ba33
-
-Pages deployment 8a2dacd6, state Worker version c78cf5fe, no migration (nothing deployable changed since c2f9c32: the docs and `scripts/simulate.mjs` only). For the owner's new `OWNER_KEY`, of ASCII letters and digits, set on the Pages project before the deploy (`secrets/README.md`). Run by the personal-assistant session from the clean worktree with the main checkout's credentials file. Checked live: `/api/site/use` 200 with the key (the days' records since 2026-11-07, no month yet, no class settled with a summary yet), 404 without it and with a wrong one; `/`, `/open`, `/play`, `/api/site` 200; `play.js`, `screen.js`, `open.js` byte-identical to the build.
-
-## 2026-11-09 — twenty-eighth deploy, 37a50f8
-
-No migration (nothing under `src/server/` changed but `OwnerView`, a type, moving from `budget.ts` to `telemetry.ts`). The owner's page, `/owner` (`design/owner-page.md`): a box for the key and nothing else until the site accepts it, then the latest day, the days, the classes, the problems and the months from `GET /api/site/use`; the key kept in the browser's `localStorage`, sent only as the header; not linked from anywhere. Before the deploy: `npm run check`, `npm test` (127 pass) in the deploy worktree; the page walked in headless Edge against a local stack (wrong key, right key, reload, forget, a stale kept key; no request address carried the key; no page errors or sideways scroll at 390 and 1200 px, light and dark) with invented figures for the classes. Run by the owner in his own terminal from the clean worktree at 37a50f8, the session's permission mode having refused it. Checked live, by the session that built the page: `/owner`, `/`, `/api/site` 200; `/api/site/use` 404 without a key and with a wrong one, 200 with the owner's (the day records, no month yet); `js/owner.js` and `owner.html` byte-identical to the build; the page's HTML holds no figure. The owner has seen the page live. Not tried: a month of real classes in the tables, a phone.
-
-## 2026-11-10 — twenty-ninth deploy, 89343a8
-
-Pages deployment 8361c956, state Worker version ce4a6dae, no migration (nothing under `src/server/` changed since 37a50f8). v6, the first visit in one look (backlog v6): the root page as one column with the sentence, the three ways to play with a picture each (`docs/ways/`), the ask with the AI's file under it and the box that opens a file in the first screen, a quiz to come back to above it all, the film and "How to ask your AI" below; the page's German, French and Italian reviewed and read once more as a visitor of each would; the film drawing the page as it now is, 68 s; the first step's ask naming the run's 4th grade. Before the deploy: `npm run check`, `npm test` (128 pass) in the deploy worktree at 89343a8; the builders' and readers' walks and `docs/film/build/sitecheck.py` on their branches, not run again on the merged tree by this session. Run by the personal-assistant session from the clean worktree with the main checkout's credentials file, on the owner's word. Checked live: `/`, `/open`, `/open?example=de`, `/play`, `/example`, `/check`, `/own-copy`, `/api/site`, `/landing/way-quizmaster.svg` 200; the root carries the new sentence and "4th grade"; `home.js`, `film.js`, `open.js` byte-identical to the build. No run against the live site. Not tried live: the page on a real phone, the film watched through by a person, an AI's fetcher against the new page, anything with a class.
-
-## 2026-11-10 — thirtieth deploy, 688dcf9
-
-Pages deployment 3b4731cf, state Worker version 6d7b3476, no migration (nothing under `src/server/` changed since 89343a8). The root page's words: "How to ask your AI" sends a visitor to any AI subscription, otherwise free Claude, other free ones having proven less reliable when tried (`design/root-page.md`, "How to ask"), in the four languages; German avoids the plural of "Quiz" in the first heading and the daily-limit message; the film rebuilt for the German heading, its posters unchanged. Before the deploy: `npm run check`, `npm test` (128 pass) in the deploy worktree at 688dcf9; `docs/film/build/sitecheck.py` in the main checkout on the same tree, "no problems". Run by the personal-assistant session from the clean worktree with the main checkout's credentials file, on the owner's word. Checked live: `/`, `/open`, `/play`, `/example`, `/own-copy`, `/api/site` 200; the root carries the new English heading, `home.js` the new German words; `home.js`, `film.js` byte-identical to the build. Not tried live: the Italian read by a speaker of it, a real phone.
-
-## 2026-11-10 — thirty-first deploy, 8936a9a
-
-Pages deployment d7490f98, state Worker version b5abdd15, no migration (nothing under `src/server/` changed since 688dcf9). The local check's cards: each starts with the root page's phrase for its way; Peers and Quizmaster carry one note, that the quiz goes into a room only its code opens, deleted when ended or three hours after its last use; Solo's, that it plays in this tab and sends nothing; the film rebuilt to draw them, its posters unchanged. Before the deploy: `npm run check`, `npm test` (128 pass) in the deploy worktree at 8936a9a; `docs/film/build/sitecheck.py` in the main checkout on the same tree, "no problems". Run by the personal-assistant session from the clean worktree with the main checkout's credentials file, on the owner's word. Checked live: `/`, `/open`, `/play`, `/example`, `/api/site` 200; `open.js` carries the new note; `open.js`, `film.js` byte-identical to the build. Not tried live: the cards on a real phone.
-
-## 2026-11-10 — thirty-second deploy, 7ef431d
-
-Pages deployment 12d58cee, state Worker version bd87e660, no migration (nothing under `src/server/` changed since 8936a9a). The film builds in about a fifth of the time, its drawing unchanged (`docs/film/README.md`, "Text"); ▶ is a turning ring from the press until the film is drawn. Before the deploy: `npm run check`, `npm test` (128 pass) and `docs/film/build/sitecheck.py` ("no problems") in the main checkout on the same tree; the drawing compared with the previous film's at seven moments, the typing among them, identical but for an animation's frame timing; the ring recorded turning through the build at 3× CPU slowdown. Run by the owner from the terminal, in the deploy worktree. Checked live: `/`, `/open`, `/play`, `/example`, `/api/site` 200; `film.js` byte-identical to the build, the root page carries the ring's style. On the owner's older test phone: the ring reads as busy, the film comes after 0.5 to 1.0 s (about 10 s before).
-
-## 2026-11-10 — thirty-third deploy, 4348d10
-
-Pages deployment c5d801c4, state Worker version 4b042678, no migration (`src/server/wrangler.toml` unchanged; `server/` changed for the booking). Room for classes in line with what binds now (backlog, "Room on the Free plan", item 3; `design/hosting-and-limits.md`, "Running classes finish"): the day's ledger books rows, requests and awake time, rows at their most and the others as estimates; the booking moves at Start to the class that came, grows when a class outgrows it, and settles with what was spent plus what devices left polling on the final ranking will; a let-in lobby no student joins gives its booking back after 20 minutes and its first student books again, reaching to `DAY_FOR_JOINS`; uploads capped by the rows they write (`DAY_ROWS_FOR_UPLOADS`) instead of 300 a day; the owner's page shows the ledger in each allowance. A day's ledger and bookings stored before read as rows; an instance still on the old code sends numbers, read as rows. Not covered: an instance on the new code reaching the site's budget object while that is still on the old one would store a ledger the new code reads as empty, for that day only. Before the deploy: `npm run check`, `npm test` (135 pass) in the main checkout at 4348d10; on a local stack `scripts/simulate.mjs` (25 students, and again all polling) and `scripts/simulate-peers.mjs` passed, and a probe of let-in, the lapse (the wait shortened to 15 s for it), a join after it, Start and the settle read the ledger as designed at each step. `sitecheck.py` not run: nothing the film draws changed. Run by the personal-assistant session from the main checkout, on the owner's word. Checked live: `/`, `/open`, `/play`, `/owner`, `/api/site` 200; `/api/site/use` 404 without a key; `js/owner.js` byte-identical to the build; `scripts/simulate-peers.mjs` against the live site, all ok (a probe-marked room). Not tried live: the owner's page with the key, a Quizmaster class, a lobby left to lapse.
+# Deployed
+
+What runs at https://classyquiz.pages.dev, and what of it has been tried
+there, for whoever reads a claim about the site and needs to know whether it
+holds live. Each deploy's contents and checks are in this file's history
+(`git log -p docs/deploy-log.md`); whoever deploys keeps it current
+(`src/DEVELOPING.md`, "Deploying").
+
+## Live
+
+- Commit 4348d10, deployed 2026-11-10: Pages deployment c5d801c4 of the
+  project `classyquiz`, version 4b042678 of the state Worker
+  `classyquiz-state`. What the repo has that isn't live:
+  `git diff 4348d10 -- src/`.
+- Cloudflare's Free plan, on an account whose limits are shared with other
+  projects on it.
+- Set on the live Pages project, not in the repo: `OWNER_KEY`
+  (`secrets/README.md`).
+- Checked at the first deploy (2026-11-02): the Pages project has no log
+  push, and the state Worker's observability reads `false`.
+
+## Tried live
+
+Each with the last time it was run there; code deployed since may have
+changed what it covered.
+
+- The Solo walk through the example quiz at desktop and phone sizes in
+  headless Edge, nothing sent while playing, then Quizmaster to `/screen`
+  with one upload (2026-11-09, 1c2f190).
+- `scripts/simulate-peers.mjs`, a probe-marked room (2026-11-10, 4348d10).
+- `scripts/simulate.mjs` with 25 students, and headless-Edge walks of the
+  WebSocket fallback and of going offline mid-question, at the first deploy
+  only (2026-11-02). Since then on local stacks, and on 2026-11-09 on a copy
+  of the site on the same account (what that copy showed:
+  `design/open-period-in-memory.md`, Situation).
+- The film played, and its time bar dragged before it loaded, in headless
+  Edge at desktop and phone sizes in three languages (2026-11-07); its build
+  on the owner's older test phone (2026-11-10; `docs/film/README.md`,
+  "Text").
+- `/owner` with the key, by the owner (2026-11-09, before the ledger of
+  4348d10).
+
+## Not tried live
+
+- A class or a crowd: no Quizmaster run with a real second device, no Peers
+  room on real phones, no final ranking or Exit with real players; only walks
+  and probe-marked rooms.
+- Real devices other than the owner's older test phone: tablets, phones, a
+  clicker, an iPhone's full screen, a phone's pull-to-refresh on `/open`.
+- A school's network: its filter on `*.pages.dev`, its Wi-Fi through
+  `/check`.
+- The AIs: their fetchers on the live page (one fetch by an implementer's
+  tool at the first deploy), and an AI building against the guidance as it
+  now is.
+- A screen reader on any page; the film in dark mode; the film watched
+  through by someone outside the project.
+- The platform's answers once an allowance is spent.
+- A deploy resetting an instance still active 300 s after it
+  (`design/open-period-in-memory.md`, Not known).
+- An own copy set up end to end by the routes on `/own-copy`.
+- Since 4348d10: the owner's page with the key, and on a phone; a lobby
+  left to lapse (`LOBBY_WAIT_MS`).
+
+The questions these leave are in the design files' "Not known" and the
+backlog's "Open: with the owner, and in the field".

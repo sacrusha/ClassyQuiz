@@ -70,8 +70,8 @@ What matters here:
   like one device. A limit keyed on the address therefore also catches the
   teacher's second device when pupils on the same Wi-Fi try codes.
 - **A big all-in-one touch screen as the wall** leaves the teacher unable to
-  unshare; nothing is private there. Out of scope (owner).
-- **Three arrangements of screens** (`playing-redefined-notes.md`, 4): a
+  unshare; nothing is private there.
+- **Three arrangements of screens**: a
   screen and a remote (the example class's: the laptop on the
   projector, the teacher's phone); one screen that steers itself, by its bar,
   the keyboard or a clicker (built: `question-flow.md`); and devices only,
@@ -125,7 +125,7 @@ confirmation. It is not in the steering bar in front of the class: when the
 Remote is away the bar says only that the Remote is gone and points to the
 menu, because the bar is in front of the class exactly when the Remote is
 likeliest away, and a tablet that read the code there could take the
-steering. Screens and wording: `user-flow.md §1`, `§3.2`, `§3.3`.
+steering.
 
 ### The single tab: check, then join
 
@@ -141,9 +141,8 @@ it shows them. One tap,
 "Let everyone in", leads to the **join screen** and lets the class in:
 teacher devices come in at any time, student devices only from that tap (or
 Start) on, and one that arrives earlier waits and joins by itself. Letting
-the class in is the moment the quiz starts to cost the day's allowance, so a
-quiz uploaded only to look it over costs none (`hosting-and-limits.md`,
-"Running classes finish"). With a Remote, the Remote's lobby has the same
+the class in is the moment the quiz starts to cost the day's allowance
+(`hosting-and-limits.md`, "Running classes finish"). With a Remote, the Remote's lobby has the same
 button until it is tapped, and the wall shows the title without the code. The
 **join screen** is the class's: address, code, QR, avatars, Start. The class's screen
 ends at the fold; a quiet line goes back to the check ("‹ Back": it holds
@@ -158,7 +157,7 @@ and Start.
 
 Start reads the same on every screen that steers: the mode is named where
 there is a choice, on the second device, since a single tab has no other mode
-to tell it from. Labels: `user-flow.md §3.3`.
+to tell it from.
 
 The worked example's "Start the example quiz" (`example-page.md`) opens
 the local check; its "Open the lobby" is an upload like any, and leads to
@@ -195,8 +194,8 @@ one that shows it.
   remote's how-to on a first visit, on the screen in front of them before
   the class is let in. One screen first would hide it there, and where it
   is needed most: a phone that uploads first (the phone-first lesson) is,
-  as a plausible assumption, nearly never the one screen (`user-flow.md`
-  §4, "Phone only", is the exception), so its default would be wrong for
+  as a plausible assumption, nearly never the one screen (a host with no
+  big screen at all is the exception, below), so its default would be wrong for
   it; and a teacher who reads the code the check does show, the join code,
   and types it on the laptop gets an avatar, not the wall. Screen and remote first
   costs a host with one screen a how-to they don't need, until the browser
@@ -209,14 +208,12 @@ one that shows it.
   makes the choice once, or not at all, and so does a host at one screen,
   after the first quiz. Plausible assumption: a laptop or phone is used the
   same way lesson after lesson; on a shared school laptop the next teacher
-  at worst finds the toggle on the other value and taps it. This first
-  default was decided on the owner's behalf; the owner hasn't seen it
-  (backlog, Open).
+  at worst finds the toggle on the other value and taps it.
 - **Devices only is not offered.** For a Quizmaster it would be a host who
   steers with nobody watching a common screen: a call shares a window, a
   table of friends is Peers, and a host without any wall can already be the
-  one screen that steers and read the questions aloud (`user-flow.md` §4,
-  "Phone only"). What it would take: the room with the question on each
+  one screen that steers and read the questions aloud, the players'
+  devices showing the choices' text. What it would take: the room with the question on each
   device that Peers builds, steered by this site's Remote, with the join
   code on the host's device; cheap once that room exists, if a host turns
   out to want it.
@@ -227,15 +224,13 @@ From the check on, the screens' words name no role where a sentence does
 without one, so they read as a class's and as a pub's: "Let everyone in",
 "Join code", "Joining opens in a moment.", "Ask whoever runs it.",
 "everyone watches this screen", "everyone reads the question", "The last
-two digits don't match this quiz." The example class is still the design
-target: a child who reads slowly or no English shows the tablet to the
+two digits don't match this quiz." For the example class: a child who reads slowly or no English shows the tablet to the
 teacher, as before. "Projector" and "Remote" stay, the roles' names, which
 the owner uses for any host ("use one as remote the other as a
 projector"). These docs keep "teacher", "class" and "teacher code": they
 speak of the example class. The words before the check, the guidance's and
 the README's follow the same rule, decided once for all entries
-(`root-page.md`, "Words for whoever comes"). Screens and words:
-`user-flow.md` §3.2–3.5.
+(`root-page.md`, "Words for whoever comes").
 
 ### A second device: one question, only when needed
 
@@ -303,7 +298,10 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
   wrong ending refuses that device's teacher codes for this quiz for
   `GUESS_LOCK_MS` (10 min). A device is its address as a hash salted with a
   salt drawn per quiz and stored with the upload; the hash is stored only
-  while it counts and the alarm deletes it afterwards. With no address (local
+  while it counts and the alarm deletes it afterwards. The address is the
+  `cf-connecting-ip` header Cloudflare sets; a request that sets it itself
+  gets Cloudflare's 403 page (seen on a copy of the site, 2026-11-09), so a
+  device can't name another address. With no address (local
   development) the device is the quiz. Owner: the "no IP addresses" decision
   is about logs and retention, not about detecting attacks.
 - **Per quiz, whatever the addresses** (`QUIZ_GUESSES` 10, one more every
@@ -329,8 +327,8 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
 ## Not known
 
 - Whether teachers read "63953 47" as theirs and "63953" as the class's.
-- Whether the words (Show the quiz here, Steer it from here, A second device,
-  Swap) are the ones teachers reach for.
+- Whether the words (Projector, Remote, Show the quiz here, Steer it from
+  here, A second device, Swap) are the ones teachers reach for.
 - Whether hosts read the toggle as a question about their setup, and
   whether a host at one screen, on a first visit, reads the how-to under
   Screen and remote as a step they have to take before letting everyone in.
@@ -350,7 +348,7 @@ the instance's storage (`guesses`), so an idle instance does not forget them.
   and whether a throttled hidden projector tab is wrongly counted away.
 - How often teachers upload at the front with the class waiting, the case
   where opening on the check costs a tap every lesson.
-- Whether the limit works against a real attacker on Cloudflare (the
-  `cf-connecting-ip` header there; which count applies).
+- Whether the limit works against a real attacker on Cloudflare (which
+  count applies).
 - That the alarm clears a device's hash once its count runs out (known from
   the code, not observed).

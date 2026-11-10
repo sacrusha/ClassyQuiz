@@ -1,5 +1,5 @@
 // A tab that came with a code from the code box, which routes by length
-// (docs/user-flow.md §1, docs/design/teacher-devices.md):
+// (docs/design/teacher-devices.md):
 //
 //   /play#63953      the class code: a student's device, straight to an
 //                    avatar, then colours. It never reaches a teacher role.

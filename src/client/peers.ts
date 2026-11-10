@@ -1,5 +1,5 @@
 // A Peers room on a player's device (backlog v5 items 3 and 7;
-// docs/design/peers.md; screens and words: docs/user-flow.md §3.9). There
+// docs/design/peers.md). There
 // is no wall and nobody steers, so each device shows what a wall would:
 // the code for the others (on the device of whoever opened the room), who
 // is in, the question itself on the device screen (client/device.ts), the

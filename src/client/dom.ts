@@ -99,9 +99,9 @@ export function teacherEntry(code: string, teacher: string, extra = ""): string 
   return `/play${extra}#${code}${teacher}`;
 }
 
-// The role this tab holds (user flow §1). Per tab, not per device: two
-// windows of one browser may hold the Projector and the Remote. sessionStorage
-// survives a reload of the tab and goes with it when it's closed.
+// The role this tab holds (docs/design/teacher-devices.md). Per tab, not per
+// device: two windows of one browser may hold the Projector and the Remote.
+// sessionStorage survives a reload of the tab and goes with it when it's closed.
 
 export interface HeldRole {
   role: "screen" | "remote";

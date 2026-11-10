@@ -6,7 +6,7 @@
 /**
  * Players in one class, removed ones included: the run is one stored value,
  * rewritten with every answer, and the projector draws every avatar. The
- * design target is a class of about 25; a larger group is what an own copy
+ * example class is about 25; a larger group is what an own copy
  * of the site is for.
  */
 export const MAX_PLAYERS = 60;

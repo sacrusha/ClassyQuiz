@@ -21,8 +21,7 @@ on the device of whoever opened the room, the code for the others (v5 item
   (`solo.md`, "The device screen"), and so is the room: the code, joining,
   the avatars and their dressing, the game's rules for answers, fixes and
   scores (`server/game.ts`, `class-and-wall.md`, `question-flow.md`).
-- Plausible assumption (from the exploration, `playing-redefined-notes.md`):
-  a few friends wait for each other. The advance rests on it: everyone
+- Plausible assumption: a few friends wait for each other. The advance rests on it: everyone
   ready needs no cadence design, where a clock would (backlog Later, "Runs
   by itself").
 - Phones sleep, batteries die, a tab gets closed (Constraints, "Survives
@@ -31,10 +30,7 @@ on the device of whoever opened the room, the code for the others (v5 item
   when every phone is asleep.
 - Someone still has to start the quiz, end it early, fix a wrong solution
   (AI-made solutions are wrong now and then: `question-flow.md`, "Fixing a
-  question during the run") and remove an avatar nobody plays. The
-  exploration's lean: whoever opened the room, from their player's screen.
-- Words: a role noun is avoided where a sentence does without one (the
-  owner); "host" is acceptable, not great, and is the code's word only.
+  question during the run") and remove an avatar nobody plays.
 - Nothing identified (Constraints): the avatars are the room's, as in a
   class.
 - The free plan's day is the classes' (backlog, Constraints): a Peers room
@@ -44,7 +40,7 @@ on the device of whoever opened the room, the code for the others (v5 item
 
 ## How the site meets it
 
-Screens and words: `user-flow.md` §3.9. Code: `client/entry-peers.ts` (the
+Code: `client/entry-peers.ts` (the
 check's card), `client/peers.ts` (the player page's Peers screens, handed
 every view of a Peers room by `client/play.ts`), `client/device.ts` (the
 question), the game's rules in `server/game.ts` (`peersStep`, `goOn`,
@@ -183,7 +179,7 @@ players." The door is the class's (`class-and-wall.md`, "The door").
 - Whether the spread showing with the key, with no lock-in before it,
   suits friends.
 - Whether fixing at the solution, until the opener taps on, is enough, or a
-  fix at the end is wanted (the exploration's "fixes at the end").
+  fix at the end is wanted.
 - Whether a "Waiting for" up to 25 s old on a polling device misleads a
   room; on WebSockets it is current.
 - Whether an answer picture's small copy (640 px) looks soft on a laptop,

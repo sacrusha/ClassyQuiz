@@ -1,5 +1,6 @@
 // What the steering tab shows and does, shared by the Remote (teach.ts) and
-// the Projector while it steers itself (screen.ts). docs/user-flow.md §3.3–3.5.
+// the Projector while it steers itself (screen.ts): docs/design/teacher-devices.md,
+// docs/design/question-flow.md.
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";

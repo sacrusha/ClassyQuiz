@@ -54,9 +54,7 @@ The figures, as `telemetry.md`, "Reading it", gives them:
 
 - **The latest day**: the classes (less the project's own runs) and the
   most at once as figures, with nothing to measure them against: how many
-  classes a day the site carries is for the figures to show, and the
-  owner's about 200 a day and 60 at once describe what the site has, not
-  a limit (`scaling-drawer.md`, "Purpose and threshold"). Beside them,
+  classes a day the site carries is for the figures to show. Beside them,
   gauges against the plan's real limits: the ledger in each of its three
   allowances (rows, requests, awake seconds) against the classes' share,
   which is what letting a class in is refused by; then the settled classes'

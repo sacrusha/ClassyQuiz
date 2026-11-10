@@ -1,4 +1,4 @@
-// The Projector: what the class sees (docs/user-flow.md §3.3, §3.4). While no
+// The Projector: what the class sees. While no
 // Remote is there it steers itself: in the lobby it is the single tab's two
 // screens, the teacher's check and then, one tap on, the class's join screen
 // (docs/design/teacher-devices.md, "The single tab: check, then join"); during

@@ -29,7 +29,8 @@ export const quizmaster: Entry = {
       ctx.say(roomRefusal(r));
       return;
     }
-    // This tab is the Projector that steers itself (user flow, rule 3); it opens on the lobby's check.
+    // This tab is the Projector that steers itself; it opens on the lobby's check
+    // (docs/design/teacher-devices.md, "The single tab: check, then join").
     tabRole.set(r.id, { role: "screen", token: r.token, code: r.code, teacher: r.teacher });
     tabLobby.set(r.id, "check");
     // Replaced, not followed: Back from the lobby passes this page, where the

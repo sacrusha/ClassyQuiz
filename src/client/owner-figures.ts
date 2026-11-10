@@ -30,7 +30,7 @@ export function turnedAway(r: DayRecord["refused"] | MonthRecord["refused"]): nu
   return r ? r.uploads + r.bytes + r.rows : 0;
 }
 
-/** Classes let in less the project's own runs: the classes of the day, as the owner's threshold counts them. */
+/** Classes let in less the project's own runs. */
 export function realClasses(d: DayRecord): number {
   return d.classes - (d.probes ?? 0);
 }

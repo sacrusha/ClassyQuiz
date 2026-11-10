@@ -29,7 +29,7 @@ without spending what it measures.
   `full` from `/api/site` for its own-copy line.
 - The live figures, 2026-11-09: two or three classes a day, 75 zip attempts
   since 2 November. Plausible assumption: they are the project's own walks
-  and probes (the deploy log names some). Telemetry is to be in place before
+  and probes (the deploy log's history in git names some). Telemetry is to be in place before
   teachers come.
 - Cloudflare's dashboard gives account-wide daily counts (Function and
   Durable Object requests, rows, duration, storage), and its Durable
@@ -41,8 +41,7 @@ without spending what it measures.
   files' "Not known"): the share of devices on long-poll, classes with at
   least one poller, reconnects per device, why a device falls back; actual
   rows and requests per class, duration per day, devices left on after the
-  lesson; classes a day and at once (the owner's threshold, about 200 and
-  60), the kind of room, class size, how far a quiz gets; the spent
+  lesson; classes a day and at once, the kind of room, class size, how far a quiz gets; the spent
   allowance and errors as devices meet them. Measured once, not by
   telemetry (item 1's probe on a Worker of its own): auto-answered pings
   cause no invocation, socket attachments write no rows and store no
@@ -167,8 +166,7 @@ school years side by side, the shortest span that shows a trend through a
 school year's holidays.
 
 - **Use** — uploads, classes, probes, classes turned away, kinds, sizes,
-  how far, minutes, the most at once, the busiest day: day and month. The
-  owner's threshold is in classes a day and at once.
+  how far, minutes, the most at once, the busiest day: day and month.
 - **Cost** — rows, requests, devices on long-poll, poller seconds and the
   awake seconds, reconnects, sleeps: day and month. The drawer's ideas wait
   for a cost per class to grow as well as a number of classes.

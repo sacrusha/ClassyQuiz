@@ -1,6 +1,5 @@
-// The local check, /open (docs/design/local-check.md; docs/user-flow.md
-// §3.1, "The local check"): a quiz read from its .zip in this browser, before
-// anything of it goes to the site. The person picks how it will be played
+// The local check, /open (docs/design/local-check.md): a quiz read from its
+// .zip in this browser, before anything of it goes to the site. The person picks how it will be played
 // (client/entries.ts); the questions and their fixes are folded away, since
 // whoever will play mustn't have to see them to get there.
 //

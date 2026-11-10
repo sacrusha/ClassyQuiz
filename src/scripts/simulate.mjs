@@ -19,7 +19,7 @@
 //
 // The upload's tab is the Projector and steers itself; a phone comes in with
 // the teacher code, is asked, steers from here, and steers from then on
-// (docs/user-flow.md §1, docs/design/teacher-devices.md). 25 students join; a
+// (docs/design/teacher-devices.md). 25 students join; a
 // fifth of them only get through over HTTP long-polling (as on a network that
 // blocks WebSockets). During the quiz, devices drop their connection and come
 // back (sleep, Wi-Fi), answers sent just before a drop are resent, one tablet
@@ -838,7 +838,7 @@ for (;;) {
     await twice({ op: "play" });
     await until(() => tv().phase === "ranking", 5000, "ranking");
     // The phone's battery dies, silently: after about 45 s the Projector
-    // steers again by itself (user flow, rule 6).
+    // steers again by itself (docs/design/teacher-devices.md, "When a device is gone").
     phone.freeze();
     const t0 = Date.now();
     log("the phone dies silently");
@@ -908,7 +908,7 @@ await sleep(1000);
 const withView = players.filter((p) => !p.dead && p.view && p.view.phase === "final");
 check(withView.length >= players.length - 3, `final view reached ${withView.length}/${players.length} devices`);
 
-// --- the roles' cases (user flow §1)
+// --- the roles' cases (docs/design/teacher-devices.md)
 
 // The phone comes back (charged): it is the Remote again, and the Projector stops steering.
 const phone2 = new Device("phone-back", instance, phone.auth, "ws");

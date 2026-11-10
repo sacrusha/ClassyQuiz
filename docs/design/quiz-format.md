@@ -18,8 +18,8 @@ The format's specification is the "How quizzes are built" section of the guidanc
 - The AI may be working from an older or cached reading of the guidance, so it may still write lines the format no longer has.
 - Plausible assumption: a quiz is single-use, and one with a format error is regenerated rather than repaired by hand (so the parser reports what it can't resolve instead of guessing, and the message is one to hand to the AI).
 - Plausible assumption: a class that sees the right answer in the same place learns "tap red" within a few questions (why answers are shuffled). In one quiz the owner's AI wrote, the right answer came first in 14 of 19 questions.
-- The teacher checks the key after upload and can fix it during the run: user-flow.md §3.3 for the list, `question-flow.md` for fixing.
-- Who the teacher is, which AIs, and that a quiz arrives as a zip (not pasted text) are in the backlog's Project and Constraints sections and in `root-page.md`.
+- The teacher checks the key after upload and can fix it during the run: `teacher-devices.md` ("The single tab: check, then join") for the list, `question-flow.md` for fixing.
+- Who the teacher is and that a quiz arrives as a zip (not pasted text) are in the backlog's Project and Constraints sections and in `root-page.md`; which AIs, in `guidance-page.md`, "The AIs verified against".
 
 ## How the site meets it
 
@@ -73,7 +73,7 @@ Alternatives that failed, kept because their reasons still hold:
 
 The order is the same on every screen: projector, tablets, the teacher's remote and the lobby's question list. Position in the text matters to nobody, since the teacher checks the key in the lobby's list and fixes it on the remote, both in screen order. `startRun` and `shownOrder` in `src/server/game.ts` make the order, and `orderOf` maps screen to text. Everything stored stays by text order; see `question-flow.md`.
 
-`Order: fixed` keeps a question's order, or every question's when it stands before the first question. The guidance publishes only the per-question form, as it does for `Background:`: the parser's quiz-wide forms aren't used, and publishing unused functionality is bad design (owner). Where a fixed order belongs (letters that label a picture, a sequence, a vote) is the AI's to see. No answer keeps its order implicitly. A rule hidden in the site is one neither the AI nor the teacher can see or rely on, so "A, B, C, none" without the line is shuffled like any answers, and letters are dropped from shuffled questions but kept under `Order: fixed`. `Order: shuffle` (or random, mixed) states the default.
+`Order: fixed` keeps a question's order, or every question's when it stands before the first question. The guidance publishes only the per-question form, as it does for `Background:`: the parser's quiz-wide forms aren't used. Where a fixed order belongs (letters that label a picture, a sequence, a vote) is the AI's to see. No answer keeps its order implicitly. A rule hidden in the site is one neither the AI nor the teacher can see or rely on, so "A, B, C, none" without the line is shuffled like any answers, and letters are dropped from shuffled questions but kept under `Order: fixed`. `Order: shuffle` (or random, mixed) states the default.
 
 An `Order:` line after the answers counts for the question above: unlike a picture line it can't be meant for the next question.
 

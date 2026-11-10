@@ -44,10 +44,6 @@ is in `backlog.md`, Project. What shapes this file:
 
 ## How the site meets it
 
-Screens, their wording and their layout are in `../user-flow.md` (§3.3 the
-lobby, §3.4 the projector, §3.5 the Remote, §3.6 the student). This section says what each
-audience sees and why.
-
 ### Getting in
 
 - The projector shows the address, the join code and a QR code for
@@ -109,7 +105,7 @@ for the teacher to find, and a stranger with the code cannot wander into a
 quiz under way.
 
 - The cap is `MAX_PLAYERS` (60, removed avatars included), `shared/limits.ts`.
-  The design target is about 25; more is what an own copy is for.
+  The example class is about 25; more is what an own copy is for.
 - The door is open in the lobby, for `DOOR_OPEN_MS` (5 minutes) after Start, and
   while the first question is up (its reveal and ranking included),
   `doorOpen` in `server/game.ts`. A teacher who presses Start before handing

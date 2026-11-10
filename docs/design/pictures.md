@@ -2,8 +2,7 @@
 
 Question pictures, backgrounds and pictures as answers: how they reach the
 site, how they are stored, and how each screen shows them. The text format's
-other parts are in `quiz-format.md`; the screens' wording and layout are in
-`../user-flow.md`.
+other parts are in `quiz-format.md`.
 
 ## Purpose
 
@@ -262,7 +261,7 @@ readable, chosen by the page, not by the AI or the teacher.
   button's colour with its shape, arranged by the same rule in a room fixed
   in px (a cached picture otherwise stretched the page when measured). Under
   the verdict, and while a late tap is on its way, the chosen picture shows
-  beside its shape. Screens: `user-flow.md §3.6`.
+  beside its shape.
 - Without a small copy, or before the pack arrives, a button shows colour and
   shape alone.
 
