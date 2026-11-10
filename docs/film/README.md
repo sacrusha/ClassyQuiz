@@ -191,6 +191,20 @@ rebuild, and what the scripts need: `src/DEVELOPING.md`, "The landing film".
   address shown is the one the browser opened, as on the page.
 - A fixed text in a fixed box carries the box's width and, measured after the
   build, shrinks around its anchor where the device's font is wider.
+- Measuring is what the build costs: each width read forces a layout of the
+  picture as it stands, so the cost grows with the square of the film's text.
+  Each width is measured once (`measure`), the widths of every first k
+  characters only for the two typed asks (`drawLines` with `o.typing`; a
+  line drawn without it throws when asked for part of its text), and the
+  fitted texts are read together, then written (`fitAll`). The build is
+  about 0.4 s on a desktop, and about 1.4 s in Edge emulating a phone at 3×
+  CPU slowdown. Plausible assumption: 3× stands for the owner's older test
+  phone, which took about 10 s before these savings, as the emulation then
+  did (9.6 s); not measured on the phone since. Presets measured at build
+  time don't stand in: the film's text face is the device's own
+  (`system-ui`), so widths differ by device. More text, such as
+  explanations over the steps, stays cheap only when drawn whole, without
+  `o.typing`.
 
 ### Reading on a phone
 

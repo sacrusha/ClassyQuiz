@@ -337,7 +337,11 @@ How the page meets it (the details: the comments on the film in
   170 KB, loads on the first press of ▶ or the picture, or on the first move
   of the time bar. It paints the same frame over the picture, then plays
   from the start or shows the moment the bar was moved to. The bar shows
-  that time while the script loads. The speed works without loading
+  that time while the script loads. From the press until the film is
+  drawn, ▶ is a turning ring, a frame painted before the build starts: the
+  build holds the page, by emulation about a second and a half on a slow
+  phone (`docs/film/README.md`, "Text"), and a press with no answer reads
+  as missed. The speed works without loading
   anything. Full screen needs the film, so it keeps its place hidden until
   then. If the script can't load or can't draw, the picture stays and the
   next press tries again.

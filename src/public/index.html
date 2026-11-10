@@ -52,7 +52,14 @@
   .cqf-again { position: absolute; left: 50%; top: 86%; transform: translate(-50%, -50%); width: min(12%, 76px); aspect-ratio: 1; border-radius: 50%; border: 0; background: rgba(29, 29, 27, .82); color: #fff; cursor: pointer; display: grid; place-items: center; padding: 0; }
   .cqf-again svg { width: 50%; height: 50%; }
   .cqf-again[hidden] { display: none; }
-  .film.loading .cqf-big { cursor: progress; opacity: .6; }
+  /* From the press until the film is drawn (loading: film.js on its way, client/film-poster.ts; building: film.js building
+     the picture, which on a slow phone holds the page for seconds): ▶ turns into a turning ring, so the press shows it was
+     taken. A transform animation, which browsers run beside the page's script, so it keeps turning while the build holds it. */
+  .film.loading .cqf-big, .film.building .cqf-big { cursor: progress; }
+  .film.loading .cqf-big svg, .film.building .cqf-big svg { visibility: hidden; }
+  .film.loading .cqf-big::after, .film.building .cqf-big::after { content: ""; position: absolute; inset: 28%; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .3); border-top-color: #fff; animation: cqf-turn .8s linear infinite; }
+  @keyframes cqf-turn { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) { .film.loading .cqf-big::after, .film.building .cqf-big::after { animation-duration: 2.4s; } }
   /* The bar, as video players have it: play, the time bar, the time and the length, the speed, full screen. It works before
      film.js is there: the speed is client/film-poster.ts's, and a move of the time bar loads the film, which then shows that
      moment. Full screen needs the film, so it keeps its place hidden until then, and nothing moves when it appears. The

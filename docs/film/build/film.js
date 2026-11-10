@@ -314,11 +314,33 @@
       while (p.length && /^ +$/.test(p[p.length - 1].text)) p.pop();
       return p.reduce((a, q) => a + measure(q.text, size, clsOf(q.kind)), 0);
     };
+    /* Each measure forces a layout of the whole picture as it grows, and the wrapping measures the same words again and
+       again: so each width is measured once. A width depends only on the text, its size and its class, and the faces are in
+       before the build (start()). */
+    const measured = new Map();
     function measure(str, size, cls) {
-      set(meas, 'font-size', String(size));
-      set(meas, 'class', cls || '');
-      meas.textContent = str;
-      return meas.getComputedTextLength();
+      const key = `${size}|${cls || ''}|${str}`;
+      let w = measured.get(key);
+      if (w === undefined) {
+        set(meas, 'font-size', String(size));
+        set(meas, 'class', cls || '');
+        meas.textContent = str;
+        w = meas.getComputedTextLength();
+        measured.set(key, w);
+      }
+      return w;
+    }
+    /** fitText for many: every width read first, then every transform written, so the reads cost one layout, not one each. */
+    function fitAll(els) {
+      els.forEach((el) => el.removeAttribute('transform'));
+      const ws = els.map((el) => (+el.getAttribute('data-fit') ? el.getComputedTextLength() : 0));
+      els.forEach((el, i) => {
+        const max = +el.getAttribute('data-fit');
+        if (max && ws[i] > max) {
+          const x = +el.getAttribute('x') || 0, y = +el.getAttribute('y') || 0, k = max / ws[i];
+          el.setAttribute('transform', `translate(${f1(x)} ${f1(y)}) scale(${k.toFixed(4)}) translate(${f1(-x)} ${f1(-y)})`);
+        }
+      });
     }
     /** Lines from pieces [[text, kind]]: breaks only at ordinary spaces (not at a no-break space); each piece keeps its index in the whole string. */
     function wrap(pieces, size, maxW, clsOf) {
@@ -346,7 +368,9 @@
       if (line.length) lines.push(line);
       return { lines, total: idx };
     }
-    /** Draws wrapped lines; returns an updater that shows the first n characters, and the caret's place. */
+    /** Draws wrapped lines; returns an updater that shows the first n characters, and the caret's place. Only lines drawn
+        with o.typing show part of their text (the widths of every first k characters are measured for them alone); the
+        others show all of it, and asking them for part throws. */
     function drawLines(parent, wrapped, x, y, size, lh, o) {
       const g = G(parent);
       const out = [];
@@ -361,23 +385,32 @@
           if (o.fillOf && o.fillOf(p.kind)) span.setAttribute('fill', o.fillOf(p.kind));
           span.textContent = p.text;
           // the width of every first k characters, measured here once: typing reads them every frame, and a measure forces a layout
-          const pre = [0];
-          for (let k = 1; k < p.text.length; k++) pre.push(measure(p.text.slice(0, k), size, cls));
           const w = measure(p.text, size, cls);
-          pre.push(w);
+          let pre = null;
+          if (o.typing) {
+            pre = [0];
+            for (let k = 1; k < p.text.length; k++) pre.push(measure(p.text.slice(0, k), size, cls));
+            pre.push(w);
+          }
           let ul = null;
           if (o.underline && o.underline(p.kind)) ul = E('rect', { x: f1(x + px), y: f1(y + li * lh + size * 0.2), width: f1(w), height: Math.max(2, size * 0.07), fill: o.underline(p.kind) }, g);
           out.push({ span, p, x: x + px, w, pre, li, ul, cls });
           px += w;
         });
       });
+      const widthTo = (o2, k) => {
+        if (k === o2.p.text.length) return o2.w;
+        if (!o2.pre) throw new Error('drawLines: part of a text drawn without o.typing');
+        return o2.pre[k];
+      };
       let shown = -1;
       function show(n) {
         if (n === shown) return; shown = n;
         for (const o2 of out) {
           const k = clamp(n - o2.p.start, 0, o2.p.text.length);
+          const wk = k ? widthTo(o2, k) : 0;
           txt(o2.span, o2.p.text.slice(0, k));
-          if (o2.ul) set(o2.ul, 'width', f1(o2.pre[k]));
+          if (o2.ul) set(o2.ul, 'width', f1(wk));
         }
       }
       function caret(n) {
@@ -385,7 +418,7 @@
         for (const o2 of out) if (o2.p.start < n || (!last && o2.p.start === 0)) last = o2;
         if (!last) return [x, y];
         const k = clamp(n - last.p.start, 0, last.p.text.length);
-        return [last.x + last.pre[k], y + last.li * lh];
+        return [last.x + (k ? widthTo(last, k) : 0), y + last.li * lh];
       }
       return { g, show, caret, out, height: wrapped.lines.length * lh };
     }
@@ -1251,8 +1284,9 @@
       const compBox = E('rect', { x: X0, rx: 30, width: X1 - X0, fill: '#fff', stroke: '#d6d6d6', 'stroke-width': 3 }, comp);
       const attach = G(comp, `<g transform="translate(0 0)"><rect x="-3" y="-3" width="96" height="126" rx="12" fill="#6b4a2e"/><image href="${ASSETS.sheet1 || ''}" x="8" y="8" width="80" height="104" preserveAspectRatio="none"/></g>
         <g transform="translate(110 0)"><rect x="-3" y="-3" width="96" height="126" rx="12" fill="#6b4a2e"/><image href="${ASSETS.sheet2 || ''}" x="8" y="8" width="80" height="104" preserveAspectRatio="none"/></g>`);
-      const typed1 = drawLines(comp, w1, X0 + 36, 0, FS, LH, opts);
-      const typed2 = drawLines(comp, w2, X0 + 36, 0, FS, LH, opts);
+      const typing = Object.assign({ typing: true }, opts);
+      const typed1 = drawLines(comp, w1, X0 + 36, 0, FS, LH, typing);
+      const typed2 = drawLines(comp, w2, X0 + 36, 0, FS, LH, typing);
       const caret = E('rect', { width: 4, height: FS * 1.1, fill: C.ink }, comp);
       const sendB = G(comp, `<circle r="34" fill="${C.ink}"/><path d="M0 16 V-14 M-13 -2 L0 -15 L13 -2" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`);
       // conversation content, y from 0 (scrolled)
@@ -1701,7 +1735,7 @@
         makeOts();
         makeInset();
         makeEnd();
-        svg.querySelectorAll('[data-fit]').forEach(fitText);
+        fitAll([...svg.querySelectorAll('[data-fit]')]);
         render(POSTER);
       } catch (err) {
         if (svg) svg.remove();
@@ -1931,15 +1965,21 @@
     const host = document.getElementById('cqfilm');
     if (!host || live) return;
     const my = ++gen;
+    // The build holds the page for a while on a slow device: "building" (▶ turning, index.html) is drawn first, a frame
+    // painted before the build starts, so a press shows it was taken.
+    host.classList.add('building');
+    const painted = () => new Promise((res) => requestAnimationFrame(() => setTimeout(res, 0)));
     const ready = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('700 40px Rubik'), document.fonts.ready]) : Promise.resolve();
-    ready.catch(() => {}).then(() => {
+    ready.catch(() => {}).then(painted).then(() => {
       if (my !== gen || live) return;
       try { live = film(host, langOf(host)); } catch (err) { host.dataset.film = 'failed'; console.error('classyQuiz film:', err); }
-    });
+    }).finally(() => { if (my === gen) host.classList.remove('building'); });
   }
   /** Back to the poster picture with nothing of the film left; the next start() builds it anew, in the language around it then. */
   function reset() {
     gen++;
+    const host = document.getElementById('cqfilm');
+    if (host) host.classList.remove('building');
     if (live) { live.destroy(); live = null; }
   }
   // the page's handle (client/film-poster.ts): build again after a reset or a failed draw, and reset on a language switch
