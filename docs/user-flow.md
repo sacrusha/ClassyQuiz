@@ -191,9 +191,10 @@ opens: docs/design/root-page.md, "One column".
   speed, full screen; on a phone held upright the time bar has a row of its
   own. At the end a replay icon on the end card. Under it, "The example,
   step by step ›" links `/example` (the worked example).
-- **How to ask your AI**: "Choose any good AI." with what is verified ("Free
-  Claude Sonnet wrote the example above, 4 Nov 2026: the one free AI that
-  does this reliably."); "Ask the AI to build you a quiz for" the address,
+- **How to ask your AI**: "Any AI subscription will do; otherwise, free
+  Claude." with why and the example's run ("Other free options have proven
+  less reliable in testing. Free Claude Sonnet wrote the example above,
+  4 Nov 2026."); "Ask the AI to build you a quiz for" the address,
   with Copy; and six example asks behind six tabs named in words: Exercise
   sheets (the first step's ask, its parts labelled: this site, which
   exercises, your class, how many, which language), A description (a chess

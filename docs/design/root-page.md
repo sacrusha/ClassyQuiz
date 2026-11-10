@@ -381,17 +381,25 @@ to see it done finds an ask close to their own case. The first step shows one
 ask and its file; this part, below the film, holds the rest, and the line
 under the box leads to it.
 
-"Choose any good AI." Its detail states only what is verified, with tier and
-date: free Claude Sonnet wrote the example above (the first step's quiz, the
-film's and `/example`'s), 4 Nov 2026 (`design/example-page.md`); in German,
-French and Italian the line adds that it was written in English and is
-translated here, as `/example`'s closing note says, since the file above it
-is the translation; and it is the
-one free AI that does this reliably, the owner's finding of 5 Nov 2026
-against free ChatGPT, Gemini and Copilot (`design/guidance-page.md`, "The AIs
-verified against"). No claim about what an AI can do goes on the page without
-the tier and date of the test (the pattern in backlog v4, owned by
-design/guidance-page.md); nothing gives a duration.
+"Any AI subscription will do; otherwise, free Claude." A visitor needs to
+know which AI to try, and the answer is their own situation, not a ranking.
+The line states a fact about subscriptions rather than telling the visitor
+to use theirs, which in translation ("Nimm die KI, die du abonniert hast")
+assumed they have one:
+a paid plan of a mainstream AI has a model at least as strong as Sonnet, web
+access, scripting and makes a zip (the owner), and of the free ones, Claude
+is the one that built the quiz in the owner's testing. The detail gives the
+reason, then the example's run: "Other free options have proven less
+reliable in testing" (the owner's findings of 5 Nov 2026 against free
+ChatGPT, Gemini and Copilot, `design/guidance-page.md`, "The AIs verified
+against"); free Claude Sonnet wrote the example above (the first step's quiz,
+the film's and `/example`'s), 4 Nov 2026 (`design/example-page.md`). In
+German, French and Italian the line adds that it was written in English and
+is translated here, as `/example`'s closing note says, since the file above
+it is the translation. A run the page names carries its tier and date (the
+pattern in backlog v4, owned by design/guidance-page.md), so what was run
+stays told apart from advice resting on what a plan offers; nothing gives a
+duration.
 
 "Ask the AI to build you a quiz for" the site's address, with Copy. The line
 says "the AI" where a pronoun would do: in the owner's testing this part had

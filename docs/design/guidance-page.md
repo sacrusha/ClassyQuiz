@@ -282,9 +282,11 @@ quoted; runs not recorded beyond the above):
 - Free Microsoft Copilot: "generally slightly above Haiku's level"; not
   trusted to generate a quiz.
 - Grok: not tested.
-- The owner's expectation, untested: ChatGPT with thinking enabled, and
-  Gemini's paid versions, should do fine where their tools aren't locked,
-  which on paid plans they probably aren't.
+- Paid plans, the owner's knowledge of them rather than a run here: the paid
+  versions of ChatGPT and Gemini have models at least as strong as Sonnet,
+  web access and scripting, and make zip files; nothing indicates they can't
+  build the quiz. The root page sends a visitor to the AI they subscribe to
+  on this basis (`design/root-page.md`, "How to ask").
 
 ## Not known
 

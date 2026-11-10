@@ -29,16 +29,22 @@ For the read:
   link: "Das Beispiel spielen ›", "Essayer l'exemple ›", "Prova l'esempio ›". French doesn't say
   "jouer l'exemple", and "Jouer au quiz d'exemple ›" (and Italian "Gioca al quiz di esempio ›")
   took the example's link onto a line of its own on a 360 px phone.
-- **"Any good AI"**: "Wähle eine gute KI.", "Choisissez une bonne IA.", "Scegli una buona IA."
-  carry no "any". With it ("egal welche", "quella che preferisci") the line reads as "any AI
-  works", against its detail's "the one free AI that does this reliably", which is the owner's
-  finding of 5 Nov 2026 against free ChatGPT, Gemini and Copilot (`design/guidance-page.md`, "The
-  AIs verified against"). The detail: "Das Beispiel oben stammt vom kostenlosen Claude Sonnet (4.
-  Nov. 2026), der einzigen kostenlosen KI, die das zuverlässig kann." / "… écrit par la version
-  gratuite de Claude Sonnet, le 4 nov. 2026⍽: la seule IA gratuite à le faire de façon fiable." /
-  "… l'ha scritto la versione gratuita di Claude Sonnet, il 4 nov. 2026: l'unica IA gratuita che
-  ci riesce in modo affidabile." The German date is in brackets: between commas, "der einzigen
-  kostenlosen KI" seemed to belong to the date.
+- **The plural of "Quiz"**: German has "die Quiz" in the dictionary and "Quizze" in speech, and
+  either reads oddly, so the German words avoid the plural: "Hier spielst du das Quiz, das deine
+  KI … macht.", "kann heute kein weiteres Quiz annehmen … nimmt sie wieder eines an". "Mehr Quiz"
+  (the way to an own copy) stays: it reads as a singular, in the advertising form, which suits
+  a line about more for free (the owner).
+- **"Any AI subscription will do; otherwise, free Claude."**: "Jedes KI-Abo reicht, sonst
+  Claude gratis." / "Tout abonnement à une IA fait l'affaire⍽; sinon, Claude en version
+  gratuite." / "Va bene qualsiasi abbonamento a un'IA; altrimenti, Claude nella versione
+  gratuita." A statement about subscriptions, not an order to use one's own: "Nimm die KI, die du
+  abonniert hast" assumed the visitor has one. German and French read by the owner; Italian not.
+  The detail's first sentence speaks of trying, not of tests, which read as published reviews:
+  "Andere kostenlose KIs haben sich beim Ausprobieren als weniger zuverlässig erwiesen." / "À
+  l'essai, les autres IA gratuites se sont montrées moins fiables." / "Alla prova, le altre IA
+  gratuite si sono rivelate meno affidabili." The page doesn't speak as "we" anywhere, so none
+  says "our". The example's line follows unchanged but for its tail; the German date stays in
+  brackets.
 - **"How to ask your AI"**, the heading and the link down to it: "So fragst du deine KI", "Que
   dire à votre IA", "Come chiedere un quiz alla tua IA". "Demander" and "chiedere" want an object,
   so "Comment demander à votre IA" and "Come chiedere alla tua IA" read as cut off. The French
