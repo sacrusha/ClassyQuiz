@@ -609,7 +609,7 @@ shows one binding.
    room first. What the design rests on that no longer holds, and the
    situation it now meets (the costs per transport, which devices poll, who
    opens a lobby): `design/hosting-and-limits.md`, Situation and "Running
-   classes finish". Built, not deployed: the ledger in rows, requests and
+   classes finish". Built and deployed (`deploy-log.md`): the ledger in rows, requests and
    awake time, estimates where there is no most; the booking moving at
    Start and as a class outgrows it; a let-in lobby nobody joins giving it
    back after `LOBBY_WAIT_MS`, its first student booking again; the settle
