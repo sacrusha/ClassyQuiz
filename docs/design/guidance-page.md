@@ -57,7 +57,7 @@ shaped as it is. The screens the page describes are in `docs/user-flow.md`.
   page informs rather than instructs, below).
 - The teacher's own words to their AI are not the page's voice; whether the
   AI fetches the page at all depends on them (the example asks, `root-page.md`,
-  "Build: two steps").
+  "How to ask").
 - Teachers differ from message to message: a full brief needs no questions,
   contradictory scans may need two, and a rule of the form "ask at most one
   question" fails both. Language is the same: the language of the exercises and
@@ -209,7 +209,7 @@ before play. Phase 1 lists whether the user plays among what gets settled,
 so an AI that can't tell asks. The site's side is the local check's fold
 (`local-check.md`); the user's side, the example asks that say "I'll play it
 myself" and "I'm playing too" in the user's own words (`root-page.md`,
-"Build: two steps").
+"How to ask").
 
 A quizmaster doesn't play. Their screens, the big screen and a second
 device that steers, take no answers; they set when the choices come and

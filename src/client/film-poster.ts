@@ -1,5 +1,5 @@
-// The film in the strip's place (public/index.html, "The film in the strip's
-// place"). Until a press the page holds its poster frame as a picture, the
+// The film on the root page (public/index.html, "The film, under the first
+// screen"). Until a press the page holds its poster frame as a picture, the
 // player's bar (play, the time bar, the time, the speed, a hidden full screen
 // button) and a hidden replay, and nothing else: nothing of the film loads or
 // plays until someone asks, and the film's words (in
@@ -26,7 +26,22 @@ declare global {
 
 const host = document.getElementById("cqfilm");
 // The poster picture, kept here: while the film plays it is out of the document, and a switch still sets its language.
-const poster = host?.querySelector<HTMLImageElement>(".cqf-stage > img") ?? null;
+// The static page holds it, in English, for a browser without scripts only (<noscript>); here it is made without a
+// source, which filmLanguage() gives it, so a visit fetches the poster of its own language and no other.
+const poster = host ? makePoster(host) : null;
+
+function makePoster(film: HTMLElement): HTMLImageElement | null {
+  const stage = film.querySelector(".cqf-stage");
+  if (!stage) return null;
+  const img = document.createElement("img");
+  img.alt = "";
+  img.width = 1600;
+  img.height = 900;
+  img.sizes = "(max-width: 42rem) 100vw, 42rem";
+  img.loading = "lazy";
+  stage.prepend(img);
+  return img;
+}
 
 const RATES: Record<string, [string, string]> = { "1": ["0.5", "½×"], "0.5": ["0.25", "¼×"], "0.25": ["1", "1×"] };
 const clock = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;

@@ -1,7 +1,8 @@
-// The root page's top (docs/design/root-page.md): code box, language, the
-// three ways to play, example ask, and Run, which opens the AI's .zip. The
+// The root page's part for people (docs/design/root-page.md): code box,
+// language, the ways to play, the two steps (the example ask, and the box
+// that opens the AI's .zip), the example asks under "How to ask". The
 // guidance for AIs below reads without this script, in English; this script
-// puts the block above it in the visitor's language (client/landing-text.ts).
+// puts the part above it in the visitor's language (client/landing-text.ts).
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
@@ -9,7 +10,8 @@ import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
 import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, type SavedQuiz } from "./dom.ts";
 import { api, readApi } from "./net.ts";
 import { listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
-import { LANG_KEY, TEXT, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
+import { LANG_KEY, TEXT, askText, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
+import { EXAMPLE_ZIP } from "./example-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, uploadDays } from "./history.ts";
 import { handOver, sweepStale } from "./handoff.ts";
@@ -36,7 +38,7 @@ codeBox();
 const codeInput = $("#code") as HTMLInputElement;
 const showLang = langSwitch((l) => apply(l));
 
-// Build a quiz: copy the address. The button is made here, not in the
+// How to ask: copy the address. The button is made here, not in the
 // HTML: an AI's fetcher converting the page to text would otherwise read the
 // address as "classyquiz.pages.devCopy".
 
@@ -58,8 +60,15 @@ if (addr && navigator.clipboard?.writeText) {
   });
 }
 
-/** The example asks: the sheets ask with each labelled part's label under it, the chess and open asks plain, and the tabs' names. */
+/**
+ * The example asks: the sheets ask plain in the first step and, under "How
+ * to ask", again with each labelled part's label under it; the other asks
+ * plain; and the tabs' names.
+ */
 function renderAsk(): void {
+  const top = $("#ask-top");
+  top.textContent = askText(t).replaceAll(DEMO, host);
+  $("#bubble-top").lang = lang;
   const bubble = $("#bubble");
   // Punctuation right after a labelled part is glued to it: a browser may break a line
   // after an inline-block, which would start the next line with "," or ".".
@@ -78,48 +87,37 @@ function renderAsk(): void {
     html += `<span class="glue"><span class="part"><u>${esc(s)}</u><span class="lab">${esc(t.labels[p.l])}</span></span>${esc(punct)}</span>`;
   });
   bubble.innerHTML = html;
-  bubble.classList.add("inplace");
   bubble.lang = lang;
-  $("#labels").innerHTML = t.labels.map((l) => `<span class="nb">${esc(l)}</span>`).join(" · ");
   for (const [id, text] of [["#bubble3", t.askChess], ["#bubble-solo", t.askSolo], ["#bubble-friends", t.askFriends], ["#bubble-group", t.askGroup], ["#bubble2", t.ask2]] as const) {
     const el = $(id);
     el.textContent = text.replaceAll(DEMO, host);
     el.lang = lang;
   }
-  for (const tab of askTabs) {
-    const name = t[tab.dataset.name as (typeof ASK_TABS)[number]["name"]];
-    tab.setAttribute("aria-label", name);
-    tab.title = name;
-  }
+  for (const tab of askTabs) tab.textContent = t[tab.dataset.name as (typeof ASK_TABS)[number]["name"]];
 }
 
-// The example asks as tabs, one picture each for what the visitor brings and
-// who plays (docs/design/root-page.md, "Build: two steps"). Made here: without
-// the script, and for an AI's fetcher, the asks stand one under the other.
+// The example asks as tabs, each named in words for what the visitor brings
+// or who plays (docs/design/root-page.md, "How to ask"). Made here: without
+// the script, and for an AI's fetcher, the asks stand one under the other,
+// and the sheets ask stands once, in the first step. Its second showing, with
+// the labels, is made here too, as the first tab.
 
 const ASK_TABS = [
-  { panel: "ask-sheets", name: "tabSheets", icon: `<span class="sheets"><img src="/landing/sheet-2.webp" alt=""><img src="/landing/sheet-1.webp" alt=""></span>` },
-  {
-    panel: "ask-chess",
-    name: "tabChess",
-    icon: `<svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#b58863"/><path d="M0 0h2v2H0zM4 0h2v2H4zM2 2h2v2H2zM6 2h2v2H6zM0 4h2v2H0zM4 4h2v2H4zM2 6h2v2H2zM6 6h2v2H6z" fill="#f0d9b5"/><text x="4" y="6.6" text-anchor="middle" font-size="7" fill="#111">&#9822;</text></svg>`,
-  },
-  { panel: "ask-solo", name: "tabSolo", icon: `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21.5c0-4.6 3.6-8 8-8s8 3.4 8 8z"/></svg>` },
-  {
-    panel: "ask-friends",
-    name: "tabFriends",
-    icon: `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="4" cy="10" r="2.4"/><circle cx="12" cy="9" r="2.8"/><circle cx="20" cy="10" r="2.4"/><path d="M.5 20c0-3 1.6-5.6 3.5-5.6s3.5 2.6 3.5 5.6zM8 20c0-3.6 1.8-6.4 4-6.4s4 2.8 4 6.4zM16.5 20c0-3 1.6-5.6 3.5-5.6s3.5 2.6 3.5 5.6z"/></svg>`,
-  },
-  {
-    panel: "ask-group",
-    name: "tabGroup",
-    icon: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2" width="19" height="11.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6.5 6h7M6.5 9.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path fill="currentColor" d="M5 15.6a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8zM12 15.6a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8zM19 15.6a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8zM2 23.5c0-1.9 1.3-3.2 3-3.2s3 1.3 3 3.2zM9 23.5c0-1.9 1.3-3.2 3-3.2s3 1.3 3 3.2zM16 23.5c0-1.9 1.3-3.2 3-3.2s3 1.3 3 3.2z"/></svg>`,
-  },
-  { panel: "ask-open", name: "tabOpen", icon: `<span class="q" aria-hidden="true">?</span>` },
+  { panel: "ask-sheets", name: "tabSheets" },
+  { panel: "ask-chess", name: "tabChess" },
+  { panel: "ask-group", name: "tabGroup" },
+  { panel: "ask-friends", name: "tabFriends" },
+  { panel: "ask-solo", name: "tabSolo" },
+  { panel: "ask-open", name: "tabOpen" },
 ] as const;
 const askTabs: HTMLButtonElement[] = [];
 {
   const asks = $("#asks");
+  const sheets = document.createElement("div");
+  sheets.className = "example";
+  sheets.id = "ask-sheets";
+  sheets.innerHTML = `<blockquote class="bubble inplace" id="bubble"></blockquote>`;
+  asks.prepend(sheets);
   const bar = document.createElement("div");
   bar.className = "ask-tabs";
   bar.setAttribute("role", "tablist");
@@ -130,7 +128,6 @@ const askTabs: HTMLButtonElement[] = [];
     tab.dataset.name = a.name;
     tab.setAttribute("role", "tab");
     tab.setAttribute("aria-controls", a.panel);
-    tab.innerHTML = a.icon;
     const panel = $(`#${a.panel}`);
     panel.setAttribute("role", "tabpanel");
     panel.setAttribute("aria-labelledby", tab.id);
@@ -160,7 +157,7 @@ function chooseAsk(i: number): void {
   });
 }
 
-/** Everything above About in language `l`. */
+/** The part for people, everything above About, in language `l`. */
 function apply(l: Lang): void {
   lang = l;
   t = TEXT[l];
@@ -169,16 +166,19 @@ function apply(l: Lang): void {
     const v = t[el.dataset.t as keyof Text];
     if (typeof v === "string") el.textContent = v;
   }
-  // Words with markup of the page's own (landing-text.ts), never anyone else's.
-  for (const el of document.querySelectorAll<HTMLElement>("[data-t-html]")) {
-    const v = t[el.dataset.tHtml as keyof Text];
-    if (typeof v === "string") el.innerHTML = v;
-  }
   for (const el of document.querySelectorAll<HTMLElement>("[data-t-aria]")) {
     const v = t[el.dataset.tAria as keyof Text];
     if (typeof v === "string") el.setAttribute("aria-label", v);
   }
+  for (const el of document.querySelectorAll<HTMLImageElement>("img[data-t-alt]")) {
+    const v = t[el.dataset.tAlt as keyof Text];
+    if (typeof v === "string") el.alt = v;
+  }
   ($("#example-link") as HTMLAnchorElement).href = `/example?lang=${l}`;
+  // The example's file and its start, in the page's language (docs/design/example-page.md).
+  $("#zipname").textContent = EXAMPLE_ZIP[l];
+  ($("#zip") as HTMLAnchorElement).href = `/examples/${EXAMPLE_ZIP[l]}`;
+  ($("#try") as HTMLAnchorElement).href = `/open?example=${l}`;
   for (const id of ["#landing", "header.top .bar"]) $(id).lang = l;
   filmLanguage(l); // after #landing's lang: the film is built in the language around it
   if (copy) copy.textContent = t.copy;

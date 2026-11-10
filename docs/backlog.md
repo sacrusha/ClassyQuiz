@@ -297,9 +297,10 @@ the open list at the end.
     Built: the top-hat fox and favicon everywhere, the shared header, one
     stylesheet for the look, Rubik for the site's own words, ink controls,
     the ranking's bars on tracks, the README's title and picture, the logo
-    kit in `docs/brand/`, `design/identity.md`. Open, the owner's words: a one-line descriptor by
-    the logo, what classyQuiz is, as a statement (the first such sentence is
-    in the English guidance under the page's largest heading); and the next
+    kit in `docs/brand/`, `design/identity.md`. The owner's "one-line descriptor by
+    the logo, what classyQuiz is, as a statement" is the root page's first
+    sentence, built with v6 item 1 and its wording not yet seen by the owner
+    (`design/root-page.md`, "What this is"). Open, the owner's words: the next
     step for "This file is not a readable .zip archive.", which lacks one
     where its neighbours have it. Open, beyond the identity: the logo kit's
     web manifest and theme colours, which make the site installable as an
@@ -307,9 +308,10 @@ the open list at the end.
     `docs/brand/web/touch-icon.svg`); a keyline on the raster icons for a dark
     tab strip, needed only by browsers that don't take the SVG icon; the
     kit's link-preview card, which no page names yet.
-    Open, from the teacher-view review and not acted on: the root's English
-    guidance starts on a different left edge from the teacher block (desktop),
-    so it reads as a second page joined on, unless that is meant; the empty join screen's right half stays blank
+    Open, from the teacher-view review and not acted on (the root's English
+    guidance on another left edge than the block above it is met by v6
+    item 1: one column, and a line that says where the manual for AIs
+    begins); the empty join screen's right half stays blank
     until children join; on a real washed-out projector the pale states
     (hidden answers, faded tiles at the reveal) may let pale red and pale
     yellow run together — unchecked.
@@ -426,9 +428,9 @@ exploration behind these items — options and what each would cost — is
 9. A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
    lesson's, recognise themselves on the page, the example class's teacher
    still served first: the word decided once (`design/root-page.md`, "Words
-   for whoever comes"), the three ways named in one sentence above Build and
-   Run, in the visitor's language, by the names the check's cards carry
-   (`design/root-page.md`, "The three ways, named"), the guidance describing the three
+   for whoever comes"), the three ways on the root page, a picture each, by
+   the names the check's cards carry and a few words in the visitor's
+   language (`design/root-page.md`, "The ways to play"), the guidance describing the three
    ways and where each reads a question (`design/guidance-page.md`), three
    more example asks with
    no line under them since no run is behind them, and the film showing the
@@ -449,9 +451,9 @@ The page a visitor first meets has to tell them, as it opens, what this is,
 whether it is for them, and that an AI's file becomes a played quiz; and it
 has to leave little in the way of whoever comes with a file and of the
 newcomer who wants to find out more (`design/root-page.md`, Purpose). The
-deployed page doesn't: what it is sits behind the film's ▶ (same file,
-"How the site meets it"). The pictures of the ways to play are made
-(`docs/ways/`); the page is not. What the owner found while directions
+deployed page doesn't: what it is sits behind the film's ▶. The page built
+for item 1 does, in one column (`design/root-page.md`, "How the site meets
+it"); it is not deployed. What the owner found while directions
 were tried is in `design/root-page.md`, Situation.
 
 1. **The page as a whole** — a visitor at a phone or a desktop gets the
@@ -461,12 +463,20 @@ were tried is in `design/root-page.md`, Situation.
    its states (a quiz to come back to, a quiz with problems, a refused
    upload, the line about an own copy), the page as an AI's fetcher reads
    it (`design/root-page.md`, "One page, two readers"), and the design
-   file and `user-flow.md` describing the page as it then is. The parts,
+   file and `user-flow.md` describing the page as it then is. Built, not
+   deployed, and not yet seen by the owner: `design/root-page.md`, where
+   "One column" says what shows as the page opens in which window. Open:
+   on a phone's window of 360 × 640 the button that opens a file is cut by
+   the screen's edge in German and French, and on a smaller one it is
+   below the edge, since the ask stands above it; the
+   implementer's calls (the open list at the end); and what nobody has
+   tried (same file, "Not known"). The parts,
    each with a purpose of its own:
 
    a. **What this is, in words** — someone who reads one sentence knows
       what the site does for them. v4 item 14 left this open as a
-      descriptor by the logo, "what classyQuiz is, as a statement".
+      descriptor by the logo, "what classyQuiz is, as a statement". Built
+      as the page's first heading ("What this is").
 
    b. **Whether it is for me: the ways to play** — a visitor recognises
       their own case and a reason to play it, and later recognises the
@@ -475,7 +485,10 @@ were tried is in `design/root-page.md`, Situation.
       are made (`docs/ways/`). What the three differ in is the setting
       and what a device shows: with a quizmaster the question is on the
       big screen and each player's device shows the choices; among friends
-      and alone each device shows the whole question.
+      and alone each device shows the whole question. Built ("The ways to
+      play"): the three pictures side by side with each way's name and
+      setting; a reason to play is in the pictures and, in words, only
+      Solo's.
 
    c. **Getting a quiz** — a visitor learns that the AI they already use
       makes the quiz, how to ask it, and that a file comes back; someone
@@ -483,37 +496,56 @@ were tried is in `design/root-page.md`, Situation.
       asks exist, six of them, with what each is for
       (`design/root-page.md`, "Build: two steps"); what the page may say
       about which AI manages it is what was verified
-      (`design/guidance-page.md`, "The AIs verified against").
+      (`design/guidance-page.md`, "The AIs verified against"). Built: one
+      ask and the file it brought in the first screen ("Two steps"), the
+      AI, the address and the six asks below it ("How to ask").
 
    d. **Opening a quiz** — whoever has the file opens it; whoever has
       none yet can play the example, which costs the site nothing until a
       room opens (`design/local-check.md`). A quiz to come back to and
       whatever goes wrong with a file show here
-      (`design/root-page.md`, "Run", "Coming back").
+      (`design/root-page.md`, "Two steps", "Opening: the `.zip` and
+      nothing else", "Coming back"). Built: the box as the second step,
+      the example's line under it, a file's problems between the two, and
+      a quiz to come back to above everything on the page.
 
    e. **Finding out more** — the newcomer who wants more than the page
       shows as it opens: what a room does over time, what playing is
       like, the whole conversation with the AI. The film and `/example`
       exist for this (`docs/film/`, `design/example-page.md`); the film
       was made to be the top of the page and tells the classroom's story.
+      Built: the film under the first screen, under a heading that says
+      what it shows, with the link to `/example` ("The film"); playing the
+      example is in the second step.
 
    f. **Where the page for people ends** — a person knows what they can
       rely on (free, open, no accounts, how long a quiz is kept) and that
       what follows is the manual for AIs. v4 item 14 noted the guidance
-      reading as a second page joined on.
+      reading as a second page joined on. Built ("Where the part for
+      people ends").
 
 2. **The page in its four languages** — a visitor reading German, French
    or Italian gets the same page, not a translation of the English
    sentence structure: the owner's findings on pronouns and on the
    visitor's side of the words hold in each language
    (`design/root-page.md`, Situation, "Languages"). The existing drafts
-   and the questions behind them: `translation-review.md`.
+   and the questions behind them: `translation-review.md`, where "The
+   first page (v6 item 1)" has the words item 1 wrote in the three, drafts
+   by its implementer with the choices each rests on.
 
 3. **The film and the worked example show the page that exists** — the
    film types the ask and shows the root page with the box that opens a
    file, and `/example` walks the same path; once the page changes, a
    newcomer who watches or reads them sees the page they will then use
-   (`docs/film/`, `design/example-page.md`).
+   (`docs/film/`, `design/example-page.md`). With item 1 built: the film
+   draws the header and, right under it, the heading and the box of the
+   second step, whose words are the page's still (`npm test` holds them
+   together); on the page the sentence, the ways and the first step now
+   stand between the two. `/example` names nothing of the page's layout.
+   The film's check runs on the new page
+   (`docs/film/build/sitecheck.py`) and, until `main` carries that page,
+   reports the page around the film as changed against `main`, which it
+   is.
 
 ## Room on the Free plan
 
@@ -733,10 +765,20 @@ With the owner:
 - The words (v5 item 9), the implementer's calls, not yet seen by the
   owner (`design/root-page.md`, "Words for whoever comes"): "quizmaster" as
   the noun where English needs one rather than "host", "the user" in the
-  guidance, no role noun where the words are translated; the three new asks
-  and their pictures (one person, three people, a screen before an
-  audience), six tabs on a phone; "Join code" on the resume card; `/check`
+  guidance, no role noun where the words are translated; the three new
+  asks; "Join code" on the resume card; `/check`
   speaking of "our network" and "school or work".
+- The first page (v6 item 1), the implementer's calls, not yet seen by the
+  owner (`design/root-page.md`): the sentence ("Here you play quizzes your
+  own AI makes from your sheets, notes or ideas."); the ways in the
+  Purpose's order, Quizmaster first, where the check has Solo first, and
+  their few words, the setting only; asking above opening at every width,
+  which leaves the button below the first screen on the smallest phones;
+  the example's file under the ask as a download; "No quiz yet? Play the
+  example ›" under the box; a quiz to come back to above everything else;
+  the film below the first screen; the asks' tabs as words, without their
+  pictures; "What you can count on" and the line that hands over to the
+  manual for AIs; the page's two first-level headings.
 - v4 item 3: the new lifetime ("upload is start"); the work is B's remainder.
 - v4 item 4: the own-copy and network-help defaults, to adjust if wanted.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
@@ -786,6 +828,17 @@ Needs a real classroom or real devices, nobody has run it:
   screen parts, with a build warning on a page's own classes that `app.css` also
   styles bare (allowlist for shared controls such as `.btn`), or esbuild's CSS
   Modules screen by screen, which touches the one-stylesheet build.
+- Probes for the root page, kept in `.tmp/first-page/` (Python with
+  Playwright and the installed Edge, against `serve.mjs`, which serves a
+  built `src/dist` on 127.0.0.1:8971 with no `/api`): `measure.py` (where
+  the first screen's parts end, per window size, language and with a quiz
+  to come back to), `walk.py` (another file type, a quiz with problems, a
+  quiz to the local check with nothing uploaded, the example's line, the
+  tabs and the labelled ask, Copy, the film where it stands, a language
+  picked, the page without its script), `astext.py` (the page as a text
+  converter reads it), `shoot.py` (one screenshot: size, language, dark,
+  a quiz to come back to, the own-copy line). They read the checkout they
+  lie in, its `src/dist`; read before running.
 - Probes kept in `.tmp/shots-tool/`: `landing-ask-sweep.mjs` (stray
   punctuation in the labelled ask across widths, full-page shots),
   `landing-stacked-order.mjs` (where Build and Run start on upright screens),

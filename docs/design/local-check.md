@@ -7,8 +7,9 @@ A quiz file opens into the site without costing the shared site a class
 quiz's bytes, which are the classes' (Constraints; `hosting-and-limits.md`),
 yet many who open a file only want to look at it, or to play it alone. So the
 `.zip` is read and checked in the browser, and only opening a room uploads
-it (the owner's ruling). The worked example's "Start the example quiz" lands
-here too, so a visitor who only looks costs nothing (v4 item 13).
+it (the owner's ruling). The worked example's "Start the example quiz" and
+the root page's "Play the example ›" land here too, so a visitor who only
+looks costs nothing (v4 item 13).
 
 On that check the person picks how the quiz will be played: the entries
 **Solo**, **Peers** and **Quizmaster**, the owner's names (v5). And whoever
@@ -45,8 +46,8 @@ Solo learner mustn't be shown them.
 
 ### Reading on the root page
 
-The Run box (under "Open the quiz your AI made", since nothing goes up
-there) reads the `.zip`, then checks it here instead of
+The box of the second step (under "Open the quiz your AI made", since nothing
+goes up there; `root-page.md`, "Two steps") reads the `.zip`, then checks it here instead of
 uploading it (`client/home.ts`; `readQuiz` in `client/opening.ts`): the text
 first (the parser's errors, with "Copy the message for your AI"), then the
 pictures the quiz names (with "Continue without these pictures"), then the
@@ -71,8 +72,8 @@ nothing and says so ("No quiz open here", the way back to the start page):
 nothing is kept. A browser that keeps no site data can't pass the quiz on;
 the root page says so in its language.
 
-The worked example needs no handoff: "Start the example quiz" opens
-`/open?example=<lang>`, which fetches the static `.zip` and reads it through
+The worked example needs no handoff: "Start the example quiz", and the root
+page's "Play the example ›", open `/open?example=<lang>`, which fetches the static `.zip` and reads it through
 the same `readQuiz` as a teacher's file, so it can't run differently; a
 reload reads it again. `/?example=<lang>`, an earlier link, forwards there.
 The example's start isn't an upload attempt, and isn't counted as one

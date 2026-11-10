@@ -2,8 +2,8 @@
 installed Edge, for looking at them as the page shows them.
 Run: py -I docs/ways/build/sheet.py [--out DIR] [--phone PX] [--desk PX]
   --out    where the renderings go (default: .tmp/ways at the repo root, which git ignores)
-  --phone  a picture's width on a phone, in CSS px (default 113)
-  --desk   a picture's width on a desktop, in CSS px (default 225)
+  --phone  a picture's width on a phone, in CSS px (default 114)
+  --desk   a picture's width on a desktop, in CSS px (default 216)
 Writes phone.png (a 390 px wide phone, 3 device px to the CSS px), phone-css.png (the same at 1 to 1, to judge what
 reads at that size), desk.png (1 to 1), and phone and desk on the page's dark ground (-dark), each with the poster
 above the three pictures, as wide as the three together; and full-<name>.png, each picture at its drawn size.
@@ -26,7 +26,7 @@ def opt(name, default, cast=str):
 
 
 out = pathlib.Path(opt('--out', str(ROOT / '.tmp' / 'ways'))).resolve(); out.mkdir(parents=True, exist_ok=True)
-phone_w, desk_w = opt('--phone', 113, int), opt('--desk', 225, int)
+phone_w, desk_w = opt("--phone", 114, int), opt("--desk", 216, int)
 NAMES = ['quizmaster', 'peers', 'solo']
 GAP = {'phone': 9, 'desk': 24}
 missing = [n for n in NAMES if not (LANDING / f'way-{n}.svg').exists()]

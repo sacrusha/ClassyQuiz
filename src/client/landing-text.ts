@@ -53,14 +53,42 @@ export interface Text {
   again: string;
   /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
   full: string;
+  /** The link under the film, to the worked example (/example). */
   see: string;
+  /** The page's first sentence, its h1: what the site does for whoever reads it (docs/design/root-page.md, "What this is"). */
+  what: string;
   /**
-   * The three ways a quiz is played here, by the names the local check's
-   * cards carry (Solo, Peers, Quizmaster: client/entries.ts), each with what
-   * it is in the visitor's language: one sentence above Build and Run, as
-   * HTML, the names in <b> (docs/design/root-page.md, "The three ways, named").
+   * The three ways a quiz is played here, a picture each. The names are the
+   * local check's cards' in every language (Quizmaster, Peers, Solo:
+   * client/entries.ts), written in the page; these are what each is, in the
+   * visitor's words, after the name (docs/design/root-page.md, "The ways to play").
    */
-  ways: string;
+  wayQuizmaster: string;
+  wayPeers: string;
+  waySolo: string;
+  /** What each way's picture shows (docs/ways/README.md), its accessible name. */
+  picQuizmaster: string;
+  picPeers: string;
+  picSolo: string;
+  /** The first of the two steps: its heading, over the example ask. */
+  getH: string;
+  /** Under the ask: that a file comes back, before the example's file name. */
+  gives: string;
+  /** From the first step down to "How to ask". */
+  more: string;
+  /** Under the box that opens a file: the example quiz, for whoever has none yet (docs/design/local-check.md). */
+  noQuiz: string;
+  tryIt: string;
+  /** The film's heading, where it stands for whoever wants to find out more. */
+  filmH: string;
+  /** "How to ask": which AI, the address, the example asks. */
+  howH: string;
+  /** Where the part for people ends: what a person can count on, and that the manual for AIs follows. */
+  relyH: string;
+  relyFree: string;
+  relyKept: string;
+  relyOpen: string;
+  manual: string;
   /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
   capSheet: string;
   capAi: string;
@@ -68,15 +96,14 @@ export interface Text {
   capZip: string;
   capWall: string;
   capTap: string;
-  build: string;
-  /** Run's heading: for whoever has the quiz their AI made (docs/design/root-page.md, "Run first when stacked"). */
+  /** The second step's heading: for whoever has the quiz their AI made (docs/design/root-page.md, "Two steps"). */
   run: string;
   /** The button that opens the file picker: what it opens. */
   upload: string;
   step1: string;
   step1detail: string;
   step2: string;
-  /** The example asks' tabs, by what the visitor brings and who plays: sheets, a description, practice alone, friends, a training session, nothing yet. */
+  /** The example asks' tabs, in words short enough for six to stand in three rows on a phone: by what the visitor brings and who plays. */
   tabSheets: string;
   tabChess: string;
   tabSolo: string;
@@ -145,22 +172,39 @@ const en: Text = {
   again: "Play again",
   full: "Full screen",
   see: "The example, step by step ›",
-  ways: "A quiz is played here in three ways: <b>Solo</b>, on your own; <b>Peers</b>, with friends, each on their own device; <b>Quizmaster</b>, you run it for a group, on a big screen.",
+  what: "Here you play quizzes your own AI makes from your sheets, notes or ideas.",
+  wayQuizmaster: "for a class or a group, on a big screen",
+  wayPeers: "with friends, each on their own device",
+  waySolo: "on your own, to practise or review",
+  picQuizmaster: "A teacher at the big screen with the question, a phone in her hand; the class answers on tablets.",
+  picPeers: "Three friends on a sofa in the evening, each with the question on their own phone, one of them laughing.",
+  picSolo: "Someone alone at a desk with their notes, the question on their phone, the answer just found right.",
+  getH: "Ask your AI for a quiz",
+  gives: "The AI's answer:",
+  more: "How to ask your AI ↓",
+  noQuiz: "No quiz yet?",
+  tryIt: "Play the example ›",
+  filmH: "From the exercise sheet to the class playing, in one minute",
+  howH: "How to ask your AI",
+  relyH: "What you can count on",
+  relyFree: "Free, without accounts or sign-up.",
+  relyKept: "Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy.",
+  relyOpen: "The code is open:",
+  manual: "The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too.",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
   capZip: "The .zip, opened here",
   capWall: "What the class sees",
   capTap: "Each student taps",
-  build: "Build a quiz",
   step1: "Choose any good AI.",
   step1detail: "Free Claude Sonnet wrote the example above, 4 Nov 2026: the one free AI that does this reliably.",
   step2: "Ask the AI to build you a quiz for",
-  tabSheets: "With photos of exercise sheets",
-  tabChess: "From a description: a chess quiz",
-  tabSolo: "To practise on your own",
-  tabFriends: "To play with friends",
-  tabGroup: "For a group you lead: a training session",
-  tabOpen: "With nothing decided yet",
+  tabSheets: "Exercise sheets",
+  tabChess: "A description",
+  tabSolo: "On your own",
+  tabFriends: "With friends",
+  tabGroup: "A training session",
+  tabOpen: "Nothing decided yet",
   ask: [
     { s: "Read " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -232,22 +276,39 @@ const de: Text = {
   again: "Nochmals abspielen",
   full: "Vollbild",
   see: "Das Beispiel Schritt für Schritt ›",
-  ways: "Gespielt wird ein Quiz hier auf drei Arten: <b>Solo</b>, für dich allein; <b>Peers</b>, mit Freunden, alle am eigenen Gerät; <b>Quizmaster</b>, du leitest es für eine Gruppe, am grossen Bildschirm.",
+  what: "Hier spielst du Quiz, die deine KI aus deinen Blättern, Notizen oder Ideen macht.",
+  wayQuizmaster: "für eine Klasse oder Gruppe, am grossen Bildschirm",
+  wayPeers: "mit Freunden, alle am eigenen Gerät",
+  waySolo: "für dich allein, zum Üben oder Wiederholen",
+  picQuizmaster: "Eine Lehrerin am grossen Bildschirm mit der Frage, das Handy in der Hand; die Klasse antwortet auf Tablets.",
+  picPeers: "Drei Freunde abends auf dem Sofa, alle mit der Frage auf dem eigenen Handy, eine Person lacht.",
+  picSolo: "Jemand allein am Schreibtisch mit Notizen, die Frage auf dem Handy, die Antwort gerade als richtig erkannt.",
+  getH: "Bitte deine KI um ein Quiz",
+  gives: "Die Antwort der KI:",
+  more: "So fragst du deine KI ↓",
+  noQuiz: "Noch kein Quiz?",
+  tryIt: "Das Beispiel spielen ›",
+  filmH: "Vom Aufgabenblatt zur spielenden Klasse, in einer Minute",
+  howH: "So fragst du deine KI",
+  relyH: "Worauf du zählen kannst",
+  relyFree: "Kostenlos, ohne Konto und ohne Anmeldung.",
+  relyKept: "Für dich allein gespielt, verlässt ein Quiz deinen Browser nie. In einem Raum gespielt, wird ein Quiz gelöscht, wenn der Raum beendet wird, sonst drei Stunden nach der letzten Benutzung. Die .zip-Datei ist deine bleibende Kopie.",
+  relyOpen: "Der Code ist offen:",
+  manual: "Der Rest dieser Seite ist das Handbuch für KIs, auf Englisch: was deine KI liest, wenn du ihr diese Adresse gibst. Du darfst es gern auch lesen.",
   capSheet: "Deine Aufgabenblätter",
   capAi: "Deine KI",
   capZip: "Die .zip, hier geöffnet",
   capWall: "Was die Klasse sieht",
   capTap: "Jedes Kind tippt",
-  build: "Ein Quiz bauen",
   step1: "Wähle eine gute KI.",
   step1detail: "Das Beispiel oben hat das kostenlose Claude Sonnet geschrieben, 4. Nov. 2026: die eine kostenlose KI, die das zuverlässig kann.",
   step2: "Bitte die KI um ein Quiz für",
-  tabSheets: "Mit Fotos von Aufgabenblättern",
-  tabChess: "Aus einer Beschreibung: ein Schach-Quiz",
-  tabSolo: "Zum Üben für dich allein",
-  tabFriends: "Zum Spielen mit Freunden",
-  tabGroup: "Für eine Gruppe, die du leitest: eine Schulung",
-  tabOpen: "Wenn noch nichts feststeht",
+  tabSheets: "Aufgabenblätter",
+  tabChess: "Eine Beschreibung",
+  tabSolo: "Für dich allein",
+  tabFriends: "Mit Freunden",
+  tabGroup: "Eine Schulung",
+  tabOpen: "Noch nichts entschieden",
   ask: [
     { s: "Lies " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -319,22 +380,39 @@ const fr: Text = {
   again: "Revoir",
   full: "Plein écran",
   see: "L'exemple pas à pas ›",
-  ways: "Ici, un quiz se joue de trois façons : <b>Solo</b>, de votre côté ; <b>Peers</b>, entre amis, chacun sur son appareil ; <b>Quizmaster</b>, vous l'animez pour un groupe, sur grand écran.",
+  what: "Ici, vous jouez aux quiz que votre propre IA crée à partir de vos fiches, notes ou idées.",
+  wayQuizmaster: "pour une classe ou un groupe, sur grand écran",
+  wayPeers: "entre amis, chacun sur son appareil",
+  waySolo: "de votre côté, pour s'exercer ou réviser",
+  picQuizmaster: "Une enseignante devant le grand écran avec la question, le téléphone à la main ; la classe répond sur des tablettes.",
+  picPeers: "Trois amis sur un canapé le soir, chacun avec la question sur son téléphone, l'un d'eux rit.",
+  picSolo: "Une personne seule à son bureau avec ses notes, la question sur son téléphone, la bonne réponse tout juste trouvée.",
+  getH: "Demandez un quiz à votre IA",
+  gives: "La réponse de l'IA :",
+  more: "Comment demander à votre IA ↓",
+  noQuiz: "Pas encore de quiz ?",
+  tryIt: "Jouer l'exemple ›",
+  filmH: "De la fiche d'exercices à la classe qui joue, en une minute",
+  howH: "Comment demander à votre IA",
+  relyH: "Ce sur quoi vous pouvez compter",
+  relyFree: "Gratuit, sans compte ni inscription.",
+  relyKept: "Joué de votre côté, un quiz ne quitte jamais votre navigateur. Joué dans une salle, un quiz est supprimé quand la salle est fermée, sinon trois heures après sa dernière utilisation. Le fichier .zip est votre copie durable.",
+  relyOpen: "Le code est ouvert :",
+  manual: "Le reste de cette page est le manuel pour les IA, en anglais : ce que lit votre IA quand vous lui donnez cette adresse. Vous pouvez le lire aussi.",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
   capZip: "Le .zip, ouvert ici",
   capWall: "Ce que voit la classe",
   capTap: "Chaque élève touche",
-  build: "Créer un quiz",
   step1: "Choisissez une bonne IA.",
   step1detail: "L'exemple ci-dessus a été écrit par Claude Sonnet gratuit, le 4 nov. 2026 : la seule IA gratuite qui le fait de façon fiable.",
   step2: "Demandez à l'IA un quiz pour",
-  tabSheets: "Avec les photos de fiches",
-  tabChess: "D'après une description : un quiz d'échecs",
-  tabSolo: "Pour réviser en solo",
-  tabFriends: "Pour jouer entre amis",
-  tabGroup: "Pour un groupe que vous animez : une formation",
-  tabOpen: "Sans rien avoir décidé",
+  tabSheets: "Fiches d'exercices",
+  tabChess: "Une description",
+  tabSolo: "De votre côté",
+  tabFriends: "Entre amis",
+  tabGroup: "Une formation",
+  tabOpen: "Rien de décidé",
   ask: [
     { s: "Lis " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -406,22 +484,39 @@ const it: Text = {
   again: "Rivedi",
   full: "Schermo intero",
   see: "L'esempio passo per passo ›",
-  ways: "Qui un quiz si gioca in tre modi: <b>Solo</b>, per conto tuo; <b>Peers</b>, con gli amici, ognuno sul proprio dispositivo; <b>Quizmaster</b>, lo guidi tu per un gruppo, sul grande schermo.",
+  what: "Qui giochi ai quiz che la tua IA crea dalle tue schede, dai tuoi appunti o dalle tue idee.",
+  wayQuizmaster: "per una classe o un gruppo, sul grande schermo",
+  wayPeers: "con gli amici, ognuno sul proprio dispositivo",
+  waySolo: "per conto tuo, per esercitarti o ripassare",
+  picQuizmaster: "Un'insegnante al grande schermo con la domanda, il telefono in mano; la classe risponde sui tablet.",
+  picPeers: "Tre amici sul divano di sera, ognuno con la domanda sul proprio telefono, uno di loro ride.",
+  picSolo: "Una persona sola alla scrivania con i suoi appunti, la domanda sul telefono, la risposta giusta appena trovata.",
+  getH: "Chiedi un quiz alla tua IA",
+  gives: "La risposta dell'IA:",
+  more: "Come chiedere alla tua IA ↓",
+  noQuiz: "Ancora nessun quiz?",
+  tryIt: "Gioca l'esempio ›",
+  filmH: "Dalla scheda alla classe che gioca, in un minuto",
+  howH: "Come chiedere alla tua IA",
+  relyH: "Su cosa puoi contare",
+  relyFree: "Gratuito, senza account né registrazione.",
+  relyKept: "Giocato per conto tuo, un quiz non lascia mai il tuo browser. Giocato in una stanza, un quiz viene eliminato quando la stanza viene chiusa, altrimenti tre ore dopo l'ultimo uso. Il file .zip è la tua copia duratura.",
+  relyOpen: "Il codice è aperto:",
+  manual: "Il resto di questa pagina è il manuale per le IA, in inglese: quello che legge la tua IA quando le dai questo indirizzo. Puoi leggerlo anche tu.",
   capSheet: "Le tue schede",
   capAi: "La tua IA",
   capZip: "Lo .zip, aperto qui",
   capWall: "Cosa vede la classe",
   capTap: "Ogni alunno tocca",
-  build: "Crea un quiz",
   step1: "Scegli una buona IA.",
   step1detail: "L'esempio qui sopra l'ha scritto Claude Sonnet gratuito, 4 nov 2026: l'unica IA gratuita che lo fa in modo affidabile.",
   step2: "Chiedi all'IA un quiz per",
-  tabSheets: "Con le foto di schede",
-  tabChess: "Da una descrizione: un quiz di scacchi",
-  tabSolo: "Per esercitarti per conto tuo",
-  tabFriends: "Per giocare con gli amici",
-  tabGroup: "Per un gruppo che guidi: una formazione",
-  tabOpen: "Senza aver ancora deciso nulla",
+  tabSheets: "Schede di esercizi",
+  tabChess: "Una descrizione",
+  tabSolo: "Per conto tuo",
+  tabFriends: "Con gli amici",
+  tabGroup: "Una formazione",
+  tabOpen: "Niente di deciso",
   ask: [
     { s: "Leggi " },
     { s: "classyquiz.pages.dev", l: 0 },

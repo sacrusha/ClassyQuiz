@@ -29,15 +29,41 @@ test("every language's other asks name the site's address, for the page to repla
   }
 });
 
-// The three ways keep the local check's names in every language (docs/design/root-page.md, "The three ways, named"),
-// and the static page, which AIs read, carries the English sentence.
-test("every language names the three ways by the check's names, in its order", async () => {
+// The page names the ways to play as the local check's cards do, in every language: the names are written in the
+// page, not translated (docs/design/root-page.md, "The ways to play").
+test("the page names the three ways by the local check's names", async () => {
   const { readFile } = await import("node:fs/promises");
   const { ENTRIES } = await import("./entries.ts");
-  const names = ENTRIES.map((e) => e.name);
-  for (const { id } of LANGS) assert.deepEqual([...TEXT[id].ways.matchAll(/<b>(.*?)<\/b>/g)].map((m) => m[1]), names, id);
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
-  assert.ok(html.includes(`data-t-html="ways">${TEXT.en.ways}</p>`), "index.html's sentence differs from landing-text.ts's");
+  const ways = html.match(/<ul class="ways">([\s\S]*?)<\/ul>/);
+  assert.ok(ways, "no list of the ways in index.html");
+  const named = [...ways[1].matchAll(/<b>(.*?)<\/b>/g)].map((m) => m[1]);
+  assert.deepEqual([...named].sort(), ENTRIES.map((e) => e.name).sort());
+});
+
+// The static page is what an AI's fetcher reads, and what stands until the script has run: it says what the
+// English table says (docs/design/root-page.md, "One page, two readers", "Languages").
+test("the static page carries the English table's words", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const plain = (s: string) => s.replace(/&nbsp;/g, " ").replace(/&rsaquo;/g, "›").replace(/&darr;/g, "↓").replace(/&amp;/g, "&");
+  const en = TEXT.en as unknown as Record<string, unknown>;
+  const seen = new Set<string>();
+  for (const m of html.matchAll(/ data-t="(\w+)"[^>]*>([^<]*)</g)) {
+    assert.equal(plain(m[2]), en[m[1]], `data-t="${m[1]}"`);
+    seen.add(m[1]);
+  }
+  for (const m of html.matchAll(/ alt="([^"]*)" data-t-alt="(\w+)"/g)) {
+    assert.equal(plain(m[1]), en[m[2]], `data-t-alt="${m[2]}"`);
+    seen.add(m[2]);
+  }
+  for (const m of html.matchAll(/ aria-label="([^"]*)" data-t-aria="(\w+)"/g)) {
+    assert.equal(plain(m[1]), en[m[2]], `data-t-aria="${m[2]}"`);
+    seen.add(m[2]);
+  }
+  // the first step's ask is the labelled ask, plain
+  assert.ok(html.includes(`<span id="ask-top">${askText(TEXT.en)}</span>`), "the first step's ask differs from landing-text.ts's");
+  for (const key of ["what", "wayQuizmaster", "wayPeers", "waySolo", "picQuizmaster", "picPeers", "picSolo", "getH", "run", "upload", "relyKept", "manual"]) assert.ok(seen.has(key), `index.html has no ${key}`);
 });
 
 // The film (public/js/film.js) types the example ask, shows the Run box's words and names its chapters and controls as this file has them, copied in when

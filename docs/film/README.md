@@ -1,7 +1,8 @@
 # The landing film
 
-A film of about 67 s, without sound, in the root page's top block, where the
-strip of five stills stood. What it does on the page (the poster, the
+A film of about 67 s, without sound, on the root page, below its first
+screen, for whoever wants to find out more than that screen shows. What it
+does on the page (the poster, the
 player's bar, the layout, what loads when): `docs/design/root-page.md`, "The
 film". This folder is the film itself: this file (what it is for, what it
 lives with, how it is made and checked), `storyboard-classyquiz.md` (the
@@ -227,8 +228,9 @@ Only rendered pictures found them, so the film is checked by looking:
   the poster; failures to load or to draw; keys, focus and a drag; the
   arrangement on desktops and upright and sideways phones;
   full screen, the browser's and the fallback; every language's ask typed
-  out in time and no fitted text shrunk below three quarters; and the rest
-  of the landing unchanged, by every element's computed style (a picture
+  out in time and no fitted text shrunk below three quarters; and the page
+  around the film unchanged against `main`'s, by every element's computed
+  style (a picture
   comparison can't: the page shows its own address, port included). The
   site's tests run with it (`npm test`; one fails while the built film's
   root-page words differ from `landing-text.ts`).

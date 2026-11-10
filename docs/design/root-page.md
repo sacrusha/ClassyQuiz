@@ -101,37 +101,181 @@ each part is for and what it depends on. The page is `src/public/index.html`
 (static, English, what AIs read) and `src/client/home.ts` (which puts the
 visitor's language and the live parts into it).
 
-As built, the page doesn't give a visitor the Purpose's first two things as
-it opens. What the site is and how a file becomes a quiz are shown by the
-film, behind ▶, and whether visitors play it isn't known; the three ways are
-one sentence under it. On a 1280 × 900 desktop the first screen is the film,
-that sentence and the two headings.
+From top to bottom, the part for people is: the header with the code box; a
+quiz to come back to, on the device that has one; the sentence that says what
+this is; the three ways to play, a picture each; the two things to do, asking
+an AI and opening its file, with the example quiz for whoever has no file;
+then, below the first screen, the film and the worked example, how to ask,
+and what a person can count on. The guidance for AIs follows.
+
+### One column
+
+Purpose: the Purpose's first two things show as the page opens, on a phone
+and on a desktop, and whoever holds a file reaches the box that opens it
+without hunting (backlog v6 item 1).
+
+The part for people is one column of the guidance's width, 42rem, in one
+order at every width, and the header's bar is as wide. Nothing is rearranged
+between a phone and a desktop, so getting a quiz stands above opening one
+everywhere (Situation: side by side worked worse), and the guidance starts
+on the edge the part for people ends on (backlog v4 item 14 found the two
+edges reading as two pages joined).
+
+What shows as the page opens depends on the browser's window, not on the
+device's screen: a phone's browser bars take part of it. Measured in Edge
+windows of these sizes, in the four languages:
+
+| Window | The sentence, the ways, the ask and the file | The button that opens a file |
+|---|---|---|
+| 1024 × 690 and larger (laptops, desktops, a tablet) | whole | whole |
+| 412 × 730 (a phone) | whole | whole |
+| 390 × 664 | whole | whole |
+| 360 × 640 | whole | whole in English and Italian; in German and French cut by the screen's edge |
+| 360 × 560 | whole; in German the file cut by the edge | below the edge, by 6 to 56 px |
+| 320 × 470 | the sentence and the ways; the ask whole in English, cut in the others | below |
+
+On a 1366 × 650 laptop the line under the button, with the example, is cut
+by the edge or just below it. A quiz to come back to stands above all of it
+and moves the rest down by its height, about 150 px on a laptop and 200 to
+260 on a phone; "Back to the quiz" is in the first screen at every size
+above.
+
+The order follows what a person does: the ask, then the file. A visitor who
+comes with a file passes the sentence, the pictures and the ask before the
+box, which is why each of them is kept short, and a phone's page is set a
+little tighter than a desktop's. Opening before asking would lift the box by
+the first step's height (about 190 px on a phone) and put the place for a
+file before the words that say where a file comes from; the implementer's
+call, not yet seen by the owner.
+
+The page follows the device's dark mode. The pictures of the ways carry their
+own room, so they stand the same on both grounds (`docs/ways/README.md`).
 
 ### One page, two readers
 
-The landing block is above "About classyQuiz"; About and below is the guidance.
-An AI told the site's name fetches the whole page, so the landing block is
-written as information to a reader, with commands only for what must be done
-(choosing an AI and asking it). The owner's purpose: the page
-doesn't order its reader about for things nobody must do. The teacher's own
-sentence to their AI, the example ask, is outside that: "Read ..." is fine
-there.
+The part for people is above "About classyQuiz"; About and below is the
+guidance. An AI told the site's name fetches the whole page, so the part for
+people is written as information to a reader, with commands only for what
+must be done (asking an AI, opening its file, choosing an AI). The owner's
+purpose: the page doesn't order its reader about for things nobody must do.
+The teacher's own sentence to their AI, the example ask, is outside that:
+"Read ..." is fine there.
 
 Parts that must not read as text for an AI are made by the script, not written
 in the HTML: the Copy button (a fetcher's text conversion would read
-"classyquiz.pages.dev" and "Copy" as one word) and the language switch (so a
-fetcher doesn't read four language names).
+"classyquiz.pages.dev" and "Copy" as one word), the language switch (so a
+fetcher doesn't read four language names), the numbers of the two steps
+(drawn by the stylesheet, so a heading doesn't read "1Ask"), and the second
+showing of the sheets ask, with its labels ("How to ask"), so a fetcher reads
+that ask once.
+
+The page has two first-level headings, the sentence for people and "About
+classyQuiz", one for each reader. The guidance's headings keep their levels
+(`guidance-page.md`, "Shape and anchors").
+
+### What this is
+
+Purpose (backlog v6 item 1a; v4 item 14 left it open as "what classyQuiz is,
+as a statement"): someone who reads one sentence knows what the site does for
+them.
+
+The sentence is the page's first heading: "Here you play quizzes your own AI
+makes from your sheets, notes or ideas." From the visitor's side it holds
+what happens here (you play), who makes the quiz (your own AI: the one the
+visitor already uses, not one the site brings), and from what (the visitor's
+own material, named by the three things the example asks start from). It has
+no pronoun whose referent a reader must find (Situation). On a phone of
+360 px or more it takes three lines in each of the four languages. The
+wording is the implementer's, not yet seen by the owner.
+
+### The ways to play
+
+Purpose (backlog v6 item 1b; v5 item 9): a visitor recognises their own case
+among the ways a quiz is played, before anything asks them to choose, and
+later recognises the local check's cards, which carry the same names
+(`local-check.md`).
+
+Three pictures side by side under the sentence, each with the way's name and
+a few words: **Quizmaster**, for a class or a group, on a big screen;
+**Peers**, with friends, each on their own device; **Solo**, on your own, to
+practise or review. What the pictures show and how they are made:
+`docs/ways/README.md`.
+
+- **The order is the Purpose's**: a class or a group, friends, alone. The
+  example class's teacher is served first (backlog, Project). The local
+  check lists its cards the other way round, Solo first, for a reason of its
+  own (`local-check.md`, "The entries"); the names are what a visitor
+  carries from this page to that one.
+- **The names are the entries' own in every language**, as the check's cards
+  carry them, written in the page and not translated: "Peers" is a name, not
+  a word to translate. The words after each name are in the page's language
+  and say the setting: with whom, and where the question is read. They don't
+  say how a room runs (Situation: a line that describes the mechanism is not
+  a reason to play).
+- **Three across at every width.** Side by side the three read as settings
+  to recognise one's own among, and on a phone they take about 150 px of
+  height, where one under the other would take most of the first screen and
+  push the two steps out of it. Each picture is a third of the column: 91 px
+  wide on a 320 px phone, 114 on a 390 px one, 216 from a tablet up, the
+  range they were drawn for.
+- **A reason to play** (backlog v6 item 1b) is in the pictures: the class
+  with its votes split, a friend laughing, the answer found right beside the
+  notes. In words only Solo's is said ("to practise or review"): a third of
+  a phone's width holds five or six words under a picture.
+- **The pictures are not buttons.** The file is the same whichever way it is
+  played, and the way is picked after opening it (`local-check.md`); a
+  picture that could be pressed would ask for a choice this page doesn't
+  need.
+- Each picture's accessible name says what it shows, in the page's language.
+
+### Two steps
+
+Purpose (backlog v6 items 1c and 1d; v4 item 1): as the page opens, the
+visitor sees that an AI's file becomes a played quiz, through one concrete
+instance, the example class's: the words to the AI, the file that came back,
+and the place where a file is opened. And whoever holds a file opens it
+there.
+
+Two headings, numbered, one above the other. Both are things someone must do,
+so both are commands ("One page, two readers").
+
+1. **"Ask your AI for a quiz"**, over the sheets ask as a chat message, the
+   two sheets it speaks of attached as small pictures; under it "The AI's
+   answer:" and a file by its name. The ask is the labelled ask of "How to
+   ask" without its labels: here it is an instance to take in at a glance,
+   there advice on how to ask. The file is the example's real `.zip` in the
+   page's language (`example-page.md`), and a download link, as an
+   attachment is in a chat: a visitor who presses it holds a file to open in
+   step 2.
+2. **"Open the quiz your AI made"**, over the box that opens a file
+   ("Opening: the `.zip` and nothing else"). Under the box, for whoever has
+   no file: "No quiz yet? Play the example ›" opens the example on the local
+   check, which costs the site nothing until a room opens
+   (`local-check.md`), and "How to ask your AI ↓" leads down the page to
+   "How to ask".
+
+The second heading and its button name what the person holds ("the quiz your
+AI made", "the .zip file"), not "Run" and "Upload": a Solo player runs
+nothing, and nothing goes to the site until a room opens on the local check
+("Words for whoever comes").
+
+"or drop it here" stands beside the button where there is a pointer that
+drags, and is left out where the device reports none (a phone).
 
 ### The film
 
-Purpose: that of the strip of five stills it replaces, carried over. A
-first-timer should see what a quiz is before reading anything: the whole path
-from the exercise sheet to the class playing (backlog v4 item 1). The owner's purpose for a film in the strip's
-place: "make it easier for users to understand what this page is and does, so
-they understand whether it's what they need, and how to use it if it is." Five
-stills showed the path; what the class does, which a teacher who doesn't know
-classroom quizzes can't guess, takes motion: the tablet answering to the wall,
-the teacher's phone setting the pace, the votes splitting before the solution.
+Purpose (backlog v6 item 1e): the newcomer who wants more than the page shows
+as it opens finds what a room does over time: the whole path from the
+exercise sheet to the class playing (backlog v4 item 1). The owner's purpose
+for the film, when it was made for the top of the page: "make it easier for
+users to understand what this page is and does, so they understand whether
+it's what they need, and how to use it if it is." The first screen now
+carries the first of that without a press; the film carries what takes
+motion and a teacher who doesn't know classroom quizzes can't guess: the
+tablet answering to the wall, the teacher's phone setting the pace, the votes
+splitting before the solution. It tells the classroom's story, and its
+heading says so: "From the exercise sheet to the class playing, in one
+minute".
 What the film itself must get across, and how it is made: `docs/film/`.
 
 The film's player is one people already know from video: a poster with ▶,
@@ -158,10 +302,12 @@ How the page meets it (the details: the comments on the film in
   bar. The poster is the teaching moment: the class at the wall with the
   votes split between the right answer and the typical error, no solution yet,
   tablets in hands, the teacher with the phone. It is rendered from the film
-  per language (`landing/film-*.webp`); the static HTML names the English
-  one, so a first visit in another language also loads the English poster:
-  about 30 KB where the browser takes the 800 px picture, 65 KB where it
-  takes the 1600 px one, as a phone's dense screen does.
+  per language (`landing/film-*.webp`), about 30 KB where the browser takes
+  the 800 px picture, 65 KB where it takes the 1600 px one, as a phone's
+  dense screen does. The picture is made by the script, in the page's
+  language, so a visit fetches its own language's poster and no other; the
+  English one in the static HTML is for a browser without scripts
+  (`<noscript>`).
 - **The bar works before the film is there.** The film's script, about
   140 KB, loads on the first press of ▶ or the picture, or on the first move
   of the time bar. It paints the same frame over the picture, then plays
@@ -171,20 +317,23 @@ How the page meets it (the details: the comments on the film in
   then. If the script can't load or can't draw, the picture stays and the
   next press tries again.
 - **Words.** The film speaks the page's language up to the upload: the ask
-  typed to the AI (Build's labelled ask, word for word), the teacher's second
-  message, the quiz, and the root page with its Run box. From the upload on,
+  typed to the AI (the sheets ask, word for word), the teacher's second
+  message, the quiz, and the root page's header with the box that opens a
+  file, whose heading and button it quotes; whether its picture of the page
+  matches the page as it is, is backlog v6 item 3's. From the upload on,
   the site's screens (the check, the wall's chrome, the Remote, the tablets)
   are English, as on the real site. Every language shows the same quiz, the
   example's 646 000 number-line question, translated: wrong answers in
   several different examples would linger. The German, French and Italian
   words are drafts pending the owner's review. A language switch takes the
   film back to its poster in the new language.
-- **Layout.** The film stands centred above Build and Run, at most 62% of the
-  screen's height, the bar under it and as wide. A phone held sideways gets
-  the same layout as a desktop. A phone held upright differs where it has
-  to: its film is about 358 px wide, and one row would leave the time bar
-  too short to drag, so the time bar takes a row of its own. Watching the
-  film big is
+- **Layout.** The film stands below the two steps, under its heading, as
+  wide as the column (672 px on a desktop) and at most 62% of the screen's
+  height, the bar under it and as wide; so on a phone held sideways the
+  heading, the film, its bar and the link under it are in one screen. A
+  phone held upright differs where it has to: its film is about 358 px
+  wide, and one row would leave the time bar too short to drag, so the time
+  bar takes a row of its own. Watching the film big is
   what the full screen button is for: the browser's full screen where it
   has one, else the film fixed over the viewport (iPhone Safari).
 - **The end card** shows the mark and the address. Once the film has played
@@ -199,99 +348,71 @@ How the page meets it (the details: the comments on the film in
   example (`design/example-page.md`), named for what a teacher looks for (a
   walkthrough), not for what the page is to us ("how it was made").
 
-### The three ways, named
+### How to ask
 
-Purpose (backlog v5 item 9): a visitor who isn't a teacher recognises a way
-to play, in their own language, before anything asks them to choose, and
-knows the names Solo, Peers and Quizmaster before the local check offers
-them as cards, in the site's English. One sentence between the film and
-Build and Run says them, each name in bold with what it is in the page's
-language: on your own; with friends, each on their own device; you run it
-for a group, on a big screen. The asks' tabs under Build can't carry that
-recognition: they are pictures of 34 px whose words are a tooltip, which a
-phone doesn't show. The names are the entries' own in every language, as
-the check's cards carry them (`local-check.md`), so the page and the check
-agree; "Peers" is a name, not a word to translate.
+Purpose (backlog v6 item 1c): a visitor learns that the AI they already use
+makes the quiz, how to ask it, and that a file comes back; someone who wants
+to see it done finds an ask close to their own case. The first step shows one
+ask and its file; this part, below the film, holds the rest, and the line
+under the box leads to it.
 
-### Run first when stacked
+"Choose any good AI." Its detail states only what is verified, with tier and
+date: free Claude Sonnet wrote the example above (the first step's quiz, the
+film's and `/example`'s), 4 Nov 2026 (`design/example-page.md`), and is the
+one free AI that does this reliably, the owner's finding of 5 Nov 2026
+against free ChatGPT, Gemini and Copilot (`design/guidance-page.md`, "The AIs
+verified against"). No claim about what an AI can do goes on the page without
+the tier and date of the test (the pattern in backlog v4, owned by
+design/guidance-page.md); nothing gives a duration.
 
-Below 860 px wide Build and Run stand one above the other, and there Run comes
-first. Build is about 650 px tall on a phone, so with Build first the upload
-box would sit a full screen down on every phone, past a natural place to stop
-reading: the teacher with a `.zip` on the phone that took the photos, and the
-one coming back mid-lesson, whose way back is in Run, would scroll for it. Run
-is short (the heading and the upload box): under the film and the three
-ways, its button is in the first screen from 390×844 up and at the bottom
-edge of a 360×640 one, and Build starts below it. A first-timer meets the
-upload before the how-to; the film above tells the story. A running quiz's
-card makes Run taller and pushes Build further down; that teacher came for
-Run. The order is visual only: the HTML, side by side on wider screens, and
-the order for keyboards and screen readers keep Build first.
-
-Run's heading is "Open the quiz your AI made" and its button "Choose the
-.zip file": Run is for whoever has the quiz their AI made, and the words
-name what that person holds. Not "Run" and "Upload": a Solo player runs
-nothing, and nothing goes to the site until a room opens on the local check
-("Words for whoever comes").
-
-### Build: two steps
-
-Step 1 is "Choose any good AI." Its detail states only what is verified, with
-tier and date: free Claude Sonnet wrote the example above (the film's quiz,
-and `/example`'s), 4 Nov 2026 (`design/example-page.md`), and is the one free AI that does this reliably,
-the owner's finding of 5 Nov 2026 against free ChatGPT, Gemini and Copilot
-(`design/guidance-page.md`, "The AIs verified against"). No claim about what an
-AI can do goes on the page without the tier and date of the test (the pattern
-in backlog v4, owned by design/guidance-page.md); nothing gives a duration.
-
-Step 2 is the ask. It says "the AI" where a pronoun would do: in the owner's
-testing Build had too many "it"s to follow. The address shown in the bubbles
-and in Copy is the one the browser opened, so an own copy shows its own.
+"Ask the AI to build you a quiz for" the site's address, with Copy. The line
+says "the AI" where a pronoun would do: in the owner's testing this part had
+too many "it"s to follow. The address shown there, in the asks and in Copy is
+the one the browser opened, so an own copy shows its own.
 
 Six example asks: three for what a teacher may bring (exercise sheets, an
 idea put in words, nothing yet), and three for the other ways to play
 (practising alone, friends with the one who asks among them, a training
-session on a big screen). They are tabs, one picture each (the two sheets,
-a chess board, a question mark), the chosen one joined to its bubble, so the
-picture names the situation and no lead-in sentence is needed ("For example",
-"Or", "The AI then" were cut for it). Each tab's name in words is its
-accessible name and tooltip. The tabs are made by `home.ts`: without it, and
-for an AI's fetcher, the asks stand one under the other, sheets first. Six
-tabs share a phone's width: at 320 px each is 36 px wide, its picture
-shrinking with it.
+session on a big screen). They are tabs named in words, in three rows on a
+phone: Exercise sheets, A description, A training session, With
+friends, On your own, Nothing decided yet; the Quizmaster's three first, as
+the ways stand above. Words, because a tab is where a visitor looks for
+their own case: pictures of 34 px with their words in a tooltip, which a
+phone doesn't show, didn't say it. The tabs are made by `home.ts`: without
+it, and for an AI's fetcher, the other five asks stand one under the other.
 
-- **Sheets**: a chat bubble with five parts underlined and
-  labelled under their words: this site, which exercises, your class, how many,
-  which language. The labels are advice on how to ask, given without ordering
-  anything. The labels stay under their words on a phone too: in the owner's
-  testing the labels set out as one line after the bubble read as broken. From
-  320 px up no label overlaps another or leaves the bubble, in the four
-  languages. Its words
+- **Exercise sheets**: the first step's ask again, with five parts underlined
+  and labelled under their words: this site, which exercises, your class, how
+  many, which language. The labels are advice on how to ask, given without
+  ordering anything. The labels stay under their words on a phone too: in the
+  owner's testing the labels set out as one line after the bubble read as
+  broken. From 320 px up no label overlaps another or leaves the bubble, in
+  the four languages. Its words
   were read wrongly in the owner's testing: "pages" as the site's pages, and
-  "no. 1, 3 and 4" as frames of the row of pictures above it (the strip of
-  five stills that the film's chapters replace). So the ask says "sheets" and ties
-  the numbers to them ("like no. 1, 3 and 4 from these two sheets").
-- **Chess**: a description with no sheets, the ask of the chess run
+  "no. 1, 3 and 4" as numbers of pictures on the page. So the ask says
+  "sheets" and ties the numbers to them ("like no. 1, 3 and 4 from these two
+  sheets").
+- **A description**: a chess quiz with no sheets, the ask of the chess run
   (`design/guidance-page.md`), tidied; it asks for the quiz in the page's
   language, where the run asked for German. It shows a brief that says how the
   teacher will run the quiz (time to look before the choices, whose turn), and
   ends "What do you need?". A line under it names the AI, plan and date,
-  Claude Opus 5.5 on a paid plan, 5 Nov 2026, since step 1 names a free model
-  and this one isn't. Its bubble is the longest, on a phone about 350 px.
-- **Practising alone, friends, a training session** (backlog v5 item 9): the
+  Claude Opus 5.5 on a paid plan, 5 Nov 2026, since the line above names a
+  free model and this one isn't. Its bubble is the longest, on a phone about
+  250 px.
+- **A training session, With friends, On your own** (backlog v5 item 9): the
   other ways to play, in the words of someone who isn't a teacher, each with
-  what it brings (notes, a topic, slides) and where it will be played. The
+  what it brings (slides, a topic, notes) and where it will be played. The
   two who play say so ("I'll play it myself, so please keep the questions and
   answers to yourself", "I'm playing too, so don't show me the questions"):
   the asker's side of what the guidance tells the AI (`guidance-page.md`,
   "The user who plays"). They have had no run and need none: AIs make
   another kind of quiz reliably (the owner). The line naming AI, plan and
   date under an ask is for a verified run, so these, like the open ask, have
-  none, and what is verified stays told apart from what isn't. Their
-  pictures: one person, three people, a screen before an audience.
-- **Nothing decided**: "Read <address>. I need a classyQuiz. Help?". That the
-  AI then asks what it still needs before it builds (the guidance's "Build
-  with the teacher") is no longer said on the page; the chess ask's closing
+  none, and what is verified stays told apart from what isn't.
+- **Nothing decided yet**: "Read <address>. I need a classyQuiz. Help?". That
+  the AI then asks what it still needs before it builds (the guidance's "Build
+  with the user") isn't said on the page; the chess ask's closing
   question shows the same turn. It is the owner's ask, translated.
 
 All of them open with "Read <address>." and call the quiz "a classyQuiz". A
@@ -310,7 +431,7 @@ ask in the page's language, then the run's short third ask, translated
 
 ### Languages
 
-The block above About is in German, English, French and Italian. The owner's
+The part for people is in German, English, French and Italian. The owner's
 purpose: to tell the visitor in passing that mixing languages in the
 instructions works, together with the example ask and the German example
 sheets. Why these four, in his reading: he can review three, may have access
@@ -321,8 +442,8 @@ and tablets wait for the backlog's Localization. The static HTML is English. The
 visitor's choice is made with a switch top right, kept on the device
 (`cq.lang`); the header with the code box and the switch is shared with
 `/example` (`client/top.ts`), so the choice holds on both; otherwise the browser's first language among the four; otherwise
-English. The words are in `client/landing-text.ts`, one table per language, Run's
-messages included, also where opening a room moved them: the local check's
+English. The words are in `client/landing-text.ts`, one table per language, the
+messages of the box that opens a file included, also where opening a room moved them: the local check's
 "Sending the quiz…" and its refusals speak the language this page spoke
 (`local-check.md`, "Opening a room"). The quiz's own problems, the archive's messages and the text
 copied for the AI stay English. Register: German "du", French "vous", Italian
@@ -346,7 +467,7 @@ What the words live with:
 - The owner: "host" is acceptable, not great, in English (in software,
   participants connect to a host too), and a role noun is avoided where a
   sentence does without one.
-- The block above About is in four languages, and the rest of the site is
+- The part for people is in four languages, and the rest of the site is
   queued for Localization (backlog, Later); a translation hits the meaning,
   not the literal word. The guidance stays English (`guidance-page.md`).
 
@@ -363,9 +484,9 @@ So, once for all entries:
   guidance, the README): it is the entry's own name, so the role and the
   card picked on the local check agree, and the word for whoever runs a pub
   quiz. "Host" stays the code's word (`peers.md`). On the landing, in every
-  language, Solo, Peers and Quizmaster stand as the entries' names, each
-  with a phrase in the page's language that says what it is ("The three
-  ways, named"), not as role nouns.
+  language, Quizmaster, Peers and Solo stand as the entries' names, each
+  with a few words in the page's language that say its setting ("The ways
+  to play"), not as role nouns.
 - **"The user"** in the guidance for whoever is in the conversation with the
   AI, the AI's own word for that person, whoever they are; **"players"** for
   whoever answers.
@@ -378,9 +499,10 @@ So, once for all entries:
   can't open. The way to more quizzes names "your school's or your
   company's" site ("The own copy").
 
-### Run: the `.zip` and nothing else
+### Opening: the `.zip` and nothing else
 
-Run is one element: a dashed box with one button and "or drop it here". The
+The second step is one element: a dashed box with one button and "or drop it
+here". The
 button opens the file chooser; a `.zip` can also be dropped on the box, or pasted
 from the file manager with Ctrl+V. The input has no `accept`: older mobile
 browsers that can't map a `.zip` filter to a picker open the photo picker
@@ -397,7 +519,8 @@ file's name is checked after choosing, and anything else gets the message below.
   files) is told what the site takes, in the teacher's language, and what the AI
   can do instead. It is counted. Silently ignoring text from a teacher whose AI
   read old guidance would leave them with nothing.
-- A quiz with problems lists them in place, in English, with "Copy the message for
+- A quiz with problems lists them in place, under the box and above the
+  example's line, in English, with "Copy the message for
   your AI", which asks for a corrected `.zip`. When the problem is pictures that
   can't go up, the teacher may continue without them. The format and its
   validation are `design/quiz-format.md`.
@@ -446,8 +569,14 @@ if the server held a shared, public list, which it must not; and the owner found
 the first design's insistence on it pointed to "a rule that snuck in as a
 requirement".
 
-The card sits above the upload box: an open quiz on this device means a lesson in
-progress or interrupted, and coming back is likelier than uploading again. A quiz
+The card stands above everything else on the page, under the header: an open
+quiz on this device means a lesson in progress or interrupted, where coming
+back is likelier than anything else the page offers, and a teacher in front
+of a class shouldn't have to look for it. It is the one part that differs by
+what the device remembers (Situation: the same page for everyone is
+preferable); the rest of the page is the same below it. It appears once the
+site has answered for the quiz, so on that device the page moves down under
+it a moment after it opens. A quiz
 at its final ranking is on the site only until the teacher's Exit, so one still
 there was left without it: a closed tab, and perhaps the photograph of the
 podium not yet taken (owner).
@@ -459,6 +588,27 @@ newest is gone from the site it is forgotten and the next is asked, at most
 long a quiz stays resumable follows the instance's lifetime
 (`design/hosting-and-limits.md`).
 
+### Where the part for people ends
+
+Purpose (backlog v6 item 1f): a person knows what they can count on, and that
+what follows is the manual for AIs, so the guidance doesn't read as a second
+page joined on (backlog v4 item 14).
+
+Under "What you can count on", three lines: free, without accounts or
+sign-up; played on one's own, a quiz never leaves the browser, and played in
+a room it is deleted when the room is ended or three hours after its last
+use, the `.zip` being the lasting copy; the code is open, with the link to
+it. They say what the guidance says of the site (`index.html`, "The manual"),
+in the visitor's language, and change with it (the lifetime:
+`design/hosting-and-limits.md`). What the shared site can't promise, room
+for every quiz on every day, isn't raised here: it is said where it applies
+("The own copy").
+
+Then one sentence, in the page's language: the rest of the page is the manual
+for AIs, in English, what the visitor's AI reads when given this address, and
+a person is welcome to read it too (`guidance-page.md`, Purpose: for people
+it only has to show that there are no secrets).
+
 ### The own copy
 
 Purpose (backlog v4 item 4): the teacher's question is "I'll run 20 to 30 a month,
@@ -468,7 +618,8 @@ be self-hosted is important, but "realistically first-time viewers won't read,
 unless the site is close to running out of quizzes and tells them". So the page
 doesn't raise it on a first visit.
 
-- One line under Run, shown only on a device that has uploaded before and only if
+- One line under the box that opens a file, below the example's line, shown
+  only on a device that has uploaded before and only if
   the site was full or busy on at least one of the last 30 days: it
   refused an upload or a class, or the classes' bookings reached
   `NEARLY_FULL` (half; the owner: lower than 80%) of the day's rows. It states the fact: "On 3 of the last
@@ -507,7 +658,7 @@ doesn't raise it on a first visit.
   service is red tape at a school: it may need a data protection review first,
   so the school's own server comes first. A company that runs trainings meets
   the same IT and the same review, and a trainer who reads "your school's"
-  is told the route isn't theirs; so this page, the line under Run and the
+  is told the route isn't theirs; so this page, the line under the box and the
   link on a refusal name a company after the school (the words widen who
   else is, they don't displace the teacher: "Words for whoever comes"). The conversion is theirs, done
   with their AI, so this project maintains one server and checks no
@@ -560,11 +711,24 @@ the teacher's concern.
 
 ## Not known
 
-- What the film's poster tells a teacher who doesn't play it, and whether
-  teachers play it. The check proposed: show the page's top to two or three
-  teachers for five seconds, then ask what the class does and what they would
-  type to their AI; then the same after one viewing of the film. Nobody has
-  done either.
+- Whether a visitor gets the Purpose's first two things from the first
+  screen. The check proposed: show the page's top to two or three people, a
+  teacher among them, for five seconds, then ask what one does here, whether
+  it is for them, and what they would type to their AI. Nobody has.
+- The first screen on real phones: the sizes in "One column" are Edge
+  windows of a phone's size on a desktop, not devices; and whether a phone
+  reports no pointer that drags, so that "or drop it here" is left out
+  there (the emulated phone showed it).
+- Whether a visitor with a file, on a small phone, takes the box under the
+  ask as close enough, or whether opening should stand first there ("One
+  column").
+- Whether the pictures are taken for buttons; whether the ways need a reason
+  in words beyond the setting, which a phone's width doesn't hold; whether
+  "Peers" is understood from "with friends" and its picture.
+- Whether a visitor presses the file under the ask, and whether a download
+  that starts there helps or puzzles.
+- Whether teachers scroll to the film, and play it, now that it stands below
+  the first screen.
 - Whether the film's end card should link somewhere, `/example` for one.
 - The film on real phones (the cost of a frame, the full screen on an iPhone
   and on Android) and whether its timings read when watched:

@@ -52,23 +52,18 @@ names "the network of a school or a company" ("das Netz einer Schule oder Firma"
 
 ## The words before the check (after v5)
 
-Drafted by the words pass, not by a translator agent. Run's heading speaks to whoever has the AI's
-quiz and its button names the file (`design/root-page.md`, "Run first when stacked"). One sentence above Build and Run names the three ways by the check's names,
-which stay English in every language ("Peers" is a name), each with what it is (`design/root-page.md`,
-"The three ways, named"). The friends tab is named like the solo tab, as a purpose.
+Drafted by the words pass, not by a translator agent. The second step's heading speaks to whoever
+has the AI's quiz and its button names the file (`design/root-page.md`, "Two steps"). The sentence
+that named the three ways and the tabs' long names are gone; their words are in "The first page
+(v6 item 1)", below.
 
 | key | en | de | fr | it |
 |---|---|---|---|---|
 | run | Open the quiz your AI made | Das Quiz deiner KI öffnen | Ouvrir le quiz de votre IA | Apri il quiz della tua IA |
 | upload | Choose the .zip file | Die .zip-Datei wählen | Choisir le fichier .zip | Scegli il file .zip |
-| ways | A quiz is played here in three ways: **Solo**, on your own; **Peers**, with friends, each on their own device; **Quizmaster**, you run it for a group, on a big screen. | Gespielt wird ein Quiz hier auf drei Arten: **Solo**, für dich allein; **Peers**, mit Freunden, alle am eigenen Gerät; **Quizmaster**, du leitest es für eine Gruppe, am grossen Bildschirm. | Ici, un quiz se joue de trois façons⍽: **Solo**, de votre côté⍽; **Peers**, entre amis, chacun sur son appareil⍽; **Quizmaster**, vous l'animez pour un groupe, sur grand écran. | Qui un quiz si gioca in tre modi: **Solo**, per conto tuo; **Peers**, con gli amici, ognuno sul proprio dispositivo; **Quizmaster**, lo guidi tu per un gruppo, sul grande schermo. |
-| tabFriends | To play with friends | Zum Spielen mit Freunden | Pour jouer entre amis | Per giocare con gli amici |
 
 Choices made: `run` is the earlier button's words without "(.zip)", and "starten / lancer / avviare"
-are gone with "play"; fr "de votre côté" for on your own, since "seul" is gendered (it "per conto
-tuo", as the solo tab); fr "chacun sur son appareil" and it "ognuno" are the generic masculine; `ways`
-in fr has U+202F before ":" and ";" (D6), since it wraps on every phone and a plain space would let a
-";" start a line.
+are gone with "play".
 
 The way to more quizzes names a company after the school, so a trainer isn't told the route is a
 school's (`design/root-page.md`, "The own copy"); the German IT link drops "Schul-", as the network
@@ -86,6 +81,66 @@ Where these words now show: a room's refusals on the local check (`siteFull`, `q
 `whatToTellIt`, `ownCopyLink`, `quizHead`) and "Sending the quiz…" before them (`sending`) speak the
 root page's language there too (`design/local-check.md`, "Opening a room"), so the proposals for
 those keys apply to the check as well as to the root page.
+
+## The first page (v6 item 1)
+
+Drafted by the page's implementer in all four languages, English included, not by a translator and
+not yet seen by the owner; backlog v6 item 2 is the read of the three. Where the words stand and
+what each is for: `design/root-page.md` ("What this is", "The ways to play", "Two steps", "How to
+ask", "Where the part for people ends"). The ways' names (Quizmaster, Peers, Solo) are written in
+the page and stay as they are in every language. ⍽ stands for U+202F.
+
+| key | en | de | fr | it |
+|---|---|---|---|---|
+| what | Here you play quizzes your own AI makes from your sheets, notes or ideas. | Hier spielst du Quiz, die deine KI aus deinen Blättern, Notizen oder Ideen macht. | Ici, vous jouez aux quiz que votre propre IA crée à partir de vos fiches, notes ou idées. | Qui giochi ai quiz che la tua IA crea dalle tue schede, dai tuoi appunti o dalle tue idee. |
+| wayQuizmaster | for a class or a group, on a big screen | für eine Klasse oder Gruppe, am grossen Bildschirm | pour une classe ou un groupe, sur grand écran | per una classe o un gruppo, sul grande schermo |
+| wayPeers | with friends, each on their own device | mit Freunden, alle am eigenen Gerät | entre amis, chacun sur son appareil | con gli amici, ognuno sul proprio dispositivo |
+| waySolo | on your own, to practise or review | für dich allein, zum Üben oder Wiederholen | de votre côté, pour s'exercer ou réviser | per conto tuo, per esercitarti o ripassare |
+| getH | Ask your AI for a quiz | Bitte deine KI um ein Quiz | Demandez un quiz à votre IA | Chiedi un quiz alla tua IA |
+| gives | The AI's answer: | Die Antwort der KI: | La réponse de l'IA⍽: | La risposta dell'IA: |
+| noQuiz | No quiz yet? | Noch kein Quiz? | Pas encore de quiz⍽? | Ancora nessun quiz? |
+| tryIt | Play the example › | Das Beispiel spielen › | Jouer l'exemple › | Gioca l'esempio › |
+| more | How to ask your AI ↓ | So fragst du deine KI ↓ | Comment demander à votre IA ↓ | Come chiedere alla tua IA ↓ |
+| filmH | From the exercise sheet to the class playing, in one minute | Vom Aufgabenblatt zur spielenden Klasse, in einer Minute | De la fiche d'exercices à la classe qui joue, en une minute | Dalla scheda alla classe che gioca, in un minuto |
+| howH | How to ask your AI | So fragst du deine KI | Comment demander à votre IA | Come chiedere alla tua IA |
+| tabSheets | Exercise sheets | Aufgabenblätter | Fiches d'exercices | Schede di esercizi |
+| tabChess | A description | Eine Beschreibung | Une description | Una descrizione |
+| tabGroup | A training session | Eine Schulung | Une formation | Una formazione |
+| tabFriends | With friends | Mit Freunden | Entre amis | Con gli amici |
+| tabSolo | On your own | Für dich allein | De votre côté | Per conto tuo |
+| tabOpen | Nothing decided yet | Noch nichts entschieden | Rien de décidé | Niente di deciso |
+| relyH | What you can count on | Worauf du zählen kannst | Ce sur quoi vous pouvez compter | Su cosa puoi contare |
+| relyFree | Free, without accounts or sign-up. | Kostenlos, ohne Konto und ohne Anmeldung. | Gratuit, sans compte ni inscription. | Gratuito, senza account né registrazione. |
+| relyKept | Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy. | Für dich allein gespielt, verlässt ein Quiz deinen Browser nie. In einem Raum gespielt, wird ein Quiz gelöscht, wenn der Raum beendet wird, sonst drei Stunden nach der letzten Benutzung. Die .zip-Datei ist deine bleibende Kopie. | Joué de votre côté, un quiz ne quitte jamais votre navigateur. Joué dans une salle, un quiz est supprimé quand la salle est fermée, sinon trois heures après sa dernière utilisation. Le fichier .zip est votre copie durable. | Giocato per conto tuo, un quiz non lascia mai il tuo browser. Giocato in una stanza, un quiz viene eliminato quando la stanza viene chiusa, altrimenti tre ore dopo l'ultimo uso. Il file .zip è la tua copia duratura. |
+| relyOpen | The code is open: | Der Code ist offen: | Le code est ouvert⍽: | Il codice è aperto: |
+| manual | The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too. | Der Rest dieser Seite ist das Handbuch für KIs, auf Englisch: was deine KI liest, wenn du ihr diese Adresse gibst. Du darfst es gern auch lesen. | Le reste de cette page est le manuel pour les IA, en anglais⍽: ce que lit votre IA quand vous lui donnez cette adresse. Vous pouvez le lire aussi. | Il resto di questa pagina è il manuale per le IA, in inglese: quello che legge la tua IA quando le dai questo indirizzo. Puoi leggerlo anche tu. |
+
+Also new, the pictures' accessible names (`picQuizmaster`, `picPeers`, `picSolo`): what each
+picture shows, a sentence each, in `landing-text.ts`.
+
+Choices made, each a question for the read:
+
+- `what` speaks to "you" in each language's register (du, vous, tu). "Own" stays with the AI in
+  fr ("propre"); de and it leave it to the possessive ("deine KI", "la tua IA"): "deine eigene KI"
+  took the sentence to four lines on a 360 px phone, and "la tua propria" is stiff. fr drops the
+  repeated "de vos" before the second and third noun, also for three lines on a phone.
+- The ways' words carry no verb and no pronoun, so nothing in them needs a referent
+  (`design/root-page.md`, Situation); they are what stood in the sentence that named the three
+  ways, without "you run it" (du leitest es, vous l'animez, lo guidi tu). fr "de votre côté" for
+  on your own, since "seul" is gendered (it "per conto tuo"); fr "chacun sur son appareil" and it
+  "ognuno" are the generic masculine. de "zum Üben oder Wiederholen" and fr "pour s'exercer ou
+  réviser" are untested against what a pupil would say.
+- `gives` is "the AI's answer", not "hands you a file": short enough to share a 390 px phone's
+  line with the file's name in all four; on a 360 px one the name wraps under it in German and
+  French.
+- The tabs' names are short so six fit a phone in three rows; they replace the long names
+  the rows for `tabSheets`, `tabChess`, `tabOpen`, `tabSolo`, `tabFriends` and `tabGroup`
+  elsewhere in this file quote, and those rows' proposals fall with them (de "Arbeitsblätter" for
+  "Aufgabenblätter" still applies to `tabSheets`, with `capSheet`).
+- `relyKept` says "room" (Raum, salle, stanza) for what the screens call a lobby and a quiz under
+  way; no screen is translated yet, so no word is fixed for it.
+- Gone with the page's old top: `build` ("Build a quiz"), whose proposals in the language tables
+  below no longer apply, and `ways`.
 
 ## The worked example (`/example`)
 

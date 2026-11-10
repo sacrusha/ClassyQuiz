@@ -22,21 +22,27 @@
   pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .9rem; line-height: 1.45; }
   code { font-family: var(--font-mono); }
 
-  .wide { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  /* The part for people (root-page.md, "One column"): one column, the guidance's width, the same order at every width. */
+  header.top { --page-w: 42rem; }
+  .landing { max-width: 42rem; margin: 0 auto; padding: 0 16px; }
+  .landing h1 { font-size: clamp(1.3rem, 1rem + 1.7vw, 1.8rem); line-height: 1.18; margin: .8rem 0 .7rem; text-wrap: balance; }
+  .landing h2 { border: 0; padding: 0; margin: 0 0 .4rem; font-size: 1.2rem; line-height: 1.25; }
 
-  /* The film in the strip's place (root-page.md, "The film"; docs/film/). Until someone presses ▶ or moves the time bar, the
-     page holds the poster frame as a picture and the player's bar: nothing else loads or plays, and the film's own words stay
-     out of this page, which AIs read. The picture is English here and in the page's language once client/home.ts has set it.
-     The first press loads /js/film.js (client/film-poster.ts); it takes this markup over, paints the same frame over the picture
-     and plays, or shows the moment the time bar was moved to, in the page's language. Centred, the example's link under its
-     right edge, at most 62% of the viewport's height (--film-h; svh: the viewport with a phone browser's bars shown). A phone
-     held sideways gets the desktop's layout. Watching it big is the full screen button's. */
-  .film { margin: 18px 0 6px; }
+  /* The film, under the first screen for whoever wants to find out more (root-page.md, "The film"; docs/film/). Until someone
+     presses ▶ or moves the time bar, the page holds the poster frame as a picture and the player's bar: nothing else loads or
+     plays, and the film's own words stay out of this page, which AIs read. The picture is made by client/film-poster.ts in
+     the page's language, so no visit fetches another language's; the English one written here is for a browser without
+     scripts. The first press loads /js/film.js (client/film-poster.ts); it takes this markup over,
+     paints the same frame over the picture and plays, or shows the moment the time bar was moved to, in the page's language.
+     As wide as the column, the example's link under its right edge, at most 62% of the viewport's height (--film-h; svh: the
+     viewport with a phone browser's bars shown), so a phone held sideways shows it whole. Watching it big is the full screen
+     button's. */
+  .film { margin: .7rem 0 0; }
   .film, .see { --film-h: 62svh; }
   .cqf-film { width: 100%; max-width: calc(var(--film-h) * 16 / 9); margin: 0 auto; container-type: inline-size; }
   .cqf-stage { position: relative; border-radius: var(--radius); overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
   .cqf-stage > svg { display: block; width: 100%; height: 100%; }
-  .cqf-stage > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; } /* over the film while it builds underneath */
+  .cqf-stage > img, .cqf-stage > noscript > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; } /* over the film while it builds underneath; in <noscript> for a browser without scripts */
   .cqf-big { position: absolute; left: 6%; bottom: 8%; width: clamp(52px, 13%, 76px); aspect-ratio: 1; border-radius: 50%; border: 0; background: rgba(29, 29, 27, .82); color: #fff; cursor: pointer; display: grid; place-items: center; } /* sized with the stage: on a phone it would cover the teacher in the poster frame */
   .cqf-big svg { width: 45%; height: 45%; margin-left: 7%; }
   .cqf-big[hidden] { display: none; }
@@ -85,61 +91,61 @@
   .cqf-stage .tb { font-weight: 700; }
   .cqf-stage .ts { font-weight: 600; }
   .cqf-stage .tn { font-variant-numeric: tabular-nums; }
-  .see { display: block; max-width: calc(var(--film-h) * 16 / 9); margin: 4px auto 6px; text-align: right; color: var(--accent); font-weight: 600; text-decoration: none; }
+  .see { display: block; max-width: calc(var(--film-h) * 16 / 9); margin: 6px auto 0; text-align: right; color: var(--accent); font-weight: 600; text-decoration: none; }
   .see:hover, .see:focus-visible { text-decoration: underline; }
-  /* The three ways, by the names the local check's cards carry, above Build and Run (root-page.md, "The three ways, named"). */
-  .ways { margin: 1.2rem 0 0; font-size: 1.05rem; text-wrap: pretty; }
-  .ways b { white-space: nowrap; }
 
-  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; }
-  .cols h2 { border: 0; padding: 0; margin: 1.6rem 0 .6rem; font-size: 1.35rem; }
-  .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
-  .steps > li { position: relative; padding-left: 2rem; margin: 0 0 .9rem; counter-increment: step; }
-  .steps > li::before { content: counter(step); position: absolute; left: 0; top: .05em; width: 1.45rem; height: 1.45rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .85rem; line-height: 1.45rem; text-align: center; }
-  .steps p { margin: 0; }
-  .steps .do { font-weight: 600; }
-  .steps .detail { color: var(--muted); font-size: .95rem; margin: .15rem 0 0; }
-  .addr { display: inline-flex; align-items: center; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 2px 4px 2px 10px; font-weight: 600; white-space: nowrap; }
-  .addr button { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; font-weight: 400; cursor: pointer; }
-  .example { margin: .6rem 0 0; }
+  /* The ways to play, a picture each (root-page.md, "The ways to play"; the pictures: docs/ways/). Three across at every
+     width, so the three are seen together and the two steps under them stay in the first screen of a phone; the gap
+     narrows there, which leaves each picture 91 px on a 320 px phone, the least they were drawn for. */
+  .ways { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(8px, 2vw, 12px); padding: 0; margin: 0; }
+  .ways li { margin: 0; }
+  .ways img { display: block; width: 100%; height: auto; border-radius: 10px; }
+  .ways p { margin: .3rem 0 0; font-size: .88rem; line-height: 1.3; color: var(--muted); text-wrap: pretty; }
+  .ways b { display: block; font: 700 1rem/1.3 var(--font-brand); color: var(--fg); }
+
+  /* The two things to do, one above the other (root-page.md, "Two steps"): the number is drawn, not text, so a fetcher
+     reads the heading alone. */
+  .steps2 { counter-reset: step; }
+  .step { margin: .9rem 0 0; counter-increment: step; }
+  .step h2::before { content: counter(step); display: inline-block; width: 1.45rem; height: 1.45rem; margin-right: .5rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .85rem/1.45rem var(--font-text); text-align: center; vertical-align: .12em; }
   .bubble { margin: 0; background: var(--bubble); border-radius: 16px 16px 16px 4px; padding: 10px 14px; font-size: .98rem; line-height: 1.5; }
   .bubble u { text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-  /* Each label under its words, out of the text's flow, so a label wider than its words doesn't spread them. */
-  .bubble .part { position: relative; display: inline-block; white-space: nowrap; }
-  .bubble .glue { white-space: nowrap; }
-  .bubble .lab { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: -.35em; font-size: .68rem; line-height: 1; color: var(--accent); font-weight: 600; white-space: nowrap; pointer-events: none; user-select: none; }
-  .bubble.inplace { line-height: 2.3; padding-bottom: 12px; }
-  .labels { color: var(--accent); font-size: .85rem; font-weight: 600; margin: .3rem 0 0; }
-  .labels .nb { white-space: nowrap; }
-  .bubble.inplace + .labels { display: none; }
-  /* The example asks as tabs: a picture each, the chosen one joined to its bubble (root-page.md, "Build: two steps"). Made by home.ts; without it the asks stand one under the other. */
-  .example + .example { margin-top: .9rem; }
-  .asks.tabbed .example { margin-top: 0; }
-  .ask-tabs { display: flex; gap: 6px; margin: .6rem 0 0 12px; }
-  .ask-tabs button { flex: 0 1 52px; min-width: 0; height: 46px; padding: 5px 3px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
-  .ask-tabs button:hover { color: var(--fg); border-color: var(--accent); }
-  .ask-tabs button[aria-selected="true"] { background: var(--bubble); border-color: var(--bubble); color: var(--fg); cursor: default; }
-  .ask-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .ask-tabs svg { width: min(34px, 100%); height: 34px; display: block; } /* six tabs share a phone's width: a tab narrower than its picture shrinks the picture */
-  .ask-tabs .sheets { position: relative; width: min(34px, 100%); height: 34px; }
-  .ask-tabs .sheets img { position: absolute; height: 30px; width: auto; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
-  .ask-tabs .sheets img:first-child { right: 1px; top: 0; transform: rotate(5deg); }
-  .ask-tabs .sheets img:last-child { left: 2px; bottom: 0; transform: rotate(-4deg); }
-  .ask-tabs .q { font: 700 1.7rem/1 var(--font-brand); }
-  .example .who { margin: .35rem 0 0; color: var(--muted); font-size: .9rem; }
+  /* The two sheets the ask speaks of, attached to the message as a chat shows them. */
+  .bubble .sheets { float: right; display: flex; margin: 3px 0 0 10px; }
+  .bubble .sheets img { display: block; height: 38px; width: auto; background: #fff; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .bubble .sheets img:first-child { transform: rotate(-3deg); }
+  .bubble .sheets img:last-child { transform: rotate(3deg); margin-left: -9px; }
+  .reply { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: .45rem 0 0; font-size: .95rem; }
+  .zip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--rule); background: var(--card); border-radius: 10px; padding: 4px 11px 4px 8px; font-weight: 600; font-size: .92rem; overflow-wrap: anywhere; color: var(--fg); text-decoration: none; }
+  .zip:hover, .zip:focus-visible { border-color: var(--accent); }
+  .zip svg { width: 15px; height: 19px; flex: none; color: var(--accent); }
 
-  .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 22px 16px; text-align: center; }
+  .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 10px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 16px; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
-  .runbox .open { text-wrap: balance; border: 0; background: var(--control); color: var(--control-ink); border-radius: 12px; padding: 14px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
-  .runbox p { color: var(--muted); margin: .6rem 0 0; }
+  .runbox .open { text-wrap: balance; border: 0; background: var(--control); color: var(--control-ink); border-radius: 12px; padding: 13px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
+  .runbox p { color: var(--muted); margin: 0; }
+  /* Nothing is dropped on a device without a pointer that drags. */
+  @media (hover: none) and (pointer: coarse) { .runbox p { display: none; } }
   #out:empty, #resume:empty { display: none; }
+  .try { margin: .5rem 0 0; display: flex; flex-wrap: wrap; gap: 0 .4em; }
+  .try a { font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .try a:hover, .try a:focus-visible { text-decoration: underline; }
+  .try .more { margin-left: auto; }
+  /* A phone: a little tighter, so the button that opens a file is in the first screen or at its edge (root-page.md, "One column"). */
+  @media (max-width: 440px) {
+    .landing h1 { margin: .7rem 0 .6rem; }
+    .step { margin-top: .75rem; }
+    .bubble { font-size: .94rem; line-height: 1.45; padding: 9px 13px; }
+    .runbox { padding: 7px 12px; }
+  }
   .muted { color: var(--muted); }
   .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0; }
   .problem .err { color: var(--bad); font-weight: 600; }
   .problem button { border: 2px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; margin: 4px 6px 0 0; }
   .problem button.primary { background: var(--control); border-color: var(--control); color: var(--control-ink); }
 
-  .resume { border: 2px solid var(--accent); border-radius: 16px; padding: 12px 16px; margin: 0 0 14px; }
+  /* A quiz to come back to, above everything else on the device that started it (root-page.md, "Coming back"). */
+  .resume { border: 2px solid var(--accent); border-radius: 16px; padding: 12px 16px; margin: 14px 0 0; }
   .resume .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; }
   .resume .title { font-weight: 700; overflow-wrap: anywhere; flex: 1 1 12em; }
   .resume .stands { color: var(--muted); font-size: .95rem; white-space: nowrap; }
@@ -148,75 +154,114 @@
   .resume .code { color: var(--muted); font-size: .95rem; }
   .resume b { font-family: var(--font-brand); font-variant-numeric: tabular-nums; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
   .resume .other { color: var(--muted); font-size: .95rem; margin: .5rem 0 0; }
-  .owncopy { color: var(--muted); font-size: .95rem; margin: 14px 0 0; }
+  .owncopy { color: var(--muted); font-size: .95rem; margin: 12px 0 0; }
 
-  .guide { margin-top: 3.5rem; padding-top: .5rem; border-top: 1px solid var(--rule); }
+  /* Below the first screen: finding out more, how to ask, what to count on. */
+  .landing .sec { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); }
+  .how .do { font-weight: 600; margin: .9rem 0 0; }
+  .how .detail { color: var(--muted); font-size: .95rem; margin: .15rem 0 0; }
+  .addr { display: inline-flex; align-items: center; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 2px 4px 2px 10px; font-weight: 600; white-space: nowrap; }
+  .addr button { border: 1px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: .85rem; font-weight: 400; cursor: pointer; }
+  /* Each label under its words, out of the text's flow, so a label wider than its words doesn't spread them. */
+  .bubble .part { position: relative; display: inline-block; white-space: nowrap; }
+  .bubble .glue { white-space: nowrap; }
+  .bubble .lab { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: -.35em; font-size: .68rem; line-height: 1; color: var(--accent); font-weight: 600; white-space: nowrap; pointer-events: none; user-select: none; }
+  .bubble.inplace { line-height: 2.3; padding-bottom: 12px; }
+  /* The example asks as tabs, named in words (root-page.md, "How to ask"). Made by home.ts; without it the asks stand one under the other. */
+  .example { margin: .9rem 0 0; }
+  .asks.tabbed .example { margin-top: 0; }
+  .ask-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: .7rem 0 .55rem; }
+  .ask-tabs button { font: 600 .92rem var(--font-text); min-height: 38px; padding: 6px 13px; border: 1px solid var(--rule); border-radius: 999px; background: transparent; color: var(--muted); cursor: pointer; }
+  .ask-tabs button:hover { color: var(--fg); border-color: var(--accent); }
+  .ask-tabs button[aria-selected="true"] { background: var(--bubble); border-color: var(--bubble); color: var(--fg); cursor: default; }
+  .ask-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .example .who { margin: .35rem 0 0; color: var(--muted); font-size: .9rem; }
+  .how .then { margin: .9rem 0 0; }
+  .rely ul { padding-left: 1.2rem; margin: .4rem 0 0; }
+  .rely .manual { margin: 1.1rem 0 0; color: var(--muted); }
 
-  /* Stacked, Run comes first: it is short, so Build's heading still shows below it, and the teacher with a .zip or coming back mid-lesson doesn't scroll past Build (root-page.md, "Run first when stacked"). Visual order only; the HTML keeps Build first. */
-  @media (max-width: 860px) {
-    .cols { grid-template-columns: minmax(0, 1fr); }
-    .cols .run { order: -1; }
-  }
+  .guide { margin-top: 2.6rem; padding-top: .5rem; border-top: 1px solid var(--rule); }
 </style>
 </head>
 <body class="follows-dark">
-<header class="top"><div class="bar wide">
+<header class="top"><div class="bar">
   <p class="logo"><span class="brand"><span class="lockup"><!--#brand-use classyquiz-horizontal-32-inline.svg--></span><span class="symbol"><!--#brand-use classyquiz-symbol-32-inline.svg--></span></span></p>
   <form class="join" id="join" action="/play" method="get" autocomplete="off"><label for="code" data-t="code">Code</label><input id="code" name="c" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345"><button type="submit" aria-label="Join" data-t-aria="join">&#9654;</button></form>
 </div></header>
 
-<div class="landing wide" id="landing">
-<div class="film" id="cqfilm"><div class="cqf">
-  <div class="cqf-film"><div class="cqf-stage" role="group" aria-label="From an exercise sheet to the class: a film without sound" data-t-aria="film"><img src="/landing/film-en.webp" srcset="/landing/film-en-800.webp 800w, /landing/film-en.webp 1600w" sizes="min(100vw, 110svh)" alt="" width="1600" height="900"><button class="cqf-big" type="button" aria-label="Play" data-t-aria="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg></button><button class="cqf-again" type="button" aria-label="Play again" data-t-aria="again" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-    <div class="cqf-bar"><button class="cqf-play" type="button" aria-label="Play" data-t-aria="play">&#9654;</button><span class="cqf-seek"><input type="range" min="0" max="67" step="0.1" value="0" aria-label="Time in the film" data-t-aria="seek" aria-valuetext="0:00"></span><span class="cqf-time">0:00<span class="cqf-dur"> / 1:07</span></span><button class="cqf-speed" type="button" aria-label="Speed" data-t-aria="speed" data-rate="1">1&times;</button><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
-</div></div>
-<a class="see" id="example-link" href="/example" data-t="see">The example, step by step &rsaquo;</a>
-<p class="ways" data-t-html="ways">A quiz is played here in three ways: <b>Solo</b>, on your own; <b>Peers</b>, with friends, each on their own device; <b>Quizmaster</b>, you run it for a group, on a big screen.</p>
+<div class="landing" id="landing">
+<div id="resume"></div>
+<h1 data-t="what">Here you play quizzes your own AI makes from your sheets, notes or ideas.</h1>
 
-<div class="cols">
-<section class="build" aria-labelledby="build-h">
-  <h2 id="build-h" data-t="build">Build a quiz</h2>
-  <ol class="steps">
-    <li><p class="do" data-t="step1">Choose any good AI.</p>
-      <p class="detail" data-t="step1detail">Free Claude Sonnet wrote the example above, 4&nbsp;Nov&nbsp;2026: the one free AI that does this reliably.</p></li>
-    <li><p class="do"><span data-t="step2">Ask the AI to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
-      <div class="asks" id="asks">
-        <div class="example" id="ask-sheets">
-          <blockquote class="bubble" id="bubble">Read <u>classyquiz.pages.dev</u>. Can you make me a classyQuiz with exercises <u>like no. 1, 3 and 4</u> from these two sheets? <u>For my 5th grade class</u>, <u>about 10 questions</u>, <u>in English</u>.</blockquote>
-          <p class="labels" id="labels">this site · which exercises · your class · how many · which language</p>
-        </div>
-        <div class="example" id="ask-chess">
-          <blockquote class="bubble" id="bubble3">Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?</blockquote>
-          <p class="who" data-t="chessWho">Claude Opus 5.5, paid plan, 5 Nov 2026</p>
-        </div>
-        <div class="example" id="ask-solo">
-          <blockquote class="bubble" id="bubble-solo">Read classyquiz.pages.dev. My biology test on Friday is about the cell. Here are my notes. Can you make me a classyQuiz to practise with, about 20 questions? I'll play it myself, so please keep the questions and answers to yourself.</blockquote>
-        </div>
-        <div class="example" id="ask-friends">
-          <blockquote class="bubble" id="bubble-friends">Read classyquiz.pages.dev. Make us a classyQuiz for our games night: 15 questions on films from the 90s, some easy, some hard. I'm playing too, so don't show me the questions.</blockquote>
-        </div>
-        <div class="example" id="ask-group">
-          <blockquote class="bubble" id="bubble-group">Read classyquiz.pages.dev. Tomorrow I'm training 25 new colleagues on our safety rules. The slides are attached. Can you make me a classyQuiz for the end of the session, on the big screen, about 10 questions?</blockquote>
-        </div>
-        <div class="example" id="ask-open">
-          <blockquote class="bubble" id="bubble2">Read classyquiz.pages.dev. I need a classyQuiz. Help?</blockquote>
-        </div>
-      </div></li>
-  </ol>
+<ul class="ways">
+  <li><img src="/landing/way-quizmaster.svg" width="640" height="400" alt="A teacher at the big screen with the question, a phone in her hand; the class answers on tablets." data-t-alt="picQuizmaster"><p><b>Quizmaster</b> <span data-t="wayQuizmaster">for a class or a group, on a big screen</span></p></li>
+  <li><img src="/landing/way-peers.svg" width="640" height="400" alt="Three friends on a sofa in the evening, each with the question on their own phone, one of them laughing." data-t-alt="picPeers"><p><b>Peers</b> <span data-t="wayPeers">with friends, each on their own device</span></p></li>
+  <li><img src="/landing/way-solo.svg" width="640" height="400" alt="Someone alone at a desk with their notes, the question on their phone, the answer just found right." data-t-alt="picSolo"><p><b>Solo</b> <span data-t="waySolo">on your own, to practise or review</span></p></li>
+</ul>
+
+<div class="steps2">
+<section class="step get" aria-labelledby="get-h">
+  <h2 id="get-h" data-t="getH">Ask your AI for a quiz</h2>
+  <blockquote class="bubble" id="bubble-top"><span class="sheets"><img src="/landing/sheet-1.webp" alt="" width="233" height="300"><img src="/landing/sheet-2.webp" alt="" width="233" height="300"></span><span id="ask-top">Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 5th grade class, about 10 questions, in English.</span></blockquote>
+  <p class="reply"><span data-t="gives">The AI's answer:</span> <a class="zip" id="zip" href="/examples/big-numbers-quiz.zip" download><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span id="zipname">big-numbers-quiz.zip</span></a></p>
 </section>
 
-<section class="run" aria-labelledby="run-h">
+<section class="step run" aria-labelledby="run-h">
   <h2 id="run-h" data-t="run">Open the quiz your AI made</h2>
-  <div id="resume"></div>
   <div class="runbox" id="runbox">
     <button type="button" class="open" id="open" data-t="upload">Choose the .zip file</button>
     <p data-t="drop">or drop it here</p>
     <input id="file" type="file" hidden>
   </div>
   <div id="out" role="status"></div>
+  <p class="try"><span data-t="noQuiz">No quiz yet?</span> <a id="try" href="/open?example=en" data-t="tryIt">Play the example &rsaquo;</a> <a class="more" href="#ask" data-t="more">How to ask your AI &darr;</a></p>
   <p class="owncopy" id="owncopy" hidden></p>
 </section>
 </div>
+
+<section class="sec" aria-labelledby="film-h">
+  <h2 id="film-h" data-t="filmH">From the exercise sheet to the class playing, in one minute</h2>
+<div class="film" id="cqfilm"><div class="cqf">
+  <div class="cqf-film"><div class="cqf-stage" role="group" aria-label="From an exercise sheet to the class: a film without sound" data-t-aria="film"><noscript><img src="/landing/film-en.webp" srcset="/landing/film-en-800.webp 800w, /landing/film-en.webp 1600w" sizes="(max-width: 42rem) 100vw, 42rem" alt="" width="1600" height="900" loading="lazy"></noscript><button class="cqf-big" type="button" aria-label="Play" data-t-aria="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21Z" fill="currentColor"/></svg></button><button class="cqf-again" type="button" aria-label="Play again" data-t-aria="again" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="cqf-bar"><button class="cqf-play" type="button" aria-label="Play" data-t-aria="play">&#9654;</button><span class="cqf-seek"><input type="range" min="0" max="67" step="0.1" value="0" aria-label="Time in the film" data-t-aria="seek" aria-valuetext="0:00"></span><span class="cqf-time">0:00<span class="cqf-dur"> / 1:07</span></span><button class="cqf-speed" type="button" aria-label="Speed" data-t-aria="speed" data-rate="1">1&times;</button><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
+</div></div>
+<a class="see" id="example-link" href="/example" data-t="see">The example, step by step &rsaquo;</a>
+</section>
+
+<section class="sec how" id="ask" aria-labelledby="how-h">
+  <h2 id="how-h" data-t="howH">How to ask your AI</h2>
+  <p class="do" data-t="step1">Choose any good AI.</p>
+  <p class="detail" data-t="step1detail">Free Claude Sonnet wrote the example above, 4&nbsp;Nov&nbsp;2026: the one free AI that does this reliably.</p>
+  <p class="do"><span data-t="step2">Ask the AI to build you a quiz for</span> <span class="addr">classyquiz.pages.dev</span></p>
+  <div class="asks" id="asks">
+    <div class="example" id="ask-chess">
+      <blockquote class="bubble" id="bubble3">Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?</blockquote>
+      <p class="who" data-t="chessWho">Claude Opus 5.5, paid plan, 5 Nov 2026</p>
+    </div>
+    <div class="example" id="ask-group">
+      <blockquote class="bubble" id="bubble-group">Read classyquiz.pages.dev. Tomorrow I'm training 25 new colleagues on our safety rules. The slides are attached. Can you make me a classyQuiz for the end of the session, on the big screen, about 10 questions?</blockquote>
+    </div>
+    <div class="example" id="ask-friends">
+      <blockquote class="bubble" id="bubble-friends">Read classyquiz.pages.dev. Make us a classyQuiz for our games night: 15 questions on films from the 90s, some easy, some hard. I'm playing too, so don't show me the questions.</blockquote>
+    </div>
+    <div class="example" id="ask-solo">
+      <blockquote class="bubble" id="bubble-solo">Read classyquiz.pages.dev. My biology test on Friday is about the cell. Here are my notes. Can you make me a classyQuiz to practise with, about 20 questions? I'll play it myself, so please keep the questions and answers to yourself.</blockquote>
+    </div>
+    <div class="example" id="ask-open">
+      <blockquote class="bubble" id="bubble2">Read classyquiz.pages.dev. I need a classyQuiz. Help?</blockquote>
+    </div>
+  </div>
+</section>
+
+<section class="sec rely" aria-labelledby="rely-h">
+  <h2 id="rely-h" data-t="relyH">What you can count on</h2>
+  <ul>
+    <li data-t="relyFree">Free, without accounts or sign-up.</li>
+    <li data-t="relyKept">Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy.</li>
+    <li><span data-t="relyOpen">The code is open:</span> <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a></li>
+  </ul>
+  <p class="manual" data-t="manual">The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too.</p>
+</section>
 </div>
 
 <main>

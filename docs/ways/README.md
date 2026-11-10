@@ -1,7 +1,7 @@
 # The pictures of the ways to play
 
-Three pictures on the root page, one beside each way to play: Quizmaster,
-Peers, Solo. Where they stand and the words beside them are the page's
+Three pictures on the root page, one above the name of each way to play:
+Quizmaster, Peers, Solo. Where they stand and the words beside them are the page's
 (`docs/design/root-page.md`). This folder is the pictures: this file (what
 they are for, what they live with, how they are made) and `build/` (the
 script that draws them and the one that renders them for looking at).
@@ -28,7 +28,7 @@ where they would be playing, with whom, and what their device would show.
   it, doing something (the class at the wall, the votes split, the murmur),
   drawn in one hand; so these pictures are drawn in the film's.
 - The page shows them at 16:10, a third of its column: from 91 px wide on a
-  320 px phone to 227 px on a desktop (`docs/design/root-page.md`, "The
+  320 px phone to 216 px on a desktop (`docs/design/root-page.md`, "The
   ways to play"). At a phone's size the mockup's class had devices nobody
   could see.
 - The page is in four languages (`docs/design/root-page.md`, "Languages"),

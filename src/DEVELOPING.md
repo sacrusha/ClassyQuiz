@@ -236,6 +236,7 @@ the repo; read a script before running it. Directories there:
   implementers built on, scripts only, no screenshots. Puppeteer hangs when
   evaluating in a tab whose window has another tab in front; call
   `bringToFront()` first.
+- `first-page/`: the root page's probes (`docs/backlog.md`, Housekeeping).
 - `stacks/<name>/`: per-implementer scripts for starting and stopping a second
   local stack (`after-upload`, `fixc`, `flow`, `hard`, `identity`, `landing`,
   `lp`, `lp3`, `owner5`, `pics`, `solo`, `stack`, `tempo-bar`, `v3`, `winners`).

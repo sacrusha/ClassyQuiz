@@ -98,66 +98,117 @@ tablets, and a quiz made in the break.
 Purpose and reasons: docs/design/root-page.md.
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│ [fox] classyQuiz                   Code [_ _ _ _ _]  ▶      EN ▾     │
-├──────────────────────────────────────────────────────────────────────┤
-│          ┌ the film, 16:9, no sound ─────────────┐                   │
-│          │ poster: the class at the wall, the    │                   │
-│          │ votes split, no solution yet  [▶]     │                   │
-│          └───────────────────────────────────────┘                   │
-│          [▶] ──●──'───'─'──'────── 0:00 / 1:07 [1×] [full screen]    │
-│                              The example, step by step ›             │
-│ A quiz is played here in three ways: Solo, on your own; Peers, with  │
-│ friends, each on their own device; Quizmaster, you run it for a …    │
-├──────────────────────────────────┬───────────────────────────────────┤
-│ Build a quiz                     │ Open the quiz your AI made        │
-│ 1 Choose any good AI.            │ ┌ Big numbers … · question 4 of 10 ┐│ only with an open
-│   Free Claude Sonnet wrote the   │ │ [Back to the quiz ▶] Join code   ││ quiz this device
-│   example above, 4 Nov 2026 …    │ │ On another device: type 63953 47 ││ started, until its
-│ 2 Ask the AI to build you a quiz │ └──────────────────────────────────┘│ final ranking
-│   for classyquiz.pages.dev [Copy]│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│   [sheets][chess][1][3][▭][?]    │ │ [ Choose the .zip file ]       │ │
-│   tabs, one ask shown:           │ │   or drop it here              │ │
-│  ( Read classyquiz… Can you … )  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
-│     labels under the parts       │ On 3 of the last 30 days this …   │ only on a device that
-│                                  │                                   │ uploaded before, the
-│                                  │                                   │ site full lately
-├──────────────────────────────────┴───────────────────────────────────┤
-│ About classyQuiz … (English, for AIs)                                 │
+┌───────────────────────────────────────────────────────────────┐
+│ [fox] classyQuiz             Code [_ _ _ _ _]  ▶      EN ▾    │
+├───────────────────────────────────────────────────────────────┤
+│ ┌ Big numbers … · question 4 of 13 ───────────────────────┐   │ only with an open
+│ │ [Back to the quiz ▶]  Join code 63953                   │   │ quiz this device
+│ │ On another device: type 63953 47 in the code box.       │   │ started
+│ └─────────────────────────────────────────────────────────┘   │
+│ Here you play quizzes your own AI makes from your sheets,     │
+│ notes or ideas.                                               │
+│ [picture]           [picture]           [picture]             │
+│ Quizmaster          Peers               Solo                  │
+│ for a class or a    with friends, each  on your own, to       │
+│ group, on a big     on their own        practise or review    │
+│ screen              device                                    │
+│ ① Ask your AI for a quiz                                      │
+│ ( Read classyquiz.pages.dev. Can you make me a   [2 sheets] ) │
+│ ( classyQuiz with exercises like no. 1, 3 and 4 … English.  ) │
+│ The AI's answer: [▯ big-numbers-quiz.zip]                     │
+│ ② Open the quiz your AI made                                  │
+│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐   │
+│ │      [ Choose the .zip file ]   or drop it here         │   │
+│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘   │
+│ No quiz yet? Play the example ›        How to ask your AI ↓   │
+│ On 3 of the last 30 days this …                               │ only on a device that
+├───────────────────────────────────────────────────────────────┤ uploaded before, the
+│ From the exercise sheet to the class playing, in one minute   │ site full lately
+│ ┌ the film, 16:9, no sound ──────────────────────────────┐    │
+│ │ poster: the class at the wall, the votes split,        │    │
+│ │ no solution yet                            [▶]         │    │
+│ └────────────────────────────────────────────────────────┘    │
+│ [▶] ──●──'───'─'──'────── 0:00 / 1:07 [1×] [full screen]      │
+│                              The example, step by step ›      │
+├───────────────────────────────────────────────────────────────┤
+│ How to ask your AI                                            │
+│ Choose any good AI.                                           │
+│ Free Claude Sonnet wrote the example above, 4 Nov 2026 …      │
+│ Ask the AI to build you a quiz for classyquiz.pages.dev [Copy]│
+│ [Exercise sheets][A description][A training session]          │
+│ [With friends][On your own][Nothing decided yet]              │
+│ ( Read classyquiz… Can you … )   one ask shown,               │
+│     labels under the parts       the sheets ask labelled      │
+├───────────────────────────────────────────────────────────────┤
+│ What you can count on                                         │
+│ • Free, without accounts or sign-up.                          │
+│ • Played on your own, a quiz never leaves your browser. …     │
+│ • The code is open: github.com/sacrusha/ClassyQuiz            │
+│ The rest of this page is the manual for AIs, in English: …    │
+├───────────────────────────────────────────────────────────────┤
+│ About classyQuiz … (English, for AIs)                         │
 ```
+
+One column, in this order at every width. Where each part stands as the page
+opens: docs/design/root-page.md, "One column".
 
 - **The header**: the mark and the name, the code box, the language. On a
   phone held upright the mark stands alone, the name kept for screen
   readers. Where the mark and the name appear across the site, and why:
   docs/design/identity.md.
-- **The block above About** speaks DE, EN, FR or IT: the device's choice
+- **The part above About** speaks DE, EN, FR or IT: the device's choice
   (`cq.lang`), else the browser's language, else English. The static HTML is
   English, for AIs' fetchers. The lobby, wall, Remote and tablets stay
   English.
-- **The film**, 67 s without sound, follows the workflow: the sheets,
-  the AI, the .zip going up to the site, the wall, a student's tablet. Until ▶
-  is pressed or the time bar moved it is its poster, a picture: the class at
-  the wall, the votes split. Under it a video player's bar: play, the time bar
-  with ticks where the five steps start (dragging shows the step's name), the
-  time and the length, the speed, full screen; on a phone held upright the
-  time bar has a row of its own. At the end a replay icon on the end card.
-  Under it, "The example, step by step ›" links `/example` (the worked
-  example).
-- **The three ways**, one sentence above Build and Run: "A quiz is played
-  here in three ways: **Solo**, on your own; **Peers**, with friends, each
-  on their own device; **Quizmaster**, you run it for a group, on a big
-  screen." The names are the local check's cards', in every language.
-- **Below 860 px wide** Build and Run stand one above the other, Run first.
-- **Build's step 2** has six example asks behind six picture tabs: the
-  labelled one with photos of sheets, a chess quiz described in words (with
-  the AI, plan and date that answered it), practising alone for a test ("I'll
-  play it myself, so please keep the questions and answers to yourself"), a
-  games night with friends ("I'm playing too, so don't show me the
-  questions"), a training session on the big screen, and the open one ("Read
-  classyquiz.pages.dev. I need a classyQuiz. Help?"). Pictures: the sheets, a
-  chess board, one person, three people, a screen before an audience, a
-  question mark.
-- **Run ("Open the quiz your AI made") takes a .zip and nothing else.** Its
+- **Coming back**, above everything else: the latest quiz this device
+  started, while it is on the site (until Exit, final ranking included): its
+  title, where it stands, Back to the quiz (`/play#` + the teacher code),
+  "Join code" and the code, and "On another device: type 63953 47 in the
+  code box". No closing time, no Delete, no older quizzes.
+- **The sentence**, the page's heading: "Here you play quizzes your own AI
+  makes from your sheets, notes or ideas."
+- **The three ways**, a picture each, side by side on a phone too:
+  **Quizmaster**, "for a class or a group, on a big screen" (a teacher at
+  the big screen, the class with tablets); **Peers**, "with friends, each on
+  their own device" (three friends on a sofa, each with a phone); **Solo**,
+  "on your own, to practise or review" (someone at a desk with notes and a
+  phone). The names are the local check's cards', in every language. The
+  pictures aren't buttons.
+- **Step 1, "Ask your AI for a quiz"**: the sheets ask as a chat message,
+  the two sheets attached as small pictures; under it "The AI's answer:" and
+  the example's file by its name (big-numbers-quiz.zip, in the page's
+  language), which downloads it.
+- **Step 2, "Open the quiz your AI made"**: the box with "Choose the .zip
+  file" and, where a pointer drags, "or drop it here". Under it "No quiz
+  yet? Play the example ›" (the example on the local check, below) and "How
+  to ask your AI ↓" (down the page).
+- **The film**, under its heading, 67 s without sound, follows the workflow:
+  the sheets, the AI, the .zip going up to the site, the wall, a student's
+  tablet. Until ▶ is pressed or the time bar moved it is its poster, a
+  picture: the class at the wall, the votes split. Under it a video player's
+  bar: play, the time bar with ticks where the five steps start (dragging
+  shows the step's name), the time and the length, the speed, full screen;
+  on a phone held upright the time bar has a row of its own. At the end a
+  replay icon on the end card. Under it, "The example, step by step ›" links
+  `/example` (the worked example).
+- **How to ask your AI**: "Choose any good AI." with what is verified ("Free
+  Claude Sonnet wrote the example above, 4 Nov 2026: the one free AI that
+  does this reliably."); "Ask the AI to build you a quiz for" the address,
+  with Copy; and six example asks behind six tabs named in words: Exercise
+  sheets (the first step's ask, its parts labelled: this site, which
+  exercises, your class, how many, which language), A description (a chess
+  quiz, with the AI, plan and date that answered it), A training session (on
+  the big screen), With friends ("I'm playing too, so don't show me the
+  questions"), On your own ("I'll play it myself, so please keep the
+  questions and answers to yourself"), and Nothing decided yet ("Read
+  classyquiz.pages.dev. I need a classyQuiz. Help?").
+- **What you can count on**: "Free, without accounts or sign-up." "Played on
+  your own, a quiz never leaves your browser. Played in a room, a quiz is
+  deleted when the room is ended, or three hours after its last use. The
+  .zip is your lasting copy." "The code is open:" and the link. Then: "The
+  rest of this page is the manual for AIs, in English: what your AI reads
+  when you give it this address. You are welcome to read it too."
+- **The box takes a .zip and nothing else.** Its
   button, "Choose the .zip file", opens the file chooser; a .zip can also
   be dropped on the box. Nothing invites pasting.
   - A file pasted with Ctrl+V (copied in the file manager) opens like a
@@ -167,7 +218,7 @@ Purpose and reasons: docs/design/root-page.md.
     download from the chat and open here." It is counted as "paste".
   - Any other file gets "The site takes the quiz as a .zip file, not a
     .docx file." and the same sentence. Attempts are counted by format.
-- **Problems with the quiz:** listed in place, with "Copy the message for your
+- **Problems with the quiz:** listed under the box, with "Copy the message for your
   AI" (which asks for a corrected .zip, in English), plus "Continue without
   these pictures" when it's pictures.
 - **A browser that keeps no site data** can't pass the quiz to the check:
@@ -175,12 +226,7 @@ Purpose and reasons: docs/design/root-page.md.
   Try another browser."
 - **On success:** the local check (below), in this tab. Nothing has gone to
   the site.
-- **Coming back:** the latest quiz this device started, while it is on
-  the site (until Exit, final ranking included): its title, where it stands, Back to the
-  quiz (`/play#` + the teacher code), "Join code" and the code, and "On another device:
-  type 63953 47 in the code box". No closing time, no Delete, no older
-  quizzes.
-- **The own copy:** one line under Run, only on a device that has
+- **The own copy:** one line under the example's line, only on a device that has
   uploaded before (`cq.days`, dates only) and only when the site was full
   or busy on a day of the last 30 (`GET /api/site`).
 - **On the lobby's check (§3.3), before the players are let in,** on a day the free site is
@@ -215,7 +261,8 @@ everything to try the same on your own AI.
 ```
 
 "Start the example quiz" opens `/open?example=<lang>`: the example on the
-local check, read as Run reads a file, nothing uploaded. `/own-copy` and
+local check, read as the root page's box reads a file, nothing uploaded; the
+root page's "Play the example ›" opens the same. `/own-copy` and
 `/check` have the same small header.
 
 #### The local check (`/open`)

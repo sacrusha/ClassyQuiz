@@ -39,7 +39,7 @@ served with the headers the build writes (dist/_headers, the CSP among them); th
     on the button; the phone turned sideways in it gives the big film;
   - every language (desktop): each ask typed out before its send, no line wider than its box, no
     fitted text shrunk below 3/4; languages whose film words are drafts are named;
-  - the rest of the landing (Build, Run, the guidance) is unchanged against
+  - the page around the film (the two steps, How to ask, the foot, the guidance) is unchanged against
     `main`'s: every element's computed style;
   - no CSP violation, console error or page error anywhere.
 """
@@ -242,7 +242,7 @@ def check(url, mode):
         print(f'{mode}: the speed before ▶: {sp}; film.js fetched: {any("film.js" in r for r in log["requests"])}')
         if sp != [['0.5', '½×'], ['0.25', '¼×'], ['1', '1×']] or any('film.js' in r for r in log['requests']): problems.append(f'{mode}: the speed before ▶: {sp}')
         before_reqs = len(log['requests'])
-        pg.screenshot(path=str(OUT / f'{mode}-page.png'))  # the landing's first screen, the film in the strip's place
+        pg.screenshot(path=str(OUT / f'{mode}-page.png'))  # the page's first screen; the film stands below it
         pg.add_style_tag(content='.cqf-big { visibility: hidden }')  # the same frame without ▶, which goes when the film plays
         poster_im = shot(pg, 'poster-picture', mode)
         pg.add_style_tag(content='.cqf-big { visibility: visible }')
@@ -324,7 +324,7 @@ def check(url, mode):
         ctx, pg, log = page(b, mode, js=False)
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         f = OUT / f'{mode}-noscript.png'; pg.locator('.cqf-stage').screenshot(path=str(f))
-        w = pg.evaluate("document.querySelector('#cqfilm .cqf-stage > img').naturalWidth")
+        w = pg.evaluate("document.querySelector('#cqfilm .cqf-stage img').naturalWidth")  # in <noscript>, which scripts off makes part of the page
         print(f'{mode}: scripts off: poster {w} px wide, screenshot {f.name}')
         if not w: problems.append(f'{mode}: scripts off: no poster')
         ctx.close()
@@ -427,7 +427,7 @@ def controls(b, url):
     # never unseen: scrolled away or the tab hidden, it pauses and stays paused
     pg.click('.cqf-bar button'); pg.wait_for_timeout(200)
     pg.evaluate('scrollTo(0, document.body.scrollHeight)'); pg.wait_for_timeout(500); a = state()['playing']
-    pg.evaluate('scrollTo(0, 0)'); pg.wait_for_timeout(500); s = state()
+    pg.evaluate("document.querySelector('.cqf-film').scrollIntoView({ block: 'center' })"); pg.wait_for_timeout(500); s = state()
     if not state()['playing']: pg.click('.cqf-bar button')
     pg.wait_for_timeout(200); h0 = state()['playing']
     pg.evaluate("Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange'))")
@@ -484,13 +484,14 @@ def arrangement(b, url):
         pg = ctx.new_page()
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         m = pg.evaluate("""() => { const r = s => document.querySelector(s).getBoundingClientRect();
-          const st = r('.cqf-stage'), bar = r('.cqf-bar'), seek = r('.cqf-seek'), heads = [r('#build-h'), r('#run-h')].sort((a, b) => a.top - b.top);
-          return { vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth, stage: [st.left, st.width, st.height], first: [heads[0].top, heads[0].bottom],
+          document.querySelector('#film-h').scrollIntoView();  // the film stands below the first screen, under its heading
+          const st = r('.cqf-stage'), bar = r('.cqf-bar'), seek = r('.cqf-seek'), end = r('#example-link').bottom;
+          return { vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth, stage: [st.left, st.width, st.height], whole: [r('#film-h').top, end],
             bar: [bar.left, bar.width, bar.top - st.bottom],  seek: seek.width,
             rows: new Set([...document.querySelectorAll('.cqf-bar > *')].map(e => Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2))).size > 1 ? 2 : 1 }; }""")
         pg.screenshot(path=str(OUT / f'layout-{name}.png'))
         print(f'{name} {w} x {h}: film {m["stage"][1]:.0f} x {m["stage"][2]:.0f}, bar {m["bar"][1]:.0f} wide {m["bar"][2]:.0f} px under it on {m["rows"]} row(s), time bar {m["seek"]:.0f} wide;'
-              f' the first heading of Build and Run from {m["first"][0]:.0f} to {m["first"][1]:.0f} of {m["vh"]}; page {m["sw"]} wide; layout-{name}.png')
+              f' from its heading to the link under it {m["whole"][0]:.0f} to {m["whole"][1]:.0f} of {m["vh"]}; page {m["sw"]} wide; layout-{name}.png')
         if abs(m['bar'][0] - m['stage'][0]) > 0.5 or abs(m['bar'][1] - m['stage'][1]) > 0.5 or not 0 <= m['bar'][2] <= 12: problems.append(f'{name}: the bar is not under the film and as wide: {m}')
         if m['rows'] != rows: problems.append(f'{name}: the bar on {m["rows"]} row(s), not {rows}')
         if m['seek'] < 150: problems.append(f'{name}: the time bar is {m["seek"]:.0f} px wide')
@@ -515,7 +516,7 @@ def fullscreen(b, url, mode, fallback):
     pg.click('.cqf-big')
     wait_until(pg, "() => document.getElementById('cqfilm').dataset.film === 'on'")
     pg.click('.cqf-play')  # paused, so the keys' effect shows
-    y0 = 60
+    y0 = pg.evaluate("Math.round(document.querySelector('.cqf-film').getBoundingClientRect().top + scrollY) - 60")  # the film in view, a little down the page
     def enter():
         pg.evaluate(f'scrollTo(0, {y0})'); pg.wait_for_timeout(100)
         pg.focus('.cqf-full'); pg.keyboard.press('Enter'); pg.wait_for_timeout(400)
@@ -597,13 +598,15 @@ def languages(b, url):
     if drafts: print(f'NOTE: the film\'s words in {", ".join(drafts)} are drafts (film.js, CONTENT)')
 
 
-STYLES = """() => [...document.querySelectorAll('.cols, .cols *, .guide, .guide *')].map(e => { const c = getComputedStyle(e);
+REST = '.steps2, .steps2 *, .how, .how *, .rely, .rely *, .guide, .guide *'  # the page around the film: the two steps, How to ask, the foot, the guidance
+STYLES = """(rest) => [...document.querySelectorAll(rest)].map(e => { const c = getComputedStyle(e);
   return [e.tagName, e.className, ...['display', 'font', 'color', 'background-color', 'border', 'border-radius', 'padding', 'margin', 'width', 'grid-template-columns', 'text-decoration-line'].map(k => c.getPropertyValue(k))].join('|'); })"""
 
 
 def rest_unchanged(dist0, dist, port=0):
-    """Everything below the film (Build, Run, the guidance) against the site without it: every element's computed style.
-    One port for both: the page shows its own address."""
+    """The page around the film (the two steps, How to ask, the foot, the guidance) against `main`'s: every element's
+    computed style. One port for both: the page shows its own address. A `main` whose page is built differently
+    (no such parts) shows up here as a change, which it is."""
     got = {}
     for d, name in ((dist0, 'before'), (dist, 'after')):
         srv, u = serve(d, port)
@@ -613,15 +616,16 @@ def rest_unchanged(dist0, dist, port=0):
             for mode, vp in (('desk', {'width': 1300, 'height': 900}), ('phone', {'width': 390, 'height': 844})):
                 pg = b.new_page(viewport=vp)
                 pg.goto(u + '/'); pg.wait_for_load_state('networkidle')
-                got[mode, name] = pg.evaluate(STYLES)
-                pg.locator('.cols').screenshot(path=str(OUT / f'{mode}-cols-{name}.png')); pg.close()
+                got[mode, name] = pg.evaluate(STYLES, REST)
+                if pg.locator('.steps2').count(): pg.locator('.steps2').screenshot(path=str(OUT / f'{mode}-steps-{name}.png'))
+                pg.close()
             b.close()
         srv.shutdown(); srv.server_close()
     for mode in ('desk', 'phone'):
         a, c = got[mode, 'before'], got[mode, 'after']
         bad = [(x, y) for x, y in zip(a, c) if x != y]
-        print(f'{mode}: Build, Run and the guidance against main: {len(a)} elements, {len(bad) + abs(len(a) - len(c))} with another style')
-        if bad or len(a) != len(c): problems.append(f'{mode}: the landing below the film changed: {bad[:3]}')
+        print(f'{mode}: the page around the film against main: {len(a)} elements there, {len(c)} here, {len(bad) + abs(len(a) - len(c))} with another style')
+        if bad or len(a) != len(c): problems.append(f'{mode}: the page around the film changed against main: {len(a)} elements there, {len(c)} here; first differences {bad[:3]}')
 
 
 dist0 = prepare(BASE, patched=False)

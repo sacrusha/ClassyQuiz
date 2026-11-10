@@ -12,7 +12,10 @@ v4 item 10).
 ## Situation
 
 - The page is reached from the link under the landing's film ("The example,
-  step by step ›", `root-page.md`, "The film"). Plausible assumption: teachers
+  step by step ›", `root-page.md`, "The film"). The landing itself shows the
+  example's ask and its file, and starts the example quiz ("Two steps"
+  there); what only this page has is the photographs, the whole
+  conversation and the files to repeat it with. Plausible assumption: teachers
   read the path shown there as the example, and look behind it for a
   walkthrough, not the result alone (the page's name and its four steps).
 - An AI told the site's name may follow that link. A teacher's chat with

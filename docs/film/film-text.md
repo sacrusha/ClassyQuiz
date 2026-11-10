@@ -17,9 +17,9 @@ Where a source disagrees with the film or with another source, it is marked
 7. **Languages.** The site's own screens after the upload (the local check, the lobby's check, the join screen, the wall chrome, the Remote, the tablets) exist in English only: `landing-text.ts` header: "The lobby, the wall, the Remote and the tablets stay English too." The root page block (header code label, Build/Run text, asks) is in DE/EN/FR/IT, and the teacher's chat with their AI, and the quiz it makes, are in the teacher's language. The film follows the page's language the same way: the ask and the root page's words come from `landing-text.ts` at build time; the second ask, the AI's status lines and the quiz's words (one quiz, the 646 000 one, translated, not each language's own example) from `CONTENT` in `docs/film/build/film.js`, where `draft: true` marks a language whose words are drafts pending the owner's review; the site's own screens stay English (`SITE` in `film.js`, which `src/client/film.test.ts` holds to the site's code). Wall *pictures* exist in 4 languages with a different question each (see 3.9); the film uses none of them.
 8. **The checks are drawn as a laptop-wide window shows them, on a phone too** (a decision, the product owner's delegate's). On a phone the site stacks the local check's cards, Quizmaster's below the fold, and the lobby's toggle (3.3, 3.4). The film is for a first-time viewer to follow which way is chosen, on a phone as much as on a laptop (`README.md`, Purpose): three cards side by side, then a close-up on one, show a choice among three in one frame, where the stacked page would need a scroll to reach the card that is taken. What it costs: a teacher who watched on a phone and opens a quiz there meets the stacked page, not the one the film showed. Plausible assumption it rests on: the same three names and buttons, stacked, are recognised as the screen the film showed; nobody outside the project has tried.
 
-## 1. Ask 1 on the landing page ("#bubble"), all four languages
+## 1. Ask 1 on the landing page, all four languages
 
-Source: `src/public/index.html` `#bubble` (EN) and `src/client/landing-text.ts` `ask` in `en/de/fr/it`. Underlined parts (labelled on the page) in `[ ]`; `classyquiz.pages.dev` is the underlined address. The labels sit under the parts.
+Source: `src/public/index.html` `#ask-top` (EN, the first step's ask) and `src/client/landing-text.ts` `ask` in `en/de/fr/it`. Underlined parts (labelled on the page) in `[ ]`; `classyquiz.pages.dev` is the underlined address. The labels sit under the parts.
 
 - EN: Read [classyquiz.pages.dev]. Can you make me a classyQuiz with exercises [like no. 1, 3 and 4] from these two sheets? [For my 5th grade class], [about 10 questions], [in English].
   labels: this site · which exercises · your class · how many · which language
@@ -70,7 +70,7 @@ Layout: teacher bubbles are light-grey, right-aligned, rounded; AI text is plain
 ### 3.1 Root page header (`src/public/index.html`, `landing-text.ts`)
 - Left: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only).
 - Right: label **Code** (DE Code, FR Code, IT Codice; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join" / "Beitreten" / "Rejoindre" / "Entra"), then the language selector "EN ▾".
-- Below the film: the Build and Run columns, Run headed "Open the quiz your AI made" (Run first on narrow screens).
+- Below the header the page has, in one column: the sentence that says what the site is, the three ways to play, and two steps, the second headed "Open the quiz your AI made" (`docs/design/root-page.md`). The film draws the header and the box of 3.2 only; whether its picture of the page still matches is backlog v6 item 3's.
 
 ### 3.2 Run box (root page, before upload)
 Heading **Open the quiz your AI made** (DE Das Quiz deiner KI öffnen, FR Ouvrir le quiz de votre IA, IT Apri il quiz della tua IA; `landing-text.ts` `run`). Dashed box with button and a line under it (`upload`, `drop`):
