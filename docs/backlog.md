@@ -537,6 +537,14 @@ film and on `/example`. What a visitor needs is on the page; this is about
 each thing standing once, where the visitor needs it, and about what remains
 reading as one page. The page as built: `design/root-page.md`.
 
+The order is the owner's: the merged element (item 1) first, because its
+size and the information it conveys, at which cognitive load, influence the
+prune and how the overall purpose is achieved; the prune (item 2a) last,
+pending until then. On a first pass the examples may be mocks: because of
+what a run costs, the owner approves the actual examples and runs them
+himself, so each is done once. While mocks are in place, nothing of this is
+deployed to the public site.
+
 1. **Getting a quiz, in one place, for the visitor's own case** — a visitor
    who isn't a teacher recognises their case among the pictures and then
    reads the teacher's ask; an ask for their own case is below the film,
