@@ -77,6 +77,7 @@ function apply(l: Lang): void {
     $("#sheets h2").textContent = m.attachedH;
     $("#sheets p").textContent = m.attached[mock];
     $("#convo-p").textContent = m.mockNote;
+    $("#quiz p").textContent = m.quizP;
     const ask = (mock === "notes" ? head.askNotes : head.askTest).replaceAll("classyquiz.pages.dev", host);
     mockChat.innerHTML = `<p class="me">${esc(ask)}</p><p class="ai">${esc(m.reply[mock])}<span class="file">${esc(exampleZip(ex, l))}</span></p>`;
     return;

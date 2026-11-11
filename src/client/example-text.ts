@@ -36,7 +36,7 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
   en: {
     title: "The example, step by step · classyQuiz",
     h1: "The example, step by step",
-    lede: "How the example quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.",
+    lede: "How the number-line quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.",
     sheetsH: "The exercise sheets",
     sheetsP: "Two maths sheets on number lines, in German, photographed with a phone.",
     photo1: "Photo of page 1",
@@ -51,15 +51,15 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     quizH: "The quiz",
     quizP: "What the AI handed over: one .zip with the quiz and its pictures.",
     runH: "Try it",
-    runP: "Start the example as if you had opened it on the start page: you choose how it is played, on your own, with friends or for a class.",
-    start: "Start the example quiz",
+    runP: "Start this quiz as if you had opened its file on the start page: you choose how it is played, on your own, with friends or for a class.",
+    start: "Start this quiz",
     runNote: "On your own, it stays in this browser. With friends or a class, it runs on this site like any quiz.",
     translated: "The example was tested in all four of the site's languages and works in each. So that it is the same example in each, the German, French and Italian pages show this run, made in English, translated.",
   },
   de: {
     title: "Das Beispiel, Schritt für Schritt · classyQuiz",
     h1: "Das Beispiel, Schritt für Schritt",
-    lede: "Wie das Beispiel-Quiz entstanden ist, von den Arbeitsblättern bis zur Klasse – mit allem, was du brauchst, um dasselbe mit deiner eigenen KI auszuprobieren.",
+    lede: "Wie das Quiz zum Zahlenstrahl entstanden ist, von den Arbeitsblättern bis zur Klasse – mit allem, was du brauchst, um dasselbe mit deiner eigenen KI auszuprobieren.",
     sheetsH: "Die Arbeitsblätter",
     sheetsP: "Zwei Mathe-Arbeitsblätter zum Zahlenstrahl, auf Deutsch, mit dem Handy fotografiert.",
     photo1: "Foto von Seite 1",
@@ -74,15 +74,15 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     quizH: "Das Quiz",
     quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz und seinen Bildern.",
     runH: "Ausprobieren",
-    runP: "Starte das Beispiel, als hättest du es auf der Startseite geöffnet: Du wählst, wie es gespielt wird, allein, mit Freunden oder mit einer Klasse.",
-    start: "Beispiel-Quiz starten",
+    runP: "Starte dieses Quiz, als hättest du seine Datei auf der Startseite geöffnet: Du wählst, wie es gespielt wird, allein, mit Freunden oder mit einer Klasse.",
+    start: "Dieses Quiz starten",
     runNote: "Allein bleibt es in diesem Browser. Mit Freunden oder einer Klasse läuft es auf dieser Seite wie jedes Quiz.",
     translated: "Das Beispiel wurde in allen vier Sprachen der Seite getestet und funktioniert in jeder. Damit es überall dasselbe Beispiel ist, zeigen die deutsche, die französische und die italienische Seite diesen Durchlauf, der auf Englisch gemacht wurde, in Übersetzung.",
   },
   fr: {
     title: "L'exemple, pas à pas · classyQuiz",
     h1: "L'exemple, pas à pas",
-    lede: "Comment le quiz d'exemple a été créé, des fiches d'exercices jusqu'à la classe, avec tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
+    lede: "Comment le quiz sur la droite graduée a été créé, des fiches d'exercices jusqu'à la classe, avec tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
     sheetsH: "Les fiches d'exercices",
     sheetsP: "Deux fiches de maths sur la droite graduée, en allemand, photographiées avec un téléphone.",
     photo1: "Photo de la page 1",
@@ -91,21 +91,21 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     dl2: "Photo, page 2 (.jpg)",
     dlPdf: "Les fiches (.pdf)",
     convoH: "La conversation",
-    convoP: "Les photos et trois demandes à l'IA. Sa première réponse était un quiz ; la deuxième demande l'a modifié ; la troisième demandait un aperçu des écrans. Claude (Sonnet), version gratuite, 4 novembre 2026.",
+    convoP: "Les photos et trois demandes à l'IA. Sa première réponse était un quiz ; la deuxième demande l'a modifié ; la troisième demandait un aperçu des écrans. Claude (Sonnet), version gratuite, 4 novembre 2026.",
     convoAlt: "La conversation, en image",
     readAll: "Lire toute la conversation ›",
     quizH: "Le quiz",
-    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses images.",
+    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses images.",
     runH: "Le lancer",
-    runP: "Lancez l'exemple comme si vous l'aviez ouvert sur la page d'accueil : vous choisissez comment y jouer, en solo, entre amis ou avec une classe.",
-    start: "Lancer le quiz d'exemple",
+    runP: "Lancez ce quiz comme si vous aviez ouvert son fichier sur la page d'accueil : vous choisissez comment y jouer, en solo, entre amis ou avec une classe.",
+    start: "Lancer ce quiz",
     runNote: "En solo, il reste dans ce navigateur. Entre amis ou avec une classe, il fonctionne sur ce site comme n'importe quel quiz.",
     translated: "L'exemple a été testé dans les quatre langues du site et fonctionne dans chacune. Pour que ce soit le même exemple partout, les pages en allemand, en français et en italien montrent la traduction de cet essai, réalisé en anglais.",
   },
   it: {
     title: "L'esempio, passo per passo · classyQuiz",
     h1: "L'esempio, passo per passo",
-    lede: "Come è nato il quiz d'esempio, dalle schede di esercizi alla classe, con tutto il necessario per rifare la stessa prova con la tua IA.",
+    lede: "Come è nato il quiz sulla retta numerica, dalle schede di esercizi alla classe, con tutto il necessario per rifare la stessa prova con la tua IA.",
     sheetsH: "Le schede di esercizi",
     sheetsP: "Due schede di matematica sulla retta numerica, in tedesco, fotografate con il telefono.",
     photo1: "Foto della pagina 1",
@@ -120,8 +120,8 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     quizH: "Il quiz",
     quizP: "Quello che l'IA ha fornito: un file .zip con il quiz e le sue immagini.",
     runH: "Provalo",
-    runP: "Avvia l'esempio come se lo avessi aperto dalla pagina iniziale: scegli come giocarlo, per conto tuo, con gli amici o con una classe.",
-    start: "Avvia il quiz d'esempio",
+    runP: "Avvia questo quiz come se ne avessi aperto il file dalla pagina iniziale: scegli come giocarlo, per conto tuo, con gli amici o con una classe.",
+    start: "Avvia questo quiz",
     runNote: "Per conto tuo, resta in questo browser. Con gli amici o con una classe funziona su questo sito come qualsiasi quiz.",
     translated: "L'esempio è stato provato in tutte e quattro le lingue del sito e funziona in ognuna. Perché sia lo stesso esempio ovunque, le pagine in tedesco, francese e italiano mostrano la traduzione di questa prova, fatta in inglese.",
   },
@@ -146,7 +146,7 @@ export interface IdeaText {
 export const IDEA_TEXT: Record<Lang, IdeaText> = {
   en: {
     lede: "How the space quiz was made, from one ask with nothing attached to the class, with everything to try the same on your own AI.",
-    convoP: "One ask, nothing attached. The AI read the site, built the quiz with NASA photographs and four drawings of its own, checked it and handed over the .zip, with an overview of every question. Claude, 11 November 2026.",
+    convoP: "One ask, nothing attached. The AI read the site, built the quiz with photographs it found and four drawings of its own, checked it and handed over the .zip, with an overview of every question. Claude, 11 November 2026.",
     reviewH: "The overview",
     reviewP: "Every question with its solution, as the AI drew them for checking the quiz before it is played.",
     reviewAlt: "Every question of the quiz with its solution, as a picture",
@@ -156,7 +156,7 @@ export const IDEA_TEXT: Record<Lang, IdeaText> = {
   },
   de: {
     lede: "Wie das Weltraum-Quiz entstanden ist, von einer einzigen Anfrage ohne Anhang bis zur Klasse – mit allem, was du brauchst, um dasselbe mit deiner eigenen KI auszuprobieren.",
-    convoP: "Eine Anfrage, nichts angehängt. Die KI hat die Seite gelesen, das Quiz mit Fotos der NASA und vier eigenen Zeichnungen gebaut, es geprüft und die .zip-Datei geliefert, dazu eine Übersicht aller Fragen. Claude, 11. November 2026.",
+    convoP: "Eine Anfrage, nichts angehängt. Die KI hat die Seite gelesen, das Quiz mit Fotos, die sie gefunden hat, und vier eigenen Zeichnungen gebaut, es geprüft und die .zip-Datei geliefert, dazu eine Übersicht aller Fragen. Claude, 11. November 2026.",
     reviewH: "Die Übersicht",
     reviewP: "Alle Fragen mit ihren Lösungen, wie die KI sie gezeichnet hat, um das Quiz vor dem Spielen zu prüfen.",
     reviewAlt: "Alle Fragen des Quiz mit ihren Lösungen, als Bild",
@@ -166,17 +166,17 @@ export const IDEA_TEXT: Record<Lang, IdeaText> = {
   },
   fr: {
     lede: "Comment le quiz sur l'espace a été créé, d'une seule demande sans pièce jointe jusqu'à la classe, avec tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
-    convoP: "Une demande, rien en pièce jointe. L'IA a lu le site, construit le quiz avec des photos de la NASA et quatre dessins à elle, l'a vérifié et a fourni le .zip, avec un aperçu de toutes les questions. Claude, 11 novembre 2026.",
+    convoP: "Une demande, rien en pièce jointe. L'IA a lu le site, construit le quiz avec des photos qu'elle a trouvées et quatre dessins à elle, l'a vérifié et a fourni le .zip, avec un aperçu de toutes les questions. Claude, 11 novembre 2026.",
     reviewH: "L'aperçu",
     reviewP: "Toutes les questions avec leurs solutions, telles que l'IA les a dessinées pour vérifier le quiz avant d'y jouer.",
     reviewAlt: "Toutes les questions du quiz avec leurs solutions, en image",
     readReview: "Voir tout l'aperçu ›",
-    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses 23 images.",
-    translated: "L'exemple a été réalisé en allemand. Pour que ce soit le même exemple dans chaque langue, les pages en anglais, en français et en italien le montrent traduit : la conversation, l'aperçu et le quiz.",
+    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses 23 images.",
+    translated: "L'exemple a été réalisé en allemand. Pour que ce soit le même exemple dans chaque langue, les pages en anglais, en français et en italien le montrent traduit : la conversation, l'aperçu et le quiz.",
   },
   it: {
     lede: "Come è nato il quiz sullo spazio, da un'unica richiesta senza allegati fino alla classe, con tutto il necessario per rifare la stessa prova con la tua IA.",
-    convoP: "Una richiesta, niente in allegato. L'IA ha letto il sito, ha costruito il quiz con foto della NASA e quattro disegni suoi, l'ha verificato e ha fornito il file .zip, con una panoramica di tutte le domande. Claude, 11 novembre 2026.",
+    convoP: "Una richiesta, niente in allegato. L'IA ha letto il sito, ha costruito il quiz con foto che ha trovato e quattro disegni suoi, l'ha verificato e ha fornito il file .zip, con una panoramica di tutte le domande. Claude, 11 novembre 2026.",
     reviewH: "La panoramica",
     reviewP: "Tutte le domande con le loro soluzioni, come l'IA le ha disegnate per verificare il quiz prima di giocarlo.",
     reviewAlt: "Tutte le domande del quiz con le loro soluzioni, come immagine",
@@ -196,13 +196,10 @@ export const MOCKS = ["notes", "test"] as const;
 export type Mock = (typeof MOCKS)[number];
 export const isMock = (x: unknown): x is Mock => MOCKS.includes(x as Mock);
 
-/** The example each way's tab showed when the tabs were the ways to play, for a link of that time (?way=). */
-const WAY_EXAMPLE: Record<string, Example> = { quizmaster: "sheets", peers: "notes", solo: "test" };
-
-/** The example a page's address names: ?ex=, else an older link's ?way=, else the worked example, the sheets. */
+/** The example a page's address names: ?ex=, else the worked example, the sheets. */
 export function exampleOf(params: URLSearchParams): Example {
   const ex = params.get("ex");
-  return isExample(ex) ? ex : (WAY_EXAMPLE[params.get("way") ?? ""] ?? "sheets");
+  return isExample(ex) ? ex : "sheets";
 }
 
 /** An example's file in a language (docs/example/faces.py writes the table from the files). */
@@ -215,6 +212,8 @@ export const exampleZip = (ex: Example, lang: Lang): string => EXAMPLE_FILES[ex]
 export interface MockText {
   attachedH: string;
   mockNote: string;
+  /** What was handed over: the stand-in quizzes have no pictures. */
+  quizP: string;
   lede: Record<Mock, string>;
   attached: Record<Mock, string>;
   reply: Record<Mock, string>;
@@ -224,6 +223,7 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
   en: {
     attachedH: "What was attached",
     mockNote: "A stand-in: this example has had no run yet, so the conversation below is made up.",
+    quizP: "What the AI handed over: one .zip with the quiz.",
     lede: { notes: "How the friends' quiz was made, from the class notes to playing it together.", test: "How the practice quiz was made, from the marked test to playing it alone." },
     attached: { notes: "A page of class notes, photographed with a phone.", test: "The marked test, photographed with a phone." },
     reply: {
@@ -234,6 +234,7 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
   de: {
     attachedH: "Was angehängt war",
     mockNote: "Ein Platzhalter: Zu diesem Beispiel gibt es noch keinen echten Durchgang, das Gespräch unten ist erfunden.",
+    quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz.",
     lede: { notes: "Wie das Quiz der Freunde entstand, von den Notizen bis zum gemeinsamen Spiel.", test: "Wie das Übungsquiz entstand, von der korrigierten Prüfung bis zum Spiel allein." },
     attached: { notes: "Eine Seite Notizen aus dem Unterricht, mit dem Handy fotografiert.", test: "Die korrigierte Prüfung, mit dem Handy fotografiert." },
     reply: {
@@ -243,17 +244,19 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
   },
   fr: {
     attachedH: "Ce qui était joint",
-    mockNote: "Un exemple provisoire : il n'a pas encore été essayé, la conversation ci-dessous est inventée.",
+    mockNote: "Un exemple provisoire : il n'a pas encore été essayé, la conversation ci-dessous est inventée.",
+    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz.",
     lede: { notes: "Comment le quiz entre amis a été fait, des notes de cours à la partie ensemble.", test: "Comment le quiz de révision a été fait, du contrôle corrigé à la partie en solo." },
     attached: { notes: "Une page de notes de cours, photographiée avec un téléphone.", test: "Le contrôle corrigé, photographié avec un téléphone." },
     reply: {
-      notes: "Voici votre quiz : 6 questions sur la Révolution française, tirées de vos notes. Ouvre le .zip sur le site ; je n'ai pas montré les questions ici, pour que tu puisses jouer aussi.",
-      test: "Voici ton quiz de révision : 6 questions sur la cellule, surtout sur ce que tu as raté. J'ai gardé les questions hors de cette conversation ; ouvre le .zip sur le site.",
+      notes: "Voici votre quiz : 6 questions sur la Révolution française, tirées de vos notes de cours. Ouvre le .zip sur le site ; je n'ai pas montré les questions ici, pour que tu puisses jouer aussi.",
+      test: "Voici ton quiz de révision : 6 questions sur la cellule, surtout sur ce que tu as raté. J'ai gardé les questions hors de cette conversation ; ouvre le .zip sur le site.",
     },
   },
   it: {
     attachedH: "Che cosa era allegato",
     mockNote: "Un segnaposto: questo esempio non è ancora stato provato, la conversazione qui sotto è inventata.",
+    quizP: "Quello che l'IA ha fornito: un file .zip con il quiz.",
     lede: { notes: "Come è nato il quiz tra amici, dagli appunti alla partita insieme.", test: "Come è nato il quiz di ripasso, dalla verifica corretta alla partita da solo." },
     attached: { notes: "Una pagina di appunti delle lezioni, fotografata con il telefono.", test: "La verifica corretta, fotografata con il telefono." },
     reply: {
