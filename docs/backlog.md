@@ -14,7 +14,8 @@ the teacher a starting point to fix by hand in a slide editor; premade content
 fails on topic. The product is the path from someone's material to a quiz
 being played — run by a quizmaster for a class or another group, among
 friends with nobody running it, or alone — and the measure is the asker's
-time. Plausible assumption: the quiz is often
+time: where the output is trusted, the time it takes to type the request and
+the wait until the result is there (the owner). Plausible assumption: the quiz is often
 made in the ten-minute break before the lesson, with the teacher's own AI, and
 used once (so the format is checkable in seconds and the run is the review:
 `design/quiz-format.md`, `design/question-flow.md`). Plausible assumption: the
@@ -430,6 +431,103 @@ site meets it"). What the owner found while directions were tried is in
    (`docs/film/README.md`, Situation); its words are held to the page by
    `npm test`, its layout is not (`src/DEVELOPING.md`, "The landing film").
 
+## v7 — Different question types
+
+The goal sentence is the owner's and open. Two epics, by the owner's naming
+both "different question types": what a question presents beside text and
+pictures (the items below), and how a question is answered beyond pressing
+one of up to four (a number or a word, a place on the picture, an order, an
+estimate; named, no items yet, and whether it is in this version is open).
+Under both lies that today the AI turns whatever the material asks into
+choices of text and pictures.
+
+1. **A simple, extensible quiz format** — the format within which extension
+   happens (the owner); what exists: `design/quiz-format.md`. Open: its
+   purpose in more words; whether it stands above both epics, since a kind
+   of answer changes what an answer line means where a sound adds a line
+   like `Image:`.
+
+2. **Audio** — some of what is practised is heard, not read: how a word
+   sounds, which instrument or animal this is, a piece of music, an everyday
+   sound for children who don't read yet. A quiz of text and pictures can
+   only ask about such content, not present it. A sound can reach the quiz
+   in more than one way: a recording the asker hands their AI with the
+   material, a recording published under a free licence, or speech and notes
+   an AI makes where it or its connectors can. The site's part is the same
+   for each: a sound in the zip, played with its question. The recording the
+   asker brings is the easy case, and the example shows it with recordings
+   that are plainly not generated (bird voices, say). The guidance says what
+   the site plays and leaves where the sound comes from to the AI, so one
+   that can do more isn't held back by the page. Not known: whether the
+   guidance has to say more on copyright. Plausible assumption, unverified:
+   a recording carries rights beyond the work's, the teaching exceptions
+   differ by country and end where a room isn't a class, and free licences
+   mostly ask for credit.
+
+3. **Content in which time matters** — a still picture, text or a sound
+   can't present what these people want practised or played. The cases are
+   thought of, not asked for by anyone; some may be sliced off, and how any
+   is met is open (the owner: a purpose shapes the problem and what can
+   solve it, so the cases come first). The owner: stored video invites
+   trouble for the 1 GB the site holds at once
+   (`design/hosting-and-limits.md`).
+
+   At school:
+   - A traffic instructor visiting a primary class wants children to
+     practise judging when it is safe to cross; a still has already decided
+     it.
+   - A foreign-language teacher wants pupils to understand speech in a
+     situation, with gesture and setting; audio alone removes half of what
+     they are meant to use.
+   - A science teacher wants pupils to recognise how an animal moves: a
+     horse's gaits, a bird's flight, how a snake travels.
+   - A science teacher wants pupils to commit to a prediction before they
+     see how an experiment comes out.
+   - A physics teacher wants pupils to translate a motion they watch into a
+     graph; describing the motion in words does half of it for them.
+   - A media teacher wants pupils to practise telling a real clip from a
+     generated or manipulated one.
+   - A music teacher wants pupils to recognise a conductor's beat pattern,
+     or which player in an ensemble is playing.
+   - A primary teacher wants quick recognition trained, a number of dots at
+     a glance, where the short time is the point.
+   - A teacher wants to check what the class took from a film it watched.
+
+   Training and exams, mostly adults, often alone:
+   - A sign language teacher wants learners to recognise vocabulary; a sign
+     is a movement, and a still shows a handshape.
+   - A referee's or coach's instructor wants trainees to judge a situation
+     as it happens: foul or not, what is wrong in this technique.
+   - A first-aid or skills trainer wants a group to tell an action done
+     right from a faulty one, compressions at the right rhythm.
+   - A driving instructor wants learners to spot a hazard while a scene
+     develops.
+   - Someone preparing for a boat licence wants to recognise light signals,
+     which are defined by their rhythm of flashes.
+   - A workplace safety trainer wants staff to recognise hand signals, for
+     cranes or marshalling, of which several are movements.
+   - A medical or nursing student wants to recognise signs that are
+     movements: a gait, a tremor, a seizure, a rhythm on a monitor.
+   - A sports club's coach wants juniors to name what they see: a jump in
+     figure skating, a throw in judo, a referee's signal.
+
+   For fun, among people who know each other:
+   - A family or a wedding party wants a quiz about its own people, with
+     clips from its own phones.
+   - Someone hosting a quiz evening wants a film or sport round, because
+     such an evening has one.
+   - Children among themselves want a round on the games and shows they
+     know, from a few seconds of footage.
+   - A quizmaster who wants game-show tension wants a picture that reveals
+     itself gradually, the fastest to recognise it winning.
+
+   What the cases differ in: who holds the footage (the maker's own phone,
+   a course or publisher, the open web, or nobody, because it can be
+   drawn); whether sound belongs to it; whether people appear in it, which
+   touches "nothing identified"; and who plays: in the training cases
+   mostly one learner with a quiz someone else made and handed on, a use
+   the Project section doesn't name.
+
 ## Room on the Free plan
 
 The site carries the classes that use it within the Free plan and doesn't
@@ -495,7 +593,13 @@ The quiz is already made; it can be more than one activity.
   whether CJK, Arabic or Hebrew render correctly (font coverage on the
   projector and the students' buttons, RTL layout of question, tiles and
   ranking) is untested.
-- **Sound** — some classes want it.
+- **Sound effects and atmosphere** — some classes want it.
+- **No file to carry** — the zip is downloaded from the AI and opened on the
+  site by hand; an AI that hands over a link or delivers through a connector
+  would spare the asker that step. Waiting (the owner): ChatGPT, much of the
+  market, is blocked on pretty much everything until its business tier,
+  where everything unlocks, browser control included; to see whether
+  something moves there.
 - **Runs by itself** — the design kept for v5 item 7. Not core purpose, but
   value: the quiz carries on while
   the teacher's hands are elsewhere — a student who needs them, the next thing
