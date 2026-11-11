@@ -1,12 +1,18 @@
-"""Draws the example conversation as the AI app's own chat, in four languages and
-two colour schemes: src/public/examples/conversation-<lang>-<light|dark>.webp.
+"""Draws the examples' conversations as the AI app's own chat, in four languages and
+two colour schemes: the sheets run's, src/public/examples/conversation-<lang>-<light|dark>.webp,
+and the space run's (the root page's "Idea" tab), conversation-idea-<lang>-<light|dark>.webp,
+with that run's overview of its questions, review-idea-<lang>.webp, which its chat shows.
 
-Run (from anywhere): py -I docs/example/build.py [--lang de] [--theme dark] [--keep]
-  --lang / --theme  only that language / scheme (default: all 8 pictures)
+Run (from anywhere): py -I docs/example/build.py [--convo idea] [--lang de] [--theme dark] [--keep]
+  --convo           only that conversation, sheets or idea (default: both)
+  --lang / --theme  only that language / scheme (default: all 8 pictures of each)
   --keep            also leave the pages and the full-size PNGs in .tmp/example/ (git-ignored)
 
-The words are text.py's; the page is HTML drawn here and shot in the installed Edge
+The words are text.py's and space_text.py's; the page is HTML drawn here and shot in the installed Edge
 (playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright.
+The space run's overview: German is the AI's own review.png (space-review-original.webp here, 1500 px
+wide); the other three are drawn from their translated .zip by the site's own src/public/preview.py, the
+script the guidance offers the AI for it.
 The faces are those of the machine (Segoe UI, Cambria, Consolas on Windows): the
 pictures differ a little on another one.
 """
@@ -19,6 +25,7 @@ TMP = ROOT / ".tmp" / "example"
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(HERE))
 import text as T  # noqa: E402
+import space_text as S  # noqa: E402
 
 WIDTH = 681          # conversation-original.webp's width
 SCALE = 2            # rendered at 2x, scaled down to WIDTH
@@ -151,6 +158,7 @@ ICONS = {
     "speaker": '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12.5 19V5L7.5 9.5Z"/><path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10"/></svg>',
     "up": '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v8H4.5v-8Z"/><path d="M7 11l3.5-6.5a1.8 1.8 0 0 1 3.3 1.3L13 9.5h5a2 2 0 0 1 2 2.3l-1 5.8a2 2 0 0 1-2 1.7H7"/></svg>',
     "down": '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1)"><path d="M7 11v8H4.5v-8Z"/><path d="M7 11l3.5-6.5a1.8 1.8 0 0 1 3.3 1.3L13 9.5h5a2 2 0 0 1 2 2.3l-1 5.8a2 2 0 0 1-2 1.7H7"/></svg>',
+    "download": '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>',
     "retry": '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></svg>',
 }
 
@@ -214,12 +222,17 @@ svg .let { fill: var(--let); font-family: "Segoe UI", Arial, sans-serif; font-we
 .frame.red { border-color: #e14b4a; } .frame.blue { border-color: #368add; } .frame.orange { border-color: #ef9f26; } .frame.green { border-color: #639921; }
 .card.plain .mid { align-items: center; }
 .react { display: flex; gap: 11px; margin: 16px 0 0 0; color: var(--react); }
+.thumb { width: 86px; height: 130px; margin: 20px 0 0 -3px; border-radius: 10px; border: 1px solid var(--chipline); overflow: hidden; background: #fbf8f2; }
+.thumb img { display: block; width: 100%; }
+.thumb + .chip { margin-top: 10px; }
+.all { display: inline-flex; align-items: center; gap: 7px; margin: 10px 0 0 -3px; padding: 6px 11px; border-radius: 9px; background: var(--chip); border: 1px solid var(--chipline); font-size: 13px; line-height: 17px; }
 .react svg { display: block; }
 """
 
 
-def page(lang, theme):
-    return f'<!doctype html><html lang="{lang}" data-theme="{theme}"><head><meta charset="utf-8"><style>{CSS}</style></head><body>{"".join(chat(lang))}</body></html>'
+def page(lang, theme, convo="sheets"):
+    blocks = chat(lang) if convo == "sheets" else chat_space(lang)
+    return f'<!doctype html><html lang="{lang}" data-theme="{theme}"><head><meta charset="utf-8"><style>{CSS}</style></head><body>{"".join(blocks)}</body></html>'
 
 
 def chat(lang):
@@ -272,6 +285,57 @@ def chat(lang):
     return out
 
 
+def chat_space(lang):
+    """The space run: one ask, nothing attached, and the AI's one answer with its overview and the .zip."""
+    out = []
+    for kind, v in S.TURN:
+        if kind == "user":
+            out.append(f'<div class="user"><div class="bub">{fmt(v[lang], lang)}</div></div>')
+        elif kind == "ai":
+            out.append(f'<p class="ai">{fmt(v[lang], lang)}</p>')
+        elif kind == "fold":
+            out.append(f'<div class="st">{fmt(S.UI[v][lang], lang)}<i class="chev"></i></div>')
+        elif kind == "bullets":
+            out.append('<ul class="ai">' + "".join(f"<li>{fmt(b[lang], lang)}</li>" for b in v) + "</ul>")
+        elif kind == "review":
+            out.append(f'<div class="thumb"><img src="{(EX / f"review-idea-{lang}.webp").as_uri()}"></div>')
+        elif kind == "chip":
+            out.append(f'<div class="chip"><div class="ico">{ICONS["archive"]}</div><div><div class="ct">{html.escape(S.ZIP_TITLE[lang])}</div><div class="cs">{S.UI["zipSub"][lang]}</div></div></div>')
+        elif kind == "all":
+            out.append(f'<div class="all">{ICONS["download"]}<span>{fmt(S.UI["all"][lang], lang)}</span></div>')
+        elif kind == "reactions":
+            out.append('<div class="react">' + "".join(ICONS[k] for k in ("copy", "speaker", "up", "down", "retry")) + "</div>")
+        else:
+            raise SystemExit("unknown block " + kind)
+    return out
+
+
+# ------------------------------------------------------------------ the space run's overview
+
+REVIEW_W = 1500
+
+
+def reviews(langs):
+    """review-idea-<lang>.webp: German the AI's own, the others drawn from their .zip by the site's preview.py."""
+    import subprocess
+    from PIL import Image
+    from faces import EXAMPLES  # the files of the root page's examples
+    TMP.mkdir(parents=True, exist_ok=True)
+    for lang in langs:
+        out = EX / f"review-idea-{lang}.webp"
+        if lang == "de":
+            im = Image.open(HERE / "space-review-original.webp").convert("RGB")
+        else:
+            png = TMP / f"review-idea-{lang}.png"
+            subprocess.run([sys.executable, "-I", str(ROOT / "src" / "public" / "preview.py"), str(EX / EXAMPLES["idea"][lang]), str(png)],
+                           check=True, cwd=str(TMP), stdout=subprocess.DEVNULL)
+            im = Image.open(png).convert("RGB")
+            png.unlink()
+        im = im.resize((REVIEW_W, round(im.height * REVIEW_W / im.width)), Image.LANCZOS)
+        im.save(out, "WEBP", quality=80, method=6)
+        print(out.name, im.size, out.stat().st_size // 1024, "KB")
+
+
 # ------------------------------------------------------------------ shooting
 
 def main():
@@ -285,31 +349,35 @@ def main():
             return v
         return None
 
+    convos = [opt("--convo")] if "--convo" in args else ("sheets", "idea")
     langs = [opt("--lang")] if "--lang" in args else T.LANGS
     themes = [opt("--theme")] if "--theme" in args else ("light", "dark")
     keep = "--keep" in args
     check_film()
+    if "idea" in convos:
+        reviews(langs)
     from playwright.sync_api import sync_playwright
     from PIL import Image
     TMP.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         b = p.chromium.launch(channel="msedge")
-        for lang in langs:
-            for theme in themes:
-                f = TMP / f"chat-{lang}-{theme}.html"
-                f.write_text(page(lang, theme), encoding="utf-8")
+        for convo, lang, theme in [(c, la, th) for c in convos for la in langs for th in themes]:
+            if True:
+                tag = f"{'idea-' if convo == 'idea' else ''}{lang}-{theme}"
+                f = TMP / f"chat-{tag}.html"
+                f.write_text(page(lang, theme, convo), encoding="utf-8")
                 ctx = b.new_context(viewport={"width": WIDTH, "height": 900}, device_scale_factor=SCALE,
                                     color_scheme="dark" if theme == "dark" else "light")
                 pg = ctx.new_page()
                 pg.goto(f.as_uri())
                 pg.evaluate("document.fonts.ready")
-                png = TMP / f"chat-{lang}-{theme}.png"
+                png = TMP / f"chat-{tag}.png"
                 pg.screenshot(path=str(png), full_page=True)
                 ctx.close()
                 im = Image.open(png).convert("RGB")
                 h = round(im.height * WIDTH / im.width)
                 im = im.resize((WIDTH, h), Image.LANCZOS)
-                out = EX / f"conversation-{lang}-{theme}.webp"
+                out = EX / f"conversation-{tag}.webp"
                 im.save(out, "WEBP", quality=88, method=6)
                 print(out.name, im.size, out.stat().st_size // 1024, "KB")
                 if not keep:
