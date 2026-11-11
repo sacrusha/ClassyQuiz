@@ -95,8 +95,7 @@ For the read:
   "niveau CM1" and Italian "quarta elementare", as the sheets ask's grade.
 - **The notes' and the test's asks** are stand-ins until the owner's runs, and go with them;
   their words aside, French "notes de cours" (above, the tabs).
-- **Small words**: "Vom Arbeitsblatt zum Quiz
-  in der Klasse, in einer Minute" over the film ("zur spielenden Klasse" was the English
+- **Small words**: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute" over the film ("zur spielenden Klasse" was the English
   participle); "Die Seite kann dieses Quiz noch nicht starten:", the subject first, since "Dieses
   Quiz kann die Seite …" doesn't show which of the two can't. French "Code pour participer" on
   the card of a quiz to come back to ("rejoindre" wants an object); "et non de texte" in the

@@ -160,9 +160,9 @@ German at 360 × 640 wasn't measured. Another tab can be taller than the first, 
 moves down by the difference. On Sheets the button is whole at every size
 from 360 × 640 up (19 px at least, German and French at 360 × 640). With
 the mock asks of Notes and Test, and the marker of a stand-in, which takes a
-row of its own on a phone, at 360 × 640 the button reaches the edge on Notes
-in English and Italian and on French Test, and is cut by 3 px in German
-(Notes, Test) and by 21 on French Notes; at 390 × 664 and on a 1366 × 650
+row of its own on a phone, at 360 × 640 the button reaches the edge on
+English Notes, Italian Notes and Test and French Test, and is cut by 3 px in
+German (Notes, Test) and by 21 on French Notes; at 390 × 664 and on a 1366 × 650
 laptop it is whole on every tab (19 and 9 px at least). A
 visitor who has chosen a tab is reading the chat, not looking for the box;
 the asks that replace the mocks are measured again. A quiz to come back to

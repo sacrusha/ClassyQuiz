@@ -78,8 +78,9 @@ script and said to be made up (`MOCK_TEXT`), the mock `.zip`
 start, and without the note below.
 
 Each page is one example of the landing's four, so its words name its quiz
-("How the number-line quiz was made") and start "this quiz"; its heading,
-"The example, step by step", is the one the visitor came from.
+("How the number-line quiz was made") and start "this quiz"; the heading,
+"The example, step by step", is the same on all four and means the example
+whose "The whole example ›" the visitor pressed.
 
 Under the steps, a note: the example was tested in all four languages and
 works in each; so that it is the same example in each, the German, French and
