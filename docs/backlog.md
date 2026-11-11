@@ -647,15 +647,14 @@ deployed to the public site.
       on the check's cards, where the way is chosen, and "The .zip is your
       lasting copy.", said nowhere else, joined it there:
       `design/local-check.md`, "The check"). Not said on the page for
-      people since: that playing costs nothing, and, but in the guidance's
-      English, that the code is open. The file's download is on the file
-      itself (the design's least surprise, a press on a file downloads it;
-      `design/root-page.md`, "Getting a quiz"). The first heading takes
+      people: that playing costs nothing, and that the code is open, which
+      only the guidance says, in English. The file's download is on the
+      file itself (the design's least surprise, a press on a file downloads
+      it; `design/root-page.md`, "Getting a quiz"). The first heading takes
       three lines on a phone in every language, since it says who plays.
-      Kept: the film's speed button, the video
-      player's own control, which answers the film's open point, its pace
-      for the teacher who wants the steps (`docs/film/README.md`, "Not
-      known").
+      Kept: the film's speed button, the video player's own control, which
+      answers the film's open point, its pace for the teacher who wants the
+      steps (`docs/film/README.md`, "Not known").
 
    b. **The first screen on a phone, in four languages** — v6 item 1's open
       point, the button that opens a file cut by the screen's edge, is
