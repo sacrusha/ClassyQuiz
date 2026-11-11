@@ -1384,7 +1384,7 @@ function avatarSvg(av, label = true) {
       const whichDown = hw + 12 + ww > 672;
       const headBot = hTop + 24 + (whichDown ? 19.7 : 0);
       G(g, `${num(hTop + 0.5 + 11.6, '1')}${T_(0, lineOf(hTop, 24, 19.2), TX.getH, 19.2, { cls: 'b', fit: 672 })}
-        ${T_(whichDown ? 0 : hw + 12, whichDown ? lineOf(hTop + 24, 19.7, 14.08) : lineOf(hTop, 24, 19.2), TX.which, 14.08, { fill: C.muted, fit: 672 })}`);
+        ${T_(whichDown ? 0 : hw + 12, whichDown ? lineOf(hTop + 24, 19.7, 14.08) : lineOf(hTop, 24, 19.2), TX.which, 14.08, { fill: C.muted, fit: whichDown ? 672 : 672 - hw - 12 })}`);
       // the ways to play, tabs in words: the name and whose case it is, the Quizmaster's open into the chat (the card's ground,
       // the chat's border round it), the others on the tab ground; widths as the page's flex shares them (1.3, 1, 1, .8 of
       // what is left over the gaps, the padding and the borders)
