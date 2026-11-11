@@ -107,23 +107,27 @@
   .step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
   .landing .step-head h2 { margin: 0; }
   .which { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.4; }
-  /* A stand-in until the owner's run (backlog, "The page for people", item 1); nothing with one is deployed. */
+  /* A stand-in until the owner's run (backlog, "The page for people", item 1); nothing with one is deployed. Made by the
+     script (client/home.ts), in the page's language, so a fetcher doesn't read it between the heading and the tabs. */
   .mock { margin-left: auto; font: 600 .72rem/1.5 var(--font-text); color: var(--muted); border: 1px dashed var(--muted); border-radius: 6px; padding: 0 6px; }
 
   /* Getting a quiz (root-page.md, "Getting a quiz"): the examples as tabs in words under the first step's heading, each named by
      what the visitor starts from, one word, and a fifth for whoever recognises none of them. A tab picks the example in the chat
      under it and nothing else. The chosen tab is open into the chat, the others stand on a ground of their own, so a phone, which
      shows nothing on hover, shows them as tabs to press. Where a language's five names don't fit the row (a phone under about
-     360 px), the row scrolls sideways under a fade at its right edge, as scrolling tabs do, and the page itself doesn't. */
-  .ways-wrap { position: relative; margin: .55rem 0 0; z-index: 1; }
-  .ways { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-  .ways::-webkit-scrollbar { display: none; }
-  .ways button { flex: 1 0 auto; margin: 0 0 -1px; padding: 7px 12px 8px; border: 1px solid transparent; border-bottom: 0; border-radius: 12px 12px 0 0; background: var(--tab); color: var(--muted); font: 700 1rem/1.2 var(--font-brand); white-space: nowrap; text-align: left; cursor: pointer; }
-  .ways button[aria-selected="true"] { background: var(--card); border-color: var(--rule); color: var(--fg); cursor: default; }
-  .ways button[aria-selected="false"] { border-color: var(--tab-edge); }
-  @media (hover: hover) { .ways button[aria-selected="false"]:hover { color: var(--fg); } }
-  .ways button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .ways-wrap.more::after { content: ""; position: absolute; right: 0; top: 0; bottom: 1px; width: 28px; pointer-events: none; background: linear-gradient(to right, transparent, var(--bg)); }
+     360 px), the row scrolls sideways under a fade at the edge it has more tabs beyond, as scrolling tabs do, and the page
+     itself doesn't. */
+  .extabs-wrap { position: relative; margin: .55rem 0 0; z-index: 1; }
+  .extabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .extabs::-webkit-scrollbar { display: none; }
+  .extabs button { flex: 1 0 auto; margin: 0 0 -1px; padding: 7px 12px 8px; border: 1px solid transparent; border-bottom: 0; border-radius: 12px 12px 0 0; background: var(--tab); color: var(--muted); font: 700 1rem/1.2 var(--font-brand); white-space: nowrap; text-align: left; cursor: pointer; }
+  .extabs button[aria-selected="true"] { background: var(--card); border-color: var(--rule); color: var(--fg); cursor: default; }
+  .extabs button[aria-selected="false"] { border-color: var(--tab-edge); }
+  @media (hover: hover) { .extabs button[aria-selected="false"]:hover { color: var(--fg); } }
+  .extabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .extabs-wrap.more::after, .extabs-wrap.less::before { content: ""; position: absolute; top: 0; bottom: 1px; width: 28px; pointer-events: none; z-index: 1; }
+  .extabs-wrap.more::after { right: 0; background: linear-gradient(to right, transparent, var(--bg)); }
+  .extabs-wrap.less::before { left: 0; background: linear-gradient(to left, transparent, var(--bg)); }
 
   /* The chat is the AI's, where the ask is typed: the visitor's message on the right with what it attaches beside it, the AI's
      answer on the left under "The AI's answer:". Its corner under the chosen tab is square while that tab is the first or the
@@ -165,7 +169,7 @@
   /* The file's way into the box, when an example is played: a copy of its name moves onto the button. */
   .flying { position: fixed; z-index: 50; margin: 0; pointer-events: none; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 5px 10px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
 
-  /* The second step: the place a file goes, outside the tabs, since it is the same for every way. Dashed, as a place to drop
+  /* The second step: the place a file goes, outside the tabs, since it is the same for every example. Dashed, as a place to drop
      something is. Here its heading and button share a row; on a phone the button is as wide as the box. */
   .run { margin-top: .9rem; }
   .runbox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; border: 2px dashed var(--dash); border-radius: 16px; padding: 12px 14px; transition: border-color .15s, background-color .15s; }
@@ -194,9 +198,9 @@
     .landing h1 { font-size: min(1.25rem, 5.25vw); margin: .6rem 0 .6rem; }
     .landing h2 { font-size: 1.1rem; }
     .which { font-size: .84rem; }
-    .ways-wrap { margin-top: .35rem; }
-    .ways { gap: 3px; }
-    .ways button { padding: 6px 7px 7px; font-size: .86rem; }
+    .extabs-wrap { margin-top: .35rem; }
+    .extabs { gap: 3px; }
+    .extabs button { padding: 6px 7px 7px; font-size: .86rem; }
     .chat { padding: 9px 10px; }
     .mine { gap: 7px; }
     .att { margin-top: 6px; }
@@ -218,7 +222,7 @@
     .runbox .open { flex: 1 1 100%; padding: 11px 20px; }
   }
   /* Five names in a 360 px row, German's the longest. */
-  @media (max-width: 380px) { .ways button { font-size: .8rem; padding-left: 6px; padding-right: 6px; } }
+  @media (max-width: 380px) { .extabs button { font-size: .8rem; padding-left: 6px; padding-right: 6px; } }
   /* The narrowest phones: the file's button wraps rather than pushing the card wider. */
   @media (max-width: 340px) { .play { white-space: normal; text-align: left; } }
 
@@ -241,13 +245,9 @@
   .resume b { font-family: var(--font-brand); font-variant-numeric: tabular-nums; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
   @media (max-width: 440px) { .resume { grid-template-columns: 1fr; } .resume .back { grid-row: auto; justify-self: start; margin: 5px 0 1px; } }
 
-  /* Below the first screen: finding out more, what to count on. Then where the part for people ends: one sentence in the page's
-     language, and the manual on the same ground and the same edge. */
-  .landing .sec { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); }
-  .rely ul { padding-left: 1.2rem; margin: .4rem 0 0; }
-  .hinge { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); color: var(--muted); }
-
-  .guide { margin-top: 1.6rem; }
+  /* Below the first screen: the film, for finding out more. Then the manual, on the same ground and the same edge, under a rule
+     as the film is: its headings say what it is. */
+  .landing .sec, .guide { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); }
 </style>
 </head>
 <body class="follows-dark">
@@ -262,8 +262,8 @@
 
 <div class="steps">
 <section class="step get" id="get" aria-labelledby="get-h">
-<div class="step-head"><h2 id="get-h" data-t="getH">Ask your AI for a quiz</h2> <p class="which" data-t="which">Any AI subscription will do, or free Claude.</p> <span class="mock" id="mock" hidden>mock example</span></div>
-<div class="ways-wrap" id="ways-wrap"><div class="ways" id="ways">
+<div class="step-head"><h2 id="get-h" data-t="getH">Ask your AI for a quiz</h2> <p class="which" data-t="which">Any AI subscription will do, or free Claude.</p></div>
+<div class="extabs-wrap" id="extabs-wrap"><div class="extabs" id="extabs">
   <button type="button" id="tab-idea" aria-controls="ex-idea" data-t="tabIdea">Idea</button>
   <button type="button" id="tab-sheets" aria-controls="ex-sheets" data-t="tabSheets">Sheets</button>
   <button type="button" id="tab-notes" aria-controls="ex-notes" data-t="tabNotes">Notes</button>
@@ -272,7 +272,7 @@
 </div></div>
 <div class="chat">
   <div class="ex" id="ex-idea">
-    <div class="mine"><blockquote class="bubble"><span class="said" id="ask-idea">Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you do 20 questions without repeats? If not, fewer.</span></blockquote></div>
+    <div class="mine"><blockquote class="bubble"><span class="said" id="ask-idea">Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you manage 20 questions without it getting repetitive? If not, fewer.</span></blockquote></div>
     <div class="answer">
       <p class="gives" data-t="gives">The AI's answer:</p>
       <div class="file"><span class="face" data-face="idea"><noscript><img src="/landing/face-idea-en.webp" width="464" height="290" alt=""></noscript></span><span class="meta"><a class="zip" href="/examples/space-quiz.zip" download><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span><span class="zipname">space-quiz.zip</span><span class="size">3.4 MB<svg viewBox="0 0 11 12" aria-hidden="true"><path d="M5.5 1v7M2.3 5.2 5.5 8.4 8.7 5.2M1 11h9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></a></span></div>
@@ -327,17 +327,6 @@
     <div class="cqf-bar"><button class="cqf-play" type="button" aria-label="Play" data-t-aria="play">&#9654;</button><span class="cqf-seek"><input type="range" min="0" max="68" step="0.1" value="0" aria-label="Time in the film" data-t-aria="seek" aria-valuetext="0:00"></span><span class="cqf-time">0:00<span class="cqf-dur"> / 1:08</span></span><button class="cqf-speed" type="button" aria-label="Speed" data-t-aria="speed" data-rate="1">1&times;</button><button class="cqf-full" type="button" aria-label="Full screen" data-t-aria="full" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="out" d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg></button></div></div>
 </div></div>
 </section>
-
-<section class="sec rely" aria-labelledby="rely-h">
-  <h2 id="rely-h" data-t="relyH">What you can count on</h2>
-  <ul>
-    <li data-t="relyFree">Free, without accounts or sign-up.</li>
-    <li data-t="relyKept">Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy.</li>
-    <li><span data-t="relyOpen">The code is open:</span> <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a></li>
-  </ul>
-</section>
-
-<p class="hinge" data-t="manual">The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too.</p>
 </div>
 
 <main>

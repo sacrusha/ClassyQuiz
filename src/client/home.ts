@@ -65,11 +65,16 @@ const TABS: { id: Example | "help"; ask: (t: Text) => string }[] = [
 ];
 const tabs = TABS.map((a) => $(`#tab-${a.id}`) as HTMLButtonElement);
 const panels = TABS.map((a) => $(`#ex-${a.id}`));
-const bar = $("#ways");
+const bar = $("#extabs");
 /** The AI's question back in the help tab, under the label every answer has: made here, so a fetcher doesn't read an AI's words as the page's. */
 const helpAnswer = document.createElement("div");
 helpAnswer.className = "answer";
 helpAnswer.innerHTML = `<p class="gives"></p><p class="said-ai"></p>`;
+/** Beside the first step's heading while a tab's example is a stand-in (example-text.ts, MOCKS; the help tab's answer too): made here, so a fetcher doesn't read it. */
+const mock = document.createElement("span");
+mock.className = "mock";
+mock.hidden = true;
+$("#get .step-head").append(mock);
 {
   bar.setAttribute("role", "tablist");
   bar.setAttribute("aria-labelledby", "get-h");
@@ -123,17 +128,19 @@ function chooseTab(i: number): void {
     tab.tabIndex = on ? 0 : -1;
     panels[j].hidden = !on;
   });
-  $("#mock").hidden = !(isMock(TABS[i].id) || TABS[i].id === "help");
+  mock.hidden = !(isMock(TABS[i].id) || TABS[i].id === "help");
   // A row that scrolls (a narrow phone): the chosen tab comes into it.
   if (bar.scrollWidth > bar.clientWidth) tabs[i].scrollIntoView({ block: "nearest", inline: "nearest" });
   edges();
 }
 
-/** The row's edges: the fade where more tabs are beyond the right one, and the chat's corner square under a chosen tab at either end. */
+/** The row's edges: a fade at either edge that has more tabs beyond it, and the chat's corner square under a chosen tab at either end. */
 function edges(): void {
   const i = tabs.findIndex((b) => b.getAttribute("aria-selected") === "true");
   const scrolls = bar.scrollWidth > bar.clientWidth + 1;
-  $("#ways-wrap").classList.toggle("more", bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 2);
+  const wrap = $("#extabs-wrap");
+  wrap.classList.toggle("more", bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 2);
+  wrap.classList.toggle("less", bar.scrollLeft > 1);
   const get = $("#get");
   get.classList.toggle("first", i === 0 && bar.scrollLeft < 1);
   get.classList.toggle("last", i === tabs.length - 1 && !scrolls);
@@ -166,6 +173,7 @@ function renderExamples(): void {
   helpAnswer.querySelector(".gives")!.textContent = t.gives;
   helpAnswer.querySelector(".said-ai")!.textContent = t.helpReply;
   helpAnswer.lang = lang;
+  mock.textContent = t.mock;
   edges();
 }
 

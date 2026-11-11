@@ -76,7 +76,7 @@ test("the static page carries the English table's words", async () => {
   for (const [id, ask] of [["idea", TEXT.en.askIdea], ["sheets", askText(TEXT.en)], ["notes", TEXT.en.askNotes], ["test", TEXT.en.askTest], ["help", TEXT.en.askHelp]]) {
     assert.ok(html.includes(`<span class="said" id="ask-${id}">${ask}</span>`), `the ${id} ask differs from landing-text.ts's`);
   }
-  for (const key of ["what", "tabIdea", "tabSheets", "tabNotes", "tabTest", "unsure", "help", "getH", "which", "gives", "see", "run", "upload", "relyKept", "manual"]) assert.ok(seen.has(key), `index.html has no ${key}`);
+  for (const key of ["what", "tabIdea", "tabSheets", "tabNotes", "tabTest", "unsure", "help", "getH", "which", "gives", "see", "run", "upload"]) assert.ok(seen.has(key), `index.html has no ${key}`);
 });
 
 // The film (public/js/film.js) types the sheets ask, shows the words of the page's first screen and its first tab's file, and names its chapters and controls as this file has them, copied in when

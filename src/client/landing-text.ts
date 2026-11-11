@@ -63,12 +63,6 @@ export interface Text extends SiteWords {
   size: (bytes: number) => string;
   /** The film's heading, where it stands for whoever wants to find out more. */
   filmH: string;
-  /** Where the part for people ends: what a person can count on, and that the manual for AIs follows. */
-  relyH: string;
-  relyFree: string;
-  relyKept: string;
-  relyOpen: string;
-  manual: string;
   /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
   capSheet: string;
   capAi: string;
@@ -96,6 +90,8 @@ export interface Text extends SiteWords {
   helpReply: string;
   /** Which AI, beside the first step's heading. */
   which: string;
+  /** Beside the first step's heading while the chosen tab's example is a stand-in, until the owner's run (backlog, "The page for people", item 1). */
+  mock: string;
   /** On the example's file: opens it in the box below, as a file of one's own is opened. */
   playThis: string;
   ask: AskPart[];
@@ -151,11 +147,6 @@ const en: Text = {
   download: "Download",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1)} MB`),
   filmH: "From the exercise sheet to the class playing, in one minute",
-  relyH: "What you can count on",
-  relyFree: "Free, without accounts or sign-up.",
-  relyKept: "Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy.",
-  relyOpen: "The code is open:",
-  manual: "The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too.",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
   capZip: "The .zip, opened here",
@@ -178,7 +169,7 @@ const en: Text = {
   tabSheets: "Sheets",
   tabNotes: "Notes",
   tabTest: "Test",
-  askIdea: "Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you do 20 questions without repeats? If not, fewer.",
+  askIdea: "Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you manage 20 questions without it getting repetitive? If not, fewer.",
   askNotes: "Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to learn and have fun. I'm playing too, so don't show me the questions.",
   askTest: "Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.",
   askHelp: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
@@ -186,6 +177,7 @@ const en: Text = {
   help: "None of these, or not sure yet",
   unsure: "Not sure?",
   which: "Any AI subscription will do, or free Claude.",
+  mock: "mock example",
   playThis: "Play this quiz ↓",
   copied: "Copied",
   run: "Open the quiz your AI made",
@@ -238,11 +230,6 @@ const de: Text = {
   download: "Herunterladen",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`),
   filmH: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute",
-  relyH: "Worauf du zählen kannst",
-  relyFree: "Kostenlos, ohne Konto und ohne Anmeldung.",
-  relyKept: "Spielst du allein, verlässt das Quiz deinen Browser nie. Spielen mehrere, wird das Quiz gelöscht, sobald es beendet ist, spätestens aber drei Stunden nach der letzten Benutzung. Die .zip-Datei ist die Kopie, die dir bleibt.",
-  relyOpen: "Der Quellcode ist offen:",
-  manual: "Der Rest dieser Seite ist das Handbuch für KIs, auf Englisch: was deine KI liest, wenn du ihr diese Adresse gibst. Du darfst es gern auch lesen.",
   capSheet: "Deine Arbeitsblätter",
   capAi: "Deine KI",
   capZip: "Die .zip-Datei, hier geöffnet",
@@ -273,6 +260,7 @@ const de: Text = {
   help: "Nichts davon, oder noch unsicher",
   unsure: "Unsicher?",
   which: "Jedes KI-Abo reicht, sonst Claude gratis.",
+  mock: "Platzhalter",
   playThis: "Dieses Quiz spielen ↓",
   copied: "Kopiert",
   run: "Öffne das Quiz deiner KI",
@@ -330,11 +318,6 @@ const fr: Text = {
   download: "Télécharger",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} Ko` : `${(n / 1048576).toFixed(1).replace(".", ",")} Mo`),
   filmH: "De la fiche d'exercices à la classe qui joue, en une minute",
-  relyH: "Ce sur quoi vous pouvez compter",
-  relyFree: "Gratuit, sans compte ni inscription.",
-  relyKept: "En solo, le quiz ne quitte jamais votre navigateur. À plusieurs, le quiz est supprimé dès qu'il est terminé, au plus tard trois heures après sa dernière utilisation. Le fichier .zip reste votre copie.",
-  relyOpen: "Le code source est ouvert :",
-  manual: "Le reste de cette page est le manuel pour les IA, en anglais : ce que lit votre IA quand vous lui donnez cette adresse. Vous pouvez le lire vous aussi.",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
   capZip: "Le .zip, ouvert ici",
@@ -355,16 +338,17 @@ const fr: Text = {
   ],
   tabIdea: "Idée",
   tabSheets: "Fiches",
-  tabNotes: "Notes",
+  tabNotes: "Cours",
   tabTest: "Contrôle",
-  askIdea: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz sur l'espace, niveau CM1, avec des images. L'ordre des planètes est connu ; les noms des lunes seraient trop difficiles. Tu arrives à 20 questions sans répétitions ? Sinon, moins.",
-  askNotes: "Lis classyquiz.pages.dev. Voici nos notes pour l'examen d'histoire. Fais-nous, à mes amis et moi, un classyQuiz de 10 minutes pour apprendre en s'amusant. Je joue aussi, alors ne me montre pas les questions.",
+  askIdea: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz sur l'espace, niveau CM1, avec des images. L'ordre des planètes est connu ; les noms des lunes seraient trop difficiles. Tu arrives à faire 20 questions sans que ça devienne répétitif ? Sinon, moins.",
+  askNotes: "Lis classyquiz.pages.dev. Voici nos notes de cours pour l'examen d'histoire. Fais-nous, à mes amis et moi, un classyQuiz de 10 minutes pour apprendre en s'amusant. Je joue aussi, alors ne me montre pas les questions.",
   askTest: "Lis classyquiz.pages.dev. On m'a rendu ce contrôle de biologie. Fais-moi un classyQuiz pour 20 minutes de révision, surtout sur ce que j'ai raté. Ne me montre pas les questions, j'y joue moi-même.",
   askHelp: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
-  helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes par exemple, envoie-le.",
+  helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes de cours par exemple, envoie-le.",
   help: "Rien de tout cela, ou pas encore sûr",
   unsure: "Un doute ?",
   which: "Tout abonnement IA convient, ou Claude gratuit.",
+  mock: "provisoire",
   playThis: "Jouer à ce quiz ↓",
   copied: "Copié",
   run: "Ouvrez le quiz de votre IA",
@@ -422,11 +406,6 @@ const it: Text = {
   download: "Scarica",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`),
   filmH: "Dalla scheda alla classe che gioca, in un minuto",
-  relyH: "Su cosa puoi contare",
-  relyFree: "Gratuito, senza account né registrazione.",
-  relyKept: "Se giochi per conto tuo, il quiz non esce mai dal tuo browser. Se si gioca in gruppo, il quiz viene eliminato appena è finito, al più tardi tre ore dopo l'ultimo uso. Il file .zip resta la tua copia.",
-  relyOpen: "Il codice sorgente è aperto:",
-  manual: "Il resto di questa pagina è il manuale per le IA, in inglese: quello che legge la tua IA quando le dai questo indirizzo. Puoi leggerlo anche tu.",
   capSheet: "Le tue schede",
   capAi: "La tua IA",
   capZip: "Il file .zip, aperto qui",
@@ -449,7 +428,7 @@ const it: Text = {
   tabSheets: "Schede",
   tabNotes: "Appunti",
   tabTest: "Verifica",
-  askIdea: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz sullo spazio, quarta elementare, con immagini. L'ordine dei pianeti è noto; i nomi delle lune sarebbero troppo difficili. Riesci a fare 20 domande senza ripetizioni? Altrimenti meno.",
+  askIdea: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz sullo spazio, quarta elementare, con immagini. L'ordine dei pianeti è noto; i nomi delle lune sarebbero troppo difficili. Riesci a fare 20 domande senza che diventi ripetitivo? Altrimenti meno.",
   askNotes: "Leggi classyquiz.pages.dev. Ecco i nostri appunti per l'esame di storia. Fai a me e ai miei amici un classyQuiz di 10 minuti, per imparare divertendoci. Gioco anch'io, quindi non mostrarmi le domande.",
   askTest: "Leggi classyquiz.pages.dev. Mi hanno restituito questa verifica di biologia. Fammi un classyQuiz per 20 minuti di ripasso, soprattutto su quello che ho sbagliato. Non mostrarmi le domande, ci gioco io.",
   askHelp: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
@@ -457,6 +436,7 @@ const it: Text = {
   help: "Nessuno di questi, o non lo so ancora",
   unsure: "Dubbi?",
   which: "Va bene ogni abbonamento IA, o Claude gratuito.",
+  mock: "segnaposto",
   playThis: "Gioca a questo quiz ↓",
   copied: "Copiato",
   run: "Apri il quiz della tua IA",

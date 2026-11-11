@@ -124,8 +124,8 @@
     playedAsk: 'How will it be played?',
     entries: [
       { name: 'Solo', line: "On your own, to practise or review. Each answer shows the solution right away, and the score comes at the end.", button: 'Play ▶', note: "Plays in this tab. Nothing is sent to the site. Reloading or closing the tab ends it." },
-      { name: 'Peers', line: "With friends, each on their own device. Nobody runs it: the quiz moves on once everyone has answered.", button: 'Play together ▶', note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use." },
-      { name: 'Quizmaster', line: "For a class or a group: the questions on a big screen, the answers on everyone's own device. You run it and don't play.", button: 'Open the lobby ▶', note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use." },
+      { name: 'Peers', line: "With friends, each on their own device. Nobody runs it: the quiz moves on once everyone has answered.", button: 'Play together ▶', note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use. The .zip is your lasting copy." },
+      { name: 'Quizmaster', line: "For a class or a group: the questions on a big screen, the answers on everyone's own device. You run it and don't play.", button: 'Open the lobby ▶', note: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use. The .zip is your lasting copy." },
     ],
     fold: 'The questions and their solutions', foldHint: 'If you will play it yourself, leave this closed.', // under the cards, below the frame
     // the question list, open on the lobby's check (client/manage.ts)

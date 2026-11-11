@@ -25,7 +25,7 @@ served with the headers the build writes (dist/_headers, the CSP among them); th
   - desktop: ▶ by keyboard leaves the focus on the bar's play/pause; the time bar's name and spoken
     value (time and chapter), the address the browser opened; one animation loop however often the bar
     is moved and played; a drag shows the chapter's name over the thumb, the release hides it; Space on
-    the page and in the code box and the arrows on the ways' tabs stay theirs, the stage and the time bar
+    the page and in the code box and the arrows on the examples' tabs stay theirs, the stage and the time bar
     take the film's keys; scrolled out
     of view or in a hidden tab it pauses and stays paused; at the end the page's replay icon (named in German)
     stands in the band under the end card's address and plays it from the start, the focus on play/pause;
@@ -405,10 +405,10 @@ def controls(b, url):
     if not (39 <= held['t'] <= 41) or held['tip'] != 'What the class sees' or held['playing'] or let_go['tip'] or let_go['playing']: bad(f'drag {held} {let_go}')
     t0 = state()['t']
     # the page's own keys stay the page's
-    tab0 = pg.evaluate("document.querySelector('#ways [aria-selected=true]').id")
-    pg.focus('#ways [aria-selected=true]'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
-    s = state(); tab1 = pg.evaluate("document.querySelector('#ways [aria-selected=true]').id")
-    print(f'desk: ArrowRight on the tabs of the ways: tab {tab0} -> {tab1}, film at {s["t"]} (was {t0})')
+    tab0 = pg.evaluate("document.querySelector('#extabs [aria-selected=true]').id")
+    pg.focus('#extabs [aria-selected=true]'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
+    s = state(); tab1 = pg.evaluate("document.querySelector('#extabs [aria-selected=true]').id")
+    print(f'desk: ArrowRight on the examples' tabs: tab {tab0} -> {tab1}, film at {s["t"]} (was {t0})')
     if s['t'] != t0 or s['playing'] or tab0 == tab1: bad(f'ArrowRight on the tabs {s}, tab {tab0} -> {tab1}')
     pg.focus('#code'); pg.keyboard.press(' '); pg.wait_for_timeout(100)
     s = state(); print(f'desk: Space in the code box: film at {s["t"]}, playing {s["playing"]}')
