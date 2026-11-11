@@ -4,7 +4,7 @@
 
 A quiz file opens into the site without costing the shared site a class
 (backlog v5 item 1). The `.zip` is read and checked in the browser, and
-only opening a room uploads it (the owner's ruling). The worked example's "Start the example quiz" and
+only opening a room uploads it (the owner's ruling). The full examples' "Start this quiz" and
 the root page's "Play this quiz ↓", under each of its examples, land here too, so a visitor who only
 looks costs nothing (v5 item 1).
 
@@ -69,10 +69,9 @@ nothing and says so ("No quiz open here", the way back to the start page):
 nothing is kept. A browser that keeps no site data can't pass the quiz on;
 the root page says so in its language.
 
-The examples need no handoff: "Start the example quiz", and the root
+The examples need no handoff: "Start this quiz" on `/example`, and the root
 page's "Play this quiz ↓", open `/open?example=<lang>&ex=<example>` (the
-worked example's, the sheets, without `ex`; an earlier link's `&way=` opens
-the example its way's tab had), which fetches the static `.zip` and reads it through
+worked example's, the sheets, without `ex`), which fetches the static `.zip` and reads it through
 the same `readQuiz` as a teacher's file, so it can't run differently; a
 reload reads it again. `/?example=<lang>`, an earlier link, forwards there.
 The example's start isn't an upload attempt, and isn't counted as one
@@ -88,10 +87,13 @@ left out taken off the quiz with a warning each) and shows:
   apart (`teacher-devices.md`, "The single tab: check, then join").
 - **The entries**, each a card with the picture of its way (`docs/ways/`),
   its name, one sentence on who it is for and how it plays, its own button,
-  and an optional quiet line (what starting it costs). The picture is where
-  the setting is seen beside the choice it belongs to: on the root page one
-  picture at a time stood for one way per example, and pulled the example
-  that showed it towards that way. One button per entry: picking and starting is one
+  and an optional quiet line (what starting it costs: for Peers and
+  Quizmaster, that the quiz goes to the site, who can join, when the room is
+  deleted, and that the `.zip` is the lasting copy). The picture is where
+  the setting is seen beside the choice it belongs to: on the root page,
+  beside an example, a picture of one way would pull that example towards
+  it (the owner: "starting on the guided classroom example pulls towards
+  quizmaster"). One button per entry: picking and starting is one
   press, which is the frictionless way for the newcomer's Solo. The three
   buttons look alike: whoever opens a quiz meaning to run it, a teacher in
   a hurry before the lesson, would otherwise press the one that stands out,

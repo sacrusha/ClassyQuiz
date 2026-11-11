@@ -60,9 +60,8 @@ sentence (`docs/design/root-page.md`, "What this is").
   second thing: each picture has one near the viewer, over a shoulder, as
   large as the scene allows, so the difference between a tablet with four
   tiles and a phone with the question, its picture and the choices one
-  under the other held on the root page from a 390 px phone's picture
-  (about 150 px wide) up, so it holds on the check's desktop cards (186 to
-  218 px); at a phone's 96 px it may read only as "a tablet" and "a phone". The film shows the difference in full. In the class, the heads beside the tablet are fair, so its dark
+  under the other holds from a picture about 150 px wide up, so on the
+  check's desktop cards (186 to 218 px); at a phone's 96 px it may read only as "a tablet" and "a phone". The film shows the difference in full. In the class, the heads beside the tablet are fair, so its dark
   frame doesn't sink into dark hair; the teacher, who is the visitor in
   this way, is drawn big enough to be seen at a phone's size.
 - **The film's hand.** The people are the film's children and teacher,

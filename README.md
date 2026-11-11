@@ -17,7 +17,11 @@ The quiz file is the same for all three; the way is picked after opening it.
 
 ## Get a quiz
 
-Give the AI you already use your material and the site's address:
+Give the AI you already use the site's address and say what the quiz is for. An idea is enough:
+
+> Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you manage 20 questions without it getting repetitive? If not, fewer.
+
+Or attach your material, sheets, notes or a marked test:
 
 > Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 4th grade class, about 10 questions, in English.
 
@@ -32,7 +36,7 @@ Other ways to ask:
 
 Open the `.zip` at [classyquiz.pages.dev](https://classyquiz.pages.dev). The site checks it in your browser and offers the three ways to play. In a room, everyone else joins from their own browser with a code.
 
-No quiz yet? The site has an example to play, and [the example, step by step](https://classyquiz.pages.dev/example) shows the conversation with the AI that made it.
+No quiz yet? The start page has examples to play, one for each thing an ask can start from, each with its whole example: what was attached, the conversation with the AI that made it, and the `.zip` ([the exercise sheets' one](https://classyquiz.pages.dev/example)).
 
 ## What you can count on
 

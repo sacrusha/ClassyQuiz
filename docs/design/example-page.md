@@ -47,7 +47,7 @@ path the film shows.
    `docs/example/README.md`. The preview shows its top. The line above it
    names model, plan and date.
 3. **The quiz**: the `.zip` the AI handed over, in the page's language.
-4. **Try it**: "Start the example quiz" opens `/open?example=<lang>&ex=<example>`, the
+4. **Try it**: "Start this quiz" opens `/open?example=<lang>&ex=<example>`, the
    local check (`local-check.md`): it fetches the static `.zip` and reads it
    through the same function as a dropped file (`opening.ts`, `readQuiz`),
    so the example can't run differently from a teacher's. Looking costs the
@@ -74,8 +74,12 @@ examples of the Notes and Test tabs, whose runs are mocks until the owner's
 (backlog, "The page for people", item 1): the same four steps, with the mock
 attachment in place of the photographs, a made-up conversation made by the
 script and said to be made up (`MOCK_TEXT`), the mock `.zip`
-(`docs/example/mock_zips.py`) and its start, and without the note below. An
-earlier link's `?way=` opens the example its way's tab had.
+(`docs/example/mock_zips.py`), which holds the quiz without pictures, and its
+start, and without the note below.
+
+Each page is one example of the landing's four, so its words name its quiz
+("How the number-line quiz was made") and start "this quiz"; its heading,
+"The example, step by step", is the one the visitor came from.
 
 Under the steps, a note: the example was tested in all four languages and
 works in each; so that it is the same example in each, the German, French and
@@ -94,6 +98,12 @@ camera's metadata.
 
 - The space run's AI: the page names it "Claude" from its screenshot, and
   neither its model nor its plan; the owner knows them.
+- The space run's photographs: 19 of its 23 pictures (15 with questions, 4
+  as the choices of question 2), in each of its four `.zip`s. The AI said
+  they are NASA's and so in the public domain; no picture carries a source
+  or a credit, and nothing else records where each comes from, so the page
+  says "photographs it found" and whether the site may hand them on is the
+  owner's (backlog, "Open: with the owner").
 - The space run's English, French and Italian: its conversation, its quiz and
   its drawings' words are drafts, and its overview in those languages is the
   site's `preview.py`'s, not an AI's.

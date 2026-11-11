@@ -13,7 +13,7 @@ The film's words themselves are in `docs/film/build/film.js` (`docs/film/README.
 
 ## 1. The ask
 
-The root page's Quizmaster ask, `ask` in `src/client/landing-text.ts` (`#ask-quizmaster` in `src/public/index.html` for English), in the page's language, copied into the film's `LANDING` at build time. The film types it in the chat, the address in the accent and underlined, its other marked parts each kept on one line. How it relates to the run's first ask: `docs/design/root-page.md`, "Getting a quiz"; why the film types the page's: `README.md`, "What it shows, and why".
+The root page's sheets ask, `ask` in `src/client/landing-text.ts` (`#ask-sheets` in `src/public/index.html` for English), in the page's language, copied into the film's `LANDING` at build time. The film types it in the chat, the address in the accent and underlined, its other marked parts each kept on one line. How it relates to the run's first ask: `docs/design/root-page.md`, "Getting a quiz"; why the film types the page's: `README.md`, "What it shows, and why".
 
 ## 2. The chat
 
@@ -30,7 +30,7 @@ The film draws the first screen as a desktop's window shows it, the column 672 p
 - Header, as wide as the column: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only); label **Code** (`code`; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join"), then the language switch "EN ▾". The laptop types the teacher code **63953 47** into the box.
 - The sentence, the page's first heading (`what`): "Play quizzes your own AI makes: for a class or group, with friends, or on your own.", its lines balanced as on the page.
 - Step 1's heading, its number in the margin: **Ask your AI for a quiz** (`getH`) and beside it "Any AI subscription will do, or free Claude." (`which`).
-- The examples as tabs in words under it, one line each, named by what an ask starts from (`tabIdea`, `tabSheets`, `tabNotes`, `tabTest`): **Idea**, open into the chat, **Sheets**, **Notes**, **Test**, and **Not sure?** (`unsure`), the four on the tabs' ground, each as wide as its name and the row's rest shared.
+- The examples as tabs in words under it, one line each, named by what an ask starts from (`tabIdea`, `tabSheets`, `tabNotes`, `tabTest`): **Idea**, open into the chat, **Sheets**, **Notes** (French **Cours**), **Test**, and **Not sure?** (`unsure`), the four on the tabs' ground, each as wide as its name and the row's rest shared.
 - The chat: the first tab's ask (`askIdea`, the owner's space run, tidied) as the visitor's message on the right, nothing attached; under it "The AI's answer:" (`gives`) and the file card, its face the quiz's first question as the site's Solo screen shows it (`src/public/landing/face-idea-<lang>.webp`, the page's own picture of it), on it the first tab's file by its name and size in the page's language (`zipIdea`, `sizeIdea`, from `client/example-files.ts`), the download arrow, and "Play this quiz ↓" (`playThis`); beside the card's foot "The whole example ›" (`see`). So the page the film shows isn't the sheets story it tells: the page opens on another example (`docs/design/root-page.md`, "Getting a quiz"), and the teacher's own file is the one that goes into the box.
 - Step 2, the Run box (3.2), its number in the margin, the margin's line joining the two.
 

@@ -196,8 +196,9 @@ before anything else comes into play (owner and product owner).
    the weak spot is a short question beside its picture, where ten winners come
    out small because the key stays visible.
 10. **The worked example, behind one link** — built, `design/example-page.md`:
-    `/example`, "The example, step by step" from the link under the landing's
-    film, in the landing's four languages (item 12). Open: whether a run of
+    `/example`, "The example, step by step", reached from "The whole example ›"
+    beside each example's file in the landing's chat, in the landing's four
+    languages (item 12). Open: whether a run of
     the owner's replaces the example's run, and whether the quiz's growth
     past the asked ten is worth leaving in the picture
     (`design/example-page.md`).
@@ -325,12 +326,15 @@ hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
 9. A visitor who isn't a teacher, and an AI asked for a quiz that isn't a
    lesson's, recognise themselves on the page, the example class's teacher
    still served first: the word decided once (`design/root-page.md`, "Words
-   for whoever comes"), the three ways on the root page, by
-   the names the check's cards carry and a few words in the visitor's
-   language, a picture each on its example's file (`design/root-page.md`, "Getting a quiz"), the guidance describing the three
-   ways and where each reads a question (`design/guidance-page.md`), three
-   more example asks, and the film showing the
-   check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
+   for whoever comes"), the three ways in the root page's first sentence,
+   in the visitor's language (`design/root-page.md`, "What this is"), and
+   their pictures on the check's cards, which carry the names Solo, Peers
+   and Quizmaster (`design/local-check.md`, "The check"), the guidance
+   describing the three ways and where each reads a question
+   (`design/guidance-page.md`), the examples' asks beside the sheets ask, one
+   per thing an ask can start from (`design/root-page.md`, "Getting a
+   quiz"), and the film showing the check and the lobby as built
+   (`docs/film/`). Open: the de/fr/it drafts
    (`translation-review.md`, "The first page in German, French and
    Italian", E6); whether someone
    who isn't a teacher reads the page as theirs, which nobody outside the
@@ -371,16 +375,17 @@ site meets it"). What the owner found while directions were tried is in
       are made (`docs/ways/`). What the three differ in is the setting
       and what a device shows: with a quizmaster the question is on the
       big screen and each player's device shows the choices; among friends
-      and alone each device shows the whole question. Built: the ways as
-      tabs, each its name and whose case it is, and each way's picture as
-      the face of its example's file ("Getting a quiz"); a reason to play
-      is in the picture and in each way's ask.
+      and alone each device shows the whole question. Built: the three
+      ways in the page's first sentence, as the check's cards say them
+      ("What this is"), and their pictures on the check's cards, where the
+      way is chosen (`design/local-check.md`, "The check"); a reason to
+      play is in the examples' asks ("Getting a quiz").
 
    c. **Getting a quiz** — a visitor learns that the AI they already use
       makes the quiz, how to ask it, and that a file comes back; someone
       who wants to see it done finds an ask close to their own case. The
-      asks exist, six of them, with what each is for
-      (`design/root-page.md`, "Two steps"); what the page may say
+      asks exist, five of them, one per tab, with what each is for
+      (`design/root-page.md`, "Getting a quiz"); what the page may say
       about which AI manages it is what was verified
       (`design/guidance-page.md`, "The AIs verified against"). Built: the
       chat, an ask and its file per example, which AI beside the first step's
@@ -404,10 +409,12 @@ site meets it"). What the owner found while directions were tried is in
       what it shows ("The film"); `/example` beside each example's file
       ("Getting a quiz").
 
-   f. **Where the page for people ends** — a person knows what they can
-      rely on (free, open, no accounts, how long a quiz is kept) and that
-      what follows is the manual for AIs. Built ("Where the part for
-      people ends").
+   f. **Where the page for people ends** — a person knows that what
+      follows is the manual for AIs. Built: the part for people ends with
+      the film, and the manual's own headings say what it is ("Where the
+      part for people ends"). What a person can rely on before trying is
+      said where it applies, not in a section of its own (item 2a of "The
+      page for people").
 
 2. **The page in its four languages** — a visitor reading German, French
    or Italian gets the same page, not a translation of the English
@@ -606,8 +613,8 @@ deployed to the public site.
       to ask ("Read <address>. I need a classyQuiz. Help?") and the AI's
       question back, a mock until a run gives one. Assessed: not an FAQ,
       since each question a visitor has before trying has its place (which
-      AI beside the first step's heading, cost and keeping under "What you
-      can count on"), and not a store for further asks
+      AI beside the first step's heading; what is sent and kept on the
+      check's cards), and not a store for further asks
       (`design/root-page.md`, "Getting a quiz").
 
    f. **Playing an example without a file of one's own** — one press from
@@ -633,28 +640,31 @@ deployed to the public site.
       picture and in words under it (the ways are said once, in the
       sentence, and their pictures stand on the check's cards, where the
       way is picked); which AI wrote the example and when (`/example`); the
-      link under the film (each example's "The whole example ›"). Back, on
-      the file itself: the file's download in the first step (the design's
-      least surprise, a press on a file downloads it; `design/root-page.md`,
-      "Getting a quiz"). The first heading takes three lines on a phone in
-      every language again, since it says who plays. Kept: how long a quiz is kept, under "What
-      you can count on", since it answers whether the site can be relied on
-      with a class's answers before anyone tries it, and stands below the first
-      screen, which it costs nothing; the film's speed button, the video
+      link under the film (each example's "The whole example ›"); "What you
+      can count on" and the sentence before the manual (the owner: no
+      sign-up is obvious, and that the section called the AI manual is the
+      AI manual is obvious; what is sent and when a room is deleted stands
+      on the check's cards, where the way is chosen, and "The .zip is your
+      lasting copy.", said nowhere else, joined it there:
+      `design/local-check.md`, "The check"). Not said on the page for
+      people since: that playing costs nothing, and, but in the guidance's
+      English, that the code is open. The file's download is on the file
+      itself (the design's least surprise, a press on a file downloads it;
+      `design/root-page.md`, "Getting a quiz"). The first heading takes
+      three lines on a phone in every language, since it says who plays.
+      Kept: the film's speed button, the video
       player's own control, which answers the film's open point, its pace
       for the teacher who wants the steps (`docs/film/README.md`, "Not
       known").
 
    b. **The first screen on a phone, in four languages** — v6 item 1's open
       point, the button that opens a file cut by the screen's edge, is
-      settled on the tab every visit opens on: whole at 360 × 640 in the four
-      languages, by 19 px at least, and on a 1366 × 650 laptop by 9
-      (`design/root-page.md`, "One column"). Open: the Notes and Test tabs,
-      taller with their mock asks and the mock marker, put it at the edge at
-      360 × 640 and cut it by 21 px in German and on French Notes; the
-      owner's asks are measured again. The tab row is the most fragile fit:
-      German has 3 px left at 360 px, and at 320 px the row scrolls
-      sideways in German, French and Italian.
+      settled on the tab every visit opens on, at 360 × 640 and larger, in
+      the four languages (the figures: `design/root-page.md`, "One
+      column"). Open: the Notes and Test tabs, taller with their mock asks
+      and the mock marker, put it at the edge or below it at 360 × 640;
+      the owner's asks are measured again. The tab row is the most fragile
+      fit (`design/root-page.md`, "Getting a quiz").
 
    c. **The film and the full examples show the page that exists** (v6
       item 3) — built: the film draws the new first screen and the check's
@@ -762,6 +772,10 @@ With the owner, what only he can do:
   (`translation-review.md`; the screens' words in `client/room-text.ts`,
   `check-text.ts`, `own-copy.ts` and `notfound.ts`); Italian has no native
   reader on the project.
+- The space run's photographs (the root page's Idea tab): where each comes
+  from and whether the site may hand it on in the four `.zip`s; the AI calls
+  them NASA's and public domain, and nothing else records a source
+  (`design/example-page.md`, Not known).
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
   script from spending the day's allowance; the free plan includes one such
   rule, and a name children can type beats pages.dev on the slowest step

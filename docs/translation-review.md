@@ -50,7 +50,9 @@ For the read:
   "une vidéo sans son", "un video senza audio".
 - **The tabs' names**, one word each, what an ask starts from, each the word its ask uses for
   what it attaches: German "Idee", "Blätter", "Notizen", "Prüfung"; French "Idée", "Fiches",
-  "Notes", "Contrôle"; Italian "Idea", "Schede", "Appunti", "Verifica". The test is the school
+  "Cours", "Contrôle"; Italian "Idea", "Schede", "Appunti", "Verifica". French "Cours", not
+  "Notes", and its ask "nos notes de cours": "notes" beside "Contrôle" also reads as marks, and
+  a student's "mes cours" are their class notes. The test is the school
   word for a marked test in each ("Prüfung" as Swiss schools say it, "contrôle", "verifica"),
   not "Test", which in German and French also reads as trying the site out. The fifth tab:
   "Unsicher?" in German, which fits a 360 px row where "Nicht sicher?" didn't (3 px are left),
@@ -69,20 +71,10 @@ For the read:
   quiz :", "La prima domanda del quiz:", then the question as the quiz has it; the download's
   tooltip "Herunterladen", "Télécharger", "Scarica", as a file's in a chat; the size with the
   language's decimal comma and French "Ko", "Mo".
-- **Code, Seite, plus**: a noun the page has for two things (`design/root-page.md`, "Languages").
-  "Der Quellcode ist offen:", "Le code source est ouvert⍽:", "Il codice sorgente è aperto:", since
-  "Code" is the header's box. "Eine eigene Website" for a site of one's own, in the link and the
-  line about busy days; everywhere else the site stays "die Seite", as people say it. "Davantage
-  de quiz⍽: …" and "Pour davantage de quiz, …". The English "The code is open:" stands under the
-  same "Code" box; it is not this item's.
-- **What is kept**: no word for a room, since Raum, salle and stanza read first as the room one
-  sits in. "Spielst du allein, verlässt das Quiz deinen Browser nie. Spielen mehrere, wird das Quiz
-  gelöscht, sobald es beendet ist, spätestens aber drei Stunden nach der letzten Benutzung." and
-  the same in "En solo … À plusieurs …", "Se giochi per conto tuo … Se si gioca in gruppo …".
-  Whether "when several play" reads true to a quizmaster who runs the quiz and doesn't play. The
-  lasting copy without a word-for-word "lasting": "Die .zip-Datei ist die Kopie, die dir bleibt.",
-  "Le fichier .zip reste votre copie.", "Il file .zip resta la tua copia." Italian "non esce mai
-  dal tuo browser", as Italian says it of data.
+- **Seite, plus**: a noun the page has for two things (`design/root-page.md`, "Languages").
+  "Eine eigene Website" for a site of one's own, in the link and the line about busy days;
+  everywhere else the site stays "die Seite", as people say it. "Davantage de quiz⍽: …" and
+  "Pour davantage de quiz, …".
 - **The sheets ask**: "like no. 1, 3 and 4" is "wie", "comme", "come" in each, without "similar"
   (ähnlich, simili), so each language says what the English says. German puts "machen" last, where
   German puts it: "Kannst du mir ein classyQuiz mit Aufgaben wie Nr. 1, 3 und 4 von diesen zwei
@@ -92,32 +84,26 @@ For the read:
   as French "une dizaine". The grade is the example run's, 4th (`design/root-page.md`, "Two
   steps"), in each region's word: "4. Klasse", "CM1" (Romandie says 6H, and the times on this
   page are "heure suisse"), "quarta elementare".
-- **The chess ask**: the choices are "Optionen", "propositions", "opzioni", apart from the answers
-  (backlog, Later, Localization); the last question's positions "eine aussichtsreiche und eine
-  gewonnene", "l'une prometteuse, l'autre gagnante", "una promettente e una vincente"; rated puzzles
-  "Puzzles mit Elo-Wertung", "des problèmes avec un classement Elo", "dei problemi con un punteggio
-  Elo" ("bewertete Puzzles" and "puzzles notés" read as reviewed, not rated). French "notation
-  algébrique", a player's name for chess notation. Italian "lascio loro" and "dai loro" are the
-  written form; a chat message would as soon say "gli".
 - **The idea's ask**, the owner's German run tidied, the others its translation: "Ich brauche ein
   classyQuiz über den Weltraum, 4. Klasse, mit Bildern. Die Planetenreihenfolge ist bekannt,
   Mondnamen wären zu schwierig. Schaffst du 20 Fragen, ohne dass es repetitiv wird? Sonst
   weniger." The run's "repetitiv" stays, the owner's word; "Planeterreihenfolge" and "is" are
-  his slips, tidied. French "niveau CM1" and Italian "quarta elementare", as the sheets ask's
-  grade; "sans répétitions", "senza ripetizioni", where the German says it won't get repetitive.
-- **The other asks**: French "Voici mes notes de cours", since "mes notes" after "contrôle" is
-  also "my marks". Italian "Domani faccio formazione … a 25 nuovi colleghi" and the tab "Un corso
-  di formazione": "una formazione" as one event is Swiss Italian and office talk, and these read
-  the same in Ticino and in Italy (the judgement is a model's, like all of the Italian).
-- **Small words**: German "kostenpflichtiges Abo" under the chess ask; "Vom Arbeitsblatt zum Quiz
+  his slips, tidied. The other three say what the German says, in the words the run's
+  conversation on `/example` has for it (`docs/example/space_text.py`): "Can you manage 20
+  questions without it getting repetitive?", "Tu arrives à faire 20 questions sans que ça
+  devienne répétitif⍽?", "Riesci a fare 20 domande senza che diventi ripetitivo?". French
+  "niveau CM1" and Italian "quarta elementare", as the sheets ask's grade.
+- **The notes' and the test's asks** are stand-ins until the owner's runs, and go with them;
+  their words aside, French "notes de cours" (above, the tabs).
+- **Small words**: "Vom Arbeitsblatt zum Quiz
   in der Klasse, in einer Minute" over the film ("zur spielenden Klasse" was the English
   participle); "Die Seite kann dieses Quiz noch nicht starten:", the subject first, since "Dieses
   Quiz kann die Seite …" doesn't show which of the two can't. French "Code pour participer" on
   the card of a quiz to come back to ("rejoindre" wants an object); "et non de texte" in the
   box's refusals, where "pas de texte" also reads "no text". The link after the line about busy
-  days: "So geht's ›", "comment faire ›", "ecco come ›". Italian "Non hai ancora un quiz?".
-  Left as they are, correct and a little heavy: French "Ce sur quoi vous pouvez compter", Italian
-  "servizio informatico".
+  days: "So geht's ›", "comment faire ›", "ecco come ›". The marker beside a stand-in's tab,
+  until the owner's runs: "Platzhalter", "provisoire", "segnaposto". Left as it is, correct and a
+  little heavy: Italian "servizio informatico".
 - **French spaces**: U+202F before ; : ? ! in everything, the asks included, so a "?" never starts
   a line; the film types the sheets ask with it. A no-break space keeps a number with its word
   in the sheets ask ("Nr. 1", "4. Klasse", "n° 1", "n. 1"; `design/root-page.md`, "Two steps").
@@ -130,9 +116,10 @@ For the read:
   the limit as a limit, in English too: "longer than the site takes (at most N KB)".
 - **Italian** has no native reader on the project (`design/root-page.md`, Not known).
 
-A 360 × 640 window cuts the button that opens a file by 8 px in German and 12 in French, because
-"The AI's answer:" and the example's file name don't share a line there (`design/root-page.md`,
-"One column"); the file's names are the example's (`client/example-text.ts`, `EXAMPLE_ZIP`).
+The first screen's words are held to its room: at 360 × 640 the button that opens a file has
+19 px to spare in French and Italian on the first tab, and the tab row 3 px in German
+(`design/root-page.md`, "One column", "Getting a quiz"). A word made longer there is measured
+again.
 
 ## The screens after the first page
 
@@ -158,8 +145,11 @@ own language (`design/root-page.md`, "Languages"). For the read:
   recalled, not looked up, as the word French versions of games and chat apps have for a lobby;
   "salle d'attente", a video call's word, has the "salle" the first page avoids for a room
   (above, "What is kept").
-- **No word for a room**, as on the first page: the line under Peers and Quizmaster says the quiz
-  is sent, who can join and when it is deleted; the server's messages say "this quiz".
+- **No word for a room**, since Raum, salle and stanza read first as the room one sits in: the
+  line under Peers and Quizmaster says the quiz is sent, who can join and when it is deleted; the
+  server's messages say "this quiz". That line ends on the lasting copy, without a word-for-word
+  "lasting": "Die .zip-Datei ist die Kopie, die dir bleibt.", "Le fichier .zip reste votre
+  copie.", "Il file .zip resta la tua copia."
 - **Choices and answers** stay apart: "Optionen", "Propositions", "Opzioni" beside "Antworten",
   "Réponses", "Risposte". Under that button the line for what it ends: "beendet das Antworten",
   "clôt les réponses", "chiude le risposte"; the Remote then says "Niemand kann mehr antworten.",
@@ -214,6 +204,11 @@ moment means in the language, not the English words. Open for you:
 - E6, the "Try it" step's words (`runP`, `runNote`), redrafted for the three ways to play by the
   words pass, not a translator: "allein / en solo / per conto tuo" for on your own (it avoids
   "da solo", gendered), "Startseite / page d'accueil / pagina iniziale" for the start page.
+  Each page is one of four examples, so it starts "this quiz": "Dieses Quiz starten", "Lancer ce
+  quiz", "Avvia questo quiz"; the sheets page's lede names its quiz: "das Quiz zum
+  Zahlenstrahl", "le quiz sur la droite graduée", "il quiz sulla retta numerica".
+- French on `/example` has U+202F before ; : ? !, as the first page has.
+- The stand-ins' pages (`MOCK_TEXT`, Notes and Test) go with the mocks; no read needed.
 
 The quizzes (`quiz_zips.py`): questions 7–13 read as the sheets' own instructions in de and as
 the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
@@ -237,6 +232,9 @@ conversation on `/example`), with `/example`'s words for it in `client/example-t
   que Pluton aujourd'hui ?", which leaves Pluto's gender, masculine or feminine in use, unsaid.
 - **French spaces** in the quiz: a no-break space before ? ! : ; and inside « », so a "?" never
   starts a line on the Solo screen (the sheets quiz's French has plain ones there).
+- **The page's line on the run**: the photographs as "Fotos, die sie gefunden hat", "des photos
+  qu'elle a trouvées", "foto che ha trovato", since nothing but the AI's answer says they are
+  NASA's.
 - **The conversation**: the AI's answer translated as the AI would have written it in that
   language; where the German says "auf Deutsch (Schweizer Schreibweise)", the others name their
   own language. The app's words (its folded steps, "Download all") are English in the German
