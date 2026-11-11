@@ -108,12 +108,14 @@ left out taken off the quiz with a warning each) and shows:
   beside the name and the button, which wrapped "Zusammen spielen ▶" at 360
   px. The picture beside the name is 96 px wide, near the smallest it is
   drawn for (91 px), and the cards are set tighter there than the site's
-  other cards, for whoever scrolls for their way: at 390 × 664 the first
-  screen holds Solo's card and Peers' picture, name and sentence, and
-  Quizmaster's button ends at 1061 px (English) to 1114 (German). At 42% of
-  the card, the picture the design proposed (137 px there), it ended at
-  1199 to 1252 and Peers' sentence was below the edge; without pictures, at
-  1018 to 1070. What it costs: the pictures at a phone's size name a
+  other cards, for whoever scrolls for their way: at 390 × 664, on the
+  sheets quiz, the first screen holds Solo's card and Peers' picture and
+  name, and Peers' sentence in English and French (German and Italian cut
+  its last line), and Quizmaster's button ends at 1061 px (English) to 1136
+  (German). Weighed with the quiet line a sentence shorter (the button at
+  1061 to 1114): at 42% of the card, the picture the design proposed (137
+  px there), it ended at 1199 to 1252 and Peers' sentence was below the
+  edge; without pictures, at 1018 to 1070. What it costs: the pictures at a phone's size name a
   setting, a class, a sofa, a desk, more than they show it; the cards with
   them still put Quizmaster's button about 400 px below a phone's first
   screen, which no size of picture changes, since the order does it.
