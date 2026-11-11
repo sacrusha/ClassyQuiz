@@ -528,6 +528,99 @@ choices of text and pictures.
    mostly one learner with a quiz someone else made and handed on, a use
    the Project section doesn't name.
 
+## The page for people: dense, not busy
+
+The owner's purpose: user experience, a dense but not overloaded site. The
+page for people grew by addition, each part built for a purpose of its own
+and set beside the others (v4 item 1, v5 item 9, v6 item 1), so a visitor
+meets the same thing more than once: the sheets ask in the first step, under
+"How to ask" and in the film; the ways to play in pictures and again in the
+words under them; the example by its file, by the link under the box, in the
+film and on `/example`. What a visitor needs is on the page; this is about
+each thing standing once, where the visitor needs it, and about what remains
+reading as one page. The page as built: `design/root-page.md`.
+
+1. **Getting a quiz, in one place, for the visitor's own case** — a visitor
+   who isn't a teacher recognises their case among the pictures and then
+   reads the teacher's ask; an ask for their own case is below the film,
+   behind a tab. The pictures of the ways, "Ask your AI for a quiz" and "How
+   to ask your AI" become one element: the way a visitor recognises as
+   theirs shows an example for it. Situation, measured on the built page in
+   phone windows 360 and 390 px wide, in the four languages: under the
+   pictures the names take 21 px and the setting words 55 to 73, a line of
+   the first heading 26; the tabs of "How to ask" take 126 and its asks 40
+   to 352, where the first step's ask takes 105 to 127. The parts, each with
+   a purpose of its own:
+
+   a. **What an example gives** — the owner: the ask, an understanding of
+      where it is typed, the result it leads to, and what to do with the
+      file that comes back. The first screen has room for the ask and the
+      file; the rest is one press away as the full example: what was
+      attached, the conversation, the `.zip`, and a start of that quiz
+      (`/example` has these parts for the sheets run,
+      `design/example-page.md`). An example is inspired by a real run and
+      tidied; the owner: that balances provenance and stability against a
+      changing site and changing AIs, without redoing the examples at every
+      change, and lets a reader follow the conversation.
+
+   b. **Quizmaster's example** — a teacher with material in hand sees their
+      case. The sheets run exists.
+
+   c. **Solo's example** — a learner sees a quiz made for their own
+      situation, not a generic one. The owner's baseline, to exceed: "I just
+      got this test back, I want a quiz that helps me solidify what I
+      learned, with a deeper focus on the areas I scored poorer, about 20
+      minutes." The owner: alone, a question may take less time than in a
+      class, and the time differs by question.
+
+   d. **Peers' example** — friends see that one of them asks and plays too.
+      The owner's baseline, to exceed: "I'm at a desk preparing for an exam
+      with my friends, these are the class notes - can you make us a short
+      10 minute quiz to learn and have fun together?"
+
+   e. **Whoever recognises none of the three, or has a question first** —
+      open, to assess: a fourth entry beside the three, marked "?". As the
+      place of the ask that takes no knowing how to ask ("Read <address>. I
+      need a classyQuiz. Help?") it has a visitor. As the place of what a
+      visitor asks before trying (which AI, what it costs, what is kept:
+      today under "How to ask" and "What you can count on") it would be an
+      FAQ. As a store for further example asks it would be what item 2
+      removes.
+
+   f. **Playing an example without a file of one's own** — one press from
+      the first screen (plausible assumption, `design/local-check.md`: a
+      newcomer's first use is Solo or a look at the example quiz). Open: its
+      form once the full example starts the quiz too; one that also shows
+      where a file goes would serve "what to do with the file" (a).
+
+   The three examples share a setting (the owner): school to begin with,
+   without ruling the others out, since a setting of its own for each way
+   risks saying "Quizmaster is for school, Peers for trivia, Solo is for
+   ...". Not known, the owner's too: whether that works out; a visitor who
+   wants a quiz for fun then reads school examples. What the examples turn
+   out to need from the manual is the manual's work, not this epic's.
+
+2. **A page that reads as one thing** — the owner: cohesive, not a dumping
+   ground of historical artifacts.
+
+   a. **Prune what distracts more than it serves** — the owner: focus the
+      user area of the page. Candidates, each with where what it says
+      otherwise stands: the setting words under the pictures (the pictures
+      show the settings, and the check's cards say them); how long a quiz
+      is kept (the check says it where a room opens); which AI wrote the
+      example and when (`/example`); the file's download in the first step
+      (`/example`); the link under the film (the full examples); the
+      film's speed button; the first heading's third line on a phone.
+
+   b. **The first screen on a phone, in four languages** — v6 item 1's open
+      point, the button that opens a file cut by the screen's edge, is
+      settled by the room item 1 leaves. Not known: in German at 360 × 640
+      the button measured 31 px cut where `design/root-page.md` says 8;
+      French matches the file.
+
+   c. **The film and the full examples show the page that exists** (v6
+      item 3) — the film draws this page's first screen, so it follows it.
+
 ## Room on the Free plan
 
 The site carries the classes that use it within the Free plan and doesn't
