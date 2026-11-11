@@ -28,6 +28,23 @@ test("every language's other asks name the site's address, for the page to repla
   }
 });
 
+// French puts a narrow no-break space (U+202F) before : ; ? !, so a mark never starts a line: on the root page and on
+// /example alike, a visitor going from one to the other (docs/translation-review.md, "French spaces").
+test("French has no plain space before : ; ? ! on the root page or /example", async () => {
+  const { EXAMPLE_TEXT, IDEA_TEXT, MOCK_TEXT } = await import("./example-text.ts");
+  const bad: string[] = [];
+  const walk = (v: unknown, at: string): void => {
+    if (typeof v === "string") {
+      if (/ [:;?!]/.test(v)) bad.push(`${at}: ${v.slice(0, 60)}`);
+    } else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) walk(x, `${at}.${k}`);
+  };
+  walk(TEXT.fr, "landing");
+  walk(EXAMPLE_TEXT.fr, "example");
+  walk(IDEA_TEXT.fr, "idea");
+  walk(MOCK_TEXT.fr, "mock");
+  assert.deepEqual(bad, []);
+});
+
 // The page's tabs are its examples, in the order example-text.ts has them, then the help ask (docs/design/root-page.md,
 // "Getting a quiz"); each example's file on the static page is the English one, with its size.
 test("the page's tabs are the examples', and each shows its own file", async () => {
