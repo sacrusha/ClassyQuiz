@@ -80,7 +80,12 @@ export interface Text extends SiteWords {
   /** The way a visitor recognises as theirs shows an example for it (docs/design/root-page.md, "Getting a quiz"): its ask, and its file. */
   askSolo: string;
   askPeers: string;
-  /** The fourth entry, "?", for whoever recognises none of the three: its name, the ask that takes no knowing how to ask, and the AI's question back (a mock until a run gives one). */
+  /** Each way's tab, under its name: whose case it is, from the opening words of the local check's cards (client/room-text.ts, quizmasterLine, peersLine, soloLine), shortened. */
+  subQuizmaster: string;
+  subPeers: string;
+  subSolo: string;
+  /** The fourth tab, for whoever recognises none of the three: its name (unsure), its tooltip (help), the ask that takes no knowing how to ask, and the AI's question back (a mock until a run gives one). */
+  unsure: string;
   help: string;
   askHelp: string;
   helpReply: string;
@@ -167,6 +172,10 @@ const en: Text = {
   askHelp: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
   helpReply: "Gladly. What is the quiz for, and who will play it? If you have material, like exercise sheets or notes, send it along.",
   help: "None of these, or not sure yet",
+  unsure: "Not sure?",
+  subQuizmaster: "for a class or group",
+  subPeers: "with friends",
+  subSolo: "on your own",
   askSolo: "Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.",
   askPeers: "Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to learn and have fun. I'm playing too, so don't show me the questions.",
   which: "Any AI subscription will do, or free Claude.",
@@ -248,6 +257,10 @@ const de: Text = {
   askHelp: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
   helpReply: "Gern. Wofür ist das Quiz, und wer spielt es? Wenn du Material hast, etwa Arbeitsblätter oder Notizen, schick es mit.",
   help: "Nichts davon, oder noch unsicher",
+  unsure: "Nicht sicher?",
+  subQuizmaster: "für Klasse oder Gruppe",
+  subPeers: "mit Freunden",
+  subSolo: "für dich allein",
   askSolo: "Lies classyquiz.pages.dev. Ich habe diese Biologieprüfung zurückbekommen. Mach mir ein classyQuiz für 20 Minuten Üben, vor allem zu dem, was ich falsch hatte. Zeig mir die Fragen nicht, ich spiele es selbst.",
   askPeers: "Lies classyquiz.pages.dev. Hier sind unsere Notizen für die Geschichtsprüfung. Mach meinen Freunden und mir ein classyQuiz für 10 Minuten, zum Lernen und zum Spass. Ich spiele mit, also zeig mir die Fragen nicht.",
   which: "Jedes KI-Abo reicht, sonst Claude gratis.",
@@ -334,6 +347,10 @@ const fr: Text = {
   askHelp: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes par exemple, envoie-le.",
   help: "Rien de tout cela, ou pas encore sûr",
+  unsure: "Un doute ?",
+  subQuizmaster: "pour une classe ou un groupe",
+  subPeers: "entre amis",
+  subSolo: "rien que pour vous",
   askSolo: "Lis classyquiz.pages.dev. On m'a rendu ce contrôle de biologie. Fais-moi un classyQuiz pour 20 minutes de révision, surtout sur ce que j'ai raté. Ne me montre pas les questions, j'y joue moi-même.",
   askPeers: "Lis classyquiz.pages.dev. Voici nos notes pour l'examen d'histoire. Fais-nous, à mes amis et moi, un classyQuiz de 10 minutes pour apprendre en s'amusant. Je joue aussi, alors ne me montre pas les questions.",
   which: "Tout abonnement IA convient, ou Claude gratuit.",
@@ -420,6 +437,10 @@ const it: Text = {
   askHelp: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
   helpReply: "Volentieri. A cosa serve il quiz, e chi ci giocherà? Se hai del materiale, per esempio schede o appunti, mandamelo.",
   help: "Nessuno di questi, o non lo so ancora",
+  unsure: "Dubbi?",
+  subQuizmaster: "per una classe o un gruppo",
+  subPeers: "tra amici",
+  subSolo: "per conto tuo",
   askSolo: "Leggi classyquiz.pages.dev. Mi hanno restituito questa verifica di biologia. Fammi un classyQuiz per 20 minuti di ripasso, soprattutto su quello che ho sbagliato. Non mostrarmi le domande, ci gioco io.",
   askPeers: "Leggi classyquiz.pages.dev. Ecco i nostri appunti per l'esame di storia. Fai a me e ai miei amici un classyQuiz di 10 minuti, per imparare divertendoci. Gioco anch'io, quindi non mostrarmi le domande.",
   which: "Va bene ogni abbonamento IA, o Claude gratuito.",

@@ -35,6 +35,12 @@
   --accent: #a8471a;
   --accent-ink: #ffffff;
   --bubble: #f4ebe1; /* the example asks on the landing */
+  /* The edge of a place to drop a file, dashed: the landing's box that opens one. */
+  --dash: #b9b3a5;
+  /* A tab not chosen (the landing's ways to play): a ground a step off the
+     paper, and an edge where that step alone doesn't hold it apart (dark). */
+  --tab: #f1eee6;
+  --tab-edge: transparent;
   --bad: #c62828;
   --good: #1f8a4c;
   --radius: 14px;
@@ -68,6 +74,9 @@
     --accent: #f0a065;
     --accent-ink: #171716;
     --bubble: #2a231e;
+    --dash: #5c5a54;
+    --tab: #1b1b1a;
+    --tab-edge: #302f2c;
     --bad: #ff8a80;
     color-scheme: dark;
   }

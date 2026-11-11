@@ -60,11 +60,15 @@ test("the static page carries the English table's words", async () => {
     assert.equal(plain(m[1]), en[m[2]], `data-t-aria="${m[2]}"`);
     seen.add(m[2]);
   }
+  for (const m of html.matchAll(/ title="([^"]*)" data-t-title="(\w+)"/g)) {
+    assert.equal(plain(m[1]), en[m[2]], `data-t-title="${m[2]}"`);
+    seen.add(m[2]);
+  }
   // the Quizmaster's ask is the labelled ask, plain; the others as the table has them
   for (const [id, ask] of [["quizmaster", askText(TEXT.en)], ["peers", TEXT.en.askPeers], ["solo", TEXT.en.askSolo], ["help", TEXT.en.askHelp]]) {
     assert.ok(html.includes(`<span class="said" id="ask-${id}">${ask}</span>`), `the ${id} ask differs from landing-text.ts's`);
   }
-  for (const key of ["what", "picQuizmaster", "picPeers", "picSolo", "help", "getH", "which", "gives", "see", "run", "upload", "relyKept", "manual"]) assert.ok(seen.has(key), `index.html has no ${key}`);
+  for (const key of ["what", "subQuizmaster", "subPeers", "subSolo", "unsure", "help", "picQuizmaster", "picPeers", "picSolo", "getH", "which", "gives", "see", "run", "upload", "relyKept", "manual"]) assert.ok(seen.has(key), `index.html has no ${key}`);
 });
 
 // The film (public/js/film.js) types the example ask, shows the words of the page's first screen and names its chapters and controls as this file has them, copied in when

@@ -1,8 +1,9 @@
 // The root page's part for people (docs/design/root-page.md): code box,
-// language, and the two steps: the ways to play as the tabs of the chat that
-// shows each one's example, and the box that opens the AI's .zip. The
-// guidance for AIs below reads without this script, in English; this script
-// puts the part above it in the visitor's language (client/landing-text.ts).
+// language, and the two steps: asking an AI for a quiz, the ways to play as
+// the tabs that pick the example the chat shows, and the box that opens the
+// AI's .zip. The guidance for AIs below reads without this script, in
+// English; this script puts the part above it in the visitor's language
+// (client/landing-text.ts).
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
@@ -45,13 +46,14 @@ const file = $("#file") as HTMLInputElement;
 let reading = false;
 
 // Getting a quiz (docs/design/root-page.md, "Getting a quiz"): the ways to
-// play are the tabs of the chat, each showing its example: the ask, and the
-// AI's file, which "Play this quiz" opens in the box below. The fourth tab,
-// "?", holds the ask that needs no knowing how to ask. Made here: without
-// the script, and for an AI's fetcher, the asks stand one under the other.
-// Every visit opens on the Quizmaster's (Situation: least surprise).
+// play are tabs in words under the first step's heading, each picking its
+// example in the chat: the ask, and the AI's answer, a file whose face is the
+// picture of that way, which plays by way of the box below. The fourth tab,
+// "Not sure?", holds the ask that needs no knowing how to ask. Made here:
+// without the script, and for an AI's fetcher, the asks stand one under the
+// other. Every visit opens on the Quizmaster's (Situation: least surprise).
 
-/** mock: a stand-in until the owner's run (backlog, "The page for people", item 1), marked in the chat's bar. */
+/** mock: a stand-in until the owner's run (backlog, "The page for people", item 1), marked beside the first step's heading. */
 const TABS: { tab: string; panel: string; way?: Way; ask: (t: Text) => string; mock?: boolean }[] = [
   { tab: "tab-quizmaster", panel: "ex-quizmaster", way: "quizmaster", ask: (t) => askText(t) },
   { tab: "tab-peers", panel: "ex-peers", way: "peers", ask: (t) => t.askPeers, mock: true },
@@ -60,9 +62,10 @@ const TABS: { tab: string; panel: string; way?: Way; ask: (t: Text) => string; m
 ];
 const tabs = TABS.map((a) => $(`#${a.tab}`) as HTMLButtonElement);
 const panels = TABS.map((a) => $(`#${a.panel}`));
-/** The AI's question back in the help panel: made here, so a fetcher doesn't read an AI's words as the page's. */
-const helpReply = document.createElement("p");
-helpReply.className = "said-ai";
+/** The AI's question back in the fourth tab, under the label every answer has: made here, so a fetcher doesn't read an AI's words as the page's. */
+const helpAnswer = document.createElement("div");
+helpAnswer.className = "answer";
+helpAnswer.innerHTML = `<p class="gives"></p><p class="said-ai"></p>`;
 {
   const bar = $("#ways");
   bar.setAttribute("role", "tablist");
@@ -73,24 +76,27 @@ helpReply.className = "said-ai";
     panels[i].setAttribute("aria-labelledby", a.tab);
     tabs[i].addEventListener("click", () => chooseTab(i));
     const way = a.way;
-    const zip = panels[i].querySelector<HTMLElement>(".zip");
-    if (way && zip) {
-      // The file in the AI's answer opens as a file of one's own does: it goes into the box below. The file
-      // itself takes a press too, as a file in a chat does; the button is the one a keyboard reaches.
+    const card = panels[i].querySelector<HTMLElement>(".file");
+    if (way && card) {
+      // The file in the AI's answer opens as a file of one's own does: it goes into the box below. The whole card takes
+      // a pointer's press, as a file in a chat does; the button is the one a keyboard reaches, and its press reaches the
+      // card too. Made here: without the script it would do nothing.
       const play = document.createElement("button");
       play.type = "button";
       play.className = "play";
-      panels[i].querySelector(".foot")!.prepend(play);
-      play.addEventListener("click", () => playExample(way, zip));
-      zip.classList.add("takes");
-      zip.addEventListener("click", () => playExample(way, zip));
+      card.querySelector(".meta")!.append(play);
+      card.classList.add("takes");
+      const zip = card.querySelector<HTMLElement>(".zip")!;
+      card.addEventListener("click", () => playExample(way, zip));
     }
   });
-  panels[3].querySelector(".bubble")!.after(helpReply);
+  panels[3].append(helpAnswer);
   bar.addEventListener("keydown", (e) => {
-    const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-    if (!step) return;
-    const i = (tabs.findIndex((b) => b.getAttribute("aria-selected") === "true") + step + tabs.length) % tabs.length;
+    const at = tabs.findIndex((b) => b.getAttribute("aria-selected") === "true");
+    const to = e.key === "ArrowRight" ? at + 1 : e.key === "ArrowLeft" ? at - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : null;
+    if (to === null) return;
+    e.preventDefault();
+    const i = (to + tabs.length) % tabs.length;
     chooseTab(i);
     tabs[i].focus();
   });
@@ -120,42 +126,52 @@ function renderExamples(): void {
       if (see) see.href = `/example?lang=${lang}${a.way === "quizmaster" ? "" : `&way=${a.way}`}`;
     }
   });
-  helpReply.textContent = t.helpReply;
-  helpReply.lang = lang;
+  helpAnswer.querySelector(".gives")!.textContent = t.gives;
+  helpAnswer.querySelector(".said-ai")!.textContent = t.helpReply;
+  helpAnswer.lang = lang;
 }
 
-/** An example played: its file moves into the box, as a file of one's own goes there, and opens on the local check. */
+/**
+ * An example played: a copy of its file's name moves into the box that opens
+ * a file, the box lights up as it does for a file dragged over it, and the
+ * file opens on the local check, as a file of one's own does. With reduced
+ * motion the box lights up and nothing flies.
+ */
 function playExample(way: Way, zip: HTMLElement): void {
   if (reading) return;
   reading = true;
-  const go = () => location.assign(`/open?example=${lang}&way=${way}`);
   const button = $("#open");
   out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof zip.animate !== "function") {
+  const landed = () => {
     runbox.classList.add("drag");
-    window.setTimeout(go, 300);
+    window.setTimeout(() => location.assign(`/open?example=${lang}&way=${way}`), 300);
+  };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof zip.animate !== "function") {
+    landed();
     return;
   }
   const fly = () => {
     const a = zip.getBoundingClientRect();
-    const b = button.getBoundingClientRect();
     const ghost = zip.cloneNode(true) as HTMLElement;
     ghost.classList.add("flying");
-    Object.assign(ghost.style, { left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px` });
+    // the copy's padding (10 px across, 5 down) set back, so it starts over the name it copies
+    Object.assign(ghost.style, { left: `${a.left - 10}px`, top: `${a.top - 5}px` });
     document.body.append(ghost);
-    const dx = b.left + b.width / 2 - (a.left + a.width / 2);
-    const dy = b.top + b.height / 2 - (a.top + a.height / 2);
-    window.setTimeout(() => runbox.classList.add("drag"), 350);
-    const done = () => {
-      ghost.remove();
-      go();
-    };
-    ghost
-      .animate(
-        [{ transform: "none" }, { transform: `translate(${dx}px, ${dy}px)`, offset: 0.75 }, { transform: `translate(${dx}px, ${dy}px) scale(.6)`, opacity: 0 }],
-        { duration: 750, easing: "cubic-bezier(.45, 0, .2, 1)" },
-      )
-      .finished.then(done, done);
+    requestAnimationFrame(() => {
+      const b = button.getBoundingClientRect(), g = ghost.getBoundingClientRect();
+      const dx = b.left + b.width / 2 - (g.left + g.width / 2);
+      const dy = b.top + b.height / 2 - (g.top + g.height / 2);
+      const done = () => {
+        ghost.remove();
+        landed();
+      };
+      ghost
+        .animate(
+          [{ transform: "none", opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(.9)`, opacity: 1, offset: 0.85 }, { transform: `translate(${dx}px, ${dy}px) scale(.8)`, opacity: 0 }],
+          { duration: 520, easing: "cubic-bezier(.4, 0, .2, 1)" },
+        )
+        .finished.then(done, done);
+    });
   };
   // The box out of sight (a quiz to come back to above it, a small window): it comes into sight first.
   if (button.getBoundingClientRect().bottom > innerHeight) {
@@ -180,6 +196,10 @@ function apply(l: Lang): void {
   for (const el of document.querySelectorAll<HTMLImageElement>("img[data-t-alt]")) {
     const v = t[el.dataset.tAlt as keyof Text];
     if (typeof v === "string") el.alt = v;
+  }
+  for (const el of document.querySelectorAll<HTMLElement>("[data-t-title]")) {
+    const v = t[el.dataset.tTitle as keyof Text];
+    if (typeof v === "string") el.title = v;
   }
   for (const id of ["#landing", "header.top .bar"]) $(id).lang = l;
   filmLanguage(l); // after #landing's lang: the film is built in the language around it
@@ -360,8 +380,8 @@ function renderResume(): void {
   // A Peers room has no teacher devices: this device comes back as its player (docs/design/peers.md).
   const href = info.peers ? `/play#${info.code}` : info.teacher ? teacherEntry(info.code, info.teacher) : `/teacher#${info.code}`;
   box.innerHTML = `<div class="resume">
-    <p class="head"><span class="title">${esc(info.title || t.untitled)}</span><span class="stands">${esc(stands)}</span></p>
-    <p class="go"><a class="back" href="${esc(href)}">${esc(t.back)}</a><span class="code">${esc(t.joinCode)} <b>${esc(info.code)}</b></span></p>
+    <p class="title">${esc(info.title || t.untitled)}</p><a class="back" href="${esc(href)}">${esc(t.back)}</a>
+    <p class="stands">${esc(stands)} · ${esc(t.joinCode)} <b>${esc(info.code)}</b></p>
     ${info.teacher && !info.peers ? `<p class="other">${t.otherDevice(esc(teacherCode(info.code, info.teacher)))}</p>` : ""}
   </div>`;
 }

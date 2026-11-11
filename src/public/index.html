@@ -25,7 +25,7 @@
   /* The part for people (root-page.md, "One column"): one column, the guidance's width, the same order at every width. */
   header.top { --page-w: 42rem; }
   .landing { max-width: 42rem; margin: 0 auto; padding: 0 16px; }
-  .landing h1 { font-size: clamp(1.3rem, 1rem + 1.7vw, 1.8rem); line-height: 1.18; margin: .8rem 0 .7rem; text-wrap: balance; }
+  .landing h1 { font-size: clamp(1.3rem, 1rem + 1.7vw, 1.8rem); line-height: 1.18; margin: .9rem 0 1rem; text-wrap: balance; }
   .landing h2 { border: 0; padding: 0; margin: 0 0 .4rem; font-size: 1.2rem; line-height: 1.25; }
 
   /* The film, under the first screen for whoever wants to find out more (root-page.md, "The film"; docs/film/). Until someone
@@ -98,108 +98,155 @@
   .cqf-stage .tb { font-weight: 700; }
   .cqf-stage .ts { font-weight: 600; }
   .cqf-stage .tn { font-variant-numeric: tabular-nums; }
-  /* Getting a quiz, in one place for the visitor's own case (root-page.md, "Getting a quiz"): the ways to play are the tabs of
-     the chat they choose an example for, standing on its top edge as a folder's tabs do, the chosen one open into it. The chat
-     is the AI's, where the ask is typed: its bar is the first step's heading and which AI; the ask is the visitor's message, on
-     the right with what it attaches, the AI's answer on the left with its file. Three pictures and a narrow "?" across at every
-     width. */
-  .ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) clamp(30px, 7vw, 46px); gap: 0 clamp(3px, 1vw, 8px); position: relative; z-index: 1; }
-  .ways button { display: flex; flex-direction: column; min-width: 0; margin: 0 0 -1px; padding: 4px 4px 3px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 14px 14px 0 0; background: transparent; color: var(--muted); font: inherit; text-align: left; cursor: pointer; }
-  .ways img { display: block; width: 100%; height: auto; border-radius: 9px; transition: opacity .15s, filter .15s; }
-  .ways b { display: block; margin: 4px 0 0 1px; font: 700 min(1rem, 3.75vw)/1.25 var(--font-brand); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ways .q { flex: 1; display: grid; place-items: center; border-radius: 9px; background: var(--code-bg); font: 700 1.35rem var(--font-brand); }
-  .ways button[aria-selected="true"] { background: var(--card); color: var(--fg); cursor: default; }
-  .ways button[aria-selected="false"] img, .ways button[aria-selected="false"] .q { opacity: .72; filter: saturate(.6); }
-  .ways button[aria-selected="false"]:hover img, .ways button[aria-selected="false"]:hover .q { opacity: 1; filter: none; }
-  .ways button[aria-selected="false"]:hover { color: var(--fg); }
+  /* The two things to do (root-page.md, "Two steps"): asking an AI for a quiz, then opening the file it made, numbered because
+     they are a sequence. The numbers are drawn, not text, so a fetcher reads the headings alone. On a wide window they hang in
+     the margin, joined by a line, so the eye takes "1, then 2" before it reads either. */
+  .steps { counter-reset: step; }
+  .step { position: relative; counter-increment: step; }
+  .step h2::before { content: counter(step); display: inline-block; width: 1.45rem; height: 1.45rem; margin-right: .5rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .85rem/1.45rem var(--font-text); text-align: center; vertical-align: .12em; }
+  .step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
+  .landing .step-head h2 { margin: 0; }
+  .which { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.4; }
+  /* A stand-in until the owner's run (backlog, "The page for people", item 1); nothing with one is deployed. */
+  .mock { margin-left: auto; font: 600 .72rem/1.5 var(--font-text); color: var(--muted); border: 1px dashed var(--muted); border-radius: 6px; padding: 0 6px; }
+
+  /* Getting a quiz (root-page.md, "Getting a quiz"): the ways to play as tabs in words, under the first step's heading, each
+     its name (the local check's card's) and whose case it is; the fourth for whoever recognises none of the three. A tab picks
+     the example in the chat under it and nothing else. The chosen tab is open into the chat, the others stand on a ground of
+     their own, so a phone, which shows nothing on hover, shows them as tabs to press. */
+  .ways { display: flex; gap: 4px; margin: .55rem 0 0; position: relative; z-index: 1; }
+  .ways button { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; margin: 0 0 -1px; padding: 6px 10px 8px; border: 1px solid transparent; border-bottom: 0; border-radius: 12px 12px 0 0; background: var(--tab); color: var(--muted); font: inherit; text-align: left; cursor: pointer; }
+  .ways button:first-child { flex-grow: 1.3; }
+  .ways button:last-child { flex-grow: .8; }
+  .ways b { font: 700 1rem/1.2 var(--font-brand); }
+  .ways span { font-size: .8rem; line-height: 1.25; margin-top: 1px; }
+  .ways button[aria-selected="true"] { background: var(--card); border-color: var(--rule); color: var(--fg); cursor: default; }
+  .ways button[aria-selected="true"] span { color: var(--muted); }
+  .ways button[aria-selected="false"] { border-color: var(--tab-edge); }
+  @media (hover: hover) { .ways button[aria-selected="false"]:hover { color: var(--fg); } }
   .ways button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .chat { position: relative; background: var(--card); border: 1px solid var(--rule); border-radius: 16px; }
+
+  /* The chat is the AI's, where the ask is typed: the visitor's message on the right with what it attaches beside it, the AI's
+     answer on the left under "The AI's answer:". */
+  .chat { position: relative; background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 12px 14px; }
   .get:has(#tab-quizmaster[aria-selected="true"]) .chat { border-top-left-radius: 0; }
   .get:has(#tab-help[aria-selected="true"]) .chat { border-top-right-radius: 0; }
-  .chat-bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; padding: 9px 14px 8px; border-bottom: 1px solid var(--rule); }
-  .chat-bar h2 { margin: 0; }
-  .chat-bar .which { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.35; }
-  .ex { padding: 12px 14px 10px; }
+  .mine { display: flex; justify-content: flex-end; align-items: flex-start; gap: 10px; }
+  .att { flex: none; display: flex; margin-top: 7px; }
+  .att img { display: block; height: 54px; width: auto; background: #fff; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .att img:first-child { transform: rotate(-4deg); }
+  .att img + img { transform: rotate(3deg); margin: 5px 0 0 -24px; }
+  .bubble { margin: 0; max-width: 31rem; background: var(--bubble); border-radius: 16px 16px 4px 16px; padding: 9px 13px; font-size: .98rem; line-height: 1.5; }
 
-  /* The two things to do, one above the other (root-page.md, "Two steps"): the number is drawn, not text, so a fetcher
-     reads the heading alone. */
-  .landing { counter-reset: step; }
-  .chat-bar h2, .runbox h2 { counter-increment: step; }
-  .chat-bar h2::before, .runbox h2::before { content: counter(step); display: inline-block; width: 1.45rem; height: 1.45rem; margin-right: .5rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .85rem/1.45rem var(--font-text); text-align: center; vertical-align: .12em; }
-  /* The visitor's message, on the right as a chat has it, with what it attaches at its top right. */
-  .bubble { margin: 0 0 0 auto; max-width: 88%; background: var(--bubble); border-radius: 16px 16px 4px 16px; padding: 9px 13px; font-size: .98rem; line-height: 1.5; }
-  .bubble .sheets { float: right; display: flex; margin: 3px 0 0 10px; }
-  .bubble .sheets img { display: block; height: 38px; width: auto; background: #fff; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
-  .bubble .sheets img:first-child { transform: rotate(-3deg); }
-  .bubble .sheets img:last-child:not(:first-child) { transform: rotate(3deg); margin-left: -9px; }
-  /* The AI's answer, on the left: its file, which "Play this quiz" opens in the box below as a file of one's own is opened. */
-  .reply { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: .5rem 0 0; font-size: .95rem; }
-  .reply .gives { color: var(--muted); }
-  .zip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--rule); background: var(--bg); border-radius: 10px 10px 10px 4px; padding: 4px 11px 4px 8px; font-weight: 600; font-size: .92rem; overflow-wrap: anywhere; color: var(--fg); }
+  /* The AI's answer is a file, and its face is the picture of that way: what the file becomes. The whole card takes a pointer's
+     press, as a file in a chat does; the button in it is the keyboard's. The press plays this quiz by way of the box below, so
+     it also shows where a file of one's own goes. The full example stands outside the card: beside its foot here, on the
+     label's row on a phone. */
+  .answer { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 4px 16px; margin-top: 10px; }
+  .gives { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.4; }
+  .file { grid-column: 1; display: flex; align-items: center; gap: 14px; min-width: 0; box-sizing: border-box; padding: 7px; border: 1px solid var(--rule); border-radius: 14px 14px 14px 4px; background: var(--bg); transition: border-color .12s; }
+  .file.takes { cursor: pointer; }
+  .file .scene { display: block; flex: none; width: 232px; height: auto; aspect-ratio: 16 / 10; border-radius: 8px; }
+  .file .meta { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; padding-right: 12px; }
+  .zip { display: flex; align-items: flex-start; gap: 7px; font-weight: 600; font-size: .95rem; line-height: 1.3; overflow-wrap: anywhere; color: var(--fg); }
   .zip svg { width: 15px; height: 19px; flex: none; color: var(--accent); }
-  .zip.takes { cursor: pointer; }
-  .zip.takes:hover, .ex:has(.play:hover, .play:focus-visible) .zip { border-color: var(--accent); }
-  .ex .play { border: 0; padding: 0; background: none; font: inherit; color: var(--accent); font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .ex .play:hover, .ex .play:focus-visible { text-decoration: underline; }
-  .said-ai { margin: .5rem 0 0; max-width: 88%; align-self: flex-start; background: var(--bg); border: 1px solid var(--rule); border-radius: 16px 16px 16px 4px; padding: 8px 13px; font-size: .95rem; line-height: 1.45; }
-  /* Under the answer, what to do with it: play it, or see the whole example. */
-  .ex .foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; margin: .55rem 0 0; font-size: .95rem; }
-  .ex .foot:empty { display: none; }
-  .ex .see { margin-left: auto; color: var(--accent); font-weight: 600; text-decoration: none; }
-  .ex .see:hover, .ex .see:focus-visible { text-decoration: underline; }
-  /* A stand-in until the owner's run (backlog, "The page for people", item 1); nothing with one is deployed. */
-  .chat-bar .mock { margin-left: auto; }
-  .mock { font: 600 .72rem var(--font-text); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--muted); border-radius: 6px; padding: 0 6px; }
-  /* The file's way into the box, when an example is played: a copy of its file moves onto the button. */
-  .flying { position: fixed; z-index: 50; margin: 0; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  .play { border: 1.5px solid var(--control); border-radius: 10px; padding: 5px 12px; background: transparent; color: var(--control); font: inherit; font-weight: 700; font-size: .95rem; line-height: 1.3; white-space: nowrap; cursor: pointer; transition: background-color .12s, color .12s; }
+  @media (hover: hover) { .file.takes:hover { border-color: var(--control); } .file.takes:hover .play { background: var(--control); color: var(--control-ink); } }
+  .play:focus-visible { background: var(--control); color: var(--control-ink); }
+  /* Its padding makes it 30 px to press; the margins take the padding back, so the rows stand where they would. */
+  .see { grid-column: 2; justify-self: start; padding: 5px 0; margin: -5px 0 4px; font-size: .9rem; font-weight: 600; line-height: 1.4; text-decoration: none; white-space: nowrap; }
+  .see:hover, .see:focus-visible { text-decoration: underline; }
+  .said-ai { grid-column: 1 / -1; justify-self: start; margin: 4px 0 0; max-width: 31rem; background: var(--bg); border: 1px solid var(--rule); border-radius: 14px 14px 14px 4px; padding: 9px 13px; font-size: .98rem; line-height: 1.5; }
+  /* The file's way into the box, when an example is played: a copy of its name moves onto the button. */
+  .flying { position: fixed; z-index: 50; margin: 0; pointer-events: none; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 5px 10px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
 
-  .run { margin: .9rem 0 0; }
-  .runbox { border: 2px dashed #b9b3a5; border-radius: 16px; padding: 10px 14px 12px; transition: border-color .15s, background-color .15s; }
+  /* The second step: the place a file goes, outside the tabs, since it is the same for every way. Dashed, as a place to drop
+     something is. Here its heading and button share a row; on a phone the button is as wide as the box. */
+  .run { margin-top: .9rem; }
+  .runbox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; border: 2px dashed var(--dash); border-radius: 16px; padding: 12px 14px; transition: border-color .15s, background-color .15s; }
   .runbox.drag { border-color: var(--accent); background: var(--code-bg); }
-  .runbox h2 { margin: 0 0 .5rem; }
-  .runbox .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 16px; margin: 0; }
-  .runbox .open { text-wrap: balance; border: 0; background: var(--control); color: var(--control-ink); border-radius: 12px; padding: 13px 28px; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
+  .landing .runbox h2 { flex: 1 1 auto; margin: 0; }
+  .runbox .pick { display: flex; align-items: center; gap: 8px 16px; margin: 0; }
+  .runbox .open { border: 0; background: var(--control); color: var(--control-ink); border-radius: 12px; padding: 12px 26px; font: inherit; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
   .runbox .drop { color: var(--muted); }
   /* Nothing is dropped on a device without a pointer that drags. */
   @media (hover: none) and (pointer: coarse) { .runbox .drop { display: none; } }
   #out:empty, #resume:empty { display: none; }
-  /* A phone: a little tighter, so the button that opens a file is in the first screen (root-page.md, "One column"). */
-  @media (max-width: 440px) {
-    .landing h1 { font-size: 1.25rem; margin: .65rem 0 .55rem; }
-    .landing h2 { font-size: 1.1rem; }
-    .chat-bar .which { font-size: .84rem; }
-    .reply { gap: 4px 8px; font-size: .92rem; }
-    .zip { font-size: .88rem; padding: 3px 9px 3px 7px; }
-    .bubble { font-size: .94rem; line-height: 1.45; }
-    .chat-bar { padding: 8px 12px 7px; }
-    .ex { padding: 10px 12px 8px; }
-    .runbox { padding: 8px 12px 10px; }
-    .runbox .open { padding: 12px 24px; }
+
+  @media (min-width: 54rem) {
+    .step h2::before { position: absolute; left: -2.55rem; margin: 0; }
+    .step.get h2::before { top: .03rem; }
+    .step.get::after { content: ""; position: absolute; left: calc(-2.55rem + .725rem - 1px); top: 1.85rem; bottom: -.9rem; width: 2px; border-radius: 1px; background: var(--rule); }
+    /* The second number stands beside the box, whatever shows under the box: placed from the box, whose border is 2 px. */
+    .step.run { position: static; }
+    .runbox { position: relative; }
+    .step.run h2::before { left: calc(-2.55rem - 2px); top: calc(50% - .725rem); }
+    .runbox::before { content: ""; position: absolute; left: calc(-2.55rem - 2px + .725rem - 1px); top: -2px; height: calc(50% - 1.1rem + 2px); width: 2px; border-radius: 1px; background: var(--rule); }
   }
+
+  /* A phone: tighter, so the button that opens a file is in the first screen (root-page.md, "One column"). */
+  @media (max-width: 600px) {
+    .landing h1 { font-size: min(1.25rem, 5.25vw); margin: .6rem 0 .6rem; }
+    .landing h2 { font-size: 1.1rem; }
+    .which { font-size: .84rem; }
+    .ways { gap: 3px; margin-top: .35rem; }
+    .ways button { padding: 5px 7px 6px; }
+    .ways b { font-size: .84rem; }
+    .ways span { font-size: .72rem; }
+    .chat { padding: 9px 10px; }
+    .mine { gap: 7px; }
+    .att { margin-top: 6px; }
+    .att img { height: 44px; }
+    .att img + img { margin: 5px 0 0 -26px; }
+    .bubble { font-size: .92rem; line-height: 1.45; padding: 7px 11px; }
+    .said-ai { font-size: .92rem; line-height: 1.45; padding: 7px 11px; }
+    .run { margin-top: .7rem; }
+    .answer { grid-template-columns: 1fr auto; align-items: baseline; gap: 3px 12px; margin-top: 6px; }
+    .gives { grid-column: 1; font-size: .84rem; }
+    .see { grid-row: 1; margin: -5px 0; font-size: .84rem; }
+    .file { grid-column: 1 / -1; gap: 10px; padding: 6px; }
+    .file .scene { width: min(42%, 150px); }
+    .file .meta { gap: 7px; padding-right: 2px; }
+    .zip { font-size: .88rem; }
+    .play { font-size: .9rem; padding: 4px 10px; }
+    .runbox { padding: 8px 12px 10px; gap: 6px 12px; }
+    .runbox .pick { flex: 1 1 100%; flex-wrap: wrap; }
+    .runbox .open { flex: 1 1 100%; padding: 11px 20px; }
+  }
+  /* The narrowest phones: the first tab's name and the file's button still fit. */
+  @media (max-width: 340px) {
+    .ways button { padding: 5px 5px 6px; }
+    .ways button:first-child { flex-grow: 1.5; }
+    .ways b { font-size: .78rem; }
+    .play { white-space: normal; text-align: left; }
+  }
+
   .muted { color: var(--muted); }
-  .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0; }
+  .problem { border: 1px solid var(--rule); border-radius: 14px; padding: 12px 16px; margin: 12px 0 0; }
+  .problem p, .problem ul { margin: .3rem 0; }
   .problem .err { color: var(--bad); font-weight: 600; }
   .problem button { border: 2px solid var(--rule); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; margin: 4px 6px 0 0; }
   .problem button.primary { background: var(--control); border-color: var(--control); color: var(--control-ink); }
-
-  /* A quiz to come back to, above everything else on the device that started it (root-page.md, "Coming back"). */
-  .resume { border: 2px solid var(--accent); border-radius: 16px; padding: 12px 16px; margin: 14px 0 0; }
-  .resume .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; }
-  .resume .title { font-weight: 700; overflow-wrap: anywhere; flex: 1 1 12em; }
-  .resume .stands { color: var(--muted); font-size: .95rem; white-space: nowrap; }
-  .resume .go { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: .5rem 0 0; }
-  .resume .back { display: inline-block; background: var(--control); color: var(--control-ink); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 18px; }
-  .resume .code { color: var(--muted); font-size: .95rem; }
-  .resume b { font-family: var(--font-brand); font-variant-numeric: tabular-nums; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
-  .resume .other { color: var(--muted); font-size: .95rem; margin: .5rem 0 0; }
   .owncopy { color: var(--muted); font-size: .95rem; margin: 12px 0 0; }
 
-  /* Below the first screen: finding out more, what to count on. */
+  /* A quiz to come back to, above everything else on the device that started it (root-page.md, "Coming back"): its title and
+     the way back on one row, where it stands and its code under the title. */
+  .resume { border: 2px solid var(--accent); border-radius: 14px; padding: 10px 14px; margin: 12px 0 0; display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; align-items: center; }
+  .resume p { margin: 0; }
+  .resume .title { font-weight: 700; overflow-wrap: anywhere; }
+  .resume .stands { color: var(--muted); font-size: .95rem; }
+  .resume .back { grid-row: span 2; background: var(--control); color: var(--control-ink); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 16px; white-space: nowrap; }
+  .resume .other { grid-column: 1 / -1; color: var(--muted); font-size: .9rem; margin-top: 4px; }
+  .resume b { font-family: var(--font-brand); font-variant-numeric: tabular-nums; color: var(--fg); letter-spacing: .05em; white-space: nowrap; }
+  @media (max-width: 440px) { .resume { grid-template-columns: 1fr; } .resume .back { grid-row: auto; justify-self: start; margin: 5px 0 1px; } }
+
+  /* Below the first screen: finding out more, what to count on. Then where the part for people ends: one sentence in the page's
+     language, and the manual on the same ground and the same edge. */
   .landing .sec { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); }
   .rely ul { padding-left: 1.2rem; margin: .4rem 0 0; }
-  .rely .manual { margin: 1.1rem 0 0; color: var(--muted); }
+  .hinge { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); color: var(--muted); }
 
-  .guide { margin-top: 2.6rem; padding-top: .5rem; border-top: 1px solid var(--rule); }
+  .guide { margin-top: 1.6rem; }
 </style>
 </head>
 <body class="follows-dark">
@@ -212,47 +259,56 @@
 <div id="resume"></div>
 <h1 data-t="what">Play quizzes your own AI makes from your sheets, notes or ideas.</h1>
 
-<section class="get" aria-labelledby="get-h">
+<div class="steps">
+<section class="step get" aria-labelledby="get-h">
+<div class="step-head"><h2 id="get-h" data-t="getH">Ask your AI for a quiz</h2> <p class="which" data-t="which">Any AI subscription will do, or free Claude.</p> <span class="mock" id="mock" hidden>mock example</span></div>
 <div class="ways" id="ways">
-  <button type="button" id="tab-quizmaster" aria-controls="ex-quizmaster"><img src="/landing/way-quizmaster.svg" width="640" height="400" alt="A teacher at the big screen with the question, a phone in her hand; the class answers on tablets." data-t-alt="picQuizmaster"><b>Quizmaster</b></button>
-  <button type="button" id="tab-peers" aria-controls="ex-peers"><img src="/landing/way-peers.svg" width="640" height="400" alt="Three friends on a sofa in the evening, each with the question on their own phone, one of them laughing." data-t-alt="picPeers"><b>Peers</b></button>
-  <button type="button" id="tab-solo" aria-controls="ex-solo"><img src="/landing/way-solo.svg" width="640" height="400" alt="Someone alone at a desk with their notes, the question on their phone, the answer just found right." data-t-alt="picSolo"><b>Solo</b></button>
-  <button type="button" id="tab-help" class="help" aria-controls="ex-help" aria-label="None of these, or not sure yet" data-t-aria="help"><span class="q" aria-hidden="true">?</span></button>
+  <button type="button" id="tab-quizmaster" aria-controls="ex-quizmaster"><b>Quizmaster</b> <span data-t="subQuizmaster">for a class or group</span></button>
+  <button type="button" id="tab-peers" aria-controls="ex-peers"><b>Peers</b> <span data-t="subPeers">with friends</span></button>
+  <button type="button" id="tab-solo" aria-controls="ex-solo"><b>Solo</b> <span data-t="subSolo">on your own</span></button>
+  <button type="button" id="tab-help" aria-controls="ex-help" title="None of these, or not sure yet" data-t-title="help"><b data-t="unsure">Not sure?</b></button>
 </div>
 <div class="chat">
-  <div class="chat-bar"><h2 id="get-h" data-t="getH">Ask your AI for a quiz</h2> <p class="which" data-t="which">Any AI subscription will do, or free Claude.</p><span class="mock" id="mock" hidden>mock</span></div>
-  <div class="panels">
-    <div class="ex" id="ex-quizmaster">
-      <blockquote class="bubble"><span class="sheets"><img src="/landing/sheet-1.webp" alt="" width="233" height="300"><img src="/landing/sheet-2.webp" alt="" width="233" height="300"></span><span class="said" id="ask-quizmaster">Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 4th grade class, about 10 questions, in English.</span></blockquote>
-      <p class="reply"><span class="gives" data-t="gives">The AI's answer:</span> <span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">big-numbers-quiz.zip</span></span></p>
-      <p class="foot"><a class="see" href="/example" data-t="see">The whole example &rsaquo;</a></p>
+  <div class="ex" id="ex-quizmaster">
+    <div class="mine"><span class="att"><img src="/landing/sheet-1.webp" alt="" width="233" height="300"><img src="/landing/sheet-2.webp" alt="" width="233" height="300"></span><blockquote class="bubble"><span class="said" id="ask-quizmaster">Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 4th grade class, about 10 questions, in English.</span></blockquote></div>
+    <div class="answer">
+      <p class="gives" data-t="gives">The AI's answer:</p>
+      <div class="file"><img class="scene" src="/landing/way-quizmaster.svg" width="640" height="400" alt="A teacher at the big screen with the question, a phone in her hand; the class answers on tablets." data-t-alt="picQuizmaster"><span class="meta"><span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">big-numbers-quiz.zip</span></span></span></div>
+      <a class="see" href="/example" data-t="see">The whole example &rsaquo;</a>
     </div>
-    <div class="ex" id="ex-peers">
-      <blockquote class="bubble"><span class="sheets"><img src="/landing/mock-notes.svg" alt="" width="233" height="300"></span><span class="said" id="ask-peers">Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to learn and have fun. I'm playing too, so don't show me the questions.</span></blockquote>
-      <p class="reply"><span class="gives" data-t="gives">The AI's answer:</span> <span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">history-exam-quiz.zip</span></span></p>
-      <p class="foot"><a class="see" href="/example?way=peers" data-t="see">The whole example &rsaquo;</a></p>
+  </div>
+  <div class="ex" id="ex-peers">
+    <div class="mine"><span class="att"><img src="/landing/mock-notes.svg" alt="" width="233" height="300"></span><blockquote class="bubble"><span class="said" id="ask-peers">Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to learn and have fun. I'm playing too, so don't show me the questions.</span></blockquote></div>
+    <div class="answer">
+      <p class="gives" data-t="gives">The AI's answer:</p>
+      <div class="file"><img class="scene" src="/landing/way-peers.svg" width="640" height="400" alt="Three friends on a sofa in the evening, each with the question on their own phone, one of them laughing." data-t-alt="picPeers"><span class="meta"><span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">history-exam-quiz.zip</span></span></span></div>
+      <a class="see" href="/example?way=peers" data-t="see">The whole example &rsaquo;</a>
     </div>
-    <div class="ex" id="ex-solo">
-      <blockquote class="bubble"><span class="sheets"><img src="/landing/mock-test.svg" alt="" width="233" height="300"></span><span class="said" id="ask-solo">Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.</span></blockquote>
-      <p class="reply"><span class="gives" data-t="gives">The AI's answer:</span> <span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">cell-test-practice.zip</span></span></p>
-      <p class="foot"><a class="see" href="/example?way=solo" data-t="see">The whole example &rsaquo;</a></p>
+  </div>
+  <div class="ex" id="ex-solo">
+    <div class="mine"><span class="att"><img src="/landing/mock-test.svg" alt="" width="233" height="300"></span><blockquote class="bubble"><span class="said" id="ask-solo">Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.</span></blockquote></div>
+    <div class="answer">
+      <p class="gives" data-t="gives">The AI's answer:</p>
+      <div class="file"><img class="scene" src="/landing/way-solo.svg" width="640" height="400" alt="Someone alone at a desk with their notes, the question on their phone, the answer just found right." data-t-alt="picSolo"><span class="meta"><span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">cell-test-practice.zip</span></span></span></div>
+      <a class="see" href="/example?way=solo" data-t="see">The whole example &rsaquo;</a>
     </div>
-    <div class="ex" id="ex-help">
-      <blockquote class="bubble"><span class="said" id="ask-help">Read classyquiz.pages.dev. I need a classyQuiz. Help?</span></blockquote>
-    </div>
+  </div>
+  <div class="ex" id="ex-help">
+    <div class="mine"><blockquote class="bubble"><span class="said" id="ask-help">Read classyquiz.pages.dev. I need a classyQuiz. Help?</span></blockquote></div>
   </div>
 </div>
 </section>
 
-<section class="run" aria-labelledby="run-h">
+<section class="step run" aria-labelledby="run-h">
   <div class="runbox" id="runbox">
     <h2 id="run-h" data-t="run">Open the quiz your AI made</h2>
-    <p class="row"><button type="button" class="open" id="open" data-t="upload">Choose the .zip file</button> <span class="drop" data-t="drop">or drop it here</span></p>
+    <p class="pick"><button type="button" class="open" id="open" data-t="upload">Choose the .zip file</button> <span class="drop" data-t="drop">or drop it here</span></p>
     <input id="file" type="file" hidden>
   </div>
   <div id="out" role="status"></div>
   <p class="owncopy" id="owncopy" hidden></p>
 </section>
+</div>
 
 <section class="sec" aria-labelledby="film-h">
   <h2 id="film-h" data-t="filmH">From the exercise sheet to the class playing, in one minute</h2>
@@ -269,8 +325,9 @@
     <li data-t="relyKept">Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy.</li>
     <li><span data-t="relyOpen">The code is open:</span> <a href="https://github.com/sacrusha/ClassyQuiz">github.com/sacrusha/ClassyQuiz</a></li>
   </ul>
-  <p class="manual" data-t="manual">The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too.</p>
 </section>
+
+<p class="hinge" data-t="manual">The rest of this page is the manual for AIs, in English: what your AI reads when you give it this address. You are welcome to read it too.</p>
 </div>
 
 <main>
