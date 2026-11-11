@@ -4,7 +4,7 @@
 // whoever will play mustn't have to see them to get there.
 //
 // The quiz arrives from the root page through handoff.ts (/open#<key>), or
-// is the worked example's, fetched here (/open?example=<lang>). Nothing of it
+// is one of the root page's examples, fetched here (/open?example=<lang>&way=<way>). Nothing of it
 // is kept: a reload of a handed-over quiz finds nothing, and says so.
 
 import * as G from "../server/game.ts";
@@ -12,7 +12,7 @@ import type { Problem } from "../quiz/format.ts";
 import type { TeacherQuestion } from "../shared/protocol.ts";
 import { $, esc, lines } from "./dom.ts";
 import { ENTRIES, type Entry, type EntryContext } from "./entries.ts";
-import { EXAMPLE_ZIP } from "./example-text.ts";
+import { WAY_ZIP, isWay } from "./example-text.ts";
 import { sweepStale, takeOver } from "./handoff.ts";
 import { TEXT, isLang } from "./landing-text.ts";
 import { T, lang, said } from "./room-text.ts";
@@ -42,7 +42,9 @@ async function arrive(): Promise<void> {
   else void sweepStale();
   let files: QuizFiles | null = null;
   if (isLang(example)) {
-    files = await exampleFiles(EXAMPLE_ZIP[example]);
+    // The root page's examples, one per way to play (docs/design/root-page.md, "Getting a quiz"); without a way, the worked example's.
+    const way = new URLSearchParams(location.search).get("way");
+    files = await exampleFiles(WAY_ZIP[isWay(way) ? way : "quizmaster"][example]);
     if (!files) return;
   } else if (key) {
     files = await takeOver(key).catch(() => null);

@@ -1,6 +1,6 @@
 // The root page's part for people (docs/design/root-page.md): code box,
-// language, the ways to play, the two steps (the example ask, and the box
-// that opens the AI's .zip), the example asks under "How to ask". The
+// language, and the two steps: the ways to play as the tabs of the chat that
+// shows each one's example, and the box that opens the AI's .zip. The
 // guidance for AIs below reads without this script, in English; this script
 // puts the part above it in the visitor's language (client/landing-text.ts).
 
@@ -11,7 +11,7 @@ import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, typ
 import { api, readApi } from "./net.ts";
 import { ZipError, listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, askText, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
-import { EXAMPLE_ZIP } from "./example-text.ts";
+import { WAY_ZIP, type Way } from "./example-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, uploadDays } from "./history.ts";
 import { handOver, sweepStale } from "./handoff.ts";
@@ -38,123 +38,130 @@ codeBox();
 const codeInput = $("#code") as HTMLInputElement;
 const showLang = langSwitch((l) => apply(l));
 
-// How to ask: copy the address. The button is made here, not in the
-// HTML: an AI's fetcher converting the page to text would otherwise read the
-// address as "classyquiz.pages.devCopy".
+const runbox = $("#runbox");
+const out = $("#out");
+const file = $("#file") as HTMLInputElement;
+/** A quiz is being read, or an example is on its way to the check: another file waits. */
+let reading = false;
 
-const addr = document.querySelector<HTMLElement>(".addr");
-let copy: HTMLButtonElement | null = null;
-if (addr) addr.textContent = host;
-if (addr && navigator.clipboard?.writeText) {
-  copy = document.createElement("button");
-  copy.type = "button";
-  addr.append(copy);
-  copy.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(host);
-      copy!.textContent = t.copied;
-      window.setTimeout(() => (copy!.textContent = t.copy), 2000);
-    } catch {
-      /* the address is there to read */
-    }
-  });
-}
+// Getting a quiz (docs/design/root-page.md, "Getting a quiz"): the ways to
+// play are the tabs of the chat, each showing its example: the ask, and the
+// AI's file, which "Play this quiz" opens in the box below. The fourth tab,
+// "?", holds the ask that needs no knowing how to ask. Made here: without
+// the script, and for an AI's fetcher, the asks stand one under the other.
+// Every visit opens on the Quizmaster's (Situation: least surprise).
 
-/**
- * The example asks: the sheets ask plain in the first step and, under "How
- * to ask", again with each labelled part's label under it; the other asks
- * plain; and the tabs' names.
- */
-function renderAsk(): void {
-  const top = $("#ask-top");
-  top.textContent = askText(t).replaceAll(DEMO, host);
-  $("#bubble-top").lang = lang;
-  const bubble = $("#bubble");
-  // Punctuation right after a labelled part is glued to it: a browser may break a line
-  // after an inline-block, which would start the next line with "," or ".".
-  let html = "";
-  let glued = 0;
-  t.ask.forEach((p, i) => {
-    const s = p.s.replaceAll(DEMO, host).slice(glued);
-    glued = 0;
-    if (p.l === undefined) {
-      html += esc(s);
-      return;
-    }
-    const next = t.ask[i + 1];
-    const punct = next && next.l === undefined ? (/^[,.;:?!]+/.exec(next.s)?.[0] ?? "") : "";
-    glued = punct.length;
-    html += `<span class="glue"><span class="part"><u>${esc(s)}</u><span class="lab">${esc(t.labels[p.l])}</span></span>${esc(punct)}</span>`;
-  });
-  bubble.innerHTML = html;
-  bubble.lang = lang;
-  for (const [id, text] of [["#bubble3", t.askChess], ["#bubble-solo", t.askSolo], ["#bubble-friends", t.askFriends], ["#bubble-group", t.askGroup], ["#bubble2", t.ask2]] as const) {
-    const el = $(id);
-    el.textContent = text.replaceAll(DEMO, host);
-    el.lang = lang;
-  }
-  for (const tab of askTabs) tab.textContent = t[tab.dataset.name as (typeof ASK_TABS)[number]["name"]];
-}
-
-// The example asks as tabs, each named in words for what the visitor brings
-// or who plays (docs/design/root-page.md, "How to ask"). Made here: without
-// the script, and for an AI's fetcher, the asks stand one under the other,
-// and the sheets ask stands once, in the first step. Its second showing, with
-// the labels, is made here too, as the first tab.
-
-const ASK_TABS = [
-  { panel: "ask-sheets", name: "tabSheets" },
-  { panel: "ask-chess", name: "tabChess" },
-  { panel: "ask-group", name: "tabGroup" },
-  { panel: "ask-friends", name: "tabFriends" },
-  { panel: "ask-solo", name: "tabSolo" },
-  { panel: "ask-open", name: "tabOpen" },
-] as const;
-const askTabs: HTMLButtonElement[] = [];
+/** mock: a stand-in until the owner's run (backlog, "The page for people", item 1), marked in the chat's bar. */
+const TABS: { tab: string; panel: string; way?: Way; ask: (t: Text) => string; mock?: boolean }[] = [
+  { tab: "tab-quizmaster", panel: "ex-quizmaster", way: "quizmaster", ask: (t) => askText(t) },
+  { tab: "tab-peers", panel: "ex-peers", way: "peers", ask: (t) => t.askPeers, mock: true },
+  { tab: "tab-solo", panel: "ex-solo", way: "solo", ask: (t) => t.askSolo, mock: true },
+  { tab: "tab-help", panel: "ex-help", ask: (t) => t.askHelp, mock: true },
+];
+const tabs = TABS.map((a) => $(`#${a.tab}`) as HTMLButtonElement);
+const panels = TABS.map((a) => $(`#${a.panel}`));
+/** The AI's question back in the help panel: made here, so a fetcher doesn't read an AI's words as the page's. */
+const helpReply = document.createElement("p");
+helpReply.className = "said-ai";
 {
-  const asks = $("#asks");
-  const sheets = document.createElement("div");
-  sheets.className = "example";
-  sheets.id = "ask-sheets";
-  sheets.innerHTML = `<blockquote class="bubble inplace" id="bubble"></blockquote>`;
-  asks.prepend(sheets);
-  const bar = document.createElement("div");
-  bar.className = "ask-tabs";
+  const bar = $("#ways");
   bar.setAttribute("role", "tablist");
-  for (const a of ASK_TABS) {
-    const tab = document.createElement("button");
-    tab.type = "button";
-    tab.id = `${a.panel}-tab`;
-    tab.dataset.name = a.name;
-    tab.setAttribute("role", "tab");
-    tab.setAttribute("aria-controls", a.panel);
-    const panel = $(`#${a.panel}`);
-    panel.setAttribute("role", "tabpanel");
-    panel.setAttribute("aria-labelledby", tab.id);
-    tab.addEventListener("click", () => chooseAsk(askTabs.indexOf(tab)));
-    askTabs.push(tab);
-    bar.append(tab);
-  }
-  // Arrow keys move between the tabs, as in any tab list.
+  bar.setAttribute("aria-labelledby", "get-h");
+  TABS.forEach((a, i) => {
+    tabs[i].setAttribute("role", "tab");
+    panels[i].setAttribute("role", "tabpanel");
+    panels[i].setAttribute("aria-labelledby", a.tab);
+    tabs[i].addEventListener("click", () => chooseTab(i));
+    const way = a.way;
+    const zip = panels[i].querySelector<HTMLElement>(".zip");
+    if (way && zip) {
+      // The file in the AI's answer opens as a file of one's own does: it goes into the box below. The file
+      // itself takes a press too, as a file in a chat does; the button is the one a keyboard reaches.
+      const play = document.createElement("button");
+      play.type = "button";
+      play.className = "play";
+      panels[i].querySelector(".foot")!.prepend(play);
+      play.addEventListener("click", () => playExample(way, zip));
+      zip.classList.add("takes");
+      zip.addEventListener("click", () => playExample(way, zip));
+    }
+  });
+  panels[3].querySelector(".bubble")!.after(helpReply);
   bar.addEventListener("keydown", (e) => {
     const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (!step) return;
-    const i = (askTabs.findIndex((b) => b.getAttribute("aria-selected") === "true") + step + askTabs.length) % askTabs.length;
-    chooseAsk(i);
-    askTabs[i].focus();
+    const i = (tabs.findIndex((b) => b.getAttribute("aria-selected") === "true") + step + tabs.length) % tabs.length;
+    chooseTab(i);
+    tabs[i].focus();
   });
-  asks.before(bar);
-  asks.classList.add("tabbed");
-  chooseAsk(0);
+  chooseTab(0);
 }
 
-function chooseAsk(i: number): void {
-  askTabs.forEach((tab, j) => {
+function chooseTab(i: number): void {
+  tabs.forEach((tab, j) => {
     const on = i === j;
     tab.setAttribute("aria-selected", String(on));
     tab.tabIndex = on ? 0 : -1;
-    $(`#${ASK_TABS[j].panel}`).hidden = !on;
+    panels[j].hidden = !on;
   });
+  $("#mock").hidden = !TABS[i].mock;
+}
+
+/** The asks, the files and the full examples' links, in the page's language. */
+function renderExamples(): void {
+  TABS.forEach((a, i) => {
+    const said = panels[i].querySelector<HTMLElement>(".said")!;
+    said.textContent = a.ask(t).replaceAll(DEMO, host);
+    said.lang = lang;
+    if (a.way) {
+      panels[i].querySelector(".zipname")!.textContent = WAY_ZIP[a.way][lang];
+      panels[i].querySelector(".play")!.textContent = t.playThis;
+      const see = panels[i].querySelector<HTMLAnchorElement>(".see");
+      if (see) see.href = `/example?lang=${lang}${a.way === "quizmaster" ? "" : `&way=${a.way}`}`;
+    }
+  });
+  helpReply.textContent = t.helpReply;
+  helpReply.lang = lang;
+}
+
+/** An example played: its file moves into the box, as a file of one's own goes there, and opens on the local check. */
+function playExample(way: Way, zip: HTMLElement): void {
+  if (reading) return;
+  reading = true;
+  const go = () => location.assign(`/open?example=${lang}&way=${way}`);
+  const button = $("#open");
+  out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof zip.animate !== "function") {
+    runbox.classList.add("drag");
+    window.setTimeout(go, 300);
+    return;
+  }
+  const fly = () => {
+    const a = zip.getBoundingClientRect();
+    const b = button.getBoundingClientRect();
+    const ghost = zip.cloneNode(true) as HTMLElement;
+    ghost.classList.add("flying");
+    Object.assign(ghost.style, { left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px` });
+    document.body.append(ghost);
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2);
+    const dy = b.top + b.height / 2 - (a.top + a.height / 2);
+    window.setTimeout(() => runbox.classList.add("drag"), 350);
+    const done = () => {
+      ghost.remove();
+      go();
+    };
+    ghost
+      .animate(
+        [{ transform: "none" }, { transform: `translate(${dx}px, ${dy}px)`, offset: 0.75 }, { transform: `translate(${dx}px, ${dy}px) scale(.6)`, opacity: 0 }],
+        { duration: 750, easing: "cubic-bezier(.45, 0, .2, 1)" },
+      )
+      .finished.then(done, done);
+  };
+  // The box out of sight (a quiz to come back to above it, a small window): it comes into sight first.
+  if (button.getBoundingClientRect().bottom > innerHeight) {
+    button.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(fly, 450);
+  } else fly();
 }
 
 /** The part for people, everything above About, in language `l`. */
@@ -174,24 +181,13 @@ function apply(l: Lang): void {
     const v = t[el.dataset.tAlt as keyof Text];
     if (typeof v === "string") el.alt = v;
   }
-  ($("#example-link") as HTMLAnchorElement).href = `/example?lang=${l}`;
-  // The example's file and its start, in the page's language (docs/design/example-page.md).
-  $("#zipname").textContent = EXAMPLE_ZIP[l];
-  ($("#zip") as HTMLAnchorElement).href = `/examples/${EXAMPLE_ZIP[l]}`;
-  ($("#try") as HTMLAnchorElement).href = `/open?example=${l}`;
   for (const id of ["#landing", "header.top .bar"]) $(id).lang = l;
   filmLanguage(l); // after #landing's lang: the film is built in the language around it
-  if (copy) copy.textContent = t.copy;
-  renderAsk();
+  renderExamples();
   renderResume();
   renderOwnCopy();
 }
 
-const runbox = $("#runbox");
-const out = $("#out");
-const file = $("#file") as HTMLInputElement;
-/** A quiz is being read: another file waits. */
-let reading = false;
 
 /** Counted by format only; a failure here never touches the upload. */
 function countAttempt(format: UploadFormat): void {
@@ -398,5 +394,8 @@ void findOpen();
 void findFull();
 // Back to this page after a quiz was handed on: the reading line is done with.
 window.addEventListener("pageshow", (e) => {
-  if (e.persisted) out.innerHTML = "";
+  if (!e.persisted) return;
+  out.innerHTML = "";
+  runbox.classList.remove("drag");
+  reading = false;
 });

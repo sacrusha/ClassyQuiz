@@ -133,3 +133,18 @@ export const EXAMPLE_ZIP: Record<Lang, string> = {
   fr: "quiz-grands-nombres.zip",
   it: "quiz-grandi-numeri.zip",
 };
+
+/** The ways to play, each with an example on the root page (docs/design/root-page.md, "Getting a quiz"). */
+export const WAYS = ["quizmaster", "peers", "solo"] as const;
+export type Way = (typeof WAYS)[number];
+export const isWay = (w: unknown): w is Way => WAYS.includes(w as Way);
+
+/**
+ * Each way's example quiz per language, opened by /open?example=<lang>&way=<way>. The Quizmaster's is the worked
+ * example's; the Solo and Peers files are mocks (docs/example/mock_zips.py) until the owner's runs replace them.
+ */
+export const WAY_ZIP: Record<Way, Record<Lang, string>> = {
+  quizmaster: EXAMPLE_ZIP,
+  peers: { en: "history-exam-quiz.zip", de: "geschichte-pruefung-quiz.zip", fr: "quiz-examen-histoire.zip", it: "quiz-esame-storia.zip" },
+  solo: { en: "cell-test-practice.zip", de: "zellen-test-uebung.zip", fr: "controle-cellule-revision.zip", it: "verifica-cellula-ripasso.zip" },
+};

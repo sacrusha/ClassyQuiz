@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 233 300" width="233" height="300"><!-- Mock: a marked test handed back, standing in until the owner's Solo run brings its own photograph (docs/example/mock_zips.py). -->
+<rect width="233" height="300" fill="#fff"/>
+<rect x="22" y="20" width="110" height="12" rx="3" fill="#3a3a3a"/>
+<circle cx="190" cy="34" r="22" fill="none" stroke="#d22" stroke-width="5"/>
+<rect x="176" y="27" width="28" height="13" rx="3" fill="#d22"/>
+<g fill="#9a9a9a">
+<rect x="22" y="72" width="150" height="8" rx="3"/><rect x="22" y="88" width="120" height="8" rx="3"/>
+<rect x="22" y="128" width="160" height="8" rx="3"/><rect x="22" y="144" width="100" height="8" rx="3"/>
+<rect x="22" y="184" width="140" height="8" rx="3"/><rect x="22" y="200" width="130" height="8" rx="3"/>
+<rect x="22" y="240" width="155" height="8" rx="3"/><rect x="22" y="256" width="90" height="8" rx="3"/>
+</g>
+<g fill="none" stroke="#d22" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+<path d="M188 80l9 9 16-20"/>
+<path d="M190 128l20 20M210 128l-20 20"/>
+<path d="M188 192l9 9 16-20"/>
+<path d="M190 240l20 20M210 240l-20 20"/>
+</g>
+</svg>

@@ -9,15 +9,14 @@
 // (docs/design/root-page.md, "Languages"; the choices:
 // docs/translation-review.md).
 //
-// The example asks are each language's version of the same ask; the marked
-// parts carry the labels. The chess ask is a description with no sheets, close
-// to the words of its run. The asks to practise alone, with friends and for a
-// training session are the other ways to play, in the words of whoever asks;
-// the two who play say so, which the guidance's "When the user will play the
-// quiz" answers. They have had no run, so no line names an AI under them. The open ask has nothing
-// decided: the open request; that the AI then asks what it needs is the
-// guidance's "Build with the user". The site's address in every ask is
-// replaced by the one the browser opened.
+// The example asks, one per way to play (docs/design/root-page.md, "Getting a
+// quiz"): the sheets ask, the Quizmaster's, is each language's version of the
+// same ask, its marked parts carrying the labels /example shows; Solo's and
+// Peers' are in the words of whoever asks, and the one who plays says so,
+// which the guidance's "The user who plays" answers; the help ask has nothing
+// decided, and the AI's question back is the guidance's "Build with the
+// user". Solo's, Peers' and the help reply are mocks until the owner's runs.
+// The site's address in every ask is replaced by the one the browser opened.
 
 import { SITE_WORDS, type SiteWords } from "./site-text.ts";
 import type { ZipProblem } from "./unzip.ts";
@@ -47,36 +46,20 @@ export interface Text extends SiteWords {
   again: string;
   /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
   full: string;
-  /** The link under the film, to the worked example (/example). */
+  /** Under an example's file, to its full example (/example). */
   see: string;
   /** The page's first sentence, its h1: what the site does for whoever reads it (docs/design/root-page.md, "What this is"). */
   what: string;
-  /**
-   * The three ways a quiz is played here, a picture each. The names are the
-   * local check's cards' in every language (Quizmaster, Peers, Solo:
-   * client/entries.ts), written in the page; these are what each is, in the
-   * visitor's words, after the name (docs/design/root-page.md, "The ways to play").
-   */
-  wayQuizmaster: string;
-  wayPeers: string;
-  waySolo: string;
-  /** What each way's picture shows (docs/ways/README.md), its accessible name. */
+  /** What each way's picture shows (docs/ways/README.md), its accessible name; the names are the local check's cards' (client/entries.ts), written in the page. */
   picQuizmaster: string;
   picPeers: string;
   picSolo: string;
-  /** The first of the two steps: its heading, over the example ask. */
+  /** The first of the two steps: its heading, the bar of the chat that shows the example ask. */
   getH: string;
   /** Under the ask: that a file comes back, before the example's file name. */
   gives: string;
-  /** From the first step down to "How to ask". */
-  more: string;
-  /** Under the box that opens a file: the example quiz, for whoever has none yet (docs/design/local-check.md). */
-  noQuiz: string;
-  tryIt: string;
   /** The film's heading, where it stands for whoever wants to find out more. */
   filmH: string;
-  /** "How to ask": which AI, the address, the example asks. */
-  howH: string;
   /** Where the part for people ends: what a person can count on, and that the manual for AIs follows. */
   relyH: string;
   relyFree: string;
@@ -94,28 +77,19 @@ export interface Text extends SiteWords {
   run: string;
   /** The button that opens the file picker: what it opens. */
   upload: string;
-  step1: string;
-  step1detail: string;
-  step2: string;
-  /** The example asks' tabs, in words short enough for six to stand in three rows on a phone: by what the visitor brings and who plays. */
-  tabSheets: string;
-  tabChess: string;
-  tabSolo: string;
-  tabFriends: string;
-  tabGroup: string;
-  tabOpen: string;
+  /** The way a visitor recognises as theirs shows an example for it (docs/design/root-page.md, "Getting a quiz"): its ask, and its file. */
+  askSolo: string;
+  askPeers: string;
+  /** The fourth entry, "?", for whoever recognises none of the three: its name, the ask that takes no knowing how to ask, and the AI's question back (a mock until a run gives one). */
+  help: string;
+  askHelp: string;
+  helpReply: string;
+  /** Which AI, in the chat's bar. */
+  which: string;
+  /** Beside the example's file: opens it in the box below, as a file of one's own is opened. */
+  playThis: string;
   ask: AskPart[];
   labels: string[];
-  /** The chess ask, and which AI answered it (its run: design/guidance-page.md). */
-  askChess: string;
-  chessWho: string;
-  /** Practising alone, playing with friends, a training session run on a big screen: no run behind them, so no line under them. */
-  askSolo: string;
-  askFriends: string;
-  askGroup: string;
-  /** The ask with nothing decided. */
-  ask2: string;
-  copy: string;
   copied: string;
   drop: string;
   zipOnly: string;
@@ -160,21 +134,14 @@ const en: Text = {
   seek: "Time in the film",
   again: "Play again",
   full: "Full screen",
-  see: "The example, step by step ›",
-  what: "Here you play quizzes your own AI makes from your sheets, notes or ideas.",
-  wayQuizmaster: "for a class or a group, on a big screen",
-  wayPeers: "with friends, each on their own device",
-  waySolo: "on your own, to practise or review",
+  see: "Step by step ›",
+  what: "Play quizzes your own AI makes from your sheets, notes or ideas.",
   picQuizmaster: "A teacher at the big screen with the question, a phone in her hand; the class answers on tablets.",
   picPeers: "Three friends on a sofa in the evening, each with the question on their own phone, one of them laughing.",
   picSolo: "Someone alone at a desk with their notes, the question on their phone, the answer just found right.",
   getH: "Ask your AI for a quiz",
   gives: "The AI's answer:",
-  more: "How to ask your AI ↓",
-  noQuiz: "No quiz yet?",
-  tryIt: "Play the example ›",
   filmH: "From the exercise sheet to the class playing, in one minute",
-  howH: "How to ask your AI",
   relyH: "What you can count on",
   relyFree: "Free, without accounts or sign-up.",
   relyKept: "Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The .zip is your lasting copy.",
@@ -185,15 +152,6 @@ const en: Text = {
   capZip: "The .zip, opened here",
   capWall: "What the class sees",
   capTap: "Each student taps",
-  step1: "Any AI subscription will do; otherwise, free Claude.",
-  step1detail: "Other free options have proven less reliable in testing. Free Claude Sonnet wrote the example above, 4 Nov 2026.",
-  step2: "Ask the AI to build you a quiz for",
-  tabSheets: "Exercise sheets",
-  tabChess: "A description",
-  tabSolo: "On your own",
-  tabFriends: "With friends",
-  tabGroup: "A training session",
-  tabOpen: "Nothing decided yet",
   ask: [
     { s: "Read " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -208,13 +166,13 @@ const en: Text = {
     { s: "." },
   ],
   labels: ["this site", "which exercises", "your class", "how many", "which language"],
-  askChess: "Read classyquiz.pages.dev. Please make me a classyQuiz for chess: 8-year-olds, 400–500 Elo, just 5 questions. Find some rated puzzles. I'll give them time to look at each question before I reveal the choices and start the countdown. Choices can be in chess notation, but without + or mate, which would make it too easy. Don't forget to say whose turn it is. For the last question, give them 2 similar positions to choose from, one promising, one winning. In English. What do you need?",
-  chessWho: "Claude Opus 5.5, paid plan, 5 Nov 2026",
-  askSolo: "Read classyquiz.pages.dev. My biology test on Friday is about the cell. Here are my notes. Can you make me a classyQuiz to practise with, about 20 questions? I'll play it myself, so please keep the questions and answers to yourself.",
-  askFriends: "Read classyquiz.pages.dev. Make us a classyQuiz for our games night: 15 questions on films from the 90s, some easy, some hard. I'm playing too, so don't show me the questions.",
-  askGroup: "Read classyquiz.pages.dev. Tomorrow I'm training 25 new colleagues on our safety rules. The slides are attached. Can you make me a classyQuiz for the end of the session, on the big screen, about 10 questions?",
-  ask2: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
-  copy: "Copy",
+  askHelp: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
+  helpReply: "Gladly. What is the quiz for, and who will play it? If you have material, like exercise sheets or notes, send it along.",
+  help: "None of these, or not sure yet",
+  askSolo: "Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.",
+  askPeers: "Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to learn and have fun. I'm playing too, so don't show me the questions.",
+  which: "Any AI subscription will do, or free Claude.",
+  playThis: "Play this quiz ↓",
   copied: "Copied",
   run: "Open the quiz your AI made",
   upload: "Choose the .zip file",
@@ -258,21 +216,14 @@ const de: Text = {
   seek: "Position im Film",
   again: "Nochmals abspielen",
   full: "Vollbild",
-  see: "Das Beispiel Schritt für Schritt ›",
-  what: "Hier spielst du das Quiz, das deine KI aus deinen Blättern, Notizen oder Ideen macht.",
-  wayQuizmaster: "für eine Klasse oder Gruppe, am Grossbildschirm",
-  wayPeers: "mit Freunden, alle am eigenen Gerät",
-  waySolo: "für dich allein, zum Üben oder Wiederholen",
+  see: "Schritt für Schritt ›",
+  what: "Spiel Quizze, die deine KI aus deinen Blättern, Notizen oder Ideen macht.",
   picQuizmaster: "Eine Lehrerin am grossen Bildschirm mit der Frage, das Handy in der Hand; die Klasse antwortet auf Tablets.",
   picPeers: "Drei Freunde abends auf dem Sofa, alle mit der Frage auf dem eigenen Handy, einer lacht.",
   picSolo: "Jemand allein am Schreibtisch mit Notizen, die Frage auf dem Handy, eben richtig beantwortet.",
   getH: "Frag deine KI nach einem Quiz",
-  gives: "Die Antwort der KI:",
-  more: "So fragst du deine KI ↓",
-  noQuiz: "Noch kein Quiz?",
-  tryIt: "Das Beispiel spielen ›",
+  gives: "Antwort der KI:",
   filmH: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute",
-  howH: "So fragst du deine KI",
   relyH: "Worauf du zählen kannst",
   relyFree: "Kostenlos, ohne Konto und ohne Anmeldung.",
   relyKept: "Spielst du allein, verlässt das Quiz deinen Browser nie. Spielen mehrere, wird das Quiz gelöscht, sobald es beendet ist, spätestens aber drei Stunden nach der letzten Benutzung. Die .zip-Datei ist die Kopie, die dir bleibt.",
@@ -283,15 +234,6 @@ const de: Text = {
   capZip: "Die .zip-Datei, hier geöffnet",
   capWall: "Was die Klasse sieht",
   capTap: "Jedes Kind tippt",
-  step1: "Jedes KI-Abo reicht, sonst Claude gratis.",
-  step1detail: "Andere kostenlose KIs haben sich beim Ausprobieren als weniger zuverlässig erwiesen. Das Beispiel oben stammt vom kostenlosen Claude Sonnet (4. Nov. 2026, auf Englisch, hier übersetzt).",
-  step2: "Frag die KI nach einem Quiz für",
-  tabSheets: "Arbeitsblätter",
-  tabChess: "Eine Beschreibung",
-  tabSolo: "Für dich allein",
-  tabFriends: "Mit Freunden",
-  tabGroup: "Eine Schulung",
-  tabOpen: "Noch nichts entschieden",
   ask: [
     { s: "Lies " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -306,13 +248,13 @@ const de: Text = {
     { s: "." },
   ],
   labels: ["diese Seite", "welche Aufgaben", "deine Klasse", "wie viele", "welche Sprache"],
-  askChess: "Lies classyquiz.pages.dev. Mach mir bitte ein classyQuiz zum Thema Schach: 8-Jährige, 400–500 Elo, nur 5 Fragen. Such dafür Puzzles mit Elo-Wertung heraus. Ich lasse ihnen bei jeder Frage Zeit zum Anschauen, bevor ich die Optionen zeige und den Countdown starte. Die Optionen dürfen in Schachnotation sein, aber ohne + oder Matt, das wäre zu einfach. Vergiss nicht zu sagen, wer am Zug ist. Bei der letzten Frage gib ihnen 2 ähnliche Stellungen zur Auswahl, eine aussichtsreiche und eine gewonnene. Auf Deutsch. Was brauchst du?",
-  chessWho: "Claude Opus 5.5, kostenpflichtiges Abo, 5. Nov. 2026",
-  askSolo: "Lies classyquiz.pages.dev. Am Freitag habe ich eine Biologieprüfung über die Zelle. Hier sind meine Notizen. Kannst du mir ein classyQuiz zum Üben machen, etwa 20 Fragen? Ich spiele es selbst, also behalte die Fragen und Antworten bitte für dich.",
-  askFriends: "Lies classyquiz.pages.dev. Mach uns ein classyQuiz für unseren Spieleabend: 15 Fragen zu Filmen aus den 90ern, ein paar leichte, ein paar schwere. Ich spiele mit, also zeig mir die Fragen nicht.",
-  askGroup: "Lies classyquiz.pages.dev. Morgen schule ich 25 neue Kolleginnen und Kollegen zu unseren Sicherheitsregeln. Die Folien sind angehängt. Kannst du mir ein classyQuiz für den Schluss der Schulung machen, auf dem grossen Bildschirm, etwa 10 Fragen?",
-  ask2: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
-  copy: "Kopieren",
+  askHelp: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
+  helpReply: "Gern. Wofür ist das Quiz, und wer spielt es? Wenn du Material hast, etwa Arbeitsblätter oder Notizen, schick es mit.",
+  help: "Nichts davon, oder noch unsicher",
+  askSolo: "Lies classyquiz.pages.dev. Ich habe diese Biologieprüfung zurückbekommen. Mach mir ein classyQuiz für 20 Minuten Üben, vor allem zu dem, was ich falsch hatte. Zeig mir die Fragen nicht, ich spiele es selbst.",
+  askPeers: "Lies classyquiz.pages.dev. Hier sind unsere Notizen für die Geschichtsprüfung. Mach meinen Freunden und mir ein classyQuiz für 10 Minuten, zum Lernen und zum Spass. Ich spiele mit, also zeig mir die Fragen nicht.",
+  which: "Jedes KI-Abo reicht, sonst Claude gratis.",
+  playThis: "Dieses Quiz spielen ↓",
   copied: "Kopiert",
   run: "Öffne das Quiz deiner KI",
   upload: ".zip-Datei auswählen",
@@ -361,21 +303,14 @@ const fr: Text = {
   seek: "Position dans la vidéo",
   again: "Revoir",
   full: "Plein écran",
-  see: "L'exemple pas à pas ›",
-  what: "Ici, vous jouez aux quiz que votre propre IA crée à partir de vos fiches, notes ou idées.",
-  wayQuizmaster: "pour une classe ou un groupe, sur grand écran",
-  wayPeers: "entre amis, chacun sur son appareil",
-  waySolo: "pour vous exercer ou réviser",
+  see: "Pas à pas ›",
+  what: "Jouez aux quiz que votre IA crée avec vos fiches, notes ou idées.",
   picQuizmaster: "Une enseignante devant le grand écran avec la question, le téléphone à la main ; la classe répond sur des tablettes.",
   picPeers: "Trois amis sur un canapé le soir, chacun avec la question sur son téléphone, l'un d'eux rit.",
   picSolo: "Une personne seule à son bureau avec ses notes, la question sur son téléphone, la bonne réponse tout juste trouvée.",
   getH: "Demandez un quiz à votre IA",
-  gives: "La réponse de l'IA :",
-  more: "Que dire à votre IA ↓",
-  noQuiz: "Pas encore de quiz ?",
-  tryIt: "Essayer l'exemple ›",
+  gives: "Réponse de l'IA :",
   filmH: "De la fiche d'exercices à la classe qui joue, en une minute",
-  howH: "Que dire à votre IA",
   relyH: "Ce sur quoi vous pouvez compter",
   relyFree: "Gratuit, sans compte ni inscription.",
   relyKept: "En solo, le quiz ne quitte jamais votre navigateur. À plusieurs, le quiz est supprimé dès qu'il est terminé, au plus tard trois heures après sa dernière utilisation. Le fichier .zip reste votre copie.",
@@ -386,15 +321,6 @@ const fr: Text = {
   capZip: "Le .zip, ouvert ici",
   capWall: "Ce que voit la classe",
   capTap: "Chaque élève répond",
-  step1: "Tout abonnement à une IA fait l'affaire ; sinon, Claude en version gratuite.",
-  step1detail: "À l'essai, les autres IA gratuites se sont montrées moins fiables. L'exemple ci-dessus a été écrit par la version gratuite de Claude Sonnet, le 4 nov. 2026, en anglais (traduit ici).",
-  step2: "Demandez à l'IA un quiz pour",
-  tabSheets: "Fiches d'exercices",
-  tabChess: "Une description",
-  tabSolo: "En solo",
-  tabFriends: "Entre amis",
-  tabGroup: "Une formation",
-  tabOpen: "Encore rien de décidé",
   ask: [
     { s: "Lis " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -409,13 +335,13 @@ const fr: Text = {
     { s: "." },
   ],
   labels: ["ce site", "quels exercices", "votre classe", "combien", "quelle langue"],
-  askChess: "Lis classyquiz.pages.dev. Fais-moi un classyQuiz d'échecs, s'il te plaît : des enfants de 8 ans, 400–500 Elo, 5 questions seulement. Trouve des problèmes avec un classement Elo. Je leur laisse le temps de regarder chaque question avant d'afficher les propositions et de lancer le compte à rebours. Les propositions peuvent être en notation algébrique, mais sans + ni mat, ce serait trop facile. N'oublie pas de dire qui a le trait. Pour la dernière question, donne-leur le choix entre 2 positions semblables, l'une prometteuse, l'autre gagnante. En français. De quoi as-tu besoin ?",
-  chessWho: "Claude Opus 5.5, abonnement payant, 5 nov. 2026",
-  askSolo: "Lis classyquiz.pages.dev. J'ai un contrôle de biologie vendredi sur la cellule. Voici mes notes de cours. Tu peux me faire un classyQuiz pour réviser, une vingtaine de questions ? J'y jouerai moi-même, alors garde les questions et les réponses pour toi.",
-  askFriends: "Lis classyquiz.pages.dev. Fais-nous un classyQuiz pour notre soirée jeux : 15 questions sur les films des années 90, des faciles et des difficiles. Je joue aussi, alors ne me montre pas les questions.",
-  askGroup: "Lis classyquiz.pages.dev. Demain, je forme 25 nouveaux collègues à nos règles de sécurité. Les diapositives sont jointes. Tu peux me faire un classyQuiz pour la fin de la séance, sur le grand écran, une dizaine de questions ?",
-  ask2: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
-  copy: "Copier",
+  askHelp: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
+  helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes par exemple, envoie-le.",
+  help: "Rien de tout cela, ou pas encore sûr",
+  askSolo: "Lis classyquiz.pages.dev. On m'a rendu ce contrôle de biologie. Fais-moi un classyQuiz pour 20 minutes de révision, surtout sur ce que j'ai raté. Ne me montre pas les questions, j'y joue moi-même.",
+  askPeers: "Lis classyquiz.pages.dev. Voici nos notes pour l'examen d'histoire. Fais-nous, à mes amis et moi, un classyQuiz de 10 minutes pour apprendre en s'amusant. Je joue aussi, alors ne me montre pas les questions.",
+  which: "Tout abonnement IA convient, ou Claude gratuit.",
+  playThis: "Jouer à ce quiz ↓",
   copied: "Copié",
   run: "Ouvrez le quiz de votre IA",
   upload: "Choisir le fichier .zip",
@@ -464,21 +390,14 @@ const it: Text = {
   seek: "Posizione nel video",
   again: "Rivedi",
   full: "Schermo intero",
-  see: "L'esempio passo per passo ›",
-  what: "Qui giochi ai quiz che la tua IA crea dalle tue schede, dai tuoi appunti o dalle tue idee.",
-  wayQuizmaster: "per una classe o un gruppo, su schermo grande",
-  wayPeers: "tra amici, ognuno sul suo dispositivo",
-  waySolo: "per conto tuo, per esercitarti o ripassare",
+  see: "Passo per passo ›",
+  what: "Gioca ai quiz che la tua IA crea da schede, appunti o idee.",
   picQuizmaster: "Un'insegnante davanti allo schermo grande con la domanda, il telefono in mano; la classe risponde sui tablet.",
   picPeers: "Tre amici sul divano di sera, ognuno con la domanda sul proprio telefono, uno di loro ride.",
   picSolo: "Una persona sola alla scrivania con i suoi appunti, la domanda sul telefono, la risposta giusta appena trovata.",
   getH: "Chiedi un quiz alla tua IA",
-  gives: "La risposta dell'IA:",
-  more: "Come chiedere un quiz alla tua IA ↓",
-  noQuiz: "Non hai ancora un quiz?",
-  tryIt: "Prova l'esempio ›",
+  gives: "Risposta dell'IA:",
   filmH: "Dalla scheda alla classe che gioca, in un minuto",
-  howH: "Come chiedere un quiz alla tua IA",
   relyH: "Su cosa puoi contare",
   relyFree: "Gratuito, senza account né registrazione.",
   relyKept: "Se giochi per conto tuo, il quiz non esce mai dal tuo browser. Se si gioca in gruppo, il quiz viene eliminato appena è finito, al più tardi tre ore dopo l'ultimo uso. Il file .zip resta la tua copia.",
@@ -489,15 +408,6 @@ const it: Text = {
   capZip: "Il file .zip, aperto qui",
   capWall: "Cosa vede la classe",
   capTap: "Ogni alunno risponde",
-  step1: "Va bene qualsiasi abbonamento a un'IA; altrimenti, Claude nella versione gratuita.",
-  step1detail: "Alla prova, le altre IA gratuite si sono rivelate meno affidabili. L'esempio qui sopra l'ha scritto la versione gratuita di Claude Sonnet, il 4 nov. 2026, in inglese (qui tradotto).",
-  step2: "Chiedi all'IA un quiz per",
-  tabSheets: "Schede di esercizi",
-  tabChess: "Una descrizione",
-  tabSolo: "Per conto tuo",
-  tabFriends: "Tra amici",
-  tabGroup: "Un corso di formazione",
-  tabOpen: "Ancora niente di deciso",
   ask: [
     { s: "Leggi " },
     { s: "classyquiz.pages.dev", l: 0 },
@@ -512,13 +422,13 @@ const it: Text = {
     { s: "." },
   ],
   labels: ["questo sito", "quali esercizi", "la tua classe", "quante", "quale lingua"],
-  askChess: "Leggi classyquiz.pages.dev. Fammi un classyQuiz di scacchi, per favore: bambini di 8 anni, 400–500 Elo, solo 5 domande. Cerca dei problemi con un punteggio Elo. A ogni domanda lascio loro il tempo di guardarla prima di mostrare le opzioni e avviare il conto alla rovescia. Le opzioni possono essere in notazione scacchistica, ma senza + né matto, altrimenti sarebbe troppo facile. Non dimenticare di dire a chi tocca muovere. Per l'ultima domanda dai loro 2 posizioni simili tra cui scegliere, una promettente e una vincente. In italiano. Di cosa hai bisogno?",
-  chessWho: "Claude Opus 5.5, abbonamento a pagamento, 5 nov. 2026",
-  askSolo: "Leggi classyquiz.pages.dev. Venerdì ho una verifica di biologia sulla cellula. Ecco i miei appunti. Mi fai un classyQuiz per esercitarmi, una ventina di domande? Ci gioco io, quindi tieni per te le domande e le risposte.",
-  askFriends: "Leggi classyquiz.pages.dev. Facci un classyQuiz per la nostra serata giochi: 15 domande sui film degli anni '90, alcune facili, altre difficili. Gioco anch'io, quindi non mostrarmi le domande.",
-  askGroup: "Leggi classyquiz.pages.dev. Domani faccio formazione sulle nostre norme di sicurezza a 25 nuovi colleghi. Le slide sono allegate. Mi fai un classyQuiz per la fine della sessione, sullo schermo grande, una decina di domande?",
-  ask2: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
-  copy: "Copia",
+  askHelp: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
+  helpReply: "Volentieri. A cosa serve il quiz, e chi ci giocherà? Se hai del materiale, per esempio schede o appunti, mandamelo.",
+  help: "Nessuno di questi, o non lo so ancora",
+  askSolo: "Leggi classyquiz.pages.dev. Mi hanno restituito questa verifica di biologia. Fammi un classyQuiz per 20 minuti di ripasso, soprattutto su quello che ho sbagliato. Non mostrarmi le domande, ci gioco io.",
+  askPeers: "Leggi classyquiz.pages.dev. Ecco i nostri appunti per l'esame di storia. Fai a me e ai miei amici un classyQuiz di 10 minuti, per imparare divertendoci. Gioco anch'io, quindi non mostrarmi le domande.",
+  which: "Va bene ogni abbonamento IA, o Claude gratuito.",
+  playThis: "Gioca a questo quiz ↓",
   copied: "Copiato",
   run: "Apri il quiz della tua IA",
   upload: "Scegli il file .zip",
