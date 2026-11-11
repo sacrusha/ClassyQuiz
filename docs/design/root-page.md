@@ -101,18 +101,18 @@ visitor's language and the live parts into it).
 
 From top to bottom, the part for people is: the header with the code box; a
 quiz to come back to, on the device that has one; the sentence that says what
-this is; the two things to do, numbered, asking an AI for a quiz and opening
-the file it made; then, below the first screen, the film and what a person
-can count on, and the sentence where the part for people ends. The guidance
-for AIs follows.
+this is and who plays; the two things to do, numbered, asking an AI for a
+quiz and opening the file it made; then, below the first screen, the film and
+what a person can count on, and the sentence where the part for people ends.
+The guidance for AIs follows.
 
 Each thing stands once, where the visitor needs it (backlog, "The page for
-people: dense, not busy"). The first screen shows one path, once: what you
-say to your AI, the file that comes back, where the file goes. Every part of
-it is a station on that path or picks whose path is shown, and each has one
-job: the ways to play are the tabs that pick the example, a way's picture is
-the face of the file its example brings, the whole of an example is behind
-its "The whole example ›", the classroom's story is the film.
+people: dense, not busy"). The first screen shows what you say and what you
+get; the local check shows how it is played. The sentence names the three
+ways, the examples show what an ask can start from, the AI's file shows the
+quiz it holds, and the pictures of the ways stand on the check's cards, where
+the way is chosen (`local-check.md`, "The check"). The whole of an example is
+behind its "The whole example ›", the classroom's story is the film.
 
 ### One column
 
@@ -130,7 +130,7 @@ two pages joined). On a wide window only the step numbers stand outside the
 column, in its left margin ("Two steps").
 
 What this costs: on a 1366 × 650 laptop the first screen is a narrow column
-with 16 px to spare under the button. Weighed against it: opening first, for
+with 9 (German, French, Italian) to 32 px (English) to spare under the button. Weighed against it: opening first, for
 the visitor who comes back with a file, which costs the first-timer what "the
 .zip file" refers to; the box fixed to the foot of a phone's window until the
 page reaches it, which would free the first screen but takes about 90 px of
@@ -141,37 +141,41 @@ gives the manual below a second edge.
 What shows as the page opens depends on the browser's window, not on the
 device's screen: a phone's browser bars take part of it. Measured in Edge
 windows of these sizes, in the four languages, with the asks carrying the
-deployed site's address and the chat on the Quizmaster's example, as every
+deployed site's address and the chat on the first tab's example, as every
 visit opens:
 
 | Window | The sentence, the tabs, the chat | The button that opens a file |
 |---|---|---|
-| 1024 × 690 and larger (laptops, desktops, a tablet) | whole | whole, 56 px above the edge |
-| 1366 × 650 | whole | whole, 16 px above the edge |
-| 412 × 730, 390 × 664 (phones) | whole | whole, 37 to 142 px above the edge |
-| 360 × 640 | whole | whole, 4 (German) to 47 px above the edge |
-| 360 × 560 | whole | below the edge, by 33 to 76 px |
-| 320 × 568 | whole | below the edge, by 57 to 96 px |
+| 1024 × 690 and larger (laptops, desktops, a tablet) | whole | whole, 49 to 72 px above the edge |
+| 1366 × 650 | whole | whole, 9 (German, French, Italian) to 32 px above the edge |
+| 412 × 730, 390 × 664 (phones) | whole | whole, 64 to 125 px above the edge |
+| 360 × 640 | whole | whole, 19 (French, Italian) to 32 px above the edge |
+| 360 × 560 | whole | below the edge, by 48 to 61 px |
+| 320 × 568 | whole, the tab row scrolling sideways in German, French and Italian | below the edge, by 67 to 104 px |
 | 320 × 470 | the sentence, the tabs and the ask | below |
 
 The phone's tighter spacing (the stylesheet's block for windows up to 600 px)
-exists to hold German at 360 × 640, and holds it by 4 px. Another tab can be
-taller than the Quizmaster's, and the box moves down by the difference: with
-the mock asks of Peers and Solo the button is cut by the edge at 360 × 640 in
-German (37 px) and in French on Peers (17 px), and on a 1366 × 650 laptop in
-German (7 px) and French (3 px); at 390 × 664 it is whole on every tab. A
+is kept from the page before; the first tab no longer needs it to hold
+German at 360 × 640. Another tab can be taller than the first, and the box
+moves down by the difference. On Sheets the button is whole at every size
+measured (19 px at least, German and French at 360 × 640). With the mock asks
+of Notes and Test, and the "mock example" marker, which takes a row of its
+own on a phone, at 360 × 640 the button reaches the edge in English, French
+and Italian and is cut by 21 px in German and on French Notes; at 390 × 664
+and on a 1366 × 650 laptop it is whole on every tab (19 and 9 px at least). A
 visitor who has chosen a tab is reading the chat, not looking for the box;
 the asks that replace the mocks are measured again. A quiz to come back to
 stands above all of it and moves the rest down by its height, about 110 px on
 a laptop and 180 to 205 on a 360 px phone; "Back to the quiz" is in the first
-screen at every size above. No window tried scrolls sideways.
+screen at every size above. No window tried scrolls the page sideways; at
+320 px the tab row does ("Getting a quiz").
 
 The order follows what a person does: the ask, then the file. A visitor who
 comes with a file passes the sentence and the chat before the box, which is
 why each of them is kept short.
 
-The page follows the device's dark mode. The pictures of the ways carry their
-own room, so they stand the same on both grounds (`docs/ways/README.md`).
+The page follows the device's dark mode. The face of the AI's file stays
+light on the dark ground, as a screenshot of the site would.
 
 ### One page, two readers
 
@@ -182,14 +186,16 @@ Parts that must not read as text for an AI are made by the script, not written
 in the HTML: the language switch (so a fetcher doesn't read four language
 names), the numbers of the two steps (drawn by the stylesheet, so a heading
 doesn't read "1Ask"), "Play this quiz ↓", which does nothing without the
-script, and the answer in the "Not sure?" tab, its label and the AI's
-question back, so a fetcher doesn't take an AI's words for the page's.
-Without the script the four asks stand one under the other, each with its
-file and its picture's description, under the tabs' words. That is what a
-fetcher reads: "Quizmaster for a class or group", "Peers with friends", "Solo
-on your own", "Not sure?", then the asks in the same order. The tabs' second
-lines are text a fetcher reads between the heading and the asks; they name
-the ways as the guidance does, which is why they stay in the HTML. The
+script, the faces of the AI's files, pictures of each quiz's first question
+whose accessible name is that question, so a fetcher reads no quiz words
+between the asks, and the answer in the "Not sure?" tab, its label and the
+AI's question back, so a fetcher doesn't take an AI's words for the page's.
+Without the script the five asks stand one under the other, the first four
+each with its file's name and size. That is what a fetcher reads: the tabs'
+names, "Idea Sheets Notes Test Not sure?", then the asks in the same order.
+The tabs' names are text a fetcher reads between the heading and the asks;
+they say what an ask can start from, as the guidance does, which is why they
+stay in the HTML. The
 film's bar is in the HTML, since it works before the
 film's script is there, with the film's length, which the film's build
 checks (`docs/film/`); a fetcher reads it as "▶ 0:00 / 1:08 1×" under the film's
@@ -205,72 +211,82 @@ Purpose (backlog v6 item 1a; v4 item 14 left it open as "what classyQuiz is,
 as a statement"): someone who reads one sentence knows what the site does for
 them.
 
-The sentence is the page's first heading: "Play quizzes your own AI makes
-from your sheets, notes or ideas." From the visitor's side it holds
-what happens here (you play), who makes the quiz (your own AI: the one the
-visitor already uses, not one the site brings), and from what (the visitor's
-own material, named by what the examples start from, and an idea for
-whoever has none). It has no pronoun whose referent a reader must find
-(Situation). It takes two lines on a desktop in each language, and on a
-phone of 390 px two in English, French and Italian and three in German;
-German, French and Italian say "your AI" without "own", which the shorter
-sentence costs and the possessive still says. The wording is the
-implementer's.
+The sentence is the page's first heading: "Play quizzes your own AI makes:
+for a class or group, with friends, or on your own." From the visitor's side
+it holds what happens here (you play), who makes the quiz (your own AI: the
+one the visitor already uses, not one the site brings), and who plays: the
+three ways, said as the check's cards open (`client/room-text.ts`,
+`quizmasterLine`, `peersLine`, `soloLine`), so a visitor recognises their
+own case among them in the sentence (Purpose), which on the page before the
+tabs' second lines and the pictures of the ways did. "Group" stays so
+whoever runs a quiz at a pub or a training session recognises the first way;
+leaving it out would save about nine characters. It doesn't say what the
+quiz is made from: the owner found that "from your sheets, notes" biased
+readers to assume attachments are required; what an ask can start from is
+the tabs' ("Getting a quiz"). It has no pronoun whose referent a reader must
+find (Situation). It takes two lines on a desktop in each language and three
+on a phone of 360 to 390 px in each. German, French and Italian say "your
+AI" without "own"; Solo is said without a gendered word (French "en solo",
+Italian "per conto tuo"); German says "in der Klasse oder Gruppe", since
+"mit Klasse" also reads as "stylish", and the singular "das Quiz" for the
+plural (`translation-review.md`). The wording is the implementer's.
 
 ### Getting a quiz
 
 Purpose (backlog, "The page for people", item 1; v6 items 1b and 1c): a
-visitor recognises their own case among the ways a quiz is played, and that
-case shows them its example: the ask, where it is typed, the file it leads
-to, and what to do with that file. Someone who wants the whole of it is one
-press from it. The ways' names are the local check's cards' (`local-check.md`),
-so the visitor carries them from this page to that one.
+visitor sees what an ask can start from, and the example shows them the ask,
+where it is typed, the file it leads to, the quiz that file holds, and what
+to do with the file. Someone who wants the whole of it is one press from it.
 
 The first step is its heading, "Ask your AI for a quiz", with which AI beside
-it; under the heading the ways to play as four tabs; under the tabs the chat
+it; under the heading the examples as five tabs; under the tabs the chat
 that shows the chosen tab's example. A visitor who reads only the two steps'
 headings has the whole how-to. The heading stands above the tabs, not inside
 the chat, so the tabs sit under "Ask": they pick an example of asking. A tab
 picks the example and nothing else; how a file is played is picked on the
-check, for any file (`local-check.md`). Whether a visitor takes the tabs so is
-not known.
+check, for any file (`local-check.md`).
 
-- **The ways are tabs in words.** Each of the three carries the way's name,
-  **Quizmaster**, **Peers**, **Solo**, and under it whose case it is: "for a
-  class or group", "with friends", "on your own", the opening words of the
-  check's cards shortened (`client/room-text.ts`, `quizmasterLine`,
-  `peersLine`, `soloLine`), so a change to the cards' words is a change to
-  these too. Words, because a visitor recognises their case in them, and a
-  phone, which shows nothing on hover, still shows them as tabs to press. The
-  chosen tab is open into the chat, on its ground; the others stand on a
-  ground a step off the paper (with an edge as well in dark mode, where the
-  step alone doesn't hold them apart). The first is the widest and the fourth
-  the narrowest, so "Quizmaster" and its line fit on a 320 px phone; the
-  Quizmaster's line wraps to two lines on a phone in every language, so the
-  tabs are about 57 px high there and 50 on a desktop. Every visit opens on
-  the Quizmaster's (Situation: least surprise; backlog, Project: the example
-  class's teacher first), and nothing is remembered. The tabs are a tab list,
-  the arrow keys, Home and End moving between them.
-  What this costs: the three settings no longer stand side by side as
-  pictures, Peers' and Solo's pictures are one press away, and the setting is
-  in words again, as the second lines, where the epic's prune (item 2a) took
-  it out from under the pictures. The pictures as the tabs would show the
-  settings side by side; but nothing on a picture says it can be pressed, and
-  at a phone's 86 to 95 px a picture names a setting no better than three
-  words do.
-- **"Not sure?", the fourth tab**, is for whoever recognises none of the
-  three, or doesn't know what to ask (backlog item 1e): "Read <address>. I
+- **The tabs name what the visitor starts from**: **Idea**, **Sheets**,
+  **Notes**, **Test**, one word each, and **Not sure?**. Not the ways to
+  play: the way is chosen on the check, for any file, and tabs named by way
+  tied each way to one kind of material ("Peers is for notes") and could read
+  as choosing how the quiz will be played. Words, because the epic's owner
+  expects nobody to press a switch between examples that carries no words.
+  One word each, because more than four tabs of two lines don't fit a 360
+  px row, and five single words do. Each name says what its ask attaches
+  (nothing, for Idea), so the name and the chat say the same thing. The
+  examples pair a material with a way (the notes played with friends, the
+  test alone); plausible assumption: that reads as an example and not as a
+  rule, since the sentence names all three ways and the check offers all
+  three for any file. The chosen tab is open into the chat, on its ground;
+  the others stand on a ground a step off the paper (with an edge as well in
+  dark mode, where the step alone doesn't hold them apart), so a phone, which
+  shows nothing on hover, shows them as tabs to press. Every visit opens on
+  the first (Situation: least surprise), and nothing is remembered. The tabs
+  are a tab list, the arrow keys, Home and End moving between them.
+  The row's fit is the most fragile number on the page. The room left in it
+  with the five names at their natural widths, in Edge's fonts, at 360 px:
+  English 45 px, German 3, French 14, Italian 24; at 390 px 49, 5, 16, 27.
+  German "Nicht sicher?" became "Unsicher?" for it. At 320 px German, French
+  and Italian don't fit (by 16 to 37 px): the row scrolls sideways under a
+  fade at its right edge, the chosen tab scrolls into view, and the page
+  doesn't scroll. A real phone's font a few pixels wider puts German at 360
+  px into that state.
+- **"Not sure?", the fifth tab**, is for whoever recognises none of the
+  four, or doesn't know what to ask (backlog item 1e): "Read <address>. I
   need a classyQuiz. Help?", and the AI's question back, what the quiz is
   for, who will play it, and the material if there is any (the guidance's
   "Build with the user"). It is the ask that takes no knowing how to ask, in
   the same chat, so it adds no new element. A tab in words like the other
-  three: its visible words are its accessible name, "None of these, or not
+  four: its visible words are its accessible name, "None of these, or not
   sure yet" its tooltip. A "?" alone read as help; a line under every ask
   ("Not sure what to ask? …") would have told every visitor the AI asks back,
-  at the cost of two lines of the first screen on every tab. It isn't an
-  FAQ: the questions a visitor has before trying each have their place, which
-  AI beside the heading, what it costs and what is kept under "What you can
-  count on". Nor a store for further asks, which the epic removes.
+  at the cost of two lines of the first screen on every tab; a link beside
+  "Any AI subscription will do" would switch the chat with no tab chosen. Its
+  cost is the row's fit, above. It isn't an FAQ: the questions a visitor has
+  before trying each have their place, which AI beside the heading, what it
+  costs and what is kept under "What you can count on". Nor a store for
+  further asks, which the epic removes.
 - **Which AI**, beside the heading: "Any AI subscription will do, or free
   Claude." A visitor needs to know which AI to try, and the answer is their
   own situation, not a ranking; the line states a fact about subscriptions
@@ -280,56 +296,94 @@ not known.
   scripting and makes a zip (the owner); of the free ones, Claude is the one
   that built the quiz in the owner's testing (5 Nov 2026, against free
   ChatGPT, Gemini and Copilot: `guidance-page.md`, "The AIs verified
-  against"). It holds for every tab, since free ChatGPT fails whoever's case
-  it is.
+  against"). It holds for every tab, since free ChatGPT fails whatever the
+  ask starts from.
 - **The chat is the AI's**, where the ask is typed. The ask is the visitor's
   message, on the right as a chat has it, with what it attaches beside it on
   the bubble's left, where it takes no line from the text. The AI's answer is
   on the left, under "The AI's answer:".
-- **The AI's answer is a file, and its face is the picture of that way**
-  (`docs/ways/`): the picture has one job, it is what the file becomes. So the
-  file and the quiz being played are one object, which is the Purpose's
-  second thing, that an AI's file becomes a played quiz, said by the first
-  screen without a press. The pictures are drawn for 91 to 216 px
-  (`docs/ways/README.md`); the card shows one at 106 to 150 px on a phone and
-  232 on a desktop. Each picture's accessible name says what it shows, in the
-  page's language.
-  On the card, the file's name and "Play this quiz ↓". The whole card takes a
-  pointer's press, as a file in a chat does; the button is the keyboard's.
-  The press moves a copy of the file's name down onto the button that opens
-  a file, the box lighting up as it does for a file dragged over it, and
-  opens the file on the local check (`/open?example=<lang>&way=<way>`), which
-  costs the site nothing until a room opens (`local-check.md`). So playing an
-  example is one press from the first screen and shows where a file of one's
-  own goes (backlog item 1f). With reduced motion the box lights up and the
-  check opens.
+- **The AI's answer is a file, and its face is the quiz it holds**: its first
+  question as the site's Solo screen shows it, "1 / 20", the question, its
+  picture, the four coloured choices with their shapes. That says the
+  Purpose's second thing, that an AI's file becomes a played quiz, through
+  one concrete instance and without a setting: a picture of the classroom on
+  the file of the example every visit opens on pulled the page towards
+  Quizmaster (the owner: "starting on the guided classroom example pulls
+  towards quizmaster"). And it shows the result the ask leads to, which the
+  owner wanted kept out of the box below. The face is a picture made from
+  the example's own `.zip` in each language: the site's Solo screen, shot at
+  800 × 500 (`docs/example/faces.py`), so it can't differ from the quiz that
+  plays, and a fetcher reads no quiz words between the asks ("One page, two
+  readers"). Its accessible name is "The quiz's first question:" and the
+  question, in the page's language. It is 232 × 145 on a desktop, where the
+  question is legible; on a phone 42% of the card up to 156 px, a thumbnail
+  that reads as a quiz screen, not as text. What it costs: in dark mode it
+  shows the light screen, as a screenshot would; a quiz whose first question
+  has no picture (the stand-ins) shows text only, which is plainer than the
+  space run's; and it shows the Solo screen as it was when faces.py last
+  ran, which a change to that screen doesn't follow until faces.py runs
+  again.
+- **Download and play are separate.** The file's name and its size, with a
+  download arrow, are a link that downloads the file, as a file in a chat
+  does. The size is counted as a browser's downloads count it (1 KB = 1024
+  bytes), so it is the size the visitor then sees. The rest of the card, its
+  face and "Play this quiz ↓" play the quiz: the whole card takes a
+  pointer's press, as a file in a chat does, the name excepted, and the
+  button is the keyboard's. The press moves a copy of the file's name down
+  onto the button that opens a file, the box lighting up as it does for a
+  file dragged over it, and opens the file on the local check
+  (`/open?example=<lang>&ex=<example>`), which costs the site nothing until a
+  room opens (`local-check.md`). So playing an example is one press from the
+  first screen and shows where a file of one's own goes (backlog item 1f).
+  With reduced motion the box lights up and the check opens. Why the
+  download: least surprise, a press on a file downloads it; and a visitor
+  who downloads can rehearse the real path, download, choose, check. The
+  owner's caution, that this depends on the audience's technical capability,
+  is met by keeping the play press the larger target. A phone has no path of
+  its own (the owner dislikes splitting them): there the download is a
+  detour only for whoever chooses it. What it costs: the epic's prune had
+  taken the file's download out of the first step (backlog item 2a); it is
+  back, on the file itself, not as a link of its own. Two presses on one card
+  mean different things.
   "The whole example ›" stands outside the card, beside its foot on a laptop
   and on the label's row on a phone: inside the card it would make the card
-  taller than its picture on a phone, which German at 360 × 640 can't afford.
-  It leads to the full example (`/example`, `example-page.md`): what was
-  attached, the whole conversation, the `.zip` to download and a start of
-  that quiz.
-  What this costs: on the tab every visit opens on, the card's picture and
-  the film's poster a scroll below are the same scene, the class at the wall.
-  The film as the Quizmaster card's picture would take a section off the
-  page, but put two plays in one card (watch the film, play the quiz), leave
-  Peers and Solo without a film, and show it at 135 px.
+  taller than its face on a phone. It leads to the full example (`/example`,
+  `example-page.md`): the whole conversation, what was attached if anything,
+  the `.zip` to download and a start of that quiz.
 - **The examples share a setting, school** (the owner: a setting of its own
   for each way risks saying "Quizmaster is for school, Peers for trivia").
-  **Quizmaster**: the sheets ask, a teacher with exercise sheets. **Peers**:
-  friends with their class notes before an exam, the one who asks playing
-  too ("I'm playing too, so don't show me the questions"). **Solo**: a
-  learner with a marked test, practising for a time rather than a number of
-  questions, mostly on what they got wrong ("Don't show me the questions,
-  I'll play it myself"). The two who play say so: the asker's side of what
-  the guidance tells the AI (`guidance-page.md`, "The user who plays").
-  Peers' and Solo's asks exceed the owner's baselines (backlog item 1c, 1d)
-  by saying where the quiz will be played and that the asker plays it, and
-  Solo's by asking for minutes, which the AI turns into questions (alone, a
-  question may take less time than in a class). Their attachments, files,
-  full examples and the "Not sure?" tab's answer are mocks, marked "mock
-  example" beside the first step's heading while their tab is chosen, until
-  the owner's runs (backlog item 1); nothing with a mock is deployed.
+  **Idea**: the owner's run without attachments (11 Nov 2026), a space quiz
+  for a 4th grade class with pictures the AI found (NASA photographs, public
+  domain) and four it drew; every visit opens on it, since it answers most
+  directly the bias the owner named: a bubble with nothing attached, and a
+  result with pictures. **Sheets**: the worked example's run, a teacher
+  with exercise sheets. **Notes**: friends with their class notes before an
+  exam, the one who asks playing too ("I'm playing too, so don't show me the
+  questions"). **Test**: a learner with a marked test, practising for a time
+  rather than a number of questions, mostly on what they got wrong ("Don't
+  show me the questions, I'll play it myself"). The two who play say so: the
+  asker's side of what the guidance tells the AI (`guidance-page.md`, "The
+  user who plays"). The notes' and the test's asks exceed the owner's
+  baselines (backlog items 1c, 1d) by saying where the quiz will be played
+  and that the asker plays it, and the test's by asking for minutes, which
+  the AI turns into questions (alone, a question may take less time than in
+  a class). Their attachments, files, full examples and the "Not sure?" tab's
+  answer are mocks, marked "mock example" beside the first step's heading
+  while their tab is chosen, until the owner's runs (backlog item 1);
+  nothing with a mock is deployed. Weighed for the first tab: Sheets, the
+  guided example, which keeps the film and the first screen telling one
+  story and shows an attachment first, the bias the owner named. What the
+  idea costs: the film, `/example`'s first full example and the Sheets tab
+  tell the sheets story, and the page opens on another.
+  The idea's ask is the owner's, tidied (backlog item 1a: inspired by a run
+  and tidied): "Read <address>." with a full stop and "a classyQuiz", which
+  every ask here has (below); his run worked with neither ("Lies
+  classyQuiz.pages.dev Ich brauche ein Weltraum/Planeten Quiz…"), so whether
+  that rule should stay is the owner's call; and no pronoun whose referent a
+  reader must find ("The order of the planets is known"). It is German; the
+  other three languages show it translated and play its quiz translated
+  (`docs/example/space_zips.py`), as the sheets run's are. The face of each
+  is its own language's quiz.
 
 Every ask opens with "Read <address>." and calls the quiz "a classyQuiz". A
 Sonnet-class model told only "make me a quiz for <address>" read the address as
@@ -361,11 +415,14 @@ tested in each, and every page shows the English run translated
 (`example-page.md`). The film types it in the page's language
 (`docs/film/film-text.md`).
 
-What the page no longer says, and where it went: the ask's five parts
+What the page no longer says, and where it went: the ways to play as the
+tabs, with whose case each is under its name, and the picture of a way as
+the face of its example's file; the ways are the sentence's, and their
+pictures are on the check's cards (`local-check.md`). The ask's five parts
 labelled under their words (this site, which exercises, your class, how
-many, which language) were advice on how to ask; with an example per way,
-the asks show what an ask holds, and the labels had no place in a chat of
-the visitor's case. The chess ask, the training session and the games night
+many, which language) were advice on how to ask; with an example for each
+thing an ask can start from, the asks show what an ask holds, and the labels
+had no place in a chat of the visitor's case. The chess ask, the training session and the games night
 are gone with "How to ask": the training session is the Quizmaster's case,
 the games night Peers', and the chess ask's lesson, that the AI asks what it
 needs, is the "Not sure?" tab's. Which AI wrote the example and when is on
@@ -382,7 +439,7 @@ Two parts, one above the other, numbered because they are a sequence: "Ask
 your AI for a quiz" with its tabs and chat ("Getting a quiz"), and **"Open
 the quiz your AI made"**, the heading inside the dashed box that opens a file
 ("Opening: the `.zip` and nothing else"). The box stands outside the tabs,
-since it is the same for every way; dashed, as a place to drop something is,
+since it is the same for every example; dashed, as a place to drop something is,
 so it reads as the place a file goes, and the file that "Play this quiz ↓"
 moves lands in it. A file's problems and the own copy's line stand under the
 box.
@@ -465,7 +522,8 @@ How the page meets it (the details: the comments on the film in
 - **Words.** The film speaks the page's language up to the upload: the ask
   typed to the AI (the sheets ask, word for word), the teacher's second
   message, the quiz, and this page's first screen as it opens, its words
-  and its pictures, on the phone and then on the laptop, so a viewer who
+  and its pictures (the first tab's ask and its file), on the phone and then
+  on the laptop, so a viewer who
   has scrolled past it recognises it (`docs/film/`). From the upload on,
   the site's screens (the check, the wall's chrome, the Remote, the tablets)
   are drawn as the site shows them (`docs/film/README.md`, Situation),
@@ -489,7 +547,7 @@ How the page meets it (the details: the comments on the film in
   ▶, the replay, play and pause, the time bar, the speed and full screen
   are named in the page's language. The time bar's spoken value is the time
   and the chapter's name.
-- Nothing links from under the film: the full example of each way is beside
+- Nothing links from under the film: the full example of each tab is beside
   its file in the chat ("Getting a quiz"), where the visitor who wants it
   already is.
 
@@ -547,8 +605,9 @@ sentence's structure, and the findings in Situation hold in each:
 - **The first screen holds the same in each language** at 360 px and wider
   ("One column"), so where two wordings say the same the shorter is taken:
   the sentence without "own" ("What this is"), the line on which AI, the
-  label before the file ("Antwort der KI:"), and the link to the full
-  example ("Das ganze Beispiel ›", "L'exemple complet ›", "Tutto l'esempio ›").
+  label before the file ("Antwort der KI:"), the link to the full example
+  ("Das ganze Beispiel ›", "L'exemple complet ›", "Tutto l'esempio ›"), and
+  the tabs' one word each ("Unsicher?" for "Nicht sicher?").
 
 The words in the three are the implementer's drafts, with the choices behind
 them in `docs/translation-review.md`.
@@ -588,9 +647,11 @@ So, once for all entries:
 - **"Quizmaster"** for whoever runs a room, where English needs a noun (the
   guidance, the README): it is the entry's own name, so the role and the
   card picked on the local check agree, and the word for whoever runs a pub
-  quiz. "Host" stays the code's word (`peers.md`). On the landing, in every
-  language, Quizmaster, Peers and Solo stand as the entries' names, the
-  tabs over the chat ("Getting a quiz"), not as role nouns.
+  quiz. "Host" stays the code's word (`peers.md`). On the landing the three
+  ways are the sentence's, said as the check's cards open them ("for a class
+  or group, with friends, or on your own"); Quizmaster, Peers and Solo stand
+  as the entries' names on the check, in every language, not as role
+  nouns.
 - **"The user"** in the guidance for whoever is in the conversation with the
   AI, the AI's own word for that person, whoever they are; **"players"** for
   whoever answers.
@@ -832,29 +893,37 @@ the teacher's concern.
   screen. The check proposed: show the page's top to two or three people, a
   teacher among them, for five seconds, then ask what one does here, whether
   it is for them, and what they would type to their AI. Nobody has; nobody
-  outside the project has seen the page. Part of it: whether a visitor reads
-  the card's picture as "this file, played", and so takes in that what the
-  AI hands over is what gets played.
+  outside the project has seen the page. Part of it: whether the sentence is
+  read as "this is for me" without the pictures of the ways; whether a
+  visitor reads a thumbnail of a question as "this file, played", and so
+  takes in that what the AI hands over is what gets played.
 - The first screen on real phones: the sizes in "One column" are Edge
   windows of a phone's size on a desktop, with Edge's fonts, not devices;
-  whether the tabs' second lines wrap there as measured; and whether a phone
+  whether the tab row fits there as measured (German at 360 px by 3 px), and
+  whether its sideways scroll at 320 px is found; and whether a phone
   reports no pointer that drags, so that "or drop it here" is left out
   there (the emulated phone showed it).
 - Whether a visitor with a file, on a small phone, takes the box under the
   ask as close enough, or whether opening should stand first there ("One
   column").
-- Whether the tabs under "Ask" are taken as examples to pick, or as
-  choosing how the quiz will be played; whether "Peers" is understood from
-  its line and its ask; whether "Not sure?" is found by whoever recognises
-  none of the three.
+- Whether tabs named by material are taken as "what I have" and pressed;
+  whether "Test" reads as a marked test and not as trying the site, and
+  "Idea" as "I only have a topic"; whether "Not sure?" is found by whoever
+  recognises none of the four.
 - Whether a visitor presses the card or "Play this quiz ↓", and takes the
-  file's way into the box as the way their own file will go.
-- Whether the same scene twice on the opening tab, the card's picture and
-  the film's poster under it, reads as the page repeating itself.
+  file's way into the box as the way their own file will go; whether a phone
+  user presses the file's name expecting to play, and is surprised by a
+  download.
+- The "a classyQuiz" and "Read <address>." rule against the owner's run,
+  which worked without them ("Getting a quiz").
+- The face as a picture made at build time, or drawn in the page from the
+  quiz: the picture is built (`docs/example/faces.py`); drawn in the page, it
+  would follow the site's Solo screen and the dark mode, at the cost of the
+  quiz's words in the page for a fetcher.
 - Whether the chat with no label for the visitor's side (only "The AI's
   answer:") reads as their own message to their AI.
 - Whether teachers scroll to the film, and play it, now that it stands below
-  the first screen.
+  the first screen and the first screen tells another example's story.
 - Whether the film's end card should link somewhere, `/example` for one.
 - The film on real phones (the cost of a frame, the full screen on an iPhone
   and on Android) and whether its timings read when watched:

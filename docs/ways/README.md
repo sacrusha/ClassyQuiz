@@ -1,19 +1,20 @@
 # The pictures of the ways to play
 
-Three pictures on the root page, one for each way to play, Quizmaster, Peers,
-Solo: the face of the file each way's example brings. Where they stand and the words beside them are the page's
-(`docs/design/root-page.md`). This folder is the pictures: this file (what
+Three pictures on the local check, one for each way to play, Quizmaster,
+Peers, Solo: each on its way's card, where the way is chosen. Where they
+stand and the words beside them are the check's (`docs/design/local-check.md`,
+"The check"). This folder is the pictures: this file (what
 they are for, what they live with, how they are made) and `build/` (the
 script that draws them and the one that renders them for looking at).
 
 ## Purpose
 
 A visitor recognises their own case among the ways to play, and a reason
-to play it, from the page as it opens (`docs/design/root-page.md`, Purpose;
-backlog v6 item 1b). The words name each way; a picture shows the visitor
-where they would be playing, with whom, and what their device would show.
-On the page it is what the AI's file becomes: the face of the example's
-file in the chat (`docs/design/root-page.md`, "Getting a quiz").
+to play it (backlog v6 item 1b). The words name each way; a picture shows the
+visitor where they would be playing, with whom, and what their device would
+show. It stands where the way is chosen, for any quiz (the owner: "the
+images could go to the open page"); the root page says who plays in its
+sentence (`docs/design/root-page.md`, "What this is").
 
 ## Situation
 
@@ -29,14 +30,14 @@ file in the chat (`docs/design/root-page.md`, "Getting a quiz").
   assumption: what makes the poster relatable is a real room with people in
   it, doing something (the class at the wall, the votes split, the murmur),
   drawn in one hand; so these pictures are drawn in the film's.
-- They are drawn for 16:10 at 91 to 216 px wide. The page shows one at a
-  time, on its example's file: from 106 px wide on a 320 px phone to 232 px
-  on a desktop (`docs/design/root-page.md`, "Getting a quiz"). At a phone's
-  size the mockup's class had devices nobody could see.
-- The page is in four languages (`docs/design/root-page.md`, "Languages"),
-  and an AI's fetcher reads it as text ("One page, two readers").
-- The page follows the device's dark mode; the film's poster is the same
-  picture in both.
+- They are drawn for 16:10 at 91 to 216 px wide. The check shows all
+  three: on a phone 96 px wide beside each card's name, from 44rem about 190
+  to 220 px on top of each card (`docs/design/local-check.md`, "The check").
+  At a phone's size the mockup's class had devices nobody could see.
+- The check speaks the device's language, in the root page's four
+  (`docs/design/root-page.md`, "Languages"); it isn't a page AIs are sent to.
+- The check follows the device's dark mode; the film's poster is the same
+  picture in both. The film draws the check with them (`docs/film/`).
 - The site's content-security policy allows pictures from the site's own
   files (`docs/film/README.md`, Situation).
 
@@ -59,9 +60,8 @@ file in the chat (`docs/design/root-page.md`, "Getting a quiz").
   second thing: each picture has one near the viewer, over a shoulder, as
   large as the scene allows, so the difference between a tablet with four
   tiles and a phone with the question, its picture and the choices one
-  under the other holds at 390 px and up; narrower it may read only as "a
-  tablet" and "a phone". The local check and the film show the difference
-  in full. In the class, the heads beside the tablet are fair, so its dark
+  under the other holds at 190 px and up; at a phone's 96 px it may read
+  only as "a tablet" and "a phone". The film shows the difference in full. In the class, the heads beside the tablet are fair, so its dark
   frame doesn't sink into dark hair; the teacher, who is the visitor in
   this way, is drawn big enough to be seen at a phone's size.
 - **The film's hand.** The people are the film's children and teacher,
@@ -74,8 +74,9 @@ file in the chat (`docs/design/root-page.md`, "Getting a quiz").
   the figures' shapes are copied, and a change to them in the film isn't
   followed.
 - **No words in them**: the question and the choices are bars, so one file
-  serves all four languages and a fetcher meets no text. The accessible name
-  of each, in the page's language, is the page's.
+  serves all four languages. The accessible name of each, in the device's
+  language, is the check's (`client/room-text.ts`, `picQuizmaster`,
+  `picPeers`, `picSolo`).
 - **SVG files, opaque.** `src/public/landing/way-quizmaster.svg`,
   `way-peers.svg`, `way-solo.svg`, drawn at 640 × 400 (16:10), 6 to 15 KB
   each, sharp at any size and density. Each carries its own room, wall to
@@ -94,7 +95,8 @@ file in the chat (`docs/design/root-page.md`, "Getting a quiz").
 ## Not known
 
 - Whether a visitor recognises their own case from them; nobody outside the
-  project has seen them.
+  project has seen them. Whether, at 96 px on a phone's card, they still say
+  more than the way's name beside them.
 - Whether, on a phone, a phone with the whole question reads as different
   from a tablet with the choices only, or only as "a device"; and whether
   that matters to a visitor choosing among the three.

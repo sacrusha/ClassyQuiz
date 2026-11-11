@@ -37,7 +37,7 @@
   --bubble: #f4ebe1; /* the example asks on the landing */
   /* The edge of a place to drop a file, dashed: the landing's box that opens one. */
   --dash: #b9b3a5;
-  /* A tab not chosen (the landing's ways to play): a ground a step off the
+  /* A tab not chosen (the landing's examples): a ground a step off the
      paper, and an edge where that step alone doesn't hold it apart (dark). */
   --tab: #f1eee6;
   --tab-edge: transparent;

@@ -642,7 +642,7 @@ const fr: RoomText = {
   foldName: "Les questions et leurs solutions",
   notes: (n) => `${n} ${n === 1 ? "remarque" : "remarques"} du site`,
   foldHint: "Si vous jouez vous-même, laissez ceci fermé.",
-  picQuizmaster: "Une enseignante devant le grand écran avec la question, le téléphone à la main ; la classe répond sur des tablettes.",
+  picQuizmaster: "Une enseignante devant le grand écran avec la question, le téléphone à la main ; la classe répond sur des tablettes.",
   picPeers: "Trois amis sur un canapé le soir, chacun avec la question sur son téléphone, l'un d'eux rit.",
   picSolo: "Une personne seule à son bureau avec ses notes, la question sur son téléphone, la bonne réponse tout juste trouvée.",
   soloLine: "Pour vous exercer ou réviser. Chaque réponse affiche aussitôt la solution, et le score vient à la fin.",

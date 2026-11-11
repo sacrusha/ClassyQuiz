@@ -383,7 +383,7 @@ site meets it"). What the owner found while directions were tried is in
       (`design/root-page.md`, "Two steps"); what the page may say
       about which AI manages it is what was verified
       (`design/guidance-page.md`, "The AIs verified against"). Built: the
-      chat, an ask and its file per way, which AI beside the first step's
+      chat, an ask and its file per example, which AI beside the first step's
       heading ("Getting a quiz").
 
    d. **Opening a quiz** — whoever has the file opens it; whoever has
@@ -549,13 +549,17 @@ deployed to the public site.
    read the teacher's ask, with an ask for their own case below the film,
    behind a tab. The pictures of the ways, "Ask your AI for a quiz" and "How
    to ask your AI" become one element: the way a visitor recognises as
-   theirs shows an example for it. Built: one path shown once, what you say
-   to your AI, the file that comes back, where the file goes; the ways as
-   tabs in words under "Ask your AI for a quiz", picking the example the
-   chat under them shows, the AI's answer a file whose face is the picture
-   of that way, and the box that opens a file as the second step outside
-   the tabs (`design/root-page.md`, "Getting a quiz", "Two steps"). The
-   parts, each with a purpose of its own:
+   theirs shows an example for it. Built: the first screen shows what you
+   say and what you get, the check shows how it is played. The sentence
+   names the three ways; the examples are tabs in words under "Ask your AI
+   for a quiz", named by what an ask starts from (Idea, Sheets, Notes, Test,
+   Not sure?), picking the example the chat under them shows; the AI's
+   answer is a file whose face is the quiz's first question; the box that
+   opens a file is the second step outside the tabs; the pictures of the
+   ways stand on the check's cards, where the way is chosen
+   (`design/root-page.md`, "What this is", "Getting a quiz", "Two steps";
+   `design/local-check.md`, "The check"). The parts, each with a purpose of
+   its own:
 
    a. **What an example gives** — the owner: the ask, an understanding of
       where it is typed, the result it leads to, and what to do with the
@@ -568,30 +572,37 @@ deployed to the public site.
       changing site and changing AIs, without redoing the examples at every
       change, and lets a reader follow the conversation. Built: the chat
       (where it is typed), the ask and the file in it, the file's face the
-      quiz being played (the result it leads to), "Play this quiz ↓" and a
-      press on the file (what to do with it), "The whole example ›" beside
-      it to the full example.
+      quiz's first question as the site shows it (the result it leads to),
+      "Play this quiz ↓" and a press on the card (what to do with it), the
+      file's name and size a download, "The whole example ›" beside it to
+      the full example. The first tab is the owner's run without
+      attachments (11 Nov 2026, German, translated for the other three
+      languages); its ask is tidied to "Read <address>." and "a classyQuiz",
+      which his run worked without: whether that rule stays is the owner's.
 
    b. **Quizmaster's example** — a teacher with material in hand sees their
-      case. Built: the sheets run.
+      case. Built: the sheets run, the second tab, "Sheets"; the first,
+      "Idea", is the owner's space run, a quiz for a class with nothing
+      attached.
 
    c. **Solo's example** — a learner sees a quiz made for their own
       situation, not a generic one. The owner's baseline, to exceed: "I just
       got this test back, I want a quiz that helps me solidify what I
       learned, with a deeper focus on the areas I scored poorer, about 20
       minutes." The owner: alone, a question may take less time than in a
-      class, and the time differs by question. A mock stands in (the ask,
-      the attachment, the `.zip`, the full example: `docs/example/mock_zips.py`,
-      `client/example-text.ts`). Open: the owner's run.
+      class, and the time differs by question. A mock stands in, the tab
+      "Test" (the ask, the attachment, the `.zip`, the full example:
+      `docs/example/mock_zips.py`, `client/example-text.ts`). Open: the
+      owner's run.
 
    d. **Peers' example** — friends see that one of them asks and plays too.
       The owner's baseline, to exceed: "I'm at a desk preparing for an exam
       with my friends, these are the class notes - can you make us a short
       10 minute quiz to learn and have fun together?" A mock stands in, as
-      for Solo. Open: the owner's run.
+      for Solo, the tab "Notes". Open: the owner's run.
 
    e. **Whoever recognises none of the three, or has a question first** —
-      built as a fourth tab, "Not sure?": the ask that takes no knowing how
+      built as a fifth tab, "Not sure?": the ask that takes no knowing how
       to ask ("Read <address>. I need a classyQuiz. Help?") and the AI's
       question back, a mock until a run gives one. Assessed: not an FAQ,
       since each question a visitor has before trying has its place (which
@@ -604,7 +615,8 @@ deployed to the public site.
       newcomer's first use is Solo or a look at the example quiz). Built: a
       press on the AI's file, or its "Play this quiz ↓", moves a copy of the
       file into the box and opens it on the check, so it also shows where a
-      file goes (a); the full example starts the quiz too.
+      file goes (a); the full example starts the quiz too. The file's name
+      on the card downloads it instead, as a file in a chat does.
 
    The three examples share a setting (the owner): school to begin with,
    without ruling the others out, since a setting of its own for each way
@@ -618,14 +630,14 @@ deployed to the public site.
 
    a. **Prune what distracts more than it serves** — the owner: focus the
       user area of the page. Gone: each way's setting said twice, in its
-      picture and in words under it (the setting is said once, in its tab's
-      second line, and the picture is its example's file; the check's cards
-      say it again where the way is picked); which AI wrote the example and
-      when (`/example`); the file's download in the first step (`/example`);
-      the link under the film (each example's "The whole example ›"); the first
-      heading's third line on a phone in English, French and Italian, where
-      German keeps three (it avoids the plural "Quizze":
-      `translation-review.md`). Kept: how long a quiz is kept, under "What
+      picture and in words under it (the ways are said once, in the
+      sentence, and their pictures stand on the check's cards, where the
+      way is picked); which AI wrote the example and when (`/example`); the
+      link under the film (each example's "The whole example ›"). Back, on
+      the file itself: the file's download in the first step (the design's
+      least surprise, a press on a file downloads it; `design/root-page.md`,
+      "Getting a quiz"). The first heading takes three lines on a phone in
+      every language again, since it says who plays. Kept: how long a quiz is kept, under "What
       you can count on", since it answers whether the site can be relied on
       with a class's answers before anyone tries it, and stands below the first
       screen, which it costs nothing; the film's speed button, the video
@@ -636,14 +648,19 @@ deployed to the public site.
    b. **The first screen on a phone, in four languages** — v6 item 1's open
       point, the button that opens a file cut by the screen's edge, is
       settled on the tab every visit opens on: whole at 360 × 640 in the four
-      languages, German by 4 px (`design/root-page.md`, "One column"). Open:
-      the Peers and Solo tabs, taller with their mock asks, push it below the
-      edge at 360 × 640 in German and on French Peers, and on a 1366 × 650
-      laptop in German and French; the owner's asks are measured again.
+      languages, by 19 px at least, and on a 1366 × 650 laptop by 9
+      (`design/root-page.md`, "One column"). Open: the Notes and Test tabs,
+      taller with their mock asks and the mock marker, put it at the edge at
+      360 × 640 and cut it by 21 px in German and on French Notes; the
+      owner's asks are measured again. The tab row is the most fragile fit:
+      German has 3 px left at 360 px, and at 320 px the row scrolls
+      sideways in German, French and Italian.
 
    c. **The film and the full examples show the page that exists** (v6
-      item 3) — built: the film draws the new first screen (`docs/film/`),
-      and `/example` has a full example per way (`design/example-page.md`).
+      item 3) — built: the film draws the new first screen and the check's
+      cards with their pictures (`docs/film/`), and `/example` has a full
+      example per tab, the space run's with its conversation and the AI's
+      overview of its questions (`design/example-page.md`).
 
 ## Room on the Free plan
 

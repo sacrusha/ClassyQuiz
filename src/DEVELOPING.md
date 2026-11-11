@@ -158,10 +158,11 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
 `--no-poster` writes `film.js` only, without the pictures) when:
 
 - `docs/film/build/film.js` changes;
-- `client/landing-text.ts` changes the example ask or the words of the
+- `client/landing-text.ts` changes the sheets ask or the words of the
   root page's first screen, which the film draws (`ask`, `code`, `what`,
-  `getH`, `which`, `subQuizmaster`, `subPeers`, `subSolo`, `unsure`,
-  `gives`, `playThis`, `see`, `run`, `upload`, `drop`, `reading`), the chapters'
+  `getH`, `which`, `tabIdea`, `tabSheets`, `tabNotes`, `tabTest`, `unsure`,
+  `askIdea`, `gives`, `playThis`, `see`, `run`, `upload`, `drop`, `reading`,
+  `size`), the first tab's file (`client/example-files.ts`), the chapters'
   names (`capSheet` … `capTap`; `capAi` is also the AI app's name on the
   phone) or the player's (`play`, `pause`, `speed`,
   `seek`): the film shows them as they were at its build, and `npm test`
@@ -179,8 +180,21 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
   it too, and `sitebuild.py` refuses to build until both agree;
 - `client/look.ts` changes the avatars, which the film draws; no test
   catches this;
-- the brand files or `public/landing/sheet-*.webp` change: the film shows
-  them, and its pictures carry them.
+- the brand files, `public/landing/sheet-*.webp`, the first tab's faces
+  (`public/landing/face-idea-*.webp`) or the ways' pictures
+  (`public/landing/way-*.svg`) change: the film shows them, and its pictures
+  carry them.
+
+## The root page's examples
+
+The example files the root page's chat offers and their faces are made
+from the sources in `docs/example/` (`docs/example/README.md`): the
+`.zip` files in `public/examples/`, `client/example-files.ts` and
+`public/landing/face-*.webp`. When an example's `.zip` changes, or the Solo
+screen the faces show, run `py -I docs/example/faces.py` (after
+`npm run build`: it shoots the faces from `dist/`); `npm test` fails while
+`example-files.ts` doesn't match the files. Then rebuild the film, which
+shows the first tab's file and face (above).
 
 Then `py -I docs/film/build/sitecheck.py`: it builds the working tree's site
 and `main`'s in `.tmp/sitecheck/`, serves both with the site's headers and

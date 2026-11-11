@@ -224,7 +224,8 @@ wide, a factor of 0.224.
   is the lower limit for anything that must be read.
 - What must be read on a screen gets a hold at the full width, then the
   camera moves in on it. The local check: the three cards' names (40 units)
-  read at the full width; then 1.8 times in on Quizmaster's card, so its
+  and its pictures read at the full width; then 1.8 times in on
+  Quizmaster's card, its picture partly above the frame, so its
   line (28 units) and its button (30) read as 50 and 54, the card that is
   chosen and why; Solo's and Peers' lines and buttons aren't meant to be
   read. The lobby's check: Screen and remote pressed, at the full width;
@@ -288,8 +289,10 @@ Only rendered pictures found them, so the film is checked by looking:
 
 - Assets are in one object, `ASSETS`: `build.py` fills it with `data:` URIs
   for the standalone page, `sitebuild.py` with the site's
-  `/landing/sheet-*.webp`, the Quizmaster's picture `/landing/way-quizmaster.svg` (which
-  the page above the film has already loaded) and the brand SVGs as text;
+  `/landing/sheet-*.webp`, the first tab's face in each language
+  `/landing/face-idea-<lang>.webp` (which the page above the film has already
+  loaded, in its language), the ways' pictures `/landing/way-*.svg` for the
+  check's cards, and the brand SVGs as text;
   the font comes from `site.css`. `sitebuild.py` refuses a `film.js` with a
   `data:` URI in it.
 - The avatars are `src/client/look.ts`'s own, read by `build.py` with the

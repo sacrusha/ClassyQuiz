@@ -48,21 +48,27 @@ For the read:
   is an "Erklärfilm" as much as an "Erklärvideo"), French "vidéo" and Italian "video", the normal
   word there for a minute's clip on a website. The name says it has no sound: "ein Film ohne Ton",
   "une vidéo sans son", "un video senza audio".
-- **The tabs' words**, under each way's name: whose case it is, the opening words of the check's
-  cards shortened. German "für Klasse oder Gruppe", "mit Freunden", "für dich allein"; French
-  "pour une classe ou un groupe", "entre amis", "rien que pour vous"; Italian "per una classe o un
-  gruppo", "tra amici", "per conto tuo". French Solo says whose case it is without "seul" or
-  "seule", which are gendered; the check's card's "Pour vous exercer" says what for, not whose
-  case. The fourth tab: "Nicht sicher?", "Un doute ?", "Dubbi?", French without "pas sûr", which
-  is gendered; its tooltip, "Rien de tout cela, ou pas encore sûr", still has the gendered word.
-  These are drafts nobody has read. Italian "schermo grande", the adjective after the noun, in
-  the Quizmaster picture's name: "il grande schermo" is the cinema.
-- **The sentence** keeps the shorter of two wordings where the longer costs a line: German "aus
-  deinen Blättern" (with "Arbeitsblättern", the page's word everywhere else, the sentence takes
-  four lines at 360 px) and French "vos fiches, notes ou idées" with one possessive (repeated, as
-  French usually does and the Italian line does, it takes four lines at 390 px and three on a
-  desktop). German "deine KI" and Italian "la tua IA" carry no "own": "deine eigene KI" reads as
-  an AI one owns.
+- **The tabs' names**, one word each, what an ask starts from, each the word its ask uses for
+  what it attaches: German "Idee", "Blätter", "Notizen", "Prüfung"; French "Idée", "Fiches",
+  "Notes", "Contrôle"; Italian "Idea", "Schede", "Appunti", "Verifica". The test is the school
+  word for a marked test in each ("Prüfung" as Swiss schools say it, "contrôle", "verifica"),
+  not "Test", which in German and French also reads as trying the site out. The fifth tab:
+  "Unsicher?" in German, which fits a 360 px row where "Nicht sicher?" didn't (3 px are left),
+  "Un doute ?", "Dubbi?", French without "pas sûr", which is gendered; its tooltip, "Rien de tout
+  cela, ou pas encore sûr", still has the gendered word. Drafts nobody has read.
+- **The ways' pictures' names**, on the check's cards: Italian "schermo grande", the adjective
+  after the noun, in Quizmaster's: "il grande schermo" is the cinema.
+- **The sentence** says who plays, in the check's cards' order of words: German "Spiel das Quiz,
+  das deine KI macht: in der Klasse oder Gruppe, mit Freunden oder allein." ("mit Klasse" also
+  reads as "stylish"; the singular, as above); French "Jouez aux quiz que votre IA crée : en classe
+  ou en groupe, entre amis, ou en solo." ("en solo" for Solo without "seul" or "seule", which are
+  gendered); Italian "Gioca ai quiz che la tua IA crea: in classe o in gruppo, tra amici o per
+  conto tuo." Three lines on a 360 px phone in each language, two on a desktop. German "deine KI"
+  and Italian "la tua IA" carry no "own": "deine eigene KI" reads as an AI one owns.
+- **The file's card**: the face's name "Die erste Frage des Quiz:", "La première question du
+  quiz :", "La prima domanda del quiz:", then the question as the quiz has it; the download's
+  tooltip "Herunterladen", "Télécharger", "Scarica", as a file's in a chat; the size with the
+  language's decimal comma and French "Ko", "Mo".
 - **Code, Seite, plus**: a noun the page has for two things (`design/root-page.md`, "Languages").
   "Der Quellcode ist offen:", "Le code source est ouvert⍽:", "Il codice sorgente è aperto:", since
   "Code" is the header's box. "Eine eigene Website" for a site of one's own, in the link and the
@@ -93,6 +99,12 @@ For the read:
   Elo" ("bewertete Puzzles" and "puzzles notés" read as reviewed, not rated). French "notation
   algébrique", a player's name for chess notation. Italian "lascio loro" and "dai loro" are the
   written form; a chat message would as soon say "gli".
+- **The idea's ask**, the owner's German run tidied, the others its translation: "Ich brauche ein
+  classyQuiz über den Weltraum, 4. Klasse, mit Bildern. Die Planetenreihenfolge ist bekannt,
+  Mondnamen wären zu schwierig. Schaffst du 20 Fragen, ohne dass es repetitiv wird? Sonst
+  weniger." The run's "repetitiv" stays, the owner's word; "Planeterreihenfolge" and "is" are
+  his slips, tidied. French "niveau CM1" and Italian "quarta elementare", as the sheets ask's
+  grade; "sans répétitions", "senza ripetizioni", where the German says it won't get repetitive.
 - **The other asks**: French "Voici mes notes de cours", since "mes notes" after "contrôle" is
   also "my marks". Italian "Domani faccio formazione … a 25 nuovi colleghi" and the tab "Un corso
   di formazione": "una formazione" as one event is Swiss Italian and office talk, and these read
@@ -205,6 +217,31 @@ moment means in the language, not the English words. Open for you:
 
 The quizzes (`quiz_zips.py`): questions 7–13 read as the sheets' own instructions in de and as
 the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
+
+## The space run (the root page's "Idea" tab)
+
+The owner's run is German; its English, French and Italian are the implementer's drafts, made
+from it, in `docs/example/space_zips.py` (the quiz) and `docs/example/space_text.py` (the
+conversation on `/example`), with `/example`'s words for it in `client/example-text.ts`
+(`IDEA_TEXT`).
+
+- **The quiz's title**: "A journey through space", "Voyage dans l'espace", "Viaggio nello
+  spazio", from "Reise durchs Weltall".
+- **The drawings' words**: Sonne, Erde, Tag, Nacht as "Sun", "Earth", "Day", "Night"; "Soleil",
+  "Terre", "Jour", "Nuit"; "Sole", "Terra", "Giorno", "Notte".
+- **The Big Dipper**: "Grosser Wagen" is "The Big Dipper" (the British "Plough" is the other
+  name), "Le Grand Chariot" (not "la Grande Ourse", which is the whole constellation), "Il Grande
+  Carro".
+- **Pronouns**: where a question's answer could point at two things the question names the noun
+  ("What is the band called?" in question 19, where "it" could be the sun); French "Qu'est-ce
+  que Pluton aujourd'hui ?", which leaves Pluto's gender, masculine or feminine in use, unsaid.
+- **French spaces** in the quiz: a no-break space before ? ! : ; and inside « », so a "?" never
+  starts a line on the Solo screen (the sheets quiz's French has plain ones there).
+- **The conversation**: the AI's answer translated as the AI would have written it in that
+  language; where the German says "auf Deutsch (Schweizer Schreibweise)", the others name their
+  own language. The app's words (its folded steps, "Download all") are English in the German
+  picture, as the app showed them, and in the language's own in the others.
+- **Italian** has no native reader on the project.
 
 ## The film's words
 

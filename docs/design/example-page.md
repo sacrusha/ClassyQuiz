@@ -11,10 +11,10 @@ v4 item 10).
 
 ## Situation
 
-- The page is reached from "The whole example ›" beside the example's file in the
-  landing's chat (`root-page.md`, "Getting a quiz"), one link per way to
-  play. The landing itself shows the example's ask and its file, and starts
-  the example quiz; what only this page has is the photographs, the whole
+- The page is reached from "The whole example ›" beside each example's file
+  in the landing's chat (`root-page.md`, "Getting a quiz"), one link per
+  tab. The landing itself shows the example's ask and its file, and starts
+  the example quiz; what only this page has is what was attached, the whole
   conversation and the files to repeat it with. Plausible assumption: teachers
   read the path shown there as the example, and look behind it for a
   walkthrough, not the result alone (the page's name and its four steps).
@@ -47,7 +47,7 @@ path the film shows.
    `docs/example/README.md`. The preview shows its top. The line above it
    names model, plan and date.
 3. **The quiz**: the `.zip` the AI handed over, in the page's language.
-4. **Try it**: "Start the example quiz" opens `/open?example=<lang>`, the
+4. **Try it**: "Start the example quiz" opens `/open?example=<lang>&ex=<example>`, the
    local check (`local-check.md`): it fetches the static `.zip` and reads it
    through the same function as a dropped file (`opening.ts`, `readQuiz`),
    so the example can't run differently from a teacher's. Looking costs the
@@ -58,12 +58,24 @@ path the film shows.
    (a visitor who isn't a teacher sees the example is theirs to play too,
    backlog v5 item 9).
 
-`?way=peers` and `?way=solo` are the full examples of the landing's Peers
-and Solo tabs, whose runs are mocks until the owner's (backlog, "The page for
-people", item 1): the same four steps, with the mock attachment in place of
-the photographs, a made-up conversation made by the script and said to be
-made up (`MOCK_TEXT` in `client/example-text.ts`), the mock `.zip`
-(`docs/example/mock_zips.py`) and its start, and without the note below.
+`/example` without `?ex=` is the worked example, the landing's Sheets tab.
+`?ex=idea` is the landing's first tab, the owner's space run (11 Nov 2026,
+German, nothing attached): no sheets' step, since nothing was attached; the
+conversation, one ask and one answer, as a picture in the page's language
+and the device's mode as above; then **the overview**, the AI's picture of
+every question with its solution, which the run handed over with the `.zip`
+for checking the quiz before it is played (German the AI's own review.png,
+the other languages drawn from their translated `.zip` by the site's
+`preview.py`, the script the guidance offers the AI for it); then the quiz
+and its start, and a note that the run was made in German and the other
+pages show it translated (words: `IDEA_TEXT` in `client/example-text.ts`;
+pictures: `docs/example/README.md`). `?ex=notes` and `?ex=test` are the full
+examples of the Notes and Test tabs, whose runs are mocks until the owner's
+(backlog, "The page for people", item 1): the same four steps, with the mock
+attachment in place of the photographs, a made-up conversation made by the
+script and said to be made up (`MOCK_TEXT`), the mock `.zip`
+(`docs/example/mock_zips.py`) and its start, and without the note below. An
+earlier link's `?way=` opens the example its way's tab had.
 
 Under the steps, a note: the example was tested in all four languages and
 works in each; so that it is the same example in each, the German, French and
@@ -79,6 +91,12 @@ paper at top and bottom, the wood beside it left, 1200 px wide, without the
 camera's metadata.
 
 ## Not known
+
+- The space run's AI: the page names it "Claude" from its screenshot, and
+  neither its model nor its plan; the owner knows them.
+- The space run's English, French and Italian: its conversation, its quiz and
+  its drawings' words are drafts, and its overview in those languages is the
+  site's `preview.py`'s, not an AI's.
 
 - The conversation and the `.zip` ("Big numbers on the number line",
   13 questions) are one real run, reviewed by the owner; the zip is that run's
