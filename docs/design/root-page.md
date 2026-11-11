@@ -155,8 +155,8 @@ visit opens:
 | 320 × 470 | the sentence, the tabs and the ask | below |
 
 The phone's tighter spacing (the stylesheet's block for windows up to 600 px)
-is kept from the page before; the first tab no longer needs it to hold
-German at 360 × 640. Another tab can be taller than the first, and the box
+is kept from the page before; whether the first tab still needs it to hold
+German at 360 × 640 wasn't measured. Another tab can be taller than the first, and the box
 moves down by the difference. On Sheets the button is whole at every size
 measured (19 px at least, German and French at 360 × 640). With the mock asks
 of Notes and Test, and the "mock example" marker, which takes a row of its

@@ -31,8 +31,8 @@ sentence (`docs/design/root-page.md`, "What this is").
   it, doing something (the class at the wall, the votes split, the murmur),
   drawn in one hand; so these pictures are drawn in the film's.
 - They are drawn for 16:10 at 91 to 216 px wide. The check shows all
-  three: on a phone 96 px wide beside each card's name, from 44rem about 190
-  to 220 px on top of each card (`docs/design/local-check.md`, "The check").
+  three: on a phone 96 px wide beside each card's name, from 44rem 186
+  to 218 px on top of each card (`docs/design/local-check.md`, "The check").
   At a phone's size the mockup's class had devices nobody could see.
 - The check speaks the device's language, in the root page's four
   (`docs/design/root-page.md`, "Languages"); it isn't a page AIs are sent to.
@@ -60,8 +60,9 @@ sentence (`docs/design/root-page.md`, "What this is").
   second thing: each picture has one near the viewer, over a shoulder, as
   large as the scene allows, so the difference between a tablet with four
   tiles and a phone with the question, its picture and the choices one
-  under the other holds at 190 px and up; at a phone's 96 px it may read
-  only as "a tablet" and "a phone". The film shows the difference in full. In the class, the heads beside the tablet are fair, so its dark
+  under the other held on the root page from a 390 px phone's picture
+  (about 150 px wide) up, so it holds on the check's desktop cards (186 to
+  218 px); at a phone's 96 px it may read only as "a tablet" and "a phone". The film shows the difference in full. In the class, the heads beside the tablet are fair, so its dark
   frame doesn't sink into dark hair; the teacher, who is the visitor in
   this way, is drawn big enough to be seen at a phone's size.
 - **The film's hand.** The people are the film's children and teacher,

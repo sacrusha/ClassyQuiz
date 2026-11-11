@@ -98,8 +98,8 @@ left out taken off the quiz with a warning each) and shows:
   and Solo plays the quiz in this tab instead of opening the lobby. What
   ranks them is their order, the reading order (`client/entries.ts`). "How
   will it be played?" heads them once there are two or more.
-  From 44rem the cards stand side by side, the picture on top (about 190 to
-  220 px wide), each button on one line. Narrower they stand one under the
+  From 44rem the cards stand side by side, the picture on top (186 px wide
+  at 44rem, 218 from 50rem), each button on one line. Narrower they stand one under the
   other, the picture beside the name, then the sentence, the button and the
   quiet line across the card. Weighed on a phone: the picture floated beside
   the text, which wrapped three short lines and then full ones; the picture
