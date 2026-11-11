@@ -1,6 +1,6 @@
 <h1><picture><source media="(prefers-color-scheme: dark)" srcset="src/public/brand/classyquiz-horizontal-colour-dark.svg"><img src="src/public/brand/classyquiz-horizontal-colour.svg" alt="classyQuiz" height="72"></picture></h1>
 
-**Play quizzes your own AI makes from your sheets, notes or ideas**: run by a quizmaster on a big screen, among friends on their own devices, or alone. Free, without accounts, nothing to install: **[classyquiz.pages.dev](https://classyquiz.pages.dev)**
+**Play quizzes your own AI makes**: run by a quizmaster for a class or group on a big screen, among friends on their own devices, or alone. Free, without accounts, nothing to install: **[classyquiz.pages.dev](https://classyquiz.pages.dev)**
 
 <p>
 <img src="src/public/landing/wall-en.webp" width="72%" alt="A question on the class's projector: the four choices, how many chose each, the right one marked, and the class's avatars across the top">
