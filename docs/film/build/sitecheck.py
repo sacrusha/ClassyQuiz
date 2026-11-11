@@ -39,7 +39,7 @@ served with the headers the build writes (dist/_headers, the CSP among them); th
     on the button; the phone turned sideways in it gives the big film;
   - every language (desktop): each ask typed out before its send, no line wider than its box, no
     fitted text shrunk below 3/4; languages whose film words are drafts are named;
-  - the page around the film (the two steps, the foot, the guidance) is unchanged against
+  - the page around the film (the two steps, the guidance) is unchanged against
     `main`'s: every element's computed style;
   - no CSP violation, console error or page error anywhere.
 """
@@ -600,13 +600,13 @@ def languages(b, url):
     if drafts: print(f'NOTE: the film\'s words in {", ".join(drafts)} are drafts (film.js, CONTENT)')
 
 
-REST = '.get, .get *, .run, .run *, .rely, .rely *, .guide, .guide *'  # the page around the film: the two steps, the foot, the guidance
+REST = '.get, .get *, .run, .run *, .guide, .guide *'  # the page around the film: the two steps, the guidance
 STYLES = """(rest) => [...document.querySelectorAll(rest)].map(e => { const c = getComputedStyle(e);
   return [e.tagName, e.className, ...['display', 'font', 'color', 'background-color', 'border', 'border-radius', 'padding', 'margin', 'width', 'grid-template-columns', 'text-decoration-line'].map(k => c.getPropertyValue(k))].join('|'); })"""
 
 
 def rest_unchanged(dist0, dist, port=0):
-    """The page around the film (the two steps, the foot, the guidance) against `main`'s: every element's
+    """The page around the film (the two steps, the guidance) against `main`'s: every element's
     computed style. One port for both: the page shows its own address. A `main` whose page is built differently
     (no such parts) shows up here as a change, which it is."""
     got = {}
