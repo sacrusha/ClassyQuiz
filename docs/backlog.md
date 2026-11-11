@@ -775,6 +775,17 @@ With the owner, what only he can do:
   from and whether the site may hand it on in the four `.zip`s; the AI calls
   them NASA's and public domain, and nothing else records a source
   (`design/example-page.md`, Not known).
+- Which plan made the space run: "Any AI subscription will do, or free
+  Claude." stands beside it on the tab every visit opens on, and free Claude
+  is verified for the sheets run only (`design/guidance-page.md`, "The AIs
+  verified against").
+- The mocks on the root page (Notes, Test, "Not sure?") until his runs
+  replace them: the deploy script has nothing that holds a deploy back while
+  they exist.
+- Two cuts made with "What you can count on" that he has not seen: the
+  sentence that introduced the manual is gone from the root page, and "The
+  .zip is your lasting copy." ends the note under Peers and Quizmaster on
+  the check.
 - A domain in front of the site, so a rate-limiting rule at the edge can stop a
   script from spending the day's allowance; the free plan includes one such
   rule, and a name children can type beats pages.dev on the slowest step
