@@ -38,7 +38,7 @@ Solo learner mustn't be shown them.
 ### Reading on the root page
 
 The box of the second step (under "Open the quiz your AI made", since nothing
-goes up there; `root-page.md`, "Two steps") reads the `.zip`, then checks it here instead of
+goes up there; `root-page.md`, "Two steps") reads the `.zip` (or what else opens: `root-page.md`, "Opening: the `.zip` and nothing else"), then checks it here instead of
 uploading it (`client/home.ts`; `readQuiz` in `client/opening.ts`): the text
 first (the parser's errors, with "Copy the message for your AI"), then the
 pictures the quiz names (with "Continue without these pictures"), then the

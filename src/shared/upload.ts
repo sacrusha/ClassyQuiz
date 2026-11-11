@@ -8,6 +8,7 @@ export const UPLOAD_FORMATS = [
   "txt",
   "md",
   "zip",
+  "quiz",
   "several files",
   "tar.gz",
   "tgz",

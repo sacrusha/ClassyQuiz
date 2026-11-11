@@ -576,6 +576,14 @@ file's name is checked after choosing, and anything else gets the message below.
   distracted. Every tool that makes `tar.gz` can make a `.zip`, and several loose
   files are too error-prone. The `.zip` is also the container the pictures travel
   in (`design/pictures.md`).
+- Two more things open, for whoever a `.zip` fails, and the page for people
+  names neither. The owner: Gemini currently can't make zip files, and some
+  phones open a `.zip` by themselves in an extractor that doesn't let it be
+  saved. So the quiz's text alone opens as a `.txt` or `.md` file, read as
+  the text in a `.zip` is, with no pictures beside it; and the same archive
+  opens under the name `.quiz` (plausible assumption: a phone doesn't hand
+  a file of that name to its extractor). The manual tells the AI that both
+  work (`index.html`, "The manual").
 - Anything else that arrives (pasted or dropped text, another file type, several
   files) is told what the site takes, in the teacher's language, and what the AI
   can do instead. It is counted. Silently ignoring text from a teacher whose AI
@@ -601,7 +609,7 @@ file's name is checked after choosing, and anything else gets the message below.
 
 Purpose: whether anyone tries another format is then a fact to look up, not a
 guess (backlog v1 item 2). Each attempt is counted under one word from the closed
-list `UPLOAD_FORMATS` in `shared/upload.ts` (paste, txt, md, zip, several files,
+list `UPLOAD_FORMATS` in `shared/upload.ts` (paste, txt, md, zip, quiz, several files,
 the common other formats, "no extension", "other"). The word comes from the file
 name only; the server takes only words from the list, anything else counts as
 "other", so no file name or text can be stored. Kept per format: the count and

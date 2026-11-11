@@ -34,7 +34,10 @@ shaped as it is.
   puts the part of it the reading model can't know into its own words.
 - Plausible assumption: a capable model already knows teaching, question
   design and how to talk to a teacher or anyone else who asks (what the cut
-  to the site's facts rests on).
+  to the site's facts rests on). What it can't know is the site: what it
+  does, how the screens and a lesson run, how long data lives, the format
+  with examples, the limits, how a quiz reaches the site and what the
+  upload shows.
 - The quiz file is the same for every way it is played (Solo, Peers,
   Quizmaster: `local-check.md`), and the user picks the way after opening it.
   The ways differ in what shapes a question: where it is read and from how
@@ -44,12 +47,11 @@ shaped as it is.
   specialises it (untested, "Not known").
 - Whoever asked the AI may play the quiz (backlog v5 item 5): a learner
   alone, one of the friends. An AI shows its draft in the conversation: the
-  example's run did (`example-page.md`), and the page asks for a
-  presentation. Plausible assumption: an AI told "I'm playing too" doesn't
-  reliably infer that the questions and solutions must stay out of the
-  conversation, so the page says it. What it can't know is the site: what it does, how the screens and a
-  lesson run, how long data lives, the format with examples, the limits, how a
-  quiz reaches the site and what the upload shows.
+  example's run did (`example-page.md`), and the page leads towards a
+  presentation. Whether seeing the questions spoils the play depends on
+  what was asked for (the owner): someone who asks for a quiz on their own
+  50 words expects those 50 words to be there, and friends who want a pop
+  quiz don't want it read out beforehand.
 - Plausible assumption: fetched text that gives orders to the reader can trip
   an AI's prompt-injection guards, while reference material gets read, and a
   well-marked example of using an AI with the site trips no guard (why the
@@ -59,7 +61,9 @@ shaped as it is.
   "How to ask").
 - Teachers differ from message to message: a full brief needs no questions,
   contradictory scans may need two, and a rule of the form "ask at most one
-  question" fails both. Language is the same: the language of the exercises and
+  question" fails both. Many models spot a rule and follow it to the
+  letter, also outside the situation it was written for (the owner).
+  Language is the same: the language of the exercises and
   of the request vary without end, AIs resolve it with location and memory, and
   no list of cases is exhaustive.
 
@@ -104,15 +108,17 @@ lie on tiles in four colours. How the parser treats a file
 that doesn't follow the format (stray text, files beside the quiz) is left off:
 a file that doesn't follow the format doesn't work, and the published format
 is narrower than the real one on purpose (`quiz.txt`, UTF-8), so that the
-format can migrate later (`quiz-format.md`).
+format can migrate later (`quiz-format.md`). The page does say that the
+quiz's text alone, and the archive named `.quiz`, open too
+(`root-page.md`, "Opening: the `.zip` and nothing else").
 
-The ways to play are described as far as they shape a quiz: the check after
-opening, its questions folded for whoever plays; Solo's solution after each
+The ways to play are described as far as they shape a quiz: Solo's solution after each
 answer and the answers copied for the player's AI; the Peers room that moves
 on once everyone has answered, and its opener's fixes; a Quizmaster's
 question first read with its choices hidden, then the choices, the answers
 without the solution, the solution, the ranking, steered from the big screen
-or a second device. What the site
+or a second device, and the optional countdown of 15 s that closes
+answering. What the site
 reports at upload is not described: the AI's file should work the first time
 (owner: there must be no loop; a loop that iterates is a failure, and "fix
 it" should allow the obvious fix, by keeping the format simple). How the steering works (its buttons, a
@@ -137,7 +143,7 @@ JavaScript; the landing's language switch (`design/root-page.md`) is a script
 over an English block, so a fetcher reads English. The guidance runs from
 "About classyQuiz" through the manual (`#site`), what informs the shape of the
 quizzes (`#quizzes`), how quizzes are built (`#format`) and "Build with the
-user" (`#with-the-user`, with `#plays` and `#presenting`). The first two
+user" (`#with-the-user`, with `#presenting`). The first two
 sections carry the FAQ-kind information (the ways to play, how a room runs,
 privacy, hosting), which doubles as context for building; the format section
 carries what building needs.
@@ -152,7 +158,11 @@ beats delivering something half right. The page gives three phases (establish
 what gets built, build, present and refine) as situation: the gaps are closed
 with the teacher before the build, because the build takes one to three
 minutes and some teachers do something else meanwhile; a teacher who
-frontloads everything probably wants the build at once. "Presentation" is deliberately abstract:
+frontloads everything probably wants the build at once. The first phase
+carries an example response: one short reply that says what the AI took
+from the material and asks what it couldn't, which leads towards that shape
+without ordering it, where an assistant's pull is to build at once on what
+it has. "Presentation" is deliberately abstract:
 each AI shows the teacher the questions, or a question type, with whatever
 tools it has, for approval or correction during the conversation, not as a
 gate. Its purpose is the teacher's feedback, so the page asks for usefulness,
@@ -178,8 +188,8 @@ about a screen per question, which is the point where the picture is the
 question (the chess run, below). Which to use is the builder's call in its
 situation; the page gives what each costs and serves. Its home is the layout page
 (`/layout`), which stays as-built and complete, as HTML and CSS, because it is
-linked rather than inlined. Presentation is for a user who won't play the
-quiz (below). On controversial subjects the user leads (the owner): an AI may bring in
+linked rather than inlined. Whether to present follows from who will play
+and what they asked for (below). On controversial subjects the user leads (the owner): an AI may bring in
 propaganda it was trained on, or guess the user's political leaning, or
 read it from memory, and build on that, which is a problem where the quiz is
 for an audience and not for the user.
@@ -187,37 +197,23 @@ for an audience and not for the user.
 ### The user who plays
 
 Purpose (backlog v5 item 5, the guidance's side): whoever asked the AI for
-the quiz can play it without having seen it. The page says so plainly, under
-its own heading ("When the user will play the quiz", `#plays`), since here
-the instruction is the point and the AI doesn't derive it (Situation): when
-the person in the conversation will be among the players, the questions,
-their choices and their solutions stay out of the conversation and out of
-everything the AI shows; the AI reports what it can without giving a
-question away (how many, the difficulty, how many have pictures, what of the
-material is covered and what isn't) and hands over the `.zip`. The report
-names the material at a grain coarser than the questions: for a short quiz,
-a topic per question would be the question list.
-What decides it is who plays, not the way it is played: a teacher making a
-quiz for a class's practice alone reviews it as usual. Nobody looks at the
-solutions before the game, so the page names where a wrong one is caught
-(the Peers opener's "Change the solution", Solo's answers copied for the
-player's AI), which also tells the AI that its own check is the only one
-before play. Phase 1 lists whether the user plays among what gets settled,
-so an AI that can't tell asks. The site's side is the local check's fold
-(`local-check.md`); the user's side, the example asks that say "I'll play it
-myself" and "I'm playing too" in the user's own words (`root-page.md`,
-"How to ask").
+the quiz can play it without the conversation having spoiled it. The page
+says so as situation, at the head of "Presenting" (`#presenting`): a user
+who will play solo or with peers might need protecting from spoilers,
+depending on what they asked for, with a case each way (vocabulary the
+user struggles with, where spoilers don't matter; a pop quiz on the space
+race played alongside friends, where they do). Whether to present, and
+what, is the AI's to derive: the layout under it leads towards showing the
+questions with their solutions, and what a spoiler costs holds that back
+where it applies. The owner: a ruling is for a hard constraint like the
+file format; a rule against showing questions gets the 50 words wrong
+(Situation). The site's side is the local check's fold (`local-check.md`);
+the user's side, the example asks that say "I'll play it myself" and "I'm
+playing too" in the user's own words (`root-page.md`, "How to ask").
 
-A quizmaster doesn't play. Their screens, the big screen and a second
-device that steers, take no answers; they set when the choices come and
-when the solution shows; and a second device shows the current question's
-solution while the players answer (`teacher-devices.md`). The page says so under Quizmaster, and under `#plays` the AI asks a
-user who says they will host and play too which they mean: to play among
-the others with nobody running it (Peers), the questions kept out of the
-conversation, or to run it for the group (Quizmaster), reviewed as usual.
-Plausible assumption: without it, an AI told "I'm hosting and playing too"
-makes a Quizmaster quiz and keeps it from the user, who then runs a quiz
-nobody checked and can't play it.
+Who plays is in the ways' descriptions: in Peers whoever opens the lobby
+plays too, and a Quizmaster runs the quiz for the group
+(`teacher-devices.md`: their screens take no answers).
 
 ### The AIs verified against
 
@@ -264,7 +260,9 @@ quoted; runs not recorded beyond the above):
 - Free ChatGPT: had a web tool on some runs and not on others, and without it
   "improvised", presenting a quiz built with no idea what was asked; it also
   hit the daily upload limit on the second photo, which makes it impractical.
-- Free Gemini: has trouble with the `.zip`.
+- Free Gemini: has trouble with the `.zip`. On one test it told the user
+  of the plain-text route by itself, from the page's sentence that plain
+  text works (the owner).
 - Free Microsoft Copilot: "generally slightly above Haiku's level"; not
   trusted to generate a quiz.
 - Grok: not tested.
@@ -280,6 +278,11 @@ quoted; runs not recorded beyond the above):
   a model reading the page.
 - Behaviour of other models and of free tiers on the current page; paid
   ChatGPT and Gemini, and Grok, untested.
+- Whether "neither is advertised" keeps an AI that can make a `.zip` from
+  offering plain text or `.quiz`, while one that can't still offers them.
+  The owner expects the phone whose extractor swallows the `.zip` to be
+  rare, and `.quiz` to come up once the user describes it to their AI
+  ("when I click on it, it only shows me a list of names"); untried.
 - Whether AI sandboxes have cairosvg or rsvg-convert, without which
   `preview.py` shows SVG pictures as "not drawn here"; untested, as is that
   path of the script.
@@ -288,10 +291,10 @@ quoted; runs not recorded beyond the above):
 - Whether the drawn number-line quizzes' pictures match their keys.
 - Whether `Read <address>.` beats "for it", "with it" and "Have a look at" at
   getting the page fetched before the first build.
-- Whether AIs keep the questions out of the conversation when the user says
-  they'll play, whether they ask when it's unclear or when the user will
-  host and play, and whether what they report instead is enough to trust
-  the zip without naming a question; no run since the page says it.
+- Whether AIs derive from the page when showing the questions would spoil
+  the play, and whether a user who wasn't shown them hears enough to trust
+  the quiz; and whether the example response leads AIs to ask before they
+  build. No run on the current page.
 - Whether an AI told how the quiz will be played shapes it differently
   (questions for a phone at arm's length, a length for friends); untested.
 - Whether AIs give answer pictures a ground of their own often enough: the

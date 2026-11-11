@@ -91,7 +91,7 @@ The lines `Image:`, `Background:` and picture answers (`+ Image: pie-3.png`) are
 
 ### Which text file in the zip
 
-The guidance asks for one `quiz.txt` in UTF-8 beside the pictures, narrower than what the site takes so that the format can migrate later under a fixed name. The site takes more: the text is the zip's `.txt` or `.md` file, found by `quizTextFromEntries` in `src/client/unzip.ts`. An AI may put a README or its own notes beside the quiz, so with several text files the one that reads as a quiz wins: no errors first, then the most questions; a tie goes to the top level, then the shortest path. When none has a question the first is taken, so the teacher's error is about the likeliest file.
+The guidance asks for one `quiz.txt` in UTF-8 beside the pictures, narrower than what the site takes so that the format can migrate later under a fixed name. The site takes more: the text is the zip's `.txt` or `.md` file, found by `quizTextFromEntries` in `src/client/unzip.ts`. An AI may put a README or its own notes beside the quiz, so with several text files the one that reads as a quiz wins: no errors first, then the most questions; a tie goes to the top level, then the shortest path. When none has a question the first is taken, so the teacher's error is about the likeliest file. The archive also opens under the name `.quiz`, and a `.txt` or `.md` file opens by itself as a quiz without pictures (`root-page.md`, "Opening: the `.zip` and nothing else"); the guidance says that both work.
 
 ### The verifier for the AI
 

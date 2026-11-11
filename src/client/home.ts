@@ -242,12 +242,19 @@ function notText(): void {
 async function fromFiles(files: File[]): Promise<void> {
   const format = uploadFormat(files.map((f) => f.name));
   countAttempt(format);
-  if (format !== "zip") {
+  // The page asks for a .zip and says nothing else; the same archive named .quiz and the quiz's text
+  // alone open too (docs/design/root-page.md, "Opening: the .zip and nothing else").
+  const text = format === "txt" || format === "md";
+  if (format !== "zip" && format !== "quiz" && !text) {
     const what = format === "several files" ? "several" : format === "no extension" || format === "other" ? "this" : format;
     out.innerHTML = problem(t.notFile(what), zipOnly());
     return;
   }
   try {
+    if (text) {
+      await toCheck(await files[0].text(), []);
+      return;
+    }
     const entries = listZip(await files[0].arrayBuffer());
     await toCheck(await quizTextFromEntries(entries), entries);
   } catch (e) {

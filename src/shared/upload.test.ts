@@ -5,6 +5,7 @@ import { isUploadFormat, uploadFormat } from "./upload.ts";
 test("upload formats are told apart by file name only", () => {
   assert.equal(uploadFormat(["Quiz.ZIP"]), "zip");
   assert.equal(uploadFormat(["quiz.markdown"]), "md");
+  assert.equal(uploadFormat(["Percentages.quiz"]), "quiz");
   assert.equal(uploadFormat(["quiz.tar.gz"]), "tar.gz");
   assert.equal(uploadFormat(["Arbeitsblatt 4.docx"]), "docx");
   assert.equal(uploadFormat(["IMG_2041.JPEG"]), "jpg");

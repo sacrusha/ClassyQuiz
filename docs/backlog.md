@@ -294,14 +294,11 @@ hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
    `design/teacher-devices.md`.
 
 5. Whoever asked the AI for the quiz plays it without having seen the
-   questions — what lets a quiz be played by its own maker: the guidance's
-   "When the user will play the quiz" and the local check's fold —
-   `design/guidance-page.md` ("The user who plays"),
-   `design/local-check.md`. A quizmaster doesn't play: the guidance says
-   so, and has the AI ask a user who will host and play which they mean,
-   Peers or Quizmaster. Open: whether AIs keep the questions out of the
-   chat, ask, and report enough without naming a question; no run since
-   the page says it.
+   questions — what lets a quiz be played by its own maker: the guidance
+   on when showing the questions spoils the play, and the local check's
+   fold — `design/guidance-page.md` ("The user who plays"),
+   `design/local-check.md`. Open: whether AIs derive it from the page; no
+   run on the current page.
 
 6. **The room's screens aren't the classroom's.** A table or a call has no
    big screen; a call may share a window as one; a class may have a projector
