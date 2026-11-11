@@ -46,17 +46,17 @@ export interface Text extends SiteWords {
   again: string;
   /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
   full: string;
-  /** Under an example's file, to its full example (/example). */
+  /** Beside an example's file, to its full example (/example). */
   see: string;
   /** The page's first sentence, its h1: what the site does for whoever reads it (docs/design/root-page.md, "What this is"). */
   what: string;
-  /** What each way's picture shows (docs/ways/README.md), its accessible name; the names are the local check's cards' (client/entries.ts), written in the page. */
+  /** What each way's picture shows (docs/ways/README.md), the face of its example's file: its accessible name. The ways' names are the local check's cards' (client/entries.ts), written in the page. */
   picQuizmaster: string;
   picPeers: string;
   picSolo: string;
-  /** The first of the two steps: its heading, the bar of the chat that shows the example ask. */
+  /** The first of the two steps: its heading, over the tabs and the chat that shows the example ask. */
   getH: string;
-  /** Under the ask: that a file comes back, before the example's file name. */
+  /** Under the ask: that an answer comes back, over the example's file (or the AI's question back). */
   gives: string;
   /** The film's heading, where it stands for whoever wants to find out more. */
   filmH: string;
@@ -89,9 +89,9 @@ export interface Text extends SiteWords {
   help: string;
   askHelp: string;
   helpReply: string;
-  /** Which AI, in the chat's bar. */
+  /** Which AI, beside the first step's heading. */
   which: string;
-  /** Beside the example's file: opens it in the box below, as a file of one's own is opened. */
+  /** On the example's file: opens it in the box below, as a file of one's own is opened. */
   playThis: string;
   ask: AskPart[];
   copied: string;
@@ -347,7 +347,7 @@ const fr: Text = {
   askHelp: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes par exemple, envoie-le.",
   help: "Rien de tout cela, ou pas encore sûr",
-  unsure: "Un doute ?",
+  unsure: "Un doute ?",
   subQuizmaster: "pour une classe ou un groupe",
   subPeers: "entre amis",
   subSolo: "rien que pour vous",

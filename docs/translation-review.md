@@ -33,7 +33,7 @@ For the read:
   KI … macht.", "kann heute kein weiteres Quiz annehmen … nimmt sie wieder eines an". "Mehr Quiz"
   (the way to an own copy) stays: it reads as a singular, in the advertising form, which suits
   a line about more for free (the owner).
-- **"Any AI subscription will do, or free Claude."**, in the chat's bar: "Jedes KI-Abo reicht,
+- **"Any AI subscription will do, or free Claude."**, beside the first step's heading: "Jedes KI-Abo reicht,
   sonst Claude gratis." / "Tout abonnement IA convient, ou Claude gratuit." / "Va bene ogni
   abbonamento IA, o Claude gratuito.", short enough to stand on one line under the heading at
   360 px. A statement about subscriptions, not an order to use one's own: "Nimm die KI, die du
@@ -48,16 +48,15 @@ For the read:
   is an "Erklärfilm" as much as an "Erklärvideo"), French "vidéo" and Italian "video", the normal
   word there for a minute's clip on a website. The name says it has no sound: "ein Film ohne Ton",
   "une vidéo sans son", "un video senza audio".
-- **The ways' words**: German "am Grossbildschirm" for on a big screen, and Italian "ognuno sul suo
-  dispositivo", so the three stand in three lines on a 390 px phone ("am grossen Bildschirm" and
-  "sul proprio dispositivo" took four). Italian "su schermo grande", the adjective after the noun,
-  here and in the picture's name and the training ask: "il grande schermo" is the cinema. Italian
-  "tra amici" (the tab too), the set phrase, as French "entre amis". French Solo is "pour vous
-  exercer ou réviser" alone: under the name "Solo", "en solo" repeated it, "seul" is gendered, "de
-  votre côté" means "for your part", and "en solitaire" took four lines at 360 px; the tab ("En
-  solo") and the line on what is kept ("En solo, …") keep the words (`design/root-page.md`,
-  "Languages"). German "zum Üben oder Wiederholen" and French "pour vous exercer ou réviser" are
-  untested against what a pupil would say.
+- **The tabs' words**, under each way's name: whose case it is, the opening words of the check's
+  cards shortened. German "für Klasse oder Gruppe", "mit Freunden", "für dich allein"; French
+  "pour une classe ou un groupe", "entre amis", "rien que pour vous"; Italian "per una classe o un
+  gruppo", "tra amici", "per conto tuo". French Solo says whose case it is without "seul" or
+  "seule", which are gendered; the check's card's "Pour vous exercer" says what for, not whose
+  case. The fourth tab: "Nicht sicher?", "Un doute ?", "Dubbi?", French without "pas sûr", which
+  is gendered; its tooltip, "Rien de tout cela, ou pas encore sûr", still has the gendered word.
+  These are drafts nobody has read. Italian "schermo grande", the adjective after the noun, in
+  the Quizmaster picture's name: "il grande schermo" is the cinema.
 - **The sentence** keeps the shorter of two wordings where the longer costs a line: German "aus
   deinen Blättern" (with "Arbeitsblättern", the page's word everywhere else, the sentence takes
   four lines at 360 px) and French "vos fiches, notes ou idées" with one possessive (repeated, as

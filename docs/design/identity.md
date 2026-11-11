@@ -51,7 +51,10 @@ App screens are set at 1.45 line height, pages read top to bottom (the root,
 ### Colours
 
 - **Paper and ink**: `--bg` `#fbf8f2`, `--fg` `#1d1d1b`, with muted text and
-  rules from the same warm grey.
+  rules from the same warm grey. From it too: the dashed edge of a place to
+  drop a file (`--dash`, the root page's box), and the ground of a tab not
+  chosen, a step off the paper (`--tab`), with an edge where that step alone
+  doesn't hold it apart, in dark mode (`--tab-edge`).
 - **Controls are ink** (`--control`): Play on the steering bar and the
   Remote, Start, Let everyone in, Upload, the code box's ▶, the on state of
   a switch, a picked shape in the students' lobby, the countdown's bar, and

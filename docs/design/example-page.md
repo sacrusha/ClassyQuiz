@@ -11,7 +11,7 @@ v4 item 10).
 
 ## Situation
 
-- The page is reached from "The whole example ›" under the example's file in the
+- The page is reached from "The whole example ›" beside the example's file in the
   landing's chat (`root-page.md`, "Getting a quiz"), one link per way to
   play. The landing itself shows the example's ask and its file, and starts
   the example quiz; what only this page has is the photographs, the whole

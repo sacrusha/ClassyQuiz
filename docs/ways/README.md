@@ -1,7 +1,7 @@
 # The pictures of the ways to play
 
-Three pictures on the root page, one above the name of each way to play:
-Quizmaster, Peers, Solo. Where they stand and the words beside them are the page's
+Three pictures on the root page, one for each way to play, Quizmaster, Peers,
+Solo: the face of the file each way's example brings. Where they stand and the words beside them are the page's
 (`docs/design/root-page.md`). This folder is the pictures: this file (what
 they are for, what they live with, how they are made) and `build/` (the
 script that draws them and the one that renders them for looking at).
@@ -12,6 +12,8 @@ A visitor recognises their own case among the ways to play, and a reason
 to play it, from the page as it opens (`docs/design/root-page.md`, Purpose;
 backlog v6 item 1b). The words name each way; a picture shows the visitor
 where they would be playing, with whom, and what their device would show.
+On the page it is what the AI's file becomes: the face of the example's
+file in the chat (`docs/design/root-page.md`, "Getting a quiz").
 
 ## Situation
 
@@ -27,10 +29,10 @@ where they would be playing, with whom, and what their device would show.
   assumption: what makes the poster relatable is a real room with people in
   it, doing something (the class at the wall, the votes split, the murmur),
   drawn in one hand; so these pictures are drawn in the film's.
-- The page shows them at 16:10, a third of its column: from 91 px wide on a
-  320 px phone to 216 px on a desktop (`docs/design/root-page.md`, "The
-  ways to play"). At a phone's size the mockup's class had devices nobody
-  could see.
+- They are drawn for 16:10 at 91 to 216 px wide. The page shows one at a
+  time, on its example's file: from 106 px wide on a 320 px phone to 232 px
+  on a desktop (`docs/design/root-page.md`, "Getting a quiz"). At a phone's
+  size the mockup's class had devices nobody could see.
 - The page is in four languages (`docs/design/root-page.md`, "Languages"),
   and an AI's fetcher reads it as text ("One page, two readers").
 - The page follows the device's dark mode; the film's poster is the same
