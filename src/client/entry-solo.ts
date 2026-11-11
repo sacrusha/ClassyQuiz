@@ -22,6 +22,8 @@ import { T } from "./room-text.ts";
 export const solo: Entry = {
   name: "Solo",
   line: T.soloLine,
+  picture: "/landing/way-solo.svg",
+  pictureAlt: T.picSolo,
   button: T.soloButton,
   note: T.soloNote,
   plays: true,

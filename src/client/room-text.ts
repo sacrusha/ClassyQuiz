@@ -99,6 +99,10 @@ export interface RoomText {
   foldName: string;
   notes: (n: number) => string;
   foldHint: string;
+  /** What each way's picture shows (docs/ways/README.md), on its card: its accessible name. */
+  picQuizmaster: string;
+  picPeers: string;
+  picSolo: string;
   soloLine: string;
   soloButton: string;
   soloNote: string;
@@ -286,6 +290,9 @@ const en: RoomText = {
   foldName: "The questions and their solutions",
   notes: (n) => `${n} ${n === 1 ? "note" : "notes"} from the site`,
   foldHint: "If you will play it yourself, leave this closed.",
+  picQuizmaster: "A teacher at the big screen with the question, a phone in her hand; the class answers on tablets.",
+  picPeers: "Three friends on a sofa in the evening, each with the question on their own phone, one of them laughing.",
+  picSolo: "Someone alone at a desk with their notes, the question on their phone, the answer just found right.",
   soloLine: "On your own, to practise or review. Each answer shows the solution right away, and the score comes at the end.",
   soloButton: "Play ▶",
   soloNote: "Plays in this tab. Nothing is sent to the site. Reloading or closing the tab ends it.",
@@ -459,6 +466,9 @@ const de: RoomText = {
   foldName: "Die Fragen und ihre Lösungen",
   notes: (n) => `${n} ${n === 1 ? "Hinweis" : "Hinweise"} der Seite`,
   foldHint: "Spielst du selbst mit, lass das geschlossen.",
+  picQuizmaster: "Eine Lehrerin am grossen Bildschirm mit der Frage, das Handy in der Hand; die Klasse antwortet auf Tablets.",
+  picPeers: "Drei Freunde abends auf dem Sofa, alle mit der Frage auf dem eigenen Handy, einer lacht.",
+  picSolo: "Jemand allein am Schreibtisch mit Notizen, die Frage auf dem Handy, eben richtig beantwortet.",
   soloLine: "Für dich allein, zum Üben oder Wiederholen. Nach jeder Antwort siehst du gleich die Lösung, am Schluss die Punkte.",
   soloButton: "Spielen ▶",
   soloNote: "Läuft in diesem Tab. Nichts geht an die Seite. Neu laden oder den Tab schliessen beendet es.",
@@ -632,6 +642,9 @@ const fr: RoomText = {
   foldName: "Les questions et leurs solutions",
   notes: (n) => `${n} ${n === 1 ? "remarque" : "remarques"} du site`,
   foldHint: "Si vous jouez vous-même, laissez ceci fermé.",
+  picQuizmaster: "Une enseignante devant le grand écran avec la question, le téléphone à la main ; la classe répond sur des tablettes.",
+  picPeers: "Trois amis sur un canapé le soir, chacun avec la question sur son téléphone, l'un d'eux rit.",
+  picSolo: "Une personne seule à son bureau avec ses notes, la question sur son téléphone, la bonne réponse tout juste trouvée.",
   soloLine: "Pour vous exercer ou réviser. Chaque réponse affiche aussitôt la solution, et le score vient à la fin.",
   soloButton: "Jouer ▶",
   soloNote: "Se joue dans cet onglet. Rien n'est envoyé au site. Recharger ou fermer l'onglet y met fin.",
@@ -805,6 +818,9 @@ const it: RoomText = {
   foldName: "Le domande e le loro soluzioni",
   notes: (n) => `${n} ${n === 1 ? "nota" : "note"} del sito`,
   foldHint: "Se giochi anche tu, lascia chiuso.",
+  picQuizmaster: "Un'insegnante davanti allo schermo grande con la domanda, il telefono in mano; la classe risponde sui tablet.",
+  picPeers: "Tre amici sul divano di sera, ognuno con la domanda sul proprio telefono, uno di loro ride.",
+  picSolo: "Una persona sola alla scrivania con i suoi appunti, la domanda sul telefono, la risposta giusta appena trovata.",
   soloLine: "Per conto tuo, per esercitarti o ripassare. Dopo ogni risposta vedi subito la soluzione, e alla fine il punteggio.",
   soloButton: "Gioca ▶",
   soloNote: "Si gioca in questa scheda. Al sito non viene inviato nulla. Ricaricare o chiudere la scheda lo termina.",

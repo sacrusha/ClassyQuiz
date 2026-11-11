@@ -1,7 +1,7 @@
 // The root page's part for people (docs/design/root-page.md): code box,
-// language, and the two steps: asking an AI for a quiz, the ways to play as
-// the tabs that pick the example the chat shows, and the box that opens the
-// AI's .zip. The guidance for AIs below reads without this script, in
+// language, and the two steps: asking an AI for a quiz, with the examples as
+// the tabs that pick what the chat shows, and the box that opens the AI's
+// .zip. The guidance for AIs below reads without this script, in
 // English; this script puts the part above it in the visitor's language
 // (client/landing-text.ts).
 
@@ -12,7 +12,8 @@ import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, typ
 import { api, readApi } from "./net.ts";
 import { ZipError, listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, askText, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
-import { WAY_ZIP, type Way } from "./example-text.ts";
+import { isMock, type Example } from "./example-text.ts";
+import { EXAMPLE_FILES } from "./example-files.ts";
 import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, uploadDays } from "./history.ts";
 import { handOver, sweepStale } from "./handoff.ts";
@@ -45,52 +46,62 @@ const file = $("#file") as HTMLInputElement;
 /** A quiz is being read, or an example is on its way to the check: another file waits. */
 let reading = false;
 
-// Getting a quiz (docs/design/root-page.md, "Getting a quiz"): the ways to
-// play are tabs in words under the first step's heading, each picking its
-// example in the chat: the ask, and the AI's answer, a file whose face is the
-// picture of that way, which plays by way of the box below. The fourth tab,
-// "Not sure?", holds the ask that needs no knowing how to ask. Made here:
-// without the script, and for an AI's fetcher, the asks stand one under the
-// other. Every visit opens on the Quizmaster's (Situation: least surprise).
+// Getting a quiz (docs/design/root-page.md, "Getting a quiz"): the examples
+// are tabs in words under the first step's heading, each named by what the
+// visitor starts from and picking its example in the chat: the ask, and the
+// AI's answer, a file whose face is the quiz's first question, which plays by
+// way of the box below and whose name downloads it. The fifth tab, "Not
+// sure?", holds the ask that needs no knowing how to ask. Made here: without
+// the script, and for an AI's fetcher, the asks stand one under the other.
+// Every visit opens on the first (Situation: least surprise).
 
-/** mock: a stand-in until the owner's run (backlog, "The page for people", item 1), marked beside the first step's heading. */
-const TABS: { tab: string; panel: string; way?: Way; ask: (t: Text) => string; mock?: boolean }[] = [
-  { tab: "tab-quizmaster", panel: "ex-quizmaster", way: "quizmaster", ask: (t) => askText(t) },
-  { tab: "tab-peers", panel: "ex-peers", way: "peers", ask: (t) => t.askPeers, mock: true },
-  { tab: "tab-solo", panel: "ex-solo", way: "solo", ask: (t) => t.askSolo, mock: true },
-  { tab: "tab-help", panel: "ex-help", ask: (t) => t.askHelp, mock: true },
+/** The tabs in the page's order: the four examples, then the help ask. */
+const TABS: { id: Example | "help"; ask: (t: Text) => string }[] = [
+  { id: "idea", ask: (t) => t.askIdea },
+  { id: "sheets", ask: (t) => askText(t) },
+  { id: "notes", ask: (t) => t.askNotes },
+  { id: "test", ask: (t) => t.askTest },
+  { id: "help", ask: (t) => t.askHelp },
 ];
-const tabs = TABS.map((a) => $(`#${a.tab}`) as HTMLButtonElement);
-const panels = TABS.map((a) => $(`#${a.panel}`));
-/** The AI's question back in the fourth tab, under the label every answer has: made here, so a fetcher doesn't read an AI's words as the page's. */
+const tabs = TABS.map((a) => $(`#tab-${a.id}`) as HTMLButtonElement);
+const panels = TABS.map((a) => $(`#ex-${a.id}`));
+const bar = $("#ways");
+/** The AI's question back in the help tab, under the label every answer has: made here, so a fetcher doesn't read an AI's words as the page's. */
 const helpAnswer = document.createElement("div");
 helpAnswer.className = "answer";
 helpAnswer.innerHTML = `<p class="gives"></p><p class="said-ai"></p>`;
 {
-  const bar = $("#ways");
   bar.setAttribute("role", "tablist");
   bar.setAttribute("aria-labelledby", "get-h");
   TABS.forEach((a, i) => {
     tabs[i].setAttribute("role", "tab");
     panels[i].setAttribute("role", "tabpanel");
-    panels[i].setAttribute("aria-labelledby", a.tab);
+    panels[i].setAttribute("aria-labelledby", tabs[i].id);
     tabs[i].addEventListener("click", () => chooseTab(i));
-    const way = a.way;
     const card = panels[i].querySelector<HTMLElement>(".file");
-    if (way && card) {
-      // The file in the AI's answer opens as a file of one's own does: it goes into the box below. The whole card takes
-      // a pointer's press, as a file in a chat does; the button is the one a keyboard reaches, and its press reaches the
-      // card too. Made here: without the script it would do nothing.
-      const play = document.createElement("button");
-      play.type = "button";
-      play.className = "play";
-      card.querySelector(".meta")!.append(play);
-      card.classList.add("takes");
-      const zip = card.querySelector<HTMLElement>(".zip")!;
-      card.addEventListener("click", () => playExample(way, zip));
-    }
+    if (a.id === "help" || !card) return;
+    const ex = a.id;
+    // The face, the quiz's first question as a picture, in the page's language (renderExamples).
+    const face = document.createElement("img");
+    face.width = 464;
+    face.height = 290;
+    face.alt = "";
+    card.querySelector(".face")!.replaceChildren(face);
+    // The file in the AI's answer opens as a file of one's own does: it goes into the box below. The whole card takes
+    // a pointer's press, as a file in a chat does, except the file's name, which downloads it; the button is the one a
+    // keyboard reaches, and its press reaches the card too. Made here: without the script it would do nothing.
+    const play = document.createElement("button");
+    play.type = "button";
+    play.className = "play";
+    card.querySelector(".meta")!.append(play);
+    card.classList.add("takes");
+    const zip = card.querySelector<HTMLElement>(".zip")!;
+    card.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) return;
+      playExample(ex, zip);
+    });
   });
-  panels[3].append(helpAnswer);
+  panels[TABS.length - 1].append(helpAnswer);
   bar.addEventListener("keydown", (e) => {
     const at = tabs.findIndex((b) => b.getAttribute("aria-selected") === "true");
     const to = e.key === "ArrowRight" ? at + 1 : e.key === "ArrowLeft" ? at - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : null;
@@ -100,6 +111,8 @@ helpAnswer.innerHTML = `<p class="gives"></p><p class="said-ai"></p>`;
     chooseTab(i);
     tabs[i].focus();
   });
+  bar.addEventListener("scroll", () => edges(), { passive: true });
+  window.addEventListener("resize", () => edges());
   chooseTab(0);
 }
 
@@ -110,25 +123,50 @@ function chooseTab(i: number): void {
     tab.tabIndex = on ? 0 : -1;
     panels[j].hidden = !on;
   });
-  $("#mock").hidden = !TABS[i].mock;
+  $("#mock").hidden = !(isMock(TABS[i].id) || TABS[i].id === "help");
+  // A row that scrolls (a narrow phone): the chosen tab comes into it.
+  if (bar.scrollWidth > bar.clientWidth) tabs[i].scrollIntoView({ block: "nearest", inline: "nearest" });
+  edges();
 }
 
-/** The asks, the files and the full examples' links, in the page's language. */
+/** The row's edges: the fade where more tabs are beyond the right one, and the chat's corner square under a chosen tab at either end. */
+function edges(): void {
+  const i = tabs.findIndex((b) => b.getAttribute("aria-selected") === "true");
+  const scrolls = bar.scrollWidth > bar.clientWidth + 1;
+  $("#ways-wrap").classList.toggle("more", bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 2);
+  const get = $("#get");
+  get.classList.toggle("first", i === 0 && bar.scrollLeft < 1);
+  get.classList.toggle("last", i === tabs.length - 1 && !scrolls);
+}
+
+/** The asks, the files, their faces and the full examples' links, in the page's language. */
 function renderExamples(): void {
   TABS.forEach((a, i) => {
     const said = panels[i].querySelector<HTMLElement>(".said")!;
     said.textContent = a.ask(t).replaceAll(DEMO, host);
     said.lang = lang;
-    if (a.way) {
-      panels[i].querySelector(".zipname")!.textContent = WAY_ZIP[a.way][lang];
-      panels[i].querySelector(".play")!.textContent = t.playThis;
-      const see = panels[i].querySelector<HTMLAnchorElement>(".see");
-      if (see) see.href = `/example?lang=${lang}${a.way === "quizmaster" ? "" : `&way=${a.way}`}`;
+    if (a.id === "help") return;
+    const f = EXAMPLE_FILES[a.id][lang];
+    const zip = panels[i].querySelector<HTMLAnchorElement>(".zip")!;
+    zip.href = `/examples/${f.zip}`;
+    zip.title = t.download;
+    zip.querySelector(".zipname")!.textContent = f.zip;
+    zip.querySelector(".size")!.firstChild!.textContent = t.size(f.bytes);
+    const face = panels[i].querySelector<HTMLImageElement>(".face img");
+    if (face) {
+      face.src = `/landing/face-${a.id}-${lang}.webp`;
+      face.alt = `${t.first} ${f.first}`;
+      face.lang = lang;
     }
+    const play = panels[i].querySelector(".play");
+    if (play) play.textContent = t.playThis;
+    const see = panels[i].querySelector<HTMLAnchorElement>(".see");
+    if (see) see.href = `/example?lang=${lang}${a.id === "sheets" ? "" : `&ex=${a.id}`}`;
   });
   helpAnswer.querySelector(".gives")!.textContent = t.gives;
   helpAnswer.querySelector(".said-ai")!.textContent = t.helpReply;
   helpAnswer.lang = lang;
+  edges();
 }
 
 /**
@@ -137,14 +175,14 @@ function renderExamples(): void {
  * file opens on the local check, as a file of one's own does. With reduced
  * motion the box lights up and nothing flies.
  */
-function playExample(way: Way, zip: HTMLElement): void {
+function playExample(ex: Example, zip: HTMLElement): void {
   if (reading) return;
   reading = true;
   const button = $("#open");
   out.innerHTML = `<p class="muted">${esc(t.reading)}</p>`;
   const landed = () => {
     runbox.classList.add("drag");
-    window.setTimeout(() => location.assign(`/open?example=${lang}&way=${way}`), 300);
+    window.setTimeout(() => location.assign(`/open?example=${lang}&ex=${ex}`), 300);
   };
   if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof zip.animate !== "function") {
     landed();
@@ -192,10 +230,6 @@ function apply(l: Lang): void {
   for (const el of document.querySelectorAll<HTMLElement>("[data-t-aria]")) {
     const v = t[el.dataset.tAria as keyof Text];
     if (typeof v === "string") el.setAttribute("aria-label", v);
-  }
-  for (const el of document.querySelectorAll<HTMLImageElement>("img[data-t-alt]")) {
-    const v = t[el.dataset.tAlt as keyof Text];
-    if (typeof v === "string") el.alt = v;
   }
   for (const el of document.querySelectorAll<HTMLElement>("[data-t-title]")) {
     const v = t[el.dataset.tTitle as keyof Text];

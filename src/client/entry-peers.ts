@@ -14,6 +14,8 @@ import { T, lang } from "./room-text.ts";
 export const peers: Entry = {
   name: "Peers",
   line: T.peersLine,
+  picture: "/landing/way-peers.svg",
+  pictureAlt: T.picPeers,
   button: T.peersButton,
   note: T.roomNote,
   plays: true,

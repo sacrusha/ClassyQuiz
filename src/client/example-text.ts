@@ -5,6 +5,7 @@
 // (docs/translation-review.md); the voice is the root page's.
 
 import type { Lang } from "./landing-text.ts";
+import { EXAMPLE_FILES } from "./example-files.ts";
 
 export interface ExampleText {
   title: string;
@@ -126,80 +127,138 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
   },
 };
 
-/** The example's quiz per language: big-numbers-quiz.zip, translated (docs/example/quiz_zips.py); home.ts runs the same files for /?example=<lang>. */
-export const EXAMPLE_ZIP: Record<Lang, string> = {
-  en: "big-numbers-quiz.zip",
-  de: "grosse-zahlen-quiz.zip",
-  fr: "quiz-grands-nombres.zip",
-  it: "quiz-grandi-numeri.zip",
-};
-
-/** The ways to play, each with an example on the root page (docs/design/root-page.md, "Getting a quiz"). */
-export const WAYS = ["quizmaster", "peers", "solo"] as const;
-export type Way = (typeof WAYS)[number];
-export const isWay = (w: unknown): w is Way => WAYS.includes(w as Way);
-
 /**
- * Each way's example quiz per language, opened by /open?example=<lang>&way=<way>. The Quizmaster's is the worked
- * example's; the Solo and Peers files are mocks (docs/example/mock_zips.py) until the owner's runs replace them.
+ * The full example of the root page's "Idea" tab, the owner's space run (11 Nov 2026, German): what replaces the worked
+ * example's words on /example?ex=idea. Nothing was attached, so the sheets' step goes, and the AI's overview of its
+ * questions (its review.png) stands after the conversation.
  */
-export const WAY_ZIP: Record<Way, Record<Lang, string>> = {
-  quizmaster: EXAMPLE_ZIP,
-  peers: { en: "history-exam-quiz.zip", de: "geschichte-pruefung-quiz.zip", fr: "quiz-examen-histoire.zip", it: "quiz-esame-storia.zip" },
-  solo: { en: "cell-test-practice.zip", de: "zellen-test-uebung.zip", fr: "controle-cellule-revision.zip", it: "verifica-cellula-ripasso.zip" },
+export interface IdeaText {
+  lede: string;
+  convoP: string;
+  reviewH: string;
+  reviewP: string;
+  reviewAlt: string;
+  readReview: string;
+  quizP: string;
+  translated: string;
+}
+
+export const IDEA_TEXT: Record<Lang, IdeaText> = {
+  en: {
+    lede: "How the space quiz was made, from one ask with nothing attached to the class, with everything to try the same on your own AI.",
+    convoP: "One ask, nothing attached. The AI read the site, built the quiz with NASA photographs and four drawings of its own, checked it and handed over the .zip, with an overview of every question. Claude, 11 November 2026.",
+    reviewH: "The overview",
+    reviewP: "Every question with its solution, as the AI drew them for checking the quiz before it is played.",
+    reviewAlt: "Every question of the quiz with its solution, as a picture",
+    readReview: "See the whole overview ›",
+    quizP: "What the AI handed over: one .zip with the quiz and its 23 pictures.",
+    translated: "The example was made in German. So that it is the same example in each language, the English, French and Italian pages show it translated: the conversation, the overview and the quiz.",
+  },
+  de: {
+    lede: "Wie das Weltraum-Quiz entstanden ist, von einer einzigen Anfrage ohne Anhang bis zur Klasse – mit allem, was du brauchst, um dasselbe mit deiner eigenen KI auszuprobieren.",
+    convoP: "Eine Anfrage, nichts angehängt. Die KI hat die Seite gelesen, das Quiz mit Fotos der NASA und vier eigenen Zeichnungen gebaut, es geprüft und die .zip-Datei geliefert, dazu eine Übersicht aller Fragen. Claude, 11. November 2026.",
+    reviewH: "Die Übersicht",
+    reviewP: "Alle Fragen mit ihren Lösungen, wie die KI sie gezeichnet hat, um das Quiz vor dem Spielen zu prüfen.",
+    reviewAlt: "Alle Fragen des Quiz mit ihren Lösungen, als Bild",
+    readReview: "Die ganze Übersicht ansehen ›",
+    quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz und seinen 23 Bildern.",
+    translated: "Das Beispiel ist auf Deutsch entstanden. Damit es in jeder Sprache dasselbe Beispiel ist, zeigen die englische, die französische und die italienische Seite es übersetzt: das Gespräch, die Übersicht und das Quiz.",
+  },
+  fr: {
+    lede: "Comment le quiz sur l'espace a été créé, d'une seule demande sans pièce jointe jusqu'à la classe, avec tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
+    convoP: "Une demande, rien en pièce jointe. L'IA a lu le site, construit le quiz avec des photos de la NASA et quatre dessins à elle, l'a vérifié et a fourni le .zip, avec un aperçu de toutes les questions. Claude, 11 novembre 2026.",
+    reviewH: "L'aperçu",
+    reviewP: "Toutes les questions avec leurs solutions, telles que l'IA les a dessinées pour vérifier le quiz avant d'y jouer.",
+    reviewAlt: "Toutes les questions du quiz avec leurs solutions, en image",
+    readReview: "Voir tout l'aperçu ›",
+    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses 23 images.",
+    translated: "L'exemple a été réalisé en allemand. Pour que ce soit le même exemple dans chaque langue, les pages en anglais, en français et en italien le montrent traduit : la conversation, l'aperçu et le quiz.",
+  },
+  it: {
+    lede: "Come è nato il quiz sullo spazio, da un'unica richiesta senza allegati fino alla classe, con tutto il necessario per rifare la stessa prova con la tua IA.",
+    convoP: "Una richiesta, niente in allegato. L'IA ha letto il sito, ha costruito il quiz con foto della NASA e quattro disegni suoi, l'ha verificato e ha fornito il file .zip, con una panoramica di tutte le domande. Claude, 11 novembre 2026.",
+    reviewH: "La panoramica",
+    reviewP: "Tutte le domande con le loro soluzioni, come l'IA le ha disegnate per verificare il quiz prima di giocarlo.",
+    reviewAlt: "Tutte le domande del quiz con le loro soluzioni, come immagine",
+    readReview: "Vedi tutta la panoramica ›",
+    quizP: "Quello che l'IA ha fornito: un file .zip con il quiz e le sue 23 immagini.",
+    translated: "L'esempio è nato in tedesco. Perché sia lo stesso esempio in ogni lingua, le pagine in inglese, francese e italiano lo mostrano tradotto: la conversazione, la panoramica e il quiz.",
+  },
 };
 
+/** The root page's examples, in its tabs' order, each named by what the visitor starts from (docs/design/root-page.md, "Getting a quiz"). */
+export const EXAMPLES = ["idea", "sheets", "notes", "test"] as const;
+export type Example = (typeof EXAMPLES)[number];
+export const isExample = (x: unknown): x is Example => EXAMPLES.includes(x as Example);
+
+/** The examples whose runs are stand-ins (docs/example/mock_zips.py) until the owner's replace them (backlog, "The page for people", item 1). */
+export const MOCKS = ["notes", "test"] as const;
+export type Mock = (typeof MOCKS)[number];
+export const isMock = (x: unknown): x is Mock => MOCKS.includes(x as Mock);
+
+/** The example each way's tab showed when the tabs were the ways to play, for a link of that time (?way=). */
+const WAY_EXAMPLE: Record<string, Example> = { quizmaster: "sheets", peers: "notes", solo: "test" };
+
+/** The example a page's address names: ?ex=, else an older link's ?way=, else the worked example, the sheets. */
+export function exampleOf(params: URLSearchParams): Example {
+  const ex = params.get("ex");
+  return isExample(ex) ? ex : (WAY_EXAMPLE[params.get("way") ?? ""] ?? "sheets");
+}
+
+/** An example's file in a language (docs/example/faces.py writes the table from the files). */
+export const exampleZip = (ex: Example, lang: Lang): string => EXAMPLE_FILES[ex][lang].zip;
+
 /**
- * The full example of a way whose run is a mock (WAY_ZIP): what replaces the worked example's sheets, conversation
- * and note on /example?way=<way>. Made up, and said to be; it goes when the owner's runs bring the real ones.
+ * The full example of an example whose run is a mock (MOCKS): what replaces the worked example's sheets, conversation
+ * and note on /example?ex=<example>. Made up, and said to be; it goes when the owner's runs bring the real ones.
  */
 export interface MockText {
   attachedH: string;
   mockNote: string;
-  lede: Record<"peers" | "solo", string>;
-  attached: Record<"peers" | "solo", string>;
-  reply: Record<"peers" | "solo", string>;
+  lede: Record<Mock, string>;
+  attached: Record<Mock, string>;
+  reply: Record<Mock, string>;
 }
 
 export const MOCK_TEXT: Record<Lang, MockText> = {
   en: {
     attachedH: "What was attached",
     mockNote: "A stand-in: this example has had no run yet, so the conversation below is made up.",
-    lede: { peers: "How the friends' quiz was made, from the class notes to playing it together.", solo: "How the practice quiz was made, from the marked test to playing it alone." },
-    attached: { peers: "A page of class notes, photographed with a phone.", solo: "The marked test, photographed with a phone." },
+    lede: { notes: "How the friends' quiz was made, from the class notes to playing it together.", test: "How the practice quiz was made, from the marked test to playing it alone." },
+    attached: { notes: "A page of class notes, photographed with a phone.", test: "The marked test, photographed with a phone." },
     reply: {
-      peers: "Here is your quiz: 6 questions on the French Revolution, from your notes. Open the .zip on the site; I haven't shown the questions here, so you can play along.",
-      solo: "Here is your practice quiz: 6 questions on the cell, most of them on what you got wrong. I've kept the questions out of this chat; open the .zip on the site.",
+      notes: "Here is your quiz: 6 questions on the French Revolution, from your notes. Open the .zip on the site; I haven't shown the questions here, so you can play along.",
+      test: "Here is your practice quiz: 6 questions on the cell, most of them on what you got wrong. I've kept the questions out of this chat; open the .zip on the site.",
     },
   },
   de: {
     attachedH: "Was angehängt war",
     mockNote: "Ein Platzhalter: Zu diesem Beispiel gibt es noch keinen echten Durchgang, das Gespräch unten ist erfunden.",
-    lede: { peers: "Wie das Quiz der Freunde entstand, von den Notizen bis zum gemeinsamen Spiel.", solo: "Wie das Übungsquiz entstand, von der korrigierten Prüfung bis zum Spiel allein." },
-    attached: { peers: "Eine Seite Notizen aus dem Unterricht, mit dem Handy fotografiert.", solo: "Die korrigierte Prüfung, mit dem Handy fotografiert." },
+    lede: { notes: "Wie das Quiz der Freunde entstand, von den Notizen bis zum gemeinsamen Spiel.", test: "Wie das Übungsquiz entstand, von der korrigierten Prüfung bis zum Spiel allein." },
+    attached: { notes: "Eine Seite Notizen aus dem Unterricht, mit dem Handy fotografiert.", test: "Die korrigierte Prüfung, mit dem Handy fotografiert." },
     reply: {
-      peers: "Hier ist euer Quiz: 6 Fragen zur Französischen Revolution, aus euren Notizen. Öffne die .zip-Datei auf der Website; die Fragen habe ich hier nicht gezeigt, damit du mitspielen kannst.",
-      solo: "Hier ist dein Übungsquiz: 6 Fragen zur Zelle, die meisten zu dem, was du falsch hattest. Die Fragen habe ich aus diesem Chat herausgehalten; öffne die .zip-Datei auf der Website.",
+      notes: "Hier ist euer Quiz: 6 Fragen zur Französischen Revolution, aus euren Notizen. Öffne die .zip-Datei auf der Website; die Fragen habe ich hier nicht gezeigt, damit du mitspielen kannst.",
+      test: "Hier ist dein Übungsquiz: 6 Fragen zur Zelle, die meisten zu dem, was du falsch hattest. Die Fragen habe ich aus diesem Chat herausgehalten; öffne die .zip-Datei auf der Website.",
     },
   },
   fr: {
     attachedH: "Ce qui était joint",
     mockNote: "Un exemple provisoire : il n'a pas encore été essayé, la conversation ci-dessous est inventée.",
-    lede: { peers: "Comment le quiz entre amis a été fait, des notes de cours à la partie ensemble.", solo: "Comment le quiz de révision a été fait, du contrôle corrigé à la partie en solo." },
-    attached: { peers: "Une page de notes de cours, photographiée avec un téléphone.", solo: "Le contrôle corrigé, photographié avec un téléphone." },
+    lede: { notes: "Comment le quiz entre amis a été fait, des notes de cours à la partie ensemble.", test: "Comment le quiz de révision a été fait, du contrôle corrigé à la partie en solo." },
+    attached: { notes: "Une page de notes de cours, photographiée avec un téléphone.", test: "Le contrôle corrigé, photographié avec un téléphone." },
     reply: {
-      peers: "Voici votre quiz : 6 questions sur la Révolution française, tirées de vos notes. Ouvre le .zip sur le site ; je n'ai pas montré les questions ici, pour que tu puisses jouer aussi.",
-      solo: "Voici ton quiz de révision : 6 questions sur la cellule, surtout sur ce que tu as raté. J'ai gardé les questions hors de cette conversation ; ouvre le .zip sur le site.",
+      notes: "Voici votre quiz : 6 questions sur la Révolution française, tirées de vos notes. Ouvre le .zip sur le site ; je n'ai pas montré les questions ici, pour que tu puisses jouer aussi.",
+      test: "Voici ton quiz de révision : 6 questions sur la cellule, surtout sur ce que tu as raté. J'ai gardé les questions hors de cette conversation ; ouvre le .zip sur le site.",
     },
   },
   it: {
     attachedH: "Che cosa era allegato",
     mockNote: "Un segnaposto: questo esempio non è ancora stato provato, la conversazione qui sotto è inventata.",
-    lede: { peers: "Come è nato il quiz tra amici, dagli appunti alla partita insieme.", solo: "Come è nato il quiz di ripasso, dalla verifica corretta alla partita da solo." },
-    attached: { peers: "Una pagina di appunti delle lezioni, fotografata con il telefono.", solo: "La verifica corretta, fotografata con il telefono." },
+    lede: { notes: "Come è nato il quiz tra amici, dagli appunti alla partita insieme.", test: "Come è nato il quiz di ripasso, dalla verifica corretta alla partita da solo." },
+    attached: { notes: "Una pagina di appunti delle lezioni, fotografata con il telefono.", test: "La verifica corretta, fotografata con il telefono." },
     reply: {
-      peers: "Ecco il vostro quiz: 6 domande sulla Rivoluzione francese, dai vostri appunti. Apri il .zip sul sito; qui non ho mostrato le domande, così puoi giocare anche tu.",
-      solo: "Ecco il tuo quiz di ripasso: 6 domande sulla cellula, soprattutto su quello che hai sbagliato. Ho tenuto le domande fuori da questa chat; apri il .zip sul sito.",
+      notes: "Ecco il vostro quiz: 6 domande sulla Rivoluzione francese, dai vostri appunti. Apri il .zip sul sito; qui non ho mostrato le domande, così puoi giocare anche tu.",
+      test: "Ecco il tuo quiz di ripasso: 6 domande sulla cellula, soprattutto su quello che hai sbagliato. Ho tenuto le domande fuori da questa chat; apri il .zip sul sito.",
     },
   },
 };

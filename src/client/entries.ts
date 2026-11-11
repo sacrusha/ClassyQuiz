@@ -26,6 +26,10 @@ export interface Entry {
   name: string;
   /** Under the name: who it is for and how it plays, one sentence, without a role noun where the sentence does without one. */
   line: string;
+  /** The picture of the way being played (docs/ways/), on its card: the setting seen where the way is chosen. */
+  picture: string;
+  /** What the picture shows, in the device's language: its accessible name. */
+  pictureAlt: string;
   /** The button that starts it. */
   button: string;
   /** A quiet line under the button, e.g. what starting it costs; optional. */

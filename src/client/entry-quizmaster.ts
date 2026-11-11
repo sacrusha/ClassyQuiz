@@ -14,6 +14,8 @@ import { T, lang } from "./room-text.ts";
 export const quizmaster: Entry = {
   name: "Quizmaster",
   line: T.quizmasterLine,
+  picture: "/landing/way-quizmaster.svg",
+  pictureAlt: T.picQuizmaster,
   button: T.quizmasterButton,
   note: T.roomNote,
   plays: false,

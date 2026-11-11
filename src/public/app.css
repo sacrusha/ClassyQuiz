@@ -414,16 +414,37 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .arrange-call { color: var(--muted); font-size: 16px; margin: 6px 0; }
 
 /* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
-   play it as cards, each with its own button; the questions folded under them, closed by default, so whoever will play
-   gets to playing without passing them. */
+   play it as cards, each with the picture of its way, its own button and what starting it costs; the questions folded under
+   them, closed by default, so whoever will play gets to playing without passing them. Side by side from 44rem, the picture
+   on top, each card's button on one line; narrower, one under the other, the picture beside the name, 96 px, near the
+   smallest it is drawn for (docs/ways/README.md), and the cards set tighter, so the next card's setting shows sooner to
+   whoever scrolls for their way (local-check.md, "The check"). */
 .open-check .ctitle + p, .open-check > p { margin: .6em 0; }
 .open-ask { font-size: 1em; margin: 1.4em 0 0; }
-.open-entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; margin: 16px 0 8px; }
+.open-entries { display: grid; gap: 12px; margin: 16px 0 8px; }
 .open-entry { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; }
+.open-way { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 8px; margin: 0 0 10px; }
 .open-entry h2 { font-size: 1.1em; margin: 0 0 .2em; }
 .open-entry p { margin: .3em 0; }
 .open-entry .btn { margin-top: .4em; }
 .open-note { color: var(--muted); font-size: .85em; }
+@media (min-width: 44rem) {
+  .open-entries { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+  .open-entry { padding: 12px 14px 14px; }
+  .open-entry .btn { padding-inline: 1em; white-space: nowrap; }
+}
+@media (max-width: 43.99rem) {
+  .open-ask { margin-top: .8em; }
+  .open-entries { gap: 10px; margin-top: 10px; }
+  .open-entry { display: grid; grid-template-columns: 96px 1fr; grid-template-areas: "pic name" "line line" "go go" "note note" "say say"; column-gap: 14px; align-items: center; padding: 10px 14px 12px; }
+  .open-entry p { margin: .2em 0; }
+  .open-way { grid-area: pic; margin: 0 0 4px; }
+  .open-entry h2 { grid-area: name; margin: 0; }
+  .open-line { grid-area: line; }
+  .open-go { grid-area: go; }
+  .open-note { grid-area: note; }
+  .open-say { grid-area: say; }
+}
 .open-say:empty { display: none; }
 .open-problem { border-left: 3px solid var(--bad); padding: 2px 12px; margin: 12px 0; }
 .open-problem ul { margin: .3em 0; padding-left: 1.2em; }

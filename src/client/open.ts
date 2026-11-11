@@ -4,7 +4,7 @@
 // whoever will play mustn't have to see them to get there.
 //
 // The quiz arrives from the root page through handoff.ts (/open#<key>), or
-// is one of the root page's examples, fetched here (/open?example=<lang>&way=<way>). Nothing of it
+// is one of the root page's examples, fetched here (/open?example=<lang>&ex=<example>). Nothing of it
 // is kept: a reload of a handed-over quiz finds nothing, and says so.
 
 import * as G from "../server/game.ts";
@@ -12,7 +12,7 @@ import type { Problem } from "../quiz/format.ts";
 import type { TeacherQuestion } from "../shared/protocol.ts";
 import { $, esc, lines } from "./dom.ts";
 import { ENTRIES, type Entry, type EntryContext } from "./entries.ts";
-import { WAY_ZIP, isWay } from "./example-text.ts";
+import { exampleOf, exampleZip } from "./example-text.ts";
 import { sweepStale, takeOver } from "./handoff.ts";
 import { TEXT, isLang } from "./landing-text.ts";
 import { T, lang, said } from "./room-text.ts";
@@ -42,9 +42,8 @@ async function arrive(): Promise<void> {
   else void sweepStale();
   let files: QuizFiles | null = null;
   if (isLang(example)) {
-    // The root page's examples, one per way to play (docs/design/root-page.md, "Getting a quiz"); without a way, the worked example's.
-    const way = new URLSearchParams(location.search).get("way");
-    files = await exampleFiles(WAY_ZIP[isWay(way) ? way : "quizmaster"][example]);
+    // The root page's examples (docs/design/root-page.md, "Getting a quiz"): ?ex= names one; without it, the worked example's.
+    files = await exampleFiles(exampleZip(exampleOf(new URLSearchParams(location.search)), example));
     if (!files) return;
   } else if (key) {
     files = await takeOver(key).catch(() => null);
@@ -131,15 +130,17 @@ function renderCheck(): void {
 }
 
 /**
- * An entry's card. No button is the primary one: a teacher in a hurry who
- * means to run the quiz would press the one that stands out, and the first
- * is Solo's (docs/design/local-check.md, "The check").
+ * An entry's card: the picture of its way, its name, the sentence, the
+ * button and what starting it costs. No button is the primary one: a teacher
+ * in a hurry who means to run the quiz would press the one that stands out,
+ * and the first is Solo's (docs/design/local-check.md, "The check").
  */
 function entryCard(e: Entry, i: number): string {
   return `<section class="open-entry">
+    <img class="open-way" src="${esc(e.picture)}" alt="${esc(e.pictureAlt)}" width="640" height="400">
     <h2>${esc(e.name)}</h2>
-    <p>${esc(e.line)}</p>
-    <p><button class="btn" type="button" data-entry="${i}">${esc(e.button)}</button></p>
+    <p class="open-line">${esc(e.line)}</p>
+    <p class="open-go"><button class="btn" type="button" data-entry="${i}">${esc(e.button)}</button></p>
     ${e.note ? `<p class="open-note">${esc(e.note)}</p>` : ""}
     <div class="open-say" data-say="${i}" role="status"></div>
   </section>`;
