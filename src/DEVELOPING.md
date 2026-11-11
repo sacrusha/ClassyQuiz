@@ -160,8 +160,8 @@ Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
 - `docs/film/build/film.js` changes;
 - `client/landing-text.ts` changes the example ask or the words of the
   root page's first screen, which the film draws (`ask`, `code`, `what`,
-  `getH`, `which`, `gives`, `playThis`, `see`, `run`, `upload`, `drop`,
-  `reading`), the chapters'
+  `getH`, `which`, `subQuizmaster`, `subPeers`, `subSolo`, `unsure`,
+  `gives`, `playThis`, `see`, `run`, `upload`, `drop`, `reading`), the chapters'
   names (`capSheet` … `capTap`; `capAi` is also the AI app's name on the
   phone) or the player's (`play`, `pause`, `speed`,
   `seek`): the film shows them as they were at its build, and `npm test`

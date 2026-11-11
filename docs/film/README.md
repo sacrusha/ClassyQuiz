@@ -234,13 +234,14 @@ wide, a factor of 0.224.
   pressed there, stays below the frame; the title and that line dim while
   the camera is in.
 - The root page: about 0.9 s at the full width, where the sentence reads
-  as about 36 units and the rest isn't meant to be read; then about twice
-  in on the two steps, from the first one's heading to the line under the
-  box, the headings and the button about 50 units, the ask about 40, the
-  frame cutting the column's right edge just after the ask's longest line,
-  so the ask is whole in every language and the link at the right of the
-  line under the box is cut.
-  The ask wraps as on the page, beside the two sheets, 589 px wide.
+  as about 36 units and the rest isn't meant to be read; then 1.8 times in
+  on the two steps, from the first one's heading to just under the box, the
+  column and the numbers in its margin across the frame: the headings about
+  34 units, the ask about 28. The file card with its picture makes the two
+  steps tall, so the frame's height sets the zoom, and the ask reads
+  smaller than a closer frame of the chat alone would show it; the line
+  read under the box while the file is read falls below the frame. The ask
+  wraps as on the page, beside the two sheets, 496 px wide.
 - The teacher code is shown twice: in the how-to, pulsing, then typed on
   the laptop, its screen filling the frame and the root page whole for
   about 0.4 s, then the camera 1.8 times in on the header while the code
@@ -287,7 +288,7 @@ Only rendered pictures found them, so the film is checked by looking:
 
 - Assets are in one object, `ASSETS`: `build.py` fills it with `data:` URIs
   for the standalone page, `sitebuild.py` with the site's
-  `/landing/sheet-*.webp`, the ways' pictures `/landing/way-*.svg` (which
+  `/landing/sheet-*.webp`, the Quizmaster's picture `/landing/way-quizmaster.svg` (which
   the page above the film has already loaded) and the brand SVGs as text;
   the font comes from `site.css`. `sitebuild.py` refuses a `film.js` with a
   `data:` URI in it.

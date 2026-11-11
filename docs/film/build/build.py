@@ -2,7 +2,7 @@
 Run: py -I build.py [out_file]   (default: .tmp/film/index.html at the repo root, which git ignores;
 the page is generated, ~230 KB, and not kept in the tree. shoot.py and sitebuild.py read it from there.)
 
-The page carries: film.css, the assets (the site's Rubik, the two sheets, the ways' pictures, the
+The page carries: film.css, the assets (the site's Rubik, the two sheets, the Quizmaster's picture, the
 brand marks) as data: URIs in one JS object, the avatar drawings taken from
 the repo's client/look.ts, the root page's words the film shows (the example
 ask, the words of the page's first screen, the chapters' and the player's names) taken from
@@ -20,8 +20,8 @@ PUB = REPO / 'public'
 PAGE = ROOT / '.tmp' / 'film' / 'index.html'   # default output, git-ignored
 
 
-# the ways to play, a picture each, on the root page the film shows (src/public/landing/way-*.svg)
-WAYS = {'wayQuizmaster': 'way-quizmaster.svg', 'wayPeers': 'way-peers.svg', 'waySolo': 'way-solo.svg'}
+# the picture on the AI's file in the root page's first screen, the Quizmaster's, the tab every visit opens on (src/public/landing/way-*.svg)
+WAYS = {'wayQuizmaster': 'way-quizmaster.svg'}
 
 
 def launch(p):
@@ -63,7 +63,7 @@ def look_js():
     return '/* From client/look.ts (types stripped by build.py). */\n' + s
 
 
-LANDING_KEYS = ('code', 'what', 'getH', 'which', 'gives', 'playThis', 'see', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
+LANDING_KEYS = ('code', 'what', 'getH', 'which', 'subQuizmaster', 'subPeers', 'subSolo', 'unsure', 'gives', 'playThis', 'see', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
 
 
 def landing_text():

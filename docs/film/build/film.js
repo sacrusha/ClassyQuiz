@@ -37,8 +37,8 @@
   // question, translated, so every language shows the same film.
 
   /** The root page's words from client/landing-text.ts, filled in by build.py: per language the example ask
-      ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what, the ways'
-      words, getH, gives, run, upload, drop, noQuiz, tryIt, more) and reading, the chapters' names (capSheet, capAi, capZip,
+      ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what, getH, which,
+      the tabs' subQuizmaster, subPeers, subSolo and unsure, gives, playThis, see, run, upload, drop) and reading, the chapters' names (capSheet, capAi, capZip,
       capWall, capTap) and the player's (play, pause, speed, seek). */
   const LANDING = /*@LANDING@*/ {};
 
@@ -163,10 +163,11 @@
       zipTitle: Q.zipTitle, title: Q.title, q1: Q.q1,
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
-      // the root page's first screen (client/landing-text.ts): the sentence, the ways as the chat's tabs (their names are the
-      // entries' own, in every language), the chat with the Quizmaster's ask as the page prints it, plain, the file it brought
-      // and what to do with it, and the box
-      what: L.what, ways: [['Quizmaster', 'wayQuizmaster'], ['Peers', 'wayPeers'], ['Solo', 'waySolo']],
+      // the root page's first screen (client/landing-text.ts): the sentence, the first step's heading, the ways as tabs in words
+      // (their names are the entries' own, in every language, each with whose case it is; the fourth, for whoever is unsure,
+      // has its name alone), the chat with the Quizmaster's ask as the page prints it, plain, the file it brought and what to do
+      // with it, and the box
+      what: L.what, ways: [['Quizmaster', L.subQuizmaster], ['Peers', L.subPeers], ['Solo', L.subSolo], [L.unsure, null]],
       getH: L.getH, which: L.which, gives: L.gives, playThis: L.playThis, see: L.see, zipFile: Q.zipFile,
       askPlain: [[glue(L.ask.map((p) => p.s).join(''))]],
       // [name, film time, key]; the player's names (play, pause, speed, the time bar) in the page's language
@@ -1018,9 +1019,10 @@
     // ---------------------------------------------------------------- the root page, as it opens
     // The page a visitor meets above the film (docs/design/root-page.md, "One column"), drawn once per screen that shows it (the
     // phone's site, the laptop), in CSS px of a window wider than the column: x from the column's left edge (the header's bar
-    // runs 16 px beyond it on either side), y from the page's top. The sizes and spacings are the page's own (src/public/index.html,
-    // site.css) at a desktop's width, where the column is 672 px; the lines are wrapped here, so a language's longer sentence
-    // takes the lines it takes on the page. The caller scales it into its screen.
+    // runs 16 px beyond it on either side, the step numbers hang 41 px left of it), y from the page's top. The sizes and
+    // spacings are the page's own (src/public/index.html, site.css) at a desktop's width, where the column is 672 px; the lines
+    // are wrapped and the widths measured here, so a language's longer words take the room they take on the page. The caller
+    // scales it into its screen.
     let rootN = 0;
     function makeRootPage(parent) {
       const n = rootN++;
@@ -1034,16 +1036,13 @@
         for (let i = 0; i < 12 && n0 > 1; i++) { const mid = (lo + hi) / 2; if (wrap(pieces, size, mid, clsOf).lines.length > n0) lo = mid; else hi = mid; }
         return wrap(pieces, size, hi, clsOf);
       };
-      /** No word alone on the last line where the line before can give one up (the page's text-wrap: pretty, near enough). */
-      const pretty = (pieces, size, maxW) => {
-        const w = wrap(pieces, size, maxW, () => '');
-        const L = w.lines;
-        if (L.length > 1 && L[L.length - 1].filter((p) => !/^ +$/.test(p.text)).length === 1) {
-          const prev = L[L.length - 2], words = prev.filter((p) => !/^ +$/.test(p.text));
-          if (words.length > 2) { const i = prev.lastIndexOf(words[words.length - 1]); L[L.length - 1] = prev.splice(i).concat(L[L.length - 1]); }
-        }
-        return w;
+      /** A box with its own radius at each corner: [top left, top right, bottom right, bottom left]. */
+      const box = (x, y, w, h, r, attrs) => {
+        const [a, b, c, d] = r;
+        return `<path d="M${f1(x + a)} ${f1(y)} H${f1(x + w - b)} Q${f1(x + w)} ${f1(y)} ${f1(x + w)} ${f1(y + b)} V${f1(y + h - c)} Q${f1(x + w)} ${f1(y + h)} ${f1(x + w - c)} ${f1(y + h)} H${f1(x + d)} Q${f1(x)} ${f1(y + h)} ${f1(x)} ${f1(y + h - d)} V${f1(y + a)} Q${f1(x)} ${f1(y)} ${f1(x + a)} ${f1(y)}Z" ${attrs}/>`;
       };
+      // a step's number, in the margin left of the column as a wide window has it
+      const num = (cy, s) => `<circle cx="-29.2" cy="${f1(cy)}" r="11.6" fill="${C.accent}"/>${T_(-29.2, cy + 4.8, s, 13.6, { cls: 'tb', fill: '#fff', anchor: 'middle' })}`;
       // the paper, the header: the mark, the code box, the language
       G(g, `<rect x="-1200" y="-200" width="3072" height="2000" fill="${C.paper}"/><rect x="-1200" y="62" width="3072" height="1" fill="${C.rule}"/>
         <use href="#cq-lockup" x="0" y="11.8" width="133.8" height="32" color="${C.ink}"/>
@@ -1056,59 +1055,73 @@
       const [ph, code] = codeG.querySelectorAll('text');
       // the sentence, the page's first heading
       const h1 = balanced([[TX.what]], 28.8, 672, 'b');
-      const h1Top = 75.8;
+      const h1Top = 77.4;
       h1.lines.forEach((l, i) => G(g, T_(0, lineOf(h1Top + i * 33.98, 33.98, 28.8), l.map((p) => p.text).join('').trimEnd(), 28.8, { cls: 'b' })));
-      // the ways to play, the tabs of the chat: three pictures, each a third of what the narrow "?" leaves, the Quizmaster's open
-      // into the chat (its card's ground, the chat's border round it), the others' pictures faded and their names muted
-      const waysTop = h1Top + h1.lines.length * 33.98 + 11.1, TW = 200.7, tabH = 151.2, chatTop = waysTop + tabH - 1.1;
-      // a tab's outline, open at its foot: the chosen one on the card's ground, the others outlined only
-      const tab = (x, w, fill) => `<path d="M${f1(x + 0.5)} ${f1(chatTop + 1)} V${f1(waysTop + 14)} Q${f1(x + 0.5)} ${f1(waysTop + 0.5)} ${f1(x + 14)} ${f1(waysTop + 0.5)} H${f1(x + w - 14)} Q${f1(x + w - 0.5)} ${f1(waysTop + 0.5)} ${f1(x + w - 0.5)} ${f1(waysTop + 14)} V${f1(chatTop + 1)}" fill="${fill}" stroke="${C.rule}"/>`;
-      G(g, tab(0, TW, C.card) + tab(TW + 8, TW, 'none') + tab(2 * (TW + 8), TW, 'none') + tab(626, 46, 'none'));
-      TX.ways.forEach(([name, key], i) => {
-        const x = i * (TW + 8), id = `cq-way${n}-${i}`, on = i === 0, it = waysTop + 5;
-        G(g, `<g opacity="${on ? 1 : 0.72}"><clipPath id="${id}"><rect x="${f1(x + 5)}" y="${f1(it)}" width="190.7" height="119.2" rx="9"/></clipPath>
-          <rect x="${f1(x + 5)}" y="${f1(it)}" width="190.7" height="119.2" rx="9" fill="#efe6d8"/>
-          <image href="${ASSETS[key] || ''}" x="${f1(x + 5)}" y="${f1(it)}" width="190.7" height="119.2" clip-path="url(#${id})" preserveAspectRatio="none"/></g>
-          ${T_(x + 6, lineOf(waysTop + 128.2, 20, 16), name, 16, { cls: 'b', fill: on ? C.ink : C.muted, fit: 189 })}`);
+      // the first step's heading, its number in the margin, and which AI beside it (under it where both don't fit, as the
+      // page's row wraps)
+      const hTop = h1Top + h1.lines.length * 33.98 + 16;
+      const hw = measure(TX.getH, 19.2, 'b'), ww = measure(TX.which, 14.08, '');
+      const whichDown = hw + 12 + ww > 672;
+      const headBot = hTop + 24 + (whichDown ? 19.7 : 0);
+      G(g, `${num(hTop + 0.5 + 11.6, '1')}${T_(0, lineOf(hTop, 24, 19.2), TX.getH, 19.2, { cls: 'b', fit: 672 })}
+        ${T_(whichDown ? 0 : hw + 12, whichDown ? lineOf(hTop + 24, 19.7, 14.08) : lineOf(hTop, 24, 19.2), TX.which, 14.08, { fill: C.muted, fit: 672 })}`);
+      // the ways to play, tabs in words: the name and whose case it is, the Quizmaster's open into the chat (the card's ground,
+      // the chat's border round it), the others on the tab ground; widths as the page's flex shares them (1.3, 1, 1, .8 of
+      // what is left over the gaps, the padding and the borders)
+      const waysTop = headBot + 8.8, tabH = 51.2, chatTop = waysTop + tabH - 1;
+      const GROW = [1.3, 1, 1, 0.8], share = (672 - 3 * 4 - 4 * 22) / GROW.reduce((a, b) => a + b, 0);
+      let tx = 0;
+      const tabs = TX.ways.map(([name, sub], i) => { const w = 22 + GROW[i] * share, t = { x: tx, w, name, sub }; tx += w + 4; return t; });
+      tabs.forEach((t, i) => {
+        const on = i === 0;
+        G(g, `${box(t.x + 0.5, waysTop + 0.5, t.w - 1, tabH, [12, 12, 0, 0], on ? `fill="${C.card}" stroke="${C.rule}"` : `fill="${C.codeBg}"`)}
+          ${T_(t.x + 11, lineOf(waysTop + 7, 19.2, 16), t.name, 16, { cls: 'b', fill: on ? C.ink : C.muted, fit: t.w - 22 })}
+          ${t.sub ? T_(t.x + 11, lineOf(waysTop + 27.2, 16, 12.8), t.sub, 12.8, { fill: C.muted, fit: t.w - 22 }) : ''}`);
       });
-      G(g, `<g opacity=".72"><rect x="631" y="${f1(waysTop + 5)}" width="36" height="143.2" rx="9" fill="${C.codeBg}"/>${T_(649, waysTop + 5 + 71.6 + 7.6, '?', 21.6, { cls: 'b', fill: C.muted, anchor: 'middle' })}</g>`);
-      // the chat, where the ask is typed: its bar is the first step's heading and which AI, the ask the visitor's message on the
-      // right with the two sheets attached at its top right, the AI's answer on the left with its file, under it what to do with it
-      const heading = (x, top, num, text) => `<circle cx="${f1(x + 11.6)}" cy="${f1(top + 13.4)}" r="11.6" fill="${C.accent}"/>${T_(x + 11.6, top + 18.2, num, 13.6, { cls: 'tb', fill: '#fff', anchor: 'middle' })}
-        ${T_(x + 31.2, lineOf(top, 24, 19.2), text, 19.2, { cls: 'b', fit: 640 - x })}`;
-      const hTop = chatTop + 10, hw = 31.2 + measure(TX.getH, 19.2, 'b'), ww = measure(TX.which, 14.08, '');
-      const whichDown = 15 + hw + 12 + ww > 657 ? 19 : 0; // the bar's flex-wrap: which AI under the heading where both don't fit
-      const barBot = chatTop + 43.6 + whichDown;
-      const bTop = barBot + 12, bL = 66, bR = 657;
-      // the ask's lines: the first two beside the sheets, the rest the bubble's full width
-      const ask = wrap(TX.askPlain, 15.68, (i) => (i < 2 ? 510.3 : 565), () => '');
+      // the chat, where the ask is typed: the ask the visitor's message on the right, the two sheets it attaches beside it;
+      // the AI's answer under it, a file whose face is the Quizmaster's picture, its name and "Play this quiz ↓" on it, and
+      // the whole example beside the card's foot
+      const bTop = chatTop + 13, bR = 657, bW = 522, bL = bR - bW;
+      const ask = wrap(TX.askPlain, 15.68, 496, () => '');
       const bH = ask.lines.length * 23.52 + 18, bBot = bTop + bH;
-      const rTop = bBot + 8, gw = measure(TX.gives, 15.2, ''), zw = measure(TX.zipFile, 14.72, 'ts'), zx = 15 + gw + 10;
-      const footTop = rTop + 32.8 + 8.8, chatBot = footTop + 23.6 + 11;
-      G(g, `<path d="M0.5 ${f1(chatTop + 0.5)} H655.5 Q671.5 ${f1(chatTop + 0.5)} 671.5 ${f1(chatTop + 16.5)} V${f1(chatBot - 16.5)} Q671.5 ${f1(chatBot - 0.5)} 655.5 ${f1(chatBot - 0.5)} H16.5 Q0.5 ${f1(chatBot - 0.5)} 0.5 ${f1(chatBot - 16.5)}Z" fill="${C.card}" stroke="${C.rule}"/>
-        <rect x="1" y="${f1(chatTop - 1)}" width="${f1(TW - 2)}" height="2.5" fill="${C.card}"/>
-        <rect x="1" y="${f1(barBot - 1)}" width="670" height="1" fill="${C.rule}"/>
-        ${heading(15, hTop, '1', TX.getH)}${T_(whichDown ? 15 : 15 + hw + 12, whichDown ? hTop + 39 : lineOf(hTop, 24, 19.2), TX.which, 14.08, { fill: C.muted, fit: 640 })}
-        <path d="M${bL + 16} ${f1(bTop)} H${bR - 16} Q${bR} ${f1(bTop)} ${bR} ${f1(bTop + 16)} V${f1(bBot - 4)} Q${bR} ${f1(bBot)} ${bR - 4} ${f1(bBot)} H${bL + 16} Q${bL} ${f1(bBot)} ${bL} ${f1(bBot - 16)} V${f1(bTop + 16)} Q${bL} ${f1(bTop)} ${bL + 16} ${f1(bTop)}Z" fill="#f4ebe1"/>`);
+      const aTop = bBot + 10, fTop = aTop + 20.16 + 4, fH = 161, fBot = fTop + fH;
+      const zw = 15 + 7 + measure(TX.zipFile, 15.2, 'ts'), pw = measure(TX.playThis, 15.2, 'tb') + 27;
+      const metaW = Math.max(zw, pw) + 12, fW = 1 + 7 + 232 + 14 + metaW + 7 + 1, mx = 15 + 1 + 7 + 232 + 14;
+      const mTop = fTop + (fH - 61.6) / 2, pTop = mTop + 19.8 + 10;
+      const chatBot = fBot + 12 + 1, sx = 15 + fW + 16;
+      G(g, `${box(0.5, chatTop + 0.5, 671, chatBot - chatTop - 1, [0, 14, 14, 14], `fill="${C.card}" stroke="${C.rule}"`)}
+        <rect x="1" y="${f1(chatTop - 1)}" width="${f1(tabs[0].w - 2)}" height="2.5" fill="${C.card}"/>
+        ${box(bL, bTop, bW, bH, [16, 16, 4, 16], 'fill="#f4ebe1"')}`);
       drawLines(g, ask, bL + 13, lineOf(bTop + 9, 23.52, 15.68), 15.68, 23.52, plain).show(ask.total);
-      [[599.3, -3, 'sheet1'], [619.1, 3, 'sheet2']].forEach(([x, r, k]) => G(g, `<g transform="rotate(${r} ${f1(x + 14.75)} ${f1(bTop + 31)})"><rect x="${f1(x + 0.5)}" y="${f1(bTop + 12.8)}" width="29.5" height="38" fill="#000" opacity=".18"/><rect x="${x}" y="${f1(bTop + 12)}" width="29.5" height="38" fill="#fff"/><image href="${ASSETS[k] || ''}" x="${x}" y="${f1(bTop + 12)}" width="29.5" height="38" preserveAspectRatio="none"/></g>`));
-      G(g, `${T_(15, lineOf(rTop + 4.6, 23.56, 15.2), TX.gives, 15.2, { fill: C.muted })}
-        <path d="M${f1(zx + 10.5)} ${f1(rTop + 0.5)} H${f1(zx + zw + 32.5)} Q${f1(zx + zw + 42.5)} ${f1(rTop + 0.5)} ${f1(zx + zw + 42.5)} ${f1(rTop + 10.5)} V${f1(rTop + 22.3)} Q${f1(zx + zw + 42.5)} ${f1(rTop + 32.3)} ${f1(zx + zw + 32.5)} ${f1(rTop + 32.3)} H${f1(zx + 4.5)} Q${f1(zx + 0.5)} ${f1(rTop + 32.3)} ${f1(zx + 0.5)} ${f1(rTop + 28.3)} V${f1(rTop + 10.5)} Q${f1(zx + 0.5)} ${f1(rTop + 0.5)} ${f1(zx + 10.5)} ${f1(rTop + 0.5)}Z" fill="${C.paper}" stroke="${C.rule}"/>
-        <path transform="translate(${f1(zx + 9)} ${f1(rTop + 6.9)})" d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="${C.accent}" stroke-width="1.6" stroke-linejoin="round"/>
-        ${T_(zx + 31, rTop + 21.6, TX.zipFile, 14.72, { cls: 'ts' })}
-        ${T_(15, lineOf(footTop, 23.56, 15.2), TX.playThis, 15.2, { cls: 'ts', fill: C.accent })}${T_(657, lineOf(footTop, 23.56, 15.2), TX.see, 15.2, { cls: 'ts', fill: C.accent, anchor: 'end' })}`);
-      // the second step: the dashed box with its heading, the button and the line beside it
-      const boxTop = chatBot + 14.4, boxH = 113.1, boxBot = boxTop + boxH;
-      const bw = measure(TX.upload, 18.4, 'tb') + 56, dw = measure(TX.drop, 17, ''), bx = (672 - (bw + 16 + dw)) / 2, by = boxTop + 44.6;
-      G(g, `<rect x="1" y="${f1(boxTop + 1)}" width="670" height="${f1(boxH - 2)}" rx="15" fill="none" stroke="#b9b3a5" stroke-width="2" stroke-dasharray="6 5"/>${heading(16, boxTop + 12, '2', TX.run)}
-        <rect x="${f1(bx)}" y="${f1(by)}" width="${f1(bw)}" height="54.5" rx="12" fill="${C.ink}"/>${T_(bx + bw / 2, by + 33.6, TX.upload, 18.4, { cls: 'tb', fill: C.paper, anchor: 'middle' })}
-        ${T_(bx + bw + 16, lineOf(boxTop + 58.7, 26.35, 17), TX.drop, 17, { fill: C.muted })}`);
+      // the sheets, 54 px high, the first turned -4°, the second 3° and tucked under it (the page's .att)
+      const attX = bL - 10 - (41.9 + 41.9 - 24), attY = bTop + 7;
+      [[attX, attY, -4, 'sheet1'], [attX + 41.9 - 24, attY + 5, 3, 'sheet2']].forEach(([x, y, r, k]) => G(g, `<g transform="rotate(${r} ${f1(x + 20.95)} ${f1(y + 27)})"><rect x="${f1(x + 0.5)}" y="${f1(y + 1)}" width="41.9" height="54" fill="#000" opacity=".18"/><rect x="${f1(x)}" y="${f1(y)}" width="41.9" height="54" fill="#fff"/><image href="${ASSETS[k] || ''}" x="${f1(x)}" y="${f1(y)}" width="41.9" height="54" preserveAspectRatio="none"/></g>`));
+      const sceneId = `cq-scene${n}`;
+      G(g, `${T_(15, lineOf(aTop, 20.16, 14.4), TX.gives, 14.4, { fill: C.muted })}
+        ${box(15.5, fTop + 0.5, fW - 1, fH - 1, [14, 14, 14, 4], `fill="${C.paper}" stroke="${C.rule}"`)}
+        <clipPath id="${sceneId}"><rect x="23" y="${f1(fTop + 8)}" width="232" height="145" rx="8"/></clipPath>
+        <rect x="23" y="${f1(fTop + 8)}" width="232" height="145" rx="8" fill="#efe6d8"/>
+        <image href="${ASSETS.wayQuizmaster || ''}" x="23" y="${f1(fTop + 8)}" width="232" height="145" clip-path="url(#${sceneId})" preserveAspectRatio="none"/>
+        <path transform="translate(${f1(mx)} ${f1(mTop)})" d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="${C.accent}" stroke-width="1.6" stroke-linejoin="round"/>
+        ${T_(mx + 22, lineOf(mTop, 19.76, 15.2), TX.zipFile, 15.2, { cls: 'ts' })}
+        <rect x="${f1(mx + 0.75)}" y="${f1(pTop + 0.75)}" width="${f1(pw - 1.5)}" height="30.3" rx="10" fill="none" stroke="${C.ink}" stroke-width="1.5"/>
+        ${T_(mx + pw / 2, lineOf(pTop + 6.5, 19.76, 15.2), TX.playThis, 15.2, { cls: 'tb', anchor: 'middle' })}
+        ${T_(sx, lineOf(fBot - 4 - 5 - 20.16, 20.16, 14.4), TX.see, 14.4, { cls: 'ts', fill: C.accent, fit: 657 - sx })}`);
+      // the second step: the dashed box, its heading with the number in the margin beside it, the button and the line beside
+      // that on the heading's row; the margin's line joins the two numbers
+      const boxTop = chatBot + 14.4, boxH = 79.3, boxBot = boxTop + boxH, mid = boxTop + boxH / 2;
+      const bw = measure(TX.upload, 17.6, 'tb') + 52, dw = measure(TX.drop, 17, ''), dx = 656 - dw, bx = dx - 16 - bw, by = mid - 25.65;
+      G(g, `<rect x="-30.2" y="${f1(hTop + 29.6)}" width="2" height="${f1(mid - 11.6 - 6 - hTop - 29.6)}" rx="1" fill="${C.rule}"/>
+        <rect x="1" y="${f1(boxTop + 1)}" width="670" height="${f1(boxH - 2)}" rx="15" fill="none" stroke="#b9b3a5" stroke-width="2" stroke-dasharray="6 5"/>
+        ${num(mid, '2')}${T_(16, lineOf(mid - 12, 24, 19.2), TX.run, 19.2, { cls: 'b', fit: bx - 16 - 16 })}
+        <rect x="${f1(bx)}" y="${f1(by)}" width="${f1(bw)}" height="51.3" rx="12" fill="${C.ink}"/>${T_(bx + bw / 2, mid + 17.6 * 0.35, TX.upload, 17.6, { cls: 'tb', fill: C.paper, anchor: 'middle' })}
+        ${T_(dx, lineOf(mid - 13.18, 26.35, 17), TX.drop, 17, { fill: C.muted })}`);
       // under the box, the reading line while a file is read
       const reading = G(g, T_(0, lineOf(boxBot + 8, 26.35, 17), TX.reading, 17, { fill: C.muted }));
       function show(isReading) { vis(reading, isReading); }
       show(false);
       // below the box the page goes on with the film's own section, which the film doesn't draw into itself
-      return { g, show, ph, code, step1: chatTop, tryBot: boxBot + 8 + 26.35, askRight: 660, go: [577.3, 31], open: [bx + bw / 2, by + 27.2] };
+      return { g, show, ph, code, step1: hTop, boxBot, tryBot: boxBot + 8 + 26.35, askLeft: -42, askRight: 660, go: [577.3, 31], open: [bx + bw / 2, mid] };
     }
 
     let lapN = 0;
@@ -1138,9 +1151,10 @@
           txt(code, TX.teacherCode.slice(0, n)); vis(ph, n === 0);
         }
         if (m === 'wall') wall.update(t);
-        // the mouse: to ▶, then, once the question has been seen, to "Show the quiz here"; after that click it leaves for the corner
-        // before the screen changes, so "Joining opens in a moment." is clear, and its ring is gone by then too
-        const pts = [[T.lapOn, 520, 420], [T.enterClick - 0.35, 520, 420], [T.enterClick, goAt[0], goAt[1]], [T.showClick - 0.55, goAt[0], goAt[1]], [T.showClick - 0.05, 360, 280],
+        // the mouse: from where it rests, in the empty part of the chat beside the AI's file (on nothing a press would take), to ▶,
+        // then, once the question has been seen, to "Show the quiz here"; after that click it leaves for the corner before the
+        // screen changes, so "Joining opens in a moment." is clear, and its ring is gone by then too
+        const pts = [[T.lapOn, 700, 380], [T.enterClick - 0.35, 700, 380], [T.enterClick, goAt[0], goAt[1]], [T.showClick - 0.55, goAt[0], goAt[1]], [T.showClick - 0.05, 360, 280],
           [T.showClick + 0.08, 360, 280], [T.shown - 0.02, 880, 540]];
         const p = keys(t, pts.map(([tt, x, y]) => [tt, [x, y]]));
         vis(cur, t > T.lapOn && t < T.shown + 0.3);
@@ -1407,17 +1421,17 @@
       const page = G(zoomG);
       const header = `<rect width="${W}" height="112" fill="${C.paper}"/><rect y="111" width="${W}" height="2" fill="${C.rule}"/><use href="#cq-lockup" x="60" y="24" width="268" height="64" color="${C.ink}"/>`;
       // The root page as it opens (makeRootPage): at the full width first, the first screen down to the line under the box, so
-      // the page above the film is the page the film shows; then in on the two steps, the ask and its file over the box that
-      // opens a file, large enough to read on a phone, the frame's foot where the next section starts.
+      // the page above the film is the page the film shows; then in on the two steps, from the first one's heading, its number
+      // in the margin, to just under the box that opens a file: the ask and its file over the box, as large as that height allows.
       const root = G(page);
       const rp = makeRootPage(root);
       // [the page's point at the frame's centre, the scale]: the whole width, then from just above the first step to just under the
-      // line under the box, and no further in than keeps the ask's longest line in the frame (in German it reaches nearly to the
-      // sheets); the centre moves straight while the scale grows evenly
-      const RS = Math.min(1.35, H / (rp.tryBot + 34)), RZ = clamp(Math.min(H / (rp.tryBot + 16 - (rp.step1 - 8)), W / (rp.askRight + 8 + 12)), 1.6, 2.7);
-      const R0 = [336, H / 2 / RS, RS], R1 = [-8 + W / 2 / RZ, rp.step1 - 8 + H / 2 / RZ, RZ];
+      // box (the line read under it while the file is read falls below the frame), and no further in than keeps the column and the
+      // numbers left of it in the frame, centred across it; the centre moves straight while the scale grows evenly
+      const RS = Math.min(1.35, H / (rp.tryBot + 34)), RZ = clamp(Math.min(H / (rp.boxBot + 8 - (rp.step1 - 8)), W / (rp.askRight + 12 - (rp.askLeft - 8))), 1.6, 2.7);
+      const R0 = [336, H / 2 / RS, RS], R1 = [(rp.askLeft - 8 + rp.askRight + 12) / 2, rp.step1 - 8 + H / 2 / RZ, RZ];
       const rootView = (k) => { const s = Math.exp(lerp(Math.log(R0[2]), Math.log(R1[2]), k)); return [W / 2 - lerp(R0[0], R1[0], k) * s, H / 2 - lerp(R0[1], R1[1], k) * s, s]; };
-      const openAt = [(rp.open[0] + 8) * RZ, (rp.open[1] - (rp.step1 - 8)) * RZ];
+      const openAt = [W / 2 + (rp.open[0] - R1[0]) * RZ, H / 2 + (rp.open[1] - R1[1]) * RZ];
       // the OS's file sheet: the .zip on top
       const fileRow = (i, name, y) => `<g><rect x="200" y="${y}" width="1200" height="120" rx="18" fill="${i === 0 ? '#eef3ff' : '#fff'}"/>
         <rect x="230" y="${y + 22}" width="76" height="76" rx="14" fill="${i === 0 ? '#e9e9e4' : '#d9cbb7'}"/>${i === 0 ? `<path d="M248 ${y + 40} h40 v40 h-40z M258 ${y + 40} v40 M266 ${y + 48} h6 M266 ${y + 58} h6 M266 ${y + 68} h6" fill="none" stroke="#6a6a66" stroke-width="3.5"/>` : ''}

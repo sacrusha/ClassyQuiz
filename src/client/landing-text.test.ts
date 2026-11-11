@@ -84,7 +84,7 @@ test("the built film carries this file's ask, the first screen's words and its o
     const t = TEXT[id];
     const want = {
       ask: t.ask, code: t.code, what: t.what,
-      getH: t.getH, which: t.which, gives: t.gives, playThis: t.playThis, see: t.see, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading,
+      getH: t.getH, which: t.which, subQuizmaster: t.subQuizmaster, subPeers: t.subPeers, subSolo: t.subSolo, unsure: t.unsure, gives: t.gives, playThis: t.playThis, see: t.see, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading,
       capSheet: t.capSheet, capAi: t.capAi, capZip: t.capZip, capWall: t.capWall, capTap: t.capTap,
       play: t.play, pause: t.pause, speed: t.speed, seek: t.seek,
     };

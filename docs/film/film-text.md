@@ -26,15 +26,16 @@ The film names no AI: the app's tile reads **AI** (DE **KI**, FR and IT **IA**; 
 ## 3. The site's screens
 
 ### 3.1 The root page as it opens (`src/public/index.html`, `landing-text.ts`; `docs/design/root-page.md`, "One column")
-The film draws the first screen as a desktop's window shows it, the column 672 px wide, from the page's own sizes (`makeRootPage` in `build/film.js`), in the page's language; below the line under the box it draws nothing (the page goes on with the film's own section). On the phone at the full width and then in on the two steps; on the laptop as a window about 1070 px wide shows it, then in on the header while the code is typed.
+The film draws the first screen as a desktop's window shows it, the column 672 px wide with the step numbers in its left margin, from the page's own sizes (`makeRootPage` in `build/film.js`), in the page's language; below the line under the box it draws nothing (the page goes on with the film's own section). On the phone at the full width and then in on the two steps; on the laptop as a window about 1070 px wide shows it, then in on the header while the code is typed.
 - Header, as wide as the column: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only); label **Code** (`code`; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join"), then the language switch "EN ▾". The laptop types the teacher code **63953 47** into the box.
 - The sentence, the page's first heading (`what`): "Play quizzes your own AI makes from your sheets, notes or ideas.", its lines balanced as on the page.
-- The ways as the tabs of the chat (`src/public/landing/way-*.svg`), the name in every language as the check's cards have it: **Quizmaster** open into the chat, **Peers** and **Solo** faded, and the narrow "?".
-- The chat, step 1: its bar **Ask your AI for a quiz** (`getH`) and "Any AI subscription will do, or free Claude." (`which`); the ask of §1 as the visitor's message on the right, plain, the two sheets attached; under it "The AI's answer:" (`gives`) and the example's file by its name in the page's language (`CONTENT.zipFile`, the same file the chat hands over); under that "Play this quiz ↓" and, at the right, "The whole example ›" (`playThis`, `see`).
-- Step 2, the Run box (3.2), its heading inside it.
+- Step 1's heading, its number in the margin: **Ask your AI for a quiz** (`getH`) and beside it "Any AI subscription will do, or free Claude." (`which`).
+- The ways as tabs in words under it, the names in every language as the check's cards have them, each with whose case it is (`subQuizmaster`, `subPeers`, `subSolo`): **Quizmaster** "for a class or group", open into the chat, **Peers** "with friends", **Solo** "on your own", and **Not sure?** (`unsure`) on the tabs' ground.
+- The chat: the ask of §1 as the visitor's message on the right, plain, the two sheets attached beside it; under it "The AI's answer:" (`gives`) and the file card, its face the Quizmaster's picture (`src/public/landing/way-quizmaster.svg`), on it the example's file by its name in the page's language (`CONTENT.zipFile`, the same file the chat hands over) and "Play this quiz ↓" (`playThis`); beside the card's foot "The whole example ›" (`see`).
+- Step 2, the Run box (3.2), its number in the margin, the margin's line joining the two.
 
 ### 3.2 Run box (root page, before upload)
-Heading **Open the quiz your AI made** (`landing-text.ts` `run`). Dashed box with the button "Choose the .zip file" and the line "or drop it here" under it (`upload`, `drop`).
+Heading **Open the quiz your AI made** (`landing-text.ts` `run`). Dashed box, the heading inside it, and on the heading's row the button "Choose the .zip file" and the line "or drop it here" (`upload`, `drop`).
 Progress after the pick: "Reading the quiz…", "Preparing the pictures… 3 of 12", "Sending the quiz…", a muted line under the box that moves the line under it down; the film shows the first. Then the local check (3.3), in this tab. The file sheet (the .zip on top) is the OS's, no site text.
 
 ### 3.3 The local check, after the upload (`open.ts` `renderCheck`, the entries in `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`; docs/design/local-check.md)
@@ -93,7 +94,7 @@ Quiz title in the top bar. Podium with the top entries: avatar, place "1.", "★
 
 ## 4. Sources in short
 - Chat: `CONTENT` in `docs/film/build/film.js`, held to `docs/example/text.py`; `big-numbers-quiz.zip` `quiz.txt`.
-- The root page's words in 4 languages, its asks and the Run box: `src/client/landing-text.ts`, `src/public/index.html`; its sizes: `index.html`'s styles and `src/public/site.css`; the ways' pictures: `src/public/landing/way-*.svg`.
+- The root page's words in 4 languages, its asks and the Run box: `src/client/landing-text.ts`, `src/public/index.html`; its sizes: `index.html`'s styles and `src/public/site.css`; the picture on the file: `src/public/landing/way-quizmaster.svg`.
 - The local check: `src/client/open.ts`, `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`.
 - The lobby's check, join, wall, ranking: `src/client/screen.ts`, `final.ts`, `manage.ts`, `teach.ts`, `steps.ts`.
 - Second device screen, tablet states: `src/client/play.ts`.
