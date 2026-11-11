@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 874e708, deployed 2026-11-10: Pages deployment fc6a7fe1 of the
-  project `classyquiz`, version a03d3812 of the state Worker
+- Commit 2aa154c, deployed 2026-11-11: Pages deployment 5ead07a5 of the
+  project `classyquiz`, version 6cfa7609 of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 874e708 -- src/`.
+  `git diff 2aa154c -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -39,6 +39,8 @@ changed what it covered.
   "Text").
 - `/owner` with the key, by the owner (2026-11-09, before the ledger of
   44ee213).
+- The root page and its script fetched: the manual as committed, and the
+  script with the opening of a quiz's text (2026-11-11, 2aa154c).
 
 ## Not tried live
 
@@ -60,6 +62,9 @@ changed what it covered.
 - An own copy set up end to end by the routes on `/own-copy`.
 - Since 44ee213: the owner's page with the key, and on a phone; a lobby
   left to lapse (`LOBBY_WAIT_MS`).
+- Since 2aa154c: a `.txt` or `.md` quiz and a `.zip` named `.quiz` opened
+  on the live site (in headless Edge on the built site only), and on a
+  phone whose extractor takes a `.zip`.
 
 The questions these leave are in the design files' "Not known" and the
 backlog's "Open: with the owner, and in the field".
