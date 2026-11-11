@@ -215,7 +215,7 @@ const de: Text = {
   again: "Nochmals abspielen",
   full: "Vollbild",
   see: "Schritt für Schritt ›",
-  what: "Spiel Quizze, die deine KI aus deinen Blättern, Notizen oder Ideen macht.",
+  what: "Spiel das Quiz, das deine KI aus deinen Blättern, Notizen oder Ideen macht.",
   picQuizmaster: "Eine Lehrerin am grossen Bildschirm mit der Frage, das Handy in der Hand; die Klasse antwortet auf Tablets.",
   picPeers: "Drei Freunde abends auf dem Sofa, alle mit der Frage auf dem eigenen Handy, einer lacht.",
   picSolo: "Jemand allein am Schreibtisch mit Notizen, die Frage auf dem Handy, eben richtig beantwortet.",

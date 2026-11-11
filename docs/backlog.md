@@ -204,7 +204,7 @@ before anything else comes into play (owner and product owner).
 11. **What a Sonnet-at-medium test (2026-11-04) misread** — the address read
     as a publish target, answer pictures lost on their tile's colour, every
     picture taken as enlargeable — met in the asks and the guidance:
-    `design/root-page.md` ("How to ask"), `design/guidance-page.md` (Not
+    `design/root-page.md` ("Getting a quiz"), `design/guidance-page.md` (Not
     known), `design/pictures.md` ("Enlarging").
 12. **The worked example in the landing's other three languages** — built,
     `design/example-page.md`: the page, the conversation picture (light and
@@ -327,7 +327,7 @@ hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
    still served first: the word decided once (`design/root-page.md`, "Words
    for whoever comes"), the three ways on the root page, a picture each, by
    the names the check's cards carry and a few words in the visitor's
-   language (`design/root-page.md`, "The ways to play"), the guidance describing the three
+   language (`design/root-page.md`, "Getting a quiz"), the guidance describing the three
    ways and where each reads a question (`design/guidance-page.md`), three
    more example asks, and the film showing the
    check and the lobby as built (`docs/film/`). Open: the de/fr/it drafts
@@ -354,11 +354,10 @@ site meets it"). What the owner found while directions were tried is in
 1. **The page as a whole** — a visitor at a phone or a desktop gets the
    Purpose's first two things from the page as it opens, and whoever holds
    a quiz file opens it without hunting. Built: `design/root-page.md`, where
-   "One column" says what shows as the page opens in which window. Open:
-   on a phone's window of 360 × 640 the button that opens a file is cut by
-   the screen's edge in German and French, and on a smaller one it is
-   below the edge, since the ask stands above it; and what nobody has
-   tried (same file, "Not known"). The parts,
+   "One column" says what shows as the page opens in which window; the
+   parts b to d are one element now ("The page for people: dense, not
+   busy", item 1). Open: what nobody has tried (same file, "Not known").
+   The parts,
    each with a purpose of its own:
 
    a. **What this is, in words** — someone who reads one sentence knows
@@ -372,10 +371,9 @@ site meets it"). What the owner found while directions were tried is in
       are made (`docs/ways/`). What the three differ in is the setting
       and what a device shows: with a quizmaster the question is on the
       big screen and each player's device shows the choices; among friends
-      and alone each device shows the whole question. Built ("The ways to
-      play"): the three pictures side by side with each way's name and
-      setting; a reason to play is in the pictures and, in words, only
-      Solo's.
+      and alone each device shows the whole question. Built: the three
+      pictures with each way's name, the tabs of the chat ("Getting a
+      quiz"); a reason to play is in the pictures and in each way's ask.
 
    c. **Getting a quiz** — a visitor learns that the AI they already use
       makes the quiz, how to ask it, and that a file comes back; someone
@@ -383,9 +381,9 @@ site meets it"). What the owner found while directions were tried is in
       asks exist, six of them, with what each is for
       (`design/root-page.md`, "Two steps"); what the page may say
       about which AI manages it is what was verified
-      (`design/guidance-page.md`, "The AIs verified against"). Built: one
-      ask and the file it brought in the first screen ("Two steps"), the
-      AI, the address and the six asks below it ("How to ask").
+      (`design/guidance-page.md`, "The AIs verified against"). Built: the
+      chat, an ask and its file per way, which AI in its bar ("Getting a
+      quiz").
 
    d. **Opening a quiz** — whoever has the file opens it; whoever has
       none yet can play the example, which costs the site nothing until a
@@ -393,7 +391,7 @@ site meets it"). What the owner found while directions were tried is in
       whatever goes wrong with a file show here
       (`design/root-page.md`, "Two steps", "Opening: the `.zip` and
       nothing else", "Coming back"). Built: the box as the second step,
-      the example's line under it, a file's problems between the two, and
+      "Play this quiz ↓" in the chat, a file's problems under the box, and
       a quiz to come back to above everything on the page.
 
    e. **Finding out more** — the newcomer who wants more than the page
@@ -402,8 +400,8 @@ site meets it"). What the owner found while directions were tried is in
       exist for this (`docs/film/`, `design/example-page.md`); the film
       was made to be the top of the page and tells the classroom's story.
       Built: the film under the first screen, under a heading that says
-      what it shows, with the link to `/example` ("The film"); playing the
-      example is in the second step.
+      what it shows ("The film"); `/example` under each example's file
+      ("Getting a quiz").
 
    f. **Where the page for people ends** — a person knows what they can
       rely on (free, open, no accounts, how long a quiz is kept) and that
@@ -530,7 +528,7 @@ choices of text and pictures.
 The owner's purpose: user experience, a dense but not overloaded site. The
 page for people grew by addition, each part built for a purpose of its own
 and set beside the others (v4 item 1, v5 item 9, v6 item 1), so a visitor
-meets the same thing more than once: the sheets ask in the first step, under
+met the same thing more than once: the sheets ask in the first step, under
 "How to ask" and in the film; the ways to play in pictures and again in the
 words under them; the example by its file, by the link under the box, in the
 film and on `/example`. What a visitor needs is on the page; this is about
@@ -539,23 +537,20 @@ reading as one page. The page as built: `design/root-page.md`.
 
 The order is the owner's: the merged element (item 1) first, because its
 size and the information it conveys, at which cognitive load, influence the
-prune and how the overall purpose is achieved; the prune (item 2a) last,
-pending until then. On a first pass the examples may be mocks: because of
+prune and how the overall purpose is achieved; the prune (item 2a) last.
+On a first pass the examples may be mocks: because of
 what a run costs, the owner approves the actual examples and runs them
 himself, so each is done once. While mocks are in place, nothing of this is
 deployed to the public site.
 
 1. **Getting a quiz, in one place, for the visitor's own case** — a visitor
-   who isn't a teacher recognises their case among the pictures and then
-   reads the teacher's ask; an ask for their own case is below the film,
+   who isn't a teacher recognised their case among the pictures and then
+   read the teacher's ask, with an ask for their own case below the film,
    behind a tab. The pictures of the ways, "Ask your AI for a quiz" and "How
    to ask your AI" become one element: the way a visitor recognises as
-   theirs shows an example for it. Situation, measured on the built page in
-   phone windows 360 and 390 px wide, in the four languages: under the
-   pictures the names take 21 px and the setting words 55 to 73, a line of
-   the first heading 26; the tabs of "How to ask" take 126 and its asks 40
-   to 352, where the first step's ask takes 105 to 127. The parts, each with
-   a purpose of its own:
+   theirs shows an example for it. Built: the ways as the tabs of a chat,
+   `design/root-page.md`, "Getting a quiz". The parts, each with a purpose
+   of its own:
 
    a. **What an example gives** — the owner: the ask, an understanding of
       where it is typed, the result it leads to, and what to do with the
@@ -566,37 +561,42 @@ deployed to the public site.
       `design/example-page.md`). An example is inspired by a real run and
       tidied; the owner: that balances provenance and stability against a
       changing site and changing AIs, without redoing the examples at every
-      change, and lets a reader follow the conversation.
+      change, and lets a reader follow the conversation. Built: the chat
+      (where it is typed), the ask and the file in it, "Play this quiz ↓"
+      (what to do with the file), "Step by step ›" to the full example.
 
    b. **Quizmaster's example** — a teacher with material in hand sees their
-      case. The sheets run exists.
+      case. Built: the sheets run.
 
    c. **Solo's example** — a learner sees a quiz made for their own
       situation, not a generic one. The owner's baseline, to exceed: "I just
       got this test back, I want a quiz that helps me solidify what I
       learned, with a deeper focus on the areas I scored poorer, about 20
       minutes." The owner: alone, a question may take less time than in a
-      class, and the time differs by question.
+      class, and the time differs by question. A mock stands in (the ask,
+      the attachment, the `.zip`, the full example: `docs/example/mock_zips.py`,
+      `client/example-text.ts`). Open: the owner's run.
 
    d. **Peers' example** — friends see that one of them asks and plays too.
       The owner's baseline, to exceed: "I'm at a desk preparing for an exam
       with my friends, these are the class notes - can you make us a short
-      10 minute quiz to learn and have fun together?"
+      10 minute quiz to learn and have fun together?" A mock stands in, as
+      for Solo. Open: the owner's run.
 
    e. **Whoever recognises none of the three, or has a question first** —
-      open, to assess: a fourth entry beside the three, marked "?". As the
-      place of the ask that takes no knowing how to ask ("Read <address>. I
-      need a classyQuiz. Help?") it has a visitor. As the place of what a
-      visitor asks before trying (which AI, what it costs, what is kept:
-      today under "How to ask" and "What you can count on") it would be an
-      FAQ. As a store for further example asks it would be what item 2
-      removes.
+      built as a fourth tab, "?": the ask that takes no knowing how to ask
+      ("Read <address>. I need a classyQuiz. Help?") and the AI's question
+      back, a mock until a run gives one. Assessed: not an FAQ, since each
+      question a visitor has before trying has its place (which AI in the
+      chat's bar, cost and keeping under "What you can count on"), and not a
+      store for further asks (`design/root-page.md`, "Getting a quiz").
 
    f. **Playing an example without a file of one's own** — one press from
       the first screen (plausible assumption, `design/local-check.md`: a
-      newcomer's first use is Solo or a look at the example quiz). Open: its
-      form once the full example starts the quiz too; one that also shows
-      where a file goes would serve "what to do with the file" (a).
+      newcomer's first use is Solo or a look at the example quiz). Built:
+      "Play this quiz ↓" under the AI's file moves a copy of the file into
+      the box and opens it on the check, so it also shows where a file goes
+      (a); the full example starts the quiz too.
 
    The three examples share a setting (the owner): school to begin with,
    without ruling the others out, since a setting of its own for each way
@@ -609,22 +609,31 @@ deployed to the public site.
    ground of historical artifacts.
 
    a. **Prune what distracts more than it serves** — the owner: focus the
-      user area of the page. Candidates, each with where what it says
-      otherwise stands: the setting words under the pictures (the pictures
-      show the settings, and the check's cards say them); how long a quiz
-      is kept (the check says it where a room opens); which AI wrote the
-      example and when (`/example`); the file's download in the first step
-      (`/example`); the link under the film (the full examples); the
-      film's speed button; the first heading's third line on a phone.
+      user area of the page. Gone: the setting words under the pictures
+      (the pictures show the settings, the asks say them, the check's cards
+      say them where the way is picked); which AI wrote the example and
+      when (`/example`); the file's download in the first step (`/example`);
+      the link under the film (each example's "Step by step ›"); the first
+      heading's third line on a phone in English, French and Italian, where
+      German keeps three (it avoids the plural "Quizze":
+      `translation-review.md`). Kept: how long a quiz is kept, under "What
+      you can count on", since it answers whether the site can be relied on
+      with a class's answers before anyone tries it, and stands below the first
+      screen, which it costs nothing; the film's speed button, the video
+      player's own control, which answers the film's open point, its pace
+      for the teacher who wants the steps (`docs/film/README.md`, "Not
+      known").
 
    b. **The first screen on a phone, in four languages** — v6 item 1's open
       point, the button that opens a file cut by the screen's edge, is
-      settled by the room item 1 leaves. Not known: in German at 360 × 640
-      the button measured 31 px cut where `design/root-page.md` says 8;
-      French matches the file.
+      settled on the tab every visit opens on: whole at 360 × 640 in the four
+      languages (`design/root-page.md`, "One column"). Open: the Peers and
+      Solo tabs, taller with their mock asks, push it below the edge there;
+      the owner's asks are measured again.
 
    c. **The film and the full examples show the page that exists** (v6
-      item 3) — the film draws this page's first screen, so it follows it.
+      item 3) — built: the film draws the new first screen (`docs/film/`),
+      and `/example` has a full example per way (`design/example-page.md`).
 
 ## Room on the Free plan
 

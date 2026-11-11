@@ -13,7 +13,7 @@ The film's words themselves are in `docs/film/build/film.js` (`docs/film/README.
 
 ## 1. The ask
 
-The root page's first step's ask, `ask` in `src/client/landing-text.ts` (`#ask-top` in `src/public/index.html` for English), in the page's language, copied into the film's `LANDING` at build time. The film types it in the chat, the address in the accent and underlined, its other labelled parts plain; the page's labels aren't drawn. How it relates to the run's first ask: `docs/design/root-page.md`, "Two steps"; why the film types the page's: `README.md`, "What it shows, and why".
+The root page's Quizmaster ask, `ask` in `src/client/landing-text.ts` (`#ask-quizmaster` in `src/public/index.html` for English), in the page's language, copied into the film's `LANDING` at build time. The film types it in the chat, the address in the accent and underlined, its other marked parts each kept on one line. How it relates to the run's first ask: `docs/design/root-page.md`, "Getting a quiz"; why the film types the page's: `README.md`, "What it shows, and why".
 
 ## 2. The chat
 
@@ -28,10 +28,10 @@ The film names no AI: the app's tile reads **AI** (DE **KI**, FR and IT **IA**; 
 ### 3.1 The root page as it opens (`src/public/index.html`, `landing-text.ts`; `docs/design/root-page.md`, "One column")
 The film draws the first screen as a desktop's window shows it, the column 672 px wide, from the page's own sizes (`makeRootPage` in `build/film.js`), in the page's language; below the line under the box it draws nothing (the page goes on with the film's own section). On the phone at the full width and then in on the two steps; on the laptop as a window about 1070 px wide shows it, then in on the header while the code is typed.
 - Header, as wide as the column: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only); label **Code** (`code`; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join"), then the language switch "EN ▾". The laptop types the teacher code **63953 47** into the box.
-- The sentence, the page's first heading (`what`): "Here you play quizzes your own AI makes from your sheets, notes or ideas.", its lines balanced as on the page.
-- The three ways, a picture each (`src/public/landing/way-*.svg`), the name in every language as the check's cards have it, then the setting (`wayQuizmaster`, `wayPeers`, `waySolo`): **Quizmaster** "for a class or a group, on a big screen", **Peers** "with friends, each on their own device", **Solo** "on your own, to practise or review" (the sentence and the settings in the other languages: `landing-text.ts`).
-- Step 1, **Ask your AI for a quiz** (`getH`): the ask of §1 as a chat message, plain, without its labels, the two sheets attached; under it "The AI's answer:" (`gives`) and the example's file by its name in the page's language (`CONTENT.zipFile`, the same file the chat hands over).
-- Step 2, the Run box (3.2), and under it "No quiz yet? Play the example ›" and, at the right, "How to ask your AI ↓" (`noQuiz`, `tryIt`, `more`).
+- The sentence, the page's first heading (`what`): "Play quizzes your own AI makes from your sheets, notes or ideas.", its lines balanced as on the page.
+- The ways as the tabs of the chat (`src/public/landing/way-*.svg`), the name in every language as the check's cards have it: **Quizmaster** open into the chat, **Peers** and **Solo** faded, and the narrow "?".
+- The chat, step 1: its bar **Ask your AI for a quiz** (`getH`) and "Any AI subscription will do, or free Claude." (`which`); the ask of §1 as the visitor's message on the right, plain, the two sheets attached; under it "The AI's answer:" (`gives`) and the example's file by its name in the page's language (`CONTENT.zipFile`, the same file the chat hands over); under that "Play this quiz ↓" and, at the right, "Step by step ›" (`playThis`, `see`).
+- Step 2, the Run box (3.2), its heading inside it.
 
 ### 3.2 Run box (root page, before upload)
 Heading **Open the quiz your AI made** (`landing-text.ts` `run`). Dashed box with the button "Choose the .zip file" and the line "or drop it here" under it (`upload`, `drop`).

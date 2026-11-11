@@ -5,7 +5,7 @@
 A quiz file opens into the site without costing the shared site a class
 (backlog v5 item 1). The `.zip` is read and checked in the browser, and
 only opening a room uploads it (the owner's ruling). The worked example's "Start the example quiz" and
-the root page's "Play the example ›" land here too, so a visitor who only
+the root page's "Play this quiz ↓", under each way's example, land here too, so a visitor who only
 looks costs nothing (v5 item 1).
 
 On that check the person picks how the quiz will be played: the entries
@@ -63,8 +63,8 @@ nothing and says so ("No quiz open here", the way back to the start page):
 nothing is kept. A browser that keeps no site data can't pass the quiz on;
 the root page says so in its language.
 
-The worked example needs no handoff: "Start the example quiz", and the root
-page's "Play the example ›", open `/open?example=<lang>`, which fetches the static `.zip` and reads it through
+The examples need no handoff: "Start the example quiz", and the root
+page's "Play this quiz ↓", open `/open?example=<lang>&way=<way>` (the worked example's without a way), which fetches the static `.zip` and reads it through
 the same `readQuiz` as a teacher's file, so it can't run differently; a
 reload reads it again. `/?example=<lang>`, an earlier link, forwards there.
 The example's start isn't an upload attempt, and isn't counted as one

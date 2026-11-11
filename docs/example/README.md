@@ -35,6 +35,10 @@ The pictures are `src/public/examples/conversation-<lang>-<light|dark>.webp`
   way `docs/film/build/shoot.py` shoots the film.
 - `quiz_zips.py`: makes the German, French and Italian `.zip`s from the English
   one (a separate piece; the pictures only quote its wording).
+- `mock_zips.py`: not this example's. The stand-in quizzes of the root page's
+  Solo and Peers examples, in the four languages, until the owner's runs
+  replace them (`docs/design/root-page.md`, "Getting a quiz"); it goes with
+  them.
 
 ## Running it
 

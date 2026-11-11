@@ -11,10 +11,10 @@ v4 item 10).
 
 ## Situation
 
-- The page is reached from the link under the landing's film ("The example,
-  step by step ›", `root-page.md`, "The film"). The landing itself shows the
-  example's ask and its file, and starts the example quiz ("Two steps"
-  there); what only this page has is the photographs, the whole
+- The page is reached from "Step by step ›" under the example's file in the
+  landing's chat (`root-page.md`, "Getting a quiz"), one link per way to
+  play. The landing itself shows the example's ask and its file, and starts
+  the example quiz; what only this page has is the photographs, the whole
   conversation and the files to repeat it with. Plausible assumption: teachers
   read the path shown there as the example, and look behind it for a
   walkthrough, not the result alone (the page's name and its four steps).
@@ -57,6 +57,13 @@ path the film shows.
    it stays in the browser, with friends or a class it runs like any quiz
    (a visitor who isn't a teacher sees the example is theirs to play too,
    backlog v5 item 9).
+
+`?way=peers` and `?way=solo` are the full examples of the landing's Peers
+and Solo tabs, whose runs are mocks until the owner's (backlog, "The page for
+people", item 1): the same four steps, with the mock attachment in place of
+the photographs, a made-up conversation made by the script and said to be
+made up (`MOCK_TEXT` in `client/example-text.ts`), the mock `.zip`
+(`docs/example/mock_zips.py`) and its start, and without the note below.
 
 Under the steps, a note: the example was tested in all four languages and
 works in each; so that it is the same example in each, the German, French and

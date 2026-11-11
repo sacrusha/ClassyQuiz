@@ -21,37 +21,25 @@ For the read:
   asks, which are the visitor's own words to the AI.
 - **The two steps**: "Frag deine KI nach einem Quiz" / "Öffne das Quiz deiner KI", "Demandez un
   quiz à votre IA" / "Ouvrez le quiz de votre IA", "Chiedi un quiz alla tua IA" / "Apri il quiz
-  della tua IA". German "fragen nach" rather than "bitten um", which reads stiffer and stood
-  beside "So fragst du deine KI". The step under "How to ask" says the same ("Frag die KI nach
-  einem Quiz für").
+  della tua IA". German "fragen nach" rather than "bitten um", which reads stiffer.
 - **Buttons and links in the infinitive** in German and French, as their interfaces have it:
-  ".zip-Datei auswählen", "Choisir le fichier .zip"; Italian "Scegli il file .zip". The example's
-  link: "Das Beispiel spielen ›", "Essayer l'exemple ›", "Prova l'esempio ›". French doesn't say
-  "jouer l'exemple", and "Jouer au quiz d'exemple ›" (and Italian "Gioca al quiz di esempio ›")
-  took the example's link onto a line of its own on a 360 px phone.
+  ".zip-Datei auswählen", "Choisir le fichier .zip"; Italian "Scegli il file .zip". Under the
+  example's file: "Dieses Quiz spielen ↓", "Jouer à ce quiz ↓", "Gioca a questo quiz ↓", the quiz
+  of the file beside it; "Schritt für Schritt ›", "Pas à pas ›", "Passo per passo ›" for its full
+  example, short enough to share a line with it on a 360 px phone.
 - **The plural of "Quiz"**: German has "die Quiz" in the dictionary and "Quizze" in speech, and
-  either reads oddly, so the German words avoid the plural: "Hier spielst du das Quiz, das deine
+  either reads oddly, so the German words avoid the plural: "Spiel das Quiz, das deine
   KI … macht.", "kann heute kein weiteres Quiz annehmen … nimmt sie wieder eines an". "Mehr Quiz"
   (the way to an own copy) stays: it reads as a singular, in the advertising form, which suits
   a line about more for free (the owner).
-- **"Any AI subscription will do; otherwise, free Claude."**: "Jedes KI-Abo reicht, sonst
-  Claude gratis." / "Tout abonnement à une IA fait l'affaire⍽; sinon, Claude en version
-  gratuite." / "Va bene qualsiasi abbonamento a un'IA; altrimenti, Claude nella versione
-  gratuita." A statement about subscriptions, not an order to use one's own: "Nimm die KI, die du
-  abonniert hast" assumed the visitor has one. German and French read by the owner; Italian not.
-  The detail's first sentence speaks of trying, not of tests, which read as published reviews:
-  "Andere kostenlose KIs haben sich beim Ausprobieren als weniger zuverlässig erwiesen." / "À
-  l'essai, les autres IA gratuites se sont montrées moins fiables." / "Alla prova, le altre IA
-  gratuite si sono rivelate meno affidabili." The page doesn't speak as "we" anywhere, so none
-  says "our". The example's line follows unchanged but for its tail; the German date stays in
-  brackets.
-- **"How to ask your AI"**, the heading and the link down to it: "So fragst du deine KI", "Que
-  dire à votre IA", "Come chiedere un quiz alla tua IA". "Demander" and "chiedere" want an object,
-  so "Comment demander à votre IA" and "Come chiedere alla tua IA" read as cut off. The French
-  with its object ("Comment demander un quiz à votre IA") took the heading to two lines at 390 px
-  and the link past the edge of a 320 px page; "Que dire à votre IA" has the form of "Que dire au
-  service informatique ›". Whether "what to say" is too narrow a name for a part that also says
-  which AI.
+- **"Any AI subscription will do, or free Claude."**, in the chat's bar: "Jedes KI-Abo reicht,
+  sonst Claude gratis." / "Tout abonnement IA convient, ou Claude gratuit." / "Va bene ogni
+  abbonamento IA, o Claude gratuito.", short enough to stand on one line under the heading at
+  360 px. A statement about subscriptions, not an order to use one's own: "Nimm die KI, die du
+  abonniert hast" assumed the visitor has one.
+- **The first sentence without "own"** in German, French and Italian ("deine KI", "votre IA",
+  "la tua IA"): with "eigene", "propre" the sentence took a third line on a phone. The possessive
+  still says the AI is the visitor's.
 - **Arbeitsblatt**, not Aufgabenblatt, in German: the film's heading, its chapter and its name,
   and the tab. It is a primary teacher's everyday word in Switzerland and Germany, and `/example`
   says it (E5); "Aufgabenblatt" reads like a university problem set.
@@ -122,11 +110,8 @@ For the read:
   a line; the film types the sheets ask with it. A no-break space keeps a number with its word
   in the sheets ask ("Nr. 1", "4. Klasse", "n° 1", "n. 1"; `design/root-page.md`, "Two steps").
 - **Apostrophes**: the keyboard's ' on the page and on `/example` alike ("l'IA", "L'exemple,
-  pas à pas"), since a visitor goes from one to the other by the link under the film, and the
+  pas à pas"), since a visitor goes from one to the other by "Step by step ›", and the
   page's asks are what a visitor copies and types. The conversation's pictures keep the app's ’.
-- **Step 1's detail** in German, French and Italian says the example was written in English and
-  is translated here ("auf Englisch, hier übersetzt", "en anglais (traduit ici)", "in inglese (qui
-  tradotto)"): the file above it is the translation (`design/root-page.md`, "How to ask").
 - **The box's messages** name what the site needs ("braucht", "attend", "accetta") and repeat the
   noun where a pronoun could point at another: German "öffne hier die neue .zip-Datei, die
   zurückkommt" where "die sie zurückschickt" could be the message. A quiz that is too long names

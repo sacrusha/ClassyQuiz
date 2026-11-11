@@ -58,7 +58,7 @@ shaped as it is.
   page informs rather than instructs, below).
 - The teacher's own words to their AI are not the page's voice; whether the
   AI fetches the page at all depends on them (the example asks, `root-page.md`,
-  "How to ask").
+  "Getting a quiz").
 - Teachers differ from message to message: a full brief needs no questions,
   contradictory scans may need two, and a rule of the form "ask at most one
   question" fails both. Many models spot a rule and follow it to the
@@ -209,7 +209,7 @@ where it applies. The owner: a ruling is for a hard constraint like the
 file format; a rule against showing questions gets the 50 words wrong
 (Situation). The site's side is the local check's fold (`local-check.md`);
 the user's side, the example asks that say "I'll play it myself" and "I'm
-playing too" in the user's own words (`root-page.md`, "How to ask").
+playing too" in the user's own words (`root-page.md`, "Getting a quiz").
 
 Who plays is in the ways' descriptions: in Peers whoever opens the lobby
 plays too, and a Quizmaster runs the quiz for the group
@@ -270,7 +270,7 @@ quoted; runs not recorded beyond the above):
   versions of ChatGPT and Gemini have models at least as strong as Sonnet,
   web access and scripting, and make zip files; nothing indicates they can't
   build the quiz. The root page sends a visitor to the AI they subscribe to
-  on this basis (`design/root-page.md`, "How to ask").
+  on this basis (`design/root-page.md`, "Getting a quiz").
 
 ## Not known
 
