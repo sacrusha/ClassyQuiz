@@ -25,8 +25,9 @@ For the read:
 - **Buttons and links in the infinitive** in German and French, as their interfaces have it:
   ".zip-Datei auswählen", "Choisir le fichier .zip"; Italian "Scegli il file .zip". Under the
   example's file: "Dieses Quiz spielen ↓", "Jouer à ce quiz ↓", "Gioca a questo quiz ↓", the quiz
-  of the file beside it; "Schritt für Schritt ›", "Pas à pas ›", "Passo per passo ›" for its full
-  example, short enough to share a line with it on a 360 px phone.
+  of the file beside it; "Das ganze Beispiel ›", "L'exemple complet ›", "Tutto l'esempio ›" for its
+  full example, short enough to share a line with it on a 360 px phone; "step by step" alone, which
+  /example's title says, read as a way of playing the quiz beside it.
 - **The plural of "Quiz"**: German has "die Quiz" in the dictionary and "Quizze" in speech, and
   either reads oddly, so the German words avoid the plural: "Spiel das Quiz, das deine
   KI … macht.", "kann heute kein weiteres Quiz annehmen … nimmt sie wieder eines an". "Mehr Quiz"
@@ -110,7 +111,7 @@ For the read:
   a line; the film types the sheets ask with it. A no-break space keeps a number with its word
   in the sheets ask ("Nr. 1", "4. Klasse", "n° 1", "n. 1"; `design/root-page.md`, "Two steps").
 - **Apostrophes**: the keyboard's ' on the page and on `/example` alike ("l'IA", "L'exemple,
-  pas à pas"), since a visitor goes from one to the other by "Step by step ›", and the
+  pas à pas"), since a visitor goes from one to the other by "The whole example ›", and the
   page's asks are what a visitor copies and types. The conversation's pictures keep the app's ’.
 - **The box's messages** name what the site needs ("braucht", "attend", "accetta") and repeat the
   noun where a pronoun could point at another: German "öffne hier die neue .zip-Datei, die

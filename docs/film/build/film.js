@@ -1061,7 +1061,9 @@
       // the ways to play, the tabs of the chat: three pictures, each a third of what the narrow "?" leaves, the Quizmaster's open
       // into the chat (its card's ground, the chat's border round it), the others' pictures faded and their names muted
       const waysTop = h1Top + h1.lines.length * 33.98 + 11.1, TW = 200.7, tabH = 151.2, chatTop = waysTop + tabH - 1.1;
-      G(g, `<path d="M0.5 ${f1(chatTop + 1)} V${f1(waysTop + 14)} Q0.5 ${f1(waysTop + 0.5)} 14 ${f1(waysTop + 0.5)} H${f1(TW - 14)} Q${f1(TW - 0.5)} ${f1(waysTop + 0.5)} ${f1(TW - 0.5)} ${f1(waysTop + 14)} V${f1(chatTop + 1)}" fill="${C.card}" stroke="${C.rule}"/>`);
+      // a tab's outline, open at its foot: the chosen one on the card's ground, the others outlined only
+      const tab = (x, w, fill) => `<path d="M${f1(x + 0.5)} ${f1(chatTop + 1)} V${f1(waysTop + 14)} Q${f1(x + 0.5)} ${f1(waysTop + 0.5)} ${f1(x + 14)} ${f1(waysTop + 0.5)} H${f1(x + w - 14)} Q${f1(x + w - 0.5)} ${f1(waysTop + 0.5)} ${f1(x + w - 0.5)} ${f1(waysTop + 14)} V${f1(chatTop + 1)}" fill="${fill}" stroke="${C.rule}"/>`;
+      G(g, tab(0, TW, C.card) + tab(TW + 8, TW, 'none') + tab(2 * (TW + 8), TW, 'none') + tab(626, 46, 'none'));
       TX.ways.forEach(([name, key], i) => {
         const x = i * (TW + 8), id = `cq-way${n}-${i}`, on = i === 0, it = waysTop + 5;
         G(g, `<g opacity="${on ? 1 : 0.72}"><clipPath id="${id}"><rect x="${f1(x + 5)}" y="${f1(it)}" width="190.7" height="119.2" rx="9"/></clipPath>

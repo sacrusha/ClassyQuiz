@@ -563,7 +563,7 @@ deployed to the public site.
       changing site and changing AIs, without redoing the examples at every
       change, and lets a reader follow the conversation. Built: the chat
       (where it is typed), the ask and the file in it, "Play this quiz ↓"
-      (what to do with the file), "Step by step ›" to the full example.
+      (what to do with the file), "The whole example ›" to the full example.
 
    b. **Quizmaster's example** — a teacher with material in hand sees their
       case. Built: the sheets run.
@@ -613,7 +613,7 @@ deployed to the public site.
       (the pictures show the settings, the asks say them, the check's cards
       say them where the way is picked); which AI wrote the example and
       when (`/example`); the file's download in the first step (`/example`);
-      the link under the film (each example's "Step by step ›"); the first
+      the link under the film (each example's "The whole example ›"); the first
       heading's third line on a phone in English, French and Italian, where
       German keeps three (it avoids the plural "Quizze":
       `translation-review.md`). Kept: how long a quiz is kept, under "What

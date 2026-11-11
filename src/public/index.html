@@ -104,11 +104,11 @@
      the right with what it attaches, the AI's answer on the left with its file. Three pictures and a narrow "?" across at every
      width. */
   .ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) clamp(30px, 7vw, 46px); gap: 0 clamp(3px, 1vw, 8px); position: relative; z-index: 1; }
-  .ways button { display: flex; flex-direction: column; min-width: 0; margin: 0 0 -1px; padding: 4px 4px 3px; border: 1px solid transparent; border-bottom: 0; border-radius: 14px 14px 0 0; background: transparent; color: var(--muted); font: inherit; text-align: left; cursor: pointer; }
+  .ways button { display: flex; flex-direction: column; min-width: 0; margin: 0 0 -1px; padding: 4px 4px 3px; border: 1px solid var(--rule); border-bottom: 0; border-radius: 14px 14px 0 0; background: transparent; color: var(--muted); font: inherit; text-align: left; cursor: pointer; }
   .ways img { display: block; width: 100%; height: auto; border-radius: 9px; transition: opacity .15s, filter .15s; }
   .ways b { display: block; margin: 4px 0 0 1px; font: 700 min(1rem, 3.75vw)/1.25 var(--font-brand); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ways .q { flex: 1; display: grid; place-items: center; border-radius: 9px; background: var(--code-bg); font: 700 1.35rem var(--font-brand); }
-  .ways button[aria-selected="true"] { background: var(--card); border-color: var(--rule); color: var(--fg); cursor: default; }
+  .ways button[aria-selected="true"] { background: var(--card); color: var(--fg); cursor: default; }
   .ways button[aria-selected="false"] img, .ways button[aria-selected="false"] .q { opacity: .72; filter: saturate(.6); }
   .ways button[aria-selected="false"]:hover img, .ways button[aria-selected="false"]:hover .q { opacity: 1; filter: none; }
   .ways button[aria-selected="false"]:hover { color: var(--fg); }
@@ -225,17 +225,17 @@
     <div class="ex" id="ex-quizmaster">
       <blockquote class="bubble"><span class="sheets"><img src="/landing/sheet-1.webp" alt="" width="233" height="300"><img src="/landing/sheet-2.webp" alt="" width="233" height="300"></span><span class="said" id="ask-quizmaster">Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 4th grade class, about 10 questions, in English.</span></blockquote>
       <p class="reply"><span class="gives" data-t="gives">The AI's answer:</span> <span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">big-numbers-quiz.zip</span></span></p>
-      <p class="foot"><a class="see" href="/example" data-t="see">Step by step &rsaquo;</a></p>
+      <p class="foot"><a class="see" href="/example" data-t="see">The whole example &rsaquo;</a></p>
     </div>
     <div class="ex" id="ex-peers">
       <blockquote class="bubble"><span class="sheets"><img src="/landing/mock-notes.svg" alt="" width="233" height="300"></span><span class="said" id="ask-peers">Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to learn and have fun. I'm playing too, so don't show me the questions.</span></blockquote>
       <p class="reply"><span class="gives" data-t="gives">The AI's answer:</span> <span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">history-exam-quiz.zip</span></span></p>
-      <p class="foot"><a class="see" href="/example?way=peers" data-t="see">Step by step &rsaquo;</a></p>
+      <p class="foot"><a class="see" href="/example?way=peers" data-t="see">The whole example &rsaquo;</a></p>
     </div>
     <div class="ex" id="ex-solo">
       <blockquote class="bubble"><span class="sheets"><img src="/landing/mock-test.svg" alt="" width="233" height="300"></span><span class="said" id="ask-solo">Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.</span></blockquote>
       <p class="reply"><span class="gives" data-t="gives">The AI's answer:</span> <span class="zip"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="zipname">cell-test-practice.zip</span></span></p>
-      <p class="foot"><a class="see" href="/example?way=solo" data-t="see">Step by step &rsaquo;</a></p>
+      <p class="foot"><a class="see" href="/example?way=solo" data-t="see">The whole example &rsaquo;</a></p>
     </div>
     <div class="ex" id="ex-help">
       <blockquote class="bubble"><span class="said" id="ask-help">Read classyquiz.pages.dev. I need a classyQuiz. Help?</span></blockquote>

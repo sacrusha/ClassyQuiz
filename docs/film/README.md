@@ -333,7 +333,7 @@ Only rendered pictures found them, so the film is checked by looking:
   half speed the classroom's motion floats, the chat and the upload read
   well), or a slower setting that halves only the chat, upload and laptop.
   The other ways to the steps are on the page: the two steps above the
-  film, and "Step by step ›" under each example's file.
+  film, and "The whole example ›" under each example's file.
 - **Other fonts.** The fit of fixed texts is checked with one wider stand-in
   font. The poster picture carries the font of the machine that rendered it;
   on a device with another `system-ui` the live frame that replaces it shows

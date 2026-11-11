@@ -204,8 +204,9 @@ so the visitor carries them from this page to that one.
 One element: the three pictures of the ways, **Quizmaster**, **Peers** and
 **Solo**, are the tabs of a chat, and a fourth, narrow tab, "?", follows
 them. The tabs stand on the chat's top edge as a folder's do, the chosen one
-open into it, the others' pictures faded; a tab is where people look for
-tabs, on the thing it switches. Every visit opens on the Quizmaster's
+open into it, the others outlined, their pictures faded, so
+a phone, which shows nothing on hover, still shows them as tabs to press; a
+tab is where people look for tabs, on the thing it switches. Every visit opens on the Quizmaster's
 (Situation: least surprise; backlog, Project: the example class's teacher
 first), and nothing is remembered.
 
@@ -231,7 +232,7 @@ first), and nothing is remembered.
   file itself takes the same press, as a file in a chat does. So playing an
   example is one press from the first screen and shows where a file of
   one's own goes (backlog item 1f). With reduced motion the box lights up
-  and the check opens. Beside it, "Step by step ›" leads to the full
+  and the check opens. Beside it, "The whole example ›" leads to the full
   example (`/example`, `example-page.md`): what was attached, the whole
   conversation, the `.zip` to download and a start of that quiz.
 - **The examples share a setting, school** (the owner: a setting of its own
@@ -479,8 +480,8 @@ sentence's structure, and the findings in Situation hold in each:
 - **The first screen holds the same in each language** at 360 px and wider
   ("One column"), so where two wordings say the same the shorter is taken:
   the sentence without "own" ("What this is"), the line on which AI, the
-  label before the file ("Antwort der KI:"), and "Step by step ›" for the
-  full example ("Schritt für Schritt ›", "Pas à pas ›", "Passo per passo ›").
+  label before the file ("Antwort der KI:"), and the link to the full
+  example ("Das ganze Beispiel ›", "L'exemple complet ›", "Tutto l'esempio ›").
 
 The words in the three are the implementer's drafts, with the choices behind
 them in `docs/translation-review.md`.

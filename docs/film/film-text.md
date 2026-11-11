@@ -30,7 +30,7 @@ The film draws the first screen as a desktop's window shows it, the column 672 p
 - Header, as wide as the column: the fox mark + "classyQuiz" (brand SVG; on a phone held upright, mark only); label **Code** (`code`; hidden under 600 px), a box with placeholder **12345** (digits, bold), a ▶ button (aria "Join"), then the language switch "EN ▾". The laptop types the teacher code **63953 47** into the box.
 - The sentence, the page's first heading (`what`): "Play quizzes your own AI makes from your sheets, notes or ideas.", its lines balanced as on the page.
 - The ways as the tabs of the chat (`src/public/landing/way-*.svg`), the name in every language as the check's cards have it: **Quizmaster** open into the chat, **Peers** and **Solo** faded, and the narrow "?".
-- The chat, step 1: its bar **Ask your AI for a quiz** (`getH`) and "Any AI subscription will do, or free Claude." (`which`); the ask of §1 as the visitor's message on the right, plain, the two sheets attached; under it "The AI's answer:" (`gives`) and the example's file by its name in the page's language (`CONTENT.zipFile`, the same file the chat hands over); under that "Play this quiz ↓" and, at the right, "Step by step ›" (`playThis`, `see`).
+- The chat, step 1: its bar **Ask your AI for a quiz** (`getH`) and "Any AI subscription will do, or free Claude." (`which`); the ask of §1 as the visitor's message on the right, plain, the two sheets attached; under it "The AI's answer:" (`gives`) and the example's file by its name in the page's language (`CONTENT.zipFile`, the same file the chat hands over); under that "Play this quiz ↓" and, at the right, "The whole example ›" (`playThis`, `see`).
 - Step 2, the Run box (3.2), its heading inside it.
 
 ### 3.2 Run box (root page, before upload)
