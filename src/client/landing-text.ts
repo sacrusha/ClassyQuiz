@@ -11,7 +11,7 @@
 //
 // The example asks, one per way to play (docs/design/root-page.md, "Getting a
 // quiz"): the sheets ask, the Quizmaster's, is each language's version of the
-// same ask, its marked parts carrying the labels /example shows; Solo's and
+// same ask, the film typing it; Solo's and
 // Peers' are in the words of whoever asks, and the one who plays says so,
 // which the guidance's "The user who plays" answers; the help ask has nothing
 // decided, and the AI's question back is the guidance's "Build with the
@@ -25,7 +25,7 @@ import type { ZipProblem } from "./unzip.ts";
 export { LANGS, LANG_KEY, chosenLang, isLang, type Lang } from "./device-lang.ts";
 import type { Lang } from "./device-lang.ts";
 
-/** A run of the example ask; `l` is the index of its label. */
+/** A run of the sheets ask; `l` marks the parts the film keeps on one line as it types them, the site's address as 0 (docs/film/build/film.js). */
 export type AskPart = { s: string; l?: number };
 
 export interface Text extends SiteWords {
@@ -89,7 +89,6 @@ export interface Text extends SiteWords {
   /** Beside the example's file: opens it in the box below, as a file of one's own is opened. */
   playThis: string;
   ask: AskPart[];
-  labels: string[];
   copied: string;
   drop: string;
   zipOnly: string;
@@ -165,7 +164,6 @@ const en: Text = {
     { s: "in English", l: 4 },
     { s: "." },
   ],
-  labels: ["this site", "which exercises", "your class", "how many", "which language"],
   askHelp: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
   helpReply: "Gladly. What is the quiz for, and who will play it? If you have material, like exercise sheets or notes, send it along.",
   help: "None of these, or not sure yet",
@@ -247,7 +245,6 @@ const de: Text = {
     { s: "auf Deutsch", l: 4 },
     { s: "." },
   ],
-  labels: ["diese Seite", "welche Aufgaben", "deine Klasse", "wie viele", "welche Sprache"],
   askHelp: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
   helpReply: "Gern. Wofür ist das Quiz, und wer spielt es? Wenn du Material hast, etwa Arbeitsblätter oder Notizen, schick es mit.",
   help: "Nichts davon, oder noch unsicher",
@@ -334,7 +331,6 @@ const fr: Text = {
     { s: "en français", l: 4 },
     { s: "." },
   ],
-  labels: ["ce site", "quels exercices", "votre classe", "combien", "quelle langue"],
   askHelp: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes par exemple, envoie-le.",
   help: "Rien de tout cela, ou pas encore sûr",
@@ -421,7 +417,6 @@ const it: Text = {
     { s: "in italiano", l: 4 },
     { s: "." },
   ],
-  labels: ["questo sito", "quali esercizi", "la tua classe", "quante", "quale lingua"],
   askHelp: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
   helpReply: "Volentieri. A cosa serve il quiz, e chi ci giocherà? Se hai del materiale, per esempio schede o appunti, mandamelo.",
   help: "Nessuno di questi, o non lo so ancora",

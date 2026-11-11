@@ -25,7 +25,7 @@ served with the headers the build writes (dist/_headers, the CSP among them); th
   - desktop: ▶ by keyboard leaves the focus on the bar's play/pause; the time bar's name and spoken
     value (time and chapter), the address the browser opened; one animation loop however often the bar
     is moved and played; a drag shows the chapter's name over the thumb, the release hides it; Space on
-    the page and in the code box and the arrows on the ask tabs stay theirs, the stage and the time bar
+    the page and in the code box and the arrows on the ways' tabs stay theirs, the stage and the time bar
     take the film's keys; scrolled out
     of view or in a hidden tab it pauses and stays paused; at the end the page's replay icon (named in German)
     stands in the band under the end card's address and plays it from the start, the focus on play/pause;
@@ -39,7 +39,7 @@ served with the headers the build writes (dist/_headers, the CSP among them); th
     on the button; the phone turned sideways in it gives the big film;
   - every language (desktop): each ask typed out before its send, no line wider than its box, no
     fitted text shrunk below 3/4; languages whose film words are drafts are named;
-  - the page around the film (the two steps, How to ask, the foot, the guidance) is unchanged against
+  - the page around the film (the two steps, the foot, the guidance) is unchanged against
     `main`'s: every element's computed style;
   - no CSP violation, console error or page error anywhere.
 """
@@ -403,10 +403,10 @@ def controls(b, url):
     if not (39 <= held['t'] <= 41) or held['tip'] != 'What the class sees' or held['playing'] or let_go['tip'] or let_go['playing']: bad(f'drag {held} {let_go}')
     t0 = state()['t']
     # the page's own keys stay the page's
-    tab0 = pg.evaluate("document.querySelector('.ask-tabs [aria-selected=true]').id")
-    pg.focus('.ask-tabs [aria-selected=true]'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
-    s = state(); tab1 = pg.evaluate("document.querySelector('.ask-tabs [aria-selected=true]').id")
-    print(f'desk: ArrowRight on the ask tabs: tab {tab0} -> {tab1}, film at {s["t"]} (was {t0})')
+    tab0 = pg.evaluate("document.querySelector('#ways [aria-selected=true]').id")
+    pg.focus('#ways [aria-selected=true]'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
+    s = state(); tab1 = pg.evaluate("document.querySelector('#ways [aria-selected=true]').id")
+    print(f'desk: ArrowRight on the ways' tabs: tab {tab0} -> {tab1}, film at {s["t"]} (was {t0})')
     if s['t'] != t0 or s['playing'] or tab0 == tab1: bad(f'ArrowRight on the tabs {s}, tab {tab0} -> {tab1}')
     pg.focus('#code'); pg.keyboard.press(' '); pg.wait_for_timeout(100)
     s = state(); print(f'desk: Space in the code box: film at {s["t"]}, playing {s["playing"]}')
@@ -485,13 +485,13 @@ def arrangement(b, url):
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         m = pg.evaluate("""() => { const r = s => document.querySelector(s).getBoundingClientRect();
           document.querySelector('#film-h').scrollIntoView();  // the film stands below the first screen, under its heading
-          const st = r('.cqf-stage'), bar = r('.cqf-bar'), seek = r('.cqf-seek'), end = r('#example-link').bottom;
+          const st = r('.cqf-stage'), bar = r('.cqf-bar'), seek = r('.cqf-seek'), end = bar.bottom;
           return { vh: innerHeight, sw: document.documentElement.scrollWidth, vw: innerWidth, stage: [st.left, st.width, st.height], whole: [r('#film-h').top, end],
             bar: [bar.left, bar.width, bar.top - st.bottom],  seek: seek.width,
             rows: new Set([...document.querySelectorAll('.cqf-bar > *')].map(e => Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2))).size > 1 ? 2 : 1 }; }""")
         pg.screenshot(path=str(OUT / f'layout-{name}.png'))
         print(f'{name} {w} x {h}: film {m["stage"][1]:.0f} x {m["stage"][2]:.0f}, bar {m["bar"][1]:.0f} wide {m["bar"][2]:.0f} px under it on {m["rows"]} row(s), time bar {m["seek"]:.0f} wide;'
-              f' from its heading to the link under it {m["whole"][0]:.0f} to {m["whole"][1]:.0f} of {m["vh"]}; page {m["sw"]} wide; layout-{name}.png')
+              f' from its heading to its bar\'s foot {m["whole"][0]:.0f} to {m["whole"][1]:.0f} of {m["vh"]}; page {m["sw"]} wide; layout-{name}.png')
         if abs(m['bar'][0] - m['stage'][0]) > 0.5 or abs(m['bar'][1] - m['stage'][1]) > 0.5 or not 0 <= m['bar'][2] <= 12: problems.append(f'{name}: the bar is not under the film and as wide: {m}')
         if m['rows'] != rows: problems.append(f'{name}: the bar on {m["rows"]} row(s), not {rows}')
         if m['seek'] < 150: problems.append(f'{name}: the time bar is {m["seek"]:.0f} px wide')
@@ -598,13 +598,13 @@ def languages(b, url):
     if drafts: print(f'NOTE: the film\'s words in {", ".join(drafts)} are drafts (film.js, CONTENT)')
 
 
-REST = '.steps2, .steps2 *, .how, .how *, .rely, .rely *, .guide, .guide *'  # the page around the film: the two steps, How to ask, the foot, the guidance
+REST = '.get, .get *, .run, .run *, .rely, .rely *, .guide, .guide *'  # the page around the film: the two steps, the foot, the guidance
 STYLES = """(rest) => [...document.querySelectorAll(rest)].map(e => { const c = getComputedStyle(e);
   return [e.tagName, e.className, ...['display', 'font', 'color', 'background-color', 'border', 'border-radius', 'padding', 'margin', 'width', 'grid-template-columns', 'text-decoration-line'].map(k => c.getPropertyValue(k))].join('|'); })"""
 
 
 def rest_unchanged(dist0, dist, port=0):
-    """The page around the film (the two steps, How to ask, the foot, the guidance) against `main`'s: every element's
+    """The page around the film (the two steps, the foot, the guidance) against `main`'s: every element's
     computed style. One port for both: the page shows its own address. A `main` whose page is built differently
     (no such parts) shows up here as a change, which it is."""
     got = {}
@@ -617,7 +617,7 @@ def rest_unchanged(dist0, dist, port=0):
                 pg = b.new_page(viewport=vp)
                 pg.goto(u + '/'); pg.wait_for_load_state('networkidle')
                 got[mode, name] = pg.evaluate(STYLES, REST)
-                if pg.locator('.steps2').count(): pg.locator('.steps2').screenshot(path=str(OUT / f'{mode}-steps-{name}.png'))
+                if pg.locator('.get').count(): pg.locator('.get').screenshot(path=str(OUT / f'{mode}-steps-{name}.png'))
                 pg.close()
             b.close()
         srv.shutdown(); srv.server_close()

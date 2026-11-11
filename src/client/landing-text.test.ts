@@ -4,10 +4,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LANGS, TEXT, askText, chosenLang } from "./landing-text.ts";
 
-test("every language labels the same five parts of its ask, in order, the site's address first", () => {
+test("every language marks the same five parts of its sheets ask, in order, the site's address first", () => {
   for (const { id } of LANGS) {
     const t = TEXT[id];
-    assert.equal(t.labels.length, 5, id);
     assert.deepEqual(t.ask.filter((p) => p.l !== undefined).map((p) => p.l), [0, 1, 2, 3, 4], id);
     assert.equal(t.ask.find((p) => p.l === 0)?.s, "classyquiz.pages.dev", id);
     assert.ok(askText(t).includes("classyquiz.pages.dev"), id);
@@ -80,8 +79,8 @@ test("the built film carries this file's ask, the first screen's words and its o
   for (const { id } of LANGS) {
     const t = TEXT[id];
     const want = {
-      ask: t.ask, code: t.code, what: t.what, wayQuizmaster: t.wayQuizmaster, wayPeers: t.wayPeers, waySolo: t.waySolo,
-      getH: t.getH, gives: t.gives, run: t.run, upload: t.upload, drop: t.drop, noQuiz: t.noQuiz, tryIt: t.tryIt, more: t.more, reading: t.reading,
+      ask: t.ask, code: t.code, what: t.what,
+      getH: t.getH, which: t.which, gives: t.gives, playThis: t.playThis, see: t.see, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading,
       capSheet: t.capSheet, capAi: t.capAi, capZip: t.capZip, capWall: t.capWall, capTap: t.capTap,
       play: t.play, pause: t.pause, speed: t.speed, seek: t.seek,
     };

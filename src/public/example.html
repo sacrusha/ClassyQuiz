@@ -33,6 +33,12 @@
   .ex .convo img { display: block; width: 100%; height: auto; }
   .ex .convo::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5rem; background: linear-gradient(transparent, var(--bg)); }
   .ex .btn.go { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 1.4em; text-decoration: none; font-weight: 700; margin: .5rem 0 .2rem; }
+  /* A mock way's conversation (client/example.ts), until its run: the ask on the right, the AI's answer and file on the left. */
+  .ex .mockchat { display: flex; flex-direction: column; gap: 8px; margin: .6rem 0 .4rem; padding: 12px; border: 1px solid var(--rule); border-radius: 12px; }
+  .ex .mockchat p { margin: 0; max-width: 88%; padding: 8px 13px; line-height: 1.45; }
+  .ex .mockchat .me { align-self: flex-end; background: var(--bubble); border-radius: 16px 16px 4px 16px; }
+  .ex .mockchat .ai { align-self: flex-start; border: 1px solid var(--rule); border-radius: 16px 16px 16px 4px; }
+  .ex .mockchat .file { display: block; width: fit-content; margin-top: 6px; border: 1px solid var(--rule); border-radius: 10px; padding: 2px 10px; font-weight: 600; font-size: .92rem; }
   .ex .translated { border-top: 1px solid var(--rule); padding-top: 1rem; }
 </style>
 </head>
@@ -46,7 +52,7 @@
 <p class="lede" data-t="lede">How the example quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.</p>
 
 <ol class="steps">
-  <li><h2 data-t="sheetsH">The exercise sheets</h2>
+  <li id="sheets"><h2 data-t="sheetsH">The exercise sheets</h2>
     <p data-t="sheetsP">Two maths sheets on number lines, in German, photographed with a phone.</p>
     <div class="pics">
       <a href="/examples/sheet-photo-1.jpg"><img src="/examples/sheet-photo-1.jpg" alt="Photo of page 1" data-t-alt="photo1" width="1200" height="1544"></a>
@@ -59,7 +65,7 @@
     </ul></li>
 
   <li><h2 data-t="convoH">The conversation</h2>
-    <p data-t="convoP">The photos and three asks to the AI. Its first answer was a quiz; the second ask changed it; the third asked for a preview of the screens. Free Claude (Sonnet), 4 November 2026.</p>
+    <p id="convo-p" data-t="convoP">The photos and three asks to the AI. Its first answer was a quiz; the second ask changed it; the third asked for a preview of the screens. Free Claude (Sonnet), 4 November 2026.</p>
     <a class="convo" href="/examples/conversation-en-light.webp" data-convo><picture><source id="convo-dark" media="(prefers-color-scheme: dark)" srcset="/examples/conversation-en-dark.webp"><img id="convo-img" src="/examples/conversation-en-light.webp" alt="The conversation, as a picture" data-t-alt="convoAlt" width="681" height="3675"></picture></a>
     <p><a href="/examples/conversation-en-light.webp" data-convo data-t="readAll">Read the whole conversation &rsaquo;</a></p></li>
 

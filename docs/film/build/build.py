@@ -63,7 +63,7 @@ def look_js():
     return '/* From client/look.ts (types stripped by build.py). */\n' + s
 
 
-LANDING_KEYS = ('code', 'what', 'wayQuizmaster', 'wayPeers', 'waySolo', 'getH', 'gives', 'run', 'upload', 'drop', 'noQuiz', 'tryIt', 'more', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
+LANDING_KEYS = ('code', 'what', 'getH', 'which', 'gives', 'playThis', 'see', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
 
 
 def landing_text():
