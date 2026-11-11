@@ -20,8 +20,10 @@ PUB = REPO / 'public'
 PAGE = ROOT / '.tmp' / 'film' / 'index.html'   # default output, git-ignored
 
 
-# the picture on the AI's file in the root page's first screen, the Quizmaster's, the tab every visit opens on (src/public/landing/way-*.svg)
-WAYS = {'wayQuizmaster': 'way-quizmaster.svg'}
+# the pictures of the ways, on the local check's cards (src/public/landing/way-*.svg), and the face of the AI's file in the root
+# page's first screen, the first tab's, in each language (src/public/landing/face-idea-<lang>.webp, docs/example/faces.py)
+WAYS = {'wayQuizmaster': 'way-quizmaster.svg', 'wayPeers': 'way-peers.svg', 'waySolo': 'way-solo.svg'}
+FACES = {f'face{l.capitalize()}': f'face-idea-{l}.webp' for l in ('de', 'en', 'fr', 'it')}
 
 
 def launch(p):
@@ -63,7 +65,24 @@ def look_js():
     return '/* From client/look.ts (types stripped by build.py). */\n' + s
 
 
-LANDING_KEYS = ('code', 'what', 'getH', 'which', 'subQuizmaster', 'subPeers', 'subSolo', 'unsure', 'gives', 'playThis', 'see', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
+LANDING_KEYS = ('code', 'what', 'getH', 'which', 'tabIdea', 'tabSheets', 'tabNotes', 'tabTest', 'unsure', 'askIdea', 'gives', 'playThis', 'see', 'run', 'upload', 'drop', 'reading', 'capSheet', 'capAi', 'capZip', 'capWall', 'capTap', 'play', 'pause', 'speed', 'seek')
+
+
+def file_size(lang, n):
+    """The file's size as the page writes it (landing-text.ts, size): KB or MB of 1024, the language's decimal sign and units;
+    client/landing-text.test.ts holds the two to each other."""
+    kb, mb = ('Ko', 'Mo') if lang == 'fr' else ('KB', 'MB')
+    if n < 1048576:
+        return f'{max(1, int(n / 1024 + 0.5))} {kb}'
+    v = f'{n / 1048576:.1f}'
+    return f'{v if lang == "en" else v.replace(".", ",")} {mb}'
+
+
+def idea_file():
+    """The first tab's file per language as the page names it: its name and size, from client/example-files.ts."""
+    src = (REPO / 'client/example-files.ts').read_text(encoding='utf-8')
+    data = json.loads(src[src.index('= {') + 2:src.rindex('} as const') + 1])
+    return {lang: (f['zip'], file_size(lang, f['bytes'])) for lang, f in data['idea'].items()}
 
 
 def landing_text():
@@ -95,6 +114,7 @@ def landing_text():
             if not v:
                 raise SystemExit(f'landing-text.ts {lang}: no plain string "{k}"')
             words[k] = json.loads(v.group(1))
+        words['zipIdea'], words['sizeIdea'] = idea_file()[lang]
         out[lang] = words
     return out
 
@@ -116,6 +136,7 @@ def main(out=None):
         'sheet1': data_uri(PUB / 'landing/sheet-1.webp', 'image/webp'),
         'sheet2': data_uri(PUB / 'landing/sheet-2.webp', 'image/webp'),
         **{k: data_uri(PUB / f'landing/{f}', 'image/svg+xml') for k, f in WAYS.items()},
+        **{k: data_uri(PUB / f'landing/{f}', 'image/webp') for k, f in FACES.items()},
         'lockup': (PUB / 'brand/classyquiz-horizontal-32-inline.svg').read_text(encoding='utf-8').strip(),
         'fox': (PUB / 'brand/classyquiz-symbol-colour.svg').read_text(encoding='utf-8').strip(),
     }

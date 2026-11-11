@@ -79,11 +79,12 @@ test("the static page carries the English table's words", async () => {
   for (const key of ["what", "tabIdea", "tabSheets", "tabNotes", "tabTest", "unsure", "help", "getH", "which", "gives", "see", "run", "upload", "relyKept", "manual"]) assert.ok(seen.has(key), `index.html has no ${key}`);
 });
 
-// The film (public/js/film.js) types the example ask, shows the words of the page's first screen and names its chapters and controls as this file has them, copied in when
+// The film (public/js/film.js) types the sheets ask, shows the words of the page's first screen and its first tab's file, and names its chapters and controls as this file has them, copied in when
 // docs/film/build/sitebuild.py builds it; its pictures are rendered then too. A change here without a rebuild would leave
 // the film saying the old words: this fails until sitebuild.py has run.
 test("the built film carries this file's ask, the first screen's words and its own names", async () => {
   const { readFile } = await import("node:fs/promises");
+  const { EXAMPLE_FILES } = await import("./example-files.ts");
   const js = await readFile(new URL("../public/js/film.js", import.meta.url), "utf8");
   const m = js.match(/const LANDING = (\{.*\});\n/);
   assert.ok(m, "no LANDING in public/js/film.js");
@@ -92,9 +93,12 @@ test("the built film carries this file's ask, the first screen's words and its o
     const t = TEXT[id];
     const want = {
       ask: t.ask, code: t.code, what: t.what,
-      getH: t.getH, which: t.which, subQuizmaster: t.subQuizmaster, subPeers: t.subPeers, subSolo: t.subSolo, unsure: t.unsure, gives: t.gives, playThis: t.playThis, see: t.see, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading,
+      getH: t.getH, which: t.which, tabIdea: t.tabIdea, tabSheets: t.tabSheets, tabNotes: t.tabNotes, tabTest: t.tabTest, unsure: t.unsure, askIdea: t.askIdea,
+      gives: t.gives, playThis: t.playThis, see: t.see, run: t.run, upload: t.upload, drop: t.drop, reading: t.reading,
       capSheet: t.capSheet, capAi: t.capAi, capZip: t.capZip, capWall: t.capWall, capTap: t.capTap,
       play: t.play, pause: t.pause, speed: t.speed, seek: t.seek,
+      // the first tab's file, as the page names it
+      zipIdea: EXAMPLE_FILES.idea[id].zip, sizeIdea: t.size(EXAMPLE_FILES.idea[id].bytes),
     };
     assert.deepEqual(built[id], JSON.parse(JSON.stringify(want)), `${id}: run docs/film/build/sitebuild.py`);
   }

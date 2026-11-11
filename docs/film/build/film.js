@@ -36,10 +36,12 @@
   // words (SITE below). One quiz in every language: the example's 646 000 arrow
   // question, translated, so every language shows the same film.
 
-  /** The root page's words from client/landing-text.ts, filled in by build.py: per language the example ask
-      ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what, getH, which,
-      the tabs' subQuizmaster, subPeers, subSolo and unsure, gives, playThis, see, run, upload, drop) and reading, the chapters' names (capSheet, capAi, capZip,
-      capWall, capTap) and the player's (play, pause, speed, seek). */
+  /** The root page's words from client/landing-text.ts, filled in by build.py: per language the sheets ask, which the
+      film types ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what,
+      getH, which, the tabs' names tabIdea, tabSheets, tabNotes, tabTest and unsure, the first tab's ask askIdea, gives,
+      playThis, see, run, upload, drop) and reading, the first tab's file as the page names it (zipIdea, its name, and
+      sizeIdea, its size, from client/example-files.ts), the chapters' names (capSheet, capAi, capZip, capWall, capTap) and
+      the player's (play, pause, speed, seek). */
   const LANDING = /*@LANDING@*/ {};
 
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
@@ -163,13 +165,14 @@
       zipTitle: Q.zipTitle, title: Q.title, q1: Q.q1,
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
-      // the root page's first screen (client/landing-text.ts): the sentence, the first step's heading, the ways as tabs in words
-      // (their names are the entries' own, in every language, each with whose case it is; the fourth, for whoever is unsure,
-      // has its name alone), the chat with the Quizmaster's ask as the page prints it, plain, the file it brought and what to do
-      // with it, and the box
-      what: L.what, ways: [['Quizmaster', L.subQuizmaster], ['Peers', L.subPeers], ['Solo', L.subSolo], [L.unsure, null]],
+      // the root page's first screen (client/landing-text.ts): the sentence, the first step's heading, the examples as tabs
+      // in words, one word each, then the help tab; the chat with the first tab's ask as the page prints it, the file it brought,
+      // its face the quiz's first question (the page's picture of it in this language, /landing/face-idea-<lang>.webp), its name
+      // and size, what to do with it; and the box
+      what: L.what, tabs: [L.tabIdea, L.tabSheets, L.tabNotes, L.tabTest, L.unsure],
       getH: L.getH, which: L.which, gives: L.gives, playThis: L.playThis, see: L.see, zipFile: Q.zipFile,
-      askPlain: [[glue(L.ask.map((p) => p.s).join(''))]],
+      zipIdea: L.zipIdea, sizeIdea: L.sizeIdea, face: 'face' + lang[0].toUpperCase() + lang.slice(1),
+      askPlain: [[glue(L.askIdea)]],
       // [name, film time, key]; the player's names (play, pause, speed, the time bar) in the page's language
       chapters: COMMON.chapters.map(([at, key]) => [L[key], at, key]),
       ui: Object.assign({}, COMMON.ui, { play: L.play, pause: L.pause, speed: L.speed, seek: L.seek }),
@@ -1065,45 +1068,45 @@
       const headBot = hTop + 24 + (whichDown ? 19.7 : 0);
       G(g, `${num(hTop + 0.5 + 11.6, '1')}${T_(0, lineOf(hTop, 24, 19.2), TX.getH, 19.2, { cls: 'b', fit: 672 })}
         ${T_(whichDown ? 0 : hw + 12, whichDown ? lineOf(hTop + 24, 19.7, 14.08) : lineOf(hTop, 24, 19.2), TX.which, 14.08, { fill: C.muted, fit: whichDown ? 672 : 672 - hw - 12 })}`);
-      // the ways to play, tabs in words: the name and whose case it is, the Quizmaster's open into the chat (the card's ground,
-      // the chat's border round it), the others on the tab ground; widths as the page's flex shares them (1.3, 1, 1, .8 of
-      // what is left over the gaps, the padding and the borders)
-      const waysTop = headBot + 8.8, tabH = 51.2, chatTop = waysTop + tabH - 1;
-      const GROW = [1.3, 1, 1, 0.8], share = (672 - 3 * 4 - 4 * 22) / GROW.reduce((a, b) => a + b, 0);
+      // the examples, tabs in words, one line each, the first open into the chat (the card's ground, the chat's border round
+      // it), the others on the tab ground; each as wide as its name, its padding and its borders, and what is left of the row
+      // shared evenly, as the page's flex has it
+      const waysTop = headBot + 8.8, tabH = 34.2, chatTop = waysTop + tabH - 1;
+      const natural = TX.tabs.map((name) => measure(name, 16, 'b') + 26);
+      const share = Math.max(0, 672 - 4 * (TX.tabs.length - 1) - natural.reduce((a, b) => a + b, 0)) / TX.tabs.length;
       let tx = 0;
-      const tabs = TX.ways.map(([name, sub], i) => { const w = 22 + GROW[i] * share, t = { x: tx, w, name, sub }; tx += w + 4; return t; });
+      const tabs = TX.tabs.map((name, i) => { const w = natural[i] + share, t = { x: tx, w, name }; tx += w + 4; return t; });
       tabs.forEach((t, i) => {
         const on = i === 0;
         G(g, `${box(t.x + 0.5, waysTop + 0.5, t.w - 1, tabH, [12, 12, 0, 0], on ? `fill="${C.card}" stroke="${C.rule}"` : `fill="${C.codeBg}"`)}
-          ${T_(t.x + 11, lineOf(waysTop + 7, 19.2, 16), t.name, 16, { cls: 'b', fill: on ? C.ink : C.muted, fit: t.w - 22 })}
-          ${t.sub ? T_(t.x + 11, lineOf(waysTop + 27.2, 16, 12.8), t.sub, 12.8, { fill: C.muted, fit: t.w - 22 }) : ''}`);
+          ${T_(t.x + 13, lineOf(waysTop + 8, 19.2, 16), t.name, 16, { cls: 'b', fill: on ? C.ink : C.muted, fit: t.w - 26 })}`);
       });
-      // the chat, where the ask is typed: the ask the visitor's message on the right, the two sheets it attaches beside it;
-      // the AI's answer under it, a file whose face is the Quizmaster's picture, its name and "Play this quiz ↓" on it, and
+      // the chat, where the ask is typed: the first tab's ask, the visitor's message on the right, nothing attached; the AI's
+      // answer under it, a file whose face is the quiz's first question, its name and size and "Play this quiz ↓" on it, and
       // the whole example beside the card's foot
-      const bTop = chatTop + 13, bR = 657, bW = 522, bL = bR - bW;
+      const bTop = chatTop + 13, bR = 657;
       const ask = wrap(TX.askPlain, 15.68, 496, () => '');
+      const bW = Math.min(496, Math.max(...ask.lines.map((l) => lineW(l, 15.68, () => '')))) + 26, bL = bR - bW;
       const bH = ask.lines.length * 23.52 + 18, bBot = bTop + bH;
       const aTop = bBot + 10, fTop = aTop + 20.16 + 4, fH = 161, fBot = fTop + fH;
-      const zw = 15 + 7 + measure(TX.zipFile, 15.2, 'ts'), pw = measure(TX.playThis, 15.2, 'tb') + 27;
+      const zw = 15 + 7 + measure(TX.zipIdea, 15.2, 'ts'), pw = measure(TX.playThis, 15.2, 'tb') + 27;
       const metaW = Math.max(zw, pw) + 12, fW = 1 + 7 + 232 + 14 + metaW + 7 + 1, mx = 15 + 1 + 7 + 232 + 14;
-      const mTop = fTop + (fH - 61.6) / 2, pTop = mTop + 19.8 + 10;
+      const metaH = 19.76 + 17.06 + 9 + 31.3, mTop = fTop + (fH - metaH) / 2, sTop = mTop + 19.76, pTop = sTop + 17.06 + 9;
       const chatBot = fBot + 12 + 1, sx = 15 + fW + 16;
       G(g, `${box(0.5, chatTop + 0.5, 671, chatBot - chatTop - 1, [0, 14, 14, 14], `fill="${C.card}" stroke="${C.rule}"`)}
         <rect x="1" y="${f1(chatTop - 1)}" width="${f1(tabs[0].w - 2)}" height="2.5" fill="${C.card}"/>
         ${box(bL, bTop, bW, bH, [16, 16, 4, 16], 'fill="#f4ebe1"')}`);
       drawLines(g, ask, bL + 13, lineOf(bTop + 9, 23.52, 15.68), 15.68, 23.52, plain).show(ask.total);
-      // the sheets, 54 px high, the first turned -4°, the second 3° and tucked under it (the page's .att)
-      const attX = bL - 10 - (41.9 + 41.9 - 24), attY = bTop + 7;
-      [[attX, attY, -4, 'sheet1'], [attX + 41.9 - 24, attY + 5, 3, 'sheet2']].forEach(([x, y, r, k]) => G(g, `<g transform="rotate(${r} ${f1(x + 20.95)} ${f1(y + 27)})"><rect x="${f1(x + 0.5)}" y="${f1(y + 1)}" width="41.9" height="54" fill="#000" opacity=".18"/><rect x="${f1(x)}" y="${f1(y)}" width="41.9" height="54" fill="#fff"/><image href="${ASSETS[k] || ''}" x="${f1(x)}" y="${f1(y)}" width="41.9" height="54" preserveAspectRatio="none"/></g>`));
       const sceneId = `cq-scene${n}`;
       G(g, `${T_(15, lineOf(aTop, 20.16, 14.4), TX.gives, 14.4, { fill: C.muted })}
         ${box(15.5, fTop + 0.5, fW - 1, fH - 1, [14, 14, 14, 4], `fill="${C.paper}" stroke="${C.rule}"`)}
         <clipPath id="${sceneId}"><rect x="23" y="${f1(fTop + 8)}" width="232" height="145" rx="8"/></clipPath>
-        <rect x="23" y="${f1(fTop + 8)}" width="232" height="145" rx="8" fill="#efe6d8"/>
-        <image href="${ASSETS.wayQuizmaster || ''}" x="23" y="${f1(fTop + 8)}" width="232" height="145" clip-path="url(#${sceneId})" preserveAspectRatio="none"/>
+        <rect x="22" y="${f1(fTop + 7)}" width="234" height="147" rx="9" fill="${C.rule}"/><rect x="23" y="${f1(fTop + 8)}" width="232" height="145" rx="8" fill="${C.paper}"/>
+        <image href="${ASSETS[TX.face] || ''}" x="23" y="${f1(fTop + 8)}" width="232" height="145" clip-path="url(#${sceneId})" preserveAspectRatio="none"/>
         <path transform="translate(${f1(mx)} ${f1(mTop)})" d="M1.5 1h7.5l4.5 4.5V18h-12zM9 1v4.5h4.5" fill="none" stroke="${C.accent}" stroke-width="1.6" stroke-linejoin="round"/>
-        ${T_(mx + 22, lineOf(mTop, 19.76, 15.2), TX.zipFile, 15.2, { cls: 'ts' })}
+        ${T_(mx + 22, lineOf(mTop, 19.76, 15.2), TX.zipIdea, 15.2, { cls: 'ts' })}
+        ${T_(mx + 22, lineOf(sTop, 17.06, 13.12), TX.sizeIdea, 13.12, { fill: C.muted })}
+        <path transform="translate(${f1(mx + 22 + measure(TX.sizeIdea, 13.12, '') + 3)} ${f1(sTop + 3.5)})" d="M5.5 1v7M2.3 5.2 5.5 8.4 8.7 5.2M1 11h9" fill="none" stroke="${C.muted}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         <rect x="${f1(mx + 0.75)}" y="${f1(pTop + 0.75)}" width="${f1(pw - 1.5)}" height="30.3" rx="10" fill="none" stroke="${C.ink}" stroke-width="1.5"/>
         ${T_(mx + pw / 2, lineOf(pTop + 6.5, 19.76, 15.2), TX.playThis, 15.2, { cls: 'tb', anchor: 'middle' })}
         ${T_(sx, lineOf(fBot - 4 - 5 - 20.16, 20.16, 14.4), TX.see, 14.4, { cls: 'ts', fill: C.accent, fit: 657 - sx })}`);
@@ -1442,21 +1445,24 @@
       const plain = { clsOf: () => '', fillOf: () => null, underline: () => null };
       const titleLine = (y, fit = 1280) => `<text x="160" y="${y}" font-size="52" class="tb" data-fit="${fit}">${esc(TX.title)}<tspan fill="${C.muted}" font-size="36" font-weight="600">${esc(TX.nq)}</tspan></text>`;
       const button = (x, y, w, h, label, size, primary) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${primary ? C.ink : '#fff'}" stroke="${primary ? C.ink : C.rule}" stroke-width="3"/>${T_(x + w / 2, y + h / 2 + size * 0.36, label, size, { cls: 'ts', fill: primary ? '#fff' : C.ink, anchor: 'middle', fit: w - 30 })}`;
-      // the local check: three cards side by side, each its name, its line, its button (the three alike, none primary) and its quiet line
-      const local = G(page, `<rect width="${W}" height="${H}" fill="${C.paper}"/>${header}${titleLine(196)}${T_(160, 262, TX.playedAsk, 32, { cls: 'b', fit: 1280 })}`);
-      const CW = 413, CG = 20, CY = 290, CP = 28;
+      // the local check: three cards side by side, each the picture of its way, its name, its line, its button (the three alike,
+      // none primary) and its quiet line
+      const local = G(page, `<rect width="${W}" height="${2 * H}" fill="${C.paper}"/>${header}${titleLine(196)}${T_(160, 262, TX.playedAsk, 32, { cls: 'b', fit: 1280 })}`);
+      const CW = 413, CG = 20, CY = 290, CP = 28, PW = CW - 2 * CP, PH = PW * 10 / 16, PY = CY + 24, NY = PY + PH + 24;
       const cards = TX.entries.map((e, i) => {
         const x = 160 + i * (CW + CG);
         const cg = G(local);
         const line = wrap([[e.line]], 28, CW - 2 * CP, plain.clsOf);
         const note = wrap([[e.note]], 22, CW - 2 * CP, plain.clsOf);
         const bw = measure(e.button, 30, 'ts') + 64;
-        const lineY = CY + 112, btnY = lineY + line.lines.length * 38 - 6, noteY = btnY + 76 + 40;
+        const lineY = NY + 86, btnY = lineY + line.lines.length * 38 - 6, noteY = btnY + 76 + 40;
         return { x, cg, line, note, bw, lineY, btnY, noteY, e, i, bottom: noteY + (note.lines.length - 1) * 30 + 34 };
       });
       const CH = Math.max(...cards.map((c) => c.bottom)) - CY;
       cards.forEach((c) => {
-        G(c.cg, `<rect x="${c.x}" y="${CY}" width="${CW}" height="${CH}" rx="22" fill="#fff" stroke="${C.rule}" stroke-width="3"/>${T_(c.x + CP, CY + 62, c.e.name, 40, { cls: 'b', fit: CW - 2 * CP })}
+        G(c.cg, `<rect x="${c.x}" y="${CY}" width="${CW}" height="${CH}" rx="22" fill="#fff" stroke="${C.rule}" stroke-width="3"/>
+          <image href="${ASSETS['way' + c.e.name] || ''}" x="${c.x + CP}" y="${PY}" width="${PW}" height="${f1(PH)}" preserveAspectRatio="none"/>
+          ${T_(c.x + CP, NY + 36, c.e.name, 40, { cls: 'b', fit: CW - 2 * CP })}
           ${button(c.x + CP, c.btnY, c.bw, 76, c.e.button, 30, false)}`);
         drawLines(c.cg, c.line, c.x + CP, c.lineY, 28, 38, plain).show(c.line.total);
         drawLines(c.cg, c.note, c.x + CP, c.noteY, 22, 30, Object.assign({ fill: C.muted }, plain)).show(c.note.total);
@@ -1465,10 +1471,10 @@
       // under the cards, out of the frame: the questions, folded ("If you will play it yourself, leave this closed.")
       G(local, `<rect x="160" y="${CY + CH + 30}" width="1280" height="2" fill="${C.rule}"/>`);
       // The camera on a page: [x, y, zoom], the page's point at the frame's top left and the scale. The whole width first, then in
-      // on Quizmaster's card, its line (28 units) and its button large enough to read on a phone; the page's right edge stays the
-      // frame's, so Peers is half in the frame, the card that is passed.
+      // on Quizmaster's card, its name, its line (28 units) and its button large enough to read on a phone, its picture above them
+      // in part; the page's right edge stays the frame's, so Peers is half in the frame, the card that is passed.
       const ZQ = 1.8;
-      const qmView = [W - W / ZQ, CY - 70, ZQ];
+      const qmView = [W - W / ZQ, NY - 120, ZQ];
       const viewOf = (v, k) => [lerp(0, -v[0] * v[2], k), lerp(0, -v[1] * v[2], k), lerp(1, v[2], k)];
       const inView = (v, x, y) => [(x - v[0]) * v[2], (y - v[1]) * v[2]];
       // The lobby's check as it opens on a first visit: Screen and remote pressed, so the how-to with the teacher code is there,

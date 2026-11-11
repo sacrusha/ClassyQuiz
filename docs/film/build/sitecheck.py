@@ -224,7 +224,9 @@ def check(url, mode):
         # 1. before any press, then ▶
         ctx, pg, log = page(b, mode)
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
-        html = pg.evaluate('document.documentElement.outerHTML')
+        # The faces of the examples' files are named by each quiz's first question, the sheets example's being the film's
+        # question 1: the page's own words for a picture, made by the script (docs/design/root-page.md, "Getting a quiz").
+        html = pg.evaluate("(() => { const d = document.documentElement.cloneNode(true); d.querySelectorAll('.face img').forEach((i) => i.removeAttribute('alt')); return d.outerHTML; })()")
         for w in FILM_WORDS:
             if w in html: problems.append(f'{mode}: the page HTML holds the film\'s words "{w}"')
         raw = (WORK / 'src/dist/index.html').read_text(encoding='utf-8')
