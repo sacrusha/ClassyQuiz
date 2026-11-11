@@ -113,7 +113,7 @@ function renderCheck(): void {
   // An entry that played in this page (Solo) gives it back: the check's own page, as open.html has it.
   document.body.className = "follows-dark";
   main.className = "check open-check";
-  main.innerHTML = `<div class="checkhead"><h1 class="ctitle">${lines(q.quiz.title || "Quiz")} <span class="cnum">· ${T.questions(n)}</span></h1></div>
+  main.innerHTML = `<div class="checkhead"><h1 class="ctitle counted"><span>${lines(q.quiz.title || "Quiz")}</span> <span class="cnum">${T.questions(n)}</span></h1></div>
     ${ENTRIES.length > 1 ? `<h2 class="open-ask">${esc(T.howPlayed)}</h2>` : ""}
     <div class="open-entries">${ENTRIES.map(entryCard).join("")}</div>
     <details class="open-fold"${foldOpen ? " open" : ""}>

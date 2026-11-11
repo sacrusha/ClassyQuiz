@@ -287,7 +287,7 @@ function renderCheck(v: ScreenView): void {
   const gone = t.remote === "away" ? `${T.remoteGone}. ` : "";
   const html = `<div class="check">
     <div class="checkhead">
-      <h1 class="ctitle">${lines(v.title || "Quiz")} <span class="cnum">· ${T.questions(nq)}</span></h1>
+      <h1 class="ctitle counted"><span>${lines(v.title || "Quiz")}</span> <span class="cnum">${T.questions(nq)}</span></h1>
       <p class="classcode">${T.joinCode} <strong>${esc(v.code)}</strong>${n > 0 ? ` <span class="joinedn">${ICON.person}${live("joined", n)}</span>` : ""}</p>
     </div>
     ${roomNotice(t)}
