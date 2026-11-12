@@ -605,8 +605,9 @@ deployed to the public site.
    d. **Peers' example** — friends see that one of them asks and plays too.
       The owner's baseline, to exceed: "I'm at a desk preparing for an exam
       with my friends, these are the class notes - can you make us a short
-      10 minute quiz to learn and have fun together?" A mock stands in, as
-      for Solo, the tab "Notes". Open: the owner's run.
+      10 minute quiz to learn and have fun together?" Built: the owner's
+      run (12 Nov 2026), the tab "Notes" (`design/root-page.md`, "Getting a
+      quiz"; `design/example-page.md`).
 
    e. **Whoever recognises none of the three, or has a question first** —
       built as a fifth tab, "Not sure?": the ask that takes no knowing how
@@ -660,9 +661,10 @@ deployed to the public site.
       point, the button that opens a file cut by the screen's edge, is
       settled on the tab every visit opens on, at 360 × 640 and larger, in
       the four languages (the figures: `design/root-page.md`, "One
-      column"). Open: the Notes and Test tabs, taller with their mock asks
-      and the mock marker, put it at the edge or below it at 360 × 640;
-      the owner's asks are measured again. The tab row is the most fragile
+      column"). Open: at 360 × 640 the Notes tab cuts it by 2 px in German
+      and French, and the Test tab, taller with its mock ask and the mock
+      marker, puts it at the edge or below; the owner's Test ask is
+      measured again. The tab row is the most fragile
       fit (`design/root-page.md`, "Getting a quiz").
 
    c. **The film and the full examples show the page that exists** (v6
@@ -779,7 +781,7 @@ With the owner, what only he can do:
   Claude." stands beside it on the tab every visit opens on, and free Claude
   is verified for the sheets run only (`design/guidance-page.md`, "The AIs
   verified against").
-- The mocks on the root page (Notes, Test, "Not sure?") until his runs
+- The mocks on the root page (Test, "Not sure?") until his runs
   replace them: the deploy script has nothing that holds a deploy back while
   they exist.
 - Two cuts made with "What you can count on" that he has not seen: the

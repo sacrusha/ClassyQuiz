@@ -69,13 +69,16 @@ the other languages drawn from their translated `.zip` by the site's
 `preview.py`, the script the guidance offers the AI for it); then the quiz
 and its start, and a note that the run was made in German and the other
 pages show it translated (words: `IDEA_TEXT` in `client/example-text.ts`;
-pictures: `docs/example/README.md`). `?ex=notes` and `?ex=test` are the full
-examples of the Notes and Test tabs, whose runs are mocks until the owner's
-(backlog, "The page for people", item 1): the same four steps, with the mock
-attachment in place of the photographs, a made-up conversation made by the
-script and said to be made up (`MOCK_TEXT`), the mock `.zip`
-(`docs/example/mock_zips.py`), which holds the quiz without pictures, and its
-start, and without the note below.
+pictures: `docs/example/README.md`). `?ex=notes` is the Notes tab's, the
+owner's notes run (12 Nov 2026, English): the same four steps, the notes'
+two pages and their PDF in place of the photographs, the conversation as a
+picture, the quiz and its start, and a note that the run was made in English
+and the other pages show it translated (words: `NOTES_TEXT`). `?ex=test` is
+the Test tab's, whose run is a mock until the owner's (backlog, "The page
+for people", item 1): the same four steps, with the mock attachment in place
+of the photographs, a made-up conversation made by the script and said to be
+made up (`MOCK_TEXT`), the mock `.zip` (`docs/example/mock_zips.py`), which
+holds the quiz without pictures, and its start, and without the note below.
 
 Each page is one example of the landing's four, so its words name its quiz
 ("How the number-line quiz was made") and start "this quiz"; the heading,
@@ -108,6 +111,9 @@ camera's metadata.
 - The space run's English, French and Italian: its conversation, its quiz and
   its drawings' words are drafts, and its overview in those languages is the
   site's `preview.py`'s, not an AI's.
+- The notes run's plan: the screenshot shows Sonnet 5.5, not which plan.
+  Its German, French and Italian conversation and quiz are drafts; the notes
+  in those languages are the owner's.
 
 - The conversation and the `.zip` ("Big numbers on the number line",
   13 questions) are one real run, reviewed by the owner; the zip is that run's

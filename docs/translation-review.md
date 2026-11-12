@@ -93,8 +93,11 @@ For the read:
   questions without it getting repetitive?", "Tu arrives à faire 20 questions sans que ça
   devienne répétitif⍽?", "Riesci a fare 20 domande senza che diventi ripetitivo?". French
   "niveau CM1" and Italian "quarta elementare", as the sheets ask's grade.
-- **The notes' and the test's asks** are stand-ins until the owner's runs, and go with them;
-  their words aside, French "notes de cours" (above, the tabs).
+- **The notes' ask** is the owner's run's, English; the other three say the same, with "zum
+  gemeinsamen Spielen / pour jouer ensemble / da giocare insieme" for "to play together". The
+  notes run's conversation and quiz use each language's own notes' terms (`docs/example/notes_text.py`, `notes_zips.py`): "nach
+  Köpfen", "par député", "per testa" for the vote by head.
+- **The test's ask** is a stand-in until the owner's run, and goes with it.
 - **Small words**: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute" over the film ("zur spielenden Klasse" was the English
   participle); "Die Seite kann dieses Quiz noch nicht starten:", the subject first, since "Dieses
   Quiz kann die Seite …" doesn't show which of the two can't. French "Code pour participer" on
@@ -207,7 +210,7 @@ moment means in the language, not the English words. Open for you:
   quiz", "Avvia questo quiz"; the sheets page's lede names its quiz: "das Quiz zum
   Zahlenstrahl", "le quiz sur la droite graduée", "il quiz sulla retta numerica".
 - French on `/example` has U+202F before ; : ? !, as the first page has.
-- The stand-ins' pages (`MOCK_TEXT`, Notes and Test) go with the mocks; no read needed.
+- The stand-in's page (`MOCK_TEXT`, Test) goes with the mock; no read needed.
 
 The quizzes (`quiz_zips.py`): questions 7–13 read as the sheets' own instructions in de and as
 the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.

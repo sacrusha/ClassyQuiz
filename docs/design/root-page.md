@@ -158,14 +158,15 @@ The phone's tighter spacing (the stylesheet's block for windows up to 600 px)
 is kept from the page before; whether the first tab still needs it to hold
 German at 360 × 640 wasn't measured. Another tab can be taller than the first, and the box
 moves down by the difference. On Sheets the button is whole at every size
-from 360 × 640 up (19 px at least, German and French at 360 × 640). With
-the mock asks of Notes and Test, and the marker of a stand-in, which takes a
-row of its own on a phone, at 360 × 640 the button reaches the edge on
-English Notes, Italian Notes and Test and French Test, and is cut by 3 px in
-German (Notes, Test) and by 21 on French Notes; at 390 × 664 and on a 1366 × 650
-laptop it is whole on every tab (19 and 9 px at least). A
-visitor who has chosen a tab is reading the chat, not looking for the box;
-the asks that replace the mocks are measured again. A quiz to come back to
+from 360 × 640 up (19 px at least, German at 360 × 640). On Notes it is
+whole from 390 × 664 up (17 px at least, German) and on a 1366 × 650 laptop
+(9 px, German and French); at 360 × 640 it is 19 px above the edge in
+English and Italian and cut by 2 px in German and French. With the mock
+ask of Test, and the marker of a stand-in, which takes a row of its own on
+a phone, at 360 × 640 the button reaches the edge in Italian and French and
+is cut by 3 px in German. A visitor who has chosen a tab is reading the
+chat, not looking for the box; the ask that replaces the Test mock is
+measured again. A quiz to come back to
 stands above all of it and moves the rest down by its height, about 110 px on
 a laptop and 180 to 205 on a 360 px phone; "Back to the quiz" is in the first
 screen at every size above. No window tried scrolls the page sideways; at
@@ -358,18 +359,17 @@ check, for any file (`local-check.md`).
   `example-page.md`, Not known) and four it drew; every visit opens on it, since it answers most
   directly the bias the owner named: a bubble with nothing attached, and a
   result with pictures. **Sheets**: the worked example's run, a teacher
-  with exercise sheets. **Notes**: friends with their class notes before an
-  exam, the one who asks playing too ("I'm playing too, so don't show me the
-  questions"). **Test**: a learner with a marked test, practising for a time
-  rather than a number of questions, mostly on what they got wrong ("Don't
-  show me the questions, I'll play it myself"). The two who play say so: the
-  asker's side of what the guidance tells the AI (`guidance-page.md`, "The
-  user who plays"). The notes' and the test's asks exceed the owner's
-  baselines (backlog items 1c, 1d) by saying where the quiz will be played
-  and that the asker plays it, and the test's by asking for minutes, which
-  the AI turns into questions (alone, a question may take less time than in
-  a class). Their attachments, files, full examples and the "Not sure?" tab's
-  answer are mocks, marked as stand-ins beside the first step's heading
+  with exercise sheets. **Notes**: the owner's run with class notes (12 Nov
+  2026, English), friends before a history exam who play together; the AI
+  kept the questions out of the chat, since the asker plays. **Test**: a
+  learner with a marked test, practising for a time rather than a number of
+  questions, mostly on what they got wrong ("Don't show me the questions,
+  I'll play it myself"). The test's ask exceeds the owner's baseline
+  (backlog item 1c) by saying that the asker plays it and by asking for
+  minutes, which the AI turns into questions (alone, a question may take
+  less time than in a class). Its attachment, file, full example and the
+  "Not sure?" tab's answer are mocks, marked as stand-ins beside the first
+  step's heading
   while their tab is chosen ("mock example", "Platzhalter", "provisoire",
   "segnaposto"; made by the script, so a fetcher doesn't read it), until the
   owner's runs (backlog item 1); nothing with a mock is deployed. Weighed for the first tab: Sheets, the
@@ -387,6 +387,9 @@ check, for any file (`local-check.md`).
   `/example` translates it (`docs/example/space_text.py`), tidied as the
   German is, and play its quiz translated (`docs/example/space_zips.py`), as
   the sheets run's are. The face of each is its own language's quiz.
+  The notes' ask is the owner's, with a workaround of that day cut from it
+  (`docs/example/notes_text.py`); the other languages show it, the
+  notes it attaches and its quiz translated (`docs/example/`).
 
 Every ask opens with "Read <address>." and calls the quiz "a classyQuiz". A
 Sonnet-class model told only "make me a quiz for <address>" read the address as
