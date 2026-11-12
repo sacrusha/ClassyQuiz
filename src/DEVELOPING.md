@@ -47,8 +47,14 @@ All commands run in `src/` unless said otherwise.
   straight from `public/`, a page shows no mark. Which file goes where:
   `docs/design/identity.md`.
 - `public/site.css`: the shared look. Every page links it first; in `dist/`
-  it is the front of `app.css`, or written into a page without `app.css`
-  (`build.mjs`), so there is no `dist/site.css`.
+  it is the front of `app.css` and `home.css`, or written into a page
+  without either (`build.mjs`), so there is no `dist/site.css`.
+- `public/home.css`: the root page's styles, a file rather than the page's
+  own `<style>`, so that `index.html`, where the manual is written, holds
+  markup and text.
+- `dist/manual.txt`: the manual as plain text, made by `build.mjs` from the
+  built page; it knows the elements the guidance uses and fails the build on
+  another.
 - `public/app.css`: one namespace for every app page and `/example`, so a
   new class can pick up an old rule (`.device` is the network check's line)
   and a bare new rule can land on another page (`docs/backlog.md`,

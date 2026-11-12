@@ -101,19 +101,20 @@ for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
 
 // site.css (the shared look) arrives with what a page already loads, so a
 // device opening a page at lesson start waits for one stylesheet at most: in
-// front of app.css for the app pages, written into the page for those with
-// their own <style> (the root page among them). A page links /site.css
-// first in public/, which also works opened straight from there.
+// front of app.css for the app pages and of home.css for the root page,
+// written into the page for those with their own <style>. A page links
+// /site.css first in public/, which also works opened straight from there.
 {
   const site = await readFile(join(dist, "site.css"), "utf8");
-  await writeFile(join(dist, "app.css"), `${site}\n${await readFile(join(dist, "app.css"), "utf8")}`);
+  const sheets = ["app.css", "home.css"];
+  for (const sheet of sheets) await writeFile(join(dist, sheet), `${site}\n${await readFile(join(dist, sheet), "utf8")}`);
   const inline = site.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\n\s*\n+/g, "\n").trim();
   const link = '<link rel="stylesheet" href="/site.css">\n';
   for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
     const page = join(dist, name);
     const html = await readFile(page, "utf8");
     if (!html.includes(link)) throw new Error(`${name}: doesn't link /site.css`);
-    const out = html.includes('<link rel="stylesheet" href="/app.css">')
+    const out = sheets.some((sheet) => html.includes(`<link rel="stylesheet" href="/${sheet}">`))
       ? html.replace(link, "")
       : html.replace(link, () => `<style>\n${inline}\n</style>\n`);
     await writeFile(page, out);
@@ -136,6 +137,82 @@ if (address !== DEMO) {
     const page = join(dist, name);
     await writeFile(page, (await readFile(page, "utf8")).replaceAll(DEMO, address));
   }
+}
+
+// The manual as plain text, /manual.txt, from the built page so that it
+// names the same address. A fetch tool may hand an AI a small model's summary
+// of the page; an AI with a shell can fetch this text itself
+// (docs/design/guidance-page.md, "Situation").
+{
+  const html = await readFile(join(dist, "index.html"), "utf8");
+  const start = html.indexOf('<div class="guide">');
+  const end = html.lastIndexOf("</div>", html.indexOf("</main>"));
+  if (start < 0 || end < start) throw new Error("index.html: no <div class=\"guide\"> inside <main>");
+  await writeFile(join(dist, "manual.txt"), `${manualText(html.slice(start + '<div class="guide">'.length, end), `https://${address}`)}\n`);
+}
+
+// Turns the guidance's markup into Markdown-like text. It knows the elements
+// the guidance uses and refuses others, so a new one is a build error rather
+// than a hole in the text.
+function manualText(src, origin) {
+  const named = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'", nbsp: " ", rsaquo: "›", lsaquo: "‹", times: "×", hellip: "…", mdash: "—", ndash: "–", rarr: "→", darr: "↓" };
+  const decode = (s) => s.replace(/&(#x[\da-f]+|#\d+|\w+);/gi, (m, e) =>
+    e[0] === "#" ? String.fromCodePoint(e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : named[e] ?? m);
+  const root = { tag: "root", kids: [] };
+  const stack = [root];
+  for (const [, text, close, tag, attrs] of src.matchAll(/([^<]+)|<(\/?)(\w+)([^>]*)>/g)) {
+    if (text !== undefined) { stack.at(-1).kids.push(text); continue; }
+    if (close) {
+      if (stack.at(-1).tag !== tag) throw new Error(`manual.txt: </${tag}> closes <${stack.at(-1).tag}>`);
+      stack.pop();
+    } else {
+      const node = { tag, href: attrs.match(/href="([^"]*)"/)?.[1], kids: [] };
+      stack.at(-1).kids.push(node);
+      stack.push(node);
+    }
+  }
+  const raw = (n) => (typeof n === "string" ? decode(n) : n.kids.map(raw).join(""));
+  const url = (a) => (a.href.startsWith("/") ? origin + a.href : a.href);
+  const inline = (n) => {
+    if (typeof n === "string") return decode(n).replace(/\s+/g, " ");
+    // A link inside code keeps the code whole; its address follows the code.
+    if (n.tag === "code") {
+      const links = n.kids.filter((k) => typeof k !== "string" && k.tag === "a").map(url);
+      return `\`${raw(n).replace(/\s+/g, " ")}\`${links.length ? ` (${links.join(", ")})` : ""}`;
+    }
+    const t = n.kids.map(inline).join("");
+    if (n.tag === "strong") return `**${t}**`;
+    if (n.tag === "a") return url(n).replace(/^https?:\/\//, "").replace(/\/$/, "") === t.replace(/`/g, "") ? t : `${t} (${url(n)})`;
+    throw new Error(`manual.txt: <${n.tag}> inside text`);
+  };
+  const isBlock = (n) => typeof n !== "string" && ["p", "ul", "ol", "pre", "blockquote", "h1", "h2", "h3"].includes(n.tag);
+  // A node's children as blocks; text and inline elements between blocks form a paragraph.
+  const blocks = (n) => {
+    const out = [];
+    let run = [];
+    const flush = () => { const t = run.map(inline).join("").trim(); if (t) out.push(t); run = []; };
+    for (const k of n.kids) {
+      if (isBlock(k)) { flush(); out.push(block(k)); } else run.push(k);
+    }
+    flush();
+    return out;
+  };
+  const block = (n) => {
+    if (/^h[1-3]$/.test(n.tag)) return `${"#".repeat(Number(n.tag[1]))} ${n.kids.map(inline).join("").trim()}`;
+    if (n.tag === "p") return n.kids.map(inline).join("").trim();
+    if (n.tag === "pre") return "```\n" + raw(n).replace(/\n$/, "") + "\n```";
+    if (n.tag === "blockquote") return blocks(n).join("\n\n").split("\n").map((l) => (l ? `> ${l}` : ">")).join("\n");
+    if (n.tag === "ul" || n.tag === "ol") {
+      return n.kids.filter((k) => typeof k !== "string").map((li, i) => {
+        if (li.tag !== "li") throw new Error(`manual.txt: <${li.tag}> in a list`);
+        const mark = n.tag === "ol" ? `${i + 1}. ` : "- ";
+        const body = blocks(li).join("\n\n").split("\n");
+        return mark + body.map((l, j) => (j && l ? " ".repeat(mark.length) + l : l)).join("\n");
+      }).join("\n");
+    }
+    throw new Error(`manual.txt: <${n.tag}> as a block`);
+  };
+  return blocks(root).join("\n\n");
 }
 
 const options = {

@@ -29,6 +29,18 @@ shaped as it is.
   plans block AI fetchers by default, and fetch tools may not follow links.
   Whether a given AI understands the site from its address alone is a fact to
   test, not to assume.
+- Claude Code's WebFetch, as its code reads in 2.1.322 (Nov 2026), asks for
+  `text/markdown` first, turns HTML into Markdown with Turndown (`style`,
+  `script`, `noscript` and `iframe` removed), and hands the calling model a
+  small model's answer to the caller's prompt rather than the page. For a
+  site off its preapproved list, that model is told to quote at most 125
+  characters at a time and to answer concisely, and it condenses the
+  manual even when the page and the caller both ask for it whole; its
+  exception for open source software doesn't take. Its summaries pass on the manual's
+  pointer to `/manual.txt`, which a model with a shell fetches whole.
+  Getting the page itself through would take a prompt injection, which a
+  public repository can't document, so an edit that doesn't know of it
+  would break it.
 - The product's situation (teacher time as the measure, the example class, the
   AI that may be a free one) is the backlog's Project and Constraints sections. The guidance
   puts the part of it the reading model can't know into its own words.

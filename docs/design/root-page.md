@@ -498,7 +498,7 @@ What it lives with, beyond the page's own situation:
   vertical phones.
 
 How the page meets it (the details: the comments on the film in
-`index.html`; the page side: `client/film-poster.ts`):
+`home.css`; the page side: `client/film-poster.ts`):
 
 - **Before a press** the page holds the poster frame as a picture, ▶ and the
   bar. The poster is the teaching moment: the class at the wall with the

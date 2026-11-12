@@ -36,10 +36,10 @@ for its own sake.
 
 `src/public/site.css` holds the colours, the typefaces, the base styles and
 the site's header; every page in `public/` links it first. `app.css` (the app
-pages) and a page's own `<style>` (the root, `/own-copy`, `/layout`) build on
+pages), `home.css` (the root) and a page's own `<style>` (`/own-copy`, `/layout`) build on
 its tokens and define none of their own, so the paper doesn't shift from the
 landing to `/check`. The build puts `site.css` in front of `app.css` for the
-app pages and writes it into the page for the others (`scripts/build.mjs`),
+app pages and of `home.css` for the root, and writes it into the page for the others (`scripts/build.mjs`),
 so a page opened at lesson start (the root, `/play`, the wall) waits for one
 stylesheet at most. Pages for a teacher follow the device's dark mode (`follows-dark`
 on `body`); the wall stays light, because projectors wash dark backgrounds

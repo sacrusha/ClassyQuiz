@@ -1,7 +1,7 @@
 /* classyQuiz's look, shared by every page: the colours, the two typefaces and
    the site's header (docs/design/identity.md). Each page links this first;
-   app.css (the app pages) and a page's own <style> build on these tokens and
-   don't define their own. */
+   app.css (the app pages), home.css (the root page) and a page's own <style>
+   build on these tokens and don't define their own. */
 
 /* Rubik Bold 1.100, OFL (fonts/OFL.txt), subset to Latin: the wordmark's
    lettering. Only the site's own words use it (the name, codes, headings,
