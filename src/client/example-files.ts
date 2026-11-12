@@ -65,32 +65,32 @@ export const EXAMPLE_FILES = {
   },
   "notes": {
     "en": {
-      "zip": "history-exam-quiz.zip",
-      "bytes": 570,
-      "title": "Mock · The French Revolution",
-      "questions": 6,
-      "first": "In which year was the Bastille stormed?"
+      "zip": "french-revolution-quiz.zip",
+      "bytes": 1513,
+      "title": "The French Revolution · Exam prep",
+      "questions": 13,
+      "first": "Who belonged to the Third Estate?"
     },
     "de": {
-      "zip": "geschichte-pruefung-quiz.zip",
-      "bytes": 627,
-      "title": "Mock · Die Französische Revolution",
-      "questions": 6,
-      "first": "In welchem Jahr wurde die Bastille gestürmt?"
+      "zip": "franzoesische-revolution-quiz.zip",
+      "bytes": 1585,
+      "title": "Die Französische Revolution · Prüfungsvorbereitung",
+      "questions": 13,
+      "first": "Wer gehörte zum Dritten Stand?"
     },
     "fr": {
-      "zip": "quiz-examen-histoire.zip",
-      "bytes": 604,
-      "title": "Mock · La Révolution française",
-      "questions": 6,
-      "first": "En quelle année la Bastille a-t-elle été prise ?"
+      "zip": "quiz-revolution-francaise.zip",
+      "bytes": 1584,
+      "title": "La Révolution française · Révisions d'examen",
+      "questions": 13,
+      "first": "Qui faisait partie du tiers état ?"
     },
     "it": {
-      "zip": "quiz-esame-storia.zip",
-      "bytes": 590,
-      "title": "Mock · La Rivoluzione francese",
-      "questions": 6,
-      "first": "In che anno fu presa la Bastiglia?"
+      "zip": "quiz-rivoluzione-francese.zip",
+      "bytes": 1501,
+      "title": "La Rivoluzione francese · Ripasso per l'esame",
+      "questions": 13,
+      "first": "Chi faceva parte del Terzo Stato?"
     }
   },
   "test": {

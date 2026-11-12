@@ -35,11 +35,12 @@ LANGS = ("en", "de", "fr", "it")
 
 # The examples, in the tabs' order: what the visitor starts from, and the file its example's AI handed over, per language.
 # idea: the owner's run (German; the others translated, space_zips.py). sheets: the worked example (English; translated,
-# quiz_zips.py). notes, test: stand-ins until the owner's runs (mock_zips.py).
+# quiz_zips.py). notes: the owner's run (English; translated, notes_zips.py). test: a stand-in until the owner's run
+# (mock_zips.py).
 EXAMPLES = {
     "idea": {"en": "space-quiz.zip", "de": "weltall-quiz.zip", "fr": "quiz-voyage-espace.zip", "it": "quiz-viaggio-spazio.zip"},
     "sheets": {"en": "big-numbers-quiz.zip", "de": "grosse-zahlen-quiz.zip", "fr": "quiz-grands-nombres.zip", "it": "quiz-grandi-numeri.zip"},
-    "notes": {"en": "history-exam-quiz.zip", "de": "geschichte-pruefung-quiz.zip", "fr": "quiz-examen-histoire.zip", "it": "quiz-esame-storia.zip"},
+    "notes": {"en": "french-revolution-quiz.zip", "de": "franzoesische-revolution-quiz.zip", "fr": "quiz-revolution-francaise.zip", "it": "quiz-rivoluzione-francese.zip"},
     "test": {"en": "cell-test-practice.zip", "de": "zellen-test-uebung.zip", "fr": "controle-cellule-revision.zip", "it": "verifica-cellula-ripasso.zip"},
 }
 

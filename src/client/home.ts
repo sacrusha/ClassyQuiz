@@ -159,6 +159,8 @@ function renderExamples(): void {
     zip.title = t.download;
     zip.querySelector(".zipname")!.textContent = f.zip;
     zip.querySelector(".size")!.firstChild!.textContent = t.size(f.bytes);
+    // The notes' run attached each language's own notes (docs/example/README.md).
+    if (a.id === "notes") panels[i].querySelector<HTMLImageElement>(".att img")!.src = `/landing/notes-${lang}.webp`;
     const face = panels[i].querySelector<HTMLImageElement>(".face img");
     if (face) {
       face.src = `/landing/face-${a.id}-${lang}.webp`;

@@ -186,13 +186,73 @@ export const IDEA_TEXT: Record<Lang, IdeaText> = {
   },
 };
 
+/**
+ * The full example of the root page's "Notes" tab, the owner's notes run (12 Nov 2026, English, the class notes attached
+ * as a PDF): what replaces the worked example's words on /example?ex=notes. The notes' two pages stand where the sheets'
+ * photographs do.
+ */
+export interface NotesText {
+  lede: string;
+  notesH: string;
+  notesP: string;
+  /** A page's picture, its accessible name: {n} is the page. */
+  page: string;
+  dlPdf: string;
+  convoP: string;
+  quizP: string;
+  translated: string;
+}
+
+export const NOTES_TEXT: Record<Lang, NotesText> = {
+  en: {
+    lede: "How the friends' quiz was made, from the class notes to playing it together, with everything to try the same on your own AI.",
+    notesH: "The class notes",
+    notesP: "Two pages of history notes on the French Revolution, as a PDF.",
+    page: "Page {n} of the notes",
+    dlPdf: "The notes (.pdf)",
+    convoP: "The notes and one ask. The AI read the site, wrote the quiz from the notes, checked it with the site's format checker and handed over the .zip, without showing the questions to someone who plays too. Claude (Sonnet), 12 November 2026.",
+    quizP: "What the AI handed over: one .zip with the quiz.",
+    translated: "The example was made in English. So that it is the same example in each language, the German, French and Italian pages show it translated: the notes, the conversation and the quiz.",
+  },
+  de: {
+    lede: "Wie das Quiz der Freunde entstanden ist, von den Notizen bis zum gemeinsamen Spiel – mit allem, was du brauchst, um dasselbe mit deiner eigenen KI auszuprobieren.",
+    notesH: "Die Notizen",
+    notesP: "Zwei Seiten Geschichtsnotizen zur Französischen Revolution, als PDF.",
+    page: "Seite {n} der Notizen",
+    dlPdf: "Die Notizen (.pdf)",
+    convoP: "Die Notizen und eine Anfrage. Die KI hat die Seite gelesen, das Quiz aus den Notizen geschrieben, es mit der Formatprüfung der Seite geprüft und die .zip-Datei geliefert, ohne die Fragen jemandem zu zeigen, der mitspielt. Claude (Sonnet), 12. November 2026.",
+    quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz.",
+    translated: "Das Beispiel ist auf Englisch entstanden. Damit es in jeder Sprache dasselbe Beispiel ist, zeigen die deutsche, die französische und die italienische Seite es übersetzt: die Notizen, das Gespräch und das Quiz.",
+  },
+  fr: {
+    lede: "Comment le quiz entre amis a été créé, des notes de cours jusqu'à la partie ensemble, avec tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
+    notesH: "Les notes de cours",
+    notesP: "Deux pages de notes d'histoire sur la Révolution française, en PDF.",
+    page: "Page {n} des notes",
+    dlPdf: "Les notes (.pdf)",
+    convoP: "Les notes et une demande. L'IA a lu le site, écrit le quiz à partir des notes, l'a vérifié avec le vérificateur de format du site et a fourni le .zip, sans montrer les questions à qui joue aussi. Claude (Sonnet), 12 novembre 2026.",
+    quizP: "Ce que l'IA a fourni  un fichier .zip avec le quiz.",
+    translated: "L'exemple a été réalisé en anglais. Pour que ce soit le même exemple dans chaque langue, les pages en allemand, en français et en italien le montrent traduit  les notes, la conversation et le quiz.",
+  },
+  it: {
+    lede: "Come è nato il quiz tra amici, dagli appunti alla partita insieme, con tutto il necessario per rifare la stessa prova con la tua IA.",
+    notesH: "Gli appunti",
+    notesP: "Due pagine di appunti di storia sulla Rivoluzione francese, in PDF.",
+    page: "Pagina {n} degli appunti",
+    dlPdf: "Gli appunti (.pdf)",
+    convoP: "Gli appunti e una richiesta. L'IA ha letto il sito, ha scritto il quiz dagli appunti, l'ha verificato con il controllo del formato del sito e ha fornito il file .zip, senza mostrare le domande a chi gioca anche lui. Claude (Sonnet), 12 novembre 2026.",
+    quizP: "Quello che l'IA ha fornito: un file .zip con il quiz.",
+    translated: "L'esempio è nato in inglese. Perché sia lo stesso esempio in ogni lingua, le pagine in tedesco, francese e italiano lo mostrano tradotto: gli appunti, la conversazione e il quiz.",
+  },
+};
+
 /** The root page's examples, in its tabs' order, each named by what the visitor starts from (docs/design/root-page.md, "Getting a quiz"). */
 export const EXAMPLES = ["idea", "sheets", "notes", "test"] as const;
 export type Example = (typeof EXAMPLES)[number];
 export const isExample = (x: unknown): x is Example => EXAMPLES.includes(x as Example);
 
 /** The examples whose runs are stand-ins (docs/example/mock_zips.py) until the owner's replace them (backlog, "The page for people", item 1). */
-export const MOCKS = ["notes", "test"] as const;
+export const MOCKS = ["test"] as const;
 export type Mock = (typeof MOCKS)[number];
 export const isMock = (x: unknown): x is Mock => MOCKS.includes(x as Mock);
 
@@ -224,10 +284,9 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
     attachedH: "What was attached",
     mockNote: "A stand-in: this example has had no run yet, so the conversation below is made up.",
     quizP: "What the AI handed over: one .zip with the quiz.",
-    lede: { notes: "How the friends' quiz was made, from the class notes to playing it together.", test: "How the practice quiz was made, from the marked test to playing it alone." },
-    attached: { notes: "A page of class notes, photographed with a phone.", test: "The marked test, photographed with a phone." },
+    lede: { test: "How the practice quiz was made, from the marked test to playing it alone." },
+    attached: { test: "The marked test, photographed with a phone." },
     reply: {
-      notes: "Here is your quiz: 6 questions on the French Revolution, from your notes. Open the .zip on the site; I haven't shown the questions here, so you can play along.",
       test: "Here is your practice quiz: 6 questions on the cell, most of them on what you got wrong. I've kept the questions out of this chat; open the .zip on the site.",
     },
   },
@@ -235,10 +294,9 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
     attachedH: "Was angehängt war",
     mockNote: "Ein Platzhalter: Zu diesem Beispiel gibt es noch keinen echten Durchgang, das Gespräch unten ist erfunden.",
     quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz.",
-    lede: { notes: "Wie das Quiz der Freunde entstand, von den Notizen bis zum gemeinsamen Spiel.", test: "Wie das Übungsquiz entstand, von der korrigierten Prüfung bis zum Spiel allein." },
-    attached: { notes: "Eine Seite Notizen aus dem Unterricht, mit dem Handy fotografiert.", test: "Die korrigierte Prüfung, mit dem Handy fotografiert." },
+    lede: { test: "Wie das Übungsquiz entstand, von der korrigierten Prüfung bis zum Spiel allein." },
+    attached: { test: "Die korrigierte Prüfung, mit dem Handy fotografiert." },
     reply: {
-      notes: "Hier ist euer Quiz: 6 Fragen zur Französischen Revolution, aus euren Notizen. Öffne die .zip-Datei auf der Website; die Fragen habe ich hier nicht gezeigt, damit du mitspielen kannst.",
       test: "Hier ist dein Übungsquiz: 6 Fragen zur Zelle, die meisten zu dem, was du falsch hattest. Die Fragen habe ich aus diesem Chat herausgehalten; öffne die .zip-Datei auf der Website.",
     },
   },
@@ -246,10 +304,9 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
     attachedH: "Ce qui était joint",
     mockNote: "Un exemple provisoire : il n'a pas encore été essayé, la conversation ci-dessous est inventée.",
     quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz.",
-    lede: { notes: "Comment le quiz entre amis a été fait, des notes de cours à la partie ensemble.", test: "Comment le quiz de révision a été fait, du contrôle corrigé à la partie en solo." },
-    attached: { notes: "Une page de notes de cours, photographiée avec un téléphone.", test: "Le contrôle corrigé, photographié avec un téléphone." },
+    lede: { test: "Comment le quiz de révision a été fait, du contrôle corrigé à la partie en solo." },
+    attached: { test: "Le contrôle corrigé, photographié avec un téléphone." },
     reply: {
-      notes: "Voici votre quiz : 6 questions sur la Révolution française, tirées de vos notes de cours. Ouvre le .zip sur le site ; je n'ai pas montré les questions ici, pour que tu puisses jouer aussi.",
       test: "Voici ton quiz de révision : 6 questions sur la cellule, surtout sur ce que tu as raté. J'ai gardé les questions hors de cette conversation ; ouvre le .zip sur le site.",
     },
   },
@@ -257,10 +314,9 @@ export const MOCK_TEXT: Record<Lang, MockText> = {
     attachedH: "Che cosa era allegato",
     mockNote: "Un segnaposto: questo esempio non è ancora stato provato, la conversazione qui sotto è inventata.",
     quizP: "Quello che l'IA ha fornito: un file .zip con il quiz.",
-    lede: { notes: "Come è nato il quiz tra amici, dagli appunti alla partita insieme.", test: "Come è nato il quiz di ripasso, dalla verifica corretta alla partita da solo." },
-    attached: { notes: "Una pagina di appunti delle lezioni, fotografata con il telefono.", test: "La verifica corretta, fotografata con il telefono." },
+    lede: { test: "Come è nato il quiz di ripasso, dalla verifica corretta alla partita da solo." },
+    attached: { test: "La verifica corretta, fotografata con il telefono." },
     reply: {
-      notes: "Ecco il vostro quiz: 6 domande sulla Rivoluzione francese, dai vostri appunti. Apri il .zip sul sito; qui non ho mostrato le domande, così puoi giocare anche tu.",
       test: "Ecco il tuo quiz di ripasso: 6 domande sulla cellula, soprattutto su quello che hai sbagliato. Ho tenuto le domande fuori da questa chat; apri il .zip sul sito.",
     },
   },

@@ -2,7 +2,7 @@
 
 One entry per piece of the chat, in the order the chat shows them; under each
 the four languages, en first. en is the real run's (a free Claude Sonnet,
-4 Nov 2026, read from docs/example/conversation-original.webp); de, fr and it
+4 Nov 2026, read from docs/example/sheets-conversation-original.webp); de, fr and it
 are drafts for the owner's review (docs/translation-review.md). Where a piece
 is also in the landing's film, it is the film's wording
 (CONTENT in docs/film/build/film.js; build.py refuses to build if they differ).

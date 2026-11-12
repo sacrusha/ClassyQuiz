@@ -1,10 +1,10 @@
-"""Stand-ins for the Solo and Peers examples of the root page's merged element
+"""The stand-in for the Solo example of the root page's merged element
 (docs/backlog.md, "The page for people: dense, not busy", item 1; docs/design/root-page.md,
-"Getting a quiz"). Mocks: nobody's run made them. The owner approves the actual examples and
-runs them himself; their .zip files then replace these, and this script goes.
+"Getting a quiz"). A mock: nobody's run made it. The owner approves the actual examples and
+runs them himself; his run's .zip files then replace these, and this script goes.
 
-Each is a short quiz in the root page's four languages, the title marked as a mock, so a look
-at the check shows which file is a stand-in.
+A short quiz in the root page's four languages, the title marked as a mock, so a look at the
+check shows which file is a stand-in.
 
     py -I docs/example/mock_zips.py      (from anywhere)
 """
@@ -47,40 +47,6 @@ QUIZZES = {
             ("Che cosa producono i ribosomi?", "Proteine", ["Zucchero", "DNA", "Grasso"]),
             ("Che cosa fa la membrana cellulare?", "Controlla che cosa entra ed esce", ["Produce energia", "Conserva il DNA", "Rende verde la cellula"]),
             ("Dove avviene la fotosintesi?", "Nei cloroplasti", ["Nei mitocondri", "Nel nucleo", "Nel vacuolo"]),
-        ]),
-    },
-    "peers": {
-        "en": ("history-exam-quiz.zip", "Mock · The French Revolution", [
-            ("In which year was the Bastille stormed?", "1789", ["1776", "1799", "1815"]),
-            ("Who was king of France when the Revolution began?", "Louis XVI", ["Louis XIV", "Napoleon", "Charles X"]),
-            ("What were the three estates?", "Clergy, nobility, everyone else", ["King, church, army", "Towns, villages, farms", "North, centre, south"]),
-            ("Which document was adopted in August 1789?", "The Declaration of the Rights of Man", ["The Code Napoléon", "The Magna Carta", "The Treaty of Versailles"]),
-            ("What was the Terror?", "A time of mass executions, 1793–94", ["A famine in 1788", "A war with Britain", "A royal decree"]),
-            ("Who took power in 1799?", "Napoleon Bonaparte", ["Robespierre", "Marie Antoinette", "Danton"]),
-        ]),
-        "de": ("geschichte-pruefung-quiz.zip", "Mock · Die Französische Revolution", [
-            ("In welchem Jahr wurde die Bastille gestürmt?", "1789", ["1776", "1799", "1815"]),
-            ("Wer war König von Frankreich, als die Revolution begann?", "Ludwig XVI.", ["Ludwig XIV.", "Napoleon", "Karl X."]),
-            ("Welches waren die drei Stände?", "Klerus, Adel, alle anderen", ["König, Kirche, Armee", "Städte, Dörfer, Höfe", "Norden, Mitte, Süden"]),
-            ("Welches Dokument wurde im August 1789 verabschiedet?", "Die Erklärung der Menschen- und Bürgerrechte", ["Der Code Napoléon", "Die Magna Carta", "Der Vertrag von Versailles"]),
-            ("Was war die Schreckensherrschaft?", "Eine Zeit der Massenhinrichtungen, 1793–94", ["Eine Hungersnot 1788", "Ein Krieg gegen England", "Ein Erlass des Königs"]),
-            ("Wer übernahm 1799 die Macht?", "Napoleon Bonaparte", ["Robespierre", "Marie Antoinette", "Danton"]),
-        ]),
-        "fr": ("quiz-examen-histoire.zip", "Mock · La Révolution française", [
-            ("En quelle année la Bastille a-t-elle été prise ?", "1789", ["1776", "1799", "1815"]),
-            ("Qui était roi de France au début de la Révolution ?", "Louis XVI", ["Louis XIV", "Napoléon", "Charles X"]),
-            ("Quels étaient les trois ordres ?", "Clergé, noblesse, tiers état", ["Roi, Église, armée", "Villes, villages, fermes", "Nord, centre, sud"]),
-            ("Quel texte a été adopté en août 1789 ?", "La Déclaration des droits de l'homme et du citoyen", ["Le Code Napoléon", "La Magna Carta", "Le traité de Versailles"]),
-            ("Qu'était la Terreur ?", "Une période d'exécutions de masse, 1793–94", ["Une famine en 1788", "Une guerre contre l'Angleterre", "Un décret royal"]),
-            ("Qui a pris le pouvoir en 1799 ?", "Napoléon Bonaparte", ["Robespierre", "Marie-Antoinette", "Danton"]),
-        ]),
-        "it": ("quiz-esame-storia.zip", "Mock · La Rivoluzione francese", [
-            ("In che anno fu presa la Bastiglia?", "1789", ["1776", "1799", "1815"]),
-            ("Chi era re di Francia quando iniziò la Rivoluzione?", "Luigi XVI", ["Luigi XIV", "Napoleone", "Carlo X"]),
-            ("Quali erano i tre stati?", "Clero, nobiltà, terzo stato", ["Re, Chiesa, esercito", "Città, villaggi, fattorie", "Nord, centro, sud"]),
-            ("Quale documento fu adottato nell'agosto 1789?", "La Dichiarazione dei diritti dell'uomo e del cittadino", ["Il Codice napoleonico", "La Magna Carta", "Il trattato di Versailles"]),
-            ("Che cos'era il Terrore?", "Un periodo di esecuzioni di massa, 1793–94", ["Una carestia nel 1788", "Una guerra con l'Inghilterra", "Un decreto del re"]),
-            ("Chi prese il potere nel 1799?", "Napoleone Bonaparte", ["Robespierre", "Maria Antonietta", "Danton"]),
         ]),
     },
 }

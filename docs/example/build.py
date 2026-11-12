@@ -1,15 +1,17 @@
 """Draws the examples' conversations as the AI app's own chat, in four languages and
 two colour schemes: the sheets run's, src/public/examples/conversation-<lang>-<light|dark>.webp,
-and the space run's (the root page's "Idea" tab), conversation-idea-<lang>-<light|dark>.webp,
-with that run's overview of its questions, review-idea-<lang>.webp, which its chat shows.
+the space run's (the root page's "Idea" tab), conversation-idea-<lang>-<light|dark>.webp,
+with that run's overview of its questions, review-idea-<lang>.webp, which its chat shows, and the notes run's
+(the "Notes" tab), conversation-notes-<lang>-<light|dark>.webp, with the pictures of its notes' pages
+(src/public/examples/notes-<lang>-<page>.webp for /example, src/public/landing/notes-<lang>.webp for the root page).
 
 Run (from anywhere): py -I docs/example/build.py [--convo idea] [--lang de] [--theme dark] [--keep]
-  --convo           only that conversation, sheets or idea (default: both)
+  --convo           only that conversation, sheets, idea or notes (default: all three)
   --lang / --theme  only that language / scheme (default: all 8 pictures of each)
   --keep            also leave the pages and the full-size PNGs in .tmp/example/ (git-ignored)
 
-The words are text.py's and space_text.py's; the page is HTML drawn here and shot in the installed Edge
-(playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright.
+The words are text.py's, space_text.py's and notes_text.py's; the page is HTML drawn here and shot in the installed Edge
+(playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright, and PyMuPDF for the notes' pages.
 The space run's overview: German is the AI's own review.png (space-review-original.webp here, 1500 px
 wide); the other three are drawn from their translated .zip by the site's own src/public/preview.py, the
 script the guidance offers the AI for it.
@@ -26,8 +28,9 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(HERE))
 import text as T  # noqa: E402
 import space_text as S  # noqa: E402
+import notes_text as N  # noqa: E402
 
-WIDTH = 681          # conversation-original.webp's width
+WIDTH = 681          # sheets-conversation-original.webp's width
 SCALE = 2            # rendered at 2x, scaled down to WIDTH
 NB = " "
 
@@ -58,6 +61,17 @@ def check_film():
                 bad.append(f"{lang}.{k}: text.py {v!r} / film.js {film[lang].get(k)!r}")
     if bad:
         raise SystemExit("text.py differs from film.js CONTENT:\n  " + "\n  ".join(bad))
+
+
+def ask_notes():
+    """askNotes of src/client/landing-text.ts per language: the root page's ask is the notes run's."""
+    src = (ROOT / "src" / "client" / "landing-text.ts").read_text(encoding="utf-8")
+    out = {}
+    for lang in N.LANGS:
+        block = src[src.index(f"\nconst {lang}: Text = {{"):]
+        m = re.search(r'\n  askNotes: "((?:[^"\\]|\\.)*)",', block)
+        out[lang] = m.group(1).replace('\\"', '"')
+    return out
 
 
 def pick(v, lang, key_hint=None):
@@ -227,11 +241,15 @@ svg .let { fill: var(--let); font-family: "Segoe UI", Arial, sans-serif; font-we
 .thumb + .chip { margin-top: 10px; }
 .all { display: inline-flex; align-items: center; gap: 7px; margin: 10px 0 0 -3px; padding: 6px 11px; border-radius: 9px; background: var(--chip); border: 1px solid var(--chipline); font-size: 13px; line-height: 17px; }
 .react svg { display: block; }
+.pdf { position: relative; width: 132px; height: 132px; margin-left: auto; border-radius: 12px; border: 1px solid var(--chipline); overflow: hidden; background: #fff; }
+.pdf img { display: block; width: 100%; }
+.pdf span { position: absolute; left: 9px; bottom: 9px; padding: 1px 6px; border-radius: 5px; background: rgba(60,60,58,.82); color: #f2f0e8; font-size: 11.5px; line-height: 16px; font-weight: 600; }
+.pdf + .user { margin-top: 10px; }
 """
 
 
 def page(lang, theme, convo="sheets"):
-    blocks = chat(lang) if convo == "sheets" else chat_space(lang)
+    blocks = chat(lang) if convo == "sheets" else chat_space(lang) if convo == "idea" else chat_notes(lang)
     return f'<!doctype html><html lang="{lang}" data-theme="{theme}"><head><meta charset="utf-8"><style>{CSS}</style></head><body>{"".join(blocks)}</body></html>'
 
 
@@ -310,6 +328,56 @@ def chat_space(lang):
     return out
 
 
+def chat_notes(lang):
+    """The notes run: the notes attached, one ask, and the AI's one answer with the .zip."""
+    from faces import EXAMPLES  # the files of the root page's examples
+    out = []
+    ask = ask_notes()
+    zip_name = EXAMPLES["notes"][lang]
+    for kind, v in N.TURN:
+        if kind == "attachment":
+            out.append(f'<div class="pdf"><img src="{(TMP / f"notes-{lang}-1.png").as_uri()}"><span>{N.UI["pdf"][lang]}</span></div>')
+        elif kind == "user":
+            out.append(f'<div class="user"><div class="bub">{fmt(ask[lang], lang)}</div></div>')
+        elif kind == "ai":
+            out.append(f'<p class="ai">{fmt(v[lang].replace("{zip}", zip_name), lang)}</p>')
+        elif kind == "fold":
+            out.append(f'<div class="st">{fmt(N.UI[v][lang], lang)}<i class="chev"></i></div>')
+        elif kind == "bullets":
+            out.append('<ul class="ai">' + "".join(f"<li>{fmt(b[lang], lang)}</li>" for b in v) + "</ul>")
+        elif kind == "chip":
+            title = zip_name[:-4].replace("-", " ").capitalize()  # the file's name, as the app titles its card
+            out.append(f'<div class="chip"><div class="ico">{ICONS["archive"]}</div><div><div class="ct">{html.escape(title)}</div><div class="cs">{N.UI["zipSub"][lang]}</div></div></div>')
+        elif kind == "reactions":
+            out.append('<div class="react">' + "".join(ICONS[k] for k in ("copy", "speaker", "up", "down", "retry")) + "</div>")
+        else:
+            raise SystemExit("unknown block " + kind)
+    return out
+
+
+def notes_pages(langs):
+    """The notes' pages as pictures: each page for /example (notes-<lang>-<page>.webp, 700 px wide), the first for the
+    root page's attachment (landing/notes-<lang>.webp, 233 px wide), and the first at full size in .tmp/example/ for the
+    conversation's thumbnail."""
+    import pymupdf
+    from PIL import Image
+    TMP.mkdir(parents=True, exist_ok=True)
+    for lang in langs:
+        doc = pymupdf.open(EX / f"notes-{lang}.pdf")
+        for i, pg in enumerate(doc, 1):
+            png = TMP / f"notes-{lang}-{i}.png"
+            pg.get_pixmap(dpi=150).save(str(png))
+            im = Image.open(png).convert("RGB")
+            if i > 1:
+                png.unlink()  # only the first page is the conversation's thumbnail
+            for w, out in ((700, EX / f"notes-{lang}-{i}.webp"), (233, ROOT / "src" / "public" / "landing" / f"notes-{lang}.webp")):
+                if w == 233 and i > 1:
+                    continue
+                small = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
+                small.save(out, "WEBP", quality=82, method=6)
+                print(out.name, small.size, out.stat().st_size // 1024, "KB")
+
+
 # ------------------------------------------------------------------ the space run's overview
 
 REVIEW_W = 1500
@@ -349,13 +417,15 @@ def main():
             return v
         return None
 
-    convos = [opt("--convo")] if "--convo" in args else ("sheets", "idea")
+    convos = [opt("--convo")] if "--convo" in args else ("sheets", "idea", "notes")
     langs = [opt("--lang")] if "--lang" in args else T.LANGS
     themes = [opt("--theme")] if "--theme" in args else ("light", "dark")
     keep = "--keep" in args
     check_film()
     if "idea" in convos:
         reviews(langs)
+    if "notes" in convos:
+        notes_pages(langs)
     from playwright.sync_api import sync_playwright
     from PIL import Image
     TMP.mkdir(parents=True, exist_ok=True)
@@ -363,7 +433,7 @@ def main():
         b = p.chromium.launch(channel="msedge")
         for convo, lang, theme in [(c, la, th) for c in convos for la in langs for th in themes]:
             if True:
-                tag = f"{'idea-' if convo == 'idea' else ''}{lang}-{theme}"
+                tag = f"{'' if convo == 'sheets' else convo + '-'}{lang}-{theme}"
                 f = TMP / f"chat-{tag}.html"
                 f.write_text(page(lang, theme, convo), encoding="utf-8")
                 ctx = b.new_context(viewport={"width": WIDTH, "height": 900}, device_scale_factor=SCALE,
@@ -384,6 +454,9 @@ def main():
                     png.unlink()
                     f.unlink()
         b.close()
+    if not keep:
+        for png in TMP.glob("notes-*-1.png"):
+            png.unlink()
 
 
 if __name__ == "__main__":

@@ -4,13 +4,14 @@
 // .zip and the start link in the page's language. The root page's link passes
 // ?lang=; without it, the device's choice. ?ex= names the root page's example
 // it came from: the idea's (the space run) has no attachment and shows the
-// AI's overview of its questions; an example whose run is a mock (MOCK_TEXT)
-// shows its attachment and a made-up conversation instead of the worked
-// example's.
+// AI's overview of its questions; the notes' (the notes run) shows the notes'
+// pages where the sheets' photographs stand; an example whose run is a mock
+// (MOCK_TEXT) shows its attachment and a made-up conversation instead of the
+// worked example's.
 
 import { $, esc, store } from "./dom.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang } from "./landing-text.ts";
-import { EXAMPLE_TEXT, IDEA_TEXT, MOCK_TEXT, exampleOf, exampleZip, isMock, type ExampleText } from "./example-text.ts";
+import { EXAMPLE_TEXT, IDEA_TEXT, MOCK_TEXT, NOTES_TEXT, exampleOf, exampleZip, isMock, type ExampleText } from "./example-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
 
 const params = new URLSearchParams(location.search);
@@ -24,10 +25,10 @@ codeBox();
 const showLang = langSwitch((l) => apply(l));
 
 // The conversation in the device's mode: <picture> picks the shown one; the
-// link to the whole picture follows the same mode. The idea's conversation and
-// overview are their own pictures (docs/example/README.md).
+// link to the whole picture follows the same mode. The idea's and the notes'
+// conversations are their own pictures (docs/example/README.md).
 const dark = matchMedia("(prefers-color-scheme: dark)");
-const convo = (l: Lang, mode: "light" | "dark") => `/examples/conversation-${ex === "idea" ? "idea-" : ""}${l}-${mode}.webp`;
+const convo = (l: Lang, mode: "light" | "dark") => `/examples/conversation-${ex === "sheets" ? "" : `${ex}-`}${l}-${mode}.webp`;
 const review = (l: Lang) => `/examples/review-idea-${l}.webp`;
 function convoLinks(): void {
   const href = convo(lang, dark.matches ? "dark" : "light");
@@ -36,7 +37,7 @@ function convoLinks(): void {
 dark.addEventListener("change", convoLinks);
 
 // A mock's attachment and conversation, made here, so a fetcher doesn't read a chat as the page's words.
-const MOCK_PIC = { notes: "/landing/mock-notes.svg", test: "/landing/mock-test.svg" } as const;
+const MOCK_PIC = { test: "/landing/mock-test.svg" } as const;
 let mockChat: HTMLElement | null = null;
 if (mock) {
   const sheets = $("#sheets");
@@ -54,6 +55,11 @@ if (mock) {
   li.id = "review";
   li.innerHTML = `<h2></h2><p></p><a class="convo" data-review><img alt="" width="1000" height="1826"></a><p><a data-review data-read></a></p>`;
   $("#convo").after(li);
+} else if (ex === "notes") {
+  // The notes' two pages in place of the sheets' photographs, and the notes' PDF in place of the sheets' files.
+  const sheets = $("#sheets");
+  sheets.querySelector(".pics")!.innerHTML = [1, 2].map(() => `<a><img alt="" width="700" height="989"></a>`).join("");
+  sheets.querySelector(".files")!.innerHTML = `<li><a download></a></li>`;
 }
 
 function apply(l: Lang): void {
@@ -78,9 +84,27 @@ function apply(l: Lang): void {
     $("#sheets p").textContent = m.attached[mock];
     $("#convo-p").textContent = m.mockNote;
     $("#quiz p").textContent = m.quizP;
-    const ask = (mock === "notes" ? head.askNotes : head.askTest).replaceAll("classyquiz.pages.dev", host);
+    const ask = head.askTest.replaceAll("classyquiz.pages.dev", host);
     mockChat.innerHTML = `<p class="me">${esc(ask)}</p><p class="ai">${esc(m.reply[mock])}<span class="file">${esc(exampleZip(ex, l))}</span></p>`;
     return;
+  }
+  if (ex === "notes") {
+    const d = NOTES_TEXT[l];
+    $(".lede").textContent = d.lede;
+    $("#sheets h2").textContent = d.notesH;
+    $("#sheets p").textContent = d.notesP;
+    $("#sheets .pics").querySelectorAll("a").forEach((a, i) => {
+      a.href = `/examples/notes-${l}-${i + 1}.webp`;
+      const img = a.querySelector("img")!;
+      img.src = a.href;
+      img.alt = d.page.replace("{n}", String(i + 1));
+    });
+    const pdf = $("#sheets .files a") as HTMLAnchorElement;
+    pdf.href = `/examples/notes-${l}.pdf`;
+    pdf.textContent = d.dlPdf;
+    $("#convo-p").textContent = d.convoP;
+    $("#quiz p").textContent = d.quizP;
+    $(".translated").textContent = d.translated;
   }
   if (ex === "idea") {
     const d = IDEA_TEXT[l];
