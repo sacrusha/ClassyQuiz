@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 30520c5, deployed 2026-11-18: Pages deployment 9a13139c of the
-  project `classyquiz`, version 7e5dcb37 of the state Worker
+- Commit 6f69f31, deployed 2026-11-18: Pages deployment 98aceb52 of the
+  project `classyquiz`, version ed26d8ea of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 30520c5 -- src/`.
+  `git diff 6f69f31 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -47,6 +47,8 @@ changed what it covered.
   (`design/guidance-page.md`, Situation): the summary gave `/manual.txt`'s
   full address and required the first line verbatim (2026-11-18, 30520c5,
   one run; sixteen on a preview deploy of the same page).
+- The sheets run's four `.zip`s fetched, each with the one fixed order left
+  (2026-11-18, 6f69f31).
 
 ## Not tried live
 
