@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 2aa154c, deployed 2026-11-11: Pages deployment 5ead07a5 of the
-  project `classyquiz`, version 6cfa7609 of the state Worker
+- Commit 30520c5, deployed 2026-11-18: Pages deployment 9a13139c of the
+  project `classyquiz`, version 7e5dcb37 of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 2aa154c -- src/`.
+  `git diff 30520c5 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -40,7 +40,13 @@ changed what it covered.
 - `/owner` with the key, by the owner (2026-11-09, before the ledger of
   44ee213).
 - The root page and its script fetched: the manual as committed, and the
-  script with the opening of a quiz's text (2026-11-11, 2aa154c).
+  script with the opening of a quiz's text (2026-11-11, 2aa154c); `/manual.txt`
+  and the root page carrying the format's required first line (2026-11-18,
+  30520c5).
+- Claude Code's WebFetch on the root page, the German ask for the format
+  (`design/guidance-page.md`, Situation): the summary gave `/manual.txt`'s
+  full address and required the first line verbatim (2026-11-18, 30520c5,
+  one run; sixteen on a preview deploy of the same page).
 
 ## Not tried live
 
@@ -51,9 +57,8 @@ changed what it covered.
   clicker, an iPhone's full screen, a phone's pull-to-refresh on `/open`.
 - A school's network: its filter on `*.pages.dev`, its Wi-Fi through
   `/check`.
-- The AIs: their fetchers on the live page (one fetch by an implementer's
-  tool at the first deploy), and an AI building against the guidance as it
-  now is.
+- The AIs: fetchers other than Claude Code's WebFetch on the live page, and
+  an AI building against the guidance as it now is.
 - A screen reader on any page; the film in dark mode; the film watched
   through by someone outside the project.
 - The platform's answers once an allowance is spent.
