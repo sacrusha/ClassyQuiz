@@ -52,9 +52,11 @@ shaped as it is.
   its first fetch with questions, and Opus asked for the whole manual, was
   refused, and fetched it with curl. The summaries' examples still put
   `Order: fixed` on ordinary questions. A model with a shell fetches
-  `/manual.txt` whole. Getting the page itself through would take a prompt
-  injection, which a public repository can't document, so an edit that
-  doesn't know of it would break it.
+  `/manual.txt` whole. In the web environment, WebFetch keeps a page cached
+  for hours, which its documentation doesn't say (the owner, Nov 2026), so
+  a changed page reaches an AI there late. Getting the page itself through
+  would take a prompt injection, which a public repository can't document,
+  so an edit that doesn't know of it would break it.
 - The product's situation (teacher time as the measure, the example class, the
   AI that may be a free one) is the backlog's Project and Constraints sections. The guidance
   puts the part of it the reading model can't know into its own words.

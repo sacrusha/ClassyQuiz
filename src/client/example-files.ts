@@ -36,28 +36,28 @@ export const EXAMPLE_FILES = {
   "sheets": {
     "en": {
       "zip": "big-numbers-quiz.zip",
-      "bytes": 39690,
+      "bytes": 39534,
       "title": "Big numbers on the number line",
       "questions": 13,
       "first": "Which number does the arrow show?"
     },
     "de": {
       "zip": "grosse-zahlen-quiz.zip",
-      "bytes": 39770,
+      "bytes": 39614,
       "title": "Grosse Zahlen am Zahlenstrahl",
       "questions": 13,
       "first": "Welche Zahl zeigt der Pfeil?"
     },
     "fr": {
       "zip": "quiz-grands-nombres.zip",
-      "bytes": 39799,
+      "bytes": 39643,
       "title": "Les grands nombres sur la droite graduée",
       "questions": 13,
       "first": "Quel nombre la flèche montre-t-elle ?"
     },
     "it": {
       "zip": "quiz-grandi-numeri.zip",
-      "bytes": 39735,
+      "bytes": 39579,
       "title": "I grandi numeri sulla retta numerica",
       "questions": 13,
       "first": "Quale numero indica la freccia?"

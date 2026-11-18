@@ -117,8 +117,11 @@ camera's metadata.
 
 - The conversation and the `.zip` ("Big numbers on the number line",
   13 questions) are one real run, reviewed by the owner; the zip is that run's
-  second turn. The owner may still replace them with a run of his own; the
-  zip's fixed orders make it one to redo (backlog, "Open: with the owner").
+  second turn without its `Order: fixed` lines, which put the right answer
+  first in every question, and with question 12's letters kept in a fixed
+  order, sorted A to D. The conversation still says the order is fixed. The
+  run is to be redone against the manual as it now is (backlog, "Open: with
+  the owner").
 - Whether a teacher on a phone reads the conversation: the preview is the
   picture scaled to the screen; the whole picture opens at full size.
 - The German, French and Italian words, pictures and quizzes are drafts (backlog v4 item 12).
