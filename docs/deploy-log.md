@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 6f69f31, deployed 2026-11-18: Pages deployment 98aceb52 of the
-  project `classyquiz`, version ed26d8ea of the state Worker
+- Commit 9812126, deployed 2026-11-19: Pages deployment 5ef4881e of the
+  project `classyquiz`, version 6fb5513a of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 6f69f31 -- src/`.
+  `git diff 9812126 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -27,7 +27,9 @@ changed what it covered.
 - The Solo walk through the example quiz at desktop and phone sizes in
   headless Edge, nothing sent while playing, then Quizmaster to `/screen`
   with one upload (2026-11-09, dfdd557).
-- `scripts/simulate-peers.mjs`, a probe-marked room (2026-11-10, 44ee213).
+- `scripts/simulate-peers.mjs --empty`, a probe-marked room: Start's ten
+  seconds, a Countdown on a question and on a solution, and the room ending
+  by itself 601 s after its final ranking was left (2026-11-19, 9812126).
 - `scripts/simulate.mjs` with 25 students, and headless-Edge walks of the
   WebSocket fallback and of going offline mid-question, at the first deploy
   only (2026-11-02). Since then on local stacks, and on 2026-11-09 on a copy
@@ -55,6 +57,10 @@ changed what it covered.
 - A class or a crowd: no Quizmaster run with a real second device, no Peers
   room on real phones, no final ranking or Exit with real players; only walks
   and probe-marked rooms.
+- Since 9812126: Start's ten seconds in a Quizmaster's room (the wall, the
+  Remote, the tablets), and a Peers room's screens in a browser (how the
+  friends stand, Countdown's button, the link to share); on local stacks
+  only. `scripts/simulate-memory.mjs` was not run for it anywhere.
 - Real devices other than the owner's older test phone: tablets, phones, a
   clicker, an iPhone's full screen, a phone's pull-to-refresh on `/open`.
 - A school's network: its filter on `*.pages.dev`, its Wi-Fi through
