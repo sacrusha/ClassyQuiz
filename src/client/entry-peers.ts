@@ -17,7 +17,7 @@ export const peers: Entry = {
   picture: "/landing/way-peers.svg",
   pictureAlt: T.picPeers,
   button: T.peersButton,
-  note: T.roomNote,
+  note: T.peersRoomNote,
   plays: true,
   async start(quiz, ctx) {
     ctx.say(`<p class="muted" lang="${lang}">${esc(TEXT[lang].sending)}</p>`);

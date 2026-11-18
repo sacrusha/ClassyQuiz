@@ -227,7 +227,8 @@ results after an accidental close is not a reason to keep anything; it has
 other answers.
 
 So the rule is one, and the same everywhere: everything is deleted three
-hours after the teacher last used the quiz, or when the teacher ends it. One
+hours after the teacher last used the quiz, or when the teacher ends it; a
+Peers room, which nobody ends, once its players have left it. One
 duration is sensible and easy to say, and the page says it as such. The
 teacher's file, the text or file the AI produced and still has in the chat,
 is the durable copy. Storage during the lifetime is Durable Object storage, so
@@ -244,6 +245,10 @@ As built:
 - A quiz is one class's lesson (backlog v4 item 3, "Upload is start"): the
   upload starts its one class, and a parallel class gets its own upload. The
   final ranking stays until the teacher's Exit or the 3 hours.
+- A Peers room has no hand to end it at its final ranking: each device
+  leaves when it likes. So it ends once nobody has been at that ranking for
+  10 minutes (`PEERS_EMPTY_MS`), rather than being kept the 3 hours unused
+  (`peers.md`, "The end").
 - Corrections made during the quiz (a key change, a voided question) apply to the
   instance's quiz and are lost when it ends; the teacher's copy still has the
   wrong key. The Later item "corrected quiz download" is what closes that.
@@ -404,7 +409,8 @@ rest are the implementer's.
   `NEARLY_FULL` (half, the owner's: lower than 80%) in any allowance count
   as busy on the landing's line beside the full days (`root-page.md`, "The
   own copy").
-- **At Start the class is there, so the booking moves to what was spent plus
+- **When the first question comes (`START_MS` after Start) the class is
+  there, so the booking moves to what was spent plus
   what is ahead of the class that came**: its players and the latecomers
   the door lets in (`MAX_LATE_JOINERS`), its devices as their lines say
   (WebSocket or long-poll), the lobby behind. Awake time is booked only

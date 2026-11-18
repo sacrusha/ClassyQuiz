@@ -113,10 +113,12 @@ or open `/owner` and type the key (`docs/design/owner-page.md`).
 class of bad-Wi-Fi devices against a running site, local or deployed. Its header
 comment says what it exercises. It is the check that the whole flow holds; run
 it after changes to the game, the protocol or the transport.
-`node scripts/simulate-peers.mjs [base-url]` is the same for a Peers room
-(`docs/design/peers.md`): friends, nobody steering, a phone going silent;
-about two minutes, most of it waiting for that phone to count as away and
-for a held poll's end.
+`node scripts/simulate-peers.mjs [base-url] [--empty]` is the same for a
+Peers room (`docs/design/peers.md`): friends, nobody steering, a phone
+going silent, Start's ten seconds, two Countdowns; about two and a half
+minutes, most of it waiting for that phone to count as away, for a held
+poll's end, for Start's time and for the Countdowns. `--empty` then leaves the final ranking and waits for the room
+to end by itself, ten minutes more.
 `node scripts/simulate-memory.mjs [base-url] --restart "<command>"` (or
 `--quiet <seconds>`) plays a small class whose instance loses its memory
 in the lobby and with each question open, by the command (one that

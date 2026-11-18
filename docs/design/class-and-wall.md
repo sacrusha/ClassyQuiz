@@ -219,7 +219,8 @@ Why this shape:
 - A plain start, not a random outfit: nobody is shown in something they did not
   pick.
 - No words on the menu, and no new control for the teacher. Start ends the
-  dressing. Late joiners get no menu and play plain.
+  dressing, after a time every screen shows (below, "The end of the
+  dressing"). Late joiners get no menu and play plain.
 - The wider audience is served by each adult's own look, from the same
   menu: one who finds an animal on a disc out of place at work dresses it
   into something that fits. Plausible assumption, unseen with either
@@ -293,9 +294,9 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   avatar still fit a 320 by 568 screen without scrolling (`.dress` in
   `app.css`, by the picker's own width).
 - The server holds the class's looks in memory, sends the screens the
-  looks changed at most once per `LOOK_SHOW_MS` (1 s), and writes them at
-  Start (`open-period-in-memory.md`), so the cost of a class is the same
-  whatever the children do.
+  looks changed at most once per `LOOK_SHOW_MS` (1 s), and writes them when
+  the first question comes (`open-period-in-memory.md`), so the cost of a
+  class is the same whatever the children do.
 - The tablet shows the pick at once and keeps showing it until its view shows
   it back. One `dress` is in flight at a time, at most every `INPUT_GAP_MS`,
   and the latest pick is sent next, so a burst of taps sends the first and
@@ -314,6 +315,57 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   a shape shows behind it as behind the others. Figure
   `../avatars/lion-before-after.png`: the lion before and after beside the
   frog, at the lobby's size and the bar's.
+
+#### The end of the dressing
+
+Purpose (the owner, after his user test of Peers): whoever is dressing
+sees the end coming, and whoever starts has a way to bring the dressing to
+a close, with the least surprise for the people on each screen.
+
+Situation:
+
+- In that test Start ended a friend's dressing at once, under their
+  fingers. A Quizmaster meets the mirror of it: a class that won't stop
+  dressing, and no way through it that isn't a cut-off.
+- A ready per player was set aside (the owner): some people confuse Ready
+  and Start even where only one of them exists; a class of 25 with
+  non-readers can't be waited on; and the wall shows nobody as missing
+  (Who has answered).
+- Who reads: the one who starts does, the teacher or a Peers room's
+  opener; friends on their phones mostly do; children on a class's
+  tablets may not, and in a class the teacher is in the room and says
+  what comes.
+
+How the site meets it: Start gives the dressing `START_MS` (10 s,
+`shared/tempo.ts`) more, then the first question comes (`startSoon`,
+`startOut` in `server/game.ts`; the instance's alarm takes the step, so a
+restart in between still begins on time). The press lets the class in, as
+Start always did; until the end the lobby stays as it was: the menu works,
+a newcomer joins and gets it.
+
+- **Every screen shows the time the same way**: Countdown's bar
+  (`question-flow.md`, "The steering bar") along the top edge, draining
+  with no digits, its last fifth warm, on the wall, the Remote, each
+  tablet and each phone (`edgeBar`, `client/clock.ts`). Over everything,
+  so nothing in the menu moves under a finger. When it is empty, the menu
+  gives way to the question, as answering closes when Countdown's bar is
+  empty.
+- **Start says what its press does**, in the small line under its label
+  that a step has where its consequence isn't in the label: "in 10 s"
+  (`startButton`, `client/steps.ts`). Once pressed it is greyed on every
+  screen that has it, as Countdown is while it runs, and a second press
+  changes nothing.
+- **In a Peers room**, the friends' line beside the opener's avatar turns
+  from "starts the quiz once everyone is in." to "starts the quiz in a
+  moment." (`peers.md`, "The lobby").
+- What carries it to a child who doesn't read is the bar, the same on the
+  wall in front of the class and on the tablet in hand, and the teacher's
+  voice. On a question the bar was barely noticed without the quizmaster
+  announcing it (`question-flow.md`, Situation), so in a class the
+  teacher's voice is what this rests on, and in a Peers room the opener's.
+- There is no way to start at once once pressed, and none to take a Start
+  back: the ten seconds are the dressing's, and the starter read them
+  under the button.
 
 ### The winners jump
 
@@ -385,6 +437,11 @@ added, and some teachers want to photograph it. So it has its own screen
 
 - Whether children dress at all, and whether teachers wait for it; whether the
   shapes help a child find their avatar from the back row.
+- Whether Start's time is seen where nobody announces it: a child or a
+  friend looking at the picker, with the bar 16 px high at the top edge;
+  whether ten seconds is enough for a class and not too
+  long for friends who are done; whether a starter wants "now" or a way
+  back, or digits for the last seconds would carry better to non-readers.
 - Whether ten at 104 px read from the back row, and twenty as a crowd; whether
   four seconds is long enough for a child to find themselves and short enough
   for the teacher; how children take being seen not jumping; how the

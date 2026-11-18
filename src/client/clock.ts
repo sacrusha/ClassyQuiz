@@ -36,3 +36,28 @@ export function clockBar(ms: number, end: number, cls = ""): string {
   const done = Math.max(0, ms - left);
   return `<div class="clockbar${cls ? ` ${cls}` : ""}${left <= 0 ? " out" : ""}" role="timer" aria-label="${T.countdown}"><span style="animation-duration:${ms}ms;animation-delay:-${Math.round(done)}ms"></span></div>`;
 }
+
+/** What the bar along the top edge shows now ("" for none): it is drawn again only when that changes. */
+let edgeKey = "";
+
+/**
+ * The bar along the top edge, over everything, as on the wall: one per page,
+ * whoever draws it. `key` names what it times (with `ms`, so a new clock on
+ * the same step starts afresh); null takes it away.
+ */
+export function edgeBar(key: string, clock: ClockView | null): void {
+  let el = document.getElementById("clock");
+  const k = clock ? `${key}|${clock.ms}` : "";
+  if (k === edgeKey && (!clock || el)) return;
+  edgeKey = k;
+  if (!clock) {
+    el?.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "clock";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = clockBar(clock.ms, localEnd(k, clock), "wall");
+}

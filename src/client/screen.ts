@@ -11,8 +11,8 @@ import { CLASS_WAITING } from "../shared/limits.ts";
 import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabHadRemote, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
-import { Presses, atOf, steeringButtons, type StepState } from "./steps.ts";
-import { clockBar, localEnd } from "./clock.ts";
+import { Presses, atOf, startButton, steeringButtons, type StepState } from "./steps.ts";
+import { edgeBar } from "./clock.ts";
 import { finalHtml, fitFinal } from "./final.ts";
 import { Line } from "./net.ts";
 import { fillPictures, load, picImg, preload } from "./pictures.ts";
@@ -120,6 +120,7 @@ function onMessage(m: ServerMessage): void {
     }
     document.body.className = "screen";
     sbar.innerHTML = "";
+    edgeBar("", null);
     main.innerHTML = `<div class="center"><p style="font-size:1.6em">${esc(said(m.reason))}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
   }
 }
@@ -398,7 +399,7 @@ function renderJoin(v: ScreenView): void {
           ${nobodyYet(v) ? `<p class="nobody">${nobodyLine()}</p>` : ""}
         </div>
       </div>
-      <div class="mstart"><button class="btn primary big" data-act="begin">${T.startQuiz}&nbsp;&#9654;</button>
+      <div class="mstart">${startButton("big", 'data-act="begin"', `${T.startQuiz}&nbsp;&#9654;`, !!t.starts)}
         <p class="device">${speedSwitch(t)}</p>
         <p class="joinnav"><button class="link" data-act="show-check">${T.backToCheck}</button>
           ${arranged === "remote" || t.remote === "away" ? `<button class="link" data-act="second-device">${t.remote === "away" ? T.remoteGoneSecond : T.secondDeviceLink}</button>` : ""}
@@ -573,28 +574,17 @@ function renderParty(v: ScreenView): void {
 
 /**
  * Last call's bar along the top edge of the wall, over everything: it takes
- * no room from the question, its picture or the tiles. Drawn again only when
- * it starts, stops or runs out; in between, CSS drains it.
+ * no room from the question, its picture or the tiles. In the lobby, Start's
+ * time, the class's dressing drawing to its end. Drawn again only when it
+ * starts, stops or runs out; in between, CSS drains it.
  */
-let clockKey = "";
 function renderClock(v: ScreenView): void {
-  const q = v.phase === "question" ? v.question : null;
-  const c = q?.clock ?? null;
-  let el = document.getElementById("clock");
-  if (!q || !c) {
-    clockKey = "";
-    el?.remove();
+  if (v.phase === "lobby") {
+    edgeBar("start", v.starts);
     return;
   }
-  const key = JSON.stringify([q.q, c.ms, c.leftMs === 0]);
-  if (key === clockKey && el) return;
-  clockKey = key;
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "clock";
-    document.body.appendChild(el);
-  }
-  el.innerHTML = clockBar(c.ms, localEnd(`${v.current}|${c.ms}`, c), "wall");
+  const q = v.phase === "question" ? v.question : null;
+  edgeBar(`${q?.q}|${q?.clock?.leftMs === 0}`, q?.clock ?? null);
 }
 
 /**

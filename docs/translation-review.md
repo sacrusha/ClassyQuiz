@@ -158,6 +158,19 @@ own language (`design/root-page.md`, "Languages"). For the read:
   "Réponses closes.", "Risposte chiuse." ("Abgabe" read as handing in schoolwork).
 - **The steering bar's longest labels**: "Schlussrangliste", "Classement final", "Classifica
   finale". Countdown is "Countdown", "Décompte", "Countdown".
+- **Under Start**, the ten seconds a dressing room gets: "in 10 s", "dans 10 s", "tra 10 s"; on
+  the friends' phones of a Peers room, beside the opener's avatar, "startet das Quiz gleich.",
+  "lance le quiz dans un instant.", "avvia il quiz tra un attimo."
+- **A Peers room** (`design/peers.md`): the invitation as a link, "Link teilen" / "Link
+  kopieren", "Partager le lien" / "Copier le lien", "Condividi il link" / "Copia il link";
+  under Countdown on the solution "dann weiter", "puis la suite", "poi avanti"; under Peers on
+  the check, when the room is deleted: the three hours first, as what to expect, then the
+  sooner end, "zehn Minuten, nachdem alle die letzte Seite verlassen haben", "dix minutes après
+  que tout le monde a quitté sa dernière page", "dieci minuti dopo che tutti hanno lasciato la
+  sua ultima pagina". A page is what one leaves in each language, and someone on the check
+  hasn't met a final ranking yet; German takes no possessive there ("seine" would first read
+  as "alle seine"). In the opener's lobby, "Freunde kommen über … dazu, mit dem Code": "treten
+  auf … bei" was "join on" carried over.
 - **"Players"** in the ⋯ menu and over the sheet is "Wer ist dabei" (beside the lobby's "n
   dabei"), "Participants", "Partecipanti", as `/check` has them; "Spieler" carries a gender, and
   the hint under it names the avatars.

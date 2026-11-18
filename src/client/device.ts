@@ -9,14 +9,17 @@
 // player's avatar and score), the stage, and a bar at the foot with one
 // button, the next step, always in the same place and kept there invisible
 // when there is none, so a hand in flow always finds it and a double tap
-// never lands on something new (docs/design/question-flow.md, "The steering bar").
+// never lands on something new (docs/design/question-flow.md, "The steering
+// bar"); a room with a Countdown has it left of that button, kept in place
+// the same way.
 
 import type { Answering, Avatar, ImageRef } from "../shared/protocol.ts";
 import { esc } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
 import { fillPictures, picImg } from "./pictures.ts";
 import { backdrop, endJump, jump, layQuestion, markTiles, type StageQuestion } from "./stage.ts";
-import { SETTLE_MS } from "./steps.ts";
+import { edgeBar } from "./clock.ts";
+import { DOUBLE_MS, SETTLE_MS } from "./steps.ts";
 import { T } from "./room-text.ts";
 
 export interface DeviceQuestion extends StageQuestion {
@@ -58,6 +61,16 @@ export interface DeviceView {
   next: string | null;
   /** Beside the foot's button, as HTML, in place of the title: what a room waits for. */
   foot?: string;
+  /**
+   * Countdown, left of the foot's button, for a room that has one (absent:
+   * no place for it). null keeps its place, invisible; without `running` a
+   * press starts it; running, it is greyed with the avatar of whoever
+   * started it, and its bar drains along the top edge
+   * (docs/design/peers.md, "Countdown").
+   */
+  countdown?: { note: string; running: { key: string; ms: number; leftMs: number; by: Avatar } | null } | null;
+  /** In the top bar, as HTML, in place of the player's avatar and score: how a room stands. */
+  standing?: string;
   /** A ⋯ at the end of the top bar, for a room's own menu. */
   menu?: boolean;
 }
@@ -76,6 +89,10 @@ export class DeviceScreen {
   private onAnswer: (shown: number) => void;
   private onNext: () => void;
   private onMenu: (() => void) | undefined;
+  private onCountdown: (() => void) | undefined;
+  /** When Countdown last became pressable, and when the foot's button was last pressed: a press soon after either isn't meant for Countdown. */
+  private countdownAt = 0;
+  private nextAt = 0;
   private live = true;
 
   /**
@@ -83,11 +100,12 @@ export class DeviceScreen {
    * shows. The page's body carries the wall's frame (classes screen and
    * steering: the full height, the foot's bar).
    */
-  constructor(root: HTMLElement, on: { answer: (shown: number) => void; next: () => void; menu?: () => void }) {
+  constructor(root: HTMLElement, on: { answer: (shown: number) => void; next: () => void; menu?: () => void; countdown?: () => void }) {
     this.root = root;
     this.onAnswer = on.answer;
     this.onNext = on.next;
     this.onMenu = on.menu;
+    this.onCountdown = on.countdown;
     root.addEventListener("click", this.click);
     document.addEventListener("keydown", this.key);
     window.addEventListener("resize", this.resize);
@@ -108,6 +126,7 @@ export class DeviceScreen {
     this.zoom(false);
     backdrop(null);
     this.root.classList.remove("dscreen", "dspread");
+    edgeBar("", null);
     this.view = null;
     this.laid = "";
   }
@@ -119,9 +138,9 @@ export class DeviceScreen {
     if (!this.root.querySelector("#stage")) {
       this.laid = "";
       this.root.classList.add("dscreen");
-      this.root.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="grow"></span><span id="qicons"></span><span class="dme" id="dme"></span><span id="dscore"></span><button class="dmenu" id="dmenu" type="button" aria-label="${T.menu}" hidden>&#8943;</button></div>
+      this.root.innerHTML = `<div class="bar" id="qbar"><span id="qpos"></span><span class="grow"></span><span id="qicons"></span><span class="dstand" id="dstand"></span><span class="dme" id="dme"></span><span id="dscore"></span><button class="dmenu" id="dmenu" type="button" aria-label="${T.menu}" hidden>&#8943;</button></div>
         <div class="stage" id="stage"></div>
-        <div class="steerbar dbar"><span class="grow" id="dtitle"></span><button class="btn primary bar-play" type="button" id="dnext"></button></div>`;
+        <div class="steerbar dbar"><span class="grow" id="dtitle"></span><button class="btn bar-last" type="button" id="dlast" hidden></button><button class="btn primary bar-play" type="button" id="dnext"></button></div>`;
     }
     if (before?.question.key !== q.key) this.zoom(false);
     backdrop(q.background);
@@ -143,14 +162,31 @@ export class DeviceScreen {
     this.at("#qpos").textContent = `${q.n} / ${q.total}`;
     const verdict = v.void && v.counts ? `<span class="voided">${ICON.void}</span>` : v.counts && v.mine !== null ? (v.counts[v.mine] ? `<span class="dverdict right">${ICON.check}</span>` : `<span class="dverdict wrong">${ICON.cross}</span>`) : "";
     this.set("#qicons", verdict);
-    this.set("#dme", v.me ? avatarSvg(v.me.avatar) : "");
-    this.set("#dscore", v.me ? `${ICON.star} ${v.me.score}` : "");
+    const own = v.me && v.standing === undefined ? v.me : null;
+    this.set("#dme", own ? avatarSvg(own.avatar) : "");
+    this.set("#dscore", own ? `${ICON.star} ${own.score}` : "");
+    this.set("#dstand", v.standing ?? "");
     this.set("#dtitle", v.foot ?? esc(v.title));
     this.at("#dmenu").hidden = !v.menu;
     const next = this.at("#dnext") as HTMLButtonElement;
     this.set("#dnext", v.next ? `${PLAY}<span class="lbl"><span>${esc(v.next)}</span></span>` : "");
     next.style.visibility = v.next ? "" : "hidden";
     next.tabIndex = v.next ? 0 : -1;
+    this.renderCountdown(v.countdown, before?.countdown);
+  }
+
+  private renderCountdown(c: DeviceView["countdown"], before: DeviceView["countdown"]): void {
+    const btn = this.at("#dlast") as HTMLButtonElement;
+    btn.hidden = c === undefined;
+    const run = c?.running ?? null;
+    if (c && !run && !(before && !before.running)) this.countdownAt = performance.now();
+    btn.style.visibility = c ? "" : "hidden";
+    btn.tabIndex = c && !run ? 0 : -1;
+    btn.disabled = !!run;
+    btn.classList.toggle("running", !!run);
+    this.set("#dlast", c ? `${run ? `<span class="dby">${avatarSvg(run.by)}</span>` : ICON.timer}<span class="lbl"><span>${T.countdown}</span><small>${esc(c.note)}</small></span>` : "");
+    // Its bar along the top edge, as on the wall.
+    edgeBar(run?.key ?? "", run);
   }
 
   /** These avatars jump over the question for a moment (the winners' band, client/stage.ts). */
@@ -172,7 +208,15 @@ export class DeviceScreen {
     const t = e.target as HTMLElement;
     if (!this.view) return;
     if (t.closest("#dnext")) {
+      this.nextAt = performance.now();
       if (this.view.next) this.onNext();
+      return;
+    }
+    if (t.closest("#dlast")) {
+      // Not the second tap of a double on the foot's button, nor one aimed at
+      // what was there before Countdown came (question-flow.md, "Presses").
+      const now = performance.now();
+      if (this.view.countdown && !this.view.countdown.running && now - this.nextAt > DOUBLE_MS && now - this.countdownAt >= SETTLE_MS) this.onCountdown?.();
       return;
     }
     if (t.closest("#dmenu")) {
@@ -215,6 +259,7 @@ export class DeviceScreen {
     if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
     if (v.next && NEXT_KEYS.has(e.key)) {
       e.preventDefault();
+      this.nextAt = performance.now();
       this.onNext();
     }
   };

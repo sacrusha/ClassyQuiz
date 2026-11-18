@@ -15,7 +15,7 @@ import type { Quiz } from "../quiz/format.ts";
 import type { LineCounts } from "../shared/line.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
 import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
-import { LAST_CALL_MS, POINTS_RIGHT, speedBonus } from "../shared/tempo.ts";
+import { LAST_CALL_MS, POINTS_RIGHT, START_MS, speedBonus } from "../shared/tempo.ts";
 
 export type Phase = "lobby" | "question" | "reveal" | "ranking" | "final";
 
@@ -31,6 +31,13 @@ export interface Clock {
   /** When Last call was pressed (server time). */
   at: number;
   ms: number;
+}
+
+/** Peers: a Countdown on one step of the room (question q's answering, or its solution), and the player who started it. */
+export interface PeersCountdown extends Clock {
+  phase: "question" | "reveal";
+  q: number;
+  by: string;
 }
 
 /** The teacher's corrections to one question; they apply to every run of the instance. */
@@ -118,6 +125,13 @@ export interface Run {
   /** When the teacher started the quiz (server time); missing before the start. */
   started?: number;
   /**
+   * Start was pressed: START_MS after `at` the first question comes, and
+   * until then the lobby stays, its dressing with it
+   * (docs/design/class-and-wall.md, "Dressing the avatar"). Missing before
+   * the press and once the quiz is under way.
+   */
+  starts?: Clock;
+  /**
    * Per question, the order its answers are shown in: position on screen →
    * index in the quiz text. Everything stored (answers, fixes) is by the
    * text's index; the views show this order. Missing in tests: the text's
@@ -146,11 +160,12 @@ export interface Run {
    * Peers (docs/design/peers.md): nobody steers, everyone plays. A
    * question's choices show with it, it closes once everyone present has
    * answered, and the next comes once everyone present is done with its
-   * solution. `host`: the player who opened the room, who also starts it,
-   * ends it, fixes a solution and removes an avatar. Absent: a room someone
-   * steers.
+   * solution, or when a Countdown a player started runs out. `host`: the
+   * player who opened the room, who also starts it, ends it early, fixes a
+   * solution and removes an avatar. `countdown`: the last one started, on
+   * the step it names. Absent: a room someone steers.
    */
-  peers?: { host: string };
+  peers?: { host: string; countdown?: PeersCountdown };
   /** Peers: player id → the question whose solution that player is done with (tapped on). */
   ready?: Record<string, number>;
   /**
@@ -342,8 +357,37 @@ export function begin(g: Game, now: number): void {
   const run = needRun(g);
   if (run.phase !== "lobby") throw new GameError("The quiz has already started.");
   delete run.waiting;
+  delete run.starts;
   run.started = now;
   open(g, run, nextShown(g, -1), now);
+}
+
+/**
+ * Start in a room: the class is let in, and START_MS later the quiz begins,
+ * so whoever is dressing sees the end coming and finishes. Once: a second
+ * press while it runs changes nothing ("running").
+ */
+export function startSoon(g: Game, now: number): "started" | "running" {
+  const run = needRun(g);
+  if (run.phase !== "lobby") throw new GameError("The quiz has already started.");
+  if (run.starts) return "running";
+  delete run.waiting;
+  run.starts = { at: now, ms: START_MS };
+  return "started";
+}
+
+/** Start pressed, the lobby still up: when it began and how long it runs; null otherwise. */
+export function startClock(g: Game): Clock | null {
+  const run = g.run;
+  return run?.phase === "lobby" ? (run.starts ?? null) : null;
+}
+
+/** Start's time ran out (now ≥ its end): the quiz begins. True when it began. */
+export function startOut(g: Game, now: number): boolean {
+  const c = startClock(g);
+  if (!c || now < c.at + c.ms) return false;
+  begin(g, now);
+  return true;
 }
 
 /** "Let the class in": students can join from now on. In the lobby only; again changes nothing. */
@@ -423,9 +467,9 @@ export function runningClock(g: Game): Clock | null {
   return run.clocks?.[run.current] ?? null;
 }
 
-/** When Last call ends (server time), or null. */
+/** When Last call ends, a Peers room's Countdown, or Start's time in the lobby (server time), or null. */
 export function deadline(g: Game): number | null {
-  const clock = runningClock(g);
+  const clock = runningClock(g) ?? peersCountdown(g) ?? startClock(g);
   return clock ? clock.at + clock.ms : null;
 }
 
@@ -676,9 +720,9 @@ export function applyFixes(g: Game, fixes: unknown): void {
 }
 
 // Peers (docs/design/peers.md, "Nobody steers"): the room moves on when
-// everyone present is done, on the plausible assumption that a few friends
-// wait for each other. "Present" is the room's to say (its devices'
-// lines); here it is a set of player ids.
+// everyone present is done, or when a Countdown one of them started runs
+// out; never by a clock of its own. "Present" is the room's to say (its
+// devices' lines); here it is a set of player ids.
 
 /** The room runs on its own: nobody steers. */
 export function isPeers(g: Game): boolean {
@@ -743,10 +787,41 @@ export function anyoneDone(g: Game): boolean {
 }
 
 /**
+ * Peers: Countdown on the step the room is on, by a player done with it
+ * (docs/design/peers.md, "Countdown"): LAST_CALL_MS later the room goes on
+ * whoever it still waits for. Once per step. "running": one already is;
+ * "refused": not now (no step, the player not done with it, a removed
+ * avatar).
+ */
+export function startCountdown(g: Game, playerId: string, now: number): "started" | "running" | "refused" {
+  const run = g.run;
+  const p = run ? playerById(run, playerId) : null;
+  if (!run?.peers || !p || p.removed || (run.phase !== "question" && run.phase !== "reveal") || !done(g, run, playerId)) return "refused";
+  if (peersCountdown(g)) return "running";
+  run.peers.countdown = { phase: run.phase, q: run.current, at: now, ms: LAST_CALL_MS, by: playerId };
+  return "started";
+}
+
+/** Peers: the Countdown on the step the room is on, while it runs; null otherwise. */
+export function peersCountdown(g: Game): PeersCountdown | null {
+  const run = g.run;
+  const c = run?.peers?.countdown;
+  return c && c.phase === run!.phase && c.q === run!.current ? c : null;
+}
+
+/** Peers: the room's Countdown ran out (now ≥ its end): the room goes on. True when it stepped. `view`: as in reveal. */
+export function countdownOut(g: Game, now: number, view: number): boolean {
+  const c = peersCountdown(g);
+  if (!c || now < c.at + c.ms) return false;
+  goOn(g, now, view);
+  return true;
+}
+
+/**
  * Peers, one step on: the open question's solution, or after it the next
  * question (the final ranking after the last). There is no ranking step
- * between them: each device shows the ranking while it waits for the
- * others. `view`: as in reveal.
+ * between them: the solution shows how the friends stand. `view`: as in
+ * reveal.
  */
 export function goOn(g: Game, now: number, view: number): void {
   const run = needRun(g);

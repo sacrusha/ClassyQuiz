@@ -280,8 +280,11 @@ hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
    end — `design/solo.md`.
 
 3. Peers: friends play together with nobody running it, whoever asked for
-   the quiz among them; the room moves on once everyone present is done —
-   `design/peers.md`.
+   the quiz among them; the room moves on once everyone present is done, or
+   when a friend who is done starts a Countdown for the others; whoever
+   opened the room is its light host (Start, a wrong solution, removing a
+   player, ending early), and the room ends by itself once everyone has left
+   — `design/peers.md`.
 
 4. Quizmaster: a host runs a quiz for a class or any other crowd; the lobby
    asks how the screens are arranged, the remote's how-to shows only where a
@@ -312,7 +315,8 @@ hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
 
 7. Nobody has to steer — Peers' side: everyone ready, the question closing
    once everyone present has answered and the next coming once everyone is
-   done with the solution — `design/peers.md` ("Nobody steers"). It rests
+   done with the solution, a friend's Countdown for whoever is held up —
+   `design/peers.md` ("Nobody steers", "Countdown"). It rests
    on a few friends waiting for each other, which, a plausible assumption,
    a class of 25 doesn't; a quizmaster whose hands are
    elsewhere is Later, "Runs by itself", whose cadence design is still owed.
@@ -819,7 +823,9 @@ Needs a real classroom or real devices, nobody has run it:
 - Android tablets and phones: the file picker with a zip downloaded from a chat
   app, a killed browser tab bringing back its role, the bar and the answered
   avatars from the back row, the steering bar's double press with a real
-  clicker and hand, whether children dress their avatars.
+  clicker and hand, whether children dress their avatars and see the end of
+  the dressing coming (`design/class-and-wall.md`, "The end of the
+  dressing").
 - The school's Wi-Fi, through /check.
 - A deploy or Durable Object restart in the middle of a run
   (`design/connections.md`).

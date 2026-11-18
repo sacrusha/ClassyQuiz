@@ -48,6 +48,7 @@ export interface At {
 
 export type Command =
   // steering: the Remote, or the Projector while no Remote is there
+  /** Start: the class let in, and START_MS later the first question; again while it runs changes nothing. */
   | { op: "begin"; at: At }
   /** "Let the class in": student devices can join from now on (teacher devices any time). */
   | { op: "letIn" }
@@ -57,7 +58,11 @@ export type Command =
    * question's reveal.
    */
   | { op: "play"; at: At }
-  /** Last call: the answers shown if they weren't, and LAST_CALL_MS later answering locks in by itself. */
+  /**
+   * Last call: the answers shown if they weren't, and LAST_CALL_MS later
+   * answering locks in by itself. In a Peers room any player done with the
+   * room's step sends it: LAST_CALL_MS later the room goes on (docs/design/peers.md, "Countdown").
+   */
   | { op: "lastCall"; at: At }
   /** Points for speed on or off, in the lobby (the join screen's switch). */
   | { op: "speed"; value: boolean }
@@ -95,14 +100,12 @@ export type Command =
   | { op: "answer"; q: number; choice: number; seq: number; v: number; ms?: number }
   /** In the lobby: the child's look, whole (shared/looks.ts); the latest one sent counts. t absent: no tool. */
   | { op: "dress"; b: number; h: number; t?: number }
-  /** Peers: done with question q's solution; the next comes once everyone present is (docs/design/peers.md). */
-  | { op: "ready"; q: number }
   /**
-   * Peers, the player who opened the room: on without waiting for the
-   * others (the solution now, or the next question). The same player also
-   * sends begin, finish, setCounts, setVoid, remove and endInstance.
+   * Peers: done with question q's solution; the next comes once everyone
+   * present is (docs/design/peers.md). The player who opened the room also
+   * sends begin, finish, setCounts, setVoid and remove.
    */
-  | { op: "goOn"; at: At };
+  | { op: "ready"; q: number };
 
 /**
  * A player device's input as the server last took it (docs/design/open-period-in-memory.md):
@@ -287,6 +290,8 @@ export interface ScreenView {
   current: number;
   /** In the lobby, the class not let in yet: the wall shows no code. */
   waiting: boolean;
+  /** In the lobby once Start is pressed: the first question comes when it runs out. */
+  starts: ClockView | null;
   players: { id: string; avatar: Avatar }[];
   answered: number;
   /**
@@ -337,6 +342,8 @@ export interface TeacherView {
   current: number;
   /** In the lobby, the class not let in yet: the steering screens offer "Let the class in". */
   waiting: boolean;
+  /** In the lobby once Start is pressed: the first question comes when it runs out. */
+  starts: ClockView | null;
   /**
    * Before the class is let in: how many classes like this one still fit
    * today, as last heard; 0 when letting in was refused. null: not known, or
@@ -374,6 +381,8 @@ export interface PlayerView {
   phase: Phase | "idle";
   current: number;
   removed: boolean;
+  /** In the lobby once Start is pressed: the dressing ends, and the first question comes, when it runs out. */
+  starts: ClockView | null;
   me: { avatar: Avatar; score: number; place: number; of: number } | null;
   /**
    * The answer pictures' small copies, in packs: fetched once, as soon as a
@@ -411,8 +420,9 @@ export interface PlayerView {
 
 /**
  * Peers (docs/design/peers.md): there is no wall, so each device gets the
- * question itself, the code to join, who is in, the spread, the winners and
- * the ranking. Every list of answers is in the order on screen.
+ * question itself, the code to join, who is in, the spread, the winners,
+ * how the friends stand and the final ranking. Every list of answers is in
+ * the order on screen.
  */
 export interface PeersView {
   /** This device's player, as in `players` and the ranking. */
@@ -420,7 +430,7 @@ export interface PeersView {
   title: string;
   /** The code friends join with, shown on the device of whoever opened the room. */
   code: string;
-  /** This device's player opened the room: it starts, ends, fixes a solution, removes an avatar. */
+  /** This device's player opened the room: it starts, ends early, fixes a solution, removes an avatar. */
   host: boolean;
   /** Who opened the room: the others' lobby says whose Start it waits for. */
   hostAvatar: Avatar | null;
@@ -445,6 +455,11 @@ export interface PeersView {
   /** With the solution: how many picked each answer, and who got it right (they jump). */
   dist: number[] | null;
   winners: string[];
+  /** With the solution: every player and score, highest first (ties in the lobby's order); id as in the players. */
+  standings: { id: string; score: number }[] | null;
+  /** A Countdown on the room's step, while it runs, and the avatar of the player who started it. */
+  countdown: (ClockView & { by: Avatar }) | null;
+  /** At the final ranking. */
   ranking: RankingView | null;
 }
 

@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";
 import * as G from "./game.ts";
-import { LAST_CALL_MS, POINTS_RIGHT, SPEED_REFERENCE_MS, speedBonus } from "../shared/tempo.ts";
+import { LAST_CALL_MS, POINTS_RIGHT, SPEED_REFERENCE_MS, START_MS, speedBonus } from "../shared/tempo.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, MAX_LOOK_CHANGES, TOOL_COUNT } from "../shared/looks.ts";
 
 const quiz = parseQuiz(`Title: T
@@ -305,7 +305,7 @@ test("avatars: the first dozen players all get different animals", () => {
   assert.equal(combos.size, G.MAX_PLAYERS);
 });
 
-test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start", () => {
+test("dressing: a look in the lobby, whole, the same for anyone, until Start's time runs out", () => {
   const { g, ids } = setup(3);
   const before = { ...g.run!.players[ids[0]].avatar };
   assert.equal(G.dress(g, ids[0], 2, 1), "stored");
@@ -332,10 +332,17 @@ test("dressing: a look in the lobby, whole, the same for anyone, fixed at Start"
   // Not for a removed avatar.
   G.removePlayer(g, ids[2]);
   assert.equal(G.dress(g, ids[2], 1, 1), "refused");
-  // Fixed at Start.
-  begin(g, 100);
+  // Start: the dressing goes on until its time runs out, a second press changing nothing.
+  assert.equal(G.startSoon(g, 100), "started");
+  assert.equal(G.startSoon(g, 5000), "running");
+  assert.equal(G.deadline(g), 100 + START_MS);
+  assert.equal(G.startOut(g, 99 + START_MS), false);
+  assert.equal(G.dress(g, ids[1], 3, 2), "stored");
+  assert.equal(G.startOut(g, 100 + START_MS), true);
+  assert.equal(g.run!.phase, "question");
+  // Then fixed.
   assert.equal(G.dress(g, ids[1], 3, 3), "refused");
-  assert.deepEqual(g.run!.players[ids[1]].avatar.b, 2);
+  assert.deepEqual(g.run!.players[ids[1]].avatar.h, 2);
 });
 
 test("dressing: a child who hammers the pictures stops at MAX_LOOK_CHANGES", () => {
@@ -564,7 +571,7 @@ test("the class joins once the teacher lets it in, or once the quiz starts", () 
   const h = G.newGame(quiz);
   G.startRun(h, "12345", "r2");
   h.run!.waiting = true;
-  G.begin(h, 0);
+  G.startSoon(h, 0);
   assert.equal(h.run!.waiting, undefined, "Start lets the class in");
   G.addPlayer(h, "p0", "t0", 0, random);
 });
@@ -657,14 +664,26 @@ test("Peers: done with a solution only while it shows; a removed avatar isn't wa
   assert.equal(g.run!.current, 1);
 });
 
-test("Peers: the host's go-on doesn't wait: the solution now, then the next question", () => {
+test("Peers: Countdown, from a player done with the step, goes on at its end whoever the room waits for; once per step", () => {
   const { g, ids, all } = peersRoom();
-  G.goOn(g, 1, 10);
-  assert.equal(g.run!.phase, "reveal", "nobody had answered");
-  G.setReady(g, ids[1], 0);
-  assert.deepEqual(G.waitingFor(g, all), [ids[0], ids[2]]);
-  G.goOn(g, 2, 11);
+  assert.equal(G.startCountdown(g, ids[1], 0), "refused", "not answered: not theirs to start");
+  G.answer(g, ids[1], 0, 0, 1, 0, 1);
+  assert.equal(G.startCountdown(g, ids[1], 1000), "started", "anyone done, not only whoever opened the room");
+  assert.equal(G.startCountdown(g, ids[0], 1500), "refused");
+  G.answer(g, ids[0], 0, 0, 1, 0, 1600);
+  assert.equal(G.startCountdown(g, ids[0], 2000), "running");
+  assert.equal(G.deadline(g), 1000 + LAST_CALL_MS);
+  assert.equal(G.countdownOut(g, 1000 + LAST_CALL_MS - 1, 10), false, "not before its end");
+  assert.deepEqual(G.waitingFor(g, all), [ids[2]]);
+  assert.equal(G.countdownOut(g, 1000 + LAST_CALL_MS, 10), true);
+  assert.equal(g.run!.phase, "reveal", "the solution, the third still not answered");
+  assert.equal(G.peersCountdown(g), null, "the question's Countdown is over with it");
+  assert.equal(G.startCountdown(g, ids[0], 20_000), "refused", "not done with the solution");
+  G.setReady(g, ids[0], 0);
+  assert.equal(G.startCountdown(g, ids[0], 20_000), "started", "the solution's own");
+  assert.equal(G.countdownOut(g, 20_000 + LAST_CALL_MS, 11), true);
   assert.equal(g.run!.phase, "question");
+  assert.equal(g.run!.current, 1);
 });
 
 // docs/design/open-period-in-memory.md: an instance that lost its memory

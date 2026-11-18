@@ -232,6 +232,9 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .teach .actions .wrap.ending::after { content: ""; flex: 0 0 56px; }
 .btn.bar-exit .lbl { display: flex; flex-direction: column; line-height: 1.1; text-align: center; }
 .btn.bar-exit .lbl small { font-size: .62em; font-weight: 500; line-height: 1.3; opacity: .85; }
+/* Start (client/steps.ts, startButton): under its label, when the quiz comes. */
+.btn.start .lbl { display: flex; flex-direction: column; line-height: 1.1; text-align: center; }
+.btn.start .lbl small { font-size: .62em; font-weight: 500; line-height: 1.3; opacity: .85; }
 
 /* dvh: on a tablet the browser's toolbar is not part of the screen. */
 body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -734,6 +737,8 @@ button.tile { border: 0; margin: 0; font: inherit; font-weight: 700; text-align:
 .dscreen:not(.dspread) .tiles.dupright .tile .side { width: 1.6em; }
 .dscreen:not(.dspread) .tiles.dupright .tile.pic.row, .dscreen:not(.dspread) .tiles.dupright .tile.pic.col { grid-template-columns: 1.6em minmax(0, 1fr) 1.6em; }
 #qbar .dme { width: 1.6em; height: 1.6em; flex: none; }
+/* A room's standing in their place: no room, and no gaps, kept for them. */
+#qbar .dme:empty, #qbar #dscore:empty { display: none; }
 #qbar .dme svg { width: 100%; height: 100%; display: block; }
 #qbar #dscore { flex: none; display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }
 .dverdict { display: inline-flex; color: #fff; border-radius: 50%; padding: .12em; }
@@ -741,6 +746,13 @@ button.tile { border: 0; margin: 0; font: inherit; font-weight: 700; text-align:
 .dverdict.wrong { background: var(--bad); }
 .dbar .grow { color: var(--muted); }
 .dbar .btn.bar-play { margin-left: auto; }
+.dbar .btn.bar-last[hidden] { display: none; }
+/* Room for whose it is beside the label; only its left edge moves, where nothing is pressed. */
+.dbar .btn.bar-last { width: auto; min-width: 8.4em; }
+/* Running, it says whose it is: that avatar in place of the timer, greyed as the wall's is. */
+.btn.bar-last .dby { width: 1.6em; height: 1.6em; flex: none; }
+.btn.bar-last .dby svg { width: 100%; height: 100%; display: block; }
+.dbar .btn.bar-last.running { opacity: .75; }
 
 /* Solo (client/entry-solo.ts): the start with the dressing menu, then the
    device's screen, then the result. */
@@ -770,8 +782,8 @@ body.play.solo { display: flex; flex-direction: column; }
 
 /* Peers (client/peers.ts): a room that runs on its own, on each player's
    device. The lobby and the final ranking are pages under nothing (body.play.peers);
-   a question, its solution and the ranking between take a screen's height
-   with the device screen's foot (body.screen.steering.peers). */
+   a question and its solution take a screen's height with the device
+   screen's foot (body.screen.steering.peers). */
 .tile.mine.sending { outline-style: dashed; animation: sending 1s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .tile.mine.sending { animation: none; } }
 .dmenu { flex: none; border: 1px solid var(--rule); background: var(--card); color: var(--fg); border-radius: 10px; min-width: 2.2em; min-height: 2em; font-size: 1em; font-weight: 700; line-height: 1; padding: 0 .4em; }
@@ -780,6 +792,25 @@ body.play.solo { display: flex; flex-direction: column; }
 .pwaiting { display: inline-flex; align-items: center; gap: .4em; color: var(--muted); font-weight: 600; }
 .pavs { display: inline-flex; gap: 2px; }
 .pavs > span { width: 1.8em; height: 1.8em; display: block; }
+/* On a phone the foot has Countdown beside its button: "Waiting for" goes above the avatars. */
+@media (max-width: 480px) {
+  .dbar .pwaiting { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; line-height: 1.1; }
+  .dbar .pwlabel { font-size: .78em; }
+  .dbar .btn.bar-last { min-width: 7.6em; }
+  /* The friends' standing takes the bar's room at the solution. */
+  body.peers #qbar { gap: .6em; }
+}
+/* At the solution, how the friends stand, in the top bar: each score with its avatars (client/peers.ts, standingLine). */
+/* Overflowing at its end, so that fitStanding can measure it; a tie's avatars overlap, a phone's bar has room for few. */
+#qbar .dstand { flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: .55em; overflow: hidden; white-space: nowrap; padding: 2px; }
+#qbar .dstand:empty { display: none; }
+.sgroup { flex: none; display: inline-flex; align-items: center; gap: .25em; }
+.sscore { display: inline-flex; align-items: center; gap: .1em; font-variant-numeric: tabular-nums; }
+.sgroup .pavs { gap: 0; }
+.sgroup .pavs > span { width: 1.6em; height: 1.6em; border-radius: 50%; box-shadow: 0 0 0 2px var(--bg); }
+.sgroup .pavs > span + span { margin-left: -.4em; }
+.sgroup .pavs > span.me { position: relative; box-shadow: 0 0 0 2px var(--fg); }
+.smore { flex: none; color: var(--muted); font-weight: 600; }
 .sheet .pav { width: 36px; height: 36px; margin-right: 8px; }
 
 .plobby { width: 100%; max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
@@ -789,6 +820,9 @@ body.play.solo { display: flex; flex-direction: column; }
 .pqr { width: 132px; height: 132px; background: #fff; padding: 6px; border-radius: 8px; flex: none; }
 .pqr svg { width: 100%; height: 100%; display: block; }
 .pcodebox p { margin: 0; }
+.plink { margin-top: 8px; }
+.plink .btn { min-height: 40px; padding: .2em .9em; }
+.plinkbox { width: 100%; box-sizing: border-box; font: inherit; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; }
 .pcode { font-family: var(--font-brand); font-size: 3.2rem; font-weight: 700; letter-spacing: .08em; line-height: 1.1; font-variant-numeric: tabular-nums; }
 @media (max-width: 480px) {
   .pjoin { gap: 12px; padding: 12px; }
@@ -806,15 +840,6 @@ body.play.solo { display: flex; flex-direction: column; }
 @media (orientation: portrait) {
   .peers .dress .hero { width: min(40vw, 20vh); height: min(40vw, 20vh); }
 }
-
-.pranking { flex: 1; min-height: 0; overflow: auto; display: flex; align-items: center; justify-content: center; }
-.pranks { display: flex; flex-direction: column; gap: 1.2vh; width: min(100%, 26em); }
-.prank { display: grid; grid-template-columns: 2.4em 2.6em 1fr; align-items: center; gap: .6em; font-weight: 800; font-size: 1.3em; padding: .2em .5em; border-radius: 12px; }
-.prank .pav { width: 2.4em; height: 2.4em; }
-.prank .pplace { font-family: var(--font-brand); text-align: right; }
-.prank .pscore { display: inline-flex; align-items: center; gap: .3em; font-variant-numeric: tabular-nums; }
-.prank.me { background: color-mix(in srgb, var(--control) 10%, var(--card)); }
-.prank.apart { margin-top: 1.5vh; }
 
 .pfinal { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; max-width: 36rem; margin: 0 auto; width: 100%; }
 .pfinal .ctitle { margin: 0; font-size: 1.5rem; }

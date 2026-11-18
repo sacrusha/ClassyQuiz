@@ -61,6 +61,7 @@ const SPEED = process.argv.includes("--speed");
 const DRESS = !process.argv.includes("--no-dress");
 // shared/tempo.ts
 const LAST_CALL_MS = 15_000;
+const START_MS = 10_000;
 const POINTS_RIGHT = 10;
 const SPEED_BONUS = 5;
 const SPEED_REFERENCE_MS = 20_000;
@@ -679,10 +680,24 @@ if (SPEED) {
   check(t.ok, "points for speed are switched on in the lobby");
   await until(() => tv().speed === true, 5000, "the switch in the teacher's view");
 }
-await steerer().send({ op: "begin", at: at() });
+check((await steerer().send({ op: "begin", at: at() })).ok, "Start");
 {
-  // The look is fixed at Start.
-  const p = players[0];
+  // Start: the class dresses on for START_MS, a second Start changing
+  // nothing; then the first question, and the look is fixed.
+  const pressed = Date.now();
+  await until(() => !!tv().starts && !!projector.view.starts, 5000, "Start's time on the steering view and the wall");
+  const again = await steerer().send({ op: "begin", at: at() });
+  check(again.ok && again.result === "stale", `a second Start while its time runs changes nothing (${again.result ?? "taken"})`);
+  const p = players.find((x) => x.d.online && x.view?.phase === "lobby") ?? players[0];
+  await until(() => !!p.view?.starts, 5000, "a tablet to have Start's time");
+  const was = looks.get(p.id) ?? { b: 0, h: 0 };
+  const dressed = { b: (was.b + 1) % 6, h: was.h, t: was.t ?? 0 };
+  const during = await p.d.send({ op: "dress", ...dressed });
+  check(during.ok, "dressing goes on while Start's time runs");
+  if (during.ok) looks.set(p.id, dressed);
+  await until(() => tv().phase === "question", START_MS + 5000, "the first question once Start's time ran out");
+  const took = Date.now() - pressed;
+  check(took >= START_MS - 500 && took < START_MS + 3000, `the first question START_MS after Start (${took} ms)`);
   const now = looks.get(p.id) ?? { b: 0, h: 0 };
   const late = await p.d.send({ op: "dress", b: (now.b + 1) % 6, h: now.h });
   check(!late.ok, "dressing is refused once the quiz has started");

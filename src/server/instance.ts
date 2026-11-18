@@ -46,6 +46,14 @@ import { LOOK_SHOW_MS } from "../shared/looks.ts";
  * how long").
  */
 export const INSTANCE_IDLE_MS = 3 * 3600_000;
+/**
+ * A Peers room ends once no device has been at its final ranking for this
+ * long: nobody ends it there, each device just goes, and a device that left
+ * is told apart from one that slept only by time. Plausible
+ * assumption: friends who look at the podium again do so while still
+ * together, within minutes (docs/design/peers.md, "The end").
+ */
+const PEERS_EMPTY_MS = 10 * 60_000;
 /** A long-poll is answered after this long even when nothing changed. */
 const POLL_HOLD_MS = 25_000;
 /**
@@ -216,6 +224,8 @@ export class Instance extends DurableObject<Env> {
    * about no one.
    */
   private memory = randomToken();
+  /** When a player's line last closed; a closed line is no longer in `lastHeard` (`peersEmptyAt`). */
+  private lineClosedAt = 0;
   /** The lobby's looks go out to the screens at most every LOOK_SHOW_MS (`showSoon`). */
   private showTimer: ReturnType<typeof setTimeout> | null = null;
   /** Wrong teacher codes, as stored; a quiz without any keeps a salt in memory until its first. */
@@ -842,6 +852,7 @@ export class Instance extends DurableObject<Env> {
     }
     // A Peers room doesn't wait for a device that closed its line (a tab closed).
     if (session.role === "player" && this.game?.run?.peers) {
+      this.lineClosedAt = Date.now();
       await this.peersCheck(ws);
       return;
     }
@@ -1124,20 +1135,23 @@ export class Instance extends DurableObject<Env> {
           if (outcome === "stored") await this.took(session.player, ws);
           return { direct: [ack(outcome !== "refused")] };
         }
+        if (cmd.op === "lastCall" && G.isPeers(game)) {
+          // Peers: Countdown, from any player done with the step; the alarm goes on at its end.
+          if (!at(cmd) || G.startCountdown(game, session.player, now) !== "started") return { direct: [ack(true, undefined, "stale")] };
+          await this.afterTeacherChange(["run"]);
+          return { direct: [ack(true)] };
+        }
         if (G.isHost(game, session.player) && cmd.op !== "answer") {
-          // The player who opened a Peers room: Start, on without waiting,
-          // the final ranking, a fix of the solution, Remove, Exit.
+          // The player who opened a Peers room: Start, the final ranking
+          // early, a fix of the solution, Remove.
           let changed: ("run" | "fixes")[] = ["run"];
           switch (cmd.op) {
             case "begin":
-            case "goOn":
             case "finish":
               if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
-              if (cmd.op === "begin") {
-                G.begin(game, now);
-                await this.bookAhead();
-              } else if (cmd.op === "goOn") G.goOn(game, now, this.nextView());
-              else G.finish(game, now);
+              // Start: the quiz begins START_MS later, by the alarm.
+              if (cmd.op === "begin" && G.startSoon(game, now) === "running") return { direct: [ack(true, undefined, "stale")] };
+              if (cmd.op === "finish") G.finish(game, now);
               break;
             case "setCounts":
               G.setCounts(game, cmd.q, this.fromScreen(cmd.q, cmd.counts));
@@ -1153,9 +1167,6 @@ export class Instance extends DurableObject<Env> {
               // The room may have waited only for that avatar.
               G.peersStep(game, now, this.nextView(), this.connectedPlayers());
               break;
-            case "endInstance":
-              await this.endInstance(id);
-              return { direct: [ack(true)] };
             default:
               return { direct: [ack(false, "not allowed")] };
           }
@@ -1235,11 +1246,11 @@ export class Instance extends DurableObject<Env> {
         case "finish":
         case "skipCurrent": {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
-          // Start without "Let the class in" lets the class in too, and books.
+          // Start without "Let the class in" lets the class in too, and books;
+          // the quiz begins START_MS later, by the alarm.
           if (cmd.op === "begin" && !(await this.bookRows())) return { direct: [ack(false, classesFullMessage())] };
           if (cmd.op === "begin") {
-            G.begin(game, now);
-            await this.bookAhead();
+            if (G.startSoon(game, now) === "running") return { direct: [ack(true, undefined, "stale")] };
           }
           else if (cmd.op === "play") G.play(game, now, this.nextView());
           else if (cmd.op === "lastCall") G.lastCall(game, now);
@@ -1741,6 +1752,8 @@ export class Instance extends DurableObject<Env> {
     // Peers: someone the room waits for may go away, and the room on without them.
     const recheck = this.peersRecheck();
     if (recheck != null) at = Math.min(at, recheck);
+    const empty = this.peersEmptyAt();
+    if (empty != null) at = Math.min(at, Math.max(Date.now() + 1000, empty));
     // A let-in lobby nobody joined gives its booking back.
     const lapse = this.lapseAt();
     if (lapse != null) at = Math.min(at, Math.max(Date.now() + 1000, lapse));
@@ -1761,7 +1774,8 @@ export class Instance extends DurableObject<Env> {
       return;
     }
     const now = Date.now();
-    if (now >= meta.lastActivity + INSTANCE_IDLE_MS) {
+    const empty = this.peersEmptyAt();
+    if (now >= meta.lastActivity + INSTANCE_IDLE_MS || (empty != null && now >= empty)) {
       await this.endInstance();
       return;
     }
@@ -1771,15 +1785,43 @@ export class Instance extends DurableObject<Env> {
       this.meta!.rows!.lapsed = true;
       await this.persist(["meta"]);
     }
-    const deadline = G.deadline(this.game!);
-    if (deadline != null && now >= deadline) {
+    const game = this.game!;
+    const deadline = G.deadline(game);
+    if (deadline != null && now >= deadline && game.run?.phase === "lobby") {
+      // Start's time ran out: the first question.
+      if (G.startOut(game, now)) {
+        await this.bookAhead();
+        await this.afterTeacherChange(["run"]);
+      }
+    } else if (deadline != null && now >= deadline && G.isPeers(game)) {
+      // A friend's Countdown ran out: the room goes on, whoever it still waits for.
+      if (G.countdownOut(game, now, this.nextView())) {
+        await this.afterTeacherChange(["run"]);
+        if (game.run?.phase === "final") await this.settleRows();
+      }
+    } else if (deadline != null && now >= deadline) {
       // Time's up: answering closes; the reveal waits for the teacher.
-      G.closeAnswers(this.game!, this.nextView());
+      G.closeAnswers(game, this.nextView());
       await this.persist(["run"]);
       this.broadcast();
     }
     await this.peersCheck();
     await this.scheduleAlarm();
+  }
+
+  /**
+   * Peers: at the final ranking, when the room ends for nobody being there
+   * (PEERS_EMPTY_MS after a device was last heard from or its line closed,
+   * or after the final ranking came, whichever is latest); null before the
+   * final ranking.
+   */
+  private peersEmptyAt(): number | null {
+    const run = this.game?.run;
+    if (!run?.peers || run.phase !== "final") return null;
+    // A removed avatar's phone, left awake on the table, is nobody at the ranking.
+    const heard = [...this.lastHeard()].filter(([id]) => G.playerById(run, id)?.removed === false).map(([, t]) => t);
+    // A memory the alarm woke has heard nobody since its last start: a poller, polling, keeps the object awake.
+    return Math.max(run.ended ?? 0, this.lineClosedAt, ...heard) + PEERS_EMPTY_MS;
   }
 
   /**
@@ -1843,11 +1885,10 @@ export class Instance extends DurableObject<Env> {
     const unsettled = rows && !rows.settled;
     await this.budget().release(this.ctx.id.toString(), unsettled ? this.spent() : undefined, unsettled ? this.classUse() : undefined).catch(() => {});
     const gone: ServerMessage = ackId ? { t: "gone", reason: "This quiz has been ended.", home: true } : { t: "gone", reason: "This quiz has ended." };
-    const host = this.game?.run?.peers?.host;
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Session | null;
-      // Whoever ended it hears that it worked before the line closes: a teacher tab, or a Peers room's opener.
-      if (ackId && (s?.role === "screen" || s?.role === "remote" || (s?.role === "player" && s.player === host))) send(ws, { t: "ack", id: ackId, ok: true });
+      // The teacher's tabs hear that it worked before their lines close.
+      if (ackId && (s?.role === "screen" || s?.role === "remote")) send(ws, { t: "ack", id: ackId, ok: true });
       send(ws, gone);
       ws.close(4000, "gone");
     }
@@ -1948,9 +1989,12 @@ export class Instance extends DurableObject<Env> {
 
   /** Last call as the screens draw it, while it runs; null without one, or once answering is locked in. */
   private clockView(): ClockView | null {
-    const clock = this.game ? G.runningClock(this.game) : null;
-    if (!clock) return null;
-    return { ms: clock.ms, leftMs: Math.max(0, clock.at + clock.ms - Date.now()) };
+    return drawn(this.game ? G.runningClock(this.game) : null);
+  }
+
+  /** Start's time in the lobby, as every screen draws it; null before Start. */
+  private startsView(): ClockView | null {
+    return drawn(this.game ? G.startClock(this.game) : null);
   }
 
   /** A player's stored answer to question q, its choice in the order on screen. */
@@ -2029,6 +2073,7 @@ export class Instance extends DurableObject<Env> {
       phase,
       current: run ? run.current : -1,
       waiting: !!run?.waiting,
+      starts: this.startsView(),
       players: active.map((p) => ({ id: p.id, avatar: p.avatar })),
       answered: this.answeredNow(),
       answeredBy: [...inIds].map((id) => ({ id, avatar: run!.players[id].avatar })),
@@ -2104,6 +2149,7 @@ export class Instance extends DurableObject<Env> {
       phase: run ? run.phase : "idle",
       current: run ? run.current : -1,
       waiting: !!run?.waiting,
+      starts: this.startsView(),
       room: this.room(),
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
@@ -2135,6 +2181,7 @@ export class Instance extends DurableObject<Env> {
     const prog = G.progress(game);
     const now = Date.now();
     const clock = this.clockView();
+    const starts = this.startsView();
     const shownAt = run && run.phase === "question" ? run.shown?.[run.current] : undefined;
     const speed = G.speedScale(game);
     const ans = G.answering(game) ?? "open";
@@ -2159,6 +2206,7 @@ export class Instance extends DurableObject<Env> {
         phase,
         current: run ? run.current : -1,
         removed: !p || p.removed,
+        starts,
         me: p && s ? { avatar: p.avatar, score: s.score, place: s.place, of: st.length } : p ? { avatar: p.avatar, score: 0, place: 0, of: st.length } : null,
         ...(packs ? { packs } : {}),
         question:
@@ -2222,9 +2270,20 @@ export class Instance extends DurableObject<Env> {
         : null,
       dist: run.phase === "reveal" ? this.onScreen(run.current, G.distribution(game, run.current)) : null,
       winners: run.phase === "reveal" ? G.winners(game, run.current) : [],
-      ranking: run.phase === "reveal" || run.phase === "final" ? this.ranking() : null,
+      standings: run.phase === "reveal" ? G.standings(game).map((s) => ({ id: s.id, score: s.score })) : null,
+      countdown: this.peersCountdownView(),
+      ranking: run.phase === "final" ? this.ranking() : null,
     };
     return (player: string): PeersView => ({ ...shared, player, host: player === run.peers!.host, ready: G.isReady(game, player) });
+  }
+
+  /** A Peers room's Countdown as the devices draw it, with whose it is; null while none runs. */
+  private peersCountdownView(): PeersView["countdown"] {
+    const game = this.game!;
+    const c = G.peersCountdown(game);
+    const by = c ? G.playerById(game.run!, c.by) : null;
+    if (!c || !by) return null;
+    return { ...drawn(c)!, by: by.avatar };
   }
 
   /**
@@ -2315,6 +2374,11 @@ type ViewCache = { screen?: ScreenView; teacher?: TeacherView; player?: (id: str
 
 /** What a polling device was last sent: the view's key, its pollKey, its version. */
 type Sent = { key: string; poll: string; v: number };
+
+/** A clock as the screens draw it: how long it runs and how much was left when the view was made. */
+function drawn(clock: G.Clock | null): ClockView | null {
+  return clock ? { ms: clock.ms, leftMs: Math.max(0, clock.at + clock.ms - Date.now()) } : null;
+}
 
 function sent(view: PlayerView): Sent {
   return { key: viewKey(view), poll: pollKey(view), v: view.v };

@@ -5,6 +5,13 @@
 export const LAST_CALL_MS = 15_000;
 
 /**
+ * Start: the first question comes this long after the press, so whoever is
+ * still dressing their avatar sees the end coming and finishes
+ * (docs/design/class-and-wall.md, "Dressing the avatar").
+ */
+export const START_MS = 10_000;
+
+/**
  * A right answer scores POINTS_RIGHT plus up to SPEED_BONUS more, by the
  * share of SPEED_REFERENCE_MS still left when it was tapped, counted from the
  * answers appearing (whole points, so ties stay possible); a tap after the

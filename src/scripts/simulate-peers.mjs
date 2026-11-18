@@ -1,7 +1,7 @@
 // A Peers room (docs/design/peers.md) against a running site, local or
 // deployed:
 //
-//   node scripts/simulate-peers.mjs [base-url]
+//   node scripts/simulate-peers.mjs [base-url] [--empty]
 //
 // Four friends: whoever uploads comes in as the room's first player, three
 // join with the code, one of them over HTTP long-polling, whose polls the
@@ -12,13 +12,25 @@
 // nothing. A phone goes silent with its socket open (a battery dying): after
 // FRESH_MS the room moves on without it, by the instance's alarm, and when
 // it comes back the room waits for it again. A tab that closes its socket
-// is let go at once. Whoever opened the room changes a solution, removes an
-// avatar, and goes on without waiting; the others can't. At the end every
-// score must be what the answers and the fixes give, and Exit sends every
-// device home, a poll that comes after it too. Takes about two minutes (the
-// silent phone, the poll's end).
+// is let go at once. Whoever opened the room changes a solution and removes
+// an avatar; the others can't. Start's time runs on every device, the
+// polling one included, a friend dressing on meanwhile, before the first
+// question comes. A friend who is done starts a Countdown, on
+// the question and on its solution: the polling device it waits for hears
+// of it at once, and the room goes on at its end, not before. At the end
+// every score must be what the answers and the fixes give, and nobody ends
+// the room. Takes about two and a half minutes (the silent phone, the poll's
+// end, Start's time, two Countdowns). With --empty it then leaves the final ranking and
+// waits for the room to end by itself, ten minutes more.
 
-const BASE = (process.argv[2] ?? "http://127.0.0.1:8788").replace(/\/+$/, "");
+const BASE = (process.argv[2]?.startsWith("http") ? process.argv[2] : "http://127.0.0.1:8788").replace(/\/+$/, "");
+const EMPTY = process.argv.includes("--empty");
+/** server/instance.ts: a Peers room ends once nobody has been at its final ranking for this long. */
+const PEERS_EMPTY_MS = 10 * 60_000;
+/** shared/tempo.ts: Countdown's length. */
+const LAST_CALL_MS = 15_000;
+/** shared/tempo.ts: from Start to the first question. */
+const START_MS = 10_000;
 const WS_BASE = BASE.replace(/^http/, "ws");
 /** server/instance.ts: a device not heard from for this long is away. */
 const FRESH_MS = 45_000;
@@ -194,7 +206,15 @@ await host.until((v) => v.peers.players.length === 4, "everyone in, on the opene
 check(ann.view.peers.host === false && !!ann.view.peers.hostAvatar, "the others see whose Start it is");
 check((await ann.send({ op: "begin", at: { phase: "lobby", current: -1 } })).ok === false, "nobody else starts it");
 check((await host.send({ op: "begin", at: { phase: "lobby", current: -1 } })).ok, "the opener starts it");
-for (const d of all) await d.until((v) => v.phase === "question" && v.question?.answering === "open", "question 1, its choices with it");
+const started = Date.now();
+for (const d of all) await d.until((v) => !!v.starts && v.phase === "lobby", "Start's time on every device, the polling one too");
+const again = await host.send({ op: "begin", at: { phase: "lobby", current: -1 } });
+check(again.ok && again.result === "stale", `a second Start while its time runs changes nothing (${again.result ?? "taken"})`);
+check((await ann.send({ op: "dress", b: 2, h: 3, t: 0 })).ok, "a friend dresses on while Start's time runs");
+for (const d of all) await d.until((v) => v.phase === "question" && v.question?.answering === "open", "question 1, its choices with it", START_MS + 8000);
+check(Date.now() - started >= START_MS - 500, `question 1 comes START_MS after Start (${Date.now() - started} ms)`);
+check((ann.view.me.avatar.b ?? 0) === 2 && (ann.view.me.avatar.h ?? 0) === 3, "the look dressed during Start's time is kept");
+check((await ann.send({ op: "dress", b: 1, h: 1, t: 0 })).ok === false, "then the dressing is over");
 check(!!ann.view.peers.question?.text, "the question itself is on each device");
 
 /** Answers the open question on the given devices with the answer of that text. */
@@ -266,24 +286,41 @@ const shown = host.view.question.answers;
 check((await host.send({ op: "setCounts", q: 2, counts: shown.map((t) => t === "b") })).ok, "the opener changes the solution of 3 to b");
 await host.until((v) => v.peers.winners.length === 0, "the winners follow the fix");
 
-// --- A tab that closes its line is let go at once; the opener removes an avatar and goes on without waiting.
+// --- A tab that closes its line is let go at once; the opener removes an avatar.
 
 await readyAll([host, ann, ben], 2);
 await sleep(300);
 check(host.view.phase === "reveal", "cat hasn't tapped on");
 cat2.close();
 await host.until((v) => v.phase === "question" && v.current === 3, "question 4 once cat's tab closed", 3000);
-check((await ann.send({ op: "goOn", at: at(ann.view) })).ok === false, "nobody else goes on without waiting");
 host.id = host.view.peers.player;
 check(host.id === host.view.peers.players[0].id && ben.view.peers.player === ben.id, "each view names its own player");
+check((await ann.send({ op: "remove", player: ben.id })).ok === false, "nobody else removes an avatar");
 check((await host.send({ op: "remove", player: ann.id })).ok, "the opener removes an avatar");
+
+// --- Countdown: anyone done starts it for those the room waits for; the room goes on at its end.
+
+await ben.until((v) => v.peers.players.length === 3, "the removed avatar gone from the polling device");
+const notYet = await ben.send({ op: "lastCall", at: at(ben.view) });
+check(notYet.result === "stale" && !ben.view.peers.countdown, "not answered: no Countdown of ben's");
 await answerAll([host], "b");
 await sleep(300);
 check(host.view.phase === "question", "the room waits for ben, not for the removed avatar");
-check((await host.send({ op: "goOn", at: at(host.view) })).ok, "the opener goes on without waiting");
-await host.until((v) => v.phase === "reveal", "the solution without waiting");
-check((await host.send({ op: "goOn", at: at(host.view) })).ok, "and on to the end");
-await host.until((v) => v.phase === "final", "the final ranking after the last");
+const pressed = Date.now();
+check((await host.send({ op: "lastCall", at: at(host.view) })).ok, "the opener, done, starts a Countdown");
+await ben.until((v) => !!v.peers.countdown, "the polling device it waits for hears of it at once", 3000);
+check(JSON.stringify(ben.view.peers.countdown.by) === JSON.stringify(host.view.peers.players[0].avatar), "and whose it is");
+check((await host.send({ op: "lastCall", at: at(host.view) })).result === "stale", "once per step");
+await sleep(LAST_CALL_MS - 3000);
+check(host.view.phase === "question", "the room doesn't go on before its end");
+await host.until((v) => v.phase === "reveal", "the solution at the Countdown's end, ben not answered", 8000);
+console.log(`     (the solution ${Math.round((Date.now() - pressed) / 1000)} s after the press)`);
+check(!host.view.peers.countdown, "the question's Countdown went with it");
+await ben.until((v) => v.phase === "reveal", "the solution on the polling device", 3000);
+await readyAll([ben], 3);
+check((await ben.send({ op: "lastCall", at: at(ben.view) })).ok, "ben, done with the solution, starts one for the opener");
+await host.until((v) => !!v.peers.countdown, "the opener sees it", 3000);
+await host.until((v) => v.phase === "final", "the final ranking at its end", LAST_CALL_MS + 8000);
 
 // --- The scores, from the answers and the fix: 3 was a, fixed to b.
 //     host a b a b = 3; ben a b a - = 2; cat b - a - = 0; ann removed.
@@ -292,13 +329,23 @@ const scores = Object.fromEntries(host.view.peers.ranking.top.map((t) => [t.id, 
 check(scores[host.id] === 3 && scores[ben.id] === 2 && scores[cat.id] === 0, `scores follow the answers and the fix (${JSON.stringify(Object.values(scores))})`);
 check(!(ann.id in scores) && !host.view.peers.players.some((p) => p.id === ann.id), "the removed avatar is out of the ranking");
 
-check((await ben.send({ op: "endInstance" })).ok === false, "nobody else ends it");
-check((await host.send({ op: "endInstance" })).ok, "Exit");
-await sleep(1500);
-// The polling device too, also when the Exit came between two of its polls.
-check([ann, ben].every((d) => d.gone?.home), `every device is sent home (${[ann, ben].map((d) => `${d.name}: ${d.gone ? (d.gone.home ? "home" : d.gone.reason) : "nothing"}`).join(", ")})`);
-const late = await post(`/api/i/${instance}/poll`, { auth: ben.auth, v: ben.view.v });
-check(late.body?.messages?.some((m) => m.t === "gone" && m.home), "a poll that comes after the Exit is sent home too");
+// --- Nobody ends the room: each device leaves when it likes.
+
+for (const d of [host, ben]) check((await d.send({ op: "endInstance" })).ok === false, `${d.name} doesn't end it for the others`);
+await sleep(500);
+check(!ben.gone && ben.view.phase === "final", "the polling device stays on the final ranking");
 for (const d of [host, ann, ben]) d.close();
+if (EMPTY) {
+  // Nobody at the final ranking: the room ends by itself.
+  const left = Date.now();
+  await sleep(PEERS_EMPTY_MS - 60_000);
+  check((await post("/api/join", { code })).status === 200, "the room is still there a minute before");
+  let gone = false;
+  while (!gone && Date.now() - left < PEERS_EMPTY_MS + 90_000) {
+    await sleep(10_000);
+    gone = (await post("/api/join", { code })).status !== 200;
+  }
+  check(gone, `the room ends once nobody has been at its final ranking for a while (${Math.round((Date.now() - left) / 1000)} s)`);
+}
 console.log(failed ? `${failed} FAILED` : "all ok");
 process.exit(failed ? 1 : 0);

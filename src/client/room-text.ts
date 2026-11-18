@@ -19,7 +19,7 @@ import { nameLooks } from "./look.ts";
 import type { LineStatus } from "./net.ts";
 import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED, quotaResetAt } from "../shared/limits.ts";
 import { TOO_MANY_CODES, WRONG_TEACHER_CODE } from "../shared/protocol.ts";
-import { LAST_CALL_MS, POINTS_RIGHT, SPEED_BONUS } from "../shared/tempo.ts";
+import { LAST_CALL_MS, POINTS_RIGHT, SPEED_BONUS, START_MS } from "../shared/tempo.ts";
 
 /** Most strings are text; the few with markup say so, and take their parts as HTML already escaped. */
 export interface RoomText {
@@ -88,7 +88,11 @@ export interface RoomText {
   ranking: string;
   finalRanking: string;
   countdownNote: string;
+  /** Under Countdown at a Peers room's solution: the room goes on to the next question. */
+  countdownOn: string;
   startQuiz: string;
+  /** Under Start: the first question comes START_MS after the press. */
+  startsIn: string;
   exit: string;
   exitNote: string;
   // The local check (client/open.ts) and its entries.
@@ -111,6 +115,8 @@ export interface RoomText {
   quizmasterLine: string;
   quizmasterButton: string;
   roomNote: string;
+  /** Peers' card: the room ends by itself after the final ranking, as nobody ends it there. */
+  peersRoomNote: string;
   peersNotHere: string;
   // Solo (client/entry-solo.ts).
   start: string;
@@ -208,12 +214,16 @@ export interface RoomText {
   movesOn: string;
   /** Follows the avatar of whoever opened the room. */
   startsOnce: string;
-  exitEverywhere: string;
-  nowWithout: (step: string) => string;
+  /** Follows the same avatar once Start is pressed, while its time runs along the top edge. */
+  startsSoon: string;
   removeSomeone: string;
   /** HTML: `site` as HTML. */
   friendsJoin: (site: string) => string;
   orQr: string;
+  /** The invitation as a link: copied on a laptop, handed to the share sheet on a phone. */
+  copyLink: string;
+  shareLink: string;
+  linkCopied: string;
   // The avatars' and the tiles' accessible names (client/look.ts), in the order of their drawings.
   animals: string[];
   backgrounds: string[];
@@ -280,7 +290,9 @@ const en: RoomText = {
   ranking: "Ranking",
   finalRanking: "Final ranking",
   countdownNote: `${LAST_CALL_MS / 1000} s, then closes`,
+  countdownOn: `${LAST_CALL_MS / 1000} s, then goes on`,
   startQuiz: "Start quiz",
+  startsIn: `in ${START_MS / 1000} s`,
   exit: "Exit",
   exitNote: "ends the quiz for everyone",
   nothingOpenH: "No quiz open here",
@@ -301,6 +313,7 @@ const en: RoomText = {
   quizmasterLine: "For a class or a group: the questions on a big screen, the answers on everyone's own device. You run it and don't play.",
   quizmasterButton: "Open the lobby ▶",
   roomNote: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted when you end it, or three hours after its last use. The .zip is your lasting copy.",
+  peersRoomNote: "Sends the quiz to the site, into a room that only people with its code can join. The room is deleted three hours after its last use, or ten minutes after everyone has left its last page. The .zip is your lasting copy.",
   peersNotHere: "This site can't play a quiz this way yet.",
   start: "Start ▶",
   result: "Result",
@@ -389,11 +402,13 @@ const en: RoomText = {
   inWithYou: (n) => `${n} in, you among them.`,
   movesOn: "The quiz moves on once everyone has answered.",
   startsOnce: "starts the quiz once everyone is in.",
-  exitEverywhere: "Exit ends the quiz on every device.",
-  nowWithout: (s) => `${s} now, without waiting`,
+  startsSoon: "starts the quiz in a moment.",
   removeSomeone: "Remove a player…",
   friendsJoin: (s) => `Friends join on <b>${s}</b> with the code`,
   orQr: "or with the QR code.",
+  copyLink: "Copy the link",
+  shareLink: "Share the link",
+  linkCopied: "Link copied.",
   animals: ["cat", "dog", "fox", "bear", "rabbit", "owl", "frog", "pig", "mouse", "lion", "panda", "penguin"],
   backgrounds: ["circle", "hexagon", "star", "heart", "flower", "pond"],
   hats: ["", "crown", "top hat", "cap", "wizard hat", "party hat", "flower", "beanie", "viking helmet", "bowler"],
@@ -456,7 +471,9 @@ const de: RoomText = {
   ranking: "Rangliste",
   finalRanking: "Schlussrangliste",
   countdownNote: `${LAST_CALL_MS / 1000} s, dann Schluss`,
+  countdownOn: `${LAST_CALL_MS / 1000} s, dann weiter`,
   startQuiz: "Quiz starten",
+  startsIn: `in ${START_MS / 1000} s`,
   exit: "Beenden",
   exitNote: "das Quiz für alle",
   nothingOpenH: "Hier ist kein Quiz offen",
@@ -477,6 +494,7 @@ const de: RoomText = {
   quizmasterLine: "Für eine Klasse oder Gruppe: die Fragen am Grossbildschirm, die Antworten auf den eigenen Geräten. Du leitest und spielst nicht mit.",
   quizmasterButton: "Lobby öffnen ▶",
   roomNote: "Sendet das Quiz an die Seite. Beitreten kann nur, wer den Code hat. Gelöscht wird es, wenn du es beendest, spätestens aber drei Stunden nach der letzten Benutzung. Die .zip-Datei ist die Kopie, die dir bleibt.",
+  peersRoomNote: "Sendet das Quiz an die Seite. Beitreten kann nur, wer den Code hat. Gelöscht wird es drei Stunden nach der letzten Benutzung, oder zehn Minuten, nachdem alle die letzte Seite verlassen haben. Die .zip-Datei ist die Kopie, die dir bleibt.",
   peersNotHere: "Diese Seite kann ein Quiz noch nicht so spielen.",
   start: "Start ▶",
   result: "Ergebnis",
@@ -565,11 +583,13 @@ const de: RoomText = {
   inWithYou: (n) => `${n} dabei, du auch.`,
   movesOn: "Das Quiz geht weiter, sobald alle geantwortet haben.",
   startsOnce: "startet das Quiz, sobald alle da sind.",
-  exitEverywhere: "Damit endet das Quiz auf allen Geräten.",
-  nowWithout: (s) => `${s} jetzt, ohne zu warten`,
+  startsSoon: "startet das Quiz gleich.",
   removeSomeone: "Jemanden entfernen…",
-  friendsJoin: (s) => `Freunde treten auf <b>${s}</b> bei, mit dem Code`,
+  friendsJoin: (s) => `Freunde kommen über <b>${s}</b> dazu, mit dem Code`,
   orQr: "oder mit dem QR-Code.",
+  copyLink: "Link kopieren",
+  shareLink: "Link teilen",
+  linkCopied: "Link kopiert.",
   animals: ["Katze", "Hund", "Fuchs", "Bär", "Hase", "Eule", "Frosch", "Schwein", "Maus", "Löwe", "Panda", "Pinguin"],
   backgrounds: ["Kreis", "Sechseck", "Stern", "Herz", "Blume", "Teich"],
   hats: ["", "Krone", "Zylinder", "Schirmmütze", "Zauberhut", "Partyhut", "Blume", "Wollmütze", "Wikingerhelm", "Melone"],
@@ -632,7 +652,9 @@ const fr: RoomText = {
   ranking: "Classement",
   finalRanking: "Classement final",
   countdownNote: `${LAST_CALL_MS / 1000} s, puis clôture`,
+  countdownOn: `${LAST_CALL_MS / 1000} s, puis la suite`,
   startQuiz: "Lancer le quiz",
+  startsIn: `dans ${START_MS / 1000} s`,
   exit: "Terminer",
   exitNote: "le quiz pour tous",
   nothingOpenH: "Aucun quiz ouvert ici",
@@ -653,6 +675,7 @@ const fr: RoomText = {
   quizmasterLine: "Pour une classe ou un groupe : les questions sur grand écran, les réponses sur l'appareil de chacun. Vous animez sans jouer.",
   quizmasterButton: "Ouvrir le salon ▶",
   roomNote: "Envoie le quiz au site, où seules les personnes qui ont son code peuvent le rejoindre. Il est supprimé quand vous y mettez fin, au plus tard trois heures après sa dernière utilisation. Le fichier .zip reste votre copie.",
+  peersRoomNote: "Envoie le quiz au site, où seules les personnes qui ont son code peuvent le rejoindre. Il est supprimé trois heures après sa dernière utilisation, ou dix minutes après que tout le monde a quitté sa dernière page. Le fichier .zip reste votre copie.",
   peersNotHere: "Ce site ne peut pas encore faire jouer un quiz de cette façon.",
   start: "Commencer ▶",
   result: "Résultat",
@@ -741,11 +764,13 @@ const fr: RoomText = {
   inWithYou: (n) => `${n} dans le quiz, vous compris.`,
   movesOn: "Le quiz avance dès que tout le monde a répondu.",
   startsOnce: "lance le quiz dès que tout le monde est là.",
-  exitEverywhere: "Cela termine le quiz sur tous les appareils.",
-  nowWithout: (s) => `${s} maintenant, sans attendre`,
+  startsSoon: "lance le quiz dans un instant.",
   removeSomeone: "Retirer quelqu'un…",
   friendsJoin: (s) => `Vos amis rejoignent sur <b>${s}</b> avec le code`,
   orQr: "ou avec le code QR.",
+  copyLink: "Copier le lien",
+  shareLink: "Partager le lien",
+  linkCopied: "Lien copié.",
   animals: ["chat", "chien", "renard", "ours", "lapin", "chouette", "grenouille", "cochon", "souris", "lion", "panda", "pingouin"],
   backgrounds: ["cercle", "hexagone", "étoile", "cœur", "fleur", "mare"],
   hats: ["", "couronne", "haut-de-forme", "casquette", "chapeau de sorcier", "chapeau de fête", "fleur", "bonnet", "casque de viking", "chapeau melon"],
@@ -808,7 +833,9 @@ const it: RoomText = {
   ranking: "Classifica",
   finalRanking: "Classifica finale",
   countdownNote: `${LAST_CALL_MS / 1000} s, poi chiude`,
+  countdownOn: `${LAST_CALL_MS / 1000} s, poi avanti`,
   startQuiz: "Avvia il quiz",
+  startsIn: `tra ${START_MS / 1000} s`,
   exit: "Termina",
   exitNote: "il quiz per tutti",
   nothingOpenH: "Nessun quiz aperto qui",
@@ -829,6 +856,7 @@ const it: RoomText = {
   quizmasterLine: "Per una classe o un gruppo: le domande su schermo grande, le risposte sul dispositivo di ognuno. Tu conduci e non giochi.",
   quizmasterButton: "Apri la lobby ▶",
   roomNote: "Invia il quiz al sito, dove può entrare solo chi ha il codice. Viene eliminato quando lo termini, al più tardi tre ore dopo l'ultimo uso. Il file .zip resta la tua copia.",
+  peersRoomNote: "Invia il quiz al sito, dove può entrare solo chi ha il codice. Viene eliminato tre ore dopo l'ultimo uso, o dieci minuti dopo che tutti hanno lasciato la sua ultima pagina. Il file .zip resta la tua copia.",
   peersNotHere: "Questo sito non può ancora far giocare un quiz in questo modo.",
   start: "Inizia ▶",
   result: "Risultato",
@@ -917,11 +945,13 @@ const it: RoomText = {
   inWithYou: (n) => `${n} in gioco, contando te.`,
   movesOn: "Il quiz va avanti appena tutti hanno risposto.",
   startsOnce: "avvia il quiz quando ci sono tutti.",
-  exitEverywhere: "Così il quiz termina su tutti i dispositivi.",
-  nowWithout: (s) => `${s} ora, senza aspettare`,
+  startsSoon: "avvia il quiz tra un attimo.",
   removeSomeone: "Rimuovi qualcuno…",
   friendsJoin: (s) => `Gli amici entrano su <b>${s}</b> con il codice`,
   orQr: "o con il codice QR.",
+  copyLink: "Copia il link",
+  shareLink: "Condividi il link",
+  linkCopied: "Link copiato.",
   animals: ["gatto", "cane", "volpe", "orso", "coniglio", "gufo", "rana", "maiale", "topo", "leone", "panda", "pinguino"],
   backgrounds: ["cerchio", "esagono", "stella", "cuore", "fiore", "stagno"],
   hats: ["", "corona", "cilindro", "cappellino", "cappello da mago", "cappello da festa", "fiore", "berretto", "elmo vichingo", "bombetta"],

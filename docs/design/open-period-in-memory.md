@@ -75,9 +75,11 @@ room, a tap on from a solution change the game in the instance's memory
 screens within `LOOK_SHOW_MS`, 1 s, one round for every child who changed
 in between, so a Projector on long-poll doesn't spend a request on each
 tap), and not written. Any
-write of the run carries everything held so far: Start writes the looks,
-the lock-in (or the reveal, if nothing locked before it) a question's
-answers, and the step that leaves the reveal the stragglers' (below). A
+write of the run carries everything held so far: the first question
+coming writes the looks (`START_MS` after Start: `class-and-wall.md`, "The
+end of the dressing"), the lock-in (or the reveal, if nothing locked
+before it) a question's answers, and the step that leaves the reveal the
+stragglers' (below). A
 join, a Peers room's step and the writes below carry it as well.
 `unwritten` names the players whose input storage doesn't have yet.
 
@@ -121,7 +123,7 @@ back are the same case: a tap made on a view older than the one that closed
 answering. It counts while the question is on screen, until the class
 leaves its reveal, and is written with that step at the latest; the wall's
 spread grows by one meanwhile, as it always has for a late tap. No timer.
-For the looks the stage ends at Start.
+For the looks the stage ends with the first question.
 
 ### A line that ends writes what it held
 
@@ -153,7 +155,7 @@ is rarely met.
 Input is lost only when all of these hold: the memory goes (a deploy's
 reset, a restart, or hibernation after the stage's line writes are
 spent); no open socket keeps a copy; and the device doesn't come back with its own copy
-before the stage settles (Start for a look; the class leaving the reveal
+before the stage settles (the first question for a look; the class leaving the reveal
 for an answer). The device then shows what is stored: its look as before,
 its answer as not given. A device opened in another browser has no copy
 of its own.

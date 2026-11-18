@@ -408,7 +408,7 @@ def controls(b, url):
     tab0 = pg.evaluate("document.querySelector('#extabs [aria-selected=true]').id")
     pg.focus('#extabs [aria-selected=true]'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
     s = state(); tab1 = pg.evaluate("document.querySelector('#extabs [aria-selected=true]').id")
-    print(f'desk: ArrowRight on the examples' tabs: tab {tab0} -> {tab1}, film at {s["t"]} (was {t0})')
+    print(f'desk: ArrowRight on the tabs of the examples: tab {tab0} -> {tab1}, film at {s["t"]} (was {t0})')
     if s['t'] != t0 or s['playing'] or tab0 == tab1: bad(f'ArrowRight on the tabs {s}, tab {tab0} -> {tab1}')
     pg.focus('#code'); pg.keyboard.press(' '); pg.wait_for_timeout(100)
     s = state(); print(f'desk: Space in the code box: film at {s["t"]}, playing {s["playing"]}')

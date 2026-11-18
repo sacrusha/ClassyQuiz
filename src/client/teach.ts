@@ -8,7 +8,7 @@ import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot
 import { ICON, avatarSvg } from "./look.ts";
 import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, roomNotice, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
 import { steeringButtons } from "./steps.ts";
-import { clockBar, localEnd } from "./clock.ts";
+import { clockBar, edgeBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures } from "./pictures.ts";
 import { LINE_WORDS, T, lang, said } from "./room-text.ts";
@@ -80,6 +80,7 @@ function onMessage(m: ServerMessage): void {
       return;
     }
     actions.innerHTML = "";
+    edgeBar("", null);
     main.innerHTML = `<div class="card"><p>${esc(said(m.reason))}</p><p><a class="btn primary" href="/">${esc(siteAddress())}</a></p></div>`;
   }
 }
@@ -199,8 +200,9 @@ function stepLine(v: TeacherView): string {
   return v.clock ? `<p class="hint lastcall-line">${ICON.timer} ${T.countdown}</p><div class="clockslot"></div>` : "";
 }
 
-/** Last call in its slot, drawn again only when it starts: CSS drains it. */
+/** Last call in its slot, drawn again only when it starts: CSS drains it. In the lobby, Start's time along the top edge, as on the wall. */
 function renderClock(v: TeacherView): void {
+  edgeBar("start", v.phase === "lobby" ? v.starts : null);
   const slot = main.querySelector<HTMLElement>(".clockslot");
   if (!slot || !v.clock) return;
   const key = `${v.current}|${v.clock.ms}|${v.clock.leftMs === 0}`;

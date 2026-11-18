@@ -64,13 +64,23 @@ function lastCallState(s: StepState): "on" | "running" | "off" {
  */
 export function steeringButtons(v: TeacherView): string {
   const s = stepState(v);
-  if (v.phase === "lobby") return `<button class="btn primary bar-play" data-act="begin">${T.startQuiz}&nbsp;${PLAY}</button>`;
+  if (v.phase === "lobby") return startButton("bar-play", 'data-act="begin"', `${T.startQuiz}&nbsp;${PLAY}`, !!v.starts);
   if (v.phase === "final") return `<button class="btn bar-exit" data-act="exit"><span class="lbl"><span>${T.exit}</span><small>${T.exitNote}</small></span></button>`;
   const lc = lastCallState(s);
   const play = playStep(s);
   const label = (text: string, note?: string) => `<span class="lbl"><span>${text}</span>${note ? `<small>${note}</small>` : ""}</span>`;
   return `<button class="btn bar-last${lc === "running" ? " running" : ""}" data-act="last-call"${lc === "off" ? ' style="visibility:hidden" tabindex="-1" aria-hidden="true"' : ""}${lc === "running" ? " disabled" : ""}>${ICON.timer}${label(T.countdown, T.countdownNote)}</button>
     <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}${label(play ? play.label : "", play?.note)}</button>`;
+}
+
+/**
+ * Start, with what its press does under it: the first question comes
+ * START_MS later, the dressing drawing to its end meanwhile
+ * (docs/design/class-and-wall.md, "Dressing the avatar"). Greyed once
+ * pressed, as Countdown is while it runs.
+ */
+export function startButton(cls: string, attr: string, label: string, pressed: boolean): string {
+  return `<button class="btn primary start ${cls}" type="button" ${attr}${pressed ? " disabled" : ""}><span class="lbl"><span>${label}</span><small>${T.startsIn}</small></span></button>`;
 }
 
 /** Presses closer than this are one press (a bouncing key, a clicker sending its code twice). */

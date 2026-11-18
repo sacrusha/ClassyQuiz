@@ -19,7 +19,7 @@ import { $, esc, findQuiz, forgetQuiz, keepAwake, lines, playerKey, rolePage, sa
 import { ICON, avatarSvg, lookKey, pickerRows, shapeSvg, wiggle } from "./look.ts";
 import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
 import { Line, api } from "./net.ts";
-import { clockBar, localEnd } from "./clock.ts";
+import { clockBar, edgeBar, localEnd } from "./clock.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
 import { packPicture, picturesHere, wantPacks } from "./packs.ts";
 import { PeersRoom } from "./peers.ts";
@@ -258,7 +258,7 @@ function onMessage(m: ServerMessage): void {
     location.replace(rolePage(instanceId, m.role) + (fromWindow && m.role === "screen" ? "&drag=1" : ""));
   } else if (m.t === "state" && m.view.role === "player" && m.view.peers) {
     view = m.view;
-    peers ??= new PeersRoom({ main, send: (cmd) => line!.send(cmd), dress: (into) => view?.me && renderDress(view.me.avatar, into) });
+    peers ??= new PeersRoom({ main, send: (cmd) => line!.send(cmd), dress: (into) => view?.me && renderDress(view.me.avatar, into), forget: () => forgetQuiz(instanceId) });
     peers.show(m.view);
   } else if (m.t === "state" && m.view.role === "player") {
     // Every answer in the class bumps the version; only redraw when this
@@ -289,6 +289,7 @@ function onMessage(m: ServerMessage): void {
     forgetQuiz(instanceId);
     line?.stop();
     clearInterval(tickTimer);
+    edgeBar("", null);
     if (m.home) {
       location.replace("/");
       return;
@@ -572,6 +573,8 @@ function onlyMineChanged(a: PlayerView, b: PlayerView): boolean {
 function render(): void {
   const v = view;
   if (!v) return;
+  // Start pressed: the dressing draws to its end along the top edge, as on the wall, the menu staying where it is.
+  edgeBar("start", v.phase === "lobby" && !v.removed ? v.starts : null);
   if (v.removed) {
     // The teacher removed this avatar: the device keeps its token, so it
     // comes back as removed rather than as a new player in the same class

@@ -130,9 +130,12 @@ and score), the stage, and a bar at the foot with one button.
   that will show it passes it from the question's start, null until it
   shows, so the tiles keep room for the counts); the avatars that jump
   (`jump`); the foot's noun, and beside it a line of the room's in place
-  of the title (`foot`: who it waits for); a ⋯ for the room's menu
+  of the title (`foot`: who it waits for); Countdown left of the foot's
+  button, in a place of its own, and its bar along the top edge
+  (`countdown`); a line in the top bar in place of the player's avatar and
+  score (`standing`: how the friends stand); a ⋯ for the room's menu
   (`menu`). A room drives it from its views as Solo drives it from its
-  run; the join code, the ranking and the end are the room's own.
+  run; the join code, the final ranking and the end are the room's own.
 - Light, as the class's screens are; a page of a screen's height has no
   site header.
 

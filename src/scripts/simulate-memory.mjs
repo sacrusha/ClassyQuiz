@@ -283,7 +283,8 @@ log("the lobby's looks came through");
 
 const at = () => ({ phase: wall.view.phase, current: wall.view.current, reading: wall.view.question?.answering === "reading", votes: !!wall.view.votes });
 check((await wall.send({ op: "begin", at: at() })).ok, "Start");
-await until(() => wall.view.phase === "question", 5000, "the first question");
+// The first question comes START_MS (shared/tempo.ts, 10 s) after Start.
+await until(() => wall.view.phase === "question", 15_000, "the first question");
 
 async function question(q, lose) {
   check((await wall.send({ op: "play", at: at() })).ok, `q${q}: the answers are shown`);
