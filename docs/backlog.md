@@ -769,6 +769,12 @@ The quiz is already made; it can be more than one activity.
 ## Open: with the owner, and in the field
 
 With the owner, what only he can do:
+- The sheets run ("Big numbers on the number line") again, against the
+  manual as it now is: every question of its `.zip`, and of the German,
+  French and Italian ones made from it, is under `Order: fixed` with the
+  right answer first, so the right answer is always red. The run worked from
+  a WebFetch summary that hid the manual (the owner;
+  `design/guidance-page.md`, Situation).
 - The read of the German, French and Italian words
   (`translation-review.md`; the screens' words in `client/room-text.ts`,
   `check-text.ts`, `own-copy.ts` and `notfound.ts`); Italian has no native
