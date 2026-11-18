@@ -23,7 +23,9 @@ key = lambda n: n.replace("\\", "/").split("/")[-1].lower()
 have = {key(n) for n in names if n != "quiz.txt"}
 used = []
 
-blocks = re.split(r"\n\s*\n", text.strip().replace("\r\n", "\n"))
+lines = text.replace("\r\n", "\n").split("\n")
+text = "\n".join(l for l in lines if not l.lstrip().startswith("//"))
+blocks = re.split(r"\n\s*\n", text.strip())
 title = blocks.pop(0).split("\n")
 if not re.match(r"Title:\s*\S", title[0]) or len(title) > 1:
     err("first block must be the single line 'Title: ...'")

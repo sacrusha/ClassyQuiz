@@ -9,7 +9,7 @@ The quiz is the finished deliverable a teacher's AI hands over after talking wit
 
 When the AI gets something wrong, the message the teacher sees must be one she can paste back to the AI (backlog v1 item 13). It is a fallback, not a loop to rely on: the owner's "there must be no loop; a loop that iterates is a failure, and 'fix it' should allow the obvious fix, by keeping the format simple".
 
-The format's specification is the "How quizzes are built" section of the guidance page, `src/public/index.html`, because that is where AIs and teachers read it. This file does not restate it. It says what the format is for and why it is shaped so. The parser is `src/quiz/format.ts`; where the page and the parser differ, the parser is what runs.
+The format's specification is the "Format" section of the guidance page, `src/public/index.html`, because that is where AIs and teachers read it. This file does not restate it. It says what the format is for and why it is shaped so. The parser is `src/quiz/format.ts`; where the page and the parser differ, the parser is what runs.
 
 ## Situation
 
@@ -41,6 +41,12 @@ Rejected formats, kept as one line each so nobody tries them again:
 The site shows quiz text as written, without Markdown, so maths is Unicode characters. The keywords (`Title:`, `Image:`, `Background:`, `Order:`) are English in every quiz language; answers carry no keyword or letter.
 
 Questions are numbered `1.`, `2.`, but the parser doesn't need the numbers. When present they separate questions robustly: a line numbered as the next question ends any stray text before it, so an AI's "Explanation:" line becomes a reported error instead of merging silently into the next question. A number is stripped only when it is the one expected next, so "1.5 + 2" stays.
+
+### Comments, and the summarizer warning
+
+A line that starts with `//` is a comment. The parser, `verify.py` and `preview.py` drop it wherever it stands; a `/` elsewhere in a line is text (`3/4`, an address), so nothing is escaped. Comments are never shown, so they are no notes to the teacher (below).
+
+Comments exist for one line. Purpose: an AI that builds from a summary of the guidance learns that the summary isn't the manual, and where the manual is. A fetch tool's small model asked for the format writes its own example from it (`guidance-page.md`, Situation), and what the format requires reaches that example and its list of parts more often than a warning elsewhere on the page. So the format's first line is a required comment, `// Summarizers misrepresent how to build a quiz, read the manual in full at https://classyquiz.pages.dev/manual.txt`, opening the examples, which the parts list says the first line must copy verbatim; the build writes a copy's own address in its place. A summary that describes the line without quoting it leaves its reader short of a line the format requires, and a follow-up ask gets it quoted. Required means published as required: nothing checks it, a quiz without it plays, and quizzes made before it still do.
 
 ### What the parser forgives, and what it refuses
 
@@ -97,7 +103,7 @@ The guidance asks for one `quiz.txt` in UTF-8 beside the pictures, narrower than
 
 Purpose: the AI that wrote `quiz.txt` can catch a slip before the teacher has to. The file is some 100 lines and still in that AI's context, so all it needs is a hint what's wrong: the question's number and the problem, such as an image named in the text and missing from the zip. No line numbers and no detail beyond that; the checker's simplicity is its value, and a longer one is one more thing to keep in step with the format.
 
-`src/public/verify.py` (served at `/verify.py`, linked from the format section of the guidance page) takes a zip and checks what the guidance specifies: `quiz.txt` at the top level in UTF-8, a one-line title, numbered question blocks separated by blank lines, two to four choices with at least one `+`, only the published tags, and every named picture present in the zip (matched without folder or case, as `imageKey` does). It prints `ok` or one line per problem.
+`src/public/verify.py` (served at `/verify.py`, linked from the format section of the guidance page) takes a zip and checks what the guidance specifies: `quiz.txt` at the top level in UTF-8, a one-line title, numbered question blocks separated by blank lines, two to four choices with at least one `+`, only the published tags, and every named picture present in the zip (matched without folder or case, as `imageKey` does). It skips comments and doesn't look for the required one. It prints `ok` or one line per problem.
 
 It is deliberately stricter than the parser, which forgives what AIs vary (see above): the verifier holds the AI to the published format, the parser protects the teacher from the AI that strayed from it. It does not check picture types, sizes, zip size or text length; the upload does. It is plain Python with the standard library, because an AI with a sandbox usually has it.
 

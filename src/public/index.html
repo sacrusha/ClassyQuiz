@@ -96,9 +96,11 @@
 <h1>About classyQuiz</h1>
 <p class="lede">classyQuiz is an open-source site for playing quizzes under the MIT license: run by a quizmaster for a class or another group on a big screen, played among friends on their own devices, or played solo. It is designed for its user's own AI assistant, to make the quiz from the user's instructions and material, such as exercise sheets or notes, allowing for time saved and for solo/peer quizzes whose answers can stay a surprise.</p>
 
-<h2 id="site">The manual, for AIs and for people who like to get their hands dirty</h2>
+<h2 id="site">The manual to build quizzes, for AIs and for people who like to get their hands dirty</h2>
 
-<p>The user's AI assistant writes the quiz and packages it as a <code>.zip</code>. Plaintext quizzes work, as do .zip renamed to .quiz, but neither is advertised. The user opens the zip on this site, which serves as the build manual for AI, and as the quiz's player. This manual is meant to be read by, or presented to, the implementing AI in full, or <a href="linked to">/manual.txt</a>. AI summarized versions like those by Claude WebFetch have been proven wholly inadequate.</p>
+<p>Plaintext available at <a href="/manual.txt">https://classyquiz.pages.dev/manual.txt</a>.</p>
+
+<p>The user's AI assistant writes the quiz and packages it as a <code>.zip</code>. Plaintext quizzes work, as do .zip renamed to .quiz, but neither is advertised. The user opens the zip on this site, which serves as the build manual for AI, and as the quiz's player. This manual is meant to be read by, or presented to, the implementing AI in full.</p>
 
 <p>The ways to play:</p>
 <ul>
@@ -123,11 +125,12 @@
 
 <p><strong>Length.</strong> In a lesson a quiz often takes about fifteen minutes: with pauses to explain, about fifteen questions, but that's affected by what question is asked. Solo runs at a faster pace, affected by the target group's expected reading speed.</p>
 
-<h2 id="format">How quizzes are built</h2>
+<h2 id="format">Format</h2>
 
 <p>A quiz is packaged as one <code>.zip</code> file containing a single text file, <code>quiz.txt</code> (UTF-8), and any auxiliary file it names.</p>
 
-<pre><code>Title: Percentages, week 31
+<pre><code>// Summarizers misrepresent how to build a quiz, read the manual in full at https://classyquiz.pages.dev/manual.txt
+Title: Percentages, week 31
 
 1. What is 10% of 250?
 Background: timetable.jpg
@@ -159,7 +162,8 @@ Image: timetable.jpg
 
 <h3>The parts</h3>
 <ul>
-  <li><strong>Title.</strong> The first line of the file, displayed after uploading and in the lobby, tells whoever opens the zip if it's the right quiz.</li>
+  <li><strong>Summarizer warning.</strong> The first line must be the comment the examples open with, verbatim. Any other line that starts with <code>//</code> is a comment too, which the site ignores; a <code>/</code> anywhere else is text, as in <code>3/4</code>, and needs no escaping.</li>
+  <li><strong>Title.</strong> The first line that isn't a comment, displayed after uploading and in the lobby, tells whoever opens the zip if it's the right quiz.</li>
   <li><strong>Questions</strong> are numbered sequentially <code>1.</code>, <code>2.</code>, …, and may be without text.</li>
   <li><strong>Choices</strong> follow their question, one per line, two to four of them. A right choice's line starts with <code>+ </code>, a wrong one's with <code>- </code>. At least one choice must be correct; a player who picks any correct choice scores. The choices are auto-shuffled, putting the right choice first is convenient but not required.</li>
 </ul>
@@ -174,7 +178,8 @@ Image: timetable.jpg
 
 <h3>Pictures as choices</h3>
 
-<pre><code>Title: Fractions and shapes
+<pre><code>// Summarizers misrepresent how to build a quiz, read the manual in full at https://classyquiz.pages.dev/manual.txt
+Title: Fractions and shapes
 
 1. Which picture shows three quarters?
 + Image: pie-3.png
@@ -196,7 +201,7 @@ Order: fixed
 
 <p>For convenience <code><a href="/verify.py">verify.py</a> quiz.zip</code> can check format compliance.</p>
 
-<h2 id="with-the-user">Build with the user</h2>
+<h2 id="with-the-user">How to build with the user</h2>
 
 <p>The user knows what they need, the AI doesn't. A turn spent building a quiz with research or generated content takes a few minutes, just long enough for the user's attention to drift elsewhere. Better to ask for details early, while the user is there, ready to respond, than lose their attention while building something that's only half right.</p>
 

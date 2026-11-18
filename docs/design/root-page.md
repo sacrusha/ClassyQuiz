@@ -278,7 +278,7 @@ check, for any file (`local-check.md`).
   four, or doesn't know what to ask (backlog item 1e): "Read <address>. I
   need a classyQuiz. Help?", and the AI's question back, what the quiz is
   for, who will play it, and the material if there is any (the guidance's
-  "Build with the user"). It is the ask that takes no knowing how to ask, in
+  "How to build with the user"). It is the ask that takes no knowing how to ask, in
   the same chat, so it adds no new element. A tab in words like the other
   four: its visible words are its accessible name, "None of these, or not
   sure yet" its tooltip. A "?" alone read as help; a line under every ask

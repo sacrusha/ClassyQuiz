@@ -1,7 +1,7 @@
 // Quiz text format: the parser.
 //
 // The specification lives on the guidance page (src/public/index.html,
-// "How quizzes are built"), because that is where AIs and teachers read it.
+// "Format"), because that is where AIs and teachers read it.
 // This module implements it; keep the two in step.
 //
 // Design (docs/design/quiz-format.md): the correct answer is marked on its own line;
@@ -117,6 +117,10 @@ const INVISIBLES = /[​⁠﻿]/g;
 // Bidi controls are stripped only at the start of a line, so a marker typed
 // in right-to-left text is still recognised.
 const LEADING_BIDI = /^[‎‏؜‪-‮⁦-⁩]+/;
+// The format's required first line is a comment that carries the manual's
+// address into summaries of the page (docs/design/quiz-format.md); comments
+// are dropped wherever they stand.
+const COMMENT = /^\s*\/\//;
 
 type Keyword = "title" | "note" | "image" | "background" | "order" | "tempo" | "time";
 
@@ -298,7 +302,7 @@ export function parseQuiz(input: string): ParseResult {
   // Non-breaking spaces stay: an author who wrote "1 000 000" with them wants
   // it kept on one line. Every pattern here reads them as spaces anyway.
   const normalised = input.replace(/\r\n?/g, "\n").replace(INVISIBLES, "");
-  const lines = selectBody(normalised.split("\n"));
+  const lines = selectBody(normalised.split("\n").filter((l) => !COMMENT.test(l)));
 
   let title: string | null = null;
   let quizBackground = "";

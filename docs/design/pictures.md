@@ -52,7 +52,7 @@ The first target is a teacher whose AI can make a zip. The owner:
   MB and a handful of rows.
 - The author of the quiz is the teacher's AI. It writes picture lines as it
   writes anything, and it can't see the wall. The guidance page
-  (`src/public/index.html`, "How quizzes are built", "Pictures on the wall",
+  (`src/public/index.html`, "Format", "Pictures on the wall",
   "Pictures as choices") carries what an AI can't derive: where a picture
   lands, the caps, that transparency shows the tile's colour. Its scope is
   `guidance-page.md`.

@@ -36,11 +36,25 @@ shaped as it is.
   site off its preapproved list, that model is told to quote at most 125
   characters at a time and to answer concisely, and it condenses the
   manual even when the page and the caller both ask for it whole; its
-  exception for open source software doesn't take. Its summaries pass on the manual's
-  pointer to `/manual.txt`, which a model with a shell fetches whole.
-  Getting the page itself through would take a prompt injection, which a
-  public repository can't document, so an edit that doesn't know of it
-  would break it.
+  exception for open source software doesn't take. Asked for the format
+  (a German ask for the exact schema, Nov 2026), most summaries dropped a
+  sentence on the page that names `/manual.txt` or asks for the manual
+  whole, whatever its wording, and one that accused the summarizer was
+  refused. Most write their own example from the format, with errors the
+  page doesn't contain: `Order: fixed` on ordinary questions, translated
+  keywords, tags after the choices. What the format requires travels
+  better, so its first line is a required comment naming the manual's
+  address (`quiz-format.md`, "Comments, and the summarizer warning"). Of
+  sixteen summaries of that version, fourteen gave the manual's address,
+  eight of them quoting the line verbatim; the other two required a fixed
+  first line they didn't quote, and a follow-up ask for that line got it
+  quoted, address included. The owner: Sonnet has so far always followed
+  its first fetch with questions, and Opus asked for the whole manual, was
+  refused, and fetched it with curl. The summaries' examples still put
+  `Order: fixed` on ordinary questions. A model with a shell fetches
+  `/manual.txt` whole. Getting the page itself through would take a prompt
+  injection, which a public repository can't document, so an edit that
+  doesn't know of it would break it.
 - The product's situation (teacher time as the measure, the example class, the
   AI that may be a free one) is the backlog's Project and Constraints sections. The guidance
   puts the part of it the reading model can't know into its own words.
@@ -154,7 +168,7 @@ The root URL serves the guidance as static HTML that reads without
 JavaScript; the landing's language switch (`design/root-page.md`) is a script
 over an English block, so a fetcher reads English. The guidance runs from
 "About classyQuiz" through the manual (`#site`), what informs the shape of the
-quizzes (`#quizzes`), how quizzes are built (`#format`) and "Build with the
+quizzes (`#quizzes`), the format (`#format`) and "How to build with the
 user" (`#with-the-user`, with `#presenting`). The first two
 sections carry the FAQ-kind information (the ways to play, how a room runs,
 privacy, hosting), which doubles as context for building; the format section
@@ -162,7 +176,7 @@ carries what building needs.
 
 The guidance's nouns are those of `root-page.md`, "Words for whoever comes".
 
-The "Build with the user" stance is the owner's, said of the teacher and
+The "How to build with the user" stance is the owner's, said of the teacher and
 true of any user: the teacher knows what
 they need and is there to say it, so the AI doesn't guess; building takes
 minutes, long enough for the teacher's attention to drift, so asking early

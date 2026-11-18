@@ -14,7 +14,7 @@
 // the sheets ask is each language's version of the same ask, the film typing it;
 // the notes' is the owner's run's (12 Nov 2026, English); the test's is
 // in the words of whoever asks; the help ask has nothing decided, and the AI's
-// question back is the guidance's "Build with the user". The test's and the
+// question back is the guidance's "How to build with the user". The test's and the
 // help reply are mocks until the owner's runs. The site's address in every ask
 // is replaced by the one the browser opened.
 
