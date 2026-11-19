@@ -117,7 +117,7 @@
 
 <p><strong>Practice, not testing.</strong> The rankings show avatars, so a low place exposes nobody.</p>
 
-<p><strong>Where the question is read.</strong> With a quizmaster, on the big screen, from the back of the room: in a class often by children who read slowly or don't read the language well, with the teacher there to read the question aloud before its choices come. In Solo and Peers, on vertical or horizontal screens as small as a phone, but close. Long choices are arranged 4×1, short ones 2×2; size is limited.</p>
+<p><strong>Where the question is read.</strong> With a quizmaster, on the big screen, from the back of the room: in a class often by children who read slowly or don't read the language well, with the teacher there to read the question aloud before its choices come. In Solo and Peers, on vertical or horizontal screens as small as a phone, but close. The site fits each question to the screen it is read on: choices two by two, or one under the other where that sets them larger, mostly on a phone; where room runs short, the question, its picture and the choices shrink together, so a long question or long choices make everything smaller.</p>
 
 <p><strong>A teaching moment.</strong> With a quizmaster, a question stays up as long as they want, and how many picked each choice shows before the solution, so the group can talk it over. A quiz carries no explanations: a player sees which choice was right, not why.</p>
 
@@ -171,7 +171,7 @@ Image: timetable.jpg
 <h3>Tags</h3>
 <p>After a question's text, before its choices.</p>
 <ul>
-  <li><strong><code>Image: q3.png</code></strong> shows one picture with the question, named by its file in the <code>.zip</code>, where the question is read: on the big screen only with a quizmaster, on each device in Solo and Peers. A wide one is placed between the question and the choices; a square or upright one to the left of a short question and the choices.</li>
+  <li><strong><code>Image: q3.png</code></strong> shows one picture with the question, named by its file in the <code>.zip</code>, where the question is read: on the big screen only with a quizmaster, on each device in Solo and Peers. On a landscape screen a square or upright picture goes beside the question and its choices, as do most photos on a 16:9 screen, and a wide one such as a number line between them; on an upright screen it goes between.</li>
   <li><strong><code>Order: fixed</code></strong> disables shuffling of choices.</li>
   <li><strong><code>Background: forest.jpg</code></strong> is a picture behind the question, cropped to fill the screen the question is read on, typically for atmosphere or context. It lies under a 55% wash of the page colour, with the text on 90% white cards, so a busy or dark picture stays readable.</li>
 </ul>
@@ -195,7 +195,7 @@ Order: fixed
 - Image: l-same.png
 - None of these</code></pre>
 
-<p>A choice's background is red <code>#d93b3b</code>, blue <code>#2f6fd6</code>, yellow <code>#e8b100</code> or green <code>#1f9d55</code>. Consider legibility where a picture is transparent. The site warns when a question's picture choices have inconsistent proportions.</p>
+<p>A choice's background is red <code>#d93b3b</code>, blue <code>#2f6fd6</code>, yellow <code>#e8b100</code> or green <code>#1f9d55</code>. Consider legibility where a picture is transparent. The site warns when a question's picture choices have inconsistent proportions. Picture choices stand two by two unless another arrangement shows them clearly larger: wide strips stay two by two on the big screen and stand one under the other on a phone, square ones stand in a row on the big screen.</p>
 
 <p>Images must be found in the <code>.zip</code>. Names are matched without regard to subfolders or case. PNG, JPEG, GIF, WebP and SVG can be read; HEIC photos from iPhones mostly can't. Images are scaled down: question images to at most 1600 pixels on the longer side, backgrounds to 1920 and choice images to 1200; a smaller image is scaled up. Limits: up to 120 files, and 16 MB for the whole <code>.zip</code>.</p>
 

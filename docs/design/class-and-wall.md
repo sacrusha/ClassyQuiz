@@ -151,6 +151,53 @@ quiz under way.
 - **Screens stay on.** The projector, teacher and student pages request a
   screen wake lock where the browser allows it (`client/dom.ts`).
 
+### How a question fills the screen
+
+Purpose (the owner): space used well, a layout that doesn't surprise, and
+rules simple enough that the AI building a quiz can be told them, at least
+approximately, and shape its questions, answers and pictures to fit.
+
+Situation: a question is read on a 16:9 or 4:3 projector, on laptops and
+tablets either way round, and on phones held upright. What runs short
+differs. On the big screen a question without a picture fits at its full
+size with room to spare; on a phone a long question competes with its
+answers for the height; with a picture all three compete, and where the
+picture goes decides what room the text has.
+
+How the site meets it (`layQuestion`, `client/stage.ts`, for text answers):
+
+- Each part has a full size: the question's type by its length (smaller
+  with a picture), the answers' by the longest answer (the sizes are on
+  `/layout`), the picture as large as its place allows: between the
+  question and the tiles, the full width and at most 62% of the height;
+  beside them, 58% or half the width.
+- The layouts tried are the tiles in two columns or one and, with a
+  picture, the picture between the question and the tiles or beside both
+  (the picture left, the question and the tiles in one column).
+- In each layout, what doesn't fit at full size shrinks alike: the
+  question, the answers and, between, the picture, by the same share of
+  their full size. Beside, the picture keeps its size and the text shrinks
+  in its column, since the picture doesn't take the text's height there.
+- The layout whose most-shrunk part stays largest is taken, the picture
+  measured against the largest any layout gives it; of layouts within 0.03
+  of it, the more familiar one: two columns first, then a picture beside,
+  then one column. The parts shrink to 0.3 of their full size at most, the question
+  to 1.1em and the answers to 1em; where no layout fits, words break, and
+  the layout that overruns least is taken.
+- What comes of it, and what the guidance tells the AI: on a landscape
+  screen square and upright pictures go beside the question and its
+  answers, on a 16:9 screen most photos too, and wide figures such as
+  number lines go between; text answers stand two by two. On an upright
+  tablet a picture goes between and the answers stand two by two; on a
+  phone the picture goes between and the answers mostly one under the
+  other. A long question or long answers make every part somewhat smaller
+  rather than one part small.
+- Questions with picture answers keep their own arrangement, by the
+  pictures' shape (`pictures.md`, "The projector").
+- The tiles' rows have the same height whatever their text
+  (`grid-auto-rows: 1fr`), so the rows don't move when a tile's content
+  changes (below).
+
 ### Tiles do not move at the reveal
 
 At the reveal the right answer gains a check mark and a count. The text must
@@ -159,9 +206,10 @@ costing the teaching moment its steadiness.
 
 - Every tile reserves the room for the mark and count from the start of the
   question; the reveal fills it.
-- The tile font starts at the size the longest answer gives, then shrinks until
-  no word is cut and no answer overflows, as the question text already fits.
-  Only at the smallest size does a word break.
+- The tiles' type is set once per question and window by the layout
+  (above), so that no word is cut and no answer overflows; a word breaks only
+  where no layout fits. The rows are of equal height, so a mark doesn't
+  change them.
 - Digit groups such as "1 000 000" stay on one line wherever answers and
   questions are shown, even when written with ordinary spaces
   (`client/dom.ts`). A false match only prevents a line break. The parser keeps
@@ -455,6 +503,12 @@ added, and some teachers want to photograph it. So it has its own screen
   also stand under the class's result, where the width is unused, so its
   avatars and the podium stay larger.
 - Whether the students' buttons need the answer text, or heads stay down.
+- Whether the layout's shares read right on a real projector and to a
+  class: 0.03 for the familiar layout, 0.3 as the floor, 58% and half for a
+  picture beside; judged headless on the space quiz, drawn number lines and
+  sentence answers, from 1920x1080 to a 360x740 phone. Whether answers
+  changing between one column and two from question to question on a phone
+  surprise anyone.
 - Whether adults at work dress at all, and whether the dapper and the
   office's registers give them a look that fits; whether a training room
   of undressed animals keeps anyone from using the site; whether children take to the office's things, and read the laptop

@@ -136,7 +136,11 @@ notes to the teacher outside the quiz text. The facts those rested on stay, per
 way of playing: where the question is read (on the big screen from the back
 of the room, or on a device at arm's length), whether the spread comes before
 the solution, that a quiz carries no explanations, and that answer pictures
-lie on tiles in four colours. How the parser treats a file
+lie on tiles in four colours. How the site lays a question out is given as
+approximate outcomes (where a picture goes on which screen, two by two or
+one under the other, everything shrinking together when room runs short),
+so the AI can shape questions, answers and pictures to fit; the rule behind
+them is `class-and-wall.md`, "How a question fills the screen". How the parser treats a file
 that doesn't follow the format (stray text, files beside the quiz) is left off:
 a file that doesn't follow the format doesn't work, and the published format
 is narrower than the real one on purpose (`quiz.txt`, UTF-8), so that the

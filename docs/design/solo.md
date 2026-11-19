@@ -107,12 +107,13 @@ and score), the stage, and a bar at the foot with one button.
   tiles are buttons at every size.
 - **Where a device differs** (`device` option): held upright, the stage
   taller than wide, it is read at arm's length in a narrow column, and
-  its answers are what is tapped. The question takes less of the height
-  than on a wall (0.7 of the wall's share), text tiles that two columns
-  would break or set small stand in one column, and alone the tiles keep
-  room for the mark only, without the count. The wall itself, on a phone
-  (a host with no big screen: `teacher-devices.md`, "How the screens are
-  arranged"), is laid out as a wall: its tiles stay two by two.
+  its answers are what is tapped. Alone, the tiles keep room for the mark
+  only, without the count, and a question with picture answers gives its
+  text 0.7 of the wall's share of the height. The rest is the wall's
+  layout (`class-and-wall.md`, "How a question fills the screen"), which
+  on a phone mostly sets text answers one under the other. The wall itself
+  on a phone (a host with no big screen: `teacher-devices.md`, "How the
+  screens are arranged") is laid out by the same rule.
 - **The foot's button** is the steering bar's Play in another hand: a noun
   for what comes next, in the same place on every question, kept there
   invisible while there is none, so a double tap never lands on something
@@ -198,8 +199,8 @@ lean; neither use is confirmed.
 - Pull to refresh is asked off while Solo is on (`overscroll-behavior`);
   checked headless in Edge only, not on Android or iOS.
 - How much of the question's height an upright device should give up
-  (0.7) and when tiles go to one column (under 1.3 em in two): tuned on
-  the example quiz, a quiz of sentence answers and the picture-answer quiz
-  at 360x740, and seen headless on an upright tablet (800x1280).
+  for picture answers (0.7): tuned on the example quiz, a quiz of sentence
+  answers and the picture-answer quiz at 360x740, and seen headless on an
+  upright tablet (800x1280).
 - Whether a tablet on its side, laid out as the wall, taps as well as one
   held upright; seen headless at 1280x800 only.

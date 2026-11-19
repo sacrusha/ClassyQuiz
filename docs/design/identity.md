@@ -24,7 +24,7 @@ for its own sake.
   frog on purple" across the room (`class-and-wall.md`). The mark comes from
   them, not from the answers.
 - The wall's type fits the question and the answers by measuring them
-  (`client/stage.ts`, `fitText`, `fitTiles`). A webfont that arrives after
+  (`client/stage.ts`, `layQuestion`). A webfont that arrives after
   the first measure would leave a wrong fit.
 - Quiz text is in any language and script.
 - School Wi-Fi is slow and filtered, so nothing on the site loads from a

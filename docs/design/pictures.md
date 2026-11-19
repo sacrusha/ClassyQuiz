@@ -205,15 +205,13 @@ figure as large as the room allows, with the question and the tiles still
 readable, chosen by the page, not by the AI or the teacher.
 
 - **Question picture, placement.** Between the question and the tiles at full
-  width, or beside (picture left, question and tiles in one column). The page
-  lays out between first, then takes beside when the picture comes out 1.3
-  times larger, with the picture at 58% of the width, else 50%, and only if
-  the question stays at 1.5em or more and no answer is squeezed or below
-  1.3em. Wide strips go between; square and upright figures, and photos with
-  short answers, go beside. A phone as the projector is always between.
-- With a picture the question starts smaller and may take at most 30% of the
-  height; the tiles keep a minimum height per row; the picture takes the
-  rest, at most 62% of the height. The figure's size is set in px from `w`
+  width, or beside (picture left, question and tiles in one column), with
+  text answers whichever keeps the most-shrunk of question, picture and
+  answers largest (`class-and-wall.md`, "How a question fills the screen"):
+  on a landscape screen square and upright figures go beside, on a 16:9
+  screen most photos too, and wide strips between; on an upright screen the
+  picture goes between. With a picture the question starts smaller. The
+  figure's size is set in px from `w`
   and `h`, so nothing moves when the file arrives. It sits on a white card:
   every screen shows pictures on white, so a transparent line drawing doesn't
   vanish on a dark page.
@@ -291,7 +289,7 @@ readable, chosen by the page, not by the AI or the teacher.
 
 ## Not known
 
-- How large a question picture or an answer picture reads from the back row on a real projector; the thresholds (1.3 times, 1.5em, 1.3em, 85%) were judged on drawn and sample quizzes only.
+- How large a question picture or an answer picture reads from the back row on a real projector; the two-by-two preference (85%) and the layout's shares (`class-and-wall.md`, Not known) were judged on drawn and sample quizzes only.
 - Whether teachers find `Z` and the click, or only the Remote's button.
 - Whether the quiz's background at the lobby and the rankings is liked.
 - Whether AIs crop tighter, leave pupils' writing out of the crop, and draw a question's answer pictures alike, with the guidance as it stands.

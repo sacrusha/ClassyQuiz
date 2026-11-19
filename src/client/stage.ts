@@ -28,21 +28,24 @@ export interface StageOptions {
   /** The tiles are buttons, data-i their place on screen: a player answers on them. */
   buttons?: boolean;
   /**
-   * A player's own device. Held upright (the stage taller than wide), it is
-   * laid out apart from the wall: the question takes less of the height,
-   * since the answers are what is tapped, text tiles stand in one column
-   * where two would break their words or set them small, and alone the
-   * tiles keep room for the mark only (app.css, `dupright`). Wider than
-   * tall, it is laid out as the wall is, so a laptop or a projector shows a
-   * question as the wall would (docs/design/solo.md, "Where a device differs").
+   * A player's own device. Held upright (the stage taller than wide), its
+   * tiles keep room for the mark only, without the count (app.css,
+   * `dupright`), and a question with picture answers gives its text less of
+   * the height, since the answers are what is tapped. Otherwise it is laid
+   * out as the wall is (docs/design/solo.md, "Where a device differs").
    */
   device?: boolean;
 }
 
-/** On an upright device, the share of the height the question's text may take, against the wall's. */
+/** On an upright device, the share of the height a picture-answer question's text may take, against the wall's. */
 const DEVICE_TEXT_ROOM = 0.7;
-/** On an upright device, text tiles set smaller than this (em) in two columns try one. */
-const DEVICE_TILE_MIN = 1.3;
+/** The smallest the question and the answers are set (em); below, words break. */
+const QUESTION_MIN = 1.1;
+const TILE_MIN = 1;
+/** How far a layout's parts shrink, against their full size, before words break instead. */
+const SHRINK_MIN = 0.3;
+/** A layout within this of the best is taken when it comes earlier: two columns, then a picture beside, then one column. */
+const FAMILIAR = 0.03;
 
 /** Whether the stage is laid out as an upright device's rather than as the wall's; its tiles then carry `dupright`. */
 function upright(stage: HTMLElement, o: StageOptions): boolean {
@@ -62,14 +65,25 @@ function questionSize(len: number, withPicture: boolean): number {
   return len <= 40 ? 3.6 : len <= 90 ? 3 : len <= 160 ? 2.4 : 1.9;
 }
 
+/** A way to lay out a question with text answers: where its picture goes, and the tiles in one column or two. */
+interface Layout {
+  cls: string;
+  one: boolean;
+  /** The picture at its full size here; beside, it keeps that size. */
+  pic?: { w: number; h: number };
+  beside?: boolean;
+}
+
 /**
- * The question, its picture and the tiles in the stage's room. The
- * picture goes between the question and the tiles, or beside both: whichever
- * shows it larger, from its shape (known before it has loaded) and the room
- * the question's text leaves. Wide figures such as number lines end up
- * between; square and upright ones beside a short question. Beside needs the
- * question to stay readable in the narrower column, so a long question keeps
- * the picture between.
+ * The question, its picture and the tiles in the stage's room
+ * (docs/design/class-and-wall.md, "How a question fills the screen"). Each
+ * part has a full size: the question's type and the answers' by their
+ * length, the picture as large as its place allows. The tiles go in two
+ * columns or one; a picture goes between the question and the tiles or
+ * beside both. In each such layout the parts that don't fit shrink alike
+ * (beside, the picture keeps its size and the text shrinks in its column),
+ * and the layout whose most-shrunk part stays largest is taken; of two
+ * about alike, the more familiar one.
  */
 export function layQuestion(stage: HTMLElement, q: StageQuestion, o: StageOptions = {}): void {
   const at = (sel: string) => stage.querySelector<HTMLElement>(sel)!;
@@ -78,63 +92,96 @@ export function layQuestion(stage: HTMLElement, q: StageQuestion, o: StageOption
     layPictureAnswers(stage, q, q.pics, o, up);
     return;
   }
-  const n = q.answers.length;
   const longest = Math.max(...q.answers.map((a) => a.length));
   const tileSize = longest <= 12 ? 2.6 : longest <= 30 ? 2 : longest <= 60 ? 1.55 : 1.25;
-  const room = up ? DEVICE_TEXT_ROOM : 1;
-  const fitAnswers = () => fitTiles(at("#tiles"), tileSize, up);
   const qHtml = `<h2 class="qtext" id="qtext">${lines(q.text)}</h2>`;
   const tilesHtml = `<div class="tiles${up ? " dupright" : ""}" id="tiles">${q.answers
     .map((a, i) => tile(i, `a${i}`, `${shapeSvg(i)}<span class="txt">${lines(a)}</span><span class="side"></span>`, o))
     .join("")}</div>`;
   const img = q.image;
-  if (!img) {
-    stage.className = "stage";
-    stage.innerHTML = qHtml + tilesHtml;
-    fitText(at("#qtext"), questionSize(q.text.length, false), window.innerHeight * 0.34 * room);
-    fitAnswers();
-    return;
-  }
   const W = stage.clientWidth;
   const H = stage.clientHeight;
   const gap = parseFloat(getComputedStyle(stage).rowGap) || 0;
-  const aspect = img.w / img.h;
-  const figure = (w: number, h: number) =>
-    `<div class="figure" id="figure" data-zoom style="width:${Math.floor(w)}px;height:${Math.floor(h)}px">${picImg(img.src, img.w, img.h)}</div>`;
+  const qSize = questionSize(q.text.length, !!img);
 
-  const between = (): number => {
-    stage.className = "stage fig between";
-    stage.innerHTML = qHtml + figure(0, 0) + tilesHtml;
-    fitText(at("#qtext"), questionSize(q.text.length, true), H * 0.3 * room);
-    const qh = at("#qtext").offsetHeight;
-    // The tiles keep room for their answers: a row of short numbers needs less than a row of sentences.
-    const rows = n > 2 ? 2 : 1;
-    const tilesMin = rows * H * (longest <= 12 ? 0.135 : longest <= 30 ? 0.16 : 0.2);
-    const h = Math.max(40, Math.min(W / aspect, H - qh - tilesMin - (q.text ? 2 : 1) * gap, H * 0.62));
-    const fig = at("#figure");
-    fig.style.width = `${Math.floor(h * aspect)}px`;
-    fig.style.height = `${Math.floor(h)}px`;
-    fitAnswers();
-    return h * h * aspect;
-  };
-
-  const betweenArea = between();
-  // Beside, the picture takes up to 58% of the width, else half; the text
-  // must stay readable in the column that leaves, or it's between after all.
-  let beside = false;
-  for (const share of [0.58, 0.5]) {
-    const sideH = Math.min(H, (share * W) / aspect);
-    if (sideH * sideH * aspect <= 1.3 * betweenArea) break;
-    stage.className = "stage fig beside";
-    stage.innerHTML = figure(sideH * aspect, sideH) + `<div class="col">${qHtml}${tilesHtml}</div>`;
-    const textSize = fitText(at("#qtext"), questionSize(q.text.length, true), H * 0.42 * room);
-    const tiles = fitTiles(at("#tiles"), tileSize);
-    if (textSize >= 1.5 && !tiles.squeezed && tiles.size >= Math.min(tileSize, 1.3)) {
-      beside = true;
-      break;
+  const layouts: Layout[] = [];
+  if (!img) layouts.push({ cls: "stage", one: false }, { cls: "stage", one: true });
+  else {
+    const aspect = img.w / img.h;
+    const h = Math.min(W / aspect, H * 0.62);
+    const between = { w: h * aspect, h };
+    layouts.push({ cls: "stage fig between", one: false, pic: between });
+    // Beside, the picture takes up to 58% of the width, else half.
+    for (const share of [0.58, 0.5]) {
+      const sh = Math.min(H, (share * W) / aspect);
+      layouts.push({ cls: "stage fig beside", one: true, beside: true, pic: { w: sh * aspect, h: sh } });
     }
+    layouts.push({ cls: "stage fig between", one: true, pic: between });
   }
-  if (!beside && stage.classList.contains("beside")) between();
+  const largest = Math.max(1, ...layouts.map((l) => (l.pic ? l.pic.w * l.pic.h : 0)));
+  const figure = (p: { w: number; h: number }) =>
+    `<div class="figure" id="figure" data-zoom style="width:${Math.floor(p.w)}px;height:${Math.floor(p.h)}px">${picImg(img!.src, img!.w, img!.h)}</div>`;
+
+  const build = (l: Layout): void => {
+    stage.className = l.cls;
+    stage.innerHTML = !l.pic ? qHtml + tilesHtml : l.beside ? figure(l.pic) + `<div class="col">${qHtml}${tilesHtml}</div>` : qHtml + figure(l.pic) + tilesHtml;
+    at("#tiles").classList.toggle("onecol", l.one);
+  };
+  // The parts at f of their full size; how far they overrun the stage at their own heights (Infinity: a word is cut).
+  const overrun = (l: Layout, f: number): number => {
+    const text = at("#qtext");
+    const tiles = at("#tiles");
+    text.style.fontSize = `${Math.max(f * qSize, QUESTION_MIN)}em`;
+    tiles.style.fontSize = `${Math.max(f * tileSize, TILE_MIN)}em`;
+    let fig = 0;
+    if (l.pic && !l.beside) {
+      fig = Math.max(40, f * l.pic.h);
+      const el = at("#figure");
+      el.style.width = `${Math.floor((fig * l.pic.w) / l.pic.h)}px`;
+      el.style.height = `${Math.floor(fig)}px`;
+    }
+    const textGap = q.text ? (l.beside ? parseFloat(getComputedStyle(text.parentElement!).rowGap) || 0 : gap) : 0;
+    return tilesOverflow(tiles) ? Infinity : text.offsetHeight + textGap + tiles.offsetHeight + (fig ? fig + gap : 0) - H;
+  };
+  // The largest f at which the layout fits; for one that doesn't fit even at the smallest, that smallest, with words
+  // broken where one would be cut, and how far it overruns.
+  const fit = (l: Layout): { f: number; excess: number } => {
+    build(l);
+    at("#qtext").style.flex = "none";
+    at("#tiles").style.flex = "none";
+    if (overrun(l, 1) <= 0) return { f: 1, excess: 0 };
+    let low = overrun(l, SHRINK_MIN);
+    if (low === Infinity) {
+      at("#tiles").classList.add("squeezed");
+      low = overrun(l, SHRINK_MIN);
+    }
+    if (low > 0 || at("#tiles").classList.contains("squeezed")) return { f: SHRINK_MIN, excess: Math.max(0, low) };
+    let lo = SHRINK_MIN;
+    let hi = 1;
+    for (let i = 0; i < 7; i++) {
+      const mid = (lo + hi) / 2;
+      if (overrun(l, mid) <= 0) lo = mid;
+      else hi = mid;
+    }
+    return { f: lo, excess: 0 };
+  };
+  // The most-shrunk part: the type against its full size, the picture against the largest any layout gives it. A layout
+  // that breaks words or overruns ranks below every one that fits, the less it overruns the better.
+  const score = (l: Layout, r: { f: number; excess: number }, broken: boolean): number => {
+    if (broken) return -1 - r.excess / Math.max(H, 1);
+    const parts = [Math.max(r.f * qSize, QUESTION_MIN) / qSize, Math.max(r.f * tileSize, TILE_MIN) / tileSize];
+    if (l.pic) parts.push((l.beside ? 1 : r.f) * Math.sqrt((l.pic.w * l.pic.h) / largest));
+    return Math.min(...parts);
+  };
+  const tried = layouts.map((l) => {
+    const r = fit(l);
+    return { l, r, s: score(l, r, r.excess > 0 || at("#tiles").classList.contains("squeezed")) };
+  });
+  const best = Math.max(...tried.map((t) => t.s));
+  const pick = tried.find((t) => t.s >= best - FAMILIAR)!;
+  build(pick.l);
+  overrun(pick.l, pick.r.f);
+  at("#tiles").classList.toggle("squeezed", tilesOverflow(at("#tiles")));
   fillPictures(stage);
 }
 
@@ -247,38 +294,11 @@ function fitCardTexts(box: HTMLElement, start: number): void {
   }
 }
 
-/**
- * Largest font, from `start` down, at which no answer word is cut and no
- * answer overflows its tile. With `column` (an upright device), tiles that
- * two columns squeeze or set small stand in one, where that sets them larger.
- */
-function fitTiles(box: HTMLElement, start: number, column = false): { size: number; squeezed: boolean } {
-  box.classList.remove("onecol");
-  const two = fitTilesAt(box, start);
-  if (!column || (!two.squeezed && two.size >= DEVICE_TILE_MIN)) return two;
-  box.classList.add("onecol");
-  const one = fitTilesAt(box, start);
-  if ((one.squeezed && !two.squeezed) || (one.squeezed === two.squeezed && one.size <= two.size)) {
-    box.classList.remove("onecol");
-    return fitTilesAt(box, start);
-  }
-  return one;
-}
-
-function fitTilesAt(box: HTMLElement, start: number): { size: number; squeezed: boolean } {
-  const tiles = [...box.querySelectorAll<HTMLElement>(".tile")];
-  const overflows = () =>
-    tiles.some((t) => t.scrollHeight > t.clientHeight + 1 || [...t.querySelectorAll<HTMLElement>(".txt")].some((x) => x.scrollWidth > x.clientWidth + 1));
-  let size = start;
-  box.style.fontSize = `${size}em`;
-  while (overflows() && size > 1) {
-    size -= 0.1;
-    box.style.fontSize = `${size}em`;
-  }
-  // Still too long at the smallest size: break inside words rather than hide text.
-  const squeezed = overflows();
-  box.classList.toggle("squeezed", squeezed);
-  return { size, squeezed };
+/** Whether an answer overflows its tile, or a word in it is cut. */
+function tilesOverflow(box: HTMLElement): boolean {
+  return [...box.querySelectorAll<HTMLElement>(".tile")].some(
+    (t) => t.scrollHeight > t.clientHeight + 1 || [...t.querySelectorAll<HTMLElement>(".txt")].some((x) => x.scrollWidth > x.clientWidth + 1),
+  );
 }
 
 /** Largest font, from `start` down, that keeps the question within `limit` pixels of height. */
