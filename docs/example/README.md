@@ -60,6 +60,10 @@ The space run's (the root page's "Idea" tab):
   (`space-review-original.webp` here, 1500 px wide), the others drawn from
   their translated `.zip` by the site's `src/public/preview.py`, the script
   the guidance offers the AI for it, so their typeface is that machine's.
+  The committed ones predate `preview.py` arranging picture answers by
+  their shape; drawn again, question 2's four planets come out two by two,
+  where the German shows them in a row. Whether to draw them again, and
+  the German too as the sheets run's is, is the owner's.
 
 The notes run's (the root page's "Notes" tab):
 
