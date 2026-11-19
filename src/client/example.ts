@@ -5,28 +5,27 @@
 // ?lang=; without it, the device's choice. ?ex= names the root page's example
 // it came from: the idea's (the space run) has no attachment, and shows its
 // own overview where the sheets' run shows its; the notes' (the notes run)
-// shows the notes' pages where the sheets' photographs stand, and no
-// overview; an example whose run is a mock (MOCK_TEXT) shows its attachment
-// and a made-up conversation instead of the worked example's.
+// and the test example (the test run) show the two pages of their attached
+// PDF in place of the photographs, and have no overview.
 
-import { $, esc, store } from "./dom.ts";
+import { $, store } from "./dom.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang } from "./landing-text.ts";
-import { EXAMPLE_TEXT, IDEA_TEXT, MOCK_TEXT, NOTES_TEXT, exampleOf, exampleZip, isMock, type ExampleText } from "./example-text.ts";
+import { EXAMPLE_TEXT, IDEA_TEXT, NOTES_TEXT, TEST_TEXT, exampleOf, exampleZip, type ExampleText } from "./example-text.ts";
 import { codeBox, langSwitch } from "./top.ts";
 
 const params = new URLSearchParams(location.search);
 const asked = params.get("lang");
 let lang: Lang = isLang(asked) ? asked : chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
 const ex = exampleOf(params);
-const mock = isMock(ex) ? ex : null;
-const host = location.host || "classyquiz.pages.dev";
+/** The words of this page if its example attached a two-page PDF (notes, test); otherwise null. */
+const PDF_TEXT = ex === "notes" ? NOTES_TEXT : ex === "test" ? TEST_TEXT : null;
 
 codeBox();
 const showLang = langSwitch((l) => apply(l));
 
 // The conversation in the device's mode: <picture> picks the shown one; the
-// link to the whole picture follows the same mode. The idea's and the notes'
-// conversations are their own pictures (docs/example/README.md).
+// link to the whole picture follows the same mode. Each example's
+// conversation is its own picture (docs/example/README.md).
 const dark = matchMedia("(prefers-color-scheme: dark)");
 const tag = ex === "sheets" ? "" : `${ex}-`;
 const convo = (l: Lang, mode: "light" | "dark") => `/examples/conversation-${tag}${l}-${mode}.webp`;
@@ -37,27 +36,14 @@ function convoLinks(): void {
 }
 dark.addEventListener("change", convoLinks);
 
-// A mock's attachment and conversation, made here, so a fetcher doesn't read a chat as the page's words.
-const MOCK_PIC = { test: "/landing/mock-test.svg" } as const;
-let mockChat: HTMLElement | null = null;
-if (mock) {
-  const sheets = $("#sheets");
-  sheets.querySelector(".pics")!.innerHTML = `<a href="${MOCK_PIC[mock]}"><img src="${MOCK_PIC[mock]}" alt="" width="233" height="300"></a>`;
-  sheets.querySelector(".files")!.remove();
-  for (const el of document.querySelectorAll("[data-convo]")) el.remove();
-  $("#review").remove();
-  mockChat = document.createElement("div");
-  mockChat.className = "mockchat";
-  $("#convo-p").after(mockChat);
-  $(".translated").remove();
-} else if (ex === "idea") {
+if (ex === "idea") {
   // Nothing was attached; its overview is taller than the sheets run's.
   $("#sheets").remove();
   const img = $("#review img");
   img.setAttribute("width", "1000");
   img.setAttribute("height", "1826");
-} else if (ex === "notes") {
-  // The notes' two pages in place of the sheets' photographs, and the notes' PDF in place of the sheets' files; the run
+} else if (PDF_TEXT) {
+  // The PDF's two pages in place of the sheets' photographs, and the PDF in place of the sheets' files; the run
   // handed over no overview.
   $("#review").remove();
   const sheets = $("#sheets");
@@ -80,30 +66,19 @@ function apply(l: Lang): void {
   zip.href = `/examples/${exampleZip(ex, l)}`;
   zip.textContent = exampleZip(ex, l);
   ($("#start") as HTMLAnchorElement).href = `/open?example=${l}&ex=${ex}`;
-  if (mock && mockChat) {
-    const m = MOCK_TEXT[l];
-    $(".lede").textContent = m.lede[mock];
-    $("#sheets h2").textContent = m.attachedH;
-    $("#sheets p").textContent = m.attached[mock];
-    $("#convo-p").textContent = m.mockNote;
-    $("#quiz p").textContent = m.quizP;
-    const ask = head.askTest.replaceAll("classyquiz.pages.dev", host);
-    mockChat.innerHTML = `<p class="me">${esc(ask)}</p><p class="ai">${esc(m.reply[mock])}<span class="file">${esc(exampleZip(ex, l))}</span></p>`;
-    return;
-  }
-  if (ex === "notes") {
-    const d = NOTES_TEXT[l];
+  if (PDF_TEXT) {
+    const d = PDF_TEXT[l];
     $(".lede").textContent = d.lede;
     $("#sheets h2").textContent = d.notesH;
     $("#sheets p").textContent = d.notesP;
     $("#sheets .pics").querySelectorAll("a").forEach((a, i) => {
-      a.href = `/examples/notes-${l}-${i + 1}.webp`;
+      a.href = `/examples/${ex}-${l}-${i + 1}.webp`;
       const img = a.querySelector("img")!;
       img.src = a.href;
       img.alt = d.page.replace("{n}", String(i + 1));
     });
     const pdf = $("#sheets .files a") as HTMLAnchorElement;
-    pdf.href = `/examples/notes-${l}.pdf`;
+    pdf.href = `/examples/${ex}-${l}.pdf`;
     pdf.textContent = d.dlPdf;
     $("#convo-p").textContent = d.convoP;
     $("#quiz p").textContent = d.quizP;

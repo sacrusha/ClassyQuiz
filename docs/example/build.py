@@ -2,16 +2,17 @@
 two colour schemes: the sheets run's, src/public/examples/conversation-<lang>-<light|dark>.webp,
 with its overview of its questions, review-<lang>.webp, which its chat shows; the space run's (the root page's "Idea"
 tab), conversation-idea-<lang>-<light|dark>.webp, with its overview, review-idea-<lang>.webp; and the notes run's
-(the "Notes" tab), conversation-notes-<lang>-<light|dark>.webp, with the pictures of its notes' pages
-(src/public/examples/notes-<lang>-<page>.webp for /example, src/public/landing/notes-<lang>.webp for the root page).
+(the "Notes" tab) and the test run's (the "Test" tab), conversation-<notes|test>-<lang>-<light|dark>.webp, each with
+the pictures of its attached PDF's pages (src/public/examples/<notes|test>-<lang>-<page>.webp for /example,
+src/public/landing/<notes|test>-<lang>.webp for the root page).
 
 Run (from anywhere): py -I docs/example/build.py [--convo idea] [--lang de] [--theme dark] [--keep]
-  --convo           only that conversation, sheets, idea or notes (default: all three)
+  --convo           only that conversation, sheets, idea, notes or test (default: all four)
   --lang / --theme  only that language / scheme (default: all 8 pictures of each)
   --keep            also leave the pages and the full-size PNGs in .tmp/example/ (git-ignored)
 
-The words are text.py's, space_text.py's and notes_text.py's; the page is HTML drawn here and shot in the installed Edge
-(playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright, and PyMuPDF for the notes' pages.
+The words are text.py's, space_text.py's, notes_text.py's and test_text.py's; the page is HTML drawn here and shot in the
+installed Edge (playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright, and PyMuPDF for the PDFs' pages.
 The overviews are drawn from their .zip by the site's own src/public/preview.py, the script the guidance offers the
 AI for it; the space run's German is the AI's own (space-review-original.webp here, 1500 px wide).
 The faces are those of the machine (Segoe UI, Cambria, Consolas on Windows): the
@@ -28,6 +29,10 @@ sys.path.insert(0, str(HERE))
 import text as T  # noqa: E402
 import space_text as S  # noqa: E402
 import notes_text as N  # noqa: E402
+import test_text as X  # noqa: E402
+
+# The runs that attached a PDF. For each: the module with its words, and the key of its ask in src/client/landing-text.ts.
+PDF_RUNS = {"notes": (N, "askNotes"), "test": (X, "askTest")}
 
 WIDTH = 681          # the pictures' width, as /example's HTML has it
 SCALE = 2            # rendered at 2x, scaled down to WIDTH
@@ -67,13 +72,10 @@ def landing_block(lang):
     return src[src.index(f"\nconst {lang}: Text = {{"):]
 
 
-def ask_notes():
-    """askNotes of src/client/landing-text.ts per language: the root page's ask is the notes run's."""
-    out = {}
-    for lang in N.LANGS:
-        m = re.search(r'\n  askNotes: "((?:[^"\\]|\\.)*)",', landing_block(lang))
-        out[lang] = m.group(1).replace('\\"', '"')
-    return out
+def landing_ask(key, lang):
+    """An ask of src/client/landing-text.ts in a language: the root page's ask is the run's."""
+    m = re.search(r'\n  %s: "((?:[^"\\]|\\.)*)",' % key, landing_block(lang))
+    return m.group(1).replace('\\"', '"')
 
 
 def ask_sheets(lang):
@@ -165,7 +167,7 @@ code { font-family: Consolas, "Cascadia Mono", monospace; font-size: .86em; back
 
 
 def page(lang, theme, convo="sheets"):
-    blocks = chat(lang) if convo == "sheets" else chat_space(lang) if convo == "idea" else chat_notes(lang)
+    blocks = chat(lang) if convo == "sheets" else chat_space(lang) if convo == "idea" else chat_pdf(convo, lang)
     return f'<!doctype html><html lang="{lang}" data-theme="{theme}"><head><meta charset="utf-8"><style>{CSS}</style></head><body>{"".join(blocks)}</body></html>'
 
 
@@ -174,11 +176,11 @@ def page(lang, theme, convo="sheets"):
 FOLD_FILES = {"made1": ("review", "q01.png", "q03b.png"), "made2": ("review", "q02a.png", "q03a.png")}
 
 
-def zip_picture(lang, name):
-    """A picture from the language's .zip of the sheets run, as a data: URI."""
+def zip_picture(lang, name, zip_name=None):
+    """A picture from a .zip, the language's of the sheets run unless named, as a data: URI."""
     import base64
     import zipfile
-    with zipfile.ZipFile(EX / T.ZIPS[lang][1]) as z:
+    with zipfile.ZipFile(EX / (zip_name or T.ZIPS[lang][1])) as z:
         return "data:image/png;base64," + base64.b64encode(z.read(name)).decode()
 
 
@@ -252,21 +254,24 @@ def chat_space(lang):
     return out
 
 
-def chat_notes(lang):
-    """The notes run: the notes attached, one ask, and the AI's one answer with the .zip."""
+def chat_pdf(convo, lang):
+    """A run that attached a PDF (the notes', the test's): the PDF, one ask, and the AI's answer with the .zip."""
     from faces import EXAMPLES  # the files of the root page's examples
+    N, ask_key = PDF_RUNS[convo]
     out = []
-    ask = ask_notes()
-    zip_name = EXAMPLES["notes"][lang]
+    zip_name = EXAMPLES[convo][lang]
     for kind, v in N.TURN:
         if kind == "attachment":
-            out.append(f'<div class="pdf"><img src="{(TMP / f"notes-{lang}-1.png").as_uri()}"><span>{N.UI["pdf"][lang]}</span></div>')
+            out.append(f'<div class="pdf"><img src="{(TMP / f"{convo}-{lang}-1.png").as_uri()}"><span>{N.UI["pdf"][lang]}</span></div>')
         elif kind == "user":
-            out.append(f'<div class="user"><div class="bub">{fmt(ask[lang], lang)}</div></div>')
+            out.append(f'<div class="user"><div class="bub">{fmt(landing_ask(ask_key, lang), lang)}</div></div>')
         elif kind == "ai":
             out.append(f'<p class="ai">{fmt(v[lang].replace("{zip}", zip_name), lang)}</p>')
         elif kind == "fold":
             out.append(f'<div class="st">{fmt(N.UI[v][lang], lang)}<i class="chev"></i></div>')
+        elif kind == "foldpics":  # the folded line of steps, with small copies of the quiz's pictures at its right, as in the app
+            pics = "".join(f'<img src="{zip_picture(lang, f, zip_name)}" style="width:29px">' for f in N.FOLD_PICS)
+            out.append(f'<div class="st files"><span>{fmt(N.UI[v][lang], lang)}<i class="chev"></i></span><span class="thumbs">{pics}</span></div>')
         elif kind == "bullets":
             out.append('<ul class="ai">' + "".join(f"<li>{fmt(b[lang], lang)}</li>" for b in v) + "</ul>")
         elif kind == "chip":
@@ -279,22 +284,22 @@ def chat_notes(lang):
     return out
 
 
-def notes_pages(langs):
-    """The notes' pages as pictures: each page for /example (notes-<lang>-<page>.webp, 700 px wide), the first for the
-    root page's attachment (landing/notes-<lang>.webp, 233 px wide), and the first at full size in .tmp/example/ for the
-    conversation's thumbnail."""
+def pdf_pages(convo, langs):
+    """An attached PDF's pages as pictures: each page for /example (<convo>-<lang>-<page>.webp, 700 px wide), the first
+    for the root page's attachment (landing/<convo>-<lang>.webp, 233 px wide), and the first at full size in
+    .tmp/example/ for the conversation's thumbnail."""
     import pymupdf
     from PIL import Image
     TMP.mkdir(parents=True, exist_ok=True)
     for lang in langs:
-        doc = pymupdf.open(EX / f"notes-{lang}.pdf")
+        doc = pymupdf.open(EX / f"{convo}-{lang}.pdf")
         for i, pg in enumerate(doc, 1):
-            png = TMP / f"notes-{lang}-{i}.png"
+            png = TMP / f"{convo}-{lang}-{i}.png"
             pg.get_pixmap(dpi=150).save(str(png))
             im = Image.open(png).convert("RGB")
             if i > 1:
                 png.unlink()  # only the first page is the conversation's thumbnail
-            for w, out in ((700, EX / f"notes-{lang}-{i}.webp"), (233, ROOT / "src" / "public" / "landing" / f"notes-{lang}.webp")):
+            for w, out in ((700, EX / f"{convo}-{lang}-{i}.webp"), (233, ROOT / "src" / "public" / "landing" / f"{convo}-{lang}.webp")):
                 if w == 233 and i > 1:
                     continue
                 small = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
@@ -345,7 +350,7 @@ def main():
             return v
         return None
 
-    convos = [opt("--convo")] if "--convo" in args else ("sheets", "idea", "notes")
+    convos = [opt("--convo")] if "--convo" in args else ("sheets", "idea", "notes", "test")
     langs = [opt("--lang")] if "--lang" in args else T.LANGS
     themes = [opt("--theme")] if "--theme" in args else ("light", "dark")
     keep = "--keep" in args
@@ -353,8 +358,9 @@ def main():
     for convo in convos:
         if convo in REVIEW:
             reviews(convo, langs)
-    if "notes" in convos:
-        notes_pages(langs)
+    for convo in convos:
+        if convo in PDF_RUNS:
+            pdf_pages(convo, langs)
     from playwright.sync_api import sync_playwright
     from PIL import Image
     TMP.mkdir(parents=True, exist_ok=True)
@@ -365,7 +371,7 @@ def main():
                 tag = f"{'' if convo == 'sheets' else convo + '-'}{lang}-{theme}"
                 f = TMP / f"chat-{tag}.html"
                 f.write_text(page(lang, theme, convo), encoding="utf-8")
-                ctx = b.new_context(viewport={"width": WIDTH, "height": 900}, device_scale_factor=SCALE,
+                ctx = b.new_context(viewport={"width": WIDTH, "height": 100}, device_scale_factor=SCALE,  # a low viewport, so the picture of a short chat has no empty space below it
                                     color_scheme="dark" if theme == "dark" else "light")
                 pg = ctx.new_page()
                 pg.goto(f.as_uri())
@@ -384,8 +390,9 @@ def main():
                     f.unlink()
         b.close()
     if not keep:
-        for png in TMP.glob("notes-*-1.png"):
-            png.unlink()
+        for convo in PDF_RUNS:
+            for png in TMP.glob(f"{convo}-*-1.png"):
+                png.unlink()
 
 
 if __name__ == "__main__":

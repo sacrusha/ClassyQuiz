@@ -14,10 +14,12 @@ page shows it as a picture and not as text: `docs/design/example-page.md`.
 
 The pictures are `src/public/examples/conversation-<lang>-<light|dark>.webp`
 (the sheets run's), `conversation-idea-<lang>-<light|dark>.webp` (the space
-run's) and `conversation-notes-<lang>-<light|dark>.webp` (the notes run's),
+run's), `conversation-notes-<lang>-<light|dark>.webp` (the notes run's) and
+`conversation-test-<lang>-<light|dark>.webp` (the test run's),
 681 px wide; the sheets and space runs' overviews, `review-<lang>.webp` and
-`review-idea-<lang>.webp`, 1500 px wide; and the notes' pages,
-`notes-<lang>-<page>.webp` there and `src/public/landing/notes-<lang>.webp`
+`review-idea-<lang>.webp`, 1500 px wide; and the pages of the notes and of
+the marked test, `notes-<lang>-<page>.webp` and `test-<lang>-<page>.webp`
+there, `src/public/landing/notes-<lang>.webp` and `test-<lang>.webp`
 for the root page's chat. They are generated: edit the source, not them.
 
 ## What the pictures are
@@ -75,6 +77,30 @@ The notes run's (the root page's "Notes" tab):
 - German, French and Italian are that run translated, each attaching its own
   language's notes, the words drafts, as the other runs' are.
 
+The test run (the "Test" tab on the root page):
+
+- The owner ran it on 19 Nov 2026 in French with Claude Opus 5.5. He attached
+  the marked test as a PDF and sent one message, and the AI gave one answer.
+  The screenshot of that conversation is `test-conversation-original.webp`
+  in this folder (dark mode).
+- The picture is drawn to show a visitor what such a conversation looks
+  like. It shows the attached PDF, the message, the AI's answer, the folded
+  line of the AI's steps with the quiz's two drawings beside it, and the
+  `.zip`. The AI's words are unchanged, except that the site's name is
+  spelled "classyQuiz".
+- During the run the app displayed its own interface words in English. The
+  French picture keeps them in English. The other pictures show them
+  translated.
+- The marked test is invented, because a real test would show a real
+  pupil's work. `test_sheet.py` writes it to
+  `src/public/examples/test-<lang>.pdf`. All four languages have the same
+  questions, the same answers and the same score, 21 of 30. The pupil's
+  name, the class, the date format and the school terms follow each
+  language's country. The run used the French PDF.
+- The English, German and Italian versions are translations of the run.
+  Each one attaches the test in its own language. The translations are
+  drafts.
+
 ## Files
 
 - `text.py`: the sheets run's words, one entry per piece of the chat with the
@@ -102,9 +128,19 @@ The notes run's (the root page's "Notes" tab):
 - `notes_zips.py`: makes the notes quiz's German, French and Italian `.zip`
   from the run's `french-revolution-quiz.zip` (in `src/public/examples/` as
   it came), in the words of each language's notes. Drafts.
-- `mock_zips.py`: the stand-in quiz of the root page's Test example, in the
-  four languages, until the owner's run replaces it
-  (`docs/design/root-page.md`, "Getting a quiz"); it goes with it.
+- `test_sheet.py`, `test_sheet.html`: build the marked test. The HTML file
+  is the sheet, with three layers: the printed test, the pupil's
+  handwriting and the teacher's red marks. The Python file holds the words
+  in four languages and writes `test-<lang>.pdf`.
+- `test_text.py`: the words of the test run's conversation in four
+  languages. The pupil's message is not in this file. `build.py` reads it
+  from `askTest` in `src/client/landing-text.ts`, so the root page and the
+  picture always show the same message.
+- `test_zips.py`: translates the quiz from the run,
+  `classyquiz-cellule.zip`, into German, English and Italian. The French
+  file in `src/public/examples/` is the one the AI handed over. The two
+  drawings contain no words and are copied unchanged. The translations are
+  drafts.
 - `faces.py`: what the root page says of each example's file and its face.
   It reads every example's `.zip` (the table `EXAMPLES` names them) and
   writes `src/client/example-files.ts` (each file's name, size, title,
@@ -120,15 +156,16 @@ The notes run's (the root page's "Notes" tab):
 From anywhere, in this order when a quiz changes:
 
 1. `py -I docs/example/space_zips.py`, `py -I docs/example/quiz_zips.py`,
-   `py -I docs/example/notes_zips.py`, `py -I docs/example/mock_zips.py`:
-   the translated and stand-in `.zip`s.
+   `py -I docs/example/notes_zips.py`, `py -I docs/example/test_zips.py`:
+   these write the translated `.zip` files. Also run
+   `py -I docs/example/test_sheet.py` if the marked test changed.
 2. `cd src && npm run build`, then `py -I docs/example/faces.py`: the
    files' table and the faces (`--files-only` for the table alone). The
    faces are shot from the built site, which opens each file by the name the
    table had at the build: when a file's name changes, the table first, then
    the build, then the faces.
 3. `py -I docs/example/build.py`: the conversations, the overviews and the
-   notes' pages (`--convo sheets`, `idea` or `notes`,
+   pages of the notes and the test (`--convo sheets`, `idea`, `notes` or `test`,
    `--lang de`, `--theme dark` for fewer); `--keep` leaves the pages and
    the full-size PNGs in
    `.tmp/example/` (git-ignored).
@@ -148,6 +185,8 @@ the site's Solo screen in the machine's `system-ui`.
 - The space run: its translations by a native reader; its model and plan,
   which the screenshot doesn't show.
 - The notes run: its translations by a native reader; its plan.
+- The test run: no native speaker has read the translations. Which plan
+  the run used is not known. No biology teacher has read the invented test.
 - The colours: light was drawn from an earlier run's light screenshot of
   the same app, dark estimated from it. By eye, dark matches the sheets
   run's screenshot; the exact colours of either are unchecked.

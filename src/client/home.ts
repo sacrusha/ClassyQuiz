@@ -12,7 +12,7 @@ import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, typ
 import { api, readApi } from "./net.ts";
 import { ZipError, listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
 import { LANG_KEY, TEXT, askText, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
-import { isMock, type Example } from "./example-text.ts";
+import type { Example } from "./example-text.ts";
 import { EXAMPLE_FILES } from "./example-files.ts";
 import { codeBox, langSwitch } from "./top.ts";
 import { daysFull, uploadDays } from "./history.ts";
@@ -70,7 +70,7 @@ const bar = $("#extabs");
 const helpAnswer = document.createElement("div");
 helpAnswer.className = "answer";
 helpAnswer.innerHTML = `<p class="gives"></p><p class="said-ai"></p>`;
-/** Beside the first step's heading while a tab's example is a stand-in (example-text.ts, MOCKS; the help tab's answer too): made here, so a fetcher doesn't read it. */
+/** A marker beside the heading of the first step. It shows while the help tab is chosen, because the answer in that tab is a stand-in. The script adds it, so a fetcher doesn't read it. */
 const mock = document.createElement("span");
 mock.className = "mock";
 mock.hidden = true;
@@ -128,7 +128,7 @@ function chooseTab(i: number): void {
     tab.tabIndex = on ? 0 : -1;
     panels[j].hidden = !on;
   });
-  mock.hidden = !(isMock(TABS[i].id) || TABS[i].id === "help");
+  mock.hidden = TABS[i].id !== "help";
   // A row that scrolls (a narrow phone): the chosen tab comes into it.
   if (bar.scrollWidth > bar.clientWidth) tabs[i].scrollIntoView({ block: "nearest", inline: "nearest" });
   edges();
@@ -159,8 +159,8 @@ function renderExamples(): void {
     zip.title = t.download;
     zip.querySelector(".zipname")!.textContent = f.zip;
     zip.querySelector(".size")!.firstChild!.textContent = t.size(f.bytes);
-    // The notes' run attached each language's own notes (docs/example/README.md).
-    if (a.id === "notes") panels[i].querySelector<HTMLImageElement>(".att img")!.src = `/landing/notes-${lang}.webp`;
+    // The notes example and the test example attach a PDF in the page's language (docs/example/README.md).
+    if (a.id === "notes" || a.id === "test") panels[i].querySelector<HTMLImageElement>(".att img")!.src = `/landing/${a.id}-${lang}.webp`;
     const face = panels[i].querySelector<HTMLImageElement>(".face img");
     if (face) {
       face.src = `/landing/face-${a.id}-${lang}.webp`;

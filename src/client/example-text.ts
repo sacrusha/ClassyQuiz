@@ -185,7 +185,7 @@ export const IDEA_TEXT: Record<Lang, IdeaText> = {
 /**
  * The full example of the root page's "Notes" tab, the owner's notes run (12 Nov 2026, English, the class notes attached
  * as a PDF): what replaces the worked example's words on /example?ex=notes. The notes' two pages stand where the sheets'
- * photographs do.
+ * photographs do. TEST_TEXT uses this shape too, because the test example also has an attached PDF of two pages.
  */
 export interface NotesText {
   lede: string;
@@ -242,15 +242,58 @@ export const NOTES_TEXT: Record<Lang, NotesText> = {
   },
 };
 
+/**
+ * The words of /example?ex=test, the page for the root page's "Test" tab. They replace the words of the sheets example.
+ * The page shows the owner's test run (19 Nov 2026, French) with the marked test attached as a PDF. That test was
+ * written for the example (docs/example/test_sheet.py), and the page tells the visitor so.
+ */
+export const TEST_TEXT: Record<Lang, NotesText> = {
+  en: {
+    lede: "How the practice quiz was made, from the marked test to playing it alone. Everything you need to try the same with your own AI is on this page.",
+    notesH: "The marked test",
+    notesP: "Two pages of a biology test on the cell, with a pupil's answers and the teacher's marks, as a PDF. The test was written for this example, so that no real pupil's work is shown.",
+    page: "Page {n} of the test",
+    dlPdf: "The test (.pdf)",
+    convoP: "One message with the test attached. The AI read the test and the site, wrote a quiz that focuses on the wrong answers and drew two pictures for it. It checked the file and handed over the .zip without showing the questions, because the person who asked plays the quiz. Claude (Opus), 19 November 2026.",
+    quizP: "The AI handed over one .zip file with the quiz and its two pictures.",
+    translated: "This example was made in French. The English, German and Italian pages show a translation of the test, the conversation and the quiz, so that every language shows the same example.",
+  },
+  de: {
+    lede: "So ist das Übungsquiz entstanden, von der korrigierten Prüfung bis zum Spielen allein. Auf dieser Seite findest du alles, um dasselbe mit deiner eigenen KI auszuprobieren.",
+    notesH: "Die korrigierte Prüfung",
+    notesP: "Zwei Seiten einer Biologieprüfung zur Zelle, mit den Antworten einer Schülerin und den Korrekturen der Lehrperson, als PDF. Die Prüfung wurde für dieses Beispiel geschrieben, damit keine echte Schülerarbeit gezeigt wird.",
+    page: "Seite {n} der Prüfung",
+    dlPdf: "Die Prüfung (.pdf)",
+    convoP: "Eine Nachricht mit der Prüfung im Anhang. Die KI hat die Prüfung und die Seite gelesen, ein Quiz vor allem zu den falschen Antworten geschrieben und zwei Bilder dafür gezeichnet. Sie hat die Datei geprüft und die .zip-Datei geliefert, ohne die Fragen zu zeigen, weil die fragende Person das Quiz selbst spielt. Claude (Opus), 19. November 2026.",
+    quizP: "Die KI hat eine .zip-Datei mit dem Quiz und seinen zwei Bildern geliefert.",
+    translated: "Dieses Beispiel ist auf Französisch entstanden. Die englische, die deutsche und die italienische Seite zeigen die Prüfung, das Gespräch und das Quiz übersetzt, damit jede Sprache dasselbe Beispiel zeigt.",
+  },
+  fr: {
+    lede: "Voici comment le quiz de révision a été créé, du contrôle corrigé jusqu'à la partie en solo. Cette page contient tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
+    notesH: "Le contrôle corrigé",
+    notesP: "Deux pages d'un contrôle de SVT sur la cellule, avec les réponses d'une élève et les corrections du professeur, en PDF. Le contrôle a été écrit pour cet exemple, afin de ne montrer le travail d'aucun élève réel.",
+    page: "Page {n} du contrôle",
+    dlPdf: "Le contrôle (.pdf)",
+    convoP: "Un message avec le contrôle en pièce jointe. L'IA a lu le contrôle et le site, a écrit un quiz centré sur les réponses fausses et a dessiné deux images pour ce quiz. Elle a vérifié le fichier et a fourni le .zip sans montrer les questions, parce que la personne qui demande joue elle-même. Claude (Opus), 19 novembre 2026.",
+    quizP: "L'IA a fourni un fichier .zip avec le quiz et ses deux images.",
+    translated: "Cet exemple a été réalisé en français. Les pages en anglais, en allemand et en italien montrent une traduction du contrôle, de la conversation et du quiz, pour que chaque langue montre le même exemple.",
+  },
+  it: {
+    lede: "Ecco come è nato il quiz di ripasso, dalla verifica corretta fino a giocarlo per conto tuo. In questa pagina trovi tutto il necessario per rifare la stessa prova con la tua IA.",
+    notesH: "La verifica corretta",
+    notesP: "Due pagine di una verifica di scienze sulla cellula, con le risposte di un'alunna e le correzioni dell'insegnante, in PDF. La verifica è stata scritta per questo esempio, per non mostrare il lavoro di nessun alunno reale.",
+    page: "Pagina {n} della verifica",
+    dlPdf: "La verifica (.pdf)",
+    convoP: "Un messaggio con la verifica in allegato. L'IA ha letto la verifica e il sito, ha scritto un quiz concentrato sulle risposte sbagliate e ha disegnato due immagini per il quiz. Ha controllato il file e ha fornito il file .zip senza mostrare le domande, perché chi ha fatto la richiesta gioca in prima persona. Claude (Opus), 19 novembre 2026.",
+    quizP: "L'IA ha fornito un file .zip con il quiz e le sue due immagini.",
+    translated: "Questo esempio è nato in francese. Le pagine in inglese, tedesco e italiano mostrano una traduzione della verifica, della conversazione e del quiz, così ogni lingua mostra lo stesso esempio.",
+  },
+};
+
 /** The root page's examples, in its tabs' order, each named by what the visitor starts from (docs/design/root-page.md, "Getting a quiz"). */
 export const EXAMPLES = ["idea", "sheets", "notes", "test"] as const;
 export type Example = (typeof EXAMPLES)[number];
 export const isExample = (x: unknown): x is Example => EXAMPLES.includes(x as Example);
-
-/** The examples whose runs are stand-ins (docs/example/mock_zips.py) until the owner's replace them (backlog, "The page for people", item 1). */
-export const MOCKS = ["test"] as const;
-export type Mock = (typeof MOCKS)[number];
-export const isMock = (x: unknown): x is Mock => MOCKS.includes(x as Mock);
 
 /** The example a page's address names: ?ex=, else the worked example, the sheets. */
 export function exampleOf(params: URLSearchParams): Example {
@@ -260,60 +303,3 @@ export function exampleOf(params: URLSearchParams): Example {
 
 /** An example's file in a language (docs/example/faces.py writes the table from the files). */
 export const exampleZip = (ex: Example, lang: Lang): string => EXAMPLE_FILES[ex][lang].zip;
-
-/**
- * The full example of an example whose run is a mock (MOCKS): what replaces the worked example's sheets, conversation
- * and note on /example?ex=<example>. Made up, and said to be; it goes when the owner's runs bring the real ones.
- */
-export interface MockText {
-  attachedH: string;
-  mockNote: string;
-  /** What was handed over: the stand-in quizzes have no pictures. */
-  quizP: string;
-  lede: Record<Mock, string>;
-  attached: Record<Mock, string>;
-  reply: Record<Mock, string>;
-}
-
-export const MOCK_TEXT: Record<Lang, MockText> = {
-  en: {
-    attachedH: "What was attached",
-    mockNote: "A stand-in: this example has had no run yet, so the conversation below is made up.",
-    quizP: "What the AI handed over: one .zip with the quiz.",
-    lede: { test: "How the practice quiz was made, from the marked test to playing it alone." },
-    attached: { test: "The marked test, photographed with a phone." },
-    reply: {
-      test: "Here is your practice quiz: 6 questions on the cell, most of them on what you got wrong. I've kept the questions out of this chat; open the .zip on the site.",
-    },
-  },
-  de: {
-    attachedH: "Was angehängt war",
-    mockNote: "Ein Platzhalter: Zu diesem Beispiel gibt es noch keinen echten Durchgang, das Gespräch unten ist erfunden.",
-    quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz.",
-    lede: { test: "Wie das Übungsquiz entstand, von der korrigierten Prüfung bis zum Spiel allein." },
-    attached: { test: "Die korrigierte Prüfung, mit dem Handy fotografiert." },
-    reply: {
-      test: "Hier ist dein Übungsquiz: 6 Fragen zur Zelle, die meisten zu dem, was du falsch hattest. Die Fragen habe ich aus diesem Chat herausgehalten; öffne die .zip-Datei auf der Website.",
-    },
-  },
-  fr: {
-    attachedH: "Ce qui était joint",
-    mockNote: "Un exemple provisoire : il n'a pas encore été essayé, la conversation ci-dessous est inventée.",
-    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz.",
-    lede: { test: "Comment le quiz de révision a été fait, du contrôle corrigé à la partie en solo." },
-    attached: { test: "Le contrôle corrigé, photographié avec un téléphone." },
-    reply: {
-      test: "Voici ton quiz de révision : 6 questions sur la cellule, surtout sur ce que tu as raté. J'ai gardé les questions hors de cette conversation ; ouvre le .zip sur le site.",
-    },
-  },
-  it: {
-    attachedH: "Che cosa era allegato",
-    mockNote: "Un segnaposto: questo esempio non è ancora stato provato, la conversazione qui sotto è inventata.",
-    quizP: "Quello che l'IA ha fornito: un file .zip con il quiz.",
-    lede: { test: "Come è nato il quiz di ripasso, dalla verifica corretta alla partita da solo." },
-    attached: { test: "La verifica corretta, fotografata con il telefono." },
-    reply: {
-      test: "Ecco il tuo quiz di ripasso: 6 domande sulla cellula, soprattutto su quello che hai sbagliato. Ho tenuto le domande fuori da questa chat; apri il .zip sul sito.",
-    },
-  },
-};

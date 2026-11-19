@@ -598,10 +598,10 @@ deployed to the public site.
       got this test back, I want a quiz that helps me solidify what I
       learned, with a deeper focus on the areas I scored poorer, about 20
       minutes." The owner: alone, a question may take less time than in a
-      class, and the time differs by question. A mock stands in, the tab
-      "Test" (the ask, the attachment, the `.zip`, the full example:
-      `docs/example/mock_zips.py`, `client/example-text.ts`). Open: the
-      owner's run.
+      class, and the time differs by question. Built: the tab "Test"
+      shows the owner's run of 19 Nov 2026, with an invented marked test
+      attached (`design/root-page.md`, "Getting a quiz";
+      `design/example-page.md`).
 
    d. **Peers' example** — friends see that one of them asks and plays too.
       The owner's baseline, to exceed: "I'm at a desk preparing for an exam
@@ -663,9 +663,8 @@ deployed to the public site.
       settled on the tab every visit opens on, at 360 × 640 and larger, in
       the four languages (the figures: `design/root-page.md`, "One
       column"). Open: at 360 × 640 the Notes tab cuts it by 2 px in German
-      and French, and the Test tab, taller with its mock ask and the mock
-      marker, puts it at the edge or below; the owner's Test ask is
-      measured again. The tab row is the most fragile
+      and French, and the Test tab has not been measured since the run
+      replaced the mock. The tab row is the most fragile
       fit (`design/root-page.md`, "Getting a quiz").
 
    c. **The film and the full examples show the page that exists** (v6
@@ -783,9 +782,9 @@ With the owner, what only he can do:
   is verified for the sheets run only, made in an app whose free and paid
   plans have the same features (`design/guidance-page.md`, "The AIs
   verified against").
-- The mocks on the root page (Test, "Not sure?") until his runs
-  replace them: the deploy script has nothing that holds a deploy back while
-  they exist.
+- The mock on the root page, the answer in the "Not sure?" tab, stays until
+  his run replaces it. The deploy script has nothing that holds a deploy
+  back while the mock exists.
 - Two cuts made with "What you can count on" that he has not seen: the
   sentence that introduced the manual is gone from the root page, and "The
   .zip is your lasting copy." ends the note under Peers and Quizmaster on

@@ -161,12 +161,10 @@ moves down by the difference. On Sheets the button is whole at every size
 from 360 × 640 up (19 px at least, German at 360 × 640). On Notes it is
 whole from 390 × 664 up (17 px at least, German) and on a 1366 × 650 laptop
 (9 px, German and French); at 360 × 640 it is 19 px above the edge in
-English and Italian and cut by 2 px in German and French. With the mock
-ask of Test, and the marker of a stand-in, which takes a row of its own on
-a phone, at 360 × 640 the button reaches the edge in Italian and French and
-is cut by 3 px in German. A visitor who has chosen a tab is reading the
-chat, not looking for the box; the ask that replaces the Test mock is
-measured again. A quiz to come back to
+English and Italian and cut by 2 px in German and French. The Test tab has not been
+measured since the run replaced the mock. The stand-in marker, which takes
+a row of its own on a phone, now appears only on "Not sure?". A visitor who has chosen a tab is reading the
+chat, not looking for the box. A quiz to come back to
 stands above all of it and moves the rest down by its height, about 110 px on
 a laptop and 180 to 205 on a 360 px phone; "Back to the quiz" is in the first
 screen at every size above. No window tried scrolls the page sideways; at
@@ -362,18 +360,24 @@ check, for any file (`local-check.md`).
   with exercise sheets (19 Nov 2026, German), a teacher who asks a second
   time to change the quiz. **Notes**: the owner's run with class notes (12 Nov
   2026, English), friends before a history exam who play together; the AI
-  kept the questions out of the chat, since the asker plays. **Test**: a
-  learner with a marked test, practising for a time rather than a number of
-  questions, mostly on what they got wrong ("Don't show me the questions,
-  I'll play it myself"). The test's ask exceeds the owner's baseline
-  (backlog item 1c) by saying that the asker plays it and by asking for
-  minutes, which the AI turns into questions (alone, a question may take
-  less time than in a class). Its attachment, file, full example and the
-  "Not sure?" tab's answer are mocks, marked as stand-ins beside the first
-  step's heading
-  while their tab is chosen ("mock example", "Platzhalter", "provisoire",
-  "segnaposto"; made by the script, so a fetcher doesn't read it), until the
-  owner's runs (backlog item 1); nothing with a mock is deployed. Weighed for the first tab: Sheets, the
+  kept the questions out of the chat, since the asker plays. **Test**: the
+  owner's run of 19 Nov 2026, in French. A learner attaches a marked test
+  and asks for practice by time, not by number of questions, mostly on the
+  wrong answers, and adds "Don't show me the questions, I'll play it
+  myself". This ask goes beyond the owner's baseline (backlog item 1c) in
+  two ways: it says that the person asking will play, and it asks for
+  minutes. The AI turned 15 minutes into 22 questions; alone, a question
+  can take less time than in a class. The attached test is invented
+  (`docs/example/test_sheet.py`), because a real test would show a real
+  pupil's work. The owner expects visitors to understand that reason, and
+  wants the sheet to look realistic while staying recognisable as
+  generated. The teacher's marks on it are ticks, crosses and points
+  without corrections, because many tests come back that way. The answer
+  in the "Not sure?" tab is still a mock. While that tab is chosen, a
+  marker beside the heading of the first step says so ("mock example",
+  "Platzhalter", "provisoire", "segnaposto"). The script adds the marker,
+  so a fetcher doesn't read it. The mock stays until the owner's run
+  (backlog item 1); nothing with a mock is deployed. Weighed for the first tab: Sheets, the
   guided example, which keeps the film and the first screen telling one
   story and shows an attachment first, the bias the owner named. What the
   idea costs: the film, `/example`'s first full example and the Sheets tab

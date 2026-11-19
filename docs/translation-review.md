@@ -97,7 +97,13 @@ For the read:
   gemeinsamen Spielen / pour jouer ensemble / da giocare insieme" for "to play together". The
   notes run's conversation and quiz use each language's own notes' terms (`docs/example/notes_text.py`, `notes_zips.py`): "nach
   Köpfen", "par député", "per testa" for the vote by head.
-- **The test's ask** is a stand-in until the owner's run, and goes with it.
+- **The test ask** comes from the owner's run and was written in French. The other three
+  languages say the same; "révision" is "Üben", "practice" and "ripasso". The test sheet, the
+  conversation and the quiz use the same school terms within each language
+  (`docs/example/test_sheet.py`, `test_text.py`, `test_zips.py`): German "Traubenzucker",
+  "Kohlenstoffdioxid", "Blende"; French "dioxygène", "lamelle"; Italian "anidride carbonica",
+  "vetrino coprioggetto". The pupil's name, the class, the date format and the points follow each
+  country's habits. Only the German sheet shows a grade.
 - **Small words**: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute" over the film ("zur spielenden Klasse" was the English
   participle); "Die Seite kann dieses Quiz noch nicht starten:", the subject first, since "Dieses
   Quiz kann die Seite …" doesn't show which of the two can't. French "Code pour participer" on
@@ -233,7 +239,7 @@ means in the language, not the German words. Open for you:
   quiz", "Avvia questo quiz"; the sheets page's lede names its quiz: "das Quiz zum
   Zahlenstrahl", "le quiz sur la droite graduée", "il quiz sulla retta numerica".
 - French on `/example` has U+202F before ; : ? !, as the first page has.
-- The stand-in's page (`MOCK_TEXT`, Test) goes with the mock; no read needed.
+- The words of the test example's page (`TEST_TEXT`) are drafts in all four languages.
 
 The quizzes (`quiz_zips.py`): German is the run's; the others' title and question 1 are the
 film's; fr has "indique" for the arrow, which a flèche does where "montre" isn't said.

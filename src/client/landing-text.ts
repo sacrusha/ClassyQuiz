@@ -14,9 +14,9 @@
 // the sheets ask is the first ask of the owner's run (19 Nov 2026, German its
 // original), the film typing it;
 // the notes' is the owner's run's (12 Nov 2026, English); the test's is
-// in the words of whoever asks; the help ask has nothing decided, and the AI's
-// question back is the guidance's "How to build with the user". The test's and the
-// help reply are mocks until the owner's runs. The site's address in every ask
+// from the owner's run (19 Nov 2026, French); the help ask has nothing decided, and the AI's
+// question back is the guidance's "How to build with the user". The help reply
+// is a mock until the owner's run. The site's address in every ask
 // is replaced by the one the browser opened.
 
 import { SITE_WORDS, type SiteWords } from "./site-text.ts";
@@ -171,7 +171,7 @@ const en: Text = {
   tabTest: "Test",
   askIdea: "Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you manage 20 questions without it getting repetitive? If not, fewer.",
   askNotes: "Read classyquiz.pages.dev. Here are our notes for the history exam. Make my friends and me a 10-minute classyQuiz, to play together, to learn and have fun. Test won't focus on exact dates.",
-  askTest: "Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 20 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.",
+  askTest: "Read classyquiz.pages.dev. I got this biology test back. Make me a classyQuiz for 15 minutes of practice, mostly on what I got wrong. Don't show me the questions, I'll play it myself.",
   askHelp: "Read classyquiz.pages.dev. I need a classyQuiz. Help?",
   helpReply: "Gladly. What is the quiz for, and who will play it? If you have material, like exercise sheets or notes, send it along.",
   help: "None of these, or not sure yet",
@@ -254,7 +254,7 @@ const de: Text = {
   tabTest: "Prüfung",
   askIdea: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz über den Weltraum, 4. Klasse, mit Bildern. Die Planetenreihenfolge ist bekannt, Mondnamen wären zu schwierig. Schaffst du 20 Fragen, ohne dass es repetitiv wird? Sonst weniger.",
   askNotes: "Lies classyquiz.pages.dev. Hier sind unsere Notizen für die Geschichtsprüfung. Mach meinen Freunden und mir ein classyQuiz für 10 Minuten, zum gemeinsamen Spielen, zum Lernen und zum Spass. In der Prüfung geht es nicht um genaue Daten.",
-  askTest: "Lies classyquiz.pages.dev. Ich habe diese Biologieprüfung zurückbekommen. Mach mir ein classyQuiz für 20 Minuten Üben, vor allem zu dem, was ich falsch hatte. Zeig mir die Fragen nicht, ich spiele es selbst.",
+  askTest: "Lies classyquiz.pages.dev. Ich habe diese Biologieprüfung zurückbekommen. Mach mir ein classyQuiz für 15 Minuten Üben, vor allem zu dem, was ich falsch hatte. Zeig mir die Fragen nicht, ich spiele es selbst.",
   askHelp: "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz. Hilfst du mir?",
   helpReply: "Gern. Wofür ist das Quiz, und wer spielt es? Wenn du Material hast, etwa Arbeitsblätter oder Notizen, schick es mit.",
   help: "Nichts davon, oder noch unsicher",
@@ -342,7 +342,7 @@ const fr: Text = {
   tabTest: "Contrôle",
   askIdea: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz sur l'espace, niveau CM1, avec des images. L'ordre des planètes est connu ; les noms des lunes seraient trop difficiles. Tu arrives à faire 20 questions sans que ça devienne répétitif ? Sinon, moins.",
   askNotes: "Lis classyquiz.pages.dev. Voici nos notes de cours pour l'examen d'histoire. Fais-nous, à mes amis et moi, un classyQuiz de 10 minutes, pour jouer ensemble, apprendre et s'amuser. L'examen ne portera pas sur les dates exactes.",
-  askTest: "Lis classyquiz.pages.dev. On m'a rendu ce contrôle de biologie. Fais-moi un classyQuiz pour 20 minutes de révision, surtout sur ce que j'ai raté. Ne me montre pas les questions, j'y joue moi-même.",
+  askTest: "Lis classyquiz.pages.dev. On m'a rendu ce contrôle de biologie. Fais-moi un classyQuiz pour 15 minutes de révision, surtout sur ce que j'ai raté. Ne me montre pas les questions, j'y joue moi-même.",
   askHelp: "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz. Tu m'aides ?",
   helpReply: "Avec plaisir. À quoi sert le quiz, et qui va y jouer ? Si tu as du matériel, des fiches ou des notes de cours par exemple, envoie-le.",
   help: "Rien de tout cela, ou pas encore sûr",
@@ -430,7 +430,7 @@ const it: Text = {
   tabTest: "Verifica",
   askIdea: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz sullo spazio, quarta elementare, con immagini. L'ordine dei pianeti è noto; i nomi delle lune sarebbero troppo difficili. Riesci a fare 20 domande senza che diventi ripetitivo? Altrimenti meno.",
   askNotes: "Leggi classyquiz.pages.dev. Ecco i nostri appunti per l'esame di storia. Fai a me e ai miei amici un classyQuiz di 10 minuti, da giocare insieme, per imparare e divertirci. L'esame non punterà sulle date precise.",
-  askTest: "Leggi classyquiz.pages.dev. Mi hanno restituito questa verifica di biologia. Fammi un classyQuiz per 20 minuti di ripasso, soprattutto su quello che ho sbagliato. Non mostrarmi le domande, ci gioco io.",
+  askTest: "Leggi classyquiz.pages.dev. Mi hanno restituito questa verifica di biologia. Fammi un classyQuiz per 15 minuti di ripasso, soprattutto su quello che ho sbagliato. Non mostrarmi le domande, ci gioco io.",
   askHelp: "Leggi classyquiz.pages.dev. Mi serve un classyQuiz. Mi aiuti?",
   helpReply: "Volentieri. A cosa serve il quiz, e chi ci giocherà? Se hai del materiale, per esempio schede o appunti, mandamelo.",
   help: "Nessuno di questi, o non lo so ancora",

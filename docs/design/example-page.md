@@ -77,12 +77,15 @@ is the Notes tab's, the owner's notes run (12 Nov 2026, English): the notes'
 two pages and their PDF in place of the photographs, the conversation as a
 picture, no overview, since the run handed over none, the quiz and its
 start, and a note that the run was made in English and the other pages
-show it translated (words: `NOTES_TEXT`). `?ex=test` is the Test tab's,
-whose run is a mock until the owner's (backlog, "The page for people",
-item 1): the mock attachment in place of the photographs, a made-up
-conversation made by the script and said to be made up (`MOCK_TEXT`), no
-overview, the mock `.zip` (`docs/example/mock_zips.py`), which holds the
-quiz without pictures, and its start, and without the note below.
+show it translated (words: `NOTES_TEXT`). `?ex=test` is the page for the Test tab. It shows the owner's test run
+(19 Nov 2026, French, Claude Opus). In place of the photographs it shows
+the two pages of the marked test and offers the PDF. The page says that
+the test was written for the example, because a real test would show a
+real pupil's work. Below that come the conversation as a picture, the quiz
+with its two drawings, and the button that starts it. There is no
+overview, because the AI made none in this run. A note at the end says
+that the run was made in French and that the other languages show a
+translation. The words are in `TEST_TEXT`.
 
 Each page is one example of the landing's four, so its words name its quiz
 ("How the number-line quiz was made") and start "this quiz"; the heading,
@@ -118,6 +121,10 @@ camera's metadata.
 - The notes run's plan: the screenshot shows Sonnet 5.5, not which plan.
   Its German, French and Italian conversation and quiz are drafts; the notes
   in those languages are the owner's.
+- The test run: which plan was used is not known; the screenshot shows only
+  "Opus 5.5". The English, German and Italian conversation and quiz are
+  draft translations. No biology teacher has read the invented test in any
+  of the four languages.
 - The sheets run's English, French and Italian conversation, overview and
   quiz are drafts (backlog v4 item 12).
 

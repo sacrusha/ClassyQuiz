@@ -95,32 +95,32 @@ export const EXAMPLE_FILES = {
   },
   "test": {
     "en": {
-      "zip": "cell-test-practice.zip",
-      "bytes": 448,
-      "title": "Mock · The cell: what I got wrong",
-      "questions": 6,
-      "first": "Which part of the cell holds the DNA?"
+      "zip": "classyquiz-cell.zip",
+      "bytes": 131056,
+      "title": "Biology Year 7 revision · The cell",
+      "questions": 22,
+      "first": "In this plant cell, what is the part the arrow points to called?"
     },
     "de": {
-      "zip": "zellen-test-uebung.zip",
-      "bytes": 484,
-      "title": "Mock · Die Zelle: was ich falsch hatte",
-      "questions": 6,
-      "first": "Welcher Teil der Zelle enthält die DNA?"
+      "zip": "classyquiz-zelle.zip",
+      "bytes": 131215,
+      "title": "Repetition Biologie 1. Sek · Die Zelle",
+      "questions": 22,
+      "first": "In dieser Pflanzenzelle: Wie heisst der Bestandteil, auf den der Pfeil zeigt?"
     },
     "fr": {
-      "zip": "controle-cellule-revision.zip",
-      "bytes": 499,
-      "title": "Mock · La cellule : mes erreurs",
-      "questions": 6,
-      "first": "Quelle partie de la cellule contient l'ADN ?"
+      "zip": "classyquiz-cellule.zip",
+      "bytes": 130597,
+      "title": "Révision SVT 5e · La cellule",
+      "questions": 22,
+      "first": "Dans cette cellule végétale, comment s'appelle l'élément montré par la flèche ?"
     },
     "it": {
-      "zip": "verifica-cellula-ripasso.zip",
-      "bytes": 455,
-      "title": "Mock · La cellula: i miei errori",
-      "questions": 6,
-      "first": "Quale parte della cellula contiene il DNA?"
+      "zip": "classyquiz-cellula.zip",
+      "bytes": 131173,
+      "title": "Ripasso di scienze, classe prima · La cellula",
+      "questions": 22,
+      "first": "In questa cellula vegetale, come si chiama la parte indicata dalla freccia?"
     }
   }
 } as const;
