@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 2f56259, deployed 2026-11-19: Pages deployment 2d827184 of the
-  project `classyquiz`, version ab7af816 of the state Worker
+- Commit 8de826b, deployed 2026-11-19: Pages deployment ac812e1d of the
+  project `classyquiz`, version 61af0b7c of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 2f56259 -- src/`.
+  `git diff 8de826b -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -53,12 +53,23 @@ changed what it covered.
   with its `.zip`, overview and conversation pictures, each quiz read on
   the local check (12 questions) and Solo's start screen; the earlier run's
   `.zip`s answer 404 on the deployment's own address (2026-11-19, 2f56259).
+- The layout of text-answer questions (`design/class-and-wall.md`, "How a
+  question fills the screen") on Solo's screen in headless Edge at
+  1366x768 and on a 360x740 phone: three of the space quiz's questions
+  with their pictures and a long word problem, laid out as on the built
+  site; `/manual.txt`, `/layout`, `/preview.py`, the sheets example's
+  German overview and a root-page face carrying the change, on the
+  deployment's address and on the production one (2026-11-19, 8de826b).
 
 ## Not tried live
 
 - A class or a crowd: no Quizmaster run with a real second device, no Peers
   room on real phones, no final ranking or Exit with real players; only walks
   and probe-marked rooms.
+- Since 8de826b: the new layout on a real projector and real phones, on a
+  wall steered in a room and on Peers devices at the spread (which lay the
+  question out again), and at other sizes (1920x1080, 1024x768, 1280x800,
+  768x1024 and 390x844 on the built site only).
 - Since 2f56259: the film with the new sheets run's words and question on
   the live site (`docs/film/build/sitecheck.py` on a local copy only).
 - Since 9812126: Start's ten seconds in a Quizmaster's room (the wall, the
