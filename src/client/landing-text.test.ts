@@ -31,7 +31,7 @@ test("every language's other asks name the site's address, for the page to repla
 // French puts a narrow no-break space (U+202F) before : ; ? !, so a mark never starts a line: on the root page and on
 // /example alike, a visitor going from one to the other (docs/translation-review.md, "French spaces").
 test("French has no plain space before : ; ? ! on the root page or /example", async () => {
-  const { EXAMPLE_TEXT, IDEA_TEXT, NOTES_TEXT, TEST_TEXT } = await import("./example-text.ts");
+  const { EXAMPLE_TEXT, PDF_TEXT } = await import("./example-text.ts");
   const bad: string[] = [];
   const walk = (v: unknown, at: string): void => {
     if (typeof v === "string") {
@@ -40,9 +40,8 @@ test("French has no plain space before : ; ? ! on the root page or /example", as
   };
   walk(TEXT.fr, "landing");
   walk(EXAMPLE_TEXT.fr, "example");
-  walk(IDEA_TEXT.fr, "idea");
-  walk(NOTES_TEXT.fr, "notes");
-  walk(TEST_TEXT.fr, "test");
+  walk(PDF_TEXT.notes.fr, "notes");
+  walk(PDF_TEXT.test.fr, "test");
   assert.deepEqual(bad, []);
 });
 

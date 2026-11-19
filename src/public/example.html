@@ -14,8 +14,7 @@
   /* The worked example (docs/design/example-page.md): the steps of the landing's film, each with what a teacher needs to repeat it. */
   header.top { --page-w: 42rem; }
   .ex { max-width: 42rem; margin: 0 auto; padding: 12px 16px 64px; line-height: var(--leading-prose); }
-  .ex h1 { font-size: var(--h1); line-height: 1.2; margin: .6rem 0 .3rem; }
-  .ex .lede { color: var(--muted); margin: 0 0 1.4rem; }
+  .ex h1 { font-size: var(--h1); line-height: 1.2; margin: .6rem 0 1.2rem; }
   .ex ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
   .ex .steps > li { position: relative; padding: 0 0 0 2.4rem; margin: 0 0 2rem; counter-increment: step; }
   .ex .steps > li::before { content: counter(step); position: absolute; left: 0; top: .1em; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .95rem; line-height: 1.7rem; text-align: center; }
@@ -43,11 +42,9 @@
 </div></header>
 <div class="ex">
 <h1 data-t="h1">The example, step by step</h1>
-<p class="lede" data-t="lede">How the number-line quiz was made, from the exercise sheets to the class, with everything to try the same on your own AI.</p>
 
 <ol class="steps">
   <li id="sheets"><h2 data-t="sheetsH">The exercise sheets</h2>
-    <p data-t="sheetsP">Two maths sheets on number lines, in German, photographed with a phone.</p>
     <div class="pics">
       <a href="/examples/sheet-photo-1.jpg"><img src="/examples/sheet-photo-1.jpg" alt="Photo of page 1" data-t-alt="photo1" width="1200" height="1544"></a>
       <a href="/examples/sheet-photo-2.jpg"><img src="/examples/sheet-photo-2.jpg" alt="Photo of page 2" data-t-alt="photo2" width="1200" height="1567"></a>
@@ -56,28 +53,26 @@
       <li><a href="/examples/sheet-photo-1.jpg" download data-t="dl1">Photo, page 1 (.jpg)</a></li>
       <li><a href="/examples/sheet-photo-2.jpg" download data-t="dl2">Photo, page 2 (.jpg)</a></li>
       <li><a href="/examples/sheet.pdf" download data-t="dlPdf">The sheets (.pdf)</a></li>
-    </ul></li>
+    </ul>
+    <p class="note" id="att-note" hidden></p></li>
 
   <li id="convo"><h2 data-t="convoH">The conversation</h2>
-    <p id="convo-p" data-t="convoP">The photos and two asks. The AI read the site, made the quiz from exercises 1, 3 and 4, checked it with the site's format checker and handed over the .zip with an overview of every question; the second ask changed it. Claude (Sonnet), 19 November 2026.</p>
+    <p class="note" id="made">Claude (Sonnet), 19 November 2026</p>
     <a class="convo" href="/examples/conversation-en-light.webp" data-convo><picture><source id="convo-dark" media="(prefers-color-scheme: dark)" srcset="/examples/conversation-en-dark.webp"><img id="convo-img" src="/examples/conversation-en-light.webp" alt="The conversation, as a picture" data-t-alt="convoAlt" width="681" height="2231"></picture></a>
     <p><a href="/examples/conversation-en-light.webp" data-convo data-t="readAll">Read the whole conversation &rsaquo;</a></p></li>
 
   <li id="review"><h2 data-t="reviewH">The overview</h2>
-    <p data-t="reviewP">Every question with its solution, as the AI drew them for checking the quiz before it is played.</p>
     <a class="convo" href="/examples/review-en.webp" data-review><img src="/examples/review-en.webp" alt="Every question of the quiz with its solution, as a picture" data-t-alt="reviewAlt" width="1500" height="2030"></a>
     <p><a href="/examples/review-en.webp" data-review data-t="readReview">See the whole overview &rsaquo;</a></p></li>
 
   <li id="quiz"><h2 data-t="quizH">The quiz</h2>
-    <p data-t="quizP">What the AI handed over with its second answer: one .zip with the quiz and its 24 pictures.</p>
     <ul class="files"><li><a id="zip" href="/examples/big-numbers-quiz-v2.zip" download>big-numbers-quiz-v2.zip</a></li></ul></li>
 
   <li><h2 data-t="runH">Try it</h2>
-    <p data-t="runP">Start this quiz as if you had opened its file on the start page: you choose how it is played, on your own, with friends or for a class.</p>
     <a class="btn primary go" id="start" href="/open?example=en" data-t="start">Start this quiz</a>
     <p class="note" data-t="runNote">On your own, it stays in this browser. With friends or a class, it runs on this site like any quiz.</p></li>
 </ol>
-<p class="note translated" data-t="translated">The example was made in German. So that it is the same example in each language, the English, French and Italian pages show it translated: the conversation, the overview and the quiz.</p>
+<p class="note translated" id="translated">This example was made in German. This page shows a translation.</p>
 </div>
 <script src="/js/example.js" defer></script>
 </body>

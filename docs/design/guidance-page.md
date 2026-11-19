@@ -54,7 +54,7 @@ shaped as it is.
   environment, Sonnet 5.5 at High, 19 Nov 2026) Sonnet said WebFetch only summarised the
   manual and the page warns of exactly that, fetched the original with a
   command into an empty directory of its own, and read `verify.py` and
-  `preview.py` before using them (`design/example-page.md`). The
+  `preview.py` before using them (`docs/example/README.md`). The
   summaries' examples still put `Order: fixed` on ordinary questions. A model with a shell fetches
   `/manual.txt` whole. In the web environment, WebFetch keeps a page cached
   for hours, which its documentation doesn't say (the owner, Nov 2026), so
@@ -79,7 +79,7 @@ shaped as it is.
   specialises it (untested, "Not known").
 - Whoever asked the AI may play the quiz (backlog v5 item 5): a learner
   alone, one of the friends. An AI shows its draft in the conversation: the
-  example's run did (`example-page.md`), and the page leads towards a
+  example's run did (`docs/example/README.md`), and the page leads towards a
   presentation. Whether seeing the questions spoils the play depends on
   what was asked for (the owner): someone who asks for a quiz on their own
   50 words expects those 50 words to be there, and friends who want a pop
@@ -297,7 +297,7 @@ eight-year-olds, in German, the last one a choice between two positions.
 The free tiers, the owner's findings as of 5 Nov 2026 (in his words where
 quoted; runs not recorded beyond the above):
 - Free Claude Sonnet: the one free AI that builds the quiz reliably. The
-  example's sheets run (19 Nov 2026, `design/example-page.md`) was made in
+  example's sheets run (19 Nov 2026, `docs/example/README.md`) was made in
   the web environment, whose free and paid plans have the same features
   there (the owner).
 - Free ChatGPT: had a web tool on some runs and not on others, and without it

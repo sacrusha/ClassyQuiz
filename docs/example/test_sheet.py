@@ -5,7 +5,7 @@ The test is a two-page biology test on the cell. A pupil has answered it and a t
 
 test_sheet.html is the sheet. It has three layers: the printed test, the pupil's handwriting and the teacher's
 red marks. The red marks are ticks, crosses and points only. The teacher does not write the right answers,
-because many tests come back that way.
+so that the sheet is representative of the tests visitors have (the owner).
 
 This file holds the words in the root page's four languages. Every language has the same questions and the
 same mistakes:

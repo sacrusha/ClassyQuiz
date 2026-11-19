@@ -96,7 +96,7 @@ export const EXAMPLE_FILES = {
   "test": {
     "en": {
       "zip": "classyquiz-cell.zip",
-      "bytes": 131056,
+      "bytes": 131055,
       "title": "Biology Year 7 revision · The cell",
       "questions": 22,
       "first": "In this plant cell, what is the part the arrow points to called?"

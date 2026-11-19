@@ -73,7 +73,7 @@ LANGS = {
         ("In this animal cell, what is the part the arrow points to called?", ["Mitochondrion", "Chloroplast", "Nucleus", "Vacuole"]),
         ("Under the microscope, your image is too dark. Which part do you adjust?", ["The diaphragm", "The focus knob", "The cover slip", "The eyepiece"]),
         ("Does a plant cell have a cell membrane?", ["Yes, just inside the cell wall", "No, the cell wall replaces the membrane", "No, only animal cells have one"]),
-        ("Grass is eaten by a rabbit, the rabbit by a fox. Where does the food of the fox come from originally?", ["From plants, which make it by photosynthesis", "From the soil", "From the water the rabbit drinks", "From the oxygen in the air"]),
+        ("Grass is eaten by a rabbit, the rabbit by a fox. Where does the fox's food come from originally?", ["From plants, which make it by photosynthesis", "From the soil", "From the water the rabbit drinks", "From the oxygen in the air"]),
         magnify("en", 10, 4, 40, 14, 4, 400),
         ("Which of these parts is found ONLY in the plant cell?", ["The chloroplasts", "The mitochondria", "The cell membrane", "The nucleus"]),
         ("Which gas does a plant take from the air for photosynthesis?", ["Carbon dioxide", "Oxygen", "Nitrogen"]),

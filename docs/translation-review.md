@@ -232,14 +232,13 @@ means in the language, not the German words. Open for you:
 - The AI says du / tu to the teacher in de, fr, it (as the film's asks); the page itself says du /
   vous / tu (the landing's register).
 
-- E6, the "Try it" step's words (`runP`, `runNote`), redrafted for the three ways to play by the
+- E6, the note under the start button (`runNote`), redrafted for the three ways to play by the
   words pass, not a translator: "allein / en solo / per conto tuo" for on your own (it avoids
-  "da solo", gendered), "Startseite / page d'accueil / pagina iniziale" for the start page.
-  Each page is one of four examples, so it starts "this quiz": "Dieses Quiz starten", "Lancer ce
-  quiz", "Avvia questo quiz"; the sheets page's lede names its quiz: "das Quiz zum
-  Zahlenstrahl", "le quiz sur la droite graduée", "il quiz sulla retta numerica".
+  "da solo", gendered). Each page is one of four examples, so the button says "this quiz":
+  "Dieses Quiz starten", "Lancer ce quiz", "Avvia questo quiz".
 - French on `/example` has U+202F before ; : ? !, as the first page has.
-- The words of the test example's page (`TEST_TEXT`) are drafts in all four languages.
+- The note on the Test page that the test was written for the example (`PDF_TEXT`) and the
+  translation note (`translated`) are drafts in all four languages.
 
 The quizzes (`quiz_zips.py`): German is the run's; the others' title and question 1 are the
 film's; fr has "indique" for the arrow, which a flèche does where "montre" isn't said.
@@ -248,8 +247,7 @@ film's; fr has "indique" for the arrow, which a flèche does where "montre" isn'
 
 The owner's run is German; its English, French and Italian are the implementer's drafts, made
 from it, in `docs/example/space_zips.py` (the quiz) and `docs/example/space_text.py` (the
-conversation on `/example`), with `/example`'s words for it in `client/example-text.ts`
-(`IDEA_TEXT`).
+conversation on `/example`).
 
 - **The quiz's title**: "A journey through space", "Voyage dans l'espace", "Viaggio nello
   spazio", from "Reise durchs Weltall".
