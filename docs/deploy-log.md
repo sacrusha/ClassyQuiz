@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 8de826b, deployed 2026-11-19: Pages deployment ac812e1d of the
-  project `classyquiz`, version 61af0b7c of the state Worker
+- Commit 721f33f, deployed 2026-11-19: Pages deployment 9b96ae67 of the
+  project `classyquiz`, version d0f66a7b of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 8de826b -- src/`.
+  `git diff 721f33f -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -60,6 +60,11 @@ changed what it covered.
   site; `/manual.txt`, `/layout`, `/preview.py`, the sheets example's
   German overview and a root-page face carrying the change, on the
   deployment's address and on the production one (2026-11-19, 8de826b).
+- The root page opening on Sheets at 360x640 in English and German in
+  headless Edge, the button that opens a file cut by 2 px as on the built
+  site; the Test example's `.zip` and face, and `/example?ex=test`,
+  answering, the mock's `.zip`s 404; on the deployment's address and on
+  the production one (2026-11-19, 721f33f).
 
 ## Not tried live
 
@@ -70,6 +75,9 @@ changed what it covered.
   wall steered in a room and on Peers devices at the spread (which lay the
   question out again), and at other sizes (1920x1080, 1024x768, 1280x800,
   768x1024 and 390x844 on the built site only).
+- Since fd6728c and 013c6a9: the Test example's quiz opened on the check
+  or played, and `/example?ex=test`'s conversation pictures looked at, on
+  the live site (the page and files answered, nothing more).
 - Since 2f56259: the film with the new sheets run's words and question on
   the live site (`docs/film/build/sitecheck.py` on a local copy only).
 - Since 9812126: Start's ten seconds in a Quizmaster's room (the wall, the
