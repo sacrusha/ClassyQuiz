@@ -210,7 +210,12 @@ cost the AI its output, so code puts them in: into an HTML page the code
 writes, where the app shows that page beside the chat, or into the picture
 `/preview.py` draws from the zip (Python and Pillow; SVG needs cairosvg or
 rsvg-convert), like `verify.py`. The page gives the layout in a short layout
-notation, so each AI picks the delivery its app shows well.
+notation, so each AI picks the delivery its app shows well. What depends on
+the quiz's own pictures, how picture choices are arranged, the notation
+leaves to the AI, which knows their shape (the owner): wide strips, squares
+and upright figures (`pictures.md`, Situation) each read best in another
+arrangement. `preview.py`, which can't ask, takes the columns that show the
+smallest picture largest.
 A text form is left to the AI that can't draw: an AI that turns sheet photos
 into a quiz can infer one. The sheet leaves out the choices' colours and
 shapes, which come from places on screen after the shuffle, so a preview's
@@ -320,9 +325,6 @@ quoted; runs not recorded beyond the above):
 - Whether AI sandboxes have cairosvg or rsvg-convert, without which
   `preview.py` shows SVG pictures as "not drawn here"; untested, as is that
   path of the script.
-- Whether answer pictures read on the site's screens: `preview.py` draws
-  them as small tiles, so an AI can't judge them from its overview (the
-  example's sheets run said so of its number-line strips, 19 Nov 2026).
 - Whether a partial ask reliably gets the short summary and question rather
   than a quiz at once; samples have gone both ways.
 - Whether the drawn number-line quizzes' pictures match their keys.

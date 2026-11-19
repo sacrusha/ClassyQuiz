@@ -247,7 +247,7 @@ readable, chosen by the page, not by the AI or the teacher.
   (`question-flow.md`).
 - Measured at 1366x768: four squares 299 px each (277 with a question
   picture), four 6:1 number lines two by two at 626x104, three upright 1:2.7
-  thermometers 180x480, two squares 473. The guidance gives these to the AI.
+  thermometers 180x480, two squares 473.
 - **The colour is the creator's choice.** A transparent answer picture shows
   the tile's colour (red, blue, yellow or green, shuffled with the answers),
   so a drawing whose contrast matters brings its own ground, the same for

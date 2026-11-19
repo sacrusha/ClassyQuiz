@@ -3,7 +3,9 @@
 The run is the owner's (19 Nov 2026, German, Claude Sonnet 5.5; its screenshot is sheets-conversation-original.webp
 here, dark): the two photographed sheets and two asks, each answered with a .zip and an overview of its questions. One
 entry per piece of the chat, in the order the chat shows them; under each the four languages. de is the AI's words as
-it wrote them and the app's own as that app showed them, in English; the asks are the owner's, the second tidied. en,
+it wrote them, less its remark that the overview showed the picture answers only small (the run's preview.py put them
+four to a row; the overview shown is the current one's), and the app's own as that app showed them, in English; the
+asks are the owner's, the second tidied. en,
 fr and it are drafts for the owner's review (docs/translation-review.md), with the app's words as that language's app
 would show them. Where the German rests on the German situation (the quiz "in Schweizer
 Schreibweise"), the translation has the situation of a teacher asking in that language about the same German sheets.
@@ -186,10 +188,10 @@ TURN2 = [
     ("fold", "made2"),
 
     ("ai", dict(
-        en="The second version of the quiz is ready, again with 12 questions. `verify.py` reports “ok”. I couldn’t try out whether the picture answers read well on the site: the preview shows them only small, and according to the site’s layout description it arranges strips like these two by two.",
-        de="Die zweite Version des Quiz ist fertig, wieder mit 12 Fragen. `verify.py` meldet «ok». Ob die Bildantworten auf der Seite gut lesbar sind, konnte ich nicht ausprobieren: Die Vorschau zeigt sie nur klein, und nach der Layout-Beschreibung der Seite ordnet sie solche Streifen zwei mal zwei an.",
-        fr="La deuxième version du quiz est prête, toujours avec 12 questions. `verify.py` répond « ok ». Je n’ai pas pu essayer si les réponses en image se lisent bien sur le site : l’aperçu ne les montre qu’en petit, et d’après la description de la mise en page, le site dispose ces bandes deux par deux.",
-        it="La seconda versione del quiz è pronta, sempre con 12 domande. `verify.py` risponde «ok». Non ho potuto provare se le risposte con immagini si leggono bene sul sito: l’anteprima le mostra solo in piccolo, e secondo la descrizione del layout il sito dispone queste strisce due per due.")),
+        en="The second version of the quiz is ready, again with 12 questions. `verify.py` reports “ok”. I couldn’t try out whether the picture answers read well on the site; according to the site’s layout description it arranges strips like these two by two.",
+        de="Die zweite Version des Quiz ist fertig, wieder mit 12 Fragen. `verify.py` meldet «ok». Ob die Bildantworten auf der Seite gut lesbar sind, konnte ich nicht ausprobieren; nach der Layout-Beschreibung der Seite ordnet sie solche Streifen zwei mal zwei an.",
+        fr="La deuxième version du quiz est prête, toujours avec 12 questions. `verify.py` répond « ok ». Je n’ai pas pu essayer si les réponses en image se lisent bien sur le site ; d’après la description de la mise en page, le site dispose ces bandes deux par deux.",
+        it="La seconda versione del quiz è pronta, sempre con 12 domande. `verify.py` risponde «ok». Non ho potuto provare se le risposte con immagini si leggono bene sul sito; secondo la descrizione del layout il sito dispone queste strisce due per due.")),
 
     ("ai", dict(en="**Picture answers**", de="**Bildantworten**", fr="**Réponses en image**", it="**Risposte con immagini**")),
     # A bullet given as (text, [sub-bullets]) has its sub-bullets under it.

@@ -1,10 +1,11 @@
-"""python preview.py quiz.zip [review.png]: the whole quiz as one picture for the teacher to review.
-Needs Pillow; SVG pictures also need cairosvg or rsvg-convert. The layout is the guidance page's
-(classyquiz.pages.dev, "Build with the teacher")."""
-import io, re, shutil, subprocess, sys, zipfile
+"""python preview.py quiz.zip [review.png]: the whole quiz as one picture for the user to review.
+Needs Pillow; SVG pictures also need cairosvg or rsvg-convert. The layout is the manual's
+(classyquiz.pages.dev/manual.txt, "Presenting")."""
+import functools, io, re, shutil, subprocess, sys, zipfile
 from PIL import Image, ImageDraw, ImageFont
 
 W, COLS, GAP, PAD = 3000, 3, 40, 28
+PIC_H = 200  # a picture choice is drawn at most this high
 CARD = (W - GAP * (COLS + 1)) // COLS
 PAGE, INK, MUTED, RULE, BAD = "#fbf8f2", "#1d1d1b", "#5d5c57", "#d8d2c4", "#c62828"
 NUM, RIGHT = "#a8471a", "#1f8a4c"
@@ -75,6 +76,7 @@ def svg(data):
         return subprocess.run(["rsvg-convert", "-w", "1200"], input=data, capture_output=True).stdout or None
 
 
+@functools.lru_cache(None)
 def picture(name):
     """The picture, or why there is none: missing from the zip is the quiz's problem, not drawable is this machine's."""
     n = files.get(key(name))
@@ -105,6 +107,27 @@ def fit(target, d, name, box, wash=False):
     target.paste(im, (x + (w - im.width) // 2, y + (h - im.height) // 2), im)
 
 
+def shown(name, w):
+    """A picture choice's size in a box w wide; one that can't be drawn counts as square."""
+    img, _ = picture(name)
+    iw, ih = img.size if img else (1, 1)
+    r = min(w / iw, PIC_H / ih)
+    return round(iw * r), round(ih * r)
+
+
+def columns(chs, inner):
+    """Text choices two to a row; picture choices in the columns that show the smallest picture largest, of equals
+    the most: wide strips one under the other, squares two by two, upright ones in a row."""
+    pics = [c[2] for c in chs if c[2]]
+    if not pics:
+        return 2
+
+    def smallest(cols):
+        w = (inner - 16 * (cols - 1)) // cols - 66
+        return min(a * b for a, b in (shown(p, w) for p in pics))
+    return max(sorted({1, 2, len(chs)}), key=lambda k: (smallest(k), k))
+
+
 def tick(d, x, y):
     d.line([(x, y + 14), (x + 10, y + 26), (x + 30, y)], fill=RIGHT, width=6, joint="curve")
 
@@ -131,11 +154,11 @@ def card(i, q):
                 d.text((PAD + k * (w + 20) + 8, y + 304), "background", font=FS, fill=MUTED)
         y += 300 + (40 if any(bg for _, bg in pics) else 0) + 16
     chs = q["choices"]
-    cols = 4 if any(c[2] for c in chs) else 2
+    cols = columns(chs, inner)
     cw = (inner - 16 * (cols - 1)) // cols
     for r in range(0, len(chs), cols):
         row = chs[r:r + cols]
-        rh = max(220 if c[2] else LH * len(wrap(c[1], F, cw - 70)) + 28 for c in row)
+        rh = max(shown(c[2], cw - 66)[1] + 20 if c[2] else LH * len(wrap(c[1], F, cw - 70)) + 28 for c in row)
         for k, (right, label, pic) in enumerate(row):
             x = PAD + k * (cw + 16)
             d.rounded_rectangle((x, y, x + cw, y + rh), 12, outline=RIGHT if right else RULE, width=6 if right else 2)

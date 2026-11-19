@@ -7,7 +7,9 @@ a walkthrough, the example step by step. The landing's film shows the path in
 about a minute; this page shows the same path with the real material, and hands
 over everything needed to repeat it on the teacher's own AI: the sheets, what
 was said to the AI, what it handed back, and the quiz itself to run (backlog
-v4 item 10).
+v4 item 10). It is there to explain and set expectations, not to reproduce a
+run faithfully (the owner): where a run met a bug the site has since fixed,
+the example shows the site as it is.
 
 ## Situation
 
@@ -49,9 +51,9 @@ path the film shows.
    (the owner).
 3. **The overview**, the AI's picture of every question with its solution,
    which the run handed over with each `.zip` for checking the quiz before
-   it is played: the second answer's, German the AI's own review-v2.png,
-   the other languages drawn from their translated `.zip` by the site's
-   `preview.py`, the script the guidance offers the AI for it.
+   it is played: the second answer's, drawn from each language's `.zip` by
+   the site's `preview.py`, the script the guidance offers the AI for it
+   and the one the run used.
 4. **The quiz**: the `.zip` the AI handed over with its second answer, in
    the page's language.
 5. **Try it**: "Start this quiz" opens `/open?example=<lang>&ex=<example>`, the
@@ -117,8 +119,7 @@ camera's metadata.
   Its German, French and Italian conversation and quiz are drafts; the notes
   in those languages are the owner's.
 - The sheets run's English, French and Italian conversation, overview and
-  quiz are drafts (backlog v4 item 12), and its overview in those languages
-  is the site's `preview.py`'s, not an AI's.
+  quiz are drafts (backlog v4 item 12).
 
 - Whether a teacher on a phone reads the conversation: the preview is the
   picture scaled to the screen; the whole picture opens at full size.

@@ -40,10 +40,10 @@ The sheets run's (the root page's "Sheets" tab, and `/example` without
 - The thumbnails beside a fold of the app's steps stand in for the run's:
   the language's overview and two of the quiz's pictures. The overview's
   thumbnail under each answer is the final overview in both answers.
-- The overview, `review-<lang>.webp`: German the AI's second, review-v2.png
-  (`sheets-review-original.webp` here, 1500 px wide), the others drawn from
-  their translated `.zip` by the site's `preview.py`, as the space run's
-  are.
+- The overview, `review-<lang>.webp`: each language's drawn from its
+  `.zip` by the site's `preview.py`, German too, since the example shows
+  the site as it is (`design/example-page.md`, Purpose); what that changes
+  in the AI's words: `text.py`.
 
 The space run's (the root page's "Idea" tab):
 

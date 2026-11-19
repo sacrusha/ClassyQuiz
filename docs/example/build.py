@@ -12,9 +12,8 @@ Run (from anywhere): py -I docs/example/build.py [--convo idea] [--lang de] [--t
 
 The words are text.py's, space_text.py's and notes_text.py's; the page is HTML drawn here and shot in the installed Edge
 (playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright, and PyMuPDF for the notes' pages.
-The overviews: German is the AI's own (sheets-review-original.webp and space-review-original.webp here, 1500 px
-wide); the other three are drawn from their translated .zip by the site's own src/public/preview.py, the
-script the guidance offers the AI for it.
+The overviews are drawn from their .zip by the site's own src/public/preview.py, the script the guidance offers the
+AI for it; the space run's German is the AI's own (space-review-original.webp here, 1500 px wide).
 The faces are those of the machine (Segoe UI, Cambria, Consolas on Windows): the
 pictures differ a little on another one.
 """
@@ -154,7 +153,6 @@ code { font-family: Consolas, "Cascadia Mono", monospace; font-size: .86em; back
 .user.t2 { margin-top: 46px; }
 .react { display: flex; gap: 11px; margin: 16px 0 0 0; color: var(--react); }
 .thumb { width: 86px; height: 130px; margin: 20px 0 0 -3px; border-radius: 10px; border: 1px solid var(--chipline); overflow: hidden; background: #fbf8f2; }
-.thumb.wide { width: 112px; height: auto; }
 .thumb img { display: block; width: 100%; }
 .thumb + .chip { margin-top: 10px; }
 .all { display: inline-flex; align-items: center; gap: 7px; margin: 10px 0 0 -3px; padding: 6px 11px; border-radius: 9px; background: var(--chip); border: 1px solid var(--chipline); font-size: 13px; line-height: 17px; }
@@ -216,7 +214,7 @@ def chat(lang):
         elif kind == "bullets":
             out.append(bullets(v))
         elif kind == "review":
-            out.append(f'<div class="thumb wide"><img src="{review}"></div>')
+            out.append(f'<div class="thumb"><img src="{review}"></div>')
         elif kind == "chip":
             title = html.escape(T.card_title(T.ZIPS[lang][v]))
             out.append(f'<div class="chip"><div class="ico">{ICONS["archive"]}</div><div><div class="ct">{title}</div><div class="cs">{T.UI["zipSub"][lang]}</div></div></div>')
@@ -307,12 +305,13 @@ def notes_pages(langs):
 # ------------------------------------------------------------------ the overviews
 
 REVIEW_W = 1500
-# Per run: the German overview, the AI's own, and the name its pictures take (review-<tag><lang>.webp).
-REVIEW = {"sheets": ("sheets-review-original.webp", ""), "idea": ("space-review-original.webp", "idea-")}
+# Per run: the German overview where it is the AI's own (None: drawn like the others), and the name its pictures
+# take (review-<tag><lang>.webp).
+REVIEW = {"sheets": (None, ""), "idea": ("space-review-original.webp", "idea-")}
 
 
 def reviews(convo, langs):
-    """review-<tag><lang>.webp: German the AI's own, the others drawn from their .zip by the site's preview.py."""
+    """review-<tag><lang>.webp: drawn from their .zip by the site's preview.py, German the AI's own where REVIEW has it."""
     import subprocess
     from PIL import Image
     from faces import EXAMPLES  # the files of the root page's examples
@@ -320,7 +319,7 @@ def reviews(convo, langs):
     TMP.mkdir(parents=True, exist_ok=True)
     for lang in langs:
         out = EX / f"review-{tag}{lang}.webp"
-        if lang == "de":
+        if lang == "de" and original:
             im = Image.open(HERE / original).convert("RGB")
         else:
             png = TMP / f"review-{tag}{lang}.png"

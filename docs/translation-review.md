@@ -212,8 +212,7 @@ means in the language, not the German words. Open for you:
   Mitte-Aufgaben en "middle-number questions", fr "exercices du nombre au milieu", it "esercizi
   del numero a metà"; "liegt über einer Tausenderstelle" (question 11, 500 000 between 490 000 and
   510 000) as crossing into the next hundred thousand. Übersicht (review.png) en overview, fr
-  aperçu, it panoramica, as in the space run; Vorschau, the same picture in the second answer, en
-  preview, fr aperçu, it anteprima. The answer "Auf keinem davon" en "On none of them", fr "Sur
+  aperçu, it panoramica, as in the space run. The answer "Auf keinem davon" en "On none of them", fr "Sur
   aucun d’eux", it "Su nessuno".
 - E4, the class and the app: "die Kinder" en the children, fr les enfants, it i bambini, as in the
   space run; 4. Klasse fr CM1 (Romandie would write 6H; as the landing's), it quarta elementare;
