@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 9812126, deployed 2026-11-19: Pages deployment 5ef4881e of the
-  project `classyquiz`, version 6fb5513a of the state Worker
+- Commit 2f56259, deployed 2026-11-19: Pages deployment 2d827184 of the
+  project `classyquiz`, version ab7af816 of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 9812126 -- src/`.
+  `git diff 2f56259 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -49,14 +49,18 @@ changed what it covered.
   (`design/guidance-page.md`, Situation): the summary gave `/manual.txt`'s
   full address and required the first line verbatim (2026-11-18, 30520c5,
   one run; sixteen on a preview deploy of the same page).
-- The sheets run's four `.zip`s fetched, each with the one fixed order left
-  (2026-11-18, 6f69f31).
+- The sheets example in its four languages, in headless Edge: `/example`
+  with its `.zip`, overview and conversation pictures, each quiz read on
+  the local check (12 questions) and Solo's start screen; the earlier run's
+  `.zip`s answer 404 on the deployment's own address (2026-11-19, 2f56259).
 
 ## Not tried live
 
 - A class or a crowd: no Quizmaster run with a real second device, no Peers
   room on real phones, no final ranking or Exit with real players; only walks
   and probe-marked rooms.
+- Since 2f56259: the film with the new sheets run's words and question on
+  the live site (`docs/film/build/sitecheck.py` on a local copy only).
 - Since 9812126: Start's ten seconds in a Quizmaster's room (the wall, the
   Remote, the tablets), and a Peers room's screens in a browser (how the
   friends stand, Countdown's button, the link to share); on local stacks

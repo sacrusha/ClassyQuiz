@@ -320,6 +320,9 @@ quoted; runs not recorded beyond the above):
 - Whether AI sandboxes have cairosvg or rsvg-convert, without which
   `preview.py` shows SVG pictures as "not drawn here"; untested, as is that
   path of the script.
+- Whether answer pictures read on the site's screens: `preview.py` draws
+  them as small tiles, so an AI can't judge them from its overview (the
+  example's sheets run said so of its number-line strips, 19 Nov 2026).
 - Whether a partial ask reliably gets the short summary and question rather
   than a quiz at once; samples have gone both ways.
 - Whether the drawn number-line quizzes' pictures match their keys.
