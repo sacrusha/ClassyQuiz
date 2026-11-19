@@ -53,7 +53,8 @@ let reading = false;
 // way of the box below and whose name downloads it. The fifth tab, "Not
 // sure?", holds the ask that needs no knowing how to ask. Made here: without
 // the script, and for an AI's fetcher, the asks stand one under the other.
-// Every visit opens on the first (Situation: least surprise).
+// Every visit opens on Sheets, so that a visitor first sees a quiz made from
+// what they attach.
 
 /** The tabs in the page's order: the four examples, then the help ask. */
 const TABS: { id: Example | "help"; ask: (t: Text) => string }[] = [
@@ -118,7 +119,7 @@ $("#get .step-head").append(mock);
   });
   bar.addEventListener("scroll", () => edges(), { passive: true });
   window.addEventListener("resize", () => edges());
-  chooseTab(0);
+  chooseTab(TABS.findIndex((a) => a.id === "sheets"));
 }
 
 function chooseTab(i: number): void {

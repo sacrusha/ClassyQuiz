@@ -126,16 +126,19 @@ alternatives were weighed and not taken:
   guidance below a second edge.
 
 What fits, measured in Edge windows of phone and laptop sizes, in the four
-languages, on the tab that every visit opens on:
+languages:
 
-- From 360 × 640 up, the sentence, the tabs, the chat and the button that
-  opens a file are all in the first screen. On 1366 × 650 and on 360 × 640
-  the button has less than 35 px to spare.
+- On Sheets, the tab every visit opens on, the sentence, the tabs, the chat
+  and the button that opens a file are all in the first screen from
+  375 × 667 up: 44 px to spare there, 9 to 32 px on 1366 × 650. At
+  360 × 640 the ask takes seven lines in English, German and French, and
+  the button is cut by 2 px; in Italian it takes six and leaves 19 px.
+- On Idea, all of it is in the first screen from 360 × 640 up, with less
+  than 35 px to spare on 1366 × 650 and on 360 × 640.
 - In smaller windows (360 × 560, 320 × 568) the button is below the edge.
-- Another tab can be taller than the first. On Sheets the button still
-  fits from 360 × 640 up. On Notes it is cut by 2 px in German and French at
-  360 × 640. The Test tab has not been measured since its run replaced the
-  mock.
+- The other tabs at 360 × 640: Notes's ask takes seven lines in German and
+  French, and cuts the button by 2 px there too; Test leaves it 32 px or
+  more.
 - A quiz to come back to stands above everything and moves the rest down by
   its height.
 
@@ -221,8 +224,8 @@ Test, and "Not sure?".
   friends, the test alone). Plausible assumption: that reads as an example
   and not as a rule, since the sentence names all three ways and the check
   offers all three for any file.
-- Every visit opens on the first tab, and nothing is remembered (least
-  surprise).
+- Every visit opens on Sheets (why: the examples, below), and nothing is
+  remembered (least surprise).
 
 **"Not sure?"** is for whoever recognises none of the four, or doesn't know
 what to ask (backlog item 1e). Its ask needs no knowledge of how to ask:
@@ -273,15 +276,17 @@ own for each way risks saying "Quizmaster is for school, Peers for trivia".
 What each example is there to show:
 
 - **Idea**: a quiz from one message with nothing attached, and a result
-  with pictures. Every visit opens on it, because it answers most directly
-  the bias the owner named, that attachments seem required. What that
-  costs: the film and the Sheets example tell the sheets story, and the
-  page opens on another.
+  with pictures. It answers most directly the bias the owner named, that
+  attachments seem required.
 - **Sheets**: a teacher with exercise sheets, who asks a second time to
   change the quiz. The ask shows how to say everything in one message: the
   exercises by number, the grade, how many questions, the language, harder
   towards the end. The file under it is the one from the second answer.
   What that costs: the file is not what that first ask alone produced.
+  Every visit opens on Sheets, so that the first chat shows a visitor's own
+  material as what the quiz is made from (the owner: people who come from
+  sites like Kahoot have that use case). It also shows an attachment first,
+  the bias that Idea, one press away, answers.
 - **Notes**: friends before an exam who play together. The AI keeps the
   questions out of the chat, because the person asking plays too.
 - **Test**: a learner with a marked test who asks for practice by minutes,

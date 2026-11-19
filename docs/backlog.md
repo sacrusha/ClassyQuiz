@@ -660,18 +660,22 @@ deployed to the public site.
 
    b. **The first screen on a phone, in four languages** — v6 item 1's open
       point, the button that opens a file cut by the screen's edge, is
-      settled on the tab every visit opens on, at 360 × 640 and larger, in
-      the four languages (the figures: `design/root-page.md`, "One
-      column"). Open: at 360 × 640 the Notes tab cuts it by 2 px in German
-      and French, and the Test tab has not been measured since the run
-      replaced the mock. The tab row is the most fragile
-      fit (`design/root-page.md`, "Getting a quiz").
+      settled in the four languages on Sheets, the tab every visit opens
+      on, from 375 × 667 up, on Idea from 360 × 640 up, and on Test at
+      360 × 640 (the figures: `design/root-page.md`, "One column"). Open:
+      at 360 × 640 an ask of seven lines cuts the button by 2 px, Sheets's
+      in English, German and French and Notes's in German and French. A
+      bubble line-height of 1.4 on phones, instead of 1.45, leaves it 3 px
+      in those cases (measured with the style injected), at the cost of
+      every ask's lines on a phone. The tab row is the most fragile fit
+      (`design/root-page.md`, "Getting a quiz").
 
    c. **The film and the full examples show the page that exists** (v6
       item 3) — built: the film draws the new first screen and the check's
       cards with their pictures (`docs/film/`), and `/example` has a full
       example per tab, the space run's with its conversation and the AI's
-      overview of its questions (`design/example-page.md`).
+      overview of its questions (`design/example-page.md`). Open: the film
+      draws the first screen on Idea, and the page opens on Sheets.
 
 ## Room on the Free plan
 
@@ -778,8 +782,8 @@ With the owner, what only he can do:
   them NASA's and public domain, and nothing else records a source
   (`design/example-page.md`, Not known).
 - Which plan made the space run: "Any AI subscription will do, or free
-  Claude." stands beside it on the tab every visit opens on, and free Claude
-  is verified for the sheets run only, made in an app whose free and paid
+  Claude." stands above it on the Idea tab, and free Claude is verified
+  for the sheets run only, made in an app whose free and paid
   plans have the same features (`design/guidance-page.md`, "The AIs
   verified against").
 - The mock on the root page, the answer in the "Not sure?" tab, stays until
