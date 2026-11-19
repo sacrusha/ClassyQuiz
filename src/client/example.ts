@@ -3,11 +3,11 @@
 // example's (the sheets); this puts the words, the conversation's picture, the
 // .zip and the start link in the page's language. The root page's link passes
 // ?lang=; without it, the device's choice. ?ex= names the root page's example
-// it came from: the idea's (the space run) has no attachment and shows the
-// AI's overview of its questions; the notes' (the notes run) shows the notes'
-// pages where the sheets' photographs stand; an example whose run is a mock
-// (MOCK_TEXT) shows its attachment and a made-up conversation instead of the
-// worked example's.
+// it came from: the idea's (the space run) has no attachment, and shows its
+// own overview where the sheets' run shows its; the notes' (the notes run)
+// shows the notes' pages where the sheets' photographs stand, and no
+// overview; an example whose run is a mock (MOCK_TEXT) shows its attachment
+// and a made-up conversation instead of the worked example's.
 
 import { $, esc, store } from "./dom.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang } from "./landing-text.ts";
@@ -28,8 +28,9 @@ const showLang = langSwitch((l) => apply(l));
 // link to the whole picture follows the same mode. The idea's and the notes'
 // conversations are their own pictures (docs/example/README.md).
 const dark = matchMedia("(prefers-color-scheme: dark)");
-const convo = (l: Lang, mode: "light" | "dark") => `/examples/conversation-${ex === "sheets" ? "" : `${ex}-`}${l}-${mode}.webp`;
-const review = (l: Lang) => `/examples/review-idea-${l}.webp`;
+const tag = ex === "sheets" ? "" : `${ex}-`;
+const convo = (l: Lang, mode: "light" | "dark") => `/examples/conversation-${tag}${l}-${mode}.webp`;
+const review = (l: Lang) => `/examples/review-${tag}${l}.webp`;
 function convoLinks(): void {
   const href = convo(lang, dark.matches ? "dark" : "light");
   for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-convo]")) a.href = href;
@@ -44,19 +45,21 @@ if (mock) {
   sheets.querySelector(".pics")!.innerHTML = `<a href="${MOCK_PIC[mock]}"><img src="${MOCK_PIC[mock]}" alt="" width="233" height="300"></a>`;
   sheets.querySelector(".files")!.remove();
   for (const el of document.querySelectorAll("[data-convo]")) el.remove();
+  $("#review").remove();
   mockChat = document.createElement("div");
   mockChat.className = "mockchat";
   $("#convo-p").after(mockChat);
   $(".translated").remove();
 } else if (ex === "idea") {
-  // Nothing was attached; the AI's overview of the questions stands after the conversation.
+  // Nothing was attached; its overview is taller than the sheets run's.
   $("#sheets").remove();
-  const li = document.createElement("li");
-  li.id = "review";
-  li.innerHTML = `<h2></h2><p></p><a class="convo" data-review><img alt="" width="1000" height="1826"></a><p><a data-review data-read></a></p>`;
-  $("#convo").after(li);
+  const img = $("#review img");
+  img.setAttribute("width", "1000");
+  img.setAttribute("height", "1826");
 } else if (ex === "notes") {
-  // The notes' two pages in place of the sheets' photographs, and the notes' PDF in place of the sheets' files.
+  // The notes' two pages in place of the sheets' photographs, and the notes' PDF in place of the sheets' files; the run
+  // handed over no overview.
+  $("#review").remove();
   const sheets = $("#sheets");
   sheets.querySelector(".pics")!.innerHTML = [1, 2].map(() => `<a><img alt="" width="700" height="989"></a>`).join("");
   sheets.querySelector(".files")!.innerHTML = `<li><a download></a></li>`;
@@ -111,14 +114,10 @@ function apply(l: Lang): void {
     $(".lede").textContent = d.lede;
     $("#convo-p").textContent = d.convoP;
     $("#quiz p").textContent = d.quizP;
-    $(".translated").textContent = d.translated;
-    const li = $("#review");
-    li.querySelector("h2")!.textContent = d.reviewH;
-    li.querySelector("p")!.textContent = d.reviewP;
-    li.querySelector("img")!.src = review(l);
-    li.querySelector("img")!.alt = d.reviewAlt;
-    li.querySelector("[data-read]")!.textContent = d.readReview;
-    for (const a of li.querySelectorAll<HTMLAnchorElement>("a[data-review]")) a.href = review(l);
+  }
+  if (ex === "idea" || ex === "sheets") {
+    ($("#review img") as HTMLImageElement).src = review(l);
+    for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-review]")) a.href = review(l);
   }
   ($("#convo-dark") as HTMLSourceElement).srcset = convo(l, "dark");
   ($("#convo-img") as HTMLImageElement).src = convo(l, "light");

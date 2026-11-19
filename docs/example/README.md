@@ -15,27 +15,35 @@ page shows it as a picture and not as text: `docs/design/example-page.md`.
 The pictures are `src/public/examples/conversation-<lang>-<light|dark>.webp`
 (the sheets run's), `conversation-idea-<lang>-<light|dark>.webp` (the space
 run's) and `conversation-notes-<lang>-<light|dark>.webp` (the notes run's),
-681 px wide; the space run's overview, `review-idea-<lang>.webp`, 1500 px
-wide; and the notes' pages, `notes-<lang>-<page>.webp` there and
-`src/public/landing/notes-<lang>.webp` for the root page's chat. They are
-generated: edit the source, not them.
+681 px wide; the sheets and space runs' overviews, `review-<lang>.webp` and
+`review-idea-<lang>.webp`, 1500 px wide; and the notes' pages,
+`notes-<lang>-<page>.webp` there and `src/public/landing/notes-<lang>.webp`
+for the root page's chat. They are generated: edit the source, not them.
 
 ## What the pictures are
 
-The sheets run's:
+The sheets run's (the root page's "Sheets" tab, and `/example` without
+`?ex=`):
 
-- A reproduction of the run (a free Claude Sonnet, 4 Nov 2026; its
-  screenshot `sheets-conversation-original.webp` in this folder, English,
-  light), all three teacher turns: the first ask with the two photographs
-  and the answer with the `.zip`,
-  the second ask and the updated `.zip`, and the third ask with the AI's four
-  preview cards.
-- The German, French and Italian pictures are that run translated, so the
-  example reads the same in each language. The page says so. The translations
-  are drafts pending the owner's review (`docs/translation-review.md`).
-- Light follows the screenshot. Dark is drawn here as that app's dark theme,
-  without a reference: colours are estimates.
-- The photographs: `sheet-photo-1.jpg`, `-2.jpg`.
+- A reproduction of the owner's run of 19 Nov 2026, German, Claude Sonnet
+  5.5 (its screenshot `sheets-conversation-original.webp` here, dark): the
+  two photographs and two asks, each answered with an overview of the
+  questions and a `.zip`; the AI's words as it wrote them, the app's folded
+  steps, the thumbnails, the files' cards and "Download all". The first ask
+  is the root page's sheets ask, read from `landing-text.ts`; the second is
+  the owner's, tidied (`text.py`). The app showed its own words in English;
+  the German picture keeps them, the others show their language's.
+- English, French and Italian are that run translated, the words drafts,
+  as the space run's are.
+- The photographs are the page's (`sheet-photo-1.jpg`, `-2.jpg`), the ones
+  the run attached, in its order, page 15 first.
+- The thumbnails beside a fold of the app's steps stand in for the run's:
+  the language's overview and two of the quiz's pictures. The overview's
+  thumbnail under each answer is the final overview in both answers.
+- The overview, `review-<lang>.webp`: German the AI's second, review-v2.png
+  (`sheets-review-original.webp` here, 1500 px wide), the others drawn from
+  their translated `.zip` by the site's `preview.py`, as the space run's
+  are.
 
 The space run's (the root page's "Idea" tab):
 
@@ -65,17 +73,18 @@ The notes run's (the root page's "Notes" tab):
 
 ## Files
 
-- `text.py`: the words, one entry per piece of the chat with the four languages
-  under each, for reading side by side. Where a piece is also in the landing's
-  film (the second ask, the status lines, the quiz's title and questions, the
-  `.zip` names) it is the film's wording (`CONTENT` in
-  `docs/film/build/film.js`); `build.py` refuses to run if they differ. The quiz
-  questions the preview cards show are those of the translated quizzes
-  (`quiz_zips.py`).
+- `text.py`: the sheets run's words, one entry per piece of the chat with the
+  four languages under each, for reading side by side. Where a piece is also
+  in the landing's film (the second ask, the status lines, the `.zip`s'
+  names, the quiz's title and first question) it is the film's wording
+  (`CONTENT` in `docs/film/build/film.js`); `build.py` refuses to run if they
+  differ.
 - `build.py`: draws the chat as HTML and shoots it in the installed Edge, the
   way `docs/film/build/shoot.py` shoots the film.
-- `quiz_zips.py`: makes the German, French and Italian `.zip`s from the English
-  one (a separate piece; the pictures only quote its wording).
+- `quiz_zips.py`: makes the sheets quiz's English, French and Italian `.zip`
+  from the run's `grosse-zahlen-quiz-v2.zip` (in `src/public/examples/` as it
+  came): title, questions and the one text answer translated, the pictures
+  unchanged, since they carry only numbers. Drafts.
 - `space_text.py`: the space run's words, as `text.py` has the sheets run's.
 - `space_zips.py`: makes the space quiz's English, French and Italian `.zip`
   from the owner's `weltall-quiz.zip` (in `src/public/examples/` as it came):
@@ -110,9 +119,12 @@ From anywhere, in this order when a quiz changes:
    `py -I docs/example/notes_zips.py`, `py -I docs/example/mock_zips.py`:
    the translated and stand-in `.zip`s.
 2. `cd src && npm run build`, then `py -I docs/example/faces.py`: the
-   files' table and the faces (`--files-only` for the table alone).
-3. `py -I docs/example/build.py`: the conversations, the space run's
-   overview and the notes' pages (`--convo sheets`, `idea` or `notes`,
+   files' table and the faces (`--files-only` for the table alone). The
+   faces are shot from the built site, which opens each file by the name the
+   table had at the build: when a file's name changes, the table first, then
+   the build, then the faces.
+3. `py -I docs/example/build.py`: the conversations, the overviews and the
+   notes' pages (`--convo sheets`, `idea` or `notes`,
    `--lang de`, `--theme dark` for fewer); `--keep` leaves the pages and
    the full-size PNGs in
    `.tmp/example/` (git-ignored).
@@ -128,16 +140,10 @@ the site's Solo screen in the machine's `system-ui`.
 
 ## Not known
 
+- The sheets run: its translations by a native reader.
 - The space run: its translations by a native reader; its model and plan,
   which the screenshot doesn't show.
 - The notes run: its translations by a native reader; its plan.
-- The faces on the French quizzes show "?" on a line of its own where the
-  quiz's text has a plain space before it, as the site's Solo screen does
-  (the sheets quiz's French); the space quiz's French has no-break spaces.
-
-- Dark: the pictures' dark theme is an estimate. The space and notes runs'
-  screenshots are dark and could serve as its reference; they haven't been
-  compared with it.
-- A few details of the screenshot: a word in the third answer is garbled in it
-  ("the ques... is only a few words", read as "question"), and the second ask
-  reads "Prease" there (the film and these pictures have "Please").
+- The colours: light was drawn from an earlier run's light screenshot of
+  the same app, dark estimated from it. By eye, dark matches the sheets
+  run's screenshot; the exact colours of either are unchecked.

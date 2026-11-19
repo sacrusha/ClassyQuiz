@@ -186,30 +186,41 @@ own language (`design/root-page.md`, "Languages"). For the read:
 
 ## The worked example (`/example`)
 
-Drafts: the page's words (`src/client/example-text.ts`), the conversation
-pictures' words (`docs/example/text.py`, four languages side by side; rebuild with
-`py -I docs/example/build.py`), the quizzes (`docs/example/quiz_zips.py`). Where they overlap with
-the film they are the film's words, so what is decided for the film applies to both; where the example would word a shared
-piece differently, the proposal is under "The film's words" below. The translations render what each
-moment means in the language, not the English words. Open for you:
+The owner's run is German; its English, French and Italian are the implementer's drafts, made
+from it: the page's words (`src/client/example-text.ts`), the conversation pictures' words
+(`docs/example/text.py`, four languages side by side; rebuild with `py -I docs/example/build.py`),
+the quizzes (`docs/example/quiz_zips.py`). Where they overlap with the film they are the film's
+words, so what is decided for the film applies to both. The translations render what each moment
+means in the language, not the German words. Open for you:
 
-- E1, de, the AI's question about the quiz's language: in English it rests on "the sheets are German,
-  but you wrote in English". With German sheets and a German ask there is no conflict, so the German AI
-  confirms instead: "In welcher Sprache soll das Quiz sein? Auf Deutsch, wie die Blätter?" / "Deutsch".
-  fr and it keep the premise (German sheets, a French or Italian ask). Is that the moment you want?
-- E2, the question card's labels are each language's app's: en Q/A (your call), de F/A (as in the
-  screenshot), fr Q/R, it D/R. fr and it are inferred from Question/Réponse and Domanda/Risposta, not
-  seen in the app. The app's other lines: de as the screenshot ("Hat einen Befehl ausgeführt …"); fr
-  and it as participles ("Commande exécutée, fichiers partagés", "Comando eseguito, file condivisi"),
-  likewise inferred.
-- E3, regional choices: "4th grade" fr CM1 (Romandie would write 6H; as the landing's),
-  de 4. Klasse, it quarta elementare. Students: de "die Kinder" (as the landing's capTap, also on the
-  page's runNote), fr "les élèves", it "gli alunni". de "Beamer", "Lektion", "Handy", "Lehrervorschau",
-  "Häuschenpapier"; fr "leçon" (Romand sense), "importer" for upload (as the landing; the page had
-  "téléversé"); « » in de, fr, it. fr ranges "questions 1 à 3", "12 et 13"; de and it keep "1–3".
-- E4, words of the sheets: de quotes the sheet's own heading («Zeichne den Abschnitt auf
-  Häuschenpapier») and its "in 20 000er-Schritten"; fr and it translate it. "Section" is de Abschnitt
-  (the sheet's), fr/it "segment(o)"; "tick" de Strich (the sheet's), fr trait, it tacca.
+- E1, the asks. The first is the root page's sheets ask as each language has it there ("etwa 12
+  Fragen" en "about 12 questions", fr "une douzaine de questions", it "una dozzina di domande";
+  "Gerne gegen Schluss etwas schwieriger." en "Preferably a bit harder towards the end.", fr "De
+  préférence un peu plus difficile vers la fin.", it "Se possibile un po' più difficile verso la
+  fine."). The second is yours, tidied in German ("könnest" → "könntest", "etwas sehr einfach" →
+  "etwas zu einfach", "1,4,6" → "1, 4, 6", the hyphen a dash, the double spaces single); the
+  others translate the tidied one.
+- E2, where the German rests on Swiss German: "12 Fragen auf Deutsch in Schweizer Schreibweise
+  (grosse Zahlen mit Abstand ab fünf Stellen, vierstellige ohne)" is, in the others, 12 questions
+  in that language "with the large numbers written as on your sheets", the same rule spelled out,
+  so the AI still says how it wrote the numbers. The quizzes keep the sheets' spaces in every
+  language, as the pictures carry them; Italian would usually write 126.000.
+- E3, the sheets' terms: Abschnitt en section, fr segment, it segmento; Strich en tick, fr trait,
+  it tacca; Strichwert en "each tick is worth", fr "un trait vaut", it "una tacca vale";
+  Spiegelzahl, the number mirrored across the middle mark, en "mirrored across the middle mark",
+  fr "le nombre symétrique par rapport au milieu", it "il numero simmetrico rispetto al centro";
+  Mitte-Aufgaben en "middle-number questions", fr "exercices du nombre au milieu", it "esercizi
+  del numero a metà"; "liegt über einer Tausenderstelle" (question 11, 500 000 between 490 000 and
+  510 000) as crossing into the next hundred thousand. Übersicht (review.png) en overview, fr
+  aperçu, it panoramica, as in the space run; Vorschau, the same picture in the second answer, en
+  preview, fr aperçu, it anteprima. The answer "Auf keinem davon" en "On none of them", fr "Sur
+  aucun d’eux", it "Su nessuno".
+- E4, the class and the app: "die Kinder" en the children, fr les enfants, it i bambini, as in the
+  space run; 4. Klasse fr CM1 (Romandie would write 6H; as the landing's), it quarta elementare;
+  Beamer fr vidéoprojecteur, it proiettore; allein fr en solo, it per conto tuo (as E6); « » in
+  de, fr and it, “ ” in en. The app's own words are English in the German picture, as the app
+  showed them; fr and it as participles ("2 pages lues, tâches mises à jour", "Ha letto 2 pagine,
+  aggiornato le attività"), inferred, not seen in the app.
 - E5, shared with the landing: the page says "Arbeitsblätter", as the landing does; should the
   landing go back to "Aufgabenblätter", the page and the quiz chat follow. it h1 "passo per passo" is
   the landing's `see`; a change there changes the page too.
@@ -225,8 +236,8 @@ moment means in the language, not the English words. Open for you:
 - French on `/example` has U+202F before ; : ? !, as the first page has.
 - The stand-in's page (`MOCK_TEXT`, Test) goes with the mock; no read needed.
 
-The quizzes (`quiz_zips.py`): questions 7–13 read as the sheets' own instructions in de and as
-the normal classroom wording in fr and it. Questions 1–6 and the title are the film's.
+The quizzes (`quiz_zips.py`): German is the run's; the others' title and question 1 are the
+film's; fr has "indique" for the arrow, which a flèche does where "montre" isn't said.
 
 ## The space run (the root page's "Idea" tab)
 
@@ -258,23 +269,13 @@ conversation on `/example`), with `/example`'s words for it in `client/example-t
 
 ## The film's words
 
-The film's own words in German, French and Italian are drafts, in `CONTENT`
+The film's own words in English, French and Italian are drafts, in `CONTENT`
 (`docs/film/build/film.js`); the example's chat and quizzes quote them (`docs/example/text.py`,
-`FILM`), so whatever you decide applies to film, pictures and zips together, and for q4 the
-quizzes' questions 5 and 6 follow its pattern (`quiz_zips.py`). Where a translator proposed other
-words:
+`FILM`), so whatever you decide applies to film, pictures and zips together. A translator's
+proposals for these words (the chip's title is the file's name as the app shows it, so the file
+would be renamed with it):
 
 | key | | in `CONTENT` | proposed | why |
 |---|---|---|---|---|
-| ask2 | de | …bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen. | …bei denen die Zahl gegeben ist und sie den Zahlenstrahl auswählen müssen, auf dem sie markiert ist. | "passenden markierten" stacks two adjectives; "matching marked" means "the one it is marked on" |
-| ask2 | fr | …choisir la droite graduée marquée qui correspond. | …choisir la droite graduée sur laquelle il est marqué. | "droite marquée" isn't said |
-| ask2 | it | Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente. | Per favore aggiungi qualche domanda in cui è dato il numero e devono scegliere la retta numerica su cui è segnato. | same |
-| status1 | de | Rufe jetzt die Seite classyquiz.pages.dev ab. | Die Seite classyquiz.pages.dev wird jetzt abgerufen. | |
-| status1 | fr | Je consulte la page classyquiz.pages.dev. | Je récupère la page classyquiz.pages.dev. | |
-| status1 | it | Sto leggendo la pagina classyquiz.pages.dev. | Recupero ora la pagina di classyquiz.pages.dev. | |
 | zipTitle | it | Quiz grandi numeri | Quiz sui grandi numeri | |
 | title | it | I grandi numeri sulla retta numerica | Grandi numeri sulla retta numerica | |
-| q1 | fr | Quel nombre la flèche montre-t-elle ? | Quel nombre la flèche indique-t-elle ? | an arrow "indique" |
-| q4 | de | Welcher Zahlenstrahl hat einen Pfeil bei 654 000? | Auf welchem Zahlenstrahl zeigt der Pfeil auf 654 000? | |
-| q4 | fr | Quelle droite graduée a une flèche à 654 000 ? | Sur quelle droite graduée la flèche indique-t-elle 654 000 ? | as the de and it proposals |
-| q4 | it | Quale retta numerica ha una freccia a 654 000? | Su quale retta numerica la freccia indica 654 000? | |

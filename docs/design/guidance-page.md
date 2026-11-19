@@ -50,8 +50,12 @@ shaped as it is.
   first line they didn't quote, and a follow-up ask for that line got it
   quoted, address included. The owner: Sonnet has so far always followed
   its first fetch with questions, and Opus asked for the whole manual, was
-  refused, and fetched it with curl. The summaries' examples still put
-  `Order: fixed` on ordinary questions. A model with a shell fetches
+  refused, and fetched it with curl. In the example's sheets run (the web
+  environment, Sonnet 5.5 at High, 19 Nov 2026) Sonnet said WebFetch only summarised the
+  manual and the page warns of exactly that, fetched the original with a
+  command into an empty directory of its own, and read `verify.py` and
+  `preview.py` before using them (`design/example-page.md`). The
+  summaries' examples still put `Order: fixed` on ordinary questions. A model with a shell fetches
   `/manual.txt` whole. In the web environment, WebFetch keeps a page cached
   for hours, which its documentation doesn't say (the owner, Nov 2026), so
   a changed page reaches an AI there late. Getting the page itself through
@@ -283,8 +287,10 @@ eight-year-olds, in German, the last one a choice between two positions.
 
 The free tiers, the owner's findings as of 5 Nov 2026 (in his words where
 quoted; runs not recorded beyond the above):
-- Free Claude Sonnet: the one free AI that builds the quiz reliably (the
-  example's run, `design/example-page.md`).
+- Free Claude Sonnet: the one free AI that builds the quiz reliably. The
+  example's sheets run (19 Nov 2026, `design/example-page.md`) was made in
+  the web environment, whose free and paid plans have the same features
+  there (the owner).
 - Free ChatGPT: had a web tool on some runs and not on others, and without it
   "improvised", presenting a quiz built with no idea what was asked; it also
   hit the daily upload limit on the second photo, which makes it impractical.

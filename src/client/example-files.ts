@@ -35,31 +35,31 @@ export const EXAMPLE_FILES = {
   },
   "sheets": {
     "en": {
-      "zip": "big-numbers-quiz.zip",
-      "bytes": 39534,
+      "zip": "big-numbers-quiz-v2.zip",
+      "bytes": 158562,
       "title": "Big numbers on the number line",
-      "questions": 13,
+      "questions": 12,
       "first": "Which number does the arrow show?"
     },
     "de": {
-      "zip": "grosse-zahlen-quiz.zip",
-      "bytes": 39614,
+      "zip": "grosse-zahlen-quiz-v2.zip",
+      "bytes": 158558,
       "title": "Grosse Zahlen am Zahlenstrahl",
-      "questions": 13,
+      "questions": 12,
       "first": "Welche Zahl zeigt der Pfeil?"
     },
     "fr": {
-      "zip": "quiz-grands-nombres.zip",
-      "bytes": 39643,
+      "zip": "quiz-grands-nombres-v2.zip",
+      "bytes": 158593,
       "title": "Les grands nombres sur la droite graduée",
-      "questions": 13,
-      "first": "Quel nombre la flèche montre-t-elle ?"
+      "questions": 12,
+      "first": "Quel nombre la flèche indique-t-elle ?"
     },
     "it": {
-      "zip": "quiz-grandi-numeri.zip",
-      "bytes": 39579,
+      "zip": "quiz-grandi-numeri-v2.zip",
+      "bytes": 158564,
       "title": "I grandi numeri sulla retta numerica",
-      "questions": 13,
+      "questions": 12,
       "first": "Quale numero indica la freccia?"
     }
   },

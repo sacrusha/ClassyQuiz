@@ -17,13 +17,12 @@ v4 item 10).
   the example quiz; what only this page has is what was attached, the whole
   conversation and the files to repeat it with. Plausible assumption: teachers
   read the path shown there as the example, and look behind it for a
-  walkthrough, not the result alone (the page's name and its four steps).
+  walkthrough, not the result alone (the page's name and its steps).
 - An AI told the site's name may follow that link. A teacher's chat with
   an AI, read as page text, could pass for instructions to it.
 - The example's material is the sheet derived from the owner's, the owner's
-  phone photographs of it printed, and a conversation with an AI. The
-  conversation (4 Nov 2026) was run on earlier stand-in photographs made from
-  the rendered sheet; the photographs on the page are of 5 Nov 2026.
+  phone photographs of it printed (5 Nov 2026), and the owner's conversation
+  with an AI that attached them (19 Nov 2026, German).
 - An upload costs the shared free site one booking and the quiz's bytes
   (`hosting-and-limits.md`).
 
@@ -33,21 +32,29 @@ v4 item 10).
 `client/example.ts` puts it in the visitor's language, one of the landing's
 four (`?lang=` from the landing's link, otherwise the device's choice, as on
 the landing; words in `client/example-text.ts`). The header is the landing's,
-code box and language switch (`client/top.ts`). The four steps follow the
+code box and language switch (`client/top.ts`). The steps follow the
 path the film shows.
 
 1. **The exercise sheets**: the two photographs, each as a download, and the
    sheets as a PDF, so a teacher can try the photographs or the clean file on
    their own AI.
 2. **The conversation**, as a picture, not text: an AI reading the page doesn't
-   read it, and the layout is the AI app's own. All three turns of the free
-   Claude Sonnet session of 4 Nov 2026, rendered from its screenshot in the
-   page's language and the device's light or dark mode (`<picture>`; the link
-   to the whole picture follows the mode). How they are made:
-   `docs/example/README.md`. The preview shows its top. The line above it
-   names model, plan and date.
-3. **The quiz**: the `.zip` the AI handed over, in the page's language.
-4. **Try it**: "Start this quiz" opens `/open?example=<lang>&ex=<example>`, the
+   read it, and the layout is the AI app's own. Both turns of the owner's
+   session of 19 Nov 2026 (Claude Sonnet 5.5, German), rendered from its
+   screenshot in the page's language and the device's light or dark mode
+   (`<picture>`; the link to the whole picture follows the mode). How they
+   are made: `docs/example/README.md`. The preview shows its top. The line
+   above it says what happened in a sentence and names the AI and the date,
+   not the plan: in that app the free and paid plans have the same features
+   (the owner).
+3. **The overview**, the AI's picture of every question with its solution,
+   which the run handed over with each `.zip` for checking the quiz before
+   it is played: the second answer's, German the AI's own review-v2.png,
+   the other languages drawn from their translated `.zip` by the site's
+   `preview.py`, the script the guidance offers the AI for it.
+4. **The quiz**: the `.zip` the AI handed over with its second answer, in
+   the page's language.
+5. **Try it**: "Start this quiz" opens `/open?example=<lang>&ex=<example>`, the
    local check (`local-check.md`): it fetches the static `.zip` and reads it
    through the same function as a dropped file (`opening.ts`, `readQuiz`),
    so the example can't run differently from a teacher's. Looking costs the
@@ -60,37 +67,32 @@ path the film shows.
 
 `/example` without `?ex=` is the worked example, the landing's Sheets tab.
 `?ex=idea` is the landing's first tab, the owner's space run (11 Nov 2026,
-German, nothing attached): no sheets' step, since nothing was attached; the
-conversation, one ask and one answer, as a picture in the page's language
-and the device's mode as above; then **the overview**, the AI's picture of
-every question with its solution, which the run handed over with the `.zip`
-for checking the quiz before it is played (German the AI's own review.png,
-the other languages drawn from their translated `.zip` by the site's
-`preview.py`, the script the guidance offers the AI for it); then the quiz
-and its start, and a note that the run was made in German and the other
-pages show it translated (words: `IDEA_TEXT` in `client/example-text.ts`;
-pictures: `docs/example/README.md`). `?ex=notes` is the Notes tab's, the
-owner's notes run (12 Nov 2026, English): the same four steps, the notes'
+German, nothing attached): the steps without the sheets', since nothing was
+attached; the conversation, one ask and one answer, and its overview, German
+the AI's own review.png, as above (words: `IDEA_TEXT` in
+`client/example-text.ts`; pictures: `docs/example/README.md`). `?ex=notes`
+is the Notes tab's, the owner's notes run (12 Nov 2026, English): the notes'
 two pages and their PDF in place of the photographs, the conversation as a
-picture, the quiz and its start, and a note that the run was made in English
-and the other pages show it translated (words: `NOTES_TEXT`). `?ex=test` is
-the Test tab's, whose run is a mock until the owner's (backlog, "The page
-for people", item 1): the same four steps, with the mock attachment in place
-of the photographs, a made-up conversation made by the script and said to be
-made up (`MOCK_TEXT`), the mock `.zip` (`docs/example/mock_zips.py`), which
-holds the quiz without pictures, and its start, and without the note below.
+picture, no overview, since the run handed over none, the quiz and its
+start, and a note that the run was made in English and the other pages
+show it translated (words: `NOTES_TEXT`). `?ex=test` is the Test tab's,
+whose run is a mock until the owner's (backlog, "The page for people",
+item 1): the mock attachment in place of the photographs, a made-up
+conversation made by the script and said to be made up (`MOCK_TEXT`), no
+overview, the mock `.zip` (`docs/example/mock_zips.py`), which holds the
+quiz without pictures, and its start, and without the note below.
 
 Each page is one example of the landing's four, so its words name its quiz
 ("How the number-line quiz was made") and start "this quiz"; the heading,
 "The example, step by step", is the same on all four and means the example
 whose "The whole example ›" the visitor pressed.
 
-Under the steps, a note: the example was tested in all four languages and
-works in each; so that it is the same example in each, the German, French and
-Italian pages show the English run translated. One quiz in every language,
-the one the film shows (its `CONTENT` in `docs/film/build/film.js`): the
-conversation's words and the `.zip`s agree with the film's where they
-overlap (`docs/example/`).
+Under the steps, a note: the example was made in German, and so that it is
+the same example in each language, the English, French and Italian pages
+show it translated (the idea's page says the same of its run, the notes'
+of its English one). One quiz in every language, the one the film shows
+(its `CONTENT` in `docs/film/build/film.js`): the conversation's words and
+the `.zip`s agree with the film's where they overlap (`docs/example/`).
 
 The files are in `src/public/examples/` (not `example/`, which would collide
 with the page's address). The photographs are the owner's
@@ -114,14 +116,9 @@ camera's metadata.
 - The notes run's plan: the screenshot shows Sonnet 5.5, not which plan.
   Its German, French and Italian conversation and quiz are drafts; the notes
   in those languages are the owner's.
+- The sheets run's English, French and Italian conversation, overview and
+  quiz are drafts (backlog v4 item 12), and its overview in those languages
+  is the site's `preview.py`'s, not an AI's.
 
-- The conversation and the `.zip` ("Big numbers on the number line",
-  13 questions) are one real run, reviewed by the owner; the zip is that run's
-  second turn without its `Order: fixed` lines, which put the right answer
-  first in every question, and with question 12's letters kept in a fixed
-  order, sorted A to D. The conversation still says the order is fixed. The
-  run is to be redone against the manual as it now is (backlog, "Open: with
-  the owner").
 - Whether a teacher on a phone reads the conversation: the preview is the
   picture scaled to the screen; the whole picture opens at full size.
-- The German, French and Italian words, pictures and quizzes are drafts (backlog v4 item 12).

@@ -11,7 +11,8 @@
 //
 // The example asks, one per thing a visitor starts from (docs/design/root-page.md,
 // "Getting a quiz"): the idea's is the owner's run, tidied, German its original;
-// the sheets ask is each language's version of the same ask, the film typing it;
+// the sheets ask is the first ask of the owner's run (19 Nov 2026, German its
+// original), the film typing it;
 // the notes' is the owner's run's (12 Nov 2026, English); the test's is
 // in the words of whoever asks; the help ask has nothing decided, and the AI's
 // question back is the guidance's "How to build with the user". The test's and the
@@ -159,10 +160,10 @@ const en: Text = {
     { s: " from these two sheets? " },
     { s: "For my 4th grade class", l: 2 },
     { s: ", " },
-    { s: "about 10 questions", l: 3 },
+    { s: "about 12 questions", l: 3 },
     { s: ", " },
     { s: "in English", l: 4 },
-    { s: "." },
+    { s: ". Preferably a bit harder towards the end." },
   ],
   tabIdea: "Idea",
   tabSheets: "Sheets",
@@ -242,10 +243,10 @@ const de: Text = {
     { s: " von diesen zwei Blättern machen? " },
     { s: "Für meine 4. Klasse", l: 2 },
     { s: ", " },
-    { s: "etwa 10 Fragen", l: 3 },
+    { s: "etwa 12 Fragen", l: 3 },
     { s: ", " },
     { s: "auf Deutsch", l: 4 },
-    { s: "." },
+    { s: ". Gerne gegen Schluss etwas schwieriger." },
   ],
   tabIdea: "Idee",
   tabSheets: "Blätter",
@@ -330,10 +331,10 @@ const fr: Text = {
     { s: " de ces deux fiches ? " },
     { s: "Pour ma classe de CM1", l: 2 },
     { s: ", " },
-    { s: "une dizaine de questions", l: 3 },
+    { s: "une douzaine de questions", l: 3 },
     { s: ", " },
     { s: "en français", l: 4 },
-    { s: "." },
+    { s: ". De préférence un peu plus difficile vers la fin." },
   ],
   tabIdea: "Idée",
   tabSheets: "Fiches",
@@ -418,10 +419,10 @@ const it: Text = {
     { s: " di queste due schede? " },
     { s: "Per la mia quarta elementare", l: 2 },
     { s: ", " },
-    { s: "una decina di domande", l: 3 },
+    { s: "una dozzina di domande", l: 3 },
     { s: ", " },
     { s: "in italiano", l: 4 },
-    { s: "." },
+    { s: ". Se possibile un po' più difficile verso la fine." },
   ],
   tabIdea: "Idea",
   tabSheets: "Schede",

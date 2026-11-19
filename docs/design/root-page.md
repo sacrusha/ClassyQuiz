@@ -358,8 +358,9 @@ check, for any file (`local-check.md`).
   public domain, the AI says; nothing records where each comes from:
   `example-page.md`, Not known) and four it drew; every visit opens on it, since it answers most
   directly the bias the owner named: a bubble with nothing attached, and a
-  result with pictures. **Sheets**: the worked example's run, a teacher
-  with exercise sheets. **Notes**: the owner's run with class notes (12 Nov
+  result with pictures. **Sheets**: the worked example, the owner's run
+  with exercise sheets (19 Nov 2026, German), a teacher who asks a second
+  time to change the quiz. **Notes**: the owner's run with class notes (12 Nov
   2026, English), friends before a history exam who play together; the AI
   kept the questions out of the chat, since the asker plays. **Test**: a
   learner with a marked test, practising for a time rather than a number of
@@ -398,26 +399,22 @@ the fetch the first act, and a failed fetch can't pass as a generic quiz (backlo
 v4 item 11). The address in every ask is the one the browser opened, so an own
 copy shows its own.
 
-**The sheets ask** is the example's run (`example-page.md`), said in one
-message (the implementer's call). The file came from a conversation:
-"Read … Can you make me a classyQuiz with exercises from these two sheets?
-For my 4th grade class.", then the two answers the AI asked for (about 10
-questions, in English), then a second ask that added questions (`/example`
-shows the three asks; the film types the second). The ask here is that
-conversation's first ask with its two answers in it, and "like no. 1, 3 and
-4 from these two sheets" for which exercises; the grade is the run's. So it
-shows how to ask in one message, which is what a first-timer needs from it,
-and nothing in it contradicts the run. Its cost: whoever reads `/example`
-finds the file took three asks rather than one, a quiz of 13 questions where
-the ask says about 10, and no choice of exercises in the run's own words.
-Its words were read wrongly in the owner's testing: "pages" as the site's
-pages, and "no. 1, 3 and 4" as numbers of pictures on the page; so the ask
-says "sheets" and ties the numbers to them. A number stays on the line of
+**The sheets ask** shows how to ask in one message, which is what a
+first-timer needs from it. It is the first ask of the example's run
+(`example-page.md`), the owner's (19 Nov 2026, German): the exercises by
+their numbers, the grade, about 12 questions, the language, and harder
+towards the end. The file beside it is the run's second, which a second
+ask changed (pictures as answers, two questions turned around); `/example`
+shows both asks, and the film types the second. Its cost: the file under
+the ask is not the one that ask alone gave. Its words come from the
+owner's testing, where "pages" was read as the site's pages and "no. 1, 3
+and 4" as numbers of pictures on the page; so the ask says "sheets" and
+ties the numbers to them. A number stays on the line of
 the word it belongs to ("no. 1", "Nr. 1", "4. Klasse", "n° 1", "n. 1",
 joined by a no-break space): a line that ends "like no." or "Für meine 4."
 reads as the end of a sentence. It is the same sheet and the same ask in four
-languages, each asking for the quiz in the page's language; the example was
-tested in each, and every page shows the English run translated
+languages, each asking for the quiz in the page's language; the run was
+made in German, and the other pages show it translated
 (`example-page.md`). The film types it in the page's language
 (`docs/film/film-text.md`).
 
@@ -531,7 +528,7 @@ How the page meets it (the details: the comments on the film in
   the site's screens (the check, the wall's chrome, the Remote, the tablets)
   are drawn as the site shows them (`docs/film/README.md`, Situation),
   untranslated for now ("Languages"). Every language shows the same quiz, the
-  example's 646 000 number-line question, translated (owner: the safest,
+  example's 126 000 number-line question, translated (owner: the safest,
   since wrong answers in several different examples would linger). A
   language switch takes the film back to its poster in the new language.
 - **Layout.** The film stands below the two steps, under its heading, as

@@ -1,7 +1,7 @@
 """Draws the examples' conversations as the AI app's own chat, in four languages and
 two colour schemes: the sheets run's, src/public/examples/conversation-<lang>-<light|dark>.webp,
-the space run's (the root page's "Idea" tab), conversation-idea-<lang>-<light|dark>.webp,
-with that run's overview of its questions, review-idea-<lang>.webp, which its chat shows, and the notes run's
+with its overview of its questions, review-<lang>.webp, which its chat shows; the space run's (the root page's "Idea"
+tab), conversation-idea-<lang>-<light|dark>.webp, with its overview, review-idea-<lang>.webp; and the notes run's
 (the "Notes" tab), conversation-notes-<lang>-<light|dark>.webp, with the pictures of its notes' pages
 (src/public/examples/notes-<lang>-<page>.webp for /example, src/public/landing/notes-<lang>.webp for the root page).
 
@@ -12,13 +12,13 @@ Run (from anywhere): py -I docs/example/build.py [--convo idea] [--lang de] [--t
 
 The words are text.py's, space_text.py's and notes_text.py's; the page is HTML drawn here and shot in the installed Edge
 (playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright, and PyMuPDF for the notes' pages.
-The space run's overview: German is the AI's own review.png (space-review-original.webp here, 1500 px
+The overviews: German is the AI's own (sheets-review-original.webp and space-review-original.webp here, 1500 px
 wide); the other three are drawn from their translated .zip by the site's own src/public/preview.py, the
 script the guidance offers the AI for it.
 The faces are those of the machine (Segoe UI, Cambria, Consolas on Windows): the
 pictures differ a little on another one.
 """
-import html, json, pathlib, re, sys
+import html, pathlib, re, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -30,7 +30,7 @@ import text as T  # noqa: E402
 import space_text as S  # noqa: E402
 import notes_text as N  # noqa: E402
 
-WIDTH = 681          # sheets-conversation-original.webp's width
+WIDTH = 681          # the pictures' width, as /example's HTML has it
 SCALE = 2            # rendered at 2x, scaled down to WIDTH
 NB = " "
 
@@ -63,18 +63,28 @@ def check_film():
         raise SystemExit("text.py differs from film.js CONTENT:\n  " + "\n  ".join(bad))
 
 
+def landing_block(lang):
+    src = (ROOT / "src" / "client" / "landing-text.ts").read_text(encoding="utf-8")
+    return src[src.index(f"\nconst {lang}: Text = {{"):]
+
+
 def ask_notes():
     """askNotes of src/client/landing-text.ts per language: the root page's ask is the notes run's."""
-    src = (ROOT / "src" / "client" / "landing-text.ts").read_text(encoding="utf-8")
     out = {}
     for lang in N.LANGS:
-        block = src[src.index(f"\nconst {lang}: Text = {{"):]
-        m = re.search(r'\n  askNotes: "((?:[^"\\]|\\.)*)",', block)
+        m = re.search(r'\n  askNotes: "((?:[^"\\]|\\.)*)",', landing_block(lang))
         out[lang] = m.group(1).replace('\\"', '"')
     return out
 
 
-def pick(v, lang, key_hint=None):
+def ask_sheets(lang):
+    """`ask` of src/client/landing-text.ts, its parts joined: the root page's sheets ask is the sheets run's first."""
+    block = landing_block(lang)
+    parts = block[block.index("\n  ask: ["):block.index("\n  ],", block.index("\n  ask: ["))]
+    return "".join(s.replace('\\"', '"') for s in re.findall(r'\{ s: "((?:[^"\\]|\\.)*)"', parts))
+
+
+def pick(v, lang):
     """A piece's text in a language: a dict of languages, or the name of a film/UI entry."""
     if isinstance(v, str):
         v = T.UI[v] if v in T.UI else {l: T.FILM[l][v] for l in T.LANGS}
@@ -83,7 +93,7 @@ def pick(v, lang, key_hint=None):
 
 def fmt(s, lang):
     """Plain text with **bold** and `code` into HTML; no-break spaces where the language wants them."""
-    s = s.replace("{zip}", T.FILM[lang]["zipFile"])
+    s = s.replace("{zip1}", T.ZIPS[lang][0]).replace("{zip2}", T.ZIPS[lang][1])
     s = re.sub(r"(\d) (\d{3})(?!\d)", lambda m: m.group(1) + NB + m.group(2), s)
     if lang == "fr":
         s = re.sub(r" ([:;?!»])", NB + r"\1", s)
@@ -92,76 +102,6 @@ def fmt(s, lang):
     s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
     s = re.sub(r"`(.+?)`", r"<code>\1</code>", s)
     return s
-
-
-# ------------------------------------------------------------------ pictures in the cards
-
-def numberline(x0, x1, y, n, big, small, bigs, sw, cls="nl"):
-    """Ticks from x0 to x1 (n intervals), the ends and bigs tall, on an axis at y; returns SVG parts and tick x's."""
-    xs = [x0 + (x1 - x0) * i / n for i in range(n + 1)]
-    parts = [f'<line class="{cls}" x1="{x0 - (x1 - x0) / n * 0.15:.1f}" x2="{x1 + (x1 - x0) / n * 0.15:.1f}" y1="{y}" y2="{y}" stroke-width="{sw}"/>']
-    for i, x in enumerate(xs):
-        h = big if i in bigs else small
-        parts.append(f'<line class="{cls}" x1="{x:.1f}" x2="{x:.1f}" y1="{y - h}" y2="{y}" stroke-width="{sw * (1.15 if i in bigs else 0.9):.2f}"/>')
-    return parts, xs
-
-
-def arrow(x, top, tip, w, hw, hh):
-    return (f'<line class="ar" x1="{x:.1f}" x2="{x:.1f}" y1="{top}" y2="{tip - hh + 1}" stroke-width="{w}"/>'
-            f'<path class="arf" d="M{x - hw / 2:.1f} {tip - hh} L{x + hw / 2:.1f} {tip - hh} L{x:.1f} {tip}Z"/>')
-
-
-def svg_big_line(label0, label1, label2):
-    """Card 1: 640 000 to 660 000, the arrow at 646 000."""
-    parts, xs = numberline(62.5, 571.5, 173, 10, 21, 10, {0, 5, 10}, 2)
-    parts.append(arrow(xs[3], 104, 151, 4, 20, 20))
-    for x, t in zip((xs[0], xs[5], xs[10]), (label0, label1, label2)):
-        parts.append(f'<text class="lb" x="{x:.1f}" y="195" font-size="14.5" text-anchor="middle">{t}</text>')
-    return f'<svg class="pic" width="634" height="356" viewBox="0 0 634 356">{"".join(parts)}</svg>'
-
-
-def svg_mini_line(frac, a, b, c):
-    """Card 2: one of the four framed lines: 640 000 to 660 000, an arrow at `frac` of the way."""
-    parts, xs = numberline(20, 257, 35, 10, 10, 5, {0, 5, 10}, 1.1)
-    ax = 20 + 237 * frac
-    parts.append(arrow(ax, 6, 33, 1.8, 9, 8))
-    for x, t in zip((xs[0], xs[5], xs[10]), (a, b, c)):
-        parts.append(f'<text class="lb" x="{x:.1f}" y="47" font-size="8.6" text-anchor="middle">{t}</text>')
-    return f'<svg width="278" height="50" viewBox="0 0 278 50">{"".join(parts)}</svg>'
-
-
-def svg_sections():
-    """Card 4: the four sections A-D, each a line of 20 steps with its end numbers."""
-    rows = [("A", "4000", "5000"), ("B", "45 000", "46 000"), ("C", "405 000", "405 100"), ("D", "450 000", "451 000")]
-    parts = []
-    for i, (letter, a, b) in enumerate(rows):
-        y = 85 + i * 44.4
-        pp, xs = numberline(139.5, 524.5, y, 20, 15, 7, {0, 20}, 1.6)
-        parts += pp
-        parts.append(f'<text class="let" x="92" y="{y - 1}" font-size="17" text-anchor="middle">{letter}</text>')
-        parts.append(f'<text class="lb" x="{xs[0]:.1f}" y="{y + 15}" font-size="11.5" text-anchor="middle">{a.replace(" ", NB)}</text>')
-        parts.append(f'<text class="lb" x="{xs[20]:.1f}" y="{y + 15}" font-size="11.5" text-anchor="middle">{b.replace(" ", NB)}</text>')
-    return f'<svg class="pic" width="634" height="356" viewBox="0 0 634 356">{"".join(parts)}</svg>'
-
-
-SHAPES = {
-    "tri": '<svg viewBox="0 0 12 12" width="12" height="12"><path d="M6 1.2 11 10.2H1Z"/></svg>',
-    "dot": '<svg viewBox="0 0 12 12" width="12" height="12"><circle cx="6" cy="6" r="3"/></svg>',
-    "sq": '<svg viewBox="0 0 12 12" width="12" height="12"><rect x="2" y="2" width="8" height="8"/></svg>',
-    "dia": '<svg viewBox="0 0 12 12" width="12" height="12"><path d="M6 2 10 6 6 10 2 6Z"/></svg>',
-}
-COLOURS = ("red", "blue", "orange", "green")
-SHAPE_KEYS = ("tri", "dot", "sq", "dia")
-
-
-def answer_buttons(labels, lang):
-    return '<div class="btns">' + "".join(
-        f'<div class="btn {c}">{SHAPES[s]}<span>{fmt(l, lang)}</span></div>'
-        for c, s, l in zip(COLOURS, SHAPE_KEYS, labels)) + "</div>"
-
-
-def card(title, body, buttons="", cls=""):
-    return f'<div class="card {cls}"><div class="q">{title}</div><div class="mid">{body}</div>{buttons}</div>'
 
 
 # ------------------------------------------------------------------ the chat
@@ -180,12 +120,10 @@ ICONS = {
 CSS = """
 :root { color-scheme: light;
   --bg:#ffffff; --ink:#1f1e1d; --ai:#16181b; --grey:#767570; --bub:#f3f4f3; --chip:#f8f8f8; --chipline:#ececea; --ico:#ececea;
-  --code:#f0efed; --card:#ffffff; --cardline:#e0e0e0; --qink:#1c1b19; --nl:#26262a; --lb:#2a2a2d; --ar:#1c7c89; --let:#2a7f8c;
-  --fail:#a3322f; --react:#5c5b57; --frame-in:#ffffff; }
+  --code:#f0efed; --react:#5c5b57; }
 :root[data-theme="dark"] { color-scheme: dark;
   --bg:#262624; --ink:#ece9df; --ai:#ece9df; --grey:#9c9a92; --bub:#1f1e1d; --chip:#2f2f2c; --chipline:#3d3c38; --ico:#3a3935;
-  --code:#383733; --card:#1f1e1d; --cardline:#3d3c38; --qink:#f2f0e8; --nl:#d8d6cc; --lb:#c9c7bc; --ar:#4db3c4; --let:#58b8c6;
-  --fail:#e5857d; --react:#a8a69d; --frame-in:#1f1e1d; }
+  --code:#383733; --react:#a8a69d; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { background: var(--bg); }
 body { width: 681px; padding: 14px 34px 20px 16px; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
@@ -194,16 +132,17 @@ body { width: 681px; padding: 14px 34px 20px 16px; font-family: "Segoe UI", "Hel
 .user { display: flex; justify-content: flex-end; margin: 8px 0 0; }
 .photos + .user { margin-top: 8px; }
 .bub { background: var(--bub); border-radius: 14px; padding: 9px 14px; font-size: 13.8px; line-height: 19px; max-width: 540px; }
-.qbox .bub { max-width: 524px; }
-.qa + .qa { margin-top: 8px; }
 .st { font-size: 13.2px; line-height: 18px; color: var(--grey); margin: 15px 0 0; }
+.st.files { display: flex; align-items: center; justify-content: space-between; }
+.st .thumbs { display: flex; gap: 5px; }
+.st .thumbs img { height: 19px; border-radius: 3px; border: 1px solid var(--chipline); object-fit: cover; background: #fff; display: block; }
 .chev { display: inline-block; margin-left: 7px; border-left: 4px solid currentColor; border-top: 3px solid transparent; border-bottom: 3px solid transparent; vertical-align: 1px; opacity: .85; }
-.fail { color: var(--fail); }
-.user + .st, .qbox + .st { margin-top: 30px; }
+.user + .st { margin-top: 30px; }
 .ai { font-family: Cambria, Georgia, serif; font-variant-numeric: lining-nums; font-size: 14.05px; line-height: 18.6px; color: var(--ai); margin-top: 15px; }
 ul.ai { padding-left: 29px; margin-top: 9px; }
 ul.ai li { margin-top: 3px; }
 ul.ai li::marker { font-size: 12px; }
+ul.ai ul { list-style: circle; padding-left: 26px; margin-top: 3px; }
 p.ai + p.ai { margin-top: 10px; }
 ul.ai + p.ai { margin-top: 12px; }
 p.ai + ul.ai { margin-top: 9px; }
@@ -213,30 +152,9 @@ code { font-family: Consolas, "Cascadia Mono", monospace; font-size: .86em; back
 .ct { font-size: 14px; line-height: 17px; }
 .cs { font-size: 11.5px; line-height: 14px; color: var(--grey); letter-spacing: .2px; }
 .user.t2 { margin-top: 46px; }
-.cap { font-size: 12px; line-height: 14px; color: var(--grey); margin: 24px 0 5px -3px; }
-.card { margin: 0 0 0 -3px; width: 634px; height: 356px; border: 1px solid var(--cardline); background: var(--card); border-radius: 14px; display: flex; flex-direction: column; align-items: center; overflow: hidden; font-family: "Segoe UI", Arial, sans-serif; }
-.q { margin-top: 24px; position: relative; font-size: 17.6px; line-height: 22px; font-weight: 500; text-align: center; color: var(--qink); padding: 0 20px; }
-.card.big .q { font-size: 19px; line-height: 26px; font-weight: 500; margin-top: 56px; max-width: 560px; }
-.mid { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
-.card { position: relative; }
-.pic { position: absolute; left: -1px; top: -1px; }
-.pic .nl, svg .nl { stroke: var(--nl); fill: none; stroke-linecap: butt; }
-svg .ar { stroke: var(--ar); }
-svg .arf { fill: var(--ar); }
-svg .lb { fill: var(--lb); font-family: "Segoe UI", Arial, sans-serif; }
-svg .let { fill: var(--let); font-family: "Segoe UI", Arial, sans-serif; font-weight: 700; }
-.btns { margin-top: auto; position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 6px; width: 100%; padding: 0 25px 21px; }
-.btn { height: 38px; border-radius: 9px; display: flex; align-items: center; gap: 10px; padding: 0 12px; font-size: 17px; font-weight: 500; color: #fff; }
-.btn svg { fill: #fff; flex: none; }
-.btn.red { background: #e14b4a; } .btn.blue { background: #368add; } .btn.orange { background: #ef9f26; color: #3a2b12; } .btn.green { background: #639921; }
-.btn.orange svg { fill: #3a2b12; }
-.frames { position: absolute; left: 0; top: 128px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 6px; width: 100%; padding: 0 25px; }
-.frame { border: 5px solid; border-radius: 12px; background: var(--frame-in); height: 60px; padding: 0; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
-.frame svg { display: block; margin-bottom: 0; }
-.frame.red { border-color: #e14b4a; } .frame.blue { border-color: #368add; } .frame.orange { border-color: #ef9f26; } .frame.green { border-color: #639921; }
-.card.plain .mid { align-items: center; }
 .react { display: flex; gap: 11px; margin: 16px 0 0 0; color: var(--react); }
 .thumb { width: 86px; height: 130px; margin: 20px 0 0 -3px; border-radius: 10px; border: 1px solid var(--chipline); overflow: hidden; background: #fbf8f2; }
+.thumb.wide { width: 112px; height: auto; }
 .thumb img { display: block; width: 100%; }
 .thumb + .chip { margin-top: 10px; }
 .all { display: inline-flex; align-items: center; gap: 7px; margin: 10px 0 0 -3px; padding: 6px 11px; border-radius: 9px; background: var(--chip); border: 1px solid var(--chipline); font-size: 13px; line-height: 17px; }
@@ -253,53 +171,61 @@ def page(lang, theme, convo="sheets"):
     return f'<!doctype html><html lang="{lang}" data-theme="{theme}"><head><meta charset="utf-8"><style>{CSS}</style></head><body>{"".join(blocks)}</body></html>'
 
 
+# The files a "Shared 2 files, created a file, and n more steps" fold shows beside it, as the app does: the overview, then
+# two of the quiz's pictures (the run's own are not kept; these stand in at 19 px high).
+FOLD_FILES = {"made1": ("review", "q01.png", "q03b.png"), "made2": ("review", "q02a.png", "q03a.png")}
+
+
+def zip_picture(lang, name):
+    """A picture from the language's .zip of the sheets run, as a data: URI."""
+    import base64
+    import zipfile
+    with zipfile.ZipFile(EX / T.ZIPS[lang][1]) as z:
+        return "data:image/png;base64," + base64.b64encode(z.read(name)).decode()
+
+
 def chat(lang):
+    """The sheets run: the two photos and two asks, each answered with an overview and a .zip."""
     out = []
-    zip_title = html.escape(T.FILM[lang]["zipTitle"])
+    review = (EX / f"review-{lang}.webp").as_uri()
 
-    def chip():
-        return f'<div class="chip"><div class="ico">{ICONS["archive"]}</div><div><div class="ct">{zip_title}</div><div class="cs">{T.UI["zipSub"][lang]}</div></div></div>'
+    def li(b):
+        if isinstance(b, tuple):  # (text, its sub-bullets)
+            return f"<li>{fmt(b[0][lang], lang)}<ul>{''.join(li(c) for c in b[1])}</ul></li>"
+        return f"<li>{fmt(b[lang], lang)}</li>"
 
-    out.append('<div class="photos"><img src="%s"><img src="%s"></div>' % (
-        (EX / "sheet-photo-1.jpg").as_uri(), (EX / "sheet-photo-2.jpg").as_uri()))
-    for ti, turn in enumerate((T.TURN1, T.TURN2, T.TURN3)):
-        for kind, v in turn:
-            if kind == "user":
-                cls = "user t2" if (ti > 0 and out[-1].startswith("<div class=\"chip\"")) else "user"
-                out.append(f'<div class="{cls}"><div class="bub">{fmt(pick(v, lang), lang)}</div></div>')
-            elif kind == "status":
-                out.append(f'<div class="st">{fmt(pick(v, lang), lang)}</div>')
-            elif kind == "fold":
-                out.append(f'<div class="st">{fmt(pick(v, lang), lang)}<i class="chev"></i></div>')
-            elif kind == "toolfail":
-                out.append(f'<div class="st">{fmt(T.UI["tool"][lang], lang)} <span class="fail">{fmt(T.UI["failed"][lang], lang)}</span><i class="chev"></i></div>')
-            elif kind == "ai":
-                out.append(f'<p class="ai">{fmt(pick(v, lang), lang)}</p>')
-            elif kind == "qa":
-                groups = "".join(f'<div class="qa"><div>{fmt(q[lang], lang)}</div><div>{fmt(a[lang], lang)}</div></div>' for q, a in v)
-                out.append(f'<div class="user qbox" style="margin-top:34px"><div class="bub">{groups}</div></div>')
-            elif kind == "bullets":
-                out.append('<ul class="ai">' + "".join(f"<li>{fmt(b[lang], lang)}</li>" for b in v) + "</ul>")
-            elif kind == "chip":
-                out.append(chip())
-            elif kind == "caption":
-                out.append(f'<div class="cap">{fmt(v[lang], lang)}</div>')
-            elif kind == "card_arrow":
-                out.append(card(fmt(T.FILM[lang]["q1"], lang), svg_big_line("640" + NB + "000", "650" + NB + "000", "660" + NB + "000"),
-                                answer_buttons(("646 000", "645 000", "644 000", "647 000"), lang)))
-            elif kind == "card_match":
-                fracs = (0.7, 0.6, 0.8, 0.3)
-                frames = "".join(f'<div class="frame {c}">{svg_mini_line(f, "640" + NB + "000", "650" + NB + "000", "660" + NB + "000")}</div>'
-                                 for c, f in zip(COLOURS, fracs))
-                out.append(card(fmt(T.FILM[lang]["q4"], lang), f'<div class="frames">{frames}</div>', cls="plain"))
-            elif kind == "card_count":
-                out.append(card(fmt(v[lang], lang).replace("... ", "...<br>"), "", answer_buttons(("560 000", "550 000", "541 000", "640 000"), lang), cls="big"))
-            elif kind == "card_section":
-                out.append(card(fmt(v[lang], lang), svg_sections(), answer_buttons(("A", "B", "C", "D"), lang)))
-            elif kind == "reactions":
-                out.append('<div class="react">' + "".join(ICONS[k] for k in ("copy", "speaker", "up", "down", "retry")) + "</div>")
-            else:
-                raise SystemExit("unknown block " + kind)
+    def bullets(items):
+        return f'<ul class="ai">{"".join(li(b) for b in items)}</ul>'
+
+    for kind, v in T.TURN1 + T.TURN2:
+        if kind == "photos":
+            out.append('<div class="photos"><img src="%s"><img src="%s"></div>' % (
+                (EX / "sheet-photo-2.jpg").as_uri(), (EX / "sheet-photo-1.jpg").as_uri()))
+        elif kind == "ask":
+            out.append(f'<div class="user"><div class="bub">{fmt(ask_sheets(lang), lang)}</div></div>')
+        elif kind == "user":
+            out.append(f'<div class="user t2"><div class="bub">{fmt(pick(v, lang), lang)}</div></div>')
+        elif kind == "fold" and v in FOLD_FILES:
+            pics = "".join(f'<img src="{review if f == "review" else zip_picture(lang, f)}" style="width:{21 if f == "review" else 36}px">'
+                           for f in FOLD_FILES[v])
+            out.append(f'<div class="st files"><span>{fmt(pick(v, lang), lang)}<i class="chev"></i></span><span class="thumbs">{pics}</span></div>')
+        elif kind == "fold":
+            out.append(f'<div class="st">{fmt(pick(v, lang), lang)}<i class="chev"></i></div>')
+        elif kind == "ai":
+            out.append(f'<p class="ai">{fmt(pick(v, lang), lang)}</p>')
+        elif kind == "bullets":
+            out.append(bullets(v))
+        elif kind == "review":
+            out.append(f'<div class="thumb wide"><img src="{review}"></div>')
+        elif kind == "chip":
+            title = html.escape(T.card_title(T.ZIPS[lang][v]))
+            out.append(f'<div class="chip"><div class="ico">{ICONS["archive"]}</div><div><div class="ct">{title}</div><div class="cs">{T.UI["zipSub"][lang]}</div></div></div>')
+        elif kind == "all":
+            out.append(f'<div class="all">{ICONS["download"]}<span>{fmt(T.UI["all"][lang], lang)}</span></div>')
+        elif kind == "reactions":
+            out.append('<div class="react">' + "".join(ICONS[k] for k in ("copy", "speaker", "up", "down", "retry")) + "</div>")
+        else:
+            raise SystemExit("unknown block " + kind)
     return out
 
 
@@ -378,24 +304,27 @@ def notes_pages(langs):
                 print(out.name, small.size, out.stat().st_size // 1024, "KB")
 
 
-# ------------------------------------------------------------------ the space run's overview
+# ------------------------------------------------------------------ the overviews
 
 REVIEW_W = 1500
+# Per run: the German overview, the AI's own, and the name its pictures take (review-<tag><lang>.webp).
+REVIEW = {"sheets": ("sheets-review-original.webp", ""), "idea": ("space-review-original.webp", "idea-")}
 
 
-def reviews(langs):
-    """review-idea-<lang>.webp: German the AI's own, the others drawn from their .zip by the site's preview.py."""
+def reviews(convo, langs):
+    """review-<tag><lang>.webp: German the AI's own, the others drawn from their .zip by the site's preview.py."""
     import subprocess
     from PIL import Image
     from faces import EXAMPLES  # the files of the root page's examples
+    original, tag = REVIEW[convo]
     TMP.mkdir(parents=True, exist_ok=True)
     for lang in langs:
-        out = EX / f"review-idea-{lang}.webp"
+        out = EX / f"review-{tag}{lang}.webp"
         if lang == "de":
-            im = Image.open(HERE / "space-review-original.webp").convert("RGB")
+            im = Image.open(HERE / original).convert("RGB")
         else:
-            png = TMP / f"review-idea-{lang}.png"
-            subprocess.run([sys.executable, "-I", str(ROOT / "src" / "public" / "preview.py"), str(EX / EXAMPLES["idea"][lang]), str(png)],
+            png = TMP / f"review-{tag}{lang}.png"
+            subprocess.run([sys.executable, "-I", str(ROOT / "src" / "public" / "preview.py"), str(EX / EXAMPLES[convo][lang]), str(png)],
                            check=True, cwd=str(TMP), stdout=subprocess.DEVNULL)
             im = Image.open(png).convert("RGB")
             png.unlink()
@@ -422,8 +351,9 @@ def main():
     themes = [opt("--theme")] if "--theme" in args else ("light", "dark")
     keep = "--keep" in args
     check_film()
-    if "idea" in convos:
-        reviews(langs)
+    for convo in convos:
+        if convo in REVIEW:
+            reviews(convo, langs)
     if "notes" in convos:
         notes_pages(langs)
     from playwright.sync_api import sync_playwright

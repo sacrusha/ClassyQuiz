@@ -65,20 +65,25 @@
     </ul></li>
 
   <li id="convo"><h2 data-t="convoH">The conversation</h2>
-    <p id="convo-p" data-t="convoP">The photos and three asks to the AI. Its first answer was a quiz; the second ask changed it; the third asked for a preview of the screens. Free Claude (Sonnet), 4 November 2026.</p>
-    <a class="convo" href="/examples/conversation-en-light.webp" data-convo><picture><source id="convo-dark" media="(prefers-color-scheme: dark)" srcset="/examples/conversation-en-dark.webp"><img id="convo-img" src="/examples/conversation-en-light.webp" alt="The conversation, as a picture" data-t-alt="convoAlt" width="681" height="3675"></picture></a>
+    <p id="convo-p" data-t="convoP">The photos and two asks. The AI read the site, made the quiz from exercises 1, 3 and 4, checked it with the site's format checker and handed over the .zip with an overview of every question; the second ask changed it. Claude (Sonnet), 19 November 2026.</p>
+    <a class="convo" href="/examples/conversation-en-light.webp" data-convo><picture><source id="convo-dark" media="(prefers-color-scheme: dark)" srcset="/examples/conversation-en-dark.webp"><img id="convo-img" src="/examples/conversation-en-light.webp" alt="The conversation, as a picture" data-t-alt="convoAlt" width="681" height="2231"></picture></a>
     <p><a href="/examples/conversation-en-light.webp" data-convo data-t="readAll">Read the whole conversation &rsaquo;</a></p></li>
 
+  <li id="review"><h2 data-t="reviewH">The overview</h2>
+    <p data-t="reviewP">Every question with its solution, as the AI drew them for checking the quiz before it is played.</p>
+    <a class="convo" href="/examples/review-en.webp" data-review><img src="/examples/review-en.webp" alt="Every question of the quiz with its solution, as a picture" data-t-alt="reviewAlt" width="1500" height="1358"></a>
+    <p><a href="/examples/review-en.webp" data-review data-t="readReview">See the whole overview &rsaquo;</a></p></li>
+
   <li id="quiz"><h2 data-t="quizH">The quiz</h2>
-    <p data-t="quizP">What the AI handed over: one .zip with the quiz and its pictures.</p>
-    <ul class="files"><li><a id="zip" href="/examples/big-numbers-quiz.zip" download>big-numbers-quiz.zip</a></li></ul></li>
+    <p data-t="quizP">What the AI handed over with its second answer: one .zip with the quiz and its 24 pictures.</p>
+    <ul class="files"><li><a id="zip" href="/examples/big-numbers-quiz-v2.zip" download>big-numbers-quiz-v2.zip</a></li></ul></li>
 
   <li><h2 data-t="runH">Try it</h2>
     <p data-t="runP">Start this quiz as if you had opened its file on the start page: you choose how it is played, on your own, with friends or for a class.</p>
     <a class="btn primary go" id="start" href="/open?example=en" data-t="start">Start this quiz</a>
     <p class="note" data-t="runNote">On your own, it stays in this browser. With friends or a class, it runs on this site like any quiz.</p></li>
 </ol>
-<p class="note translated" data-t="translated">The example was tested in all four of the site's languages and works in each. So that it is the same example in each, the German, French and Italian pages show this run, made in English, translated.</p>
+<p class="note translated" data-t="translated">The example was made in German. So that it is the same example in each language, the English, French and Italian pages show it translated: the conversation, the overview and the quiz.</p>
 </div>
 <script src="/js/example.js" defer></script>
 </body>

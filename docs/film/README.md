@@ -113,7 +113,7 @@ assumption it rests on: the viewer infers it.
   shows the sentence a viewer finds on the page; it holds on the address,
   the one thing a teacher has to remember.
 - **The ranking comes after the whole quiz**: the wall's counter runs from
-  1 / 13 to 13 / 13 first, since after one question twelve children would
+  1 / 12 to 12 / 12 first, since after one question twelve children would
   tie at ★ 1, where a ranking after the whole quiz has places. The end card
   gives the address once more.
 

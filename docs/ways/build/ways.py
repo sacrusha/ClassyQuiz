@@ -59,7 +59,7 @@ def shape(i, x, y, size, fill):
 
 # ---------------------------------------------------------------- the screens
 def number_line(x, y, w, h):
-    """The example's question picture (q1.svg of big-numbers-quiz.zip, as the film draws it), in a w x h box."""
+    """A number line with an arrow, as the example's first question has (fewer ticks), in a w x h box."""
     s = w / 1600
     out = f'<rect x="{f(x)}" y="{f(y)}" width="{f(w)}" height="{f(h)}" rx="{f(max(1, w * .02))}" fill="#fff"/>'
     k = h / 340

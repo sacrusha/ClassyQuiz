@@ -22,13 +22,18 @@ export interface ExampleText {
   convoP: string;
   convoAlt: string;
   readAll: string;
+  /** The overview, the AI's picture of every question with its solution (the sheets' and the idea's runs). */
+  reviewH: string;
+  reviewP: string;
+  reviewAlt: string;
+  readReview: string;
   quizH: string;
   quizP: string;
   runH: string;
   runP: string;
   start: string;
   runNote: string;
-  /** Under the steps: one run, translated, so the example is the same in every language. */
+  /** Under the steps: the run's language, and the others translated, so the example is the same in every language. */
   translated: string;
 }
 
@@ -45,16 +50,20 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     dl2: "Photo, page 2 (.jpg)",
     dlPdf: "The sheets (.pdf)",
     convoH: "The conversation",
-    convoP: "The photos and three asks to the AI. Its first answer was a quiz; the second ask changed it; the third asked for a preview of the screens. Free Claude (Sonnet), 4 November 2026.",
+    convoP: "The photos and two asks. The AI read the site, made the quiz from exercises 1, 3 and 4, checked it with the site's format checker and handed over the .zip with an overview of every question; the second ask changed it. Claude (Sonnet), 19 November 2026.",
     convoAlt: "The conversation, as a picture",
     readAll: "Read the whole conversation ›",
+    reviewH: "The overview",
+    reviewP: "Every question with its solution, as the AI drew them for checking the quiz before it is played.",
+    reviewAlt: "Every question of the quiz with its solution, as a picture",
+    readReview: "See the whole overview ›",
     quizH: "The quiz",
-    quizP: "What the AI handed over: one .zip with the quiz and its pictures.",
+    quizP: "What the AI handed over with its second answer: one .zip with the quiz and its 24 pictures.",
     runH: "Try it",
     runP: "Start this quiz as if you had opened its file on the start page: you choose how it is played, on your own, with friends or for a class.",
     start: "Start this quiz",
     runNote: "On your own, it stays in this browser. With friends or a class, it runs on this site like any quiz.",
-    translated: "The example was tested in all four of the site's languages and works in each. So that it is the same example in each, the German, French and Italian pages show this run, made in English, translated.",
+    translated: "The example was made in German. So that it is the same example in each language, the English, French and Italian pages show it translated: the conversation, the overview and the quiz.",
   },
   de: {
     title: "Das Beispiel, Schritt für Schritt · classyQuiz",
@@ -68,16 +77,20 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     dl2: "Foto, Seite 2 (.jpg)",
     dlPdf: "Die Arbeitsblätter (.pdf)",
     convoH: "Das Gespräch",
-    convoP: "Die Fotos und drei Anfragen an die KI. Ihre erste Antwort war ein Quiz; die zweite Anfrage hat es geändert; die dritte wollte eine Vorschau der Bildschirme. Claude (Sonnet) in der kostenlosen Version, 4. November 2026.",
+    convoP: "Die Fotos und zwei Anfragen. Die KI hat die Seite gelesen, das Quiz aus den Aufgaben 1, 3 und 4 gemacht, es mit der Formatprüfung der Seite geprüft und die .zip-Datei mit einer Übersicht aller Fragen geliefert; die zweite Anfrage hat es geändert. Claude (Sonnet), 19. November 2026.",
     convoAlt: "Das Gespräch, als Bild",
     readAll: "Das ganze Gespräch lesen ›",
+    reviewH: "Die Übersicht",
+    reviewP: "Alle Fragen mit ihren Lösungen, wie die KI sie gezeichnet hat, um das Quiz vor dem Spielen zu prüfen.",
+    reviewAlt: "Alle Fragen des Quiz mit ihren Lösungen, als Bild",
+    readReview: "Die ganze Übersicht ansehen ›",
     quizH: "Das Quiz",
-    quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz und seinen Bildern.",
+    quizP: "Was die KI mit ihrer zweiten Antwort geliefert hat: eine .zip-Datei mit dem Quiz und seinen 24 Bildern.",
     runH: "Ausprobieren",
     runP: "Starte dieses Quiz, als hättest du seine Datei auf der Startseite geöffnet: Du wählst, wie es gespielt wird, allein, mit Freunden oder mit einer Klasse.",
     start: "Dieses Quiz starten",
     runNote: "Allein bleibt es in diesem Browser. Mit Freunden oder einer Klasse läuft es auf dieser Seite wie jedes Quiz.",
-    translated: "Das Beispiel wurde in allen vier Sprachen der Seite getestet und funktioniert in jeder. Damit es überall dasselbe Beispiel ist, zeigen die deutsche, die französische und die italienische Seite diesen Durchlauf, der auf Englisch gemacht wurde, in Übersetzung.",
+    translated: "Das Beispiel ist auf Deutsch entstanden. Damit es in jeder Sprache dasselbe Beispiel ist, zeigen die englische, die französische und die italienische Seite es übersetzt: das Gespräch, die Übersicht und das Quiz.",
   },
   fr: {
     title: "L'exemple, pas à pas · classyQuiz",
@@ -91,16 +104,20 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     dl2: "Photo, page 2 (.jpg)",
     dlPdf: "Les fiches (.pdf)",
     convoH: "La conversation",
-    convoP: "Les photos et trois demandes à l'IA. Sa première réponse était un quiz ; la deuxième demande l'a modifié ; la troisième demandait un aperçu des écrans. Claude (Sonnet), version gratuite, 4 novembre 2026.",
+    convoP: "Les photos et deux demandes. L'IA a lu le site, fait le quiz à partir des exercices 1, 3 et 4, l'a vérifié avec le vérificateur de format du site et a fourni le .zip avec un aperçu de toutes les questions ; la deuxième demande l'a modifié. Claude (Sonnet), 19 novembre 2026.",
     convoAlt: "La conversation, en image",
     readAll: "Lire toute la conversation ›",
+    reviewH: "L'aperçu",
+    reviewP: "Toutes les questions avec leurs solutions, telles que l'IA les a dessinées pour vérifier le quiz avant d'y jouer.",
+    reviewAlt: "Toutes les questions du quiz avec leurs solutions, en image",
+    readReview: "Voir tout l'aperçu ›",
     quizH: "Le quiz",
-    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses images.",
+    quizP: "Ce que l'IA a fourni avec sa deuxième réponse : un fichier .zip avec le quiz et ses 24 images.",
     runH: "Le lancer",
     runP: "Lancez ce quiz comme si vous aviez ouvert son fichier sur la page d'accueil : vous choisissez comment y jouer, en solo, entre amis ou avec une classe.",
     start: "Lancer ce quiz",
     runNote: "En solo, il reste dans ce navigateur. Entre amis ou avec une classe, il fonctionne sur ce site comme n'importe quel quiz.",
-    translated: "L'exemple a été testé dans les quatre langues du site et fonctionne dans chacune. Pour que ce soit le même exemple partout, les pages en allemand, en français et en italien montrent la traduction de cet essai, réalisé en anglais.",
+    translated: "L'exemple a été réalisé en allemand. Pour que ce soit le même exemple dans chaque langue, les pages en anglais, en français et en italien le montrent traduit : la conversation, l'aperçu et le quiz.",
   },
   it: {
     title: "L'esempio, passo per passo · classyQuiz",
@@ -114,75 +131,54 @@ export const EXAMPLE_TEXT: Record<Lang, ExampleText> = {
     dl2: "Foto, pagina 2 (.jpg)",
     dlPdf: "Le schede (.pdf)",
     convoH: "La conversazione",
-    convoP: "Le foto e tre richieste all'IA. La sua prima risposta era un quiz; la seconda richiesta l'ha modificato; la terza chiedeva un'anteprima delle schermate. Claude (Sonnet), versione gratuita, 4 novembre 2026.",
+    convoP: "Le foto e due richieste. L'IA ha letto il sito, ha fatto il quiz dagli esercizi 1, 3 e 4, l'ha verificato con il controllo del formato del sito e ha fornito il file .zip con una panoramica di tutte le domande; la seconda richiesta l'ha modificato. Claude (Sonnet), 19 novembre 2026.",
     convoAlt: "La conversazione, come immagine",
     readAll: "Leggi tutta la conversazione ›",
+    reviewH: "La panoramica",
+    reviewP: "Tutte le domande con le loro soluzioni, come l'IA le ha disegnate per verificare il quiz prima di giocarlo.",
+    reviewAlt: "Tutte le domande del quiz con le loro soluzioni, come immagine",
+    readReview: "Vedi tutta la panoramica ›",
     quizH: "Il quiz",
-    quizP: "Quello che l'IA ha fornito: un file .zip con il quiz e le sue immagini.",
+    quizP: "Quello che l'IA ha fornito con la sua seconda risposta: un file .zip con il quiz e le sue 24 immagini.",
     runH: "Provalo",
     runP: "Avvia questo quiz come se ne avessi aperto il file dalla pagina iniziale: scegli come giocarlo, per conto tuo, con gli amici o con una classe.",
     start: "Avvia questo quiz",
     runNote: "Per conto tuo, resta in questo browser. Con gli amici o con una classe funziona su questo sito come qualsiasi quiz.",
-    translated: "L'esempio è stato provato in tutte e quattro le lingue del sito e funziona in ognuna. Perché sia lo stesso esempio ovunque, le pagine in tedesco, francese e italiano mostrano la traduzione di questa prova, fatta in inglese.",
+    translated: "L'esempio è nato in tedesco. Perché sia lo stesso esempio in ogni lingua, le pagine in inglese, francese e italiano lo mostrano tradotto: la conversazione, la panoramica e il quiz.",
   },
 };
 
 /**
  * The full example of the root page's "Idea" tab, the owner's space run (11 Nov 2026, German): what replaces the worked
- * example's words on /example?ex=idea. Nothing was attached, so the sheets' step goes, and the AI's overview of its
- * questions (its review.png) stands after the conversation.
+ * example's words on /example?ex=idea. Nothing was attached, so the sheets' step goes; the overview and the note under
+ * the steps are the worked example's words, both runs having been made in German with an overview handed over.
  */
 export interface IdeaText {
   lede: string;
   convoP: string;
-  reviewH: string;
-  reviewP: string;
-  reviewAlt: string;
-  readReview: string;
   quizP: string;
-  translated: string;
 }
 
 export const IDEA_TEXT: Record<Lang, IdeaText> = {
   en: {
     lede: "How the space quiz was made, from one ask with nothing attached to the class, with everything to try the same on your own AI.",
     convoP: "One ask, nothing attached. The AI read the site, built the quiz with photographs it found and four drawings of its own, checked it and handed over the .zip, with an overview of every question. Claude, 11 November 2026.",
-    reviewH: "The overview",
-    reviewP: "Every question with its solution, as the AI drew them for checking the quiz before it is played.",
-    reviewAlt: "Every question of the quiz with its solution, as a picture",
-    readReview: "See the whole overview ›",
     quizP: "What the AI handed over: one .zip with the quiz and its 23 pictures.",
-    translated: "The example was made in German. So that it is the same example in each language, the English, French and Italian pages show it translated: the conversation, the overview and the quiz.",
   },
   de: {
     lede: "Wie das Weltraum-Quiz entstanden ist, von einer einzigen Anfrage ohne Anhang bis zur Klasse – mit allem, was du brauchst, um dasselbe mit deiner eigenen KI auszuprobieren.",
     convoP: "Eine Anfrage, nichts angehängt. Die KI hat die Seite gelesen, das Quiz mit Fotos, die sie gefunden hat, und vier eigenen Zeichnungen gebaut, es geprüft und die .zip-Datei geliefert, dazu eine Übersicht aller Fragen. Claude, 11. November 2026.",
-    reviewH: "Die Übersicht",
-    reviewP: "Alle Fragen mit ihren Lösungen, wie die KI sie gezeichnet hat, um das Quiz vor dem Spielen zu prüfen.",
-    reviewAlt: "Alle Fragen des Quiz mit ihren Lösungen, als Bild",
-    readReview: "Die ganze Übersicht ansehen ›",
     quizP: "Was die KI geliefert hat: eine .zip-Datei mit dem Quiz und seinen 23 Bildern.",
-    translated: "Das Beispiel ist auf Deutsch entstanden. Damit es in jeder Sprache dasselbe Beispiel ist, zeigen die englische, die französische und die italienische Seite es übersetzt: das Gespräch, die Übersicht und das Quiz.",
   },
   fr: {
     lede: "Comment le quiz sur l'espace a été créé, d'une seule demande sans pièce jointe jusqu'à la classe, avec tout ce qu'il faut pour refaire l'essai avec votre propre IA.",
     convoP: "Une demande, rien en pièce jointe. L'IA a lu le site, construit le quiz avec des photos qu'elle a trouvées et quatre dessins à elle, l'a vérifié et a fourni le .zip, avec un aperçu de toutes les questions. Claude, 11 novembre 2026.",
-    reviewH: "L'aperçu",
-    reviewP: "Toutes les questions avec leurs solutions, telles que l'IA les a dessinées pour vérifier le quiz avant d'y jouer.",
-    reviewAlt: "Toutes les questions du quiz avec leurs solutions, en image",
-    readReview: "Voir tout l'aperçu ›",
     quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz et ses 23 images.",
-    translated: "L'exemple a été réalisé en allemand. Pour que ce soit le même exemple dans chaque langue, les pages en anglais, en français et en italien le montrent traduit : la conversation, l'aperçu et le quiz.",
   },
   it: {
     lede: "Come è nato il quiz sullo spazio, da un'unica richiesta senza allegati fino alla classe, con tutto il necessario per rifare la stessa prova con la tua IA.",
     convoP: "Una richiesta, niente in allegato. L'IA ha letto il sito, ha costruito il quiz con foto che ha trovato e quattro disegni suoi, l'ha verificato e ha fornito il file .zip, con una panoramica di tutte le domande. Claude, 11 novembre 2026.",
-    reviewH: "La panoramica",
-    reviewP: "Tutte le domande con le loro soluzioni, come l'IA le ha disegnate per verificare il quiz prima di giocarlo.",
-    reviewAlt: "Tutte le domande del quiz con le loro soluzioni, come immagine",
-    readReview: "Vedi tutta la panoramica ›",
     quizP: "Quello che l'IA ha fornito: un file .zip con il quiz e le sue 23 immagini.",
-    translated: "L'esempio è nato in tedesco. Perché sia lo stesso esempio in ogni lingua, le pagine in inglese, francese e italiano lo mostrano tradotto: la conversazione, la panoramica e il quiz.",
   },
 };
 
@@ -231,8 +227,8 @@ export const NOTES_TEXT: Record<Lang, NotesText> = {
     page: "Page {n} des notes",
     dlPdf: "Les notes (.pdf)",
     convoP: "Les notes et une demande. L'IA a lu le site, écrit le quiz à partir des notes, l'a vérifié avec le vérificateur de format du site et a fourni le .zip, sans montrer les questions à qui joue aussi. Claude (Sonnet), 12 novembre 2026.",
-    quizP: "Ce que l'IA a fourni  un fichier .zip avec le quiz.",
-    translated: "L'exemple a été réalisé en anglais. Pour que ce soit le même exemple dans chaque langue, les pages en allemand, en français et en italien le montrent traduit  les notes, la conversation et le quiz.",
+    quizP: "Ce que l'IA a fourni : un fichier .zip avec le quiz.",
+    translated: "L'exemple a été réalisé en anglais. Pour que ce soit le même exemple dans chaque langue, les pages en allemand, en français et en italien le montrent traduit : les notes, la conversation et le quiz.",
   },
   it: {
     lede: "Come è nato il quiz tra amici, dagli appunti alla partita insieme, con tutto il necessario per rifare la stessa prova con la tua IA.",

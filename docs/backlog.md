@@ -198,10 +198,7 @@ before anything else comes into play (owner and product owner).
 10. **The worked example, behind one link** — built, `design/example-page.md`:
     `/example`, "The example, step by step", reached from "The whole example ›"
     beside each example's file in the landing's chat, in the landing's four
-    languages (item 12). Open: whether a run of
-    the owner's replaces the example's run, and whether the quiz's growth
-    past the asked ten is worth leaving in the picture
-    (`design/example-page.md`).
+    languages (item 12).
 11. **What a Sonnet-at-medium test (2026-11-04) misread** — the address read
     as a publish target, answer pictures lost on their tile's colour, every
     picture taken as enlargeable — met in the asks and the guidance:
@@ -209,12 +206,12 @@ before anything else comes into play (owner and product owner).
     known), `design/pictures.md` ("Enlarging").
 12. **The worked example in the landing's other three languages** — built,
     `design/example-page.md`: the page, the conversation picture (light and
-    dark) and the quiz in de, fr and it, the English run translated so the
-    example is the same in each, as the page says. Open: the translations are
-    drafts (`docs/example/text.py`, the page's
+    dark), the overview and the quiz in en, fr and it, the owner's German
+    run translated so the example is the same in each, as the page says.
+    Open: the translations are drafts (`docs/example/text.py`, the page's
     words in `client/example-text.ts`, the quizzes in
     `docs/example/quiz_zips.py`); the choices are
-    `docs/translation-review.md` E1–E5.
+    `docs/translation-review.md`, "The worked example".
 14. **One product, made on purpose** — the teacher deciding whether to rely
     on the site in front of a class meets the same name, mark, paper, ink and
     type on every page.
@@ -773,13 +770,6 @@ The quiz is already made; it can be more than one activity.
 ## Open: with the owner, and in the field
 
 With the owner, what only he can do:
-- The sheets run ("Big numbers on the number line") again, against the
-  manual as it now is. The run worked from a WebFetch summary that hid the
-  manual (the owner) and fixed the order of every question with the right
-  answer first; its `.zip`s are a hotfix without those orders
-  (`design/example-page.md`), and its conversation still explains them. The
-  run waits until the web environment's WebFetch, which caches for hours,
-  shows the current manual (`design/guidance-page.md`, Situation).
 - The read of the German, French and Italian words
   (`translation-review.md`; the screens' words in `client/room-text.ts`,
   `check-text.ts`, `own-copy.ts` and `notfound.ts`); Italian has no native
@@ -790,7 +780,8 @@ With the owner, what only he can do:
   (`design/example-page.md`, Not known).
 - Which plan made the space run: "Any AI subscription will do, or free
   Claude." stands beside it on the tab every visit opens on, and free Claude
-  is verified for the sheets run only (`design/guidance-page.md`, "The AIs
+  is verified for the sheets run only, made in an app whose free and paid
+  plans have the same features (`design/guidance-page.md`, "The AIs
   verified against").
 - The mocks on the root page (Test, "Not sure?") until his runs
   replace them: the deploy script has nothing that holds a deploy back while

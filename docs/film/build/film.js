@@ -33,7 +33,7 @@
   // the teacher's chat with their AI and the quiz it makes are in the teacher's language, the
   // page's (de en fr it), and so is the root page; the site's own screens after the upload (the
   // check, the second device's choice, the wall's chrome, the Remote, the tablets) are the site's
-  // words (SITE below). One quiz in every language: the example's 646 000 arrow
+  // words (SITE below). One quiz in every language: the example's 126 000 arrow
   // question, translated, so every language shows the same film.
 
   /** The root page's words from client/landing-text.ts, filled in by build.py: per language the sheets ask, which the
@@ -46,70 +46,66 @@
 
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
      on the AI app's tile (its name under the tile is the chapter's, LANDING.capAi); ask2 is the teacher's
-     second message, the real conversation's second ask, which changes the quiz; then the AI's status
-     lines, the .zip it makes (the chip's title and the file's name), the quiz's title and its question 1.
-     q4, question 4, is not shown (the lobby's list shows only question 1 in the frame); docs/example/build.py
-     holds the example's words to it (docs/example/text.py, FILM).
-     en is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
+     second message, the real conversation's second ask, which changes the quiz; then the AI's first words
+     (status1) and the step it shows after the second ask (status2), the .zips it hands over (the chips'
+     titles, the first answer's and the second's, and the second's file name), the quiz's title and its
+     question 1. docs/example/build.py holds the example's words to them (docs/example/text.py, FILM).
+     de is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
      to be replaced by the translators' (build.py and sitecheck.py name them). */
   const CONTENT = {
     en: {
-      draft: false,
+      draft: true,
       ai: 'AI',
-      ask2: 'Please add some questions where the number is given and they have to pick the matching marked number line.',
-      status1: 'Fetching the classyquiz.pages.dev page now.',
-      status2: 'Planning the spacing of the four new number-line questions',
-      zipTitle: 'Big numbers quiz', zipFile: 'big-numbers-quiz.zip',
+      ask2: 'Thanks. 3, 7 and 10 would work even better with pictures as answers. 2 and 11 turned out a bit too easy – you could turn exercises like 1, 4, 6 around, with pictures as answers, and mix them in for a bit more variety.',
+      status1: 'I’ll read classyquiz.pages.dev first, so I know which format the quiz has to be built in.',
+      status2: 'Setting the positions for the number-line question with a target number',
+      zipTitle: 'Big numbers quiz', zipTitle2: 'Big numbers quiz v2', zipFile: 'big-numbers-quiz-v2.zip',
       title: 'Big numbers on the number line',
       q1: 'Which number does the arrow show?',
-      q4: 'Which number line has an arrow at 654 000?',
     },
     de: {
-      draft: true,
+      draft: false,
       ai: 'KI',
-      ask2: 'Bitte füge ein paar Fragen hinzu, bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen.',
-      status1: 'Rufe jetzt die Seite classyquiz.pages.dev ab.',
-      status2: 'Plane die Abstände der vier neuen Zahlenstrahl-Fragen',
-      zipTitle: 'Grosse Zahlen Quiz', zipFile: 'grosse-zahlen-quiz.zip',
+      ask2: 'Danke. 3, 7 und 10 würden mit Bildern als Antwort noch besser funktionieren. 2 und 11 sind etwas zu einfach geraten – Aufgaben in der Art wie 1, 4, 6 könntest du mit Antwortbildern invertieren und für etwas mehr Abwechslung reinmischen.',
+      status1: 'Ich lese zuerst classyquiz.pages.dev, damit ich weiss, in welchem Format das Quiz gebaut werden muss.',
+      status2: 'Positionen für Zahlenstrahl-Aufgabe mit Zielzahl festlegen',
+      zipTitle: 'Grosse zahlen quiz', zipTitle2: 'Grosse zahlen quiz v2', zipFile: 'grosse-zahlen-quiz-v2.zip',
       title: 'Grosse Zahlen am Zahlenstrahl',
       q1: 'Welche Zahl zeigt der Pfeil?',
-      q4: 'Welcher Zahlenstrahl hat einen Pfeil bei 654 000?',
     },
     fr: {
       draft: true,
       ai: 'IA',
-      ask2: 'Ajoute s’il te plaît quelques questions où le nombre est donné et où ils doivent choisir la droite graduée marquée qui correspond.',
-      status1: 'Je consulte la page classyquiz.pages.dev.',
-      status2: 'Planification de l’espacement des quatre nouvelles questions sur la droite graduée',
-      zipTitle: 'Quiz grands nombres', zipFile: 'quiz-grands-nombres.zip',
+      ask2: 'Merci. Les 3, 7 et 10 marcheraient encore mieux avec des images comme réponses. Les 2 et 11 sont un peu trop faciles – tu pourrais inverser des exercices comme les 1, 4, 6, avec des images comme réponses, et les mélanger aux autres pour un peu plus de variété.',
+      status1: 'Je lis d’abord classyquiz.pages.dev, pour savoir dans quel format le quiz doit être construit.',
+      status2: 'Définition des positions pour l’exercice sur la droite graduée avec un nombre cible',
+      zipTitle: 'Quiz grands nombres', zipTitle2: 'Quiz grands nombres v2', zipFile: 'quiz-grands-nombres-v2.zip',
       title: 'Les grands nombres sur la droite graduée',
-      q1: 'Quel nombre la flèche montre-t-elle ?',
-      q4: 'Quelle droite graduée a une flèche à 654 000 ?',
+      q1: 'Quel nombre la flèche indique-t-elle ?',
     },
     it: {
       draft: true,
       ai: 'IA',
-      ask2: 'Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente.',
-      status1: 'Sto leggendo la pagina classyquiz.pages.dev.',
-      status2: 'Pianifico la spaziatura delle quattro nuove domande sulla retta numerica',
-      zipTitle: 'Quiz grandi numeri', zipFile: 'quiz-grandi-numeri.zip',
+      ask2: 'Grazie. La 3, la 7 e la 10 funzionerebbero ancora meglio con immagini come risposte. La 2 e l’11 sono venute un po’ troppo facili – potresti invertire esercizi come l’1, il 4 e il 6, con immagini come risposte, e mescolarli per avere un po’ più di varietà.',
+      status1: 'Prima leggo classyquiz.pages.dev, così so in che formato va costruito il quiz.',
+      status2: 'Definizione delle posizioni per l’esercizio sulla retta numerica con un numero obiettivo',
+      zipTitle: 'Quiz grandi numeri', zipTitle2: 'Quiz grandi numeri v2', zipFile: 'quiz-grandi-numeri-v2.zip',
       title: 'I grandi numeri sulla retta numerica',
       q1: 'Quale numero indica la freccia?',
-      q4: 'Quale retta numerica ha una freccia a 654 000?',
     },
   };
 
   /** The film's own words and the example's figures, the same in every language. */
   const COMMON = {
     zipSub: 'ZIP',
-    choices: ['646 000', '645 000', '644 000', '647 000'],
+    choices: ['126 000', '125 000', '127 000', '120 600'],
     right: 0,
     codePh: '12345',
     photos: ['sheet-photo-1.jpg', 'sheet-photo-2.jpg'],
-    nq: ' · 13 questions', nqList: '13 questions',
+    nq: ' · 12 questions', nqList: '12 questions', count: 12,
     code: '63953', teacherCode: '63953 47',
     addr: 'classyquiz.pages.dev',
-    of: ' / 13',
+    of: ' / 12',
     // the chapters' starts, marked on the time bar: [film time, the key of its name in landing-text.ts (LANDING)]
     chapters: [[0, 'capSheet'], [4.4, 'capAi'], [19.6, 'capZip'], [35.7, 'capWall'], [46.0, 'capTap']],
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
@@ -162,7 +158,7 @@
       ask2: [[glue(Q.ask2)]],
       ai: Q.ai, aiName: L.capAi,
       status1: Q.status1, status2: Q.status2,
-      zipTitle: Q.zipTitle, title: Q.title, q1: Q.q1,
+      zipTitle: Q.zipTitle, zipTitle2: Q.zipTitle2, title: Q.title, q1: Q.q1,
       files: [Q.zipFile, ...COMMON.photos],
       codeLabel: L.code, run: L.run, upload: L.upload, drop: L.drop, reading: L.reading,
       // the root page's first screen (client/landing-text.ts): the sentence, the first step's heading, the examples as tabs
@@ -438,7 +434,7 @@
     function makeClass() {
       const r = rng(7);
       for (let i = 0; i < 20; i++) AVATARS.push({ a: i % 12, c: (i * 3) % 8, b: [0, 1, 2, 3, 4, 5, 0, 2, 1, 3][i % 10], h: [0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 3, 5][i % 12] });
-      // 12 right (646 000), 6 the halfway mistake (645 000), 2 one tick off (644 000), 0 the other.
+      // 12 right (126 000), 6 on the middle mark (125 000), 2 one tick past it (127 000), 0 the other.
       const ans = [0, 1, 0, 0, 2, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0];
       for (let i = 0; i < 20; i++) {
         const row = i < 10 ? 0 : 1;
@@ -531,12 +527,12 @@
       for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!fin(x, y) && r() < 0.48) q += `M${x} ${y}h1v1h-1z`;
       const finder = (x, y) => `<path d="M${x} ${y}h7v7h-7zM${x + 1} ${y + 1}v5h5v-5z" fill-rule="evenodd"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3"/>`;
       html += `<symbol id="cq-qr" viewBox="-1 -1 27 27"><rect x="-1" y="-1" width="27" height="27" fill="#fff"/><g fill="#1d1d1b"><path d="${q}"/>${finder(0, 0)}${finder(18, 0)}${finder(0, 18)}</g></symbol>`;
-      // The question's picture: q1.svg from big-numbers-quiz.zip, as vector.
+      // The question's picture: q01.png from grosse-zahlen-quiz-v2.zip, as vector (120 000 to 140 000, a tick each 1000).
       let nl = '<rect width="1600" height="340" fill="#fff"/><line x1="80" y1="240" x2="1520" y2="240" stroke="#222" stroke-width="5"/>';
-      for (let i = 0; i <= 10; i++) {
-        const x = 100 + i * 140, big = i % 5 === 0;
-        nl += `<line x1="${x}" y1="240" x2="${x}" y2="${big ? 180 : 214}" stroke="#222" stroke-width="${big ? 6 : 4}"/>`;
-        if (big) nl += `<text x="${x}" y="298" font-size="44" text-anchor="middle" fill="#222">${['640 000', '650 000', '660 000'][i / 5]}</text>`;
+      for (let i = 0; i <= 20; i++) {
+        const x = 100 + i * 70, big = i % 10 === 0, mid = i % 5 === 0;
+        nl += `<line x1="${x}" y1="240" x2="${x}" y2="${big ? 180 : mid ? 200 : 214}" stroke="#222" stroke-width="${big ? 6 : 4}"/>`;
+        if (big) nl += `<text x="${x}" y="298" font-size="44" text-anchor="middle" fill="#222">${['120 000', '130 000', '140 000'][i / 10]}</text>`;
       }
       nl += '<line x1="520" y1="50" x2="520" y2="160" stroke="#1c7c8c" stroke-width="12"/><polygon points="494,145 546,145 520,190" fill="#1c7c8c"/>';
       html += `<symbol id="cq-q1" viewBox="0 0 1600 340">${nl}</symbol>`;
@@ -648,7 +644,7 @@
           set(cnt, 'fill', n === 20 ? C.good : C.muted);
           cntG.querySelector('g').setAttribute('fill', n === 20 ? C.good : C.muted);
           if (m === 'flick') {
-            const k = Math.min(12, Math.floor(eseg(t, T.flick[0], T.flick[1]) * 12.99));
+            const k = Math.min(TX.count - 1, Math.floor(eseg(t, T.flick[0], T.flick[1]) * (TX.count - 0.01)));
             txt(pos, `${k + 1}${TX.of}`);
             op(qbody, 0);
             const gw = 620, pw = 760;
@@ -1326,15 +1322,15 @@
       const bars1 = [1080, 1010, 1100, 720, 1040, 860, 600].map((w, i) => E('rect', { x: X0, y: y + 14 + i * 42, width: w, height: 22, rx: 11, fill: '#d9d9d6' }, ai1));
       y += 14 + 7 * 42 + 20;
       // the AI's .zip as a chip, twice: the quiz, then the quiz changed by the second ask; the thumb takes the second
-      const zipChip = (yy) => {
+      const zipChip = (yy, title) => {
         const z = G(conv, `<rect x="${X0}" y="${yy}" width="470" height="104" rx="18" fill="#f4f4f2" stroke="#e0e0dc" stroke-width="2"/>
           <rect x="${X0 + 24}" y="${yy + 22}" width="60" height="60" rx="12" fill="#fff" stroke="#d0d0cc" stroke-width="2"/><path d="M${X0 + 40} ${yy + 40} h28 v28 h-28z M${X0 + 46} ${yy + 40} v28 M${X0 + 52} ${yy + 46} h4 M${X0 + 52} ${yy + 54} h4 M${X0 + 52} ${yy + 62} h4" fill="none" stroke="#6a6a66" stroke-width="3"/>
-          ${T_(X0 + 104, yy + 50, TX.zipTitle, 32, { cls: 'ts', fit: 270 })}${T_(X0 + 104, yy + 84, TX.zipSub, 22, { fill: '#8a8a8a', fit: 270 })}
+          ${T_(X0 + 104, yy + 50, title, 32, { cls: 'ts', fit: 270 })}${T_(X0 + 104, yy + 84, TX.zipSub, 22, { fill: '#8a8a8a', fit: 270 })}
           <g class="zip-ok"><circle cx="${X0 + 420}" cy="${yy + 52}" r="26" fill="${C.good}"/>${icon('check', X0 + 402, yy + 34, 36, '#fff', true)}</g>`);
         const pop = (t, at) => { vis(z, t >= at); if (t >= at) tf(z, `translate(${X0} ${yy + 52}) scale(${popIn(t, at, 0.3).toFixed(3)}) translate(${-X0} ${-(yy + 52)})`); };
         return { g: z, ok: z.querySelector('.zip-ok'), y: yy, pop };
       };
-      const zip1 = zipChip(y);
+      const zip1 = zipChip(y, TX.zipTitle);
       vis(zip1.ok, false);
       y += 104 + 60;
       const bw2 = Math.max(...w2.lines.map((l) => lineW(l, FS, clsOf))) + 60;
@@ -1347,7 +1343,7 @@
       y += 36;
       const bars2 = [980, 1060, 760, 520].map((w, i) => E('rect', { x: X0, y: y + 14 + i * 42, width: w, height: 22, rx: 11, fill: '#d9d9d6' }, ai2));
       y += 14 + 4 * 42 + 20;
-      const zip2 = zipChip(y);
+      const zip2 = zipChip(y, TX.zipTitle2);
       // where the conversation rests at the end: the second .zip just above the composer, empty again (64 + one line high, at the foot)
       const scEnd = Math.max(0, zip2.y + 104 - (880 - 64 - LH - 30));
       // geometry of the composer
@@ -1578,7 +1574,7 @@
         vis(g, on1 || on2);
         if (!(on1 || on2)) return;
         wall.update(t); tab.update(t);
-        // finger: comes in, taps red (646 000), goes
+        // finger: comes in, taps red (126 000), goes
         const tp = T.oneTap;
         const off = Math.max(1 - eseg(t, tp - 0.55, tp - 0.05), eseg(t, tp + 0.2, tp + 0.6));
         vis(finger, on1 && off < 0.999);

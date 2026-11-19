@@ -1,192 +1,175 @@
-"""The words of the example conversation, per language, for review side by side.
+"""The words of the sheets run's conversation, per language, for review side by side.
 
-One entry per piece of the chat, in the order the chat shows them; under each
-the four languages, en first. en is the real run's (a free Claude Sonnet,
-4 Nov 2026, read from docs/example/sheets-conversation-original.webp); de, fr and it
-are drafts for the owner's review (docs/translation-review.md). Where a piece
-is also in the landing's film, it is the film's wording
-(CONTENT in docs/film/build/film.js; build.py refuses to build if they differ).
+The run is the owner's (19 Nov 2026, German, Claude Sonnet 5.5; its screenshot is sheets-conversation-original.webp
+here, dark): the two photographed sheets and two asks, each answered with a .zip and an overview of its questions. One
+entry per piece of the chat, in the order the chat shows them; under each the four languages. de is the AI's words as
+it wrote them and the app's own as that app showed them, in English; the asks are the owner's, the second tidied. en,
+fr and it are drafts for the owner's review (docs/translation-review.md), with the app's words as that language's app
+would show them. Where the German rests on the German situation (the quiz "in Schweizer
+Schreibweise"), the translation has the situation of a teacher asking in that language about the same German sheets.
+The quiz's title and questions are the translated quizzes' (quiz_zips.py).
 
-de, fr and it render what each moment means in that language, not the English
-words: where the English rests on the teacher writing English to German sheets
-(the AI's question about the quiz's language), the German chat has the German
-situation. Where the AI quotes the sheets, de quotes their own German.
+The first ask is the root page's sheets ask (`ask` in src/client/landing-text.ts), which build.py reads from there.
+Where a piece is also in the landing's film (the second ask, the status lines, the .zips' names, the quiz's title and
+first question) it is the film's wording (CONTENT in docs/film/build/film.js); build.py refuses to run if they differ.
 
-Markup: **bold**, `code`. A plain space between a digit and three digits is a
-thousands separator (build.py makes it a no-break space), and in fr a space
-before : ; ? ! and inside « » is a no-break space too. {zip} is the chat's .zip
-file name in the language (from FILMS below).
+Markup: **bold**, `code`. A plain space between a digit and three digits is a thousands separator (build.py makes it a
+no-break space), and in fr a space before : ; ? ! and inside « » is a no-break space too. {zip1} and {zip2} are the
+chat's two .zip files in the language (ZIPS below).
 """
 
 LANGS = ("en", "de", "fr", "it")
+NB = " "
+
+# The two .zips the AI handed over, per language: the first answer's and the second's (the one /example offers).
+ZIPS = {
+    "en": ("big-numbers-quiz.zip", "big-numbers-quiz-v2.zip"),
+    "de": ("grosse-zahlen-quiz.zip", "grosse-zahlen-quiz-v2.zip"),
+    "fr": ("quiz-grands-nombres.zip", "quiz-grands-nombres-v2.zip"),
+    "it": ("quiz-grandi-numeri.zip", "quiz-grandi-numeri-v2.zip"),
+}
+
+
+def card_title(name):
+    """The file's name as the app titles its card: without .zip, dashes as spaces, the first letter capital."""
+    return name[:-4].replace("-", " ").capitalize()
+
 
 # What the film says for these (build.py checks them against film.js CONTENT).
 FILM = {
-    "en": dict(zipTitle="Big numbers quiz", zipFile="big-numbers-quiz.zip",
-               title="Big numbers on the number line",
-               q1="Which number does the arrow show?",
-               q4="Which number line has an arrow at 654 000?",
-               ask2="Please add some questions where the number is given and they have to pick the matching marked number line.",
-               status1="Fetching the classyquiz.pages.dev page now.",
-               status2="Planning the spacing of the four new number-line questions"),
-    "de": dict(zipTitle="Grosse Zahlen Quiz", zipFile="grosse-zahlen-quiz.zip",
-               title="Grosse Zahlen am Zahlenstrahl",
-               q1="Welche Zahl zeigt der Pfeil?",
-               q4="Welcher Zahlenstrahl hat einen Pfeil bei 654 000?",
-               ask2="Bitte füge ein paar Fragen hinzu, bei denen die Zahl gegeben ist und sie den passenden markierten Zahlenstrahl auswählen müssen.",
-               status1="Rufe jetzt die Seite classyquiz.pages.dev ab.",
-               status2="Plane die Abstände der vier neuen Zahlenstrahl-Fragen"),
-    "fr": dict(zipTitle="Quiz grands nombres", zipFile="quiz-grands-nombres.zip",
-               title="Les grands nombres sur la droite graduée",
-               q1="Quel nombre la flèche montre-t-elle ?",
-               q4="Quelle droite graduée a une flèche à 654 000 ?",
-               ask2="Ajoute s’il te plaît quelques questions où le nombre est donné et où ils doivent choisir la droite graduée marquée qui correspond.",
-               status1="Je consulte la page classyquiz.pages.dev.",
-               status2="Planification de l’espacement des quatre nouvelles questions sur la droite graduée"),
-    "it": dict(zipTitle="Quiz grandi numeri", zipFile="quiz-grandi-numeri.zip",
-               title="I grandi numeri sulla retta numerica",
-               q1="Quale numero indica la freccia?",
-               q4="Quale retta numerica ha una freccia a 654 000?",
-               ask2="Per favore aggiungi alcune domande in cui il numero è dato e devono scegliere la retta numerica segnata corrispondente.",
-               status1="Sto leggendo la pagina classyquiz.pages.dev.",
-               status2="Pianifico la spaziatura delle quattro nuove domande sulla retta numerica"),
+    lang: dict(zipTitle=card_title(ZIPS[lang][0]), zipTitle2=card_title(ZIPS[lang][1]), zipFile=ZIPS[lang][1], **words)
+    for lang, words in {
+        "en": dict(
+            title="Big numbers on the number line",
+            q1="Which number does the arrow show?",
+            ask2="Thanks. 3, 7 and 10 would work even better with pictures as answers. 2 and 11 turned out a bit too easy – you could turn exercises like 1, 4, 6 around, with pictures as answers, and mix them in for a bit more variety.",
+            status1="I’ll read classyquiz.pages.dev first, so I know which format the quiz has to be built in.",
+            status2="Setting the positions for the number-line question with a target number"),
+        "de": dict(
+            title="Grosse Zahlen am Zahlenstrahl",
+            q1="Welche Zahl zeigt der Pfeil?",
+            ask2="Danke. 3, 7 und 10 würden mit Bildern als Antwort noch besser funktionieren. 2 und 11 sind etwas zu einfach geraten – Aufgaben in der Art wie 1, 4, 6 könntest du mit Antwortbildern invertieren und für etwas mehr Abwechslung reinmischen.",
+            status1="Ich lese zuerst classyquiz.pages.dev, damit ich weiss, in welchem Format das Quiz gebaut werden muss.",
+            status2="Positionen für Zahlenstrahl-Aufgabe mit Zielzahl festlegen"),
+        "fr": dict(
+            title="Les grands nombres sur la droite graduée",
+            q1="Quel nombre la flèche indique-t-elle ?",
+            ask2="Merci. Les 3, 7 et 10 marcheraient encore mieux avec des images comme réponses. Les 2 et 11 sont un peu trop faciles – tu pourrais inverser des exercices comme les 1, 4, 6, avec des images comme réponses, et les mélanger aux autres pour un peu plus de variété.",
+            status1="Je lis d’abord classyquiz.pages.dev, pour savoir dans quel format le quiz doit être construit.",
+            status2="Définition des positions pour l’exercice sur la droite graduée avec un nombre cible"),
+        "it": dict(
+            title="I grandi numeri sulla retta numerica",
+            q1="Quale numero indica la freccia?",
+            ask2="Grazie. La 3, la 7 e la 10 funzionerebbero ancora meglio con immagini come risposte. La 2 e l’11 sono venute un po’ troppo facili – potresti invertire esercizi come l’1, il 4 e il 6, con immagini come risposte, e mescolarli per avere un po’ più di varietà.",
+            status1="Prima leggo classyquiz.pages.dev, così so in che formato va costruito il quiz.",
+            status2="Definizione delle posizioni per l’esercizio sulla retta numerica con un numero obiettivo"),
+    }.items()
 }
 
-# The app's own words around the chat (the run was in a German app: its status lines were German;
-# each language here shows what that language's app would).
+# The app's own words around the chat: English in the German run, as the app showed them; each other language shows
+# what that language's app would.
 UI = {
-    "ran": dict(
-        en="Ran a command, shared files",
-        de="Hat einen Befehl ausgeführt, Dateien geteilt",
-        fr="Commande exécutée, fichiers partagés",
-        it="Comando eseguito, file condivisi"),
-    "tool": dict(
-        en="Used a tool",
-        de="Hat ein Tool verwendet",
-        fr="Outil utilisé",
-        it="Strumento utilizzato"),
-    "failed": dict(
-        en="Failed",
-        de="Fehlgeschlagen",
-        fr="Échec",
-        it="Non riuscito"),
+    "read": dict(en="Read 2 pages, updated tasks", de="Read 2 pages, updated tasks",
+                 fr="2 pages lues, tâches mises à jour", it="Ha letto 2 pagine, aggiornato le attività"),
+    "ran": dict(en="Read 2 files, ran a command", de="Read 2 files, ran a command",
+                fr="2 fichiers lus, 1 commande exécutée", it="Ha letto 2 file, eseguito un comando"),
+    "made1": dict(en="Shared 2 files, created a file, and 11 more steps", de="Shared 2 files, created a file, and 11 more steps",
+                  fr="2 fichiers partagés, 1 fichier créé et 11 autres étapes", it="Ha condiviso 2 file, creato un file e altri 11 passaggi"),
+    "made2": dict(en="Shared 2 files, created a file, and 7 more steps", de="Shared 2 files, created a file, and 7 more steps",
+                  fr="2 fichiers partagés, 1 fichier créé et 7 autres étapes", it="Ha condiviso 2 file, creato un file e altri 7 passaggi"),
+    "all": dict(en="Download all", de="Download all", fr="Tout télécharger", it="Scarica tutto"),
     "zipSub": dict(en="ZIP", de="ZIP", fr="ZIP", it="ZIP"),
 }
 
+FILES = dict(en="Files:", de="Dateien:", fr="Fichiers :", it="File:")
+
 # ------------------------------------------------------------------ turn 1
+# The photos in the run's order: page 15 (exercises 4 and 5), then page 14 (exercises 1 to 3).
 
 TURN1 = [
-    ("user", dict(
-        en="Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises from these two sheets? For my 4th grade class.",
-        de="Lies classyquiz.pages.dev. Kannst du mir ein classyQuiz mit Aufgaben von diesen zwei Blättern machen? Für meine 4. Klasse.",
-        fr="Lis classyquiz.pages.dev. Tu peux me faire un classyQuiz avec des exercices de ces deux fiches ? Pour ma classe de CM1.",
-        it="Leggi classyquiz.pages.dev. Mi puoi fare un classyQuiz con gli esercizi di queste due schede? Per la mia quarta elementare.")),
-
-    ("status", "status1"),
+    ("photos", None),
+    ("ask", None),
+    ("ai", "status1"),
+    ("fold", "read"),
 
     ("ai", dict(
-        en="I’ll start by reading the ClassyQuiz page to see what format it expects.",
-        de="Ich lese zuerst die ClassyQuiz-Seite, um zu sehen, welches Format sie erwartet.",
-        fr="Je commence par lire la page ClassyQuiz pour voir quel format elle attend.",
-        it="Per prima cosa leggo la pagina di ClassyQuiz per vedere che formato richiede.")),
-
-    ("fold", dict(
-        en="Fetched: classyQuiz",
-        de="Abgerufen: classyQuiz",
-        fr="Consulté : classyQuiz",
-        it="Letto: classyQuiz")),
-
-    # The AI's two questions with the teacher's answers, as one grey card on the right.
-    # The labels are each language's app's own (Q/A, Frage/Antwort, Question/Réponse, Domanda/Risposta).
-    # The language question rests on the sheets being German: where the teacher writes German too (de),
-    # the AI asks to confirm German instead.
-    ("qa", [
-        (dict(
-            en="Q: Which language should the quiz be in? The sheets are German, but you wrote to me in English.",
-            de="F: In welcher Sprache soll das Quiz sein? Auf Deutsch, wie die Blätter?",
-            fr="Q : Dans quelle langue veux-tu le quiz ? Les fiches sont en allemand, mais tu m’as écrit en français.",
-            it="D: In che lingua vuoi il quiz? Le schede sono in tedesco, ma mi hai scritto in italiano."),
-         dict(
-            en="A: English",
-            de="A: Deutsch",
-            fr="R : Français",
-            it="R: Italiano")),
-        (dict(
-            en="Q: How long should the quiz be?",
-            de="F: Wie lang soll das Quiz sein?",
-            fr="Q : Quelle longueur doit avoir le quiz ?",
-            it="D: Quanto deve essere lungo il quiz?"),
-         dict(
-            en="A: About 10 questions",
-            de="A: Etwa 10 Fragen",
-            fr="R : Une dizaine de questions",
-            it="R: Una decina di domande")),
-    ]),
-
-    ("fold", dict(
-        en="Checking arrow positions for the number-line questions",
-        de="Prüfe die Pfeilpositionen der Zahlenstrahl-Fragen",
-        fr="Vérification de la position des flèches pour les questions sur la droite graduée",
-        it="Controllo le posizioni delle frecce per le domande sulla retta numerica")),
-
-    ("ai", dict(
-        en="Thanks. Next I’ll draw the number lines and pack everything into a `.zip`.",
-        de="Danke. Als Nächstes zeichne ich die Zahlenstrahlen und packe alles in eine `.zip`-Datei.",
-        fr="Merci. Je vais maintenant dessiner les droites graduées et tout mettre dans un `.zip`.",
-        it="Grazie. Ora disegno le rette numeriche e metto tutto in un file `.zip`.")),
-
+        en="WebFetch only summarises the manual, and the page warns against exactly that. I’ll try loading the original text directly, and I’m making an empty directory of my own for it.",
+        de="WebFetch fasst das Handbuch nur zusammen, die Seite warnt aber genau davor. Ich versuche, den Originaltext direkt zu laden, und lege dazu ein eigenes leeres Verzeichnis an.",
+        fr="WebFetch ne fait que résumer le manuel, et la page met justement en garde contre cela. J’essaie de charger directement le texte original, et je crée pour cela un répertoire vide à moi.",
+        it="WebFetch riassume soltanto il manuale, e la pagina avverte proprio di questo. Provo a caricare direttamente il testo originale, e per farlo creo una cartella vuota tutta mia.")),
     ("fold", "ran"),
 
     ("ai", dict(
-        en="Your quiz is ready as `{zip}`. Upload it on classyquiz.pages.dev to run it.",
-        de="Dein Quiz ist fertig: `{zip}`. Lade es auf classyquiz.pages.dev hoch, um es zu starten.",
-        fr="Ton quiz est prêt : `{zip}`. Importe-le sur classyquiz.pages.dev pour le lancer.",
-        it="Il tuo quiz è pronto: `{zip}`. Caricalo su classyquiz.pages.dev per avviarlo.")),
+        en="Read the manual in the original; `verify.py` is harmless. I’ll also look at `preview.py` and check which fonts and libraries I have for drawing the number lines.",
+        de="Das Handbuch im Original gelesen, `verify.py` ist harmlos. Ich schaue mir noch `preview.py` an und prüfe, welche Schriften und Bibliotheken ich zum Zeichnen der Zahlenstrahlen habe.",
+        fr="J’ai lu le manuel original, `verify.py` est sans danger. Je regarde encore `preview.py` et je vérifie de quelles polices et bibliothèques je dispose pour dessiner les droites graduées.",
+        it="Ho letto il manuale originale, `verify.py` è innocuo. Guardo ancora `preview.py` e controllo quali font e librerie ho per disegnare le rette numeriche.")),
+    ("fold", "made1"),
 
     ("ai", dict(
-        en="It has 10 questions in English, with new numbers in the style of the sheets rather than a 1:1 copy:",
-        de="Es hat 10 Fragen auf Deutsch, mit neuen Zahlen im Stil der Blätter statt einer 1:1-Kopie:",
-        fr="Il compte 10 questions en français, avec de nouveaux nombres dans le style des fiches plutôt qu’une copie à l’identique :",
-        it="Ha 10 domande in italiano, con numeri nuovi nello stile delle schede invece di una copia 1:1:")),
+        en="The quiz “Big numbers on the number line” is ready: 12 questions in English, the large numbers written as on your sheets (a space between groups of three digits from five digits up, none in four-digit numbers). I looked up the format in the manual on classyquiz.pages.dev. `verify.py` reports “ok”, and I computed the solutions from the same numbers that draw the pictures.",
+        de="Das Quiz «Grosse Zahlen am Zahlenstrahl» ist fertig: 12 Fragen auf Deutsch in Schweizer Schreibweise (grosse Zahlen mit Abstand ab fünf Stellen, vierstellige ohne). Ich habe das Format im Handbuch von classyquiz.pages.dev nachgelesen. `verify.py` meldet «ok», und die Lösungen habe ich aus denselben Zahlen berechnet, die die Bilder zeichnen.",
+        fr="Le quiz « Les grands nombres sur la droite graduée » est prêt : 12 questions en français, les grands nombres écrits comme sur tes fiches (une espace entre les groupes de trois chiffres à partir de cinq chiffres, aucune pour ceux à quatre chiffres). J’ai vérifié le format dans le manuel de classyquiz.pages.dev. `verify.py` répond « ok », et j’ai calculé les solutions à partir des mêmes nombres qui servent à dessiner les images.",
+        it="Il quiz «I grandi numeri sulla retta numerica» è pronto: 12 domande in italiano, con i grandi numeri scritti come sulle tue schede (uno spazio tra i gruppi di tre cifre da cinque cifre in su, nessuno nei numeri di quattro cifre). Ho controllato il formato nel manuale di classyquiz.pages.dev. `verify.py` risponde «ok», e ho calcolato le soluzioni dagli stessi numeri con cui sono disegnate le immagini.")),
 
+    ("ai", dict(
+        en="**Structure** (new numbers, not copied 1:1 from the sheets)",
+        de="**Aufbau** (neue Zahlen, nicht 1:1 von den Blättern)",
+        fr="**Structure** (de nouveaux nombres, pas une copie à l’identique des fiches)",
+        it="**Struttura** (numeri nuovi, non copiati 1:1 dalle schede)")),
     ("bullets", [
         dict(
-            en="**Questions 1–3:** read the arrow on a number line. The step size is different each time (2000, 50, 20), so students have to work out what one small tick is worth first.",
-            de="**Fragen 1–3:** den Pfeil auf einem Zahlenstrahl ablesen. Die Schrittweite ist jedes Mal anders (2000, 50, 20), die Kinder müssen also zuerst herausfinden, was ein kleiner Strich wert ist.",
-            fr="**Questions 1 à 3 :** lire la flèche sur une droite graduée. Le pas change à chaque fois (2000, 50, 20) : les élèves doivent donc d’abord trouver ce que vaut un petit trait.",
-            it="**Domande 1–3:** leggere la freccia su una retta numerica. Il passo cambia ogni volta (2000, 50, 20), quindi gli alunni devono prima capire quanto vale una piccola tacca."),
+            en=f"**Reading the arrow, like no.{NB}1** (questions 1, 4, 6, 9, 12): the number line as a picture, four numbers to choose from. The wrong answers are typical mistakes, such as one tick off or mirrored across the middle mark.",
+            de=f"**Pfeil ablesen wie Nr.{NB}1** (Fragen 1, 4, 6, 9, 12): Zahlenstrahl als Bild, vier Zahlen zur Auswahl. Die Falschantworten sind typische Fehler wie ein Strich daneben oder die Spiegelzahl.",
+            fr=f"**Lire la flèche, comme le n°{NB}1** (questions 1, 4, 6, 9, 12) : la droite graduée en image, quatre nombres au choix. Les mauvaises réponses sont des erreurs typiques, comme un trait à côté ou le nombre symétrique par rapport au milieu.",
+            it=f"**Leggere la freccia, come il n.{NB}1** (domande 1, 4, 6, 9, 12): la retta numerica come immagine, quattro numeri tra cui scegliere. Le risposte sbagliate sono errori tipici, come una tacca più in là o il numero simmetrico rispetto al centro."),
         dict(
-            en="**Questions 4–6:** count on in steps of 20 000, 500 and 50.",
-            de="**Fragen 4–6:** in 20 000er-, 500er- und 50er-Schritten weiterzählen.",
-            fr="**Questions 4 à 6 :** compter de 20 000 en 20 000, de 500 en 500 et de 50 en 50.",
-            it="**Domande 4–6:** contare di 20 000 in 20 000, di 500 in 500 e di 50 in 50."),
+            en=f"**The number in the middle, like no.{NB}3** (questions 2, 5, 8, 11): text-only questions.",
+            de=f"**Zahl in der Mitte wie Nr.{NB}3** (Fragen 2, 5, 8, 11): reine Textfragen.",
+            fr=f"**Le nombre au milieu, comme le n°{NB}3** (questions 2, 5, 8, 11) : des questions de texte seulement.",
+            it=f"**Il numero a metà, come il n.{NB}3** (domande 2, 5, 8, 11): domande solo di testo."),
         dict(
-            en="**Questions 7–8:** find the number exactly in the middle of two others.",
-            de="**Fragen 7–8:** die Zahl finden, die genau in der Mitte zwischen zwei anderen liegt.",
-            fr="**Questions 7 et 8 :** trouver le nombre situé exactement au milieu de deux autres.",
-            it="**Domande 7–8:** trovare il numero che sta esattamente a metà tra altri due."),
-        dict(
-            en="**Questions 9–10:** use one picture of the four sections A–D to say which section a number lies on, or which number belongs on section C.",
-            de="**Fragen 9–10:** mit einem Bild der vier Abschnitte A–D sagen, auf welchem Abschnitt eine Zahl liegt oder welche Zahl auf Abschnitt C gehört.",
-            fr="**Questions 9 et 10 :** à l’aide d’une image des quatre segments A–D, dire sur quel segment se trouve un nombre, ou quel nombre va sur le segment C.",
-            it="**Domande 9–10:** con un’immagine dei quattro segmenti A–D, dire su quale segmento si trova un numero o quale numero va sul segmento C."),
+            en=f"**Matching the section, like no.{NB}4** (questions 3, 7, 10): a picture with sections A to D, and the answers “Section A” and so on. Question 10 has the option “On none of the sections”.",
+            de=f"**Abschnitt zuordnen wie Nr.{NB}4** (Fragen 3, 7, 10): Bild mit Abschnitten A bis D, dazu Antworten «Abschnitt A» usw. Frage 10 hat die Option «Auf keinem Abschnitt».",
+            fr=f"**Trouver le segment, comme le n°{NB}4** (questions 3, 7, 10) : une image avec les segments A à D, et les réponses « Segment A », etc. La question 10 a l’option « Sur aucun segment ».",
+            it=f"**Trovare il segmento, come il n.{NB}4** (domande 3, 7, 10): un’immagine con i segmenti da A a D, e le risposte «Segmento A» ecc. La domanda 10 ha l’opzione «Su nessun segmento»."),
     ]),
 
-    # The AI's "sheet 1" for the none-of-the-sections case is as in the run (that case is on the second photo).
-    # de quotes the sheet's own heading (exercise 5); fr and it translate it.
     ("ai", dict(
-        en="I drew the number lines myself, so the numbers on them aren’t from your sheet. I left out the “draw it on squared paper” exercise (sheet 2, exercise 5) because students can’t draw on their phones. I also didn’t use sheet 1’s “none of the sections” case, since it needs a fifth answer and the site allows four.",
-        de="Die Zahlenstrahlen habe ich selbst gezeichnet, die Zahlen darauf stammen also nicht von deinem Blatt. Die Aufgabe «Zeichne den Abschnitt auf Häuschenpapier» (Blatt\u00a02, Aufgabe\u00a05) habe ich weggelassen, weil die Kinder auf ihren Handys nicht zeichnen können. Auch den Fall «auf keinem der Abschnitte» von Blatt\u00a01 habe ich nicht verwendet, da er eine fünfte Antwort braucht und die Seite nur vier zulässt.",
-        fr="J’ai dessiné moi-même les droites graduées, donc les nombres qui y figurent ne viennent pas de ta fiche. J’ai laissé de côté l’exercice « Dessine le segment sur du papier quadrillé » (fiche\u00a02, exercice\u00a05), parce que les élèves ne peuvent pas dessiner sur leur téléphone. Je n’ai pas non plus utilisé le cas « sur aucun des segments » de la fiche\u00a01, car il demande une cinquième réponse et le site n’en accepte que quatre.",
-        it="Le rette numeriche le ho disegnate io, quindi i numeri non sono quelli della tua scheda. Ho lasciato fuori l’esercizio «Disegna il segmento su carta quadrettata» (scheda\u00a02, esercizio\u00a05), perché gli alunni non possono disegnare sul telefono. Non ho usato nemmeno il caso «su nessuno dei segmenti» della scheda\u00a01, perché richiede una quinta risposta e il sito ne accetta solo quattro.")),
+        en="**Difficulty:** questions 1 to 4 are easy (each tick worth 1000 or 500), 5 to 8 medium (ticks worth 50, similar-looking sections such as 52 000, 520 000 and 502 000). 9 to 12 are the hardest:",
+        de="**Schwierigkeit:** Fragen 1 bis 4 sind leicht (Strichwert 1000 oder 500), 5 bis 8 mittel (Strichwert 50, ähnlich aussehende Abschnitte wie 52 000, 520 000 und 502 000). 9 bis 12 sind am schwierigsten:",
+        fr="**Difficulté :** les questions 1 à 4 sont faciles (un trait vaut 1000 ou 500), 5 à 8 moyennes (un trait vaut 50, des segments qui se ressemblent, comme 52 000, 520 000 et 502 000). 9 à 12 sont les plus difficiles :",
+        it="**Difficoltà:** le domande da 1 a 4 sono facili (una tacca vale 1000 o 500), da 5 a 8 medie (una tacca vale 50, segmenti simili come 52 000, 520 000 e 502 000). Da 9 a 12 sono le più difficili:")),
+    ("bullets", [
+        dict(en="**Question 9:** each tick is worth 25.", de="**Frage 9:** Strichwert 25.",
+             fr="**Question 9 :** un trait vaut 25.", it="**Domanda 9:** una tacca vale 25."),
+        dict(en="**Question 10:** the number is on none of the sections.", de="**Frage 10:** Die Zahl liegt auf keinem der Abschnitte.",
+             fr="**Question 10 :** le nombre ne se trouve sur aucun des segments.", it="**Domanda 10:** il numero non si trova su nessuno dei segmenti."),
+        dict(en="**Question 11:** the middle of 490 000 and 510 000 crosses into the next hundred thousand.",
+             de="**Frage 11:** Die Mitte von 490 000 und 510 000 liegt über einer Tausenderstelle.",
+             fr="**Question 11 :** le milieu de 490 000 et 510 000 passe à la centaine de mille suivante.",
+             it="**Domanda 11:** il punto medio tra 490 000 e 510 000 passa al centinaio di migliaia successivo."),
+        dict(en="**Question 12:** the arrow is just left of 900 000, at 899 970.", de="**Frage 12:** Der Pfeil steht links von 900 000 bei 899 970.",
+             fr="**Question 12 :** la flèche est juste à gauche de 900 000, à 899 970.", it="**Domanda 12:** la freccia è appena a sinistra di 900 000, a 899 970."),
+    ]),
 
     ("ai", dict(
-        en="One thing I couldn’t test is how the pictures look on your projector. You can check them in the teacher’s preview after upload, with the answers folded away.",
-        de="Eines konnte ich nicht testen: wie die Bilder auf deinem Beamer aussehen. Du kannst sie nach dem Hochladen in der Lehrervorschau prüfen, mit eingeklappten Antworten.",
-        fr="Une chose que je n’ai pas pu tester : le rendu des images sur ton projecteur. Tu peux les vérifier dans l’aperçu enseignant après l’import, avec les réponses masquées.",
-        it="Una cosa che non ho potuto verificare è come appaiono le immagini sul tuo proiettore. Puoi controllarle nell’anteprima per l’insegnante dopo il caricamento, con le risposte nascoste.")),
+        en="I haven’t chosen a way of playing; you set that on the site (on your own, with friends, or as quizmaster on the projector). The quiz has no explanations, so the children only see which answer was right. If you play it yourself and don’t want to see the solutions, don’t look at the overview file.",
+        de="Ich habe kein Spielformat gewählt, das stellst du auf der Seite ein (allein, mit Freunden oder als Quizmaster am Beamer). Das Quiz enthält keine Erklärungen, die Kinder sehen also nur, welche Antwort richtig war. Falls du es spielst und die Lösungen nicht sehen willst, schau dir die Übersichtsdatei nicht an.",
+        fr="Je n’ai pas choisi de façon de jouer, tu la choisis sur le site (en solo, entre amis ou en quizmaster au vidéoprojecteur). Le quiz ne contient pas d’explications : les enfants voient donc seulement quelle réponse était juste. Si tu y joues toi-même et que tu ne veux pas voir les solutions, ne regarde pas le fichier d’aperçu.",
+        it="Non ho scelto un modo di gioco, lo scegli tu sul sito (per conto tuo, con gli amici o come quizmaster al proiettore). Il quiz non contiene spiegazioni, quindi i bambini vedono solo quale risposta era giusta. Se ci giochi tu e non vuoi vedere le soluzioni, non guardare il file della panoramica.")),
 
-    ("chip", None),
+    ("ai", FILES),
+    ("bullets", [
+        {lang: "{zip1}" for lang in LANGS},
+        dict(en="review.png (an overview of all questions with the right answers marked)",
+             de="review.png (Übersicht aller Fragen mit markierten richtigen Antworten)",
+             fr="review.png (un aperçu de toutes les questions, les bonnes réponses marquées)",
+             it="review.png (una panoramica di tutte le domande con le risposte giuste segnate)"),
+    ]),
+    ("review", None),
+    ("chip", 0),
+    ("all", None),
 ]
 
 # ------------------------------------------------------------------ turn 2
@@ -196,148 +179,57 @@ TURN2 = [
     ("fold", "status2"),
 
     ("ai", dict(
-        en="I’ll add three matching questions and place them right after the three “read the arrow” questions.",
-        de="Ich füge drei Zuordnungsfragen hinzu und setze sie direkt nach den drei Fragen «Pfeil ablesen».",
-        fr="J’ajoute trois questions d’association et je les place juste après les trois questions « lire la flèche ».",
-        it="Aggiungo tre domande di abbinamento e le metto subito dopo le tre domande «leggi la freccia».")),
-
-    ("fold", "ran"),
+        en="Understood: the three section questions get pictures as answers, and I’ll replace questions 2 and 11 with reversed arrow questions. First I’ll check on the layout page how picture answers are shown, so that I choose suitable picture formats.",
+        de="Verstanden: Die drei Abschnitts-Fragen bekommen Bilder als Antworten, und Frage 2 und 11 ersetze ich durch umgekehrte Pfeil-Aufgaben. Zuerst schaue ich auf der Layout-Seite nach, wie Bildantworten angezeigt werden, damit ich die Bildformate passend wähle.",
+        fr="Compris : les trois questions sur les segments auront des images comme réponses, et je remplace les questions 2 et 11 par des exercices de flèche inversés. Je regarde d’abord sur la page de mise en page comment les réponses en image sont affichées, pour choisir des formats d’image adaptés.",
+        it="Capito: le tre domande sui segmenti avranno immagini come risposte, e sostituisco le domande 2 e 11 con esercizi sulla freccia al contrario. Prima controllo sulla pagina del layout come vengono mostrate le risposte con immagini, così scelgo i formati giusti.")),
+    ("fold", "made2"),
 
     ("ai", dict(
-        en="I’ve updated `{zip}`. It now has 13 questions, with three new ones in the middle as questions 4–6. In each, a number is given and the students pick which of four number lines has the arrow in the right place:",
-        de="Ich habe `{zip}` aktualisiert. Das Quiz hat jetzt 13 Fragen; die drei neuen stehen in der Mitte, als Fragen 4–6. Bei jeder ist eine Zahl vorgegeben, und die Kinder wählen, auf welchem der vier Zahlenstrahlen der Pfeil an der richtigen Stelle steht:",
-        fr="J’ai mis à jour `{zip}`. Le quiz compte maintenant 13 questions, dont trois nouvelles au milieu (questions 4 à 6). Dans chacune, un nombre est donné et les élèves choisissent laquelle des quatre droites graduées porte la flèche au bon endroit :",
-        it="Ho aggiornato `{zip}`. Ora il quiz ha 13 domande, con le tre nuove nel mezzo, come domande 4–6. In ciascuna è dato un numero e gli alunni scelgono quale delle quattro rette numeriche ha la freccia nel punto giusto:")),
+        en="The second version of the quiz is ready, again with 12 questions. `verify.py` reports “ok”. I couldn’t try out whether the picture answers read well on the site: the preview shows them only small, and according to the site’s layout description it arranges strips like these two by two.",
+        de="Die zweite Version des Quiz ist fertig, wieder mit 12 Fragen. `verify.py` meldet «ok». Ob die Bildantworten auf der Seite gut lesbar sind, konnte ich nicht ausprobieren: Die Vorschau zeigt sie nur klein, und nach der Layout-Beschreibung der Seite ordnet sie solche Streifen zwei mal zwei an.",
+        fr="La deuxième version du quiz est prête, toujours avec 12 questions. `verify.py` répond « ok ». Je n’ai pas pu essayer si les réponses en image se lisent bien sur le site : l’aperçu ne les montre qu’en petit, et d’après la description de la mise en page, le site dispose ces bandes deux par deux.",
+        it="La seconda versione del quiz è pronta, sempre con 12 domande. `verify.py` risponde «ok». Non ho potuto provare se le risposte con immagini si leggono bene sul sito: l’anteprima le mostra solo in piccolo, e secondo la descrizione del layout il sito dispone queste strisce due per due.")),
 
+    ("ai", dict(en="**Picture answers**", de="**Bildantworten**", fr="**Réponses en image**", it="**Risposte con immagini**")),
+    # A bullet given as (text, [sub-bullets]) has its sub-bullets under it.
     ("bullets", [
         dict(
-            en="**Question 4:** the number is 654 000, on the line from 640 000 to 660 000 with steps of 2000. The wrong arrows sit one or two steps off, and one is far off.",
-            de="**Frage 4:** Die Zahl ist 654 000, auf dem Zahlenstrahl von 640 000 bis 660 000 in 2000er-Schritten. Die falschen Pfeile liegen einen oder zwei Schritte daneben, einer weit daneben.",
-            fr="**Question 4 :** le nombre est 654 000, sur la droite de 640 000 à 660 000 avec un pas de 2000. Les mauvaises flèches sont décalées d’un ou deux pas, et l’une est très loin.",
-            it="**Domanda 4:** il numero è 654 000, sulla retta da 640 000 a 660 000 con passo 2000. Le frecce sbagliate sono a uno o due passi di distanza, e una è molto lontana."),
-        dict(
-            en="**Question 5:** the number is 81 750, on the line from 81 000 to 82 000 with steps of 50. The wrong arrows are one step either side and two steps further on, so students need to count the small ticks.",
-            de="**Frage 5:** Die Zahl ist 81 750, auf dem Zahlenstrahl von 81 000 bis 82 000 in 50er-Schritten. Die falschen Pfeile liegen einen Schritt links und rechts davon und zwei Schritte weiter; die Kinder müssen also die kleinen Striche zählen.",
-            fr="**Question 5 :** le nombre est 81 750, sur la droite de 81 000 à 82 000 avec un pas de 50. Les mauvaises flèches sont à un pas de chaque côté et à deux pas plus loin : les élèves doivent donc compter les petits traits.",
-            it="**Domanda 5:** il numero è 81 750, sulla retta da 81 000 a 82 000 con passo 50. Le frecce sbagliate sono a un passo per parte e a due passi più avanti, quindi gli alunni devono contare le piccole tacche."),
-        dict(
-            en="**Question 6:** the number is 308 080, on the line from 307 900 to 308 100 with steps of 20.",
-            de="**Frage 6:** Die Zahl ist 308 080, auf dem Zahlenstrahl von 307 900 bis 308 100 in 20er-Schritten.",
-            fr="**Question 6 :** le nombre est 308 080, sur la droite de 307 900 à 308 100 avec un pas de 20.",
-            it="**Domanda 6:** il numero è 308 080, sulla retta da 307 900 a 308 100 con passo 20."),
+            en="**Questions 3, 7 and 10** (“Which section is the number … on?”): each answer is a number-line section of its own, with its start and end numbers; the letters A to D are gone. In question 10, three answers are pictures and the fourth is the text “On none of them” (right: 99 000 is on none of the sections). That text is fixed in last place.",
+            de="**Fragen 3, 7 und 10** («Auf welchem Abschnitt liegt die Zahl …?»): Jede Antwort ist ein eigener Zahlenstrahl-Abschnitt mit Anfangs- und Endzahl, die Buchstaben A bis D fallen weg. Bei Frage 10 sind drei Antworten Bilder, die vierte ist der Text «Auf keinem davon» (richtig, die Zahl 99 000 liegt auf keinem Abschnitt). Der Text steht dort fest an letzter Stelle.",
+            fr="**Questions 3, 7 et 10** (« Sur quel segment se trouve le nombre … ? ») : chaque réponse est un segment de droite graduée à part, avec son nombre de début et de fin ; les lettres A à D disparaissent. À la question 10, trois réponses sont des images, la quatrième est le texte « Sur aucun d’eux » (juste : 99 000 ne se trouve sur aucun segment). Ce texte reste fixé en dernière position.",
+            it="**Domande 3, 7 e 10** («Su quale segmento si trova il numero …?»): ogni risposta è un segmento di retta numerica a sé, con il numero iniziale e finale; le lettere da A a D spariscono. Nella domanda 10 tre risposte sono immagini, la quarta è il testo «Su nessuno» (giusta: 99 000 non si trova su nessun segmento). Quel testo resta fisso all’ultimo posto."),
+        (dict(
+            en="**Questions 2 and 11** (the two middle-number questions you found too easy): I replaced them with reversed arrow questions, so the children pick the picture with the right arrow.",
+            de="**Fragen 2 und 11** (die beiden Mitte-Aufgaben, die dir zu einfach waren): Ich habe sie durch umgekehrte Pfeil-Aufgaben ersetzt, die Kinder wählen also das Bild mit dem richtigen Pfeil.",
+            fr="**Questions 2 et 11** (les deux exercices du nombre au milieu, trop faciles pour toi) : je les ai remplacées par des exercices de flèche inversés ; les enfants choisissent donc l’image avec la bonne flèche.",
+            it="**Domande 2 e 11** (i due esercizi del numero a metà, che per te erano troppo facili): le ho sostituite con esercizi sulla freccia al contrario, quindi i bambini scelgono l’immagine con la freccia giusta."), [
+            dict(
+                en="**Question 2:** “Which arrow shows 735 000?” on the line from 700 000 to 800 000 (each tick worth 5000).",
+                de="**Frage 2:** «Welcher Pfeil zeigt 735 000?» auf dem Strahl von 700 000 bis 800 000 (Strichwert 5000).",
+                fr="**Question 2 :** « Quelle flèche indique 735 000 ? » sur la droite de 700 000 à 800 000 (un trait vaut 5000).",
+                it="**Domanda 2:** «Quale freccia indica 735 000?» sulla retta da 700 000 a 800 000 (una tacca vale 5000)."),
+            dict(
+                en="**Question 11:** “Which arrow shows 37 200?” on the line from 34 000 to 38 000 (each tick worth 200). The wrong arrows are one tick off or mirrored.",
+                de="**Frage 11:** «Welcher Pfeil zeigt 37 200?» auf dem Strahl von 34 000 bis 38 000 (Strichwert 200). Die falschen Pfeile liegen einen Strich daneben oder gespiegelt.",
+                fr="**Question 11 :** « Quelle flèche indique 37 200 ? » sur la droite de 34 000 à 38 000 (un trait vaut 200). Les mauvaises flèches sont décalées d’un trait ou symétriques.",
+                it="**Domanda 11:** «Quale freccia indica 37 200?» sulla retta da 34 000 a 38 000 (una tacca vale 200). Le frecce sbagliate sono spostate di una tacca o simmetriche."),
+        ]),
     ]),
 
     ("ai", dict(
-        en="All four pictures in a question have the same shape and labels, and only the arrow moves. That is also why the site shouldn’t warn about mismatched proportions. The answers stay in the order written (not shuffled), so the correct picture is always the first one in the file. Because the site shuffles answers at upload by default, the order is fixed in the quiz text, so it won’t change on your screen.",
-        de="Alle vier Bilder einer Frage haben dieselbe Form und dieselben Beschriftungen, nur der Pfeil verschiebt sich. Darum sollte die Seite auch nicht vor unpassenden Proportionen warnen. Die Antworten bleiben in der Reihenfolge, in der sie geschrieben sind (nicht gemischt), das richtige Bild ist also immer das erste in der Datei. Weil die Seite die Antworten beim Hochladen standardmässig mischt, ist die Reihenfolge im Quiztext festgelegt und ändert sich auf deinem Bildschirm nicht.",
-        fr="Les quatre images d’une question ont la même forme et les mêmes étiquettes, seule la flèche bouge. C’est aussi pour cela que le site ne devrait pas signaler de proportions différentes. Les réponses restent dans l’ordre où elles sont écrites (sans mélange), donc la bonne image est toujours la première du fichier. Comme le site mélange par défaut les réponses à l’import, l’ordre est fixé dans le texte du quiz : il ne changera pas sur ton écran.",
-        it="Le quattro immagini di una domanda hanno la stessa forma e le stesse etichette, e si sposta solo la freccia. È anche per questo che il sito non dovrebbe segnalare proporzioni diverse. Le risposte restano nell’ordine in cui sono scritte (non mescolate), quindi l’immagine corretta è sempre la prima nel file. Poiché il sito di default mescola le risposte al caricamento, l’ordine è fissato nel testo del quiz e sul tuo schermo non cambierà.")),
+        en="Questions 1, 4, 5, 6, 8, 9 and 12 are unchanged. Two middle-number questions (5 and 8) are still in, so that this type comes up too. If they’re too easy for you, I can make them harder or replace them with more reversed questions.",
+        de="Fragen 1, 4, 5, 6, 8, 9 und 12 sind unverändert. Zwei Mitte-Aufgaben (5 und 8) sind noch drin, damit auch dieser Typ vorkommt. Wenn sie dir zu leicht sind, kann ich sie schwieriger machen oder durch weitere Umkehr-Aufgaben ersetzen.",
+        fr="Les questions 1, 4, 5, 6, 8, 9 et 12 n’ont pas changé. Deux exercices du nombre au milieu (5 et 8) restent, pour que ce type soit aussi présent. S’ils te semblent trop faciles, je peux les rendre plus difficiles ou les remplacer par d’autres exercices inversés.",
+        it="Le domande 1, 4, 5, 6, 8, 9 e 12 sono invariate. Due esercizi del numero a metà (5 e 8) sono rimasti, così c’è anche questo tipo. Se ti sembrano troppo facili, posso renderli più difficili o sostituirli con altri esercizi al contrario.")),
 
-    ("ai", dict(
-        en="The quiz is now a bit past the 10 questions you asked for. If it’s too long for your lesson, you can skip questions 12–13 during play.",
-        de="Das Quiz hat jetzt etwas mehr als die 10 Fragen, die du wolltest. Wenn es für deine Lektion zu lang ist, kannst du die Fragen 12–13 beim Spielen überspringen.",
-        fr="Le quiz dépasse maintenant un peu la dizaine de questions demandée. S’il est trop long pour ta leçon, tu peux sauter les questions 12 et 13 pendant la partie.",
-        it="Ora il quiz supera di poco la decina di domande che avevi chiesto. Se è troppo lungo per la tua lezione, puoi saltare le domande 12–13 durante il gioco.")),
-
-    ("chip", None),
-]
-
-# ------------------------------------------------------------------ turn 3
-# The teacher's third message starts in lower case, as in the run.
-
-TURN3 = [
-    ("user", dict(
-        en="thanks. Can you make a visual preview, just one per question type?",
-        de="danke. Kannst du eine visuelle Vorschau machen, nur eine pro Fragetyp?",
-        fr="merci. Tu peux faire un aperçu visuel, juste un par type de question ?",
-        it="grazie. Puoi fare un’anteprima visiva, solo una per tipo di domanda?")),
-
-    ("fold", dict(
-        en="Setting up a visualizer mockup of the projector screens",
-        de="Erstelle ein Mock-up der Beamer-Ansichten im Visualizer",
-        fr="Préparation d’une maquette visuelle des écrans projetés",
-        it="Preparo un mockup visivo delle schermate del proiettore")),
-
-    ("ai", dict(
-        en="I’ll check the site’s layout page so the previews match how the class will actually see them.",
-        de="Ich schaue mir die Layout-Seite der Website an, damit die Vorschau zeigt, wie die Klasse die Fragen tatsächlich sehen wird.",
-        fr="Je regarde la page du site consacrée à la mise en page, pour que les aperçus correspondent à ce que la classe verra vraiment.",
-        it="Controllo la pagina sul layout del sito, così le anteprime corrisponderanno a ciò che la classe vedrà davvero.")),
-
-    ("toolfail", None),
-
-    # Four preview cards. The questions are the zip's (the quiz's own wording, questions 1, 4, 7 and 12).
-    # The captions name the question types as the bullets below them do.
-    ("caption", dict(
-        en="Reading an arrow (questions 1–3)",
-        de="Pfeil ablesen (Fragen 1–3)",
-        fr="Lire une flèche (questions 1 à 3)",
-        it="Leggere la freccia (domande 1–3)")),
-    ("card_arrow", None),   # question: the film's q1
-
-    ("caption", dict(
-        en="Picking the matching number line (questions 4–6)",
-        de="Passenden Zahlenstrahl wählen (Fragen 4–6)",
-        fr="Choisir la droite graduée qui correspond (questions 4 à 6)",
-        it="Scegliere la retta numerica corrispondente (domande 4–6)")),
-    ("card_match", None),   # question: the film's q4
-
-    ("caption", dict(
-        en="Counting and middle questions, text only (questions 7–11)",
-        de="Weiterzählen und Mitte finden, nur Text (Fragen 7–11)",
-        fr="Compter et trouver le milieu, texte seul (questions 7 à 11)",
-        it="Contare e trovare il numero a metà, solo testo (domande 7–11)")),
-    ("card_count", dict(
-        en="Count in steps of 20 000: 500 000, 520 000, 540 000, ... What comes next?",
-        de="Zähle in 20 000er-Schritten: 500 000, 520 000, 540 000, ... Welche Zahl kommt als Nächstes?",
-        fr="Compte de 20 000 en 20 000 : 500 000, 520 000, 540 000, ... Quel nombre vient ensuite ?",
-        it="Conta di 20 000 in 20 000: 500 000, 520 000, 540 000, ... Quale numero viene dopo?")),
-
-    ("caption", dict(
-        en="Finding the section (questions 12–13)",
-        de="Abschnitt finden (Fragen 12–13)",
-        fr="Trouver le segment (questions 12 et 13)",
-        it="Trovare il segmento (domande 12–13)")),
-    ("card_section", dict(
-        en="On which section does 45 200 lie?",
-        de="Auf welchem Abschnitt liegt 45 200?",
-        fr="Sur quel segment se trouve 45 200 ?",
-        it="Su quale segmento si trova 45 200?")),
-
-    ("ai", dict(
-        en="Above are four mock-ups of how the questions will look on the projector, one per question type. Here is what each one shows:",
-        de="Oben siehst du vier Mock-ups, wie die Fragen auf dem Beamer aussehen werden, eines pro Fragetyp. Das zeigen sie im Einzelnen:",
-        fr="Ci-dessus, quatre maquettes de ce à quoi ressembleront les questions au projecteur, une par type de question. Voici ce que montre chacune :",
-        it="Qui sopra ci sono quattro mock-up di come appariranno le domande sul proiettore, uno per tipo di domanda. Ecco cosa mostra ciascuno:")),
-
+    ("ai", FILES),
     ("bullets", [
-        dict(
-            en="**Reading an arrow:** the number line sits full width between the question and the answers, and the four answers are plain text buttons.",
-            de="**Pfeil ablesen:** Der Zahlenstrahl steht in voller Breite zwischen Frage und Antworten, und die vier Antworten sind einfache Textknöpfe.",
-            fr="**Lire une flèche :** la droite graduée occupe toute la largeur entre la question et les réponses, et les quatre réponses sont de simples boutons de texte.",
-            it="**Leggere la freccia:** la retta numerica occupa tutta la larghezza tra la domanda e le risposte, e le quattro risposte sono semplici pulsanti di testo."),
-        dict(
-            en="**Picking the matching number line:** the question is only a few words, and the four answers are pictures. The coloured frame around each picture is its answer colour.",
-            de="**Passenden Zahlenstrahl wählen:** Die Frage besteht nur aus wenigen Wörtern, und die vier Antworten sind Bilder. Der farbige Rahmen um jedes Bild ist seine Antwortfarbe.",
-            fr="**Choisir la droite graduée qui correspond :** la question ne fait que quelques mots, et les quatre réponses sont des images. Le cadre coloré autour de chaque image est la couleur de sa réponse.",
-            it="**Scegliere la retta numerica corrispondente:** la domanda è di poche parole e le quattro risposte sono immagini. La cornice colorata attorno a ogni immagine è il colore della sua risposta."),
-        dict(
-            en="**Counting and middle questions:** only text, with the four answer buttons at the bottom.",
-            de="**Weiterzählen und Mitte finden:** nur Text, mit den vier Antwortknöpfen unten.",
-            fr="**Compter et trouver le milieu :** du texte seulement, avec les quatre boutons de réponse en bas.",
-            it="**Contare e trovare il numero a metà:** solo testo, con i quattro pulsanti di risposta in basso."),
-        dict(
-            en="**Finding the section:** the four sections A–D are one tall picture, and the answers are the letters A–D.",
-            de="**Abschnitt finden:** Die vier Abschnitte A–D sind ein einziges hohes Bild, und die Antworten sind die Buchstaben A–D.",
-            fr="**Trouver le segment :** les quatre segments A–D forment une seule image haute, et les réponses sont les lettres A–D.",
-            it="**Trovare il segmento:** i quattro segmenti A–D sono un’unica immagine alta e le risposte sono le lettere A–D."),
+        {lang: "{zip2}" for lang in LANGS},
+        dict(en="review-v2.png (overview)", de="review-v2.png (Übersicht)", fr="review-v2.png (aperçu)", it="review-v2.png (panoramica)"),
     ]),
-
-    ("ai", dict(
-        en="These are my own approximations, so the real site will differ in the exact colours, shapes and spacing. The students’ phones show only the coloured answer buttons and never the question. For the real look, check the teacher preview after you upload the `.zip`.",
-        de="Das sind meine eigenen Annäherungen; die echte Website weicht in den genauen Farben, Formen und Abständen also ab. Auf den Handys der Kinder sieht man nur die farbigen Antwortknöpfe, nie die Frage. Wie es wirklich aussieht, siehst du in der Lehrervorschau, nachdem du die `.zip`-Datei hochgeladen hast.",
-        fr="Ce sont mes propres approximations : sur le vrai site, les couleurs, les formes et les espacements exacts seront différents. Les téléphones des élèves n’affichent que les boutons de réponse colorés, jamais la question. Pour voir le rendu réel, regarde l’aperçu enseignant après avoir importé le `.zip`.",
-        it="Sono approssimazioni mie, quindi nel sito vero colori, forme e spaziature esatti saranno diversi. I telefoni degli alunni mostrano solo i pulsanti colorati delle risposte, mai la domanda. Per vedere l’aspetto reale, controlla l’anteprima per l’insegnante dopo aver caricato il file `.zip`.")),
-
+    ("review", None),
+    ("chip", 1),
+    ("all", None),
     ("reactions", None),
 ]

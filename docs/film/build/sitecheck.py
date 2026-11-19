@@ -56,7 +56,7 @@ TMP = ROOT / '.tmp' / 'sitecheck'
 WORK = TMP / 'work'          # the working tree's src/, copied
 BASE = TMP / 'main'          # main's src/
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else TMP / 'shots').resolve(); OUT.mkdir(parents=True, exist_ok=True)
-FILM_WORDS = ['Which number does the arrow show', 'Let everyone in', 'How will it be played', '646 000', 'Big numbers on the number line', 'Setting up a visualizer mockup', 'Reading an arrow']
+FILM_WORDS = ['Which number does the arrow show', 'Let everyone in', 'How will it be played', '126 000', 'Big numbers on the number line', 'Setting the positions for the number-line question', 'mix them in for a bit more variety']
 problems = []
 DUR = film_length()
 CLOCK = lambda x: f'{x // 60}:{x % 60:02d}'

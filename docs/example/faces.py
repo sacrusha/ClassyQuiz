@@ -34,12 +34,12 @@ OUT_FACES = ROOT / "src" / "public" / "landing"
 LANGS = ("en", "de", "fr", "it")
 
 # The examples, in the tabs' order: what the visitor starts from, and the file its example's AI handed over, per language.
-# idea: the owner's run (German; the others translated, space_zips.py). sheets: the worked example (English; translated,
-# quiz_zips.py). notes: the owner's run (English; translated, notes_zips.py). test: a stand-in until the owner's run
-# (mock_zips.py).
+# idea: the owner's run (German; the others translated, space_zips.py). sheets: the owner's run, the worked example
+# (German; translated, quiz_zips.py). notes: the owner's run (English; translated, notes_zips.py). test: a stand-in until
+# the owner's run (mock_zips.py).
 EXAMPLES = {
     "idea": {"en": "space-quiz.zip", "de": "weltall-quiz.zip", "fr": "quiz-voyage-espace.zip", "it": "quiz-viaggio-spazio.zip"},
-    "sheets": {"en": "big-numbers-quiz.zip", "de": "grosse-zahlen-quiz.zip", "fr": "quiz-grands-nombres.zip", "it": "quiz-grandi-numeri.zip"},
+    "sheets": {"en": "big-numbers-quiz-v2.zip", "de": "grosse-zahlen-quiz-v2.zip", "fr": "quiz-grands-nombres-v2.zip", "it": "quiz-grandi-numeri-v2.zip"},
     "notes": {"en": "french-revolution-quiz.zip", "de": "franzoesische-revolution-quiz.zip", "fr": "quiz-revolution-francaise.zip", "it": "quiz-rivoluzione-francese.zip"},
     "test": {"en": "cell-test-practice.zip", "de": "zellen-test-uebung.zip", "fr": "controle-cellule-revision.zip", "it": "verifica-cellula-ripasso.zip"},
 }
