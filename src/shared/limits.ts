@@ -148,9 +148,9 @@ const OWN_COPY = "For more quizzes, a site of your own, your school's or your co
 
 /**
  * Why a device can't join (server/game.ts); shown on it. Whoever runs the
- * quiz is in the room and can act on it; the words name no role, so they fit
- * a class and any other crowd (docs/design/teacher-devices.md, "Words for
- * any crowd"). The pages match these strings: a change reaches a page open
+ * quiz is in the room and can act on it; the words are for a class and any
+ * other crowd (docs/design/teacher-devices.md, "Words for any crowd"). The
+ * pages match these strings: a change reaches a page open
  * during a deploy only once it reloads.
  */
 export const CLASS_FULL = "This quiz is full. Ask whoever runs it.";

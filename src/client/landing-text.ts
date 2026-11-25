@@ -5,9 +5,7 @@
 // (client/room-text.ts).
 //
 // German, French and Italian say the same as the English in their own
-// sentences, with a noun where a pronoun could point at two things
-// (docs/design/root-page.md, "Languages"; the choices:
-// docs/translation-review.md).
+// sentences (docs/design/root-page.md, "Languages").
 //
 // The example asks, one per thing a visitor starts from (docs/design/root-page.md,
 // "Getting a quiz"): the idea's is the owner's run, tidied, German its original;
@@ -66,7 +64,7 @@ export interface Text extends SiteWords {
   /** About, the last part for people (docs/design/root-page.md, "Where the part for people ends"): its heading and what the site is. */
   aboutH: string;
   about: string;
-  /** About's last line, one link to graculus.ch: the words before and after the maker's name, Graculus (docs/design/identity.md, "The maker's name"). */
+  /** About's last sentence, the words around the maker's name, Graculus, which links to graculus.ch (docs/design/identity.md, "The maker's name"). */
   madeBy: string;
   madeFor: string;
   /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
@@ -154,9 +152,9 @@ const en: Text = {
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1)} MB`),
   filmH: "From the exercise sheet to the class playing, in one minute",
   aboutH: "About classyQuiz",
-  about: "classyQuiz is an open-source site for playing quizzes under the MIT license: run for a class or another group on a big screen, played among friends on their own devices, or played on your own. It is designed for your own AI assistant, to make the quiz from your instructions and material, such as exercise sheets or notes, allowing for time saved and for quizzes whose answers can stay a surprise, alone or with friends.",
+  about: "classyQuiz is an open-source website for playing quizzes, released under the MIT license. You can run a quiz for a class or a group on a big screen, play it with friends, each on your own device, or play it alone. Your own AI makes the quizzes from your instructions and your material, such as exercise sheets or notes. That saves time, and the answers can stay a surprise, even for you.",
   madeBy: "classyQuiz is made by",
-  madeFor: ", personal training in instructing AI.",
+  madeFor: ", which offers personal training in instructing AI.",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
   capZip: "The .zip, opened here",
@@ -241,9 +239,9 @@ const de: Text = {
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`),
   filmH: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute",
   aboutH: "Über classyQuiz",
-  about: "classyQuiz ist eine Open-Source-Website zum Quizspielen, unter der MIT-Lizenz: für eine Klasse oder eine andere Gruppe auf einem Grossbildschirm geleitet, unter Freunden auf den eigenen Geräten oder allein. Die Website ist für deine eigene KI gemacht, die das Quiz aus deinen Anweisungen und deinem Material macht, etwa aus Arbeitsblättern oder Notizen. Das spart Zeit, und allein oder unter Freunden können die Lösungen eine Überraschung bleiben.",
-  madeBy: "classyQuiz ist von",
-  madeFor: ". Persönliches Training: KI instruieren.",
+  about: "classyQuiz ist eine Open-Source-Website für Quizze, unter der MIT-Lizenz. Du kannst ein Quiz für eine Klasse oder eine Gruppe auf einem grossen Bildschirm leiten, es mit Freunden spielen, jeder auf seinem eigenen Gerät, oder allein. Deine eigene KI erstellt die Quizze aus deinen Anweisungen und Unterlagen, etwa aus Arbeitsblättern oder Notizen. Das spart Zeit, und die Antworten können eine Überraschung bleiben, auch für dich.",
+  madeBy: "classyQuiz wird von",
+  madeFor: " entwickelt, das persönliches Training in der Anleitung von KI anbietet.",
   capSheet: "Deine Arbeitsblätter",
   capAi: "Deine KI",
   capZip: "Die .zip-Datei, hier geöffnet",
@@ -333,9 +331,9 @@ const fr: Text = {
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} Ko` : `${(n / 1048576).toFixed(1).replace(".", ",")} Mo`),
   filmH: "De la fiche d'exercices à la classe qui joue, en une minute",
   aboutH: "À propos de classyQuiz",
-  about: "classyQuiz est un site open source sous licence MIT pour jouer à des quiz : animés pour une classe ou un autre groupe sur grand écran, entre amis sur leurs propres appareils, ou en solo. Le site est conçu pour votre propre IA, qui crée le quiz à partir de vos instructions et de vos documents, comme des fiches d'exercices ou des notes de cours. Cela fait gagner du temps, et en solo ou entre amis, les réponses peuvent rester une surprise.",
+  about: "classyQuiz est un site open source de quiz, sous licence MIT. Vous pouvez animer un quiz pour une classe ou un groupe sur grand écran, y jouer entre amis, chacun sur son appareil, ou seul. Votre propre IA crée les quiz à partir de vos instructions et de vos documents, comme des fiches d'exercices ou des notes de cours. Vous gagnez du temps, et les réponses peuvent rester une surprise, même pour vous.",
   madeBy: "classyQuiz est réalisé par",
-  madeFor: ", formation individuelle pour instruire l'IA.",
+  madeFor: ", qui propose des formations individuelles pour apprendre à donner des instructions à l'IA.",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
   capZip: "Le .zip, ouvert ici",
@@ -425,9 +423,9 @@ const it: Text = {
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`),
   filmH: "Dalla scheda alla classe che gioca, in un minuto",
   aboutH: "Informazioni su classyQuiz",
-  about: "classyQuiz è un sito open source con licenza MIT per giocare ai quiz: condotti per una classe o un altro gruppo su schermo grande, tra amici sui propri dispositivi, o per conto tuo. Il sito è pensato per la tua IA, che crea il quiz dalle tue istruzioni e dal tuo materiale, come schede o appunti. Così risparmi tempo, e per conto tuo o tra amici le risposte possono restare una sorpresa.",
+  about: "classyQuiz è un sito open source di quiz, con licenza MIT. Puoi condurre un quiz per una classe o un gruppo su un grande schermo, giocarci con gli amici, ognuno sul proprio dispositivo, o da solo. La tua IA crea i quiz dalle tue istruzioni e dai tuoi materiali, come schede o appunti. Risparmi tempo, e le risposte possono restare una sorpresa, anche per te.",
   madeBy: "classyQuiz è realizzato da",
-  madeFor: ", formazione individuale per istruire l'IA.",
+  madeFor: ", che offre formazione individuale per imparare a dare istruzioni all'IA.",
   capSheet: "Le tue schede",
   capAi: "La tua IA",
   capZip: "Il file .zip, aperto qui",

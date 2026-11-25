@@ -24,7 +24,7 @@ export interface EntryContext {
 export interface Entry {
   /** The entry's name, the owner's: Solo, Peers, Quizmaster. */
   name: string;
-  /** Under the name: who it is for and how it plays, one sentence, without a role noun where the sentence does without one. */
+  /** Under the name: who it is for and how it plays, one sentence. */
   line: string;
   /** The picture of the way being played (docs/ways/), on its card: the setting seen where the way is chosen. */
   picture: string;

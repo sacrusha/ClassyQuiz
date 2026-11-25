@@ -1,6 +1,6 @@
 """The sheets run's quiz in English, French and Italian: the run's grosse-zahlen-quiz-v2.zip (src/public/examples/, as it
 came) with its quiz.txt translated, the pictures unchanged (they carry only numbers). Title and question 1 are the film's
-(CONTENT in docs/film/build/film.js); all of it is a draft for the owner's review (docs/translation-review.md).
+(CONTENT in docs/film/build/film.js); all of it is a draft for the owner's review.
 
     py -I docs/example/quiz_zips.py      (from anywhere)
 

@@ -191,10 +191,8 @@ parts:
   recognises the first way.
 - It doesn't say what the quiz is made from. The owner found that "from
   your sheets, notes" made readers assume that attachments are required.
-- It has no pronoun whose referent a reader must find (Situation).
 
-The wording is the implementer's. The choices in the other three languages
-are in `translation-review.md`.
+The wording is the implementer's.
 
 ### Getting a quiz
 
@@ -384,18 +382,17 @@ text copied for the AI stay English, because the AI reads them.
 
 Purpose (backlog v6 item 2): a visitor who reads German, French or Italian
 gets the same page in that language's own sentences, and the findings in
-Situation hold in each:
+Situation hold in each. Besides:
 
-- **No pronoun whose referent a reader must find.** Where English leans on
-  "it", the translation names the noun.
-- **A noun that the page uses for two things is told apart** where the two
-  could be confused. German "Seite" is this page and also the site, so a
-  site of one's own is "eine eigene Website".
-- **The first screen holds the same in each language** from 360 px up, so
-  where two wordings say the same, the shorter is taken.
+- German "Seite" is this page and also the site; a site of one's own is
+  "eine eigene Website".
+- The plural of "Quiz" (the owner): the Duden says "Quizze" is wrong, and
+  every normal German speaker says "die Quiz" as a plural is wrong. A line
+  with "Quiz" in the singular is a workaround for that.
+- At 360 px the first screen's words have little room to spare in any of
+  the four languages.
 
-The words in the three languages are the implementer's drafts. The choices
-behind them are in `translation-review.md`.
+The words in the three languages are the implementer's drafts.
 
 ### Words for whoever comes
 
@@ -409,21 +406,23 @@ What the words live with:
 - "Teacher" stood for two people: whoever asks the AI for the quiz, and
   whoever runs it in the room. In Solo and Peers nobody runs it, and the
   person who asked plays.
-- The owner: "host" is acceptable but not great in English, and a role noun
-  is avoided where a sentence does without one.
+- The owner: "Host is ok not great in English (participants also connect
+  to a host, in software language), translations will have to be careful to
+  hit meaning, not literal. Peers might get away without the word,
+  Quizmaster may or may not need one", for example "Join with this code to
+  add an optional second quizmaster device, use one as remote the other as
+  a projector."
 - The page and the screens are translated, and a translation hits the
-  meaning, not the literal word.
+  meaning, not the literal word. The words for someone who receives guests
+  (Gastgeber, hôte, ospite) don't say who runs a quiz.
 
-The decisions, for all three ways:
+The words, for all three ways:
 
-- **No role noun where the words are translated.** The page says "you". The
-  screens use a sentence ("Ask whoever runs it"). A noun would need a word
-  in each language that suits a classroom and a pub alike, and the words
-  for someone who receives guests (Gastgeber, hôte, ospite) don't say who
-  runs a quiz.
-- **"Quizmaster"** for whoever runs a room, where English needs a noun (the
-  guidance, the README). It is the name of the way on the local check and
-  the word for whoever runs a pub quiz. "Host" remains the code's word.
+- **The page says "you"**; the screens say what to do in a sentence ("Ask
+  whoever runs it").
+- **"Quizmaster"** is the name of the way on the local check and the word
+  for whoever runs a pub quiz; the guidance and the README use it for
+  whoever runs a room. "Host" remains the code's word.
 - **"The user"** in the guidance for whoever talks to the AI. **"Players"**
   for whoever answers.
 - **"Teacher", "class", "students", "lesson"** stay where the classroom is

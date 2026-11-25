@@ -210,8 +210,7 @@ before anything else comes into play (owner and product owner).
     run translated so the example is the same in each, as the page says.
     Open: the translations are drafts (`docs/example/text.py`, the page's
     words in `client/example-text.ts`, the quizzes in
-    `docs/example/quiz_zips.py`); the choices are
-    `docs/translation-review.md`, "The worked example".
+    `docs/example/quiz_zips.py`).
 14. **One product, made on purpose** — the teacher deciding whether to rely
     on the site in front of a class meets the same name, mark, paper, ink and
     type on every page.
@@ -335,11 +334,9 @@ hand; the classroom is a Quizmaster's quiz, and nothing built was undone.
    (`design/guidance-page.md`), the examples' asks beside the sheets ask, one
    per thing an ask can start from (`design/root-page.md`, "Getting a
    quiz"), and the film showing the check and the lobby as built
-   (`docs/film/`). Open: the de/fr/it drafts
-   (`translation-review.md`, "The first page in German, French and
-   Italian", E6); whether someone
-   who isn't a teacher reads the page as theirs, which nobody outside the
-   project has tried.
+   (`docs/film/`). Open: the de/fr/it drafts; whether someone who isn't a
+   teacher reads the page as theirs, which nobody outside the project has
+   tried.
 
 Out under the lifetime as decided (keeping serves rejoining a quiz in
 progress: `design/hosting-and-limits.md`, "What lives, and for how long"): playing at different times — each at home when they like, a
@@ -422,9 +419,7 @@ site meets it"). What the owner found while directions were tried is in
    sentence structure: the owner's findings on pronouns and on the
    visitor's side of the words hold in each language
    (`design/root-page.md`, "Languages"). Built: every word of the page and
-   its states in the three, in `client/landing-text.ts`; the choices behind
-   the words, `translation-review.md`, "The first page in German, French and
-   Italian".
+   its states in the three, in `client/landing-text.ts`.
 
 3. **The film and the worked example show the page that exists** — the
    film types the ask and shows the root page with the box that opens a
@@ -724,10 +719,10 @@ association visible and a way back to graculus.ch (the owner's purpose:
 `design/identity.md`, "The maker's name").
 
 1. **The maker's name on the root page** — built: About classyQuiz closes
-   the part for people, in the visitor's language, with one line to
-   graculus.ch (`design/root-page.md`, "Where the part for people ends").
-   Open: the German, French and Italian are drafts
-   (`translation-review.md`).
+   the part for people, in the visitor's language, and names its maker with
+   a link to graculus.ch (`design/root-page.md`, "Where the part for people
+   ends").
+   Open: the German, French and Italian are drafts.
 
 ## Later — Paper and memory
 
@@ -798,10 +793,10 @@ The quiz is already made; it can be more than one activity.
 ## Open: with the owner, and in the field
 
 With the owner, what only he can do:
-- The read of the German, French and Italian words
-  (`translation-review.md`; the screens' words in `client/room-text.ts`,
-  `check-text.ts`, `own-copy.ts` and `notfound.ts`); Italian has no native
-  reader on the project.
+- The read of the German, French and Italian words: the page's, the
+  screens' (`client/room-text.ts`, `check-text.ts`, `own-copy.ts`,
+  `notfound.ts`), `/example`'s and the film's; Italian has no native reader
+  on the project.
 - The space run's photographs (the root page's Idea tab): where each comes
   from and whether the site may hand it on in the four `.zip`s; the AI calls
   them NASA's and public domain, and nothing else records a source

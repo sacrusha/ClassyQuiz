@@ -46,7 +46,7 @@ In English in every language of the film (0.7). The `.zip` is read in the browse
 Under the cards, folded: "▸ The questions and their solutions" and "If you will play it yourself, leave this closed." The film draws the laptop-wide layout (0.8), the fold below the frame; the camera moves in on Quizmaster's card, and the thumb taps "Open the lobby ▶" (while it goes up the site says "Sending the quiz…" under the button; the film leaves it out).
 
 ### 3.4 The lobby's check, then the Remote's lobby (`screen.ts` `renderCheck`, `teach.ts` `lobby`; docs/design/teacher-devices.md, "The single tab: check, then join")
-In English in every language of the film (0.7), and no role named (docs/design/teacher-devices.md, "Words for any crowd"). The check, the tab that opened the lobby (here the phone, the Projector until a second device takes that):
+In English in every language of the film (0.7). The check, the tab that opened the lobby (here the phone, the Projector until a second device takes that):
 - Title line as on the local check; right of it (under it on a phone) "Join code **63953**".
 - "**How are the screens arranged?**" and a toggle of two, side by side (stacked on a phone): **One screen** "It shows the quiz and steers it: the buttons under the quiz, the keyboard or a clicker." and **Screen and remote** "One device shows the quiz, another steers it: a phone, say." Screen and remote is pressed on a first visit (why: docs/design/teacher-devices.md, "How the screens are arranged").
 - Under Screen and remote only, the how-to (verbatim): "On the second device, open **classyquiz.pages.dev** and type **63953 47**." and, hidden on a phone, " With two screens on this computer: open a second screen in a new window."

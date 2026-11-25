@@ -3,8 +3,8 @@
 The run is the owner's (12 Nov 2026, English, Claude Sonnet, the class notes attached as a PDF,
 src/public/examples/notes-<lang>.pdf; its screenshot is notes-conversation-original.webp here, dark). en is its words as
 shown; the ask is the root page's (askNotes in src/client/landing-text.ts, read from there by build.py), which is the
-run's with a workaround of that day cut from it. de, fr and it are drafts for the owner's review
-(docs/translation-review.md), in the words of that language's notes and quiz (notes_zips.py), with the app's words as
+run's with a workaround of that day cut from it. de, fr and it are drafts for the owner's review,
+in the words of that language's notes and quiz (notes_zips.py), with the app's words as
 that language's app would show them.
 
 Markup as text.py's: **bold**, `code`, {zip} for the language's .zip name (faces.py's EXAMPLES); in fr a space before

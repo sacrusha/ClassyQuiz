@@ -196,21 +196,11 @@ video. The association isn't hidden, and classyQuiz is a way back to
 graculus.ch for someone who comes from that material, as from a Graculus
 video to classyQuiz to graculus.ch.
 
-- **One line closing About classyQuiz**, the last part for people on the
-  root page (`root-page.md`, "Where the part for people ends"), in the
-  visitor's language: the chough, "classyQuiz is made by Graculus, personal
-  training in instructing AI." and "graculus.ch ›", all one link. German
-  carries graculus.ch's own German line ("Persönliches Training: KI
-  instruieren."). An AI that fetches the page reads the line in English;
-  `/manual.txt` starts below it.
-- **The chough** is Graculus's bird (graculus.ch's `assets/bird.svg`),
-  copied to `src/public/brand/graculus-bird.svg` with its navy as
-  `currentColor`, so it takes the line's colour and holds in dark mode; the
-  beak keeps Graculus's yellow. The copy's viewBox starts at 0 0 (the
-  original's at 32.04 4.71), because the build's `<use>` places a symbol
-  there. It is written in as the fox is (`<!--#brand-use-->`), its drawing
-  after the guidance.
-- Only the root page carries it.
+About classyQuiz, the last part for people on the root page (`root-page.md`,
+"Where the part for people ends"), names the maker in its last sentence, in
+the visitor's language, the name a link to graculus.ch. An AI that fetches
+the page reads it in English; `/manual.txt` starts below it. Only the root
+page names the maker.
 
 ## Not known
 

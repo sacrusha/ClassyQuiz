@@ -215,21 +215,17 @@ one that shows it.
 
 ### Words for any crowd
 
-From the check on, the screens' words name no role where a sentence does
-without one, so they read as a class's and as a pub's: "Let everyone in",
-"Join code", "Joining opens in a moment.", "Ask whoever runs it.",
-"everyone watches this screen", "everyone reads the question", "The last
-two digits don't match this quiz." The owner's example of a sentence that
-does without a role noun: "Join with this code to add an optional second
-quizmaster device, use one as remote the other as a projector." The device
+From the check on, the screens' words read as a class's and as a pub's:
+"Let everyone in", "Join code", "Joining opens in a moment.", "Ask whoever
+runs it.", "everyone watches this screen", "everyone reads the question",
+"The last two digits don't match this quiz." What the owner said about
+naming who runs it: `root-page.md`, "Words for whoever comes". The device
 that steers is the "Remote"; the one that shows the quiz is "the big
 screen", the root page's word, on the Remote, in the tab's title and on the
 page for an address that isn't one, since a television, a touch board or a
 shared window shows a quiz as a projector does. These docs keep "teacher",
 "class", "teacher code" and "Projector" (the role `screen`): they speak of
-the example class. The words before the check, the guidance's and
-the README's follow the same rule, decided once for all entries
-(`root-page.md`, "Words for whoever comes").
+the example class.
 
 ### A second device: one question, only when needed
 

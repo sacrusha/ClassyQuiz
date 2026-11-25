@@ -6,7 +6,7 @@ The owner ran it on 19 Nov 2026 in French with Claude Opus 5.5. He attached the 
 test-conversation-original.webp in this folder.
 
 - fr holds the AI's words from the run. One change: the site's name is spelled "classyQuiz".
-- en, de and it are draft translations (docs/translation-review.md). They use the same school terms as the test
+- en, de and it are draft translations. They use the same school terms as the test
   sheet and the quiz in that language (test_sheet.py, test_zips.py).
 - The pupil's message is not in this file. build.py reads it from askTest in src/client/landing-text.ts, so the
   root page and the picture always show the same message.

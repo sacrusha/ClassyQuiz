@@ -1,8 +1,8 @@
 // /example's words in the four languages (docs/design/example-page.md). The
 // static HTML is English, so an AI's fetcher reads English; example.ts swaps
 // these in. The header's words (code, join, language) are the root page's,
-// from landing-text.ts. de, fr and it are drafts for the owner's review
-// (docs/translation-review.md); the voice is the root page's.
+// from landing-text.ts. de, fr and it are drafts for the owner's review;
+// the voice is the root page's.
 
 import type { Lang } from "./landing-text.ts";
 import { EXAMPLE_FILES } from "./example-files.ts";

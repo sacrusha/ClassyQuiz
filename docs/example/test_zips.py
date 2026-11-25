@@ -5,7 +5,7 @@ This script writes three more .zip files beside it. In each one, quiz.txt has a 
 questions and translated choices. The two drawings contain no words and are copied unchanged.
 
 The translations use the same school terms as the test sheet in that language (test_sheet.py). They are drafts
-that the owner has not reviewed (docs/translation-review.md). The root page's "Test" tab offers these files
+that the owner has not reviewed. The root page's "Test" tab offers these files
 (docs/design/root-page.md, "Getting a quiz").
 
     py -I docs/example/test_zips.py      (from anywhere)

@@ -2,7 +2,7 @@
 
 The run is the owner's (11 Nov 2026, German, nothing attached; its screenshot is space-conversation-original.webp here,
 dark). de is its words as typed, the ask's slips included, and the app's own words as that app showed
-them, in English; en, fr and it are drafts for the owner's review (docs/translation-review.md), with the app's words as
+them, in English; en, fr and it are drafts for the owner's review, with the app's words as
 that language's app would show them. Where the German rests on the German situation (the quiz "auf Deutsch (Schweizer
 Schreibweise)"), the translation has its own language's. The quiz's title and the names in the AI's summary are the
 translated quizzes' (space_zips.py).
