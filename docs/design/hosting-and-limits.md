@@ -671,8 +671,7 @@ What devices do afterwards: `connections.md`, "The allowance spent".
 - Whether teachers are seen with more than five latecomers, or re-uploading
   after the 3 hours.
 - Whether the German, French and Italian wording of the two caps' messages
-  and of the ledger's "right now" ones reads right; it has not been seen
-  in a browser.
+  reads right; it has not been seen in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.
 - Whether any school converts the server, and how its AI fares with the
   README section; and which outside address serves a converted copy's own
