@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 080c083, deployed 2026-11-25: Pages deployment 4d036da8 of the
-  project `classyquiz`, version b389da5a of the state Worker
+- Commit 7eadc81, deployed 2026-11-25: Pages deployment c84edb96 of the
+  project `classyquiz`, version 33ecaa4a of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 080c083 -- src/`.
+  `git diff 7eadc81 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -75,6 +75,11 @@ changed what it covered.
   both, a reload bringing the three back, an unshared quiz's phone
   unchanged; on the deployment's address; the production one served the
   same `play.js`, `screen.js` and `app.css` (2026-11-25, c56a7fc).
+- The root page's About and its line to Graculus, in English at 1280 px
+  and in German on a dark 390 px phone, in headless Edge; `/manual.txt`
+  starting at the manual's heading; the line's link landing on
+  graculus.ch; on the deployment's address and on the production one
+  (2026-11-25, 7eadc81).
 
 ## Not tried live
 
@@ -88,6 +93,8 @@ changed what it covered.
 - Since fd6728c and 013c6a9: the Test example's quiz opened on the check
   or played, and `/example?ex=test`'s conversation pictures looked at, on
   the live site (the page and files answered, nothing more).
+- Since 7eadc81: About and its line to Graculus in French and Italian (a
+  360 px French phone on the built site only), and in English on a phone.
 - Since 2f56259: the film with the new sheets run's words and question on
   the live site (`docs/film/build/sitecheck.py` on a local copy only).
 - Since 9812126: Start's ten seconds in a Quizmaster's room (the wall, the
