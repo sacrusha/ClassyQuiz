@@ -212,8 +212,13 @@ How the site meets it:
   reload brings every place back; the page's places sleep and wake
   together (`connections.md`, "Devices left on").
 - **Every finger presses for itself** while the page is split
-  (`client/tap.ts`), and the split page doesn't pinch, scroll or call up a
-  menu. A device of its own presses by click as before.
+  (`client/tap.ts`): lifted over the element it went down on, as a click
+  is. A contact held a second or longer is a hand resting on the glass and
+  presses nothing (plausible assumption: a child's deliberate press lifts
+  well within it); nor does a pen's side button or eraser, which click
+  nothing; fingers down together on one element press it once. The split
+  page doesn't pinch, scroll, call up a menu or lift a picture to drag. A
+  device of its own, and a mouse, press by click as before.
 - **Sizes follow the column** (`.seats` in `app.css`): the dressing stacks
   and text answers stand one under the other in a column taller than wide.
   A browser without container units (Safari before 16) offers no + and
@@ -576,7 +581,7 @@ added, and some teachers want to photograph it. So it has its own screen
 ## Not known
 
 - A shared device in real hands, on a real iPad: palm rejection, whether a
-  resting hand presses a button in its own place, the four- and
+  second tells a resting hand from a child's press, the four- and
   five-finger gestures that leave Safari (on by default, Settings,
   Multitasking & Gestures); the columns judged headless only, three at
   768 × 1024, 1024 × 768 and 1180 × 820; whether three side by side at one
