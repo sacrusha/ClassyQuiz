@@ -131,8 +131,8 @@ quiz under way.
 
 Purpose (backlog, "Fewer devices than people"): a class with fewer devices
 than people, each person with a place, an avatar and a score of their own.
-The owner: a nice-to-have, and a classroom's problem, so for a Quizmaster
-only. Two children on one tablet as one player works without it.
+The owner: a nice-to-have. Two children on one tablet as one player
+works without it.
 
 Situation:
 
@@ -158,17 +158,36 @@ Situation:
 - The places size themselves by their column, with container units, which
   Safari has from 16. The owner: for a nice-to-have, Safari 16 may be its
   floor.
+- With it allowed, every device in the lobby shows the +, a phone too, and
+  the browser remembers the choice (below): a laptop that had it on for one
+  class has it on for the next, which may have a device each.
+- Apple's school mode for one iPad among several pupils, each signing in,
+  is "Shared iPad" ("Geteiltes iPad", "iPad partagé", "iPad condiviso"),
+  meant for schools without a device each, so plausibly known in the
+  schools this is for. The check's line above the switch speaks of the
+  window shared in a video call. A split screen is the games' word for
+  several players at one screen; the Duden's entry has two players at one
+  PC.
 
 How the site meets it:
 
 - **The teacher allows it** on the check, under how the screens are
   arranged, and on the Remote's lobby beside Points for speed: the switch
-  "Shared devices", what it does always under it, the + included, so the
-  teacher can say it to the class (`shareSwitch`, `client/manage.ts`). The
-  browser keeps the last choice (`sharing`, `client/dom.ts`), and a quiz
-  never set takes it (plausible assumption: a class short of devices is
-  short lesson after lesson). Off, no device offers a place; places
-  already there stay.
+  "Split screen" (`shareSwitch`, `client/manage.ts`), named for what the
+  players' devices do rather than "shared", which names Apple's mode and
+  the window of the line above (Situation). What it does stays under it,
+  on or off: up to three at a device, each with their own avatar and
+  score, which is what sets it apart from two at a tablet as one player,
+  and the + until the quiz starts, so the teacher can say it to the
+  class. Beside it, a player's device as the switch makes it: one animal
+  in two colours and the +, muted while off, a tap on it a tap on the
+  switch. It shows in
+  any language that the split is at the players' devices, not among the
+  screens asked about just above, and a switch a browser left on shows in
+  colour before the class is let in. The browser keeps the last choice
+  (`sharing`, `client/dom.ts`), and a quiz never set takes it (plausible
+  assumption: a class short of devices is short lesson after lesson). Off,
+  no device offers a place; places already there stay.
 - **A player's device splits** (`client/play.ts`): its place becomes a
   column, and in the lobby a + along the edge adds another, up to
   `MAX_SEATS` (3, `shared/limits.ts`). No words: a + and a person. A new

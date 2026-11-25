@@ -676,7 +676,7 @@ deployed to the public site.
       example per tab, the space run's with its conversation and the AI's
       overview of its questions (`design/example-page.md`). Open: the film
       draws the first screen on Idea, and the page opens on Sheets; the
-      film's lobby check has no switch for shared devices
+      film's lobby check has no split screen switch
       (`design/class-and-wall.md`, "Sharing a device").
 
 ## Room on the Free plan
@@ -769,10 +769,12 @@ The quiz is already made; it can be more than one activity.
   stand for twenty-four children is unchecked, and team play is a mode of its
   own. Built for a Quizmaster: a device shared by up to three, each with a
   place, an avatar and a score of their own, allowed by the teacher on the
-  check — `design/class-and-wall.md`, "Sharing a device". Open: Solo and
-  Peers as variants (one device, 2–4 players), whose design would differ;
-  whether pupils misuse adding and closing places (user testing); hands on
-  a real iPad (same file, Not known).
+  check — `design/class-and-wall.md`, "Sharing a device". Peers folds it
+  in, the + always offered (the owner). Open: the Peers layout,
+  fundamentally different since its devices show the question themselves,
+  and with it whether a phone splits and how many share a device; whether
+  pupils misuse adding and closing places (user testing); hands on a real
+  iPad (same file, Not known).
 - **Dark mode** — a visitor whose device is dark gets every screen dark;
   the players' screens are light with no reason recorded, probably an
   oversight (the owner: models have dropped dark mode unnoticed before, in

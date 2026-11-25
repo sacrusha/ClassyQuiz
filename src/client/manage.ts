@@ -417,10 +417,18 @@ export function speedSwitch(v: TeacherView): string {
 }
 
 /**
- * The check's switch for devices shared (docs/design/class-and-wall.md,
- * "Sharing a device"): what it does stays in view, since a teacher deciding
- * whether to turn it on needs that, and says it to the class.
+ * A player's device as the switch makes it (client/play.ts): one animal in
+ * colours of two families, as seatAvatar (server/game.ts) gives them, and
+ * the + beside.
+ */
+const SPLIT_PICTURE = `<span class="sharepic" data-act="share" aria-hidden="true"><span class="col">${avatarSvg({ a: 2, c: 1 }, false)}</span><span class="col">${avatarSvg({ a: 2, c: 4 }, false)}</span><span class="add">${ICON.plus}${ICON.person}</span></span>`;
+
+/**
+ * The switch for a split screen at the players' devices, on the check and
+ * the Remote's lobby (docs/design/class-and-wall.md, "Sharing a device"):
+ * what it does stays in view, since a teacher deciding whether to turn it on
+ * needs that, and says it to the class.
  */
 export function shareSwitch(v: TeacherView): string {
-  return `<button class="speed-switch" role="switch" aria-checked="${!!v.share}" data-act="share"><span class="knob" aria-hidden="true"></span>${T.shareSwitch}</button><small class="share-note">${T.shareNote}</small>`;
+  return `<span class="share${v.share ? " on" : ""}"><span class="share-text"><button class="speed-switch share-switch" role="switch" aria-checked="${!!v.share}" aria-describedby="share-note" data-act="share"><span class="knob" aria-hidden="true"></span>${T.shareSwitch}</button><span class="share-note" id="share-note">${T.shareNote}</span></span>${SPLIT_PICTURE}</span>`;
 }

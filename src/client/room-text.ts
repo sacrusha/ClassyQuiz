@@ -80,7 +80,7 @@ export interface RoomText {
   endQuiz: string;
   speedSwitch: string;
   speedNote: string;
-  /** The check's switch for devices shared (docs/design/class-and-wall.md, "Sharing a device"), and what it does. */
+  /** The switch for a split screen at the players' devices (docs/design/class-and-wall.md, "Sharing a device"), and what it does. */
   shareSwitch: string;
   shareNote: string;
   // The steering bar (client/steps.ts): nouns for what the class sees next (docs/design/question-flow.md, "The steering bar").
@@ -289,8 +289,8 @@ const en: RoomText = {
   endQuiz: "End the quiz: final ranking",
   speedSwitch: "Points for speed",
   speedNote: `A right answer ${POINTS_RIGHT}, up to ${SPEED_BONUS} more the quicker it comes.`,
-  shareSwitch: "Shared devices",
-  shareNote: `Up to ${MAX_SEATS} people play side by side on one device, each with an avatar of their own. The + at the device's edge adds a place.`,
+  shareSwitch: "Split screen",
+  shareNote: `Up to ${MAX_SEATS} people play at one device, each with their own avatar and score. Until the quiz starts, the + adds one more.`,
   choices: "Choices",
   answers: "Answers",
   closesAnswering: "closes answering",
@@ -474,8 +474,8 @@ const de: RoomText = {
   endQuiz: "Quiz beenden: Schlussrangliste",
   speedSwitch: "Punkte fürs Tempo",
   speedNote: `Eine richtige Antwort gibt ${POINTS_RIGHT}, bis zu ${SPEED_BONUS} mehr, je schneller sie kommt.`,
-  shareSwitch: "Geteilte Geräte",
-  shareNote: `Bis zu ${MAX_SEATS} Personen spielen nebeneinander an einem Gerät, jede mit eigenem Avatar. Das + am Rand des Geräts fügt einen Platz hinzu.`,
+  shareSwitch: "Splitscreen",
+  shareNote: `Bis zu ${MAX_SEATS} Personen spielen an einem Gerät, jede mit eigenem Avatar und eigenen Punkten. Bis das Quiz beginnt, fügt das + eine weitere hinzu.`,
   choices: "Optionen",
   answers: "Antworten",
   closesAnswering: "beendet das Antworten",
@@ -659,8 +659,8 @@ const fr: RoomText = {
   endQuiz: "Terminer le quiz : classement final",
   speedSwitch: "Points de rapidité",
   speedNote: `Une bonne réponse vaut ${POINTS_RIGHT}, et jusqu'à ${SPEED_BONUS} de plus si elle arrive vite.`,
-  shareSwitch: "Appareils partagés",
-  shareNote: `Jusqu'à ${MAX_SEATS} personnes jouent côte à côte sur un appareil, chacune avec son propre avatar. Le + au bord de l'appareil ajoute une place.`,
+  shareSwitch: "Écran divisé",
+  shareNote: `Jusqu'à ${MAX_SEATS} personnes jouent sur un appareil, chacune avec son avatar et ses points. Jusqu'au début du quiz, le + en ajoute une.`,
   choices: "Propositions",
   answers: "Réponses",
   closesAnswering: "clôt les réponses",
@@ -844,8 +844,8 @@ const it: RoomText = {
   endQuiz: "Termina il quiz: classifica finale",
   speedSwitch: "Punti per la velocità",
   speedNote: `Una risposta giusta vale ${POINTS_RIGHT}, e fino a ${SPEED_BONUS} in più se arriva in fretta.`,
-  shareSwitch: "Dispositivi condivisi",
-  shareNote: `Fino a ${MAX_SEATS} persone giocano fianco a fianco su un dispositivo, ognuna con il proprio avatar. Il + sul bordo del dispositivo aggiunge un posto.`,
+  shareSwitch: "Split screen",
+  shareNote: `Fino a ${MAX_SEATS} persone giocano su un dispositivo, ognuna con il proprio avatar e i propri punti. Finché il quiz non inizia, il + ne aggiunge un'altra.`,
   choices: "Opzioni",
   answers: "Risposte",
   closesAnswering: "chiude le risposte",

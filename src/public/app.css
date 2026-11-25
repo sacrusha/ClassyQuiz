@@ -449,9 +449,23 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .arrange-opt small { font-size: .85em; color: var(--muted); }
 .arrange-opt[aria-pressed="true"] { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
 .arrange-call { color: var(--muted); font-size: 16px; margin: 6px 0; }
-/* Devices shared (docs/design/class-and-wall.md, "Sharing a device"): what the switch does stays under it, on or off. */
+/* Split screen (docs/design/class-and-wall.md, "Sharing a device"): the switch with what it does under it, on or off, and
+   beside them a player's device as the switch makes it, muted while off. */
+.share { display: flex; align-items: center; gap: 14px; text-align: left; }
+.share-text { flex: 1; min-width: 0; }
+.speed-switch.share-switch { color: var(--fg); }
 .share-note { display: block; color: var(--muted); }
-.check .cshare { text-align: left; font-size: 16px; margin: 14px 0 0; }
+.sharepic { flex: none; display: flex; width: 112px; height: 80px; border: 4px solid var(--fg); border-radius: 10px; background: var(--bg);
+  overflow: hidden; cursor: pointer; transition: filter .15s, opacity .15s; }
+.share:not(.on) .sharepic { filter: grayscale(1); opacity: .45; }
+.sharepic .col { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; }
+.sharepic .col + .col { border-left: 2px solid var(--rule); }
+.sharepic .col svg { width: 82%; height: auto; display: block; }
+.sharepic .add { flex: 0 0 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border-left: 2px dashed var(--rule); background: color-mix(in srgb, var(--fg) 4%, transparent); color: var(--muted); }
+.sharepic .add .icon { width: 14px; height: 14px; }
+.sharepic .add .icon + .icon { width: 11px; height: 11px; }
+.check .cshare { font-size: 16px; margin: 22px 0 0; }
 
 /* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
    play it as cards, each with the picture of its way, its own button and what starting it costs; the questions folded under
@@ -576,6 +590,9 @@ body.teach { padding-bottom: 96px; }
 .joinbox .codebig { font-family: var(--font-brand); font-size: 2.8rem; font-weight: 700; letter-spacing: .1em; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .joinbox .joined { color: var(--muted); margin-bottom: 8px; }
 .joinbox .avatars { justify-content: center; }
+.joinbox .share { max-width: 30rem; margin: 0 auto; }
+/* The crowd above moves the Remote's lobby anyway, and a room kept there for the note would part the two switches. */
+.joinbox .speed-switch[aria-checked="false"] + .speed-note { display: none; }
 .teach .device { margin: 10px 0; font-size: .95rem; }
 .current .qt { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; overflow-wrap: anywhere; }
 .current .answers { padding-left: 0; }

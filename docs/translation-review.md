@@ -164,6 +164,14 @@ own language (`design/root-page.md`, "Languages"). For the read:
   "Réponses closes.", "Risposte chiuse." ("Abgabe" read as handing in schoolwork).
 - **The steering bar's longest labels**: "Schlussrangliste", "Classement final", "Classifica
   finale". Countdown is "Countdown", "Décompte", "Countdown".
+- **Split screen**, the switch for up to three at one device (`design/class-and-wall.md`,
+  "Sharing a device"): "Splitscreen", the Duden's spelling, and Italian "Split screen",
+  loanwords as Countdown is; the games' "schermo condiviso" shares "condivis-" with "iPad
+  condiviso" and the video call's "condividi" above it. French "Écran divisé" for the same
+  reason: the games' "écran partagé" meets "iPad partagé" and "vous partagez"; a French reader
+  may find "écran partagé" plain enough beside the picture. In the note under it, until when
+  the + works comes first ("Bis das Quiz beginnt, fügt das + …"), so it doesn't read as how
+  long the added place lasts; a no-break space holds the + to its article.
 - **Under Start**, the ten seconds a dressing room gets: "in 10 s", "dans 10 s", "tra 10 s"; on
   the friends' phones of a Peers room, beside the opener's avatar, "startet das Quiz gleich.",
   "lance le quiz dans un instant.", "avvia il quiz tra un attimo."
