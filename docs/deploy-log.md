@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit c56a7fc, deployed 2026-11-25: Pages deployment 5582ec12 of the
-  project `classyquiz`, version 80fbf97d of the state Worker
+- Commit 080c083, deployed 2026-11-25: Pages deployment 4d036da8 of the
+  project `classyquiz`, version b389da5a of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff c56a7fc -- src/`.
+  `git diff 080c083 -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -27,14 +27,16 @@ changed what it covered.
 - The Solo walk through the example quiz at desktop and phone sizes in
   headless Edge, nothing sent while playing, then Quizmaster to `/screen`
   with one upload (2026-11-09, dfdd557).
-- `scripts/simulate-peers.mjs --empty`, a probe-marked room: Start's ten
-  seconds, a Countdown on a question and on a solution, and the room ending
-  by itself 601 s after its final ranking was left (2026-11-19, 9812126).
-- `scripts/simulate.mjs` with 25 students, and headless-Edge walks of the
-  WebSocket fallback and of going offline mid-question, at the first deploy
-  only (2026-11-02). Since then on local stacks, and on 2026-11-09 on a copy
-  of the site on the same account (what that copy showed:
-  `design/open-period-in-memory.md`, Situation).
+- `scripts/simulate-peers.mjs`, a probe-marked room: Start's ten seconds,
+  a Countdown on a question and on a solution (2026-11-25, 080c083); with
+  `--empty`, the room ending by itself 601 s after its final ranking was
+  left (2026-11-19, 9812126).
+- `scripts/simulate.mjs` with 25 students, and with `--all-poll` (1,628
+  HTTP requests), probe-marked, the rest hints among its checks
+  (2026-11-25, 080c083). Headless-Edge walks of the WebSocket fallback and
+  of going offline mid-question at the first deploy only (2026-11-02);
+  on 2026-11-09 on a copy of the site on the same account (what that copy
+  showed: `design/open-period-in-memory.md`, Situation).
 - The film played, and its time bar dragged before it loaded, in headless
   Edge at desktop and phone sizes in three languages (2026-11-07); its build
   on the owner's older test phone (2026-11-10; `docs/film/README.md`,
@@ -104,8 +106,13 @@ changed what it covered.
 - A deploy resetting an instance still active 300 s after it
   (`design/open-period-in-memory.md`, Not known).
 - An own copy set up end to end by the routes on `/own-copy`.
-- Since 44ee213: the owner's page with the key, and on a phone; a lobby
-  left to lapse (`LOBBY_WAIT_MS`).
+- Since 44ee213: the owner's page with the key, and on a phone.
+- Since 080c083 (on local stacks only): a lobby's booking lapsing after its
+  last join, a small started quiz giving back, a Peers room booked at its
+  first friend, the "right now" refusals and notice, a refused join's line
+  and asking once a minute, a page resting on long-poll and a teacher's
+  tab at rest across a memory loss, `SiteBudget` reading once per wake;
+  answers that aren't the site's.
 - Since c56a7fc: a shared device on a real iPad or any real tablet, on
   long-poll, at other sizes, and the Remote's switch and a browser's
   remembered choice (all on a local stack only).
