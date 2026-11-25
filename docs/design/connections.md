@@ -77,7 +77,9 @@ either way.
   (`MIN_POLL_GAP`); a quick empty answer waits 1.5 s. A device with no player
   yet (choosing an avatar or a role) is held like any other poller, until the
   choices on offer change. When a tab changes identity (a guest becomes a
-  player) the held poll is let go and asked again as the new one.
+  player) the held poll is let go and asked again as the new one. Where no
+  class is in, a poller left alone stops holding polls ("A poller left
+  alone rests").
 - Server-Sent Events were rejected: proxies buffer them too, commands would
   still need POST, and they do not hibernate.
 
@@ -119,25 +121,77 @@ left on after the lesson stops costing requests all day.
 - It lives in `client/net.ts`, so it covers every page with a line, the
   picture screens included.
 
+### A poller left alone rests
+
+Purpose: a quiz nobody is using doesn't spend the plan's duration, of which
+a few dozen lobbies left open would spend a day's (`hosting-and-limits.md`,
+"Running classes finish", Not covered), and a class that is in is never
+slowed for the plan's sake.
+
+Situation: a held poll keeps the object awake, so one device on long-poll
+keeps its quiz's object awake until its page sleeps. With a class in, its
+booking carries that time; with none in (a lobby whose class waits
+outside, a quiz nobody came to, a final ranking) nothing does, or only the
+final ranking's estimate. An object holding no poll and running no timer
+can hibernate, and by Cloudflare's pricing page isn't billed while idle;
+hibernating loses its memory, which is all it knows of a poller
+(`open-period-in-memory.md`, Situation).
+
+- **Where no class is in** (`atRest`, `server/instance.ts`), a page on
+  long-poll that has shown no change and felt no touch for 5 minutes
+  (`REST_AFTER_MS`) holds no poll and asks every 30 s (`REST_EVERY_MS`)
+  instead, until something is stored, a touch or a command. Students whose
+  devices went quiet are still a class in (what that leaves awake:
+  `hosting-and-limits.md`, "Running classes finish", Not covered).
+- **A step from another device reaches a tab at rest up to 30 s late**: a
+  wall nobody touches shows the class let in from the Remote that much
+  after the tap (owner: adequate).
+- **A player's device at rest counts as away** to the others, as one
+  asleep does: across a loss of memory its asking is no sign of it, and
+  nothing is stored for it.
+- **A teacher's tab at rest stays there** to the other teacher device and
+  to a teacher code, by a stored word, a row as it goes to rest, as it
+  stops and as it is found gone. Purpose: the lobby is where a class
+  arrives, and there a wall saying "Remote gone", or a teacher code taking
+  the place of a tab that is lit, is a stumble in front of it (the lobby
+  opened early, the walked quiz: `hosting-and-limits.md`, Situation, "Who
+  opens a lobby"). The cost of not relying on memory: a tab that went away
+  at rest is found gone within `REST_FRESH_MS` (75 s) of another device
+  next sending a command, a teacher code, a reconnect or a poll not at rest;
+  not a timer's `tick`, and a hand on a wall on WebSocket sends nothing.
+  Until then the wall doesn't steer for a Remote that died at rest. 75 s,
+  not the 45 s of other tabs: plausibly (from memory, not checked) Chrome
+  runs the chained timers of a silent tab hidden over five minutes once a
+  minute; whether a timer set after a request's answer is chained isn't
+  known.
+
+What would let a poller cost no duration at all, and count as there while
+it waits: `scaling-drawer.md`, "Duration".
+
 ### The allowance spent
 
-When the account's daily allowance is spent, devices say so instead of showing
-the offline dot. The words, with the hour it comes back computed in Swiss time,
-are the root page's (`quota`, `client/site-text.ts`) with the way to an own
-copy, in the device's language (`quotaNotice`, `client/room-text.ts`);
-joining and opening a room show the same words. The cap itself and what the budget is made of are in
-`hosting-and-limits.md`.
+What devices say when the account's daily allowance is spent, and how they
+know: `hosting-and-limits.md`, "When the allowance runs out anyway". While
+spent, a device asks again once a minute (`QUOTA_RETRY`), not every
+few seconds. The notice goes once something is stored or an HTTP call
+succeeds again.
 
-- The Function maps a platform error whose message reads like a spent limit
-  (`isQuotaError`: "free tier", "daily limit", "quota") to `{error: "quota"}`
-  with status 503.
-- An instance whose write fails that way answers `{t: "quota"}` and reloads
-  its state from storage, so nothing shows that is not stored.
-- The client also takes a 429, or a response body mentioning error 1027, as
-  spent (`readApi` in `client/net.ts`).
-- While spent, a device asks again once a minute (`QUOTA_RETRY`), not every
-  few seconds. The notice goes once something is stored or an HTTP call
-  succeeds again.
+### Answers that aren't the site's
+
+Purpose: what a device keeps is a way back (a student's place in a quiz,
+the secret of the quiz the device opened, the owner's key), and none of it
+is lost because something other than the site answered.
+
+Situation: a school filter answers in the site's place with a page of its
+own, under any status, a 404 among them; so does Cloudflare once the day's
+Function requests are spent (`hosting-and-limits.md`, Situation). The
+site's own answers are JSON, and a refusal names its reason (`error`).
+
+So an answer that isn't JSON counts as no answer unless it reads as the
+allowance spent (`readApi`, `client/net.ts`), and a device forgets only on
+the site's `error`, never on a status. Not covered: a picture, where a
+page that comes with a 200 is taken for the picture and shows broken
+until the page reloads.
 
 ### Bodies without a length
 
@@ -159,8 +213,11 @@ with pictures already need a length.
   (`open-period-in-memory.md`, Situation and Not known).
 - Why a page on long-polling never tries WebSocket again: the behaviour is
   v1's (`client/net.ts`), its reason unrecorded.
-- The wording of the platform's spent-limit error is a best reading, matched
-  on "free tier", "daily limit", "quota". What Cloudflare returns once Pages
-  Functions pass their requests is undocumented (the Workers documentation
-  names error 1027; status and Pages behaviour are not). To check in the
-  dashboard the first time it happens.
+- Whether five minutes, 30 s and 75 s are right; none has been seen in a
+  lesson, nor a hidden tab's asking at rest. A tab slowed past 75 s would
+  read as gone and back, a row each time. A teacher's tab at rest across a
+  loss of memory was seen on the local runtime only.
+- Whether an object asked every 30 s by a device at rest is billed only
+  while it answers; measured are a held poll and the pings
+  (`scaling-drawer.md`), not this. To measure on a copy of the site: the
+  day's duration before and after a lobby on long-poll left at rest.

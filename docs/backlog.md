@@ -709,8 +709,12 @@ donations could pay for hosting off it instead (`scaling-drawer.md`,
    2026-11-10). The situation the booking meets (the costs per transport,
    which devices poll, who opens a lobby): `design/hosting-and-limits.md`,
    Situation. Built: the ledger in rows, requests and awake time, a lobby
-   nobody joins giving its booking back, the uploads' cap in rows
-   (`design/hosting-and-limits.md`, "Running classes finish"). Open: the
+   whose class doesn't come and a small started quiz whose devices went
+   away giving their booking back, a Peers room booked from its first
+   friend, a refused class told whether to wait, the uploads' cap in rows
+   (`design/hosting-and-limits.md`, "Running classes finish"), a device on
+   long-poll resting where no class is in (`design/connections.md`, "A
+   poller left alone rests"). Open: the
    lifetime of a lobby left waiting, and the stored bytes against a wave of
    looks at the room.
 

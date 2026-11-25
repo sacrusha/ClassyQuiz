@@ -394,13 +394,15 @@ export function toast(msg: string, ms = 4000): void {
  * full: what that means for this quiz, and the way to more quizzes
  * (docs/design/hosting-and-limits.md, "Running classes finish"). It stays
  * while it holds; the page opens beside the quiz. The words are
- * classesFullMessage's (shared/limits.ts), the refusal's.
+ * classesFullMessage's (shared/limits.ts), the refusal's: for the day, or
+ * for now when the quizzes open now hold the room. Let in, it says the
+ * same while the first join is refused: the device that asked says only
+ * that the site is full (JOIN_NO_ROOM).
  */
 export function roomNotice(v: TeacherView): string {
   const room = v.room;
   if (room === null || room >= ROOM_WARN) return "";
-  const at = quotaResetAt();
-  const says = room === 0 ? T.classesFull(at) : T.nearlyFull(room);
+  const says = v.roomHeld ? (room === 0 ? T.classesFullNow : T.nearlyFullNow(room)) : room === 0 ? T.classesFull(quotaResetAt()) : T.nearlyFull(room);
   return `<p class="roomnote">${esc(says)} <a href="/own-copy" target="_blank" rel="noopener">${esc(SITE.ownCopyLink)}</a></p>`;
 }
 

@@ -131,6 +131,10 @@ export interface DeviceHeld {
  * held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v.
  * line: the device's own count of its line (docs/design/telemetry.md), with
  * the hello, every command and every poll; the newest replaces the one before.
+ * rest: a long-poll's own (docs/design/connections.md, "A poller left alone rests").
+ * In its answer, beside `messages`: no class is in the quiz, so a device
+ * left alone may rest. In its body: the device is at rest, and this poll is
+ * answered at once with what the device would show.
  */
 export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld; line?: LineCounts } | { t: "cmd"; id: string; cmd: Command; line?: LineCounts };
 
@@ -348,11 +352,18 @@ export interface TeacherView {
   /** In the lobby once Start is pressed: the first question comes when it runs out. */
   starts: ClockView | null;
   /**
-   * Before the class is let in: how many classes like this one still fit
-   * today, as last heard; 0 when letting in was refused. null: not known, or
-   * let in. Below ROOM_WARN the check warns, with the way to more quizzes.
+   * Before the class is let in: how many classes like this one still fit,
+   * as last heard; 0 when letting in was refused. null: not known, or let
+   * in. Below ROOM_WARN the check warns, with the way to more quizzes. Let
+   * in, 0 while its first student's join is refused (JOIN_NO_ROOM).
    */
   room: number | null;
+  /**
+   * With `room` below ROOM_WARN: the quizzes open now hold what fills the
+   * site, so there is room again as they give it back, and the check says
+   * "right now"; absent, the day is that far spent, or which isn't known.
+   */
+  roomHeld?: true;
   screen: Presence;
   remote: Presence;
   /** The question's picture fills the projector. */

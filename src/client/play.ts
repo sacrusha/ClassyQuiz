@@ -71,6 +71,14 @@ async function start(): Promise<void> {
   showWaiting();
   let instance = "";
   const joinFrom = Date.now();
+  /** No answer, or one that isn't the site's. */
+  const notReached = (): void => {
+    const words = document.getElementById("unreached");
+    if (words && Date.now() - joinFrom >= UNREACHED_MS) {
+      words.textContent = unreachedText();
+      words.hidden = false;
+    }
+  };
   for (;;) {
     try {
       const r = await api<{ instance?: string; message?: string }>("/api/join", teacher ? { code: typed, secret: savedHere?.secret } : { code });
@@ -78,11 +86,15 @@ async function start(): Promise<void> {
         instance = r.body.instance;
         break;
       }
-      if (r.status === 404 || (r.status === 429 && r.body.error === "locked")) {
-        for (let slot = 0; slot < MAX_SEATS; slot++) store.remove(seatKey(code, slot));
+      // The site's own word, not a status: a filter's page can come as a 404
+      // too, and says nothing about the quiz or this device's places in it.
+      const no = r.body.error;
+      if (no === "code" || no === "teacher" || no === "locked") {
+        // With a wrong teacher code the quiz is still there, and so are the places.
+        if (no === "code") for (let slot = 0; slot < MAX_SEATS; slot++) store.remove(seatKey(code, slot));
         if (!teacher) showNoQuiz();
-        else if (r.body.error === "locked") showTeacherForm(TOO_MANY_CODES);
-        else if (r.body.error === "teacher") showTeacherForm(WRONG_TEACHER_CODE);
+        else if (no === "locked") showTeacherForm(TOO_MANY_CODES);
+        else if (no === "teacher") showTeacherForm(WRONG_TEACHER_CODE);
         else showTeacherForm(T.noQuizCode(code));
         return;
       }
@@ -92,12 +104,9 @@ async function start(): Promise<void> {
         await new Promise((res) => setTimeout(res, 60_000));
         continue;
       }
+      if (r.body.json === false) notReached();
     } catch {
-      const words = document.getElementById("unreached");
-      if (words && Date.now() - joinFrom >= UNREACHED_MS) {
-        words.textContent = unreachedText();
-        words.hidden = false;
-      }
+      notReached();
     }
     await new Promise((res) => setTimeout(res, 2000));
   }

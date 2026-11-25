@@ -15,7 +15,7 @@
 // ("Requests", "Duration"), not measurements; telemetry is to replace them.
 
 import type { LineCounts } from "../shared/line.ts";
-import { MAX_LATE_JOINERS, MAX_LINE_WRITES, MAX_PLAYERS, SLEEP_AFTER_MS, type Cost } from "../shared/limits.ts";
+import { MAX_LATE_JOINERS, MAX_LINE_WRITES, MAX_PLAYERS, REST_AFTER_MS, REST_EVERY_MS, SLEEP_AFTER_MS, type Cost } from "../shared/limits.ts";
 
 /** A student in the lobby: the join, and a few avatars taken back. */
 const PER_PLAYER_LOBBY = 6;
@@ -97,11 +97,16 @@ export function ahead(c: ClassNow): Cost {
   };
 }
 
-/** After the final ranking: devices left polling on it, until they sleep (SLEEP_AFTER_MS). Nothing is written then. */
+/**
+ * After the final ranking: devices left polling on it hold polls until they
+ * rest (REST_AFTER_MS), then ask every REST_EVERY_MS until they sleep
+ * (SLEEP_AFTER_MS). Nothing is written then.
+ */
 export function tail(pollers: number): Cost {
   if (pollers <= 0) return NONE;
-  const s = SLEEP_AFTER_MS / 1000;
-  return { rows: 0, requests: Math.ceil(pollers * (s / POLL_HOLD_S)), awakeS: s };
+  const held = REST_AFTER_MS / 1000;
+  const asks = (SLEEP_AFTER_MS - REST_AFTER_MS) / REST_EVERY_MS;
+  return { rows: 0, requests: Math.ceil(pollers * (held / POLL_HOLD_S + asks)), awakeS: held };
 }
 
 /**

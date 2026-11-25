@@ -398,7 +398,8 @@ async function findOpen(): Promise<void> {
   for (const q of saved.slice(0, ASK_AT_MOST)) {
     try {
       const r = await api<QuizInfo>(`/api/i/${q.id}/info`, { secret: q.secret });
-      if (r.status === 404) {
+      // The site's own word that the quiz is gone, not a 404: a page in the site's place can come with one.
+      if (r.body.error === "gone" || r.body.error === "not found") {
         forgetQuiz(q.id);
         continue;
       }

@@ -269,7 +269,7 @@ menu on both.
 ### When a device is gone
 
 Presence changes with time, not events, so teacher pages send a periodic
-`tick`.
+`tick`; a tab heard from again after it read as gone is told at once.
 
 - **The Remote gone.** The wall steers again `FRESH_MS` (45 s) after the last
   sign from the Remote and says "Remote gone". When the phone comes back with
@@ -283,6 +283,8 @@ Presence changes with time, not events, so teacher pages send a periodic
 - **A clicker or the keyboard** works on any Projector during the quiz, also
   while a Remote steers. Other commands from a Projector that does not steer
   are refused.
+- **A tab at rest on long-poll is there**: `connections.md`, "A poller
+  left alone rests".
 - **Leave** drops a role; the device comes back with the code.
 - Roles belong to tabs, not devices: each tab keeps its token in
   sessionStorage, so a reload, sleep or a dropped connection resumes the

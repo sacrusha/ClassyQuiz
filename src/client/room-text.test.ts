@@ -4,20 +4,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, JOIN_NO_ROOM, ROOM_FULL, ROOM_STARTED, classesFullMessage, roomsFullMessage, siteFullMessage } from "../shared/limits.ts";
 import { TOO_MANY_CODES, WRONG_TEACHER_CODE } from "../shared/protocol.ts";
 import { LOOK_DRAWINGS } from "./look.ts";
-import { ROOM_TEXT } from "./room-text.ts";
+import { ROOM_TEXT, said } from "./room-text.ts";
 
 test("every message the server says has words in German, French and Italian", async () => {
   const sources = await Promise.all(["../server/game.ts", "../server/instance.ts", "../functions/api/[[path]].ts"].map((f) => readFile(new URL(f, import.meta.url), "utf8")));
   // A sentence, not a code ("gone", "quota"): the pages show these.
   const said = sources.flatMap((s) => [...s.matchAll(/(?:GameError\(|error: |reason: )"([A-Z][^"]+[.?])"/g)].map((m) => m[1]));
   assert.ok(said.length > 20, `only ${said.length} messages found`);
-  const all = [...new Set([...said, CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED, TOO_MANY_CODES, WRONG_TEACHER_CODE])];
+  const all = [...new Set([...said, CLASS_FULL, CLASS_STARTED, CLASS_WAITING, JOIN_NO_ROOM, ROOM_FULL, ROOM_STARTED, TOO_MANY_CODES, WRONG_TEACHER_CODE])];
   for (const l of ["de", "fr", "it"] as const) {
     const missing = all.filter((m) => !ROOM_TEXT[l].server[m]);
     assert.deepEqual(missing, [], `${l} has no words for these`);
+  }
+});
+
+// These carry a time or a reason, so the pages know them by their start, which a rewording loses.
+test("the site's refusals for want of room are said in German, French and Italian", () => {
+  const refusals = [classesFullMessage("now"), classesFullMessage("day"), roomsFullMessage("now"), roomsFullMessage("day"), siteFullMessage("uploads"), siteFullMessage("bytes")];
+  for (const l of ["de", "fr", "it"] as const) {
+    for (const m of refusals) assert.notEqual(said(m, l), m, `${l} shows this in English`);
   }
 });
 

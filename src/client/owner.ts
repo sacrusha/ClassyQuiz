@@ -199,7 +199,11 @@ async function load(typed: boolean): Promise<void> {
       if (out.hidden) shell(false);
       return;
     }
-    if (r.status === 404) {
+    // The site answers in JSON. A page comes from elsewhere: a filter, or
+    // Cloudflare in the Function's place once the day's requests are spent,
+    // a day the owner has reason to look here.
+    const fromSite = (r.headers.get("content-type") ?? "").includes("json");
+    if (r.status === 404 && fromSite) {
       // The site answers 404 to a wrong key and to no key set alike.
       store.remove(KEY);
       key = "";
@@ -208,7 +212,7 @@ async function load(typed: boolean): Promise<void> {
       return;
     }
     if (!r.ok) {
-      say(`The site answered ${r.status}.`, true);
+      say(fromSite ?`The site answered ${r.status}.` : `The answer (${r.status}) was not the site's. The key is kept; try again.`, true);
       return;
     }
     const view = (await r.json()) as OwnerView;

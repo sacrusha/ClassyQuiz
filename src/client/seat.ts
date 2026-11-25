@@ -5,7 +5,7 @@
 
 import type { Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, JOIN_AGAIN_MS, JOIN_NO_ROOM, ROOM_FULL, ROOM_STARTED } from "../shared/limits.ts";
 import { esc, findQuiz, forgetQuiz, lines, rolePage, seatKey, siteHead, store, tabRole } from "./dom.ts";
 import { ICON, avatarSvg, lookKey, pickerRows, shapeSvg, wiggle } from "./look.ts";
 import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
@@ -70,8 +70,12 @@ export class Seat {
    * be lying on a desk with nobody at it.
    */
   private displaced = false;
-  /** The class turned this place away (full, or started), in the phase it was then; asked again when that changes. */
-  private refused: { reason: string; phase: string } | null = null;
+  /**
+   * The class turned this place away (full, or started), in the phase it was
+   * then; asked again when that changes. again: the site had no room
+   * (JOIN_NO_ROOM), and the place asks again by itself from then on.
+   */
+  private refused: { reason: string; phase: string; again?: number } | null = null;
   /**
    * When the open question's answers appeared here (performance.now()),
    * per question: a tap's time for the points for speed is counted from here,
@@ -239,7 +243,9 @@ export class Seat {
       } else if (m.phase === "final") {
         this.showFinished();
       } else if (this.refused && this.refused.phase === m.phase && m.avatars.length === 0) {
-        this.showRefused(this.refused.reason);
+        // Waiting for room: this choice came with the page's tick, and the first past the time asks again.
+        if (this.refused.again && Date.now() >= this.refused.again) this.newPlayer(true);
+        else this.showRefused(this.refused.reason, !this.refused.again);
       } else if (m.waiting) {
         // Before the teacher lets the class in: wait here; the next choice without it joins.
         this.showRefused(CLASS_WAITING, false);
@@ -396,13 +402,14 @@ export class Seat {
     if (this.choice) this.enter(this.choice);
   }
 
-  private newPlayer(): void {
+  /** again: asked by the page itself while it waits for room on the site, its words left up. */
+  private newPlayer(again = false): void {
     const line = this.line;
     if (!line) return;
     this.busy = true;
-    this.showWaiting();
+    if (!again) this.showWaiting();
     const beside = this.ctx.beside();
-    this.joining = line.send(beside ? { op: "newPlayer", beside } : { op: "newPlayer" });
+    this.joining = line.send(beside ? { op: "newPlayer", beside } : { op: "newPlayer" }, again);
     void this.joining.then((a) => {
       this.joining = null;
       if (this.closed) return;
@@ -410,7 +417,10 @@ export class Seat {
         this.busy = false;
         if (this.choice?.phase === "final") this.showFinished();
         else if (a.error === CLASS_WAITING) this.showRefused(CLASS_WAITING, false);
-        else if (a.error === CLASS_FULL || a.error === CLASS_STARTED || a.error === ROOM_FULL || a.error === ROOM_STARTED || a.error === "not allowed") {
+        else if (a.error === JOIN_NO_ROOM) {
+          this.refused = { reason: a.error, phase: this.choice?.phase ?? "", again: Date.now() + JOIN_AGAIN_MS };
+          this.showRefused(a.error, false);
+        } else if (a.error === CLASS_FULL || a.error === CLASS_STARTED || a.error === ROOM_FULL || a.error === ROOM_STARTED || a.error === "not allowed") {
           this.refused = { reason: a.error, phase: this.choice?.phase ?? "" };
           this.showRefused(a.error);
         }
@@ -420,7 +430,7 @@ export class Seat {
 
   /** Turned away by the class (MAX_PLAYERS, MAX_LATE_JOINERS): the teacher is in the room. */
   private showRefused(reason: string, final = true): void {
-    // final: turned away; otherwise waiting to be let in, with the line's dot.
+    // final: turned away; otherwise waiting to be let in or for room on the site, with the line's dot.
     const mark = final
       ? `<div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div>`
       : `<div class="dot" data-status="connecting" style="width:28px;height:28px"></div>`;

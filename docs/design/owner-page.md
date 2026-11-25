@@ -47,7 +47,8 @@ The key:
 - A key the site stops accepting (changed on the Pages project) is dropped
   and asked for again. The site answers 404 to that and to a copy with no
   key set alike, and the page says so in those words. A site that can't be
-  reached keeps the key.
+  reached keeps the key, and so does an answer that isn't the site's
+  (`connections.md`, "Answers that aren't the site's").
 
 The figures, as `telemetry.md`, "Reading it", gives them:
 

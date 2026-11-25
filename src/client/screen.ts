@@ -384,6 +384,8 @@ function nobodyLine(): string {
 function renderJoin(v: ScreenView): void {
   const t = v.steer!;
   const n = v.players.length;
+  // With the first join refused for want of room, the notice says why nobody is in.
+  const nobody = nobodyYet(v);
   const html = `<div class="mlobby">
     <div class="mfold">
       <div class="bar"><span class="grow">${esc(v.title || "Quiz")}</span></div>
@@ -397,7 +399,7 @@ function renderJoin(v: ScreenView): void {
           <div class="count">${ICON.person}${live("joined", n)}</div>
           ${n === 0 ? howTo(v.code) : ""}
           <div class="avatars" data-crowd></div>
-          ${nobodyYet(v) ? `<p class="nobody">${nobodyLine()}</p>` : ""}
+          ${roomNotice(t) || (nobody ? `<p class="nobody">${nobodyLine()}</p>` : "")}
         </div>
       </div>
       <div class="mstart">${startButton("big", 'data-act="begin"', `${T.startQuiz}&nbsp;&#9654;`, !!t.starts)}

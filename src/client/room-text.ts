@@ -17,7 +17,7 @@ import { deviceLang } from "./device-lang.ts";
 import { SITE_WORDS } from "./site-text.ts";
 import { nameLooks } from "./look.ts";
 import type { LineStatus } from "./net.ts";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, MAX_SEATS, ROOM_FULL, ROOM_STARTED, quotaResetAt } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, JOIN_NO_ROOM, MAX_SEATS, ROOM_FULL, ROOM_STARTED, quotaResetAt } from "../shared/limits.ts";
 import { TOO_MANY_CODES, WRONG_TEACHER_CODE } from "../shared/protocol.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, SPEED_BONUS, START_MS } from "../shared/tempo.ts";
 
@@ -40,8 +40,13 @@ export interface RoomText {
   classesFull: (at: string | null) => string;
   /** A Peers room refused as it opens (roomsFullMessage). */
   roomsFull: (at: string | null) => string;
+  /** The same two when the quizzes open now hold the room and give it back (shared/limits.ts, ClassFull "now"). */
+  classesFullNow: string;
+  roomsFullNow: string;
   /** The day nearly full, on the check before the players are let in (client/manage.ts, roomNotice). */
   nearlyFull: (room: number) => string;
+  /** Nearly full of what the quizzes open now hold (shared/protocol.ts, `roomHeld`). */
+  nearlyFullNow: (room: number) => string;
   close: string;
   more: string;
   back: string;
@@ -250,9 +255,12 @@ const en: RoomText = {
   questions: (n) => `${n} ${n === 1 ? "question" : "questions"}`,
   question: (n) => `Question ${n}`,
   ownCopy: (s) => `For more quizzes, a site of your own, your school's or your company's: ${s}/own-copy says how.`,
-  classesFull: (a) => `The free site can't let another group in today: the quizzes under way use what is left. It takes new ones again at ${at(a, (t) => `${t} Swiss time`)}.`,
-  roomsFull: (a) => `The free site can't take more quizzes today: the ones running now use what is left. It takes new ones again at ${at(a, (t) => `${t} Swiss time`)}.`,
+  classesFull: (a) => `The free site can't let another group in today: today's quizzes have used up what it has for the day. It takes new ones again at ${at(a, (t) => `${t} Swiss time`)}.`,
+  roomsFull: (a) => `The free site can't take more quizzes today: today's quizzes have used up what it has for the day. It takes new ones again at ${at(a, (t) => `${t} Swiss time`)}.`,
+  classesFullNow: "The free site can't let another group in right now: the quizzes open at the moment hold what it has left for today. It may have room again later today, as they finish.",
+  roomsFullNow: "The free site can't take more quizzes right now: the ones open at the moment hold what it has left for today. It may have room again later today, as they finish.",
   nearlyFull: (r) => `The free site is nearly full today: room for ${r === 1 ? "one more group" : `about ${r} more groups`}.`,
+  nearlyFullNow: (r) => `The free site is nearly full right now: room for ${r === 1 ? "one more group" : `about ${r} more groups`}.`,
   close: "Close",
   more: "more",
   back: "back",
@@ -435,9 +443,12 @@ const de: RoomText = {
   questions: (n) => `${n} ${n === 1 ? "Frage" : "Fragen"}`,
   question: (n) => `Frage ${n}`,
   ownCopy: (s) => `Mehr Quiz gibt es mit einer eigenen Website für dich, deine Schule oder deine Firma. Wie das geht, steht auf ${s}/own-copy.`,
-  classesFull: (a) => `Die Gratis-Seite kann heute keine weitere Gruppe hereinlassen: Was übrig ist, brauchen die Runden, die schon laufen. Ab ${at(a, (t) => `${t} Uhr Schweizer Zeit`)} nimmt sie wieder neue an.`,
-  roomsFull: (a) => `Die Gratis-Seite kann heute kein weiteres Quiz annehmen: Was übrig ist, brauchen die Runden, die gerade laufen. Ab ${at(a, (t) => `${t} Uhr Schweizer Zeit`)} nimmt sie wieder eines an.`,
+  classesFull: (a) => `Die Gratis-Seite kann heute keine weitere Gruppe hereinlassen: Die Runden von heute haben aufgebraucht, was die Seite für den Tag hat. Ab ${at(a, (t) => `${t} Uhr Schweizer Zeit`)} nimmt sie wieder neue an.`,
+  roomsFull: (a) => `Die Gratis-Seite kann heute kein weiteres Quiz annehmen: Die Runden von heute haben aufgebraucht, was die Seite für den Tag hat. Ab ${at(a, (t) => `${t} Uhr Schweizer Zeit`)} nimmt sie wieder eines an.`,
+  classesFullNow: "Die Gratis-Seite kann im Moment keine weitere Gruppe hereinlassen: Was heute noch übrig ist, halten die Runden besetzt, die gerade offen sind. Wenn diese zu Ende gehen, hat die Seite heute vielleicht wieder Platz.",
+  roomsFullNow: "Die Gratis-Seite kann im Moment kein weiteres Quiz annehmen: Was heute noch übrig ist, halten die Runden besetzt, die gerade offen sind. Wenn diese zu Ende gehen, hat die Seite heute vielleicht wieder Platz.",
   nearlyFull: (r) => `Die Gratis-Seite ist heute fast voll: Platz für ${r === 1 ? "noch eine Gruppe" : `noch etwa ${r} Gruppen`}.`,
+  nearlyFullNow: (r) => `Die Gratis-Seite ist im Moment fast voll: Platz für ${r === 1 ? "noch eine Gruppe" : `noch etwa ${r} Gruppen`}.`,
   close: "Schliessen",
   more: "mehr",
   back: "zurück",
@@ -620,9 +631,12 @@ const fr: RoomText = {
   questions: (n) => `${n} ${n === 1 ? "question" : "questions"}`,
   question: (n) => `Question ${n}`,
   ownCopy: (s) => `Pour davantage de quiz, un site à vous, à votre école ou à votre entreprise : ${s}/own-copy explique comment faire.`,
-  classesFull: (a) => `Le site gratuit ne peut plus accueillir de groupe aujourd'hui : les quiz en cours utilisent ce qui reste. Il en accepte de nouveau à partir de ${at(a, (t) => `${t}, heure suisse`)}.`,
-  roomsFull: (a) => `Le site gratuit n'accepte plus de nouveaux quiz aujourd'hui : ceux qui tournent en ce moment utilisent ce qui reste. Il en accepte de nouveau à partir de ${at(a, (t) => `${t}, heure suisse`)}.`,
+  classesFull: (a) => `Le site gratuit ne peut plus accueillir de groupe aujourd'hui : les quiz du jour ont épuisé ce qu'il a pour la journée. Il en accepte de nouveau à partir de ${at(a, (t) => `${t}, heure suisse`)}.`,
+  roomsFull: (a) => `Le site gratuit n'accepte plus de nouveaux quiz aujourd'hui : les quiz du jour ont épuisé ce qu'il a pour la journée. Il en accepte de nouveau à partir de ${at(a, (t) => `${t}, heure suisse`)}.`,
+  classesFullNow: "Le site gratuit ne peut pas accueillir d'autre groupe pour l'instant : les quiz ouverts en ce moment retiennent ce qui reste pour aujourd'hui. Il aura peut-être de nouveau de la place plus tard dans la journée, à mesure qu'ils se terminent.",
+  roomsFullNow: "Le site gratuit n'accepte pas de nouveaux quiz pour l'instant : ceux qui sont ouverts en ce moment retiennent ce qui reste pour aujourd'hui. Il aura peut-être de nouveau de la place plus tard dans la journée, à mesure qu'ils se terminent.",
   nearlyFull: (r) => `Le site gratuit est presque complet aujourd'hui : il reste de la place pour ${r === 1 ? "un seul groupe" : `environ ${r} groupes`}.`,
+  nearlyFullNow: (r) => `Le site gratuit est presque complet pour l'instant : il reste de la place pour ${r === 1 ? "un seul groupe" : `environ ${r} groupes`}.`,
   close: "Fermer",
   more: "plus",
   back: "retour",
@@ -805,9 +819,12 @@ const it: RoomText = {
   questions: (n) => `${n} ${n === 1 ? "domanda" : "domande"}`,
   question: (n) => `Domanda ${n}`,
   ownCopy: (s) => `Per avere più quiz, un sito tuo, della tua scuola o della tua azienda: su ${s}/own-copy trovi come fare.`,
-  classesFull: (a) => `Per oggi il sito gratuito non può far entrare un altro gruppo: i quiz in corso usano ciò che resta. Ne accetta di nuovo dalle ${at(a, (t) => `${t}, ora svizzera`)}.`,
-  roomsFull: (a) => `Per oggi il sito gratuito non può accettare altri quiz: quelli in corso usano ciò che resta. Ne accetta di nuovo dalle ${at(a, (t) => `${t}, ora svizzera`)}.`,
+  classesFull: (a) => `Per oggi il sito gratuito non può far entrare un altro gruppo: i quiz di oggi hanno esaurito ciò che ha per la giornata. Ne accetta di nuovo dalle ${at(a, (t) => `${t}, ora svizzera`)}.`,
+  roomsFull: (a) => `Per oggi il sito gratuito non può accettare altri quiz: quelli di oggi hanno esaurito ciò che ha per la giornata. Ne accetta di nuovo dalle ${at(a, (t) => `${t}, ora svizzera`)}.`,
+  classesFullNow: "Al momento il sito gratuito non può far entrare un altro gruppo: i quiz aperti ora tengono occupato ciò che resta per oggi. Più tardi in giornata, man mano che finiscono, potrebbe esserci di nuovo posto.",
+  roomsFullNow: "Al momento il sito gratuito non può accettare altri quiz: quelli aperti ora tengono occupato ciò che resta per oggi. Più tardi in giornata, man mano che finiscono, potrebbe esserci di nuovo posto.",
   nearlyFull: (r) => `Oggi il sito gratuito è quasi pieno: c'è posto ${r === 1 ? "per un solo altro gruppo" : `per circa altri ${r} gruppi`}.`,
+  nearlyFullNow: (r) => `Al momento il sito gratuito è quasi pieno: c'è posto ${r === 1 ? "per un solo altro gruppo" : `per circa altri ${r} gruppi`}.`,
   close: "Chiudi",
   more: "altro",
   back: "indietro",
@@ -990,6 +1007,7 @@ de.server = {
   [CLASS_STARTED]: "Dieses Quiz hat schon begonnen und nimmt niemanden mehr auf. Frag die Person, die es leitet.",
   [ROOM_FULL]: "Dieses Quiz ist voll: Es nimmt niemanden mehr auf.",
   [ROOM_STARTED]: "Dieses Quiz hat schon begonnen und nimmt niemanden mehr auf.",
+  [JOIN_NO_ROOM]: "Die Seite ist im Moment voll. Dieses Gerät versucht es von selbst immer wieder.",
   [WRONG_TEACHER_CODE]: "Die letzten zwei Ziffern passen nicht zu diesem Quiz.",
   [TOO_MANY_CODES]: "Zu viele falsche Codes für dieses Quiz. Versuch es in ein paar Minuten nochmals.",
   "This quiz has ended.": "Dieses Quiz ist beendet.",
@@ -1028,6 +1046,7 @@ fr.server = {
   [CLASS_STARTED]: "Ce quiz a déjà commencé et n'accepte plus personne. Demandez à la personne qui l'anime.",
   [ROOM_FULL]: "Ce quiz est complet : il n'accepte plus personne.",
   [ROOM_STARTED]: "Ce quiz a déjà commencé et n'accepte plus personne.",
+  [JOIN_NO_ROOM]: "Le site est complet pour le moment. Cet appareil réessaie tout seul.",
   [WRONG_TEACHER_CODE]: "Les deux derniers chiffres ne correspondent pas à ce quiz.",
   [TOO_MANY_CODES]: "Trop de codes erronés pour ce quiz. Réessayez dans quelques minutes.",
   "This quiz has ended.": "Ce quiz est terminé.",
@@ -1066,6 +1085,7 @@ it.server = {
   [CLASS_STARTED]: "Questo quiz è già iniziato e non accetta più nessuno. Chiedi a chi lo conduce.",
   [ROOM_FULL]: "Questo quiz è al completo: non accetta più nessuno.",
   [ROOM_STARTED]: "Questo quiz è già iniziato e non accetta più nessuno.",
+  [JOIN_NO_ROOM]: "Al momento il sito è pieno. Questo dispositivo riprova da solo.",
   [WRONG_TEACHER_CODE]: "Le ultime due cifre non corrispondono a questo quiz.",
   [TOO_MANY_CODES]: "Troppi codici sbagliati per questo quiz. Riprova tra qualche minuto.",
   "This quiz has ended.": "Questo quiz è terminato.",
@@ -1115,21 +1135,38 @@ const site = (): string => (typeof location === "undefined" ? "classyquiz.pages.
  * A message from the server, or one of the server's rules run here (a fix on
  * the check), in this device's language. The day's caps are said again
  * here, with the time this browser works out; the server's wording is
- * recognised by its start. Anything else comes back as it was.
+ * recognised by its start. Anything else comes back as it was. l: another
+ * language than the device's, for the test of those starts.
  */
-export function said(msg: string): string {
-  if (lang === "en") return msg;
-  const known = T.server[msg];
+export function said(msg: string, l: Lang = lang): string {
+  if (l === "en") return msg;
+  const t = ROOM_TEXT[l];
+  const known = t.server[msg];
   if (known) return known;
-  const a = quotaResetAt();
-  const own = T.ownCopy(site());
-  if (msg.startsWith("The free site can't let another group in today")) return `${T.classesFull(a)} ${own}`;
-  if (msg.startsWith("The free site can't take more quizzes today:")) return `${T.roomsFull(a)} ${own}`;
-  if (msg.startsWith("The free site can't take more quizzes today.")) return `${SITE.siteFull("uploads", a)} ${own}`;
-  if (msg.startsWith("The free site has no room for another quiz")) return `${SITE.siteFull("bytes", a)} ${own}`;
-  if (msg.startsWith("The free site has used up today's allowance")) return `${SITE.quota(a)} ${own}`;
-  if (msg === SITE_WORDS.en.notTaken) return SITE.notTaken;
+  const full = fullWords(msg, l);
+  if (full) return `${full} ${t.ownCopy(site())}`;
+  if (msg === SITE_WORDS.en.notTaken) return SITE_WORDS[l].notTaken;
   return msg;
+}
+
+/**
+ * The site's refusal for want of room or allowance, known by the start of
+ * the server's wording, without the way to an own copy that the server ends
+ * it with: said() spells that out as an address, a page that can link
+ * there links (client/refusal.ts). null: another message.
+ */
+export function fullWords(msg: string, l: Lang = lang): string | null {
+  const t = ROOM_TEXT[l];
+  const words = SITE_WORDS[l];
+  const a = quotaResetAt();
+  if (msg.startsWith("The free site can't let another group in today")) return t.classesFull(a);
+  if (msg.startsWith("The free site can't let another group in right now")) return t.classesFullNow;
+  if (msg.startsWith("The free site can't take more quizzes today:")) return t.roomsFull(a);
+  if (msg.startsWith("The free site can't take more quizzes right now")) return t.roomsFullNow;
+  if (msg.startsWith("The free site can't take more quizzes today.")) return words.siteFull("uploads", a);
+  if (msg.startsWith("The free site has no room for another quiz")) return words.siteFull("bytes", a);
+  if (msg.startsWith("The free site has used up today's allowance")) return words.quota(a);
+  return null;
 }
 
 /** The day's allowance spent, as the notice over every page says it (client/net.ts). */

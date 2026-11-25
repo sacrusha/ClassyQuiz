@@ -30,9 +30,10 @@ import type {
 } from "../shared/protocol.ts";
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
 import type { Env } from "./env.ts";
+import type { Booked } from "./budget.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
-import { CLASS_FULL, CLASS_STARTED, DAY_FOR_CLASSES, LINE_WRITE_MS, LOBBY_WAIT_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type Cost, type SiteFull } from "../shared/limits.ts";
-import { add, ahead, asCost, atLetIn, grown, room, spent, tail, uploadRows, type ClassNow } from "./rows.ts";
+import { AWAY_WAIT_MS, CLASS_FULL, CLASS_STARTED, DAY_FOR_CLASSES, FEW_PLAYERS, JOIN_AGAIN_MS, JOIN_NO_ROOM, LINE_WRITE_MS, LOBBY_WAIT_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, ROOM_WARN, SLEEP_AFTER_MS, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type ClassFull, type Cost, type SiteFull } from "../shared/limits.ts";
+import { NO_COST, add, ahead, asCost, atLetIn, grown, room, spent, tail, uploadRows, type ClassNow } from "./rows.ts";
 import { readLine, type LineCounts } from "../shared/line.ts";
 import { summarize, type ClassUse, type RoomKind } from "./telemetry.ts";
 import { LOOK_SHOW_MS } from "../shared/looks.ts";
@@ -63,6 +64,12 @@ const POLL_HOLD_MS = 25_000;
  * free for another tab (docs/design/teacher-devices.md, "When a device is gone").
  */
 const FRESH_MS = 45_000;
+/**
+ * A teacher's tab at rest not heard from for this long is away: past a
+ * minute, since a browser may slow a hidden tab's asking to once a minute
+ * (docs/design/connections.md, "A poller left alone rests").
+ */
+const REST_FRESH_MS = 75_000;
 /**
  * A role's tab not heard from for this long is "quiet", as is one whose line
  * closed and hasn't come back: a teacher code takes a quiet Remote (entry()).
@@ -139,16 +146,31 @@ interface Meta {
    * (docs/design/hosting-and-limits.md, "Running classes finish"), and the
    * rows it wrote since. booked: what the site's ledger holds for it (absent
    * on a booking from before requests and duration were booked); at: when it
-   * was booked; lapsed: no student came within LOBBY_WAIT_MS, or none was
-   * there at the start, and the booking holds only what was spent until a
-   * student comes; settled: done at the final ranking.
+   * was booked; lapsed: the booking holds only what was spent (`lapseAt`;
+   * none there at the start; a Peers room from its opening until its first
+   * friend), until a student comes, the quiz starts with one, or a player's
+   * device comes back (`heardFrom`); settled: done at the final ranking.
    */
   rows?: { written: number; booked?: Cost; at?: number; lapsed?: true; settled?: true };
-  /** The day's ledger across the site, as last heard (at upload, at letting in): the check's warning. */
+  /**
+   * The day's ledger across the site, as last heard (at upload, at letting
+   * in, refused or not): the check's warning. dayStays: what of it stays
+   * for the day (server/budget.ts, `Ledger`); absent on a quiz uploaded
+   * before the ledger said so.
+   */
   day?: Cost;
+  dayStays?: Cost;
   /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): its class is kept apart in the telemetry (docs/design/telemetry.md). */
   probe?: true;
 }
+
+/**
+ * Teacher tabs that said they are at rest (docs/design/connections.md, "A
+ * poller left alone rests"), stored as `rest`: the tab's token, and until
+ * when its word stands, which is past its page's sleep. Written when a tab
+ * goes to rest, when it stops and when it is found gone, a row each.
+ */
+type Rests = Partial<Record<RoleName, { token: string; until: number }>>;
 
 type Session =
   /** since: when this socket said hello (a tab that never pings is away after FRESH_MS). */
@@ -238,6 +260,20 @@ export class Instance extends DurableObject<Env> {
    * away (FRESH_MS).
    */
   private closed = new Map<string, number>();
+  /** A tab's word that it is at rest, as stored: across a loss of memory, `lastPoll` can't tell it from a tab that is gone. */
+  private rests: Rests = {};
+  /** When this memory began: before REST_FRESH_MS after it, a tab at rest it hasn't heard from was not missed. */
+  private readonly woke = Date.now();
+  private upTimer: ReturnType<typeof setTimeout> | null = null;
+  /**
+   * The quiz's first player was refused for want of room (`bookAgain`), and
+   * how: until `until` the ledger isn't asked again, since each asking is a
+   * request and a page may ask without pause (one from before
+   * JOIN_NO_ROOM, open across a deploy); the teacher's lobby says so
+   * (`room`) until a player is in. In memory only: a refusal writes nothing.
+   */
+  private joinRefused: { full: ClassFull; until: number } | null = null;
+  private upUntil = 0;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -274,14 +310,16 @@ export class Instance extends DurableObject<Env> {
 
   private async loadStored(): Promise<void> {
     const storage = this.ctx.storage;
-    const [meta, record, fixes, run, guesses] = await Promise.all([
+    const [meta, record, fixes, run, guesses, rests] = await Promise.all([
       storage.get<Meta>("meta"),
       storage.get<QuizRecord>("quiz"),
       storage.get<G.Fix[]>("fixes"),
       storage.get<G.Run | null>("run"),
       storage.get<Guesses>("guesses"),
+      storage.get<Rests>("rest"),
     ]);
     if (guesses) this.guesses = guesses;
+    this.rests = rests ?? {};
     if (meta && record && fixes) {
       this.meta = meta;
       this.quizRecord = record;
@@ -332,20 +370,20 @@ export class Instance extends DurableObject<Env> {
     const booked = await this.budget().reserve(this.ctx.id.toString(), bytes, codeUntil, uploadRows(Object.keys(pictures.files).length));
     if (typeof booked === "string") return { ok: false, errors: [], warnings: [], error: siteFullMessage(booked), full: booked };
     const peers = mode === "peers";
-    // Peers: the others join with the code at once, so the class is booked
-    // now; a steered room books it when the class is let in.
-    let rows: { day: Cost } | "rows" | null = null;
-    const cost = atLetIn(r.quiz.questions.length);
+    // Peers: refused as it opens when the room wouldn't fit, as a class at
+    // letting in, but booked from its first friend on (`bookAgain`); a
+    // steered room books its class when it is let in.
+    let rows: Booked | null = null;
     if (peers) {
       try {
-        rows = await this.budget().bookRows(this.ctx.id.toString(), cost, codeUntil, probe);
+        rows = await this.budget().bookRows(this.ctx.id.toString(), NO_COST, codeUntil, probe, "letIn", atLetIn(r.quiz.questions.length));
       } catch (e) {
         // The ledger can't be reached: the room opens unbooked rather than be stopped by the site's own bookkeeping.
         console.error("rows not booked:", e instanceof Error ? e.message : String(e));
       }
-      if (rows === "rows") {
+      if (rows?.full) {
         await this.budget().release(this.ctx.id.toString()).catch(() => {});
-        return { ok: false, errors: [], warnings: [], error: roomsFullMessage() };
+        return { ok: false, errors: [], warnings: [], error: roomsFullMessage(rows.full) };
       }
     }
     const code = await this.claimCode(codeUntil);
@@ -357,11 +395,12 @@ export class Instance extends DurableObject<Env> {
       ...(pictures.packs > 0 ? { packs: pictures.packs, packSecret: randomToken() } : {}),
     };
     const teacher = randomDigits(2);
-    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, day: booked.day, ...(probe ? { probe: true as const } : {}) };
+    this.meta = { secret, code, codeUntil, roles: { screen: peers ? null : token, remote: null }, teacher, lastActivity: now, v: 1, day: booked.day, dayStays: booked.stays, ...(probe ? { probe: true as const } : {}) };
     this.endedBy = null;
     if (rows) {
       this.meta.day = rows.day;
-      this.meta.rows = { written: 0, booked: cost, at: now };
+      this.meta.dayStays = rows.stays;
+      this.meta.rows = { written: 0, booked: NO_COST, at: now, lapsed: true };
     }
     // The pasting tab is about to open the Projector with it.
     if (!peers) this.lastPoll.set(`screen:${token}`, now);
@@ -565,6 +604,7 @@ export class Instance extends DurableObject<Env> {
     if (!this.live()) return "wrong";
     // A Peers room has no teacher devices: every device is a player's.
     if (this.game!.run?.peers) return "wrong";
+    this.watchRests();
     if (typeof secret === "string" && safeEqual(secret, this.meta!.secret)) return "ok";
     return this.checkTeacher(digits, await this.deviceKey(ip));
   }
@@ -662,7 +702,7 @@ export class Instance extends DurableObject<Env> {
       return new Response(null, { status: 101, webSocket: pair[0] });
     }
     if (req.method !== "POST") return new Response("not found", { status: 404 });
-    let body: { auth?: Auth; v?: number; cmd?: { id: string; cmd: Command }; secret?: string; held?: DeviceHeld; line?: unknown };
+    let body: { auth?: Auth; v?: number; cmd?: { id: string; cmd: Command }; secret?: string; held?: DeviceHeld; line?: unknown; rest?: unknown };
     try {
       body = await req.json();
     } catch {
@@ -677,8 +717,20 @@ export class Instance extends DurableObject<Env> {
     if (session.role === null) return json({ messages: out });
     // The device's address, passed on by the API function (GUESS_MAX).
     if (session.role === "guest" && action === "cmd") session.dev = await this.deviceKey(req.headers.get("x-cq-ip"));
-    this.notePoll(session);
+    // A device at rest asks without holding, and the object may lose its
+    // memory between two askings: a player's device at rest counts as away,
+    // a teacher's tab stays there by its stored word (`rests`).
+    const resting = action === "poll" && body.rest === true;
+    const staff = session.role === "screen" || session.role === "remote";
+    // A teacher's tab heard from after it read as away: the other hears it is back now, not at a tick it may no longer send.
+    const back = staff && this.presence(session.role) === "away";
+    if (staff) await this.noteRest(session, resting && this.atRest());
+    if (staff || !resting) this.notePoll(session);
+    if ((await this.restsGone()) || back) this.broadcastStaff();
+    // A page's own tick is nobody at a device, as a rest's asking isn't.
+    if (!resting && !(action === "cmd" && body.cmd?.cmd?.op === "tick")) this.watchRests();
     this.takeLine(session, body.line);
+    if (session.role === "player" && !resting) await this.heardFrom();
     if (action === "cmd" && body.cmd && session.role !== null) {
       // A command over HTTP: the reply is its acknowledgement plus, for a
       // guest becoming a player or taking a role, who it is now.
@@ -700,47 +752,49 @@ export class Instance extends DurableObject<Env> {
     }
     if (action === "poll") {
       if (session.role === null) return json({ messages: out });
+      // Said with every poll's answer, as things are when it goes out.
+      const answer = (messages: ServerMessage[]) => json({ messages, ...(this.atRest() ? { rest: true } : {}) });
       const known = typeof body.v === "number" ? body.v : -1;
       if (session.role === "guest") {
         // The first poll gets the choice at once (it's in `out`); later ones
         // are held until the choice changes, instead of being answered at
         // once over and over (the tab would spin and redraw its buttons).
-        if (known === -1) return json({ messages: out });
+        if (known === -1 || resting) return answer(out);
         const chooseKey = JSON.stringify(this.chooseMessage());
         const msgs = await this.hold(session, chooseKey);
         const fresh = this.chooseMessage();
-        return json({ messages: msgs.length > 0 ? msgs : JSON.stringify(fresh) !== chooseKey ? [fresh] : [] });
+        return answer(msgs.length > 0 ? msgs : JSON.stringify(fresh) !== chooseKey ? [fresh] : []);
       }
       if (session.role === "player") {
         const pid = session.player;
         // The device's input, as it was last taken: back in memory if the instance lost it.
         await this.fromDevice(pid, body.held);
-        const view = this.viewFor(session) as PlayerView;
+        const view = this.viewFor(session, {}, undefined, resting) as PlayerView;
         const last = this.sentToPoller.get(pid);
         // Answer at once when the device's view changed, or when it didn't
         // get the last one (its version is older than what was sent).
-        if (!last || known < last.v || last.poll !== pollKey(view)) {
+        if (resting || !last || known < last.v || last.poll !== pollKey(view)) {
           this.sentToPoller.set(pid, sent(view));
-          return json({ messages: [...out, { t: "state", view }] });
+          return answer([...out, { t: "state", view }]);
         }
         const msgs = await this.hold(session);
         this.notePoll(session);
-        if (msgs.length > 0 || !this.live()) return json({ messages: msgs });
+        if (msgs.length > 0 || !this.live()) return answer(msgs);
         // A poll that ran out is all the server knows of a poller's line ending.
         this.lineEnded(pid);
         // The hold ran out: what changed without ending it (pollKey) comes
         // with its end, which costs no request of its own.
         const now = this.viewFor(session) as PlayerView | null;
         const before = this.sentToPoller.get(pid);
-        if (!now || (before && before.key === viewKey(now))) return json({ messages: [] });
+        if (!now || (before && before.key === viewKey(now))) return answer([]);
         this.sentToPoller.set(pid, sent(now));
-        return json({ messages: [{ t: "state", view: now }] });
+        return answer([{ t: "state", view: now }]);
       }
       const view = this.viewFor(session);
-      if (view && view.v > known) return json({ messages: [...out, { t: "state", view }] });
+      if (view && (resting || view.v > known)) return answer([...out, { t: "state", view }]);
       const msgs = await this.hold(session);
       this.notePoll(session);
-      return json({ messages: msgs });
+      return answer(msgs);
     }
     return json({ error: "not found" }, 404);
   }
@@ -770,8 +824,92 @@ export class Instance extends DurableObject<Env> {
   }
 
   private notePoll(session: Session): void {
-    if (session.role === "player") this.lastPoll.set(session.player, Date.now());
-    else if (session.role === "screen" || session.role === "remote") this.lastPoll.set(`${session.role}:${session.token}`, Date.now());
+    const key = noteKey(session);
+    if (key) this.lastPoll.set(key, Date.now());
+  }
+
+  /** The tab's word that it is at rest, while it stands. */
+  private restOf(role: RoleName): { token: string; until: number } | null {
+    const rest = this.rests[role];
+    return rest && rest.token === this.meta?.roles[role] && Date.now() < rest.until ? rest : null;
+  }
+
+  /**
+   * A teacher's tab was heard from: its word is stored when it goes to rest
+   * and when it stops (a touch, a step, a reload). until: SLEEP_AFTER_MS
+   * from now is past the page's sleep, which comes that long after its last
+   * change, and a rest begins REST_AFTER_MS after that.
+   */
+  private async noteRest(session: Extract<Session, { role: RoleName }>, resting: boolean): Promise<void> {
+    const mine = this.restOf(session.role)?.token === session.token;
+    if (resting === mine) return;
+    const next = { ...this.rests };
+    if (resting) next[session.role] = { token: session.token, until: Date.now() + SLEEP_AFTER_MS };
+    else delete next[session.role];
+    await this.storeRests(next);
+  }
+
+  /**
+   * A tab at rest that stopped asking is gone (`presence`), and its word
+   * goes: stored, or a later wake would take it for there again. True when
+   * one went.
+   */
+  private async restsGone(): Promise<boolean> {
+    const next = { ...this.rests };
+    for (const role of ["screen", "remote"] as const) if (this.restOf(role) && this.presence(role) === "away") delete next[role];
+    if (Object.keys(next).length === Object.keys(this.rests).length) return false;
+    await this.storeRests(next);
+    return true;
+  }
+
+  /** Kept in memory only once stored; never in the way of the message it came with. */
+  private async storeRests(next: Rests): Promise<void> {
+    try {
+      if (Object.keys(next).length > 0) await this.ctx.storage.put("rest", next);
+      else await this.ctx.storage.delete("rest");
+    } catch (e) {
+      if (isQuotaError(e)) await this.load().catch(() => {});
+      else console.error("a tab's rest not stored:", e instanceof Error ? e.message : String(e));
+      return;
+    }
+    this.rests = next;
+    const rows = this.meta?.rows;
+    if (rows && !rows.settled) rows.written++;
+  }
+
+  /**
+   * Someone is at a device while a tab is at rest: the object stays up
+   * until that tab's next asking is due, so one that went away at rest is
+   * found gone. Left to hibernate, each wake would take it for there again.
+   */
+  private watchRests(): void {
+    for (const role of ["screen", "remote"] as const) {
+      const rest = this.restOf(role);
+      if (rest) this.stayUp(Math.max(this.lastPoll.get(`${role}:${rest.token}`) ?? 0, this.woke) + REST_FRESH_MS);
+    }
+  }
+
+  /** A pending timer keeps the object from hibernating; when it runs out, who is gone is looked at again. */
+  private stayUp(until: number): void {
+    if (until <= Math.max(this.upUntil, Date.now())) return;
+    this.upUntil = until;
+    if (this.upTimer) clearTimeout(this.upTimer);
+    this.upTimer = setTimeout(async () => {
+      this.upTimer = null;
+      if (this.live() && (await this.restsGone())) this.broadcastStaff();
+    }, until - Date.now() + 100);
+  }
+
+  /**
+   * No class is in the quiz, so a poller left alone may rest
+   * (docs/design/connections.md, "A poller left alone rests"). A lapsed
+   * booking with students in isn't at rest: a class waiting long in the
+   * lobby with its tablets locked is there.
+   */
+  private atRest(): boolean {
+    const run = this.game?.run;
+    if (!run || run.waiting || run.phase === "final") return true;
+    return !!this.meta?.rows?.lapsed && this.students().length === 0;
   }
 
   /** Holds a long-poll until the tab's view changes, or POLL_HOLD_MS. */
@@ -805,7 +943,12 @@ export class Instance extends DurableObject<Env> {
         // This socket is the player's newest: it keeps the copy of their input.
         this.mirror(session.player, ws);
         session = ws.deserializeAttachment() as Session;
+        await this.heardFrom();
       }
+      // A tab that rested on long-poll and was reloaded: on a socket it rests no more.
+      if (session.role === "screen" || session.role === "remote") await this.noteRest(session, false);
+      if (await this.restsGone()) this.broadcastStaff();
+      this.watchRests();
       // A guest keeps the device it connected from, for a teacher code it may send.
       if (session.role === "guest") session = { role: "guest", dev: (ws.deserializeAttachment() as { dev?: string } | null)?.dev };
       ws.serializeAttachment(session);
@@ -824,6 +967,9 @@ export class Instance extends DurableObject<Env> {
     if (msg.t === "cmd") {
       const session = ws.deserializeAttachment() as Session;
       if (!session || session.role === null) return;
+      if (session.role === "player") await this.heardFrom();
+      if (await this.restsGone()) this.broadcastStaff();
+      if (msg.cmd?.op !== "tick") this.watchRests();
       const replies = await this.command(session, msg.id, msg.cmd, ws);
       let next = replies.session;
       if (next && next.role === "player") next = { ...next, since: Date.now() };
@@ -915,7 +1061,8 @@ export class Instance extends DurableObject<Env> {
    * Whether the tab holding a role is there, quiet (soon away), or away;
    * "none" when nobody holds it. Quiet: not heard from for QUIET_MS, or its
    * line closed and it hasn't been heard from since (`closed`). A polling
-   * tab whose poll is held is heard from now.
+   * tab whose poll is held is heard from now; one at rest is there while it
+   * keeps asking (`rests`).
    */
   private presence(role: RoleName, exclude?: WebSocket): "none" | "present" | "quiet" | "away" {
     const token = this.meta?.roles[role];
@@ -933,6 +1080,9 @@ export class Instance extends DurableObject<Env> {
       open = true;
     }
     for (const w of this.waiters) if (w.session.role === role && w.session.token === token) last = now;
+    // At rest the tab asks every REST_EVERY_MS and is there while it does; a
+    // memory younger than REST_FRESH_MS hasn't had the time to miss it.
+    if (this.restOf(role)) return now - Math.max(last, this.woke) < REST_FRESH_MS ? "present" : "away";
     const age = now - last;
     if (age >= FRESH_MS) return "away";
     if (age >= QUIET_MS || (!open && this.closed.get(key) === last)) return "quiet";
@@ -1002,6 +1152,8 @@ export class Instance extends DurableObject<Env> {
         w.resolve([msg]);
       }
     }
+    // A tab at rest hears it with its next asking, which the memory has to live to see.
+    if (this.restOf(role)?.token === token) this.stayUp(Date.now() + REST_FRESH_MS);
     this.lastPoll.delete(`${role}:${token}`);
     this.closed.delete(`${role}:${token}`);
     this.moved.set(`${role}:${token}`, msg);
@@ -1105,8 +1257,9 @@ export class Instance extends DurableObject<Env> {
           // A place beside a player at a shared device: named by that player's token, which only that device holds.
           const beside = typeof cmd.beside === "string" ? Object.values(run.players).find((pl) => safeEqual(pl.token, cmd.beside!)) : undefined;
           if (typeof cmd.beside === "string" && !beside) return { direct: [ack(false, "not allowed")] };
-          // The first student after the booking lapsed: the class is coming after all.
-          if (!(await this.bookAgain())) return { direct: [ack(false, G.isPeers(game) ? roomsFullMessage() : classesFullMessage()), this.chooseMessage()] };
+          // A student after the booking lapsed: the class is coming after all.
+          const full = await this.bookAgain();
+          if (full) return { direct: [ack(false, JOIN_NO_ROOM), this.chooseMessage()] };
           const p = G.addPlayer(game, randomToken(12), randomToken(), now, Math.random, beside);
           const joins = (run.joins ??= {});
           joins[id] = p.id;
@@ -1259,7 +1412,8 @@ export class Instance extends DurableObject<Env> {
           if (!at(cmd)) return { direct: [ack(true, undefined, "stale")] };
           // Start without "Let the class in" lets the class in too, and books;
           // the quiz begins START_MS later, by the alarm.
-          if (cmd.op === "begin" && !(await this.bookRows())) return { direct: [ack(false, classesFullMessage())] };
+          const full = cmd.op === "begin" ? await this.bookRows() : null;
+          if (full) return { direct: [ack(false, classesFullMessage(full))] };
           if (cmd.op === "begin") {
             if (G.startSoon(game, now) === "running") return { direct: [ack(true, undefined, "stale")] };
           }
@@ -1273,11 +1427,13 @@ export class Instance extends DurableObject<Env> {
           changed.push("run");
           break;
         }
-        case "letIn":
-          if (!(await this.bookRows())) return { direct: [ack(false, classesFullMessage())] };
+        case "letIn": {
+          const full = await this.bookRows();
+          if (full) return { direct: [ack(false, classesFullMessage(full))] };
           G.letIn(game);
           changed = ["run"];
           break;
+        }
         case "speed":
           G.setSpeed(game, !!cmd.value);
           changed = ["run"];
@@ -1342,68 +1498,128 @@ export class Instance extends DurableObject<Env> {
   /**
    * Letting the class in books it against the day's ledger (rows at the most
    * it can write, requests and awake time estimated: server/rows.ts); a quiz
-   * whose class waits outside books nothing. False: the day has no room.
+   * whose class waits outside books nothing. Says how the ledger is full
+   * when it has no room; null: the class is in.
    */
-  private async bookRows(): Promise<boolean> {
+  private async bookRows(): Promise<ClassFull | null> {
     const meta = this.meta!;
     const run = this.game!.run;
-    if (!run?.waiting || meta.rows) return true;
+    if (!run?.waiting || meta.rows) return null;
     const cost = atLetIn(this.game!.quiz.questions.length);
-    let booked: { day: Cost } | "rows";
+    let booked: Booked;
     try {
       booked = await this.budget().bookRows(this.ctx.id.toString(), cost, meta.codeUntil, !!meta.probe);
     } catch (e) {
       // The ledger can't be reached: the class goes in unbooked rather than
       // be stopped by the site's own bookkeeping.
       console.error("class not booked:", e instanceof Error ? e.message : String(e));
-      return true;
+      return null;
     }
-    if (booked === "rows") {
-      // Kept for the check's notice, which lasts until the teacher tries again.
-      meta.day = DAY_FOR_CLASSES;
+    // Refused too, the ledger is kept: the check's notice lasts until the teacher tries again.
+    meta.day = booked.day;
+    meta.dayStays = booked.stays;
+    if (booked.full) {
       await this.persist(["meta"]);
       this.broadcastStaff();
-      return false;
+      return booked.full;
     }
-    meta.day = booked.day;
     meta.rows = { written: 0, booked: cost, at: Date.now() };
-    return true;
+    return null;
   }
 
   /**
-   * The first student after the class's booking lapsed books it again, as at
-   * letting in or, once under way, for the class it will be; it may reach
-   * further than letting in (DAY_FOR_JOINS), since the children are there.
-   * False: not even that is left. The ledger out of reach: the student comes in.
+   * A student joining after the class's booking lapsed books it again, as at
+   * letting in or, once under way, for the class it will be: never refused
+   * with students already in, since the class has started arriving; the
+   * first student of a lobby or quiz with none may reach further than
+   * letting in (DAY_FOR_JOINS). Says how the ledger is full when not even
+   * that is left; null: the student comes in, also with the ledger out of
+   * reach.
    */
-  private async bookAgain(): Promise<boolean> {
+  private async bookAgain(): Promise<ClassFull | null> {
     const meta = this.meta!;
     const rows = meta.rows;
     const run = this.game!.run;
-    if (!rows?.lapsed || rows.settled || !run) return true;
+    if (!rows?.lapsed || rows.settled || !run) return null;
     const cost = run.phase === "lobby" ? atLetIn(this.game!.quiz.questions.length) : add(this.spent(), ahead(this.classNow(1)));
-    let booked: { day: Cost } | "rows";
+    if (this.students().length > 0) {
+      await this.rebook(cost);
+      return null;
+    }
+    const refused = this.joinRefused;
+    if (refused && Date.now() < refused.until) return refused.full;
+    let booked: Booked;
     try {
       booked = await this.budget().bookRows(this.ctx.id.toString(), cost, meta.codeUntil, !!meta.probe, "join");
     } catch (e) {
       console.error("class not booked again:", e instanceof Error ? e.message : String(e));
-      return true;
+      this.joinRefused = null;
+      return null;
     }
-    if (booked === "rows") return false;
+    if (booked.full) {
+      this.joinRefused = { full: booked.full, until: Date.now() + JOIN_AGAIN_MS };
+      if (refused?.full !== booked.full) this.broadcastStaff();
+      return booked.full;
+    }
+    this.joinRefused = null;
     meta.day = booked.day;
+    meta.dayStays = booked.stays;
     meta.rows = { written: rows.written, booked: cost, at: Date.now() };
+    // The booking may lapse again from here (`lapseAt`), and no alarm was left for that.
+    await this.scheduleAlarm();
+    return null;
+  }
+
+  /** A lapsed booking moves back to `cost`, never refused; it may lapse again from now on. False: the ledger didn't take it. */
+  private async rebook(cost: Cost): Promise<boolean> {
+    const rows = this.meta!.rows!;
+    if (!(await this.moveBooking(cost))) return false;
+    delete rows.lapsed;
+    rows.at = Date.now();
+    await this.scheduleAlarm();
     return true;
   }
 
   /**
-   * How many classes like this one still fit today, for the check's warning
-   * (ROOM_WARN); null when the class is let in, or the day's ledger isn't
-   * known in this object's memory.
+   * A player's device heard from: a started quiz whose booking lapsed with
+   * players in (their devices went away, or it lapsed in the lobby and the
+   * ledger was out of reach at the start) books what is ahead again, never
+   * refused. Stored at once: nothing else need write before the object
+   * loses its memory, and a wake on the stored `lapsed` would leave the
+   * ledger holding a booking no alarm gives back (`lapseAt`).
    */
-  private room(): number | null {
-    const day = this.meta?.day;
-    if (!this.game?.run?.waiting || day === undefined) return null;
-    return room(asCost(day), atLetIn(this.game.quiz.questions.length), DAY_FOR_CLASSES);
+  private async heardFrom(): Promise<void> {
+    const rows = this.meta?.rows;
+    const run = this.game?.run;
+    if (!rows?.lapsed || rows.settled || !run?.started || run.phase === "final" || this.students().length === 0) return;
+    if (!(await this.rebook(add(this.spent(), ahead(this.classNow()))))) return;
+    // Never in the way of the message it came with: unstored, the next one books again.
+    try {
+      await this.persist(["meta"]);
+    } catch (e) {
+      if (isQuotaError(e)) await this.load().catch(() => {});
+      else console.error("booking taken up again, not stored:", e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  /**
+   * How many classes like this one still fit now, for the check's warning
+   * (ROOM_WARN); null when the class is let in, or the day's ledger isn't
+   * known in this object's memory. roomHeld: the quizzes open now hold what
+   * fills the site; without their bookings the check wouldn't say the same
+   * of the day. At none, that is when a refusal says "now"
+   * (server/budget.ts, bookRows). Let in, none while its first student's
+   * join is refused (`joinRefused`).
+   */
+  private room(): Pick<TeacherView, "room" | "roomHeld"> {
+    const meta = this.meta;
+    if (this.joinRefused && this.students().length === 0) return { room: 0, ...(this.joinRefused.full === "now" ? { roomHeld: true as const } : {}) };
+    if (!this.game?.run?.waiting || meta?.day === undefined) return { room: null };
+    const each = atLetIn(this.game.quiz.questions.length);
+    const now = room(asCost(meta.day), each, DAY_FOR_CLASSES);
+    if (now >= ROOM_WARN || meta.dayStays === undefined) return { room: now };
+    const without = room(asCost(meta.dayStays), each, DAY_FOR_CLASSES);
+    return { room: now, ...(without >= (now === 0 ? 1 : ROOM_WARN) ? { roomHeld: true as const } : {}) };
   }
 
   /** The class as it is now, for what is ahead of it. extra: a student about to join. */
@@ -1429,10 +1645,10 @@ export class Instance extends DurableObject<Env> {
   }
 
   /** Students in the class: its players but a Peers room's opener, who opened it. */
-  private students(): number {
+  private students(): G.Player[] {
     const run = this.game?.run;
-    if (!run) return 0;
-    return G.activePlayers(run).filter((p) => p.id !== run.peers?.host).length;
+    if (!run) return [];
+    return G.activePlayers(run).filter((p) => p.id !== run.peers?.host);
   }
 
   /** Moves the class's booking to `cost`; kept in meta only once the ledger took it. */
@@ -1449,19 +1665,20 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * At the start the class is there, its devices' lines known and the looks
-   * fixed: the booking moves to what was spent plus what is ahead. With no
-   * student there it is a look at the room or a teacher alone, and holds
-   * only what was spent until one comes (`bookAgain`).
+   * fixed: the booking moves to what was spent plus what is ahead, also
+   * when it had lapsed in the lobby with students in. With no student there
+   * it is a look at the room or a teacher alone, and holds only what was
+   * spent until one comes (`bookAgain`).
    */
   private async bookAhead(): Promise<void> {
     const rows = this.meta!.rows;
     const run = this.game!.run;
     if (!rows || rows.settled || !run) return;
-    if (this.students() === 0) {
+    if (this.students().length === 0) {
       if (await this.moveBooking(this.spent())) rows.lapsed = true;
       return;
     }
-    await this.moveBooking(add(this.spent(), ahead(this.classNow())));
+    if (await this.moveBooking(add(this.spent(), ahead(this.classNow())))) delete rows.lapsed;
   }
 
   /**
@@ -1477,14 +1694,23 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * A let-in lobby that no student joined within LOBBY_WAIT_MS: the booking
-   * holds only what was spent until a student comes (`bookAgain`). For the
-   * alarm: when that is due, or null.
+   * When the booking gives back all but what was spent
+   * (docs/design/hosting-and-limits.md, "Running classes finish"), for the
+   * alarm; null: not due. A let-in lobby still waiting LOBBY_WAIT_MS after it
+   * was booked or its latest student joined, until a student comes
+   * (`bookAgain`) or the quiz starts (`bookAhead`). A started quiz of at
+   * most FEW_PLAYERS none of whose players' devices was heard from for
+   * AWAY_WAIT_MS, until one comes back (`heardFrom`).
    */
   private lapseAt(): number | null {
     const rows = this.meta?.rows;
-    if (!rows?.at || rows.lapsed || rows.settled || this.game?.run?.phase !== "lobby" || this.students() > 0) return null;
-    return rows.at + LOBBY_WAIT_MS;
+    const run = this.game?.run;
+    if (!rows?.at || rows.lapsed || rows.settled || !run) return null;
+    if (run.phase === "lobby") return Math.max(rows.at, ...this.students().map((p) => p.joined)) + LOBBY_WAIT_MS;
+    const players = G.activePlayers(run);
+    if (run.started === undefined || run.phase === "final" || players.length > FEW_PLAYERS) return null;
+    const heard = this.lastHeard();
+    return Math.max(rows.at, run.started, ...players.map((p) => heard.get(p.id) ?? 0)) + AWAY_WAIT_MS;
   }
 
   /** The final ranking: nothing more is written for the class, so the booking settles with what was spent and what devices left polling on it will. */
@@ -1769,7 +1995,7 @@ export class Instance extends DurableObject<Env> {
     if (recheck != null) at = Math.min(at, recheck);
     const empty = this.peersEmptyAt();
     if (empty != null) at = Math.min(at, Math.max(Date.now() + 1000, empty));
-    // A let-in lobby nobody joined gives its booking back.
+    // A lobby left waiting, or a small quiz whose devices went away, gives its booking back.
     const lapse = this.lapseAt();
     if (lapse != null) at = Math.min(at, Math.max(Date.now() + 1000, lapse));
     // Each setAlarm() writes a row (Cloudflare's Durable Objects pricing), so
@@ -1835,7 +2061,7 @@ export class Instance extends DurableObject<Env> {
     if (!run?.peers || run.phase !== "final") return null;
     // A removed avatar's phone, left awake on the table, is nobody at the ranking.
     const heard = [...this.lastHeard()].filter(([id]) => G.playerById(run, id)?.removed === false).map(([, t]) => t);
-    // A memory the alarm woke has heard nobody since its last start: a poller, polling, keeps the object awake.
+    // A memory the alarm woke has heard nobody since its last start: a poller holding a poll keeps the object awake, and one at rest has left.
     return Math.max(run.ended ?? 0, this.lineClosedAt, ...heard) + PEERS_EMPTY_MS;
   }
 
@@ -1911,8 +2137,11 @@ export class Instance extends DurableObject<Env> {
     this.waiters.clear();
     if (this.lineTimer) clearTimeout(this.lineTimer);
     if (this.showTimer) clearTimeout(this.showTimer);
+    if (this.upTimer) clearTimeout(this.upTimer);
     this.lineTimer = null;
     this.showTimer = null;
+    this.upTimer = null;
+    this.rests = {};
     this.lineEnds.clear();
     this.unwritten.clear();
     this.takenHere.clear();
@@ -2165,7 +2394,7 @@ export class Instance extends DurableObject<Env> {
       current: run ? run.current : -1,
       waiting: !!run?.waiting,
       starts: this.startsView(),
-      room: this.room(),
+      ...this.room(),
       screen: this.shown("screen", exclude),
       remote: this.shown("remote", exclude),
       zoom: G.zoomed(game) && !game.fixes[run!.current].hidePicture && !!this.imageRef(game.quiz.questions[run!.current].image),
@@ -2188,7 +2417,7 @@ export class Instance extends DurableObject<Env> {
     };
   }
 
-  private playerViews(): (player: string) => PlayerView {
+  private playerViews(here?: string): (player: string) => PlayerView {
     const game = this.game!;
     const meta = this.meta!;
     const run = game.run;
@@ -2202,7 +2431,7 @@ export class Instance extends DurableObject<Env> {
     const speed = G.speedScale(game);
     const ans = G.answering(game) ?? "open";
     const votes = G.lockedIn(game);
-    const peers = run?.peers ? this.peersViews() : null;
+    const peers = run?.peers ? this.peersViews(here) : null;
     // A Peers device lays out the question itself, as the wall would, and
     // draws the answer pictures' small copies where it has them (`pics`
     // here, the full pictures' addresses in `peers.question.pics`).
@@ -2260,11 +2489,12 @@ export class Instance extends DurableObject<Env> {
    * Peers (docs/design/peers.md): what a wall would show, on each device,
    * and what the room's opener needs to start, fix and remove.
    */
-  private peersViews(): (player: string) => PeersView {
+  private peersViews(here?: string): (player: string) => PeersView {
     const game = this.game!;
     const meta = this.meta!;
     const run = game.run!;
     const present = this.connectedPlayers();
+    if (here) present.add(here);
     const showQ = run.current >= 0 && (run.phase === "question" || run.phase === "reveal");
     const q = showQ ? game.quiz.questions[run.current] : null;
     const pics = showQ ? this.answerPics(run.current) : undefined;
@@ -2318,12 +2548,13 @@ export class Instance extends DurableObject<Env> {
     return { ...(pictures.length > 0 ? { pictures } : {}), ...(inPacks.length > 0 ? { inPacks } : {}) };
   }
 
-  private viewFor(session: Session, cache: ViewCache = {}, exclude?: WebSocket): View | null {
+  /** here: the player asks at rest, away to the others (`fetch`) and there to itself: its own view mustn't show it gone. */
+  private viewFor(session: Session, cache: ViewCache = {}, exclude?: WebSocket, here = false): View | null {
     if (!this.live()) return null;
     if (session.role === "remote") return (cache.teacher ??= this.teacherView(exclude));
     if (session.role === "screen") return (cache.screen ??= this.screenView(cache, exclude));
     if (session.role === "player") {
-      const f = (cache.player ??= this.playerViews());
+      const f = here ? this.playerViews(session.player) : (cache.player ??= this.playerViews());
       return f(session.player);
     }
     return null;
@@ -2413,6 +2644,13 @@ function sent(view: PlayerView): Sent {
 function pollKey(view: PlayerView): string {
   if (!view.peers) return viewKey(view);
   return viewKey({ ...view, peers: { ...view.peers, players: [], waitingFor: [] } });
+}
+
+/** Where a device's last poll is noted (`lastPoll`): a player by id, a teacher's tab by its role and token; a guest's isn't. */
+function noteKey(s: Session): string | null {
+  if (s.role === "player") return s.player;
+  if (s.role === "screen" || s.role === "remote") return `${s.role}:${s.token}`;
+  return null;
 }
 
 /** Where a device's line is kept in the run: a player by id, a teacher's tab by its role; a guest's isn't. */

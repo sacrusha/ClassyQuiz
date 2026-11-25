@@ -20,7 +20,7 @@ export interface LineCounts {
   /** WebSocket messages sent (hellos, commands), pings apart. */
   sent: number;
   pings: number;
-  /** Seconds on long-poll. */
+  /** Seconds on long-poll holding polls, which keep the quiz's object awake: not those asleep or at rest. */
   pollS: number;
   /** Times the device was told the day's allowance was spent. */
   quota: number;

@@ -121,7 +121,8 @@ poll's end, for Start's time and for the Countdowns. `--empty` then leaves the f
 to end by itself, ten minutes more.
 `node scripts/simulate-memory.mjs [base-url] --restart "<command>"` (or
 `--quiet <seconds>`) plays a small class whose instance loses its memory
-in the lobby and with each question open, by the command (one that
+before the class is let in (under a Remote at rest), in the lobby and with
+each question open, by the command (one that
 restarts the local state Worker in place, keeping its `--persist-to`) or
 by going quiet long enough to hibernate (40 s does it locally, 90 s on
 Cloudflare, where 20 s didn't); it fails when the memory wasn't in fact

@@ -474,6 +474,17 @@ counts hold no content, no identity and no time of day, and they are public
 anyone. A failed count never touches the upload. A quiz that is sent again
 after a fix counts again, because these are attempts, not quizzes.
 
+A format is counted at most `DAY_ATTEMPTS_PER_FORMAT` times a UTC day,
+since each count is a row of the plan's day that no booking holds
+(`hosting-and-limits.md`, "Protecting the day's allowance"). Later
+attempts that day write nothing, and the tally says on how many days it
+got that far (`capped`), so a count that may be short says so. Per
+format, because the question is about the other formats: a day's `.zip`s
+don't keep a `.docx` from being counted. Plausible assumption: a quiz
+handed to a class to play alone at home can take `.zip` to its most on an
+ordinary day; the count then understates `.zip`, which the question
+doesn't turn on.
+
 ### Coming back: the resume card
 
 Purpose (backlog v4 item 2): the device that started a quiz gets back to it
@@ -583,7 +594,9 @@ The help reaches the teacher in four places:
   nothing runs if the site is blocked;
 - on the wall's join screen, after a while with nobody in. That is the
   moment the class watches the teacher wait;
-- on a device that reaches the page but not the quiz.
+- on a device that reaches the page but not the quiz, or gets an answer
+  that isn't the site's (`connections.md`, "Answers that aren't the
+  site's").
 
 When only live connections are blocked, the quiz carries on over plain
 requests by itself (`connections.md`).

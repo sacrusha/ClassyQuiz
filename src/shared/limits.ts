@@ -69,6 +69,12 @@ export const INPUT_GAP_MS = 300;
  */
 export const DAY_ROWS_FOR_UPLOADS = 15_000;
 /**
+ * Upload attempts counted a day under one format (server/stats.ts), each a
+ * row that no booking holds (docs/design/root-page.md, "Upload attempts
+ * counted by format").
+ */
+export const DAY_ATTEMPTS_PER_FORMAT = 100;
+/**
  * What a class spends of the day's allowances that a class can run out of
  * mid-lesson (docs/design/hosting-and-limits.md, Situation, "What a class
  * costs"): rows written, Durable Object requests (a class's Function requests
@@ -95,20 +101,25 @@ export interface Cost {
 export const DAY_FOR_CLASSES: Cost = { rows: 80_000, requests: 75_000, awakeS: 80_000 };
 /**
  * How far a class may reach when its first student comes after its booking
- * lapsed (LOBBY_WAIT_MS): the children are at the tablets then, so refusing
- * them costs more than refusing the teacher at letting in, and less than a
- * class under way failing. Past this the join is refused.
+ * lapsed with no student in (docs/design/hosting-and-limits.md, "Running
+ * classes finish"): the children are at the tablets then, so refusing them
+ * costs more than refusing the teacher at letting in, and less than a class
+ * under way failing. Past this the join is refused.
  */
 export const DAY_FOR_JOINS: Cost = { rows: 90_000, requests: 87_000, awakeS: 92_000 };
 /**
- * A let-in lobby that no student has joined holds its booking this long
- * (docs/design/hosting-and-limits.md, "Running classes finish"). Plausible
- * assumption: a teacher lets the class in when it is there or about to come
- * in, within a break's length (Swiss breaks run 5 to 20 minutes); a lobby
- * still empty after that is a look at the room, or a teacher who let in
- * early, whose first student books again (DAY_FOR_JOINS).
+ * A let-in lobby holds its booking this long after it was let in or its
+ * latest student joined; what it rests on: docs/design/hosting-and-limits.md,
+ * "Running classes finish".
  */
 export const LOBBY_WAIT_MS = 20 * 60_000;
+/**
+ * A started quiz of at most FEW_PLAYERS holds its booking while one of its
+ * players' devices was heard from within this long; the same section says
+ * what they rest on.
+ */
+export const AWAY_WAIT_MS = 10 * 60_000;
+export const FEW_PLAYERS = 4;
 /**
  * The check warns that the site is nearly full when fewer classes than this
  * still fit today (this one included), with the way to more quizzes; a day
@@ -123,6 +134,14 @@ export const NEARLY_FULL = 0.5;
 export const MAX_LIVE_BYTES = 1_000_000_000;
 /** A device whose view hasn't changed for this long goes to sleep; a tap wakes it. */
 export const SLEEP_AFTER_MS = 45 * 60_000;
+/**
+ * A device on long-poll, in a quiz no class is in, rests once its page has
+ * shown no change and felt no touch for REST_AFTER_MS: it holds no poll,
+ * which would keep the quiz's object awake, and asks every REST_EVERY_MS
+ * instead (docs/design/connections.md, "A poller left alone rests").
+ */
+export const REST_AFTER_MS = 5 * 60_000;
+export const REST_EVERY_MS = 30_000;
 
 /** The self-hosting nudge, appended to every refusal. */
 const OWN_COPY = "For more quizzes, a site of your own, your school's or your company's: classyquiz.pages.dev/own-copy says how.";
@@ -141,6 +160,15 @@ export const CLASS_STARTED = "This quiz has started and takes no more players. A
 /** The same in a Peers room, where nobody runs it (docs/design/peers.md). */
 export const ROOM_FULL = "This quiz is full: it takes no more players.";
 export const ROOM_STARTED = "This quiz has started and takes no more players.";
+/**
+ * A quiz's first player refused for want of room on the site
+ * (docs/design/hosting-and-limits.md, "Running classes finish"): the device
+ * waits and asks again every JOIN_AGAIN_MS, and the quiz asks the day's
+ * ledger no more often than that, whatever its pages do. Why, and whether
+ * for the day, is on the lobby of whoever runs it (`TeacherView.room`).
+ */
+export const JOIN_NO_ROOM = "The site is full right now. This device tries again by itself.";
+export const JOIN_AGAIN_MS = 60_000;
 
 /**
  * Which site-wide cap refused an upload (server/budget.ts). They free up
@@ -159,19 +187,32 @@ export function quotaResetAt(now = new Date()): string | null {
   }
 }
 
-/** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
-/** Letting a class in, refused: the day's rows are booked by the classes under way. */
-export function classesFullMessage(now = new Date()): string {
+/**
+ * How the day's ledger refused a class (server/budget.ts). "day": what the
+ * day's finished classes spent leaves no room for it, until 00:00 UTC.
+ * "now": it would fit but for what the quizzes open now hold, which some of
+ * them give back as they start, finish or are left waiting; when, and
+ * whether to this class or another, isn't known
+ * (docs/design/hosting-and-limits.md, "A refused class hears whether to
+ * wait").
+ */
+export type ClassFull = "now" | "day";
+
+/** Letting a class in, refused. */
+export function classesFullMessage(full: ClassFull, now = new Date()): string {
+  if (full === "now") return `The free site can't let another group in right now: the quizzes open at the moment hold what it has left for today. It may have room again later today, as they finish. ${OWN_COPY}`;
   const at = quotaResetAt(now);
-  return `The free site can't let another group in today: the quizzes under way use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+  return `The free site can't let another group in today: today's quizzes have used up what it has for the day. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
 /** The same for a Peers room, refused as it opens: it is a quiz among friends, not a class. */
-export function roomsFullMessage(now = new Date()): string {
+export function roomsFullMessage(full: ClassFull, now = new Date()): string {
+  if (full === "now") return `The free site can't take more quizzes right now: the ones open at the moment hold what it has left for today. It may have room again later today, as they finish. ${OWN_COPY}`;
   const at = quotaResetAt(now);
-  return `The free site can't take more quizzes today: the ones running now use what is left. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
+  return `The free site can't take more quizzes today: today's quizzes have used up what it has for the day. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
+/** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
   if (full === "bytes") {
     return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use). ${OWN_COPY}`;

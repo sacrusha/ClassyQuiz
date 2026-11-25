@@ -79,10 +79,11 @@ Quizmaster's is.
 There is no Projector, no Remote and no teacher code: the teacher code is
 refused (`teacherCheck`, "The last two digits don't match this quiz."), and the
 start page's resume card brings the device that opened it back as its
-player. The others join at once, so the room is booked at upload as a
-steered room's class is when it is let in (`atLetIn`, `server/rows.ts`;
-`hosting-and-limits.md`, "Running classes finish"); a day without room
-refuses under the card's button.
+player. Opening it checks that the site has room for it as for a steered
+room's class let in (`atLetIn`, `server/rows.ts`), and a ledger without
+room refuses under the card's button, for the day or for now; the room is
+booked from its first friend's join, so one played alone holds only what
+it spent (`hosting-and-limits.md`, "Running classes finish").
 
 ### The lobby
 
@@ -253,8 +254,11 @@ there for them; after it, whatever the instance held goes
 costs is an alarm now and then while a device stays on the podium (a row
 each), and a device that comes back after it finds the quiz ended. What
 the instance has heard is in its memory only; a memory the alarm woke has
-heard nobody since it started, which holds because a device polling keeps
-the object awake.
+heard nobody since it started, which holds because a device that holds a
+poll keeps the object awake, and one at rest (`connections.md`, "A poller
+left alone rests") counts as having left: on long-poll a room ends ten to
+fifteen minutes after its last device was touched, under a podium still
+lit.
 
 ## Not known
 

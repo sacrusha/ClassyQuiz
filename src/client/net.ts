@@ -15,7 +15,7 @@
 
 import type { AnswerAck, Auth, ClientMessage, Command, DeviceHeld, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
-import { SLEEP_AFTER_MS } from "../shared/limits.ts";
+import { REST_AFTER_MS, REST_EVERY_MS, SLEEP_AFTER_MS } from "../shared/limits.ts";
 import { hideNotice, showNotice } from "./notice.ts";
 import { pauseAwake } from "./dom.ts";
 import { emptyLine, readLine, type LineCounts } from "../shared/line.ts";
@@ -93,8 +93,19 @@ export class Line {
   /** The line's own count of itself; pollS is kept as pollMs and pollSince while the page lives. */
   private line: LineCounts;
   private pollMs = 0;
-  /** Since when the line has been polling, not asleep. */
+  /** Since when the line has been holding polls: polling, and neither asleep nor at rest. */
   private pollSince: number | null = null;
+  /** The server's word with a poll's answer: no class is in this quiz, so a poller left alone may rest. */
+  private mayRest = false;
+  /**
+   * At rest (docs/design/connections.md, "A poller left alone rests"): no
+   * poll is held and the line asks every REST_EVERY_MS. To the others a
+   * player's device then counts as away; a teacher's tab stays there. A
+   * step in the quiz, a touch or a command ends it.
+   */
+  private resting = false;
+  /** Ends a rest's wait before its time. */
+  private stir: (() => void) | null = null;
 
   private opts: LineOptions;
 
@@ -129,6 +140,7 @@ export class Line {
     window.addEventListener("pageshow", kick);
     const touched = () => {
       lastChange = Date.now();
+      this.stir?.();
     };
     document.addEventListener("pointerdown", touched, { passive: true });
     document.addEventListener("keydown", touched);
@@ -143,6 +155,8 @@ export class Line {
     this.line.slept++;
     if (this.pollSince !== null) this.pollMs += Date.now() - this.pollSince;
     this.pollSince = null;
+    this.resting = false;
+    this.stir?.();
     clearTimeout(this.retryTimer);
     this.clearPing();
     const ws = this.ws;
@@ -191,6 +205,7 @@ export class Line {
    */
   repoll(): void {
     this.pollAbort?.abort();
+    this.stir?.();
   }
 
   stop(): void {
@@ -201,6 +216,7 @@ export class Line {
     this.ws?.close();
     this.ws = null;
     this.pollAbort?.abort();
+    this.stir?.();
   }
 
   /**
@@ -218,13 +234,14 @@ export class Line {
   }
 
 
-  send(cmd: Command): Promise<Extract<ServerMessage, { t: "ack" }>> {
-    if (this.asleep) {
-      // A page's timer asking how things are doesn't wake the line; anything else is someone at the device.
-      if (cmd.op === "tick") return Promise.resolve({ t: "ack", id: "", ok: false, error: "asleep" });
-      this.wake();
+  /** own: the page asking by itself (its timer's tick, a refused join asked again), which doesn't wake the line or end its rest; anything else is someone at the device. */
+  send(cmd: Command, own = cmd.op === "tick"): Promise<Extract<ServerMessage, { t: "ack" }>> {
+    if (own && (this.asleep || this.resting)) return Promise.resolve({ t: "ack", id: "", ok: false, error: "asleep" });
+    if (this.asleep) this.wake();
+    if (!own) {
+      lastChange = Date.now();
+      this.stir?.();
     }
-    if (cmd.op !== "tick") lastChange = Date.now();
     return new Promise((resolve) => {
       const p: Pending = { id: `${Date.now().toString(36)}-${(++this.seq).toString(36)}-${Math.random().toString(36).slice(2, 7)}`, cmd, resolve, sent: false };
       this.pending.push(p);
@@ -250,6 +267,7 @@ export class Line {
       this.connect();
     } else {
       this.flush();
+      this.stir?.();
     }
   }
 
@@ -431,7 +449,16 @@ export class Line {
       const key = m.t === "state" ? viewKey(m.view) : JSON.stringify(m);
       if (key !== this.lastKey) {
         this.lastKey = key;
-        lastChange = Date.now();
+        // At rest, only something stored ends the rest (a step, a join, a
+        // role taken: the view's version moves). Who is there changes with
+        // time and is drawn without ending it: a player's device at rest
+        // counts as away, and two that woke at each other's coming and going
+        // would keep each other from resting.
+        if (!this.resting || (m.t === "state" && m.view.v > this.v)) lastChange = Date.now();
+      } else if (this.resting) {
+        // A rest's poll is answered with what the page shows already: nothing to draw again.
+        if (m.t === "state") this.v = Math.max(this.v, m.view.v);
+        return;
       }
     }
     if (m.t === "state") {
@@ -526,6 +553,27 @@ export class Line {
     this.flushing = false;
   }
 
+  /** Goes to rest, or ends it. Seconds at rest aren't seconds polling (`pollS`): no poll is held. */
+  private rest(on: boolean): void {
+    if (on === this.resting) return;
+    this.resting = on;
+    const now = Date.now();
+    if (on && this.pollSince !== null) this.pollMs += now - this.pollSince;
+    this.pollSince = on ? null : now;
+  }
+
+  private restWait(): Promise<void> {
+    return new Promise((resolve) => {
+      const done = () => {
+        clearTimeout(t);
+        this.stir = null;
+        resolve();
+      };
+      const t = setTimeout(done, REST_EVERY_MS);
+      this.stir = done;
+    });
+  }
+
   private async pollLoop(): Promise<void> {
     if (this.polling) return;
     this.polling = true;
@@ -534,13 +582,15 @@ export class Line {
     while (!this.stopped && !this.asleep) {
       try {
         const t0 = Date.now();
+        this.rest(this.mayRest && t0 - lastChange > REST_AFTER_MS);
+        const resting = this.resting;
         const ctl = new AbortController();
         this.pollAbort = ctl;
-        let res: { messages?: ServerMessage[] };
+        let res: { messages?: ServerMessage[]; rest?: boolean };
         try {
           const held = this.heldNow();
           this.line.http++;
-          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v, ...(held ? { held } : {}), ...this.lineNow() }, ctl.signal);
+          res = await post(`/api/i/${this.opts.instance}/poll`, { auth: this.opts.auth(), v: first ? -1 : this.v, ...(resting ? { rest: true } : {}), ...(held ? { held } : {}), ...this.lineNow() }, ctl.signal);
         } catch (e) {
           // Let go on purpose (repoll): ask again at once, as whoever the tab is now.
           if (ctl.signal.aborted && !this.stopped) continue;
@@ -553,6 +603,7 @@ export class Line {
         delay = 500;
         this.setStatus("live");
         if (this.quota === "http") this.setQuota(null);
+        this.mayRest = res.rest === true;
         let gone = false;
         const msgs = res.messages ?? [];
         for (const m of msgs) {
@@ -560,6 +611,11 @@ export class Line {
           if (m.t === "gone") gone = true;
         }
         if (gone) break;
+        if (resting) {
+          // The rest goes on unless the answer brought a step, or someone touched the page meanwhile.
+          if (this.mayRest && lastChange < t0) await this.restWait();
+          continue;
+        }
         // A quick empty answer is not a reason to ask again at once, and no
         // answer at all makes this loop spin.
         const took = Date.now() - t0;
@@ -606,12 +662,13 @@ export async function api<T>(path: string, body: unknown): Promise<{ status: num
 }
 
 /**
- * An API answer's body (`json: false` when it wasn't JSON, e.g. a school
- * filter's page). When the site's daily allowance is spent it comes back with
- * `quota`, which the page says in its own words: our functions say
- * `{error: "quota"}`; past the request allowance Cloudflare answers itself,
- * with its error 1027 (a best reading of its docs, unverified; a 429 counts
- * too).
+ * An API answer's body. One that isn't JSON isn't the site's (a school
+ * filter's page, say) and comes back as `json: false`, its status saying
+ * nothing about a quiz, so callers go by the site's `error`; or as `quota`
+ * when it reads as the daily allowance spent: our functions' `{error:
+ * "quota"}`, or what Cloudflare answers in the Function's place past the
+ * day's requests (docs/design/hosting-and-limits.md, "When the allowance
+ * runs out anyway").
  */
 export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
   const text = await res.text().catch(() => "");
@@ -622,7 +679,7 @@ export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
   } catch {
     parsed = null;
   }
-  const quota = parsed ? parsed.error === "quota" : res.status === 429 || /\b1027\b/.test(text);
+  const quota = parsed ? parsed.error === "quota" : res.status === 429 || (res.status === 405 && text === "") || /\b1027\b/.test(text);
   if (quota) return { ...(parsed ?? ({} as T)), quota: true } as ApiBody<T>;
   return parsed ?? ({ json: false } as ApiBody<T>);
 }

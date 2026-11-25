@@ -18,10 +18,26 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
 
 - **The plan.** Cloudflare's Free limits are account-wide and reset at
   00:00 UTC: 100,000 Function requests, 100,000 Durable Object requests,
-  100,000 rows written, 13,000 GB-s of Durable Object duration, 5 GB stored
-  in all. Past any of them, further operations of that type fail. One class
-  that spends the day's allowance spends it for every class on the site.
-  Only `/api/*` runs code; static pages and scripts don't count.
+  100,000 rows written, 5,000,000 rows read (a listing counts every row it
+  reads), 13,000 GB-s of Durable Object duration, 5 GB stored in all. Past
+  any of them, further operations of that type fail. One class that spends
+  the day's allowance spends it for every class on the site. Only `/api/*`
+  runs code; static pages and scripts don't count.
+- **Past the day's Function requests** Cloudflare answers in the
+  Function's place: its Workers limits page names two ways, set per route,
+  the Worker bypassed ("Requests behave as if no Worker is configured") or
+  an error 1027 page; its Pages Functions pricing page names neither (Not
+  known). Bypassed, the static server answers `/api`: a POST with an empty
+  405, a GET with the site's 404 page (seen on the live site for a path no
+  Function takes, 2026-11-25).
+- **A flood.** A post or a video that spreads brings a burst of visitors at
+  any hour of the UTC day. Plausible assumption: most look at the root
+  page and the film, some play an example or open a room to see it (the
+  looks at the room below), few are a class. Pages, film, examples and
+  Solo cost the plan nothing; a visitor spends from the first request to
+  `/api`: a file opened on the root page, a room opened, a class let in.
+  Bookings and stored bytes are held at once, so for them a flood's rate
+  counts as well as its size.
 - **What a class costs**, for 25 over 15 questions, estimated, nothing
   measured yet (the figures come with telemetry, `telemetry.md`):
   - Rows: about 250, most of them the teacher's steps. Answers and looks are
@@ -33,12 +49,13 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
     of each for a 15-minute run, growing with how long devices stay on
     (`scaling-drawer.md`, "Requests").
   - Duration: on WebSockets next to nothing. A single polling device keeps
-    the object awake: about 340 GB-s for a 45-minute lesson, about twice
-    that with a device left polling on the final ranking until it sleeps
-    (`scaling-drawer.md`, "Duration"). One poller costs a class nearly all
-    of it. Also growing with time, with no most a class can spend.
+    the object awake: about 340 GB-s for a 45-minute lesson, and about 40
+    more with a device left polling on the final ranking until it rests
+    (`scaling-drawer.md`, "Duration"; `connections.md`, "A poller left
+    alone rests"). One poller costs a class nearly all of it. Also growing
+    with time, with no most a class can spend.
   - So the day carries some 400 classes on rows and on WebSocket requests,
-    some 33 with every device polling, some 19 to 38 with a poller in every
+    some 33 with every device polling, some 34 with a poller in every
     class. What binds first turns on the share of classes with at least one
     poller, which isn't known. The landing page's "room for a few dozen
     classes a day" rests on this (`shared/limits.ts`, comment on
@@ -65,7 +82,8 @@ usage limits nudge heavy use toward self-hosting. It has no domain of its own
     them. Likely the most common once the site is advertised, a few
     hundred a day plausibly. They have no reasonable way to close it, and
     offering one would be a minor optimization. Plausibly they tap through
-    to the join screen, maybe Start. Their quiz is the example (about
+    to the join screen, maybe Start, some with a phone of their own joined
+    to see a player's side. Their quiz is the example (about
     40 KB) or one of their own, a few MB with pictures; a teacher's
     homework quizzes, plausibly played Solo, are never uploaded. A
     forgotten tab on a desktop keeps its socket; a phone or tablet
@@ -298,11 +316,11 @@ them, and the README points self-hosters there.
   or who made it. It also keeps the UTC days on which it refused an upload
   or a class for 31 days, for the landing's own-copy line (backlog v4 item 4; the landing is `root-page.md`).
 - **A refused upload says which cap it hit.** The two caps free up
-  differently, so `SiteBudget.reserve` answers `true`, `"uploads"` or
-  `"bytes"` and the failure carries it as `full`, beside `error`
-  (`siteFullMessage` in `shared/limits.ts`, English, for any reader that
-  doesn't know `full`). The uploads cap says the site takes new quizzes again
-  at 01:00 Swiss time (`quotaResetAt`; "00:00 UTC" without time zone data);
+  differently, so `SiteBudget.reserve` answers `"uploads"` or `"bytes"`
+  (booked, the day's ledger), and the failure carries it as `full`, beside
+  `error` (`siteFullMessage` in `shared/limits.ts`, English, for any
+  reader that doesn't know `full`). The uploads cap says the site takes
+  new quizzes again at 01:00 Swiss time (`quotaResetAt`; "00:00 UTC" without time zone data);
   the bytes cap says it does once others have ended or expired, three hours
   after their last use (`INSTANCE_IDLE_MS`). Both point to the own-copy page
   as the self-hosting nudge, and show to the teacher as a message, not as a
@@ -310,6 +328,14 @@ them, and the README points self-hosters there.
   `client/site-text.ts` (`siteFull`), shown in the visitor's language on
   the local check, where the upload happens (`local-check.md`, "Opening a
   room").
+- **The upload attempts' count** (`root-page.md`, "Upload attempts counted
+  by format") costs every file opened on the root page, looked at or
+  played alone too, a row held by no booking. So its rows are capped at
+  `DAY_ATTEMPTS_PER_FORMAT` (100) a format a day: the list's 26 formats at
+  their most write 2,600 of the about 5,000 rows the classes' and uploads'
+  shares leave; plausibly a flood opens `.zip`s and a handful of other
+  formats, some hundreds. Its requests aren't capped ("What is not
+  limited, and why").
 - **A request body without a length.** Every POST to an instance is read in
   the Function and capped at 20 KB (`MAX_COMMAND_BYTES`,
   `functions/api/[[path]].ts`) whatever its Content-Length says, and forwarded
@@ -369,13 +395,16 @@ rest are the implementer's.
   `DAY_FOR_CLASSES`: 80,000 rows, 75,000 requests, 80,000 awake seconds of
   the plan's 100,000, 100,000 and about 101,000. What is left over is for
   what no class books (uploads, whose quiz and pictures are rows; picture
-  fetches, joins and the landing; the site's small objects) and for
+  fetches, joins and the landing; the upload attempts' count; the site's
+  small objects) and for
   estimates that come out low; requests leave more, since more of them come
   from outside a class. If the plan's limits change, or what comes from
   outside a class, the shares are what to revisit.
 - **Rows are booked at the most, requests and duration as an estimate**
   (`server/rows.ts`). Rows have a most a class can write, so their booking
-  leaves no margin to guess: at letting in `MAX_PLAYERS`, each joining and
+  leaves no margin to guess, but for the few that teacher tabs at rest
+  write (`connections.md`, "A poller left alone rests"): at letting in
+  `MAX_PLAYERS`, each joining and
   taking an avatar back a few times (6 rows), plus the teacher's steps (20
   rows a question, the alarms among them) and the writes when a line ends
   with input held (`MAX_LINE_WRITES` a stage, 2 rows each;
@@ -403,7 +432,9 @@ rest are the implementer's.
   "nearly full today: room for about n more groups", or at none "can't let
   another group in today … again at 01:00 Swiss time", both with "More
   quizzes: a site of your own, your school's or your company's ›"
-  (`roomNotice`, `client/manage.ts`). It lasts while it holds, where a toast
+  (`roomNotice`, `client/manage.ts`); "right now" for "today" when the
+  quizzes open now fill the ledger ("A refused class hears whether to
+  wait"). It lasts while it holds, where a toast
   would be gone before a teacher who looked away saw it. The count is from
   the upload or the last tap, not live. Days whose ledger reached
   `NEARLY_FULL` (half, the owner's: lower than 80%) in any allowance count
@@ -427,38 +458,85 @@ rest are the implementer's.
   request and a few rows each time. Rests on: a fallback mid-lesson is the
   site's own (a crowded access point), so it shows one device at a time,
   and the shares' margin carries it until the next step.
-- **A let-in lobby that no student joins within `LOBBY_WAIT_MS` (20
-  minutes) gives its booking back** to what it spent; the quiz stays. Its
-  first student books it again, and may reach further, to `DAY_FOR_JOINS`
+- **A let-in lobby gives its booking back `LOBBY_WAIT_MS` (20 minutes)
+  after it was let in or its latest student joined**, to what it spent; the
+  quiz stays. A student joining after that books it again, as letting in
+  does: never refused with students already in, since the class has
+  started arriving and refusing a child in front of the others costs more
+  than a booking that overshoots into the shares' margin. The first
+  student of a quiz with none in may reach further, to `DAY_FOR_JOINS`
   (90,000 rows, 87,000 requests, 92,000 awake seconds), since the children
   are there and refusing them costs more than refusing the teacher at
-  letting in, less than a class under way failing. Past that the join is
-  refused, with the same words as at letting in. A Start with no student
-  there books only what was spent, and its first student books it the same
-  way. Rests on: looks at the room are likely the most common lobbies
-  (Situation, "Who opens a lobby"), and look like a class until a student
-  comes; a teacher lets the class in when it is there or about to come in,
-  within a break's length (plausible assumption: Swiss breaks run 5 to 20
-  minutes). If teachers turn out to let in long before, more first
-  students reach into the joins' share; if lobbies are rarely looks, the
-  wait matters less.
-- **A class that has had students keeps its booking until its final
-  ranking**, whether or not its devices are there. Rests on: breaks are
-  shared across a school (Situation), so bookings that shrank at recess
-  would come back at once, into a margin that might not hold them all.
+  letting in, less than a class under way failing; past that the join is
+  refused. The device says the site is full and asks again every minute
+  (`JOIN_NO_ROOM`), while its page is neither asleep nor at rest; the
+  teacher's lobby shows the notice of a refused let-in; and the quiz asks
+  the ledger at most once a minute whatever its pages do, since each
+  asking is a request. A quiz that starts with no student there
+  holds only what was spent until its first student. Rests on: looks at
+  the room are likely the most common lobbies, and with the looker's own
+  phone joined look like a class (Situation, "Who opens a lobby"), and
+  held for the quiz's three hours would fill the ledger. A teacher
+  lets the class in when it is there or about to come in, within a
+  break's length (plausible assumption: Swiss breaks run 5 to 20
+  minutes), and starts once it is in. If teachers turn out to let in long
+  before, more first students reach into the joins' share; if classes wait in the lobby
+  longer than that before Start, their bookings come back unchecked, at
+  their next student or at the first question, into the shares' margin;
+  if lobbies are rarely looks, the wait matters less.
+- **A started quiz of at most `FEW_PLAYERS` (4) gives its booking back** to
+  what it spent once none of its players' devices has been heard from for
+  `AWAY_WAIT_MS` (10 minutes); a player's device coming back books what is
+  ahead again, never refused. Rests on: a look started with the looker's
+  own phone in is one or two players nobody returns to; held for the
+  quiz's three hours, some 116 such bookings (690 rows each for 15
+  questions) fill the ledger's rows. A small group that does come back
+  books about as many rows again into the shares' margin; plausibly few
+  come back at once, since the groups whose breaks are shared, school
+  classes, are larger. The players' devices, not the teacher's: a
+  desktop tab keeps its socket (Situation, "Who opens a lobby"), and a
+  look's projector is one. Plausible assumption: a group playing is heard
+  from every few seconds, a phone locked or put away not at all. A
+  player's device left lit holds the booking until its page sleeps
+  (`connections.md`, "Devices left on").
+- **A larger class under way keeps its booking until its final ranking**,
+  whether or not its devices are there. Rests on: breaks are shared across
+  a school (Situation), so bookings that shrank at recess would come back
+  at once, into a margin that might not hold them all.
+- **A Peers room's opening books nothing**: it is refused as it opens when
+  the ledger has no room for it as for a class let in, and its first
+  friend's join books it as the first student of an empty lobby does.
+  Rests on: plausibly the opener alone, a look at the room, is the
+  commonest Peers room in a flood (Situation, "A flood"), and a booking at
+  opening would hold a let-in's share for the wait with no further tap.
+- **A refused class hears whether to wait.** The ledger sums what the
+  day's finished classes spent, which stays until 00:00 UTC, and what the
+  quizzes open now hold, some of which comes back as they start, lapse or
+  finish. A flood fills it with the second (Situation, "A flood"), and a
+  teacher told "today … again at 01:00" gives up on a class that could
+  still go in that day. So a refusal, and the check's notice, say "day"
+  when the class wouldn't fit beside what stays alone, with the hour the
+  day comes back, and "now" when it would (`ClassFull`,
+  `shared/limits.ts`). "now" names no time: what comes back goes to
+  whichever booking asks next, so in a flood a teacher who waits competes
+  with the looks still arriving.
 - **At the final ranking the booking settles**: the ledger keeps what was
   spent (rows counted per key the instance stores, requests and awake time
   as the devices' lines say) plus what devices left polling on the ranking
-  will spend until they sleep (`SLEEP_AFTER_MS`), and gets the rest back; if
-  that call fails, the quiz's end settles it instead, with what was spent.
-  The quiz itself stays its three hours for photographs and rejoining. A
-  quiz that ends or expires before its final ranking settles then. Rests on:
-  nothing writes after the final ranking, and a device left polling keeps
-  the object awake as long as during the lesson.
+  will spend (`tail`, `server/rows.ts`), and gets the rest back; if that
+  call fails, the quiz's end settles it instead, with what was spent. The
+  quiz itself stays its three hours for photographs and rejoining. A quiz
+  that ends or expires before its final ranking settles then. Rests on:
+  nothing but a resting tab's word writes after the final ranking, and a
+  device left on it is touched little (`connections.md`, "A poller left
+  alone rests").
 - So the ledger limits classes at the same time, not in the day: some 74
   lobbies let in at once (awake time binds), some 96 started classes of 25
   on WebSockets (rows, booked at their most), some 30 with a poller (awake time), while
-  finished classes count what they spent. The last booking of a busy day
+  finished classes count what they spent. A lobby holds its place for the
+  wait, so let-ins no class follows are carried at some 220 an hour, a
+  Peers room joined by a friend among them; past that rate classes are
+  refused for now. The last booking of a busy day
   leaves some of the day unused, which is accepted.
 - **One quiz per device.** A device's next upload ends its previous quiz if
   that one never started (`POST /api/i/:id/replaced` with the previous
@@ -488,14 +566,38 @@ plan", item 3):
   class would have joined. An idea kept for it: `scaling-drawer.md`, "Stored
   data: pictures".
 
-Not covered: a lobby before its class is let in books nothing, so what its
-teacher devices spend comes out of what the shares leave over; a projector
-on long-poll keeps its object awake until the page sleeps (`SLEEP_AFTER_MS`),
-some 345 GB-s, which a wave of looks at the room from behind a filter would
-make large. Plausible assumption: looks come from homes and offices whose
-networks pass WebSockets (Situation, "Which devices poll"). And a script
-hammering `/api`, which spends requests no class booked; that is the case
-for a domain with a rate-limiting rule.
+Not covered:
+
+- What a quiz spends before its class is let in, or after its booking
+  lapsed, is booked by no one: it comes out of what the shares leave over,
+  and the ledger counts it only at the quiz's next booking, its settle or
+  its end. A projector on long-poll there holds polls for five minutes
+  after it last changed or was touched (`connections.md`, "A poller left
+  alone rests"): some 300 awake seconds a lobby, as many again each time
+  someone comes back to it, and some 80 requests of each kind until the
+  page sleeps. The 21,000 awake seconds the shares leave are some 70 such
+  lobbies, the day's 101,000 some 340, past which every object on the
+  account stops, classes under way included; of the about 1,000 lobbies
+  the uploads' cap lets open in a day, fewer than one in fourteen may be
+  on long-poll. Plausible assumption: looks come from
+  homes and offices whose networks pass WebSockets (Situation, "Which
+  devices poll"); the share isn't known, and nothing counts a lobby that
+  is never let in.
+- A quiz whose booking lapsed with a student in it (a looker's own phone)
+  holds its polls until the page sleeps, whether or not that phone is
+  still there: a class waiting long for Start with its tablets locked
+  looks the same, and with a class in no poller rests.
+- Rows read. `SiteBudget` reads what it stores once as it wakes and
+  answers from memory after: some 120 rows of days and months, and a row
+  for each quiz alive, up to some 1,000 (the uploads' cap). It sleeps after
+  10 s or more without a call (`open-period-in-memory.md`, Situation), so a
+  flood's calls, close together, cost it little. Calls spaced to wake it
+  every 10 s all day, with each of the day's 1,000 quizzes alive some four
+  hours, would cost some 2.5 million of the 5,000,000; past them every
+  object's reads fail, classes under way included. What the other objects
+  read is not estimated, and none of it is measured.
+- A script hammering `/api`, which spends requests no class booked; that is
+  the case for a domain with a rate-limiting rule.
 
 ### When the allowance runs out anyway
 
@@ -503,13 +605,24 @@ Devices say so instead of showing the offline dot, in their language: "The
 free site has used up today's allowance. It works again at 01:00 Swiss
 time", the hour computed (02:00 in summer), with the own-copy pointer
 (`quotaNotice`, `client/room-text.ts`). Joining says the same, and so does
-opening a room on the local check. The mapping: the Function
-turns a platform error that reads like a spent limit (`isQuotaError`, matched
-on "free tier", "daily limit", "quota") into `{error: "quota"}` (503); an
-instance whose write fails that way answers `{t: "quota"}` and reloads its
-state from storage, so nothing shows that isn't stored; the client also takes
-a 429, or a page mentioning error 1027, as spent. What devices do afterwards
-(asking once a minute, resending a step) is in `connections.md`.
+opening a room on the local check.
+
+How a device knows:
+
+- **Rows, Durable Object requests or duration spent.** The Function runs
+  and turns a platform error that reads like a spent limit (`isQuotaError`,
+  matched on "free tier", "daily limit", "quota") into `{error: "quota"}`
+  (503); an instance whose write fails that way answers `{t: "quota"}` and
+  reloads its state from storage, so nothing shows that isn't stored.
+- **Function requests spent.** The Function doesn't run, and which answer
+  comes in its place isn't established (Situation, "Past the day's
+  Function requests"), so the client takes each as spent (`readApi`,
+  `client/net.ts`): a 429, a page mentioning error 1027, or an empty 405.
+  Plausible assumption: nothing else answers a device's POST with an
+  empty 405; a school filter that did would have its devices say the
+  allowance is spent.
+
+What devices do afterwards: `connections.md`, "The allowance spent".
 
 ### What is not limited, and why
 
@@ -546,16 +659,20 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
   Claude and Gemini had access failures that may be the same thing. A robots
   verdict cached per host spelling is the working explanation, not a
   confirmed one; cached verdicts expire on the fetcher's schedule.
-- The wording of the platform's error when an allowance is spent, and what
-  Cloudflare returns once Pages Functions pass their requests (the Workers
-  docs say error 1027; status and Pages behaviour aren't documented).
-  `isQuotaError` is a best reading.
+- Which answer a Pages project gets once its Functions pass the day's
+  requests (Situation, "Past the day's Function requests"), whether a
+  setting chooses, and the status the 1027 page comes with; neither has
+  been seen. To look up on the dashboard, or on the first day it happens.
+- The wording of the platform's error when rows, Durable Object requests
+  or duration are spent; `isQuotaError` is a best reading.
 - Whether the numbers (15,000 upload rows, 1 GB, 60 players, 5 late joiners,
-  3 hours) fit real use; no figures from real classes yet.
+  3 hours, 100 counted upload attempts a day per format) fit real use; no
+  figures from real classes yet.
 - Whether teachers are seen with more than five latecomers, or re-uploading
   after the 3 hours.
 - Whether the German, French and Italian wording of the two caps' messages
-  reads right; it has not been seen in a browser.
+  and of the ledger's "right now" ones reads right; it has not been seen
+  in a browser.
 - Whether a domain with an edge rate-limiting rule becomes necessary.
 - Whether any school converts the server, and how its AI fares with the
   README section; and which outside address serves a converted copy's own
@@ -564,9 +681,14 @@ a 429, or a page mentioning error 1027, as spent. What devices do afterwards
 - The share of classes with at least one poller, and how much of it the
   site's own fallback makes; how long devices stay on after the final
   ranking (telemetry: `polled`, classes with a poller, `awakeS`).
-- How many lobbies are looks at the room, how far they go (let in,
-  Start), and what they upload; how long a lobby opened early waits for its
-  class; how often a quiz is walked to another device, and to whom.
+- How many lobbies are looks at the room, how far they go (let in, a phone
+  of the looker's joined, Start), and what they upload; how long a lobby
+  opened early waits for its class, and a class in the lobby for Start;
+  how long a small group's devices go unheard mid-quiz and still come
+  back; how often a quiz is walked to another device, and to whom.
+- What holds the room when a class is refused for now, and how long until
+  it gets in; the day's record counts the ledger's refusals as one figure
+  (`refused.rows`, `telemetry.md`).
 - Whether the class cost above, and so the capacity sentence, still holds now
   that a question steps through four or five states, each a view to every
   device; it was derived when a question had three.

@@ -28,6 +28,11 @@
 // changes a key after the reveal, voids one question and skips another. The
 // phone dies silently too, and the Projector takes the steering back.
 //
+// A poll's answer says a poller may rest before the class is let in and at
+// the final ranking, never with the class in or under way; a poll from a
+// device at rest is answered at once (docs/design/connections.md, "A poller
+// left alone rests").
+//
 // At the end, once every device is quiet, every student's score must equal
 // what the server's acknowledgements told their tablet is stored, and the
 // teacher's fixes. That is the constraint "survives school Wi-Fi" made
@@ -349,6 +354,14 @@ check(/^\d{5}$/.test(code), `the upload returns the quiz's code (${code})`);
 check(/^\d{2}$/.test(teacher), `the upload returns the teacher code's two digits (${teacher})`);
 log("uploaded", instance.slice(0, 8), "code", code);
 
+/**
+ * Whether a poll's answer says a poller may rest: only with no class in the
+ * quiz (docs/design/connections.md, "A poller left alone rests"). Asked as
+ * a guest, whose first poll is answered at once and is no sign of any
+ * device.
+ */
+const saysRest = async () => (await post(`/api/i/${instance}/poll`, { auth: { role: "guest" }, v: -1 })).body.rest === true;
+
 // The pasting tab: the Projector, steering itself while no Remote is there.
 const projector = new Device("projector", instance, { role: "screen", token: screenToken }, "ws");
 projector.start();
@@ -542,8 +555,14 @@ function maybeAnswer(p) {
   const tooSoon = await early.send({ op: "newPlayer" });
   check(!tooSoon.ok, `a student can't join before the class is let in (${tooSoon.error})`);
   check(steerer().view.waiting === true, "the steering screen says the class waits");
+  check(await saysRest(), "before the class is let in, a poll's answer says a poller may rest");
+  // Not as a guest's first poll (v: -1), which is answered at once anyway.
+  const asked = Date.now();
+  await post(`/api/i/${instance}/poll`, { auth: { role: "guest" }, v: 0, rest: true });
+  check(Date.now() - asked < 3000, `a poll from a device at rest is answered at once (${Date.now() - asked} ms)`);
   const letIn = await steerer().send({ op: "letIn" });
   check(letIn.ok, "the steering screen lets the class in");
+  check(!(await saysRest()), "with the class let in, no poller is told it may rest");
   await until(() => !choices.at(-1).waiting, 5000, "the early device hearing it is let in");
   check(true, "a waiting student device hears that the class is let in");
   early.kill();
@@ -698,6 +717,7 @@ check((await steerer().send({ op: "begin", at: at() })).ok, "Start");
   await until(() => tv().phase === "question", START_MS + 5000, "the first question once Start's time ran out");
   const took = Date.now() - pressed;
   check(took >= START_MS - 500 && took < START_MS + 3000, `the first question START_MS after Start (${took} ms)`);
+  check(!(await saysRest()), "under way, no poller is told it may rest");
   const now = looks.get(p.id) ?? { b: 0, h: 0 };
   const late = await p.d.send({ op: "dress", b: (now.b + 1) % 6, h: now.h });
   check(!late.ok, "dressing is refused once the quiz has started");
@@ -946,6 +966,7 @@ const old = players.find((p) => !p.dead && p.token);
 const reloaded = await post(`/api/i/${instance}/poll`, { auth: { role: "player", token: old.token }, v: -1 });
 const oldView = (reloaded.body.messages ?? []).find((m) => m.t === "state")?.view;
 check(oldView?.phase === "final" && oldView.me?.place >= 1, `a tablet coming back at the final ranking gets its place (${oldView?.phase}, ${oldView?.me?.place})`);
+check(reloaded.body.rest === true, "at the final ranking a poll's answer says a poller may rest");
 {
   const late = new Device("late", instance, { role: "guest" }, "ws");
   late.start();

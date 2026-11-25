@@ -135,7 +135,9 @@ written (`lineEnded`) unless the line is back within `LINE_WRITE_MS`
 (1 s): a poll since, or a new socket that keeps the copy. A held poll's
 end is all the server knows of a poller's line, and a poller that is
 still there polls again within a fraction of a second, so the write is
-spent on one that stopped. One write covers every line that ended in
+spent on one that stopped, or went to rest, after which the object may
+hibernate (`connections.md`, "A poller left alone rests"). One write covers
+every line that ended in
 between, at most `MAX_LINE_WRITES` (10) in a stage for the whole class
 (`Run.lineWrites`, stored with the run); past those the input waits for
 the stage's own write.

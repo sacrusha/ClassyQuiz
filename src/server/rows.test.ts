@@ -39,7 +39,7 @@ test("what a class spent is what telemetry counts as its requests", () => {
   assert.equal(s.rows, 30);
 });
 
-test("devices left polling on the final ranking book their time until they sleep; none, nothing", () => {
+test("devices left polling on the final ranking book their time until they rest; none, nothing", () => {
   assert.deepEqual(tail(0), NONE);
   assert.ok(tail(3).awakeS > 0 && tail(3).requests > tail(1).requests);
 });

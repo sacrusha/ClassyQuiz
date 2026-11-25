@@ -6,7 +6,7 @@ import { quotaResetAt } from "../shared/limits.ts";
 import { esc } from "./dom.ts";
 import { TEXT } from "./landing-text.ts";
 import type { RoomResult } from "./opening.ts";
-import { lang, said } from "./room-text.ts";
+import { fullWords, lang, said } from "./room-text.ts";
 
 /**
  * Why a room didn't open, as HTML: the quiz (the server's checks are the
@@ -25,5 +25,8 @@ export function roomRefusal(r: RoomResult | null): string {
   if ((r.errors?.length ?? 0) > 0) return box(t.quizHead, `<ul lang="en">${r.errors.map((e) => `<li>${esc(e.message)}</li>`).join("")}</ul>`);
   if (r.quota) return box(t.quota(quotaResetAt()), ownCopy);
   if (r.full) return box(t.siteFull(r.full, quotaResetAt()), ownCopy);
+  // A Peers room refused for want of room comes as the server's sentence alone.
+  const full = r.error ? fullWords(r.error) : null;
+  if (full) return box(full, ownCopy);
   return box(r.error ? said(r.error) : t.notTaken);
 }

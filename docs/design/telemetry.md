@@ -57,7 +57,9 @@ worked (reconnects are that minus one) and the WebSocket attempts that
 failed, those that opened and carried nothing apart (a filter that takes
 the upgrade and drops the frames, against one that refuses it); the HTTP
 requests it sent (polls, commands); the WebSocket
-messages it sent, and its pings apart; the seconds it spent on long-poll;
+messages it sent, and its pings apart; the seconds it spent on long-poll
+holding polls (not those at rest, `connections.md`, "A poller left alone
+rests");
 how often it was told the allowance was spent; whether it went to sleep;
 and its script errors, as a number. Integers and one word from a closed
 list; never an error's message, which can carry quiz text. The server takes

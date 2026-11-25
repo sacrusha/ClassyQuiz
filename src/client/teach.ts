@@ -130,8 +130,8 @@ function lobby(v: TeacherView): string {
     v.screen === "present"
       ? `<p class="device"><span class="ok">${T.projector} ✓</span> · <button class="link" data-act="swap">${T.swap}</button></p><p class="device">${secondDevice(v)}</p>`
       : projectorLine(v);
-  const letIn = v.waiting ? `${roomNotice(v)}<p class="cstart"><button class="btn primary big" data-act="let-in">${T.letIn}&nbsp;&#9654;</button></p>` : "";
-  return `${letIn}<section class="joinbox">
+  const letIn = v.waiting ? `<p class="cstart"><button class="btn primary big" data-act="let-in">${T.letIn}&nbsp;&#9654;</button></p>` : "";
+  return `${roomNotice(v)}${letIn}<section class="joinbox">
       <div class="addr">${esc(siteAddress())}</div>
       <div class="codebig">${esc(v.code)}</div>
       <div class="joined">${T.joined(live("joined", n))}</div>

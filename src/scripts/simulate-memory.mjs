@@ -21,6 +21,10 @@
 // showed answering open). Each dresses in the lobby and answers both
 // questions. At the end the wall's looks are the ones each tablet had
 // acknowledged, and every score is what the acknowledged answers give.
+//
+// Before them, with the class waiting outside, a Remote at rest on long-poll
+// goes through one loss more: it is there to the wall after it
+// (docs/design/connections.md, "A poller left alone rests").
 
 import { spawnSync } from "node:child_process";
 
@@ -240,6 +244,27 @@ const instance = up.body.id;
 const wall = new Device("wall", instance, { role: "screen", token: up.body.token }, "ws");
 wall.start();
 await until(() => wall.view, 10_000, "the wall's view");
+const players = [];
+
+// Before the class is let in, a Remote on long-poll at rest: after the loss
+// it is there to the wall (docs/design/connections.md, "A poller left alone
+// rests"), where a memory that just began has heard nothing of it.
+{
+  const took = await post(`/api/i/${instance}/cmd`, { auth: { role: "guest" }, cmd: { id: "remote-1", cmd: { op: "takeRole", role: "remote", teacher: up.body.teacher } } });
+  const remote = { role: "remote", token: (took.body.messages ?? []).find((m) => m.t === "role")?.token };
+  check(!!remote.token, "a second device takes the steering");
+  const asked = await post(`/api/i/${instance}/poll`, { auth: remote, v: 0, rest: true });
+  check(asked.body.rest === true, "a Remote at rest hears the quiz is at rest");
+  await loseMemory("before the class is let in, a Remote at rest");
+  // The view the wall has is from before the loss; a tick's answer brings one from after it.
+  wall.view = null;
+  await wall.send({ op: "tick" });
+  await until(() => wall.view, 10_000, "the wall's view after the loss");
+  check(wall.view.remote === "present", `a Remote at rest is there to the wall after the loss (${wall.view.remote})`);
+  await post(`/api/i/${instance}/cmd`, { auth: remote, cmd: { id: "remote-2", cmd: { op: "leave" } } });
+  await until(() => wall.view.steer, 10_000, "the wall steering again once the Remote left");
+}
+
 check((await wall.send({ op: "letIn" })).ok, "the wall lets the class in");
 
 const kinds = [
@@ -248,7 +273,6 @@ const kinds = [
   { name: "poller", mode: "poll" },
   { name: "straggler", mode: "ws" },
 ];
-const players = [];
 for (const k of kinds) {
   const d = new Device(k.name, instance, { role: "guest" }, k.mode);
   const p = { ...k, d, id: null, look: null, acked: {}, texts: {} };

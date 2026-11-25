@@ -38,10 +38,10 @@ time counts, which is negligible.
 
 **Estimate.** A class with at least one polling device costs about 340 GB-s
 for a 45-minute lesson, so about 38 such classes a day. A device left polling
-on the final ranking adds up to `SLEEP_AFTER_MS` (45 min without a change of
-view), so about 680 GB-s and about 19 classes a day. Below the 33 classes a
-day that requests allow when every device polls. How often a class has a
-poller is not known.
+on the final ranking adds the five minutes before it rests (`REST_AFTER_MS`;
+`design/connections.md`, "A poller left alone rests"), about 40 GB-s, so
+about 34 classes a day, as many as the 33 that requests allow when every
+device polls. How often a class has a poller is not known.
 
 **How you'd know.** Daily duration in the Cloudflare dashboard, near 13,000
 GB-s. Classes with at least one poller and the seconds devices spent
@@ -49,20 +49,22 @@ polling, from telemetry (`GET /api/site/use`, `design/telemetry.md`).
 
 **Ideas, cheapest first:**
 
-- **Pollers dormant after 5 minutes, asleep after 45** (owner: adequate).
-  After 5 minutes without a change of view or the device's own input, a
-  poller stops holding polls and asks with short polls that the server
-  answers at once, about every 30 s. A short poll lets the object hibernate.
-  It costs about 2 requests a minute per dormant device (Function plus Durable
-  Object). A step after a long pause reaches the wall within 30 s, with no
-  tap. That matters for the wall in Screen-and-remote mode, which nobody
-  touches. Sleep with "Tap to continue" stays at 45 minutes. A dormant wall
-  on the final ranking keeps the ranking visible, since that's the photograph
-  moment. It takes back the time after the lesson: about 380 GB-s per class,
-  about 34 classes a day. The lesson itself stays.
 - **Short polls throughout.** No held polls at all: no duration, more
   requests, and a step reaches a poller a few seconds late. Trades the
   duration limit for the requests limit.
+- **The Function holds the poll, on a socket to the object.** The `/api`
+  Function waits out a poll on a WebSocket to the quiz's object, accepted
+  for hibernation as a device's is, so the object hibernates under its
+  pollers as under its sockets: a class with pollers would cost the
+  duration a WebSocket class does, the lesson included, and what the
+  object knows of a poller would lie with that socket rather than in
+  memory (`design/connections.md`, "A poller left alone rests"). Not
+  established: that an object whose socket ends in a Function is billed
+  as one whose socket ends in a browser, which a probe Worker would tell,
+  as on 2026-11-09; how it runs on the local stack. The cost: the poll's
+  path through `server/instance.ts` rewritten around sockets, and more
+  Cloudflare-specific code in the router for a school that converts the
+  server.
 - **One object for the whole site holding every class's polls.** Duration
   becomes a fixed cost: at most 0.125 GB × 24 h ≈ 10,800 GB-s a day, however
   many classes poll. The cost:
