@@ -306,6 +306,10 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 @container (max-width: 322px) {
   .dress .prow-t { max-width: calc(4 * var(--pick) + 3 * var(--gap)); margin-inline: auto; }
 }
+/* Narrower than a phone's own, as a split device's place can be: the six shapes in halves too. */
+@container (max-width: 285px) {
+  .dress .prow-b { max-width: calc(3 * var(--pick) + 2 * var(--gap)); margin-inline: auto; }
+}
 /* A changed look: the child sees which one on the wall is theirs. */
 @keyframes wiggle { 0% { transform: none; } 25% { transform: scale(1.12) rotate(-8deg); } 50% { transform: scale(1.12) rotate(8deg); } 75% { transform: scale(1.05) rotate(-4deg); } 100% { transform: none; } }
 .dress .hero.wiggle, .lobby .crowd .av.wiggle, .avatars > .wiggle { animation: wiggle .55s ease-out; }
@@ -321,22 +325,48 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
    three people are on the glass at once: nothing pinches, scrolls or calls up a menu. */
 body.shared { -webkit-touch-callout: none; }
 .play main.seats { flex-direction: row; height: 100vh; height: 100dvh; padding: 0; gap: 0; touch-action: none; }
+/* Two or three places in a window taller than wide: the page is drawn a quarter turn round, its top at the device's
+   right edge, so the places stand along the long side and the device is held sideways. Drawn only: the device's own
+   rotation is left as it is; one that rotates its screen when held sideways makes the window wider than tall, and the
+   page is drawn as it is. The body turns, so the bar along the top edge, the dot and the banner, fixed in it, turn
+   too; its own box, before the turn, is wider than the window, hence nothing scrolls. */
+@media (orientation: portrait) {
+  html:has(body.shared .seats > .seat + .seat) { overflow: hidden; }
+  body.shared:has(.seats > .seat + .seat) {
+    width: 100vh; width: 100dvh; height: 100vw; min-height: 0;
+    transform-origin: 0 0; transform: translateX(100vw) rotate(90deg);
+  }
+  body.shared:has(.seats > .seat + .seat) main.seats { height: 100%; min-height: 0; }
+}
 .seats > .seat { flex: 1 1 0; min-width: 0; position: relative; display: flex; overflow: hidden; container: seat / size; }
 .seats > .seat + .seat { border-left: 3px solid var(--rule); }
-.seat-body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
-.seat-close { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; padding: 9px; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--muted); }
+/* Room between the parts as the place allows: a third of a sideways phone has little to spare. */
+.seat-body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: clamp(6px, 3cqmin, 12px); gap: clamp(6px, 3cqmin, 12px); }
+/* Over the animal's side of the dressing, where nothing is pressed; a place is closable in the lobby only. */
+.seat-close { position: absolute; top: 8px; left: 8px; width: 40px; height: 40px; padding: 9px; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--muted); }
 .seat-close .icon { width: 100%; height: 100%; display: block; }
 .seat:not(.closable) > .seat-close { display: none; }
-.seat.closable .top { padding-right: 48px; }
 .addseat { flex: 0 0 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; border: 0; border-left: 3px dashed var(--rule); background: color-mix(in srgb, var(--fg) 4%, transparent); color: var(--muted); }
 .addseat .icon { width: 30px; height: 30px; }
 .seats .hero { width: min(52cqw, 44cqh); height: min(52cqw, 44cqh); }
 .seats .big { font-size: clamp(1.6rem, 9cqmin, 2.4rem); }
-.seats .ansbtn { font-size: clamp(1.1rem, 6cqmin, 2.4rem); min-height: 64px; }
-.seats .ansbtn .shape { width: clamp(36px, 12cqmin, 120px); height: clamp(36px, 12cqmin, 120px); }
+.seats .top { gap: clamp(6px, 3cqmin, 10px); font-size: clamp(1rem, 5.5cqmin, 1.2rem); }
+.seats .top .me { width: clamp(32px, 14cqmin, 48px); height: clamp(32px, 14cqmin, 48px); }
+.seats .top .timeup .icon { width: clamp(24px, 10cqmin, 32px); height: clamp(24px, 10cqmin, 32px); }
+.seats .clockbar { height: clamp(10px, 4cqmin, 16px); }
+.seats .ansbtn:not(.pic) { padding: clamp(6px, 3cqmin, 10px); gap: clamp(4px, 2cqmin, 8px); }
+/* The page doesn't scroll, so the answers share the place's room rather than taking what their text needs; the text
+   and its shape are set at the share of their size that fits (--fit, client/seat.ts), words whole until nothing fits. */
+.seats .buttons { min-height: 0; gap: clamp(6px, 3cqmin, 12px); }
+.seats .buttons:not(.pics) { grid-auto-rows: minmax(0, 1fr); }
+.seats .buttons:not(.pics):not(.squeezed) .ansbtn { overflow-wrap: normal; }
+.seats .ansbtn { font-size: calc(var(--fit, 1) * clamp(1.1rem, 6cqmin, 2.4rem)); min-height: 0; overflow: hidden; }
+.seats .ansbtn .shape { width: calc(var(--fit, 1) * clamp(36px, 12cqmin, 120px)); height: calc(var(--fit, 1) * clamp(36px, 12cqmin, 120px)); }
 .seats .verdict { width: 40cqmin; height: 40cqmin; }
 .seats .verdict-shape .shape { width: 12cqmin; height: 12cqmin; }
 .seats .dress .hero { width: min(44cqw, 58cqh); height: min(44cqw, 58cqh); }
+/* Laid out in a room larger than the place and shrunk into it (client/seat.ts, fitDress); position: the parts' offsets are measured against it. */
+.seats .dress { position: relative; transform-origin: 0 0; }
 @container seat (orientation: portrait) {
   .seats .dress { grid-template: "hero" auto "picker" auto "look" auto / 1fr; align-content: center; gap: 20px; }
   .seats .dress .hero { width: min(62cqw, 30cqh); height: min(62cqw, 30cqh); }

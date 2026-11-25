@@ -158,6 +158,23 @@ Situation:
 - The places size themselves by their column, with container units, which
   Safari has from 16. The owner: for a nice-to-have, Safari 16 may be its
   floor.
+- A place's room is fixed: the split page doesn't scroll (below), and a
+  place is a third of a tablet. What its answers need differs by question:
+  four answers near the format's length (80 characters before the check
+  warns, `quiz-format.md`) are taller than a third of a sideways iPad at
+  the size its column gives text, a German compound such as
+  "Kohlenstoffdioxidkonzentration" is wider than a third of an upright
+  one or of a sideways phone, and short answers leave room over.
+- Phones split too; the owner split a sideways Android. Sideways, a phone
+  leaves the page about 640–915 × 260–330 px beside its status bar and
+  Chrome's toolbar (plausible assumption, not measured on a device), and
+  half of that doesn't hold the dressing's 22 pictures at the 41 px a
+  phone's own menu gives them. The owner: a split screen may be forced to
+  landscape in what it shows, not by changing the device's settings; its
+  pictures may shrink to fit, and it may give less room to margins.
+- Split along a window's short side, places are slices: a third of an
+  upright phone is about 100 px wide. Along its long side two or three
+  places always come out squarer, whatever the window's proportions.
 - With it allowed, every device in the lobby shows the +, a phone too, and
   the browser remembers the choice (below): a laptop that had it on for one
   class has it on for the next, which may have a device each.
@@ -195,10 +212,22 @@ How the site meets it:
   reload. It is a new player beside the device's others (`newPlayer` with
   `beside`), joining only when the + is tapped, so no place stands on the
   wall empty. The class's caps are any device's.
+- **Two or three places are landscape**, so they stand along the long
+  side (Situation): in a window taller than wide the page is drawn a
+  quarter turn round, its top at the device's right edge, and the device
+  is held sideways (`body.shared` in `app.css`). Turned rather than
+  stacked in bands on the upright device, as a plausible assumption:
+  children sharing a device sit side by side, each in front of their
+  place. The device's own rotation is left alone; one that rotates its
+  screen makes the window wider than tall, where the page is drawn as it
+  is. One place with the + stays upright: once the teacher allows it
+  every device in the class shows the +, also one a child plays at alone.
+  A browser without `:has` (Firefox before 121) splits upright.
 - **In the lobby a × closes a place** while the device keeps a player in
   another, so closing places neither leaves it without one nor rerolls its
   animal. Its player is gone and the avatar free (`leaveSeat`,
-  `server/game.ts`).
+  `server/game.ts`). It stands at the place's top left, over the animal's
+  side of the dressing, where nothing is pressed.
 - **Under way the places stay as they are**, with neither + nor ×; the
   server takes neither then. A place without a player under way, turned
   away or its avatar picked back on another device, closes by itself.
@@ -219,9 +248,31 @@ How the site meets it:
   nothing; fingers down together on one element press it once. The split
   page doesn't pinch, scroll, call up a menu or lift a picture to drag. A
   device of its own, and a mouse, press by click as before.
-- **Sizes follow the column** (`.seats` in `app.css`): the dressing stacks
-  and text answers stand one under the other in a column taller than wide.
-  A browser without container units (Safari before 16) offers no + and
+- **Sizes follow the column** (`.seats` in `app.css`): the room between
+  the parts, the bar at the top and Last call's bar are smaller in a
+  smaller place.
+- **The dressing is shrunk into the place**: laid out as in a room larger
+  than the place, the animal above the pictures in a place taller than
+  wide and beside them otherwise, and scaled down into
+  it at the largest share at which it fits (`fitDress`, `client/seat.ts`),
+  its pictures, animal and gaps alike, its rows broken as in that room
+  (Dressing the avatar, below). On a sideways phone its pictures come out
+  at 25 to 38 px. It is made up to a tenth smaller where that keeps every
+  row free of a stray picture; in a few places beside the animal (two to
+  a phone about 340 to 380 px tall) a row keeps one.
+- **The answers share the place's room** rather than take what their text
+  needs. Text answers are set at the largest share of their column's size
+  at which each fits its button with its words whole, shape and text alike
+  (`fitTextButtons`, `client/seat.ts`): one under the other in a column
+  taller than wide and two by two otherwise, unless the other way keeps
+  the text larger by more than 0.03. Below half the column's size words
+  break, and an answer still too long is cut at its button's edge; its
+  shape and colour stay, and the wall shows it whole. Picture answers are
+  arranged as on a device of its own (`pictures.md`, "The students'
+  devices"). Answers and dressing are laid out again when the room
+  changes: a device turned, a place added, closed or closing by itself
+  under way.
+- A browser without container units (Safari before 16) offers no + and
   plays one place.
 
 ### What each screen shows
@@ -437,7 +488,8 @@ What it is (`shared/looks.ts`, `client/look.ts`):
   so the menu is four lines and Start stays on the first screen of a 360 by
   640 phone. At 320 px the tools break four and three, and the menu and the
   avatar still fit a 320 by 568 screen without scrolling (`.dress` in
-  `app.css`, by the picker's own width).
+  `app.css`, by the picker's own width). Narrower still, as a split
+  device's place can be, the shapes break three and three.
 - The server holds the class's looks in memory, sends the screens the
   looks changed at most once per `LOOK_SHOW_MS` (1 s), and writes them when
   the first question comes (`open-period-in-memory.md`), so the cost of a
@@ -585,10 +637,16 @@ added, and some teachers want to photograph it. So it has its own screen
   five-finger gestures that leave Safari (on by default, Settings,
   Multitasking & Gestures); the columns judged headless only, three at
   768 × 1024, 1024 × 768 and 1180 × 820; whether three side by side at one
-  9.7" iPad works, and an upright iPad's columns of 256 px; whether pupils
+  9.7" iPad works; whether children turn a device when its page turns,
+  and which way round they hold one whose rotation is locked; whether pupils
   misuse adding and closing places (user testing, the owner); whether
   neighbours copying each other's tile matters in a practice quiz; whether
-  a teacher says what the + does.
+  a teacher says what the + does; how small a child still reads an answer
+  in a place (half its column's size, 9 px in a third of a sideways phone,
+  before words break) and presses a dressing picture (25 to 38 px on a
+  sideways phone), and whether answers changing between one column and
+  two from question to question surprise anyone there. The sideways
+  phones' sizes are assumed, and judged headless only.
 - Whether children dress at all, and whether teachers wait for it; whether the
   shapes help a child find their avatar from the back row.
 - Whether Start's time is seen where nobody announces it: a child or a

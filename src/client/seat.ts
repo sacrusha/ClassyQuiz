@@ -97,10 +97,15 @@ export class Seat {
   /** A join or a pick on its way, and what a close waits on for its player (close). */
   private joining: Promise<Ack> | null = null;
   private welcomed: (() => void) | null = null;
+  /** A split device's place has a room of its own, which changes when a tablet turns or a place is added or closed. */
+  private resizer = new ResizeObserver(() => {
+    if (this.root.closest(".seats")) this.layOut();
+  });
 
   constructor(ctx: SeatContext) {
     this.ctx = ctx;
     this.root = ctx.root;
+    this.resizer.observe(this.root);
     const saved = ctx.teacher ? null : store.get<Saved>(this.key());
     if (saved && saved.instance === ctx.instance) this.auth = { role: "player", token: saved.token };
     this.order = this.token ? (saved?.at ?? ctx.slot) : Date.now();
@@ -142,6 +147,7 @@ export class Seat {
   async close(): Promise<void> {
     if (this.closed) return;
     this.closed = true;
+    this.resizer.disconnect();
     clearInterval(this.tickTimer);
     clearTimeout(this.outTimer);
     const line = this.line;
@@ -161,6 +167,28 @@ export class Seat {
     const nodes = [...this.root.childNodes];
     this.root = root;
     root.replaceChildren(...nodes);
+    this.resizer.disconnect();
+    this.resizer.observe(root);
+    // Joined again (a place closing by itself under way): what it shows takes the page's own layout. Split, the
+    // observer's first call fits it to the new place.
+    if (!root.closest(".seats")) this.layOut();
+  }
+
+  /**
+   * What the place shows, laid out in the room it has: the answers'
+   * pictures by their shape; split, text answers that fit and the dressing
+   * shrunk into the place, otherwise both as the stylesheet sets them.
+   */
+  private layOut(): void {
+    // A place being added is drawn before it stands on the page; the observer lays it out once it does.
+    if (!this.root.isConnected) return;
+    const split = !!this.root.closest(".seats");
+    const box = this.root.querySelector<HTMLElement>(".buttons");
+    const pics = this.view?.question?.pics;
+    if (box && pics) arrangePictureButtons(box, pics);
+    else if (box) (split ? fitTextButtons : unfitTextButtons)(box);
+    const dress = this.root.querySelector<HTMLElement>(".dress");
+    if (dress) (split ? fitDress : unfitDress)(dress);
   }
 
   private onMessage(m: ServerMessage): void {
@@ -511,7 +539,7 @@ export class Seat {
           })
           .join("")}
       </div>`;
-      if (pics) arrangePictureButtons(root.querySelector<HTMLElement>(".buttons")!, pics);
+      this.layOut();
       if (out) {
         // Locked in, the spread on the wall: look up. Otherwise Last call ran out here.
         root.querySelector(".top")?.insertAdjacentHTML("beforeend", q.votes ? `<span class="timeup look">${ICON.eye}</span>` : `<span class="timeup">${ICON.timer}</span>`);
@@ -588,6 +616,7 @@ export class Seat {
       </div>`;
       box = this.root.querySelector<HTMLElement>(".dress")!;
       box.querySelectorAll<HTMLButtonElement>(".pick").forEach((btn) => onTap(btn, () => this.pick(btn)));
+      this.layOut();
     }
     const hero = box.querySelector<HTMLElement>(".hero")!;
     const key = lookKey(shown);
@@ -671,6 +700,7 @@ function packImg(p: PackPic): string {
  * arriving doesn't push the buttons around.
  */
 function arrangePictureButtons(box: HTMLElement, pics: (PackPic | null)[]): void {
+  box.style.height = "";
   const W = box.clientWidth;
   const H = box.clientHeight;
   box.style.height = `${H}px`;
@@ -697,4 +727,128 @@ function arrangePictureButtons(box: HTMLElement, pics: (PackPic | null)[]): void
     b.classList.remove("row", "col");
     b.classList.add(g.orient);
   });
+}
+
+/** Text answers as the stylesheet sets them. */
+function unfitTextButtons(box: HTMLElement): void {
+  box.classList.remove("squeezed");
+  box.style.gridTemplateColumns = "";
+  box.style.removeProperty("--fit");
+}
+
+/** How far a split place's text answers shrink against the size its column gives them before words break instead. */
+const FIT_MIN = 0.5;
+/** The other column count is taken only when it lets the text be larger by more than this. */
+const FAMILIAR = 0.03;
+
+/**
+ * Text answers in a split device's place (docs/design/class-and-wall.md,
+ * "Sharing a device"): the place doesn't scroll, so the buttons share its
+ * room (app.css, `.seats`) and their text and shape are set at the largest
+ * share of their size (`--fit`) at which every answer fits its button
+ * without breaking a word, in the stylesheet's column count or the other,
+ * whichever keeps it larger.
+ */
+function fitTextButtons(box: HTMLElement): void {
+  unfitTextButtons(box);
+  const given = getComputedStyle(box).gridTemplateColumns.split(" ").length;
+  // Lines taller than the button, or a word wider than it.
+  const spills = () => [...box.children].some((b) => b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1);
+  const set = (cols: number, f: number) => {
+    box.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+    box.style.setProperty("--fit", `${f}`);
+  };
+  // The largest share at which the answers fit; null where they don't even at FIT_MIN.
+  const fit = (cols: number): number | null => {
+    set(cols, 1);
+    if (!spills()) return 1;
+    set(cols, FIT_MIN);
+    if (spills()) return null;
+    let lo = FIT_MIN;
+    let hi = 1;
+    for (let i = 0; i < 6; i++) {
+      const mid = (lo + hi) / 2;
+      set(cols, mid);
+      if (spills()) hi = mid;
+      else lo = mid;
+    }
+    return lo;
+  };
+  const other = given === 1 ? 2 : 1;
+  const atGiven = fit(given);
+  const atOther = atGiven !== 1 && box.children.length > 1 ? fit(other) : null;
+  if (atOther !== null && (atGiven === null || atOther > atGiven + FAMILIAR)) set(other, atOther);
+  else if (atGiven !== null) set(given, atGiven);
+  else {
+    // Words break, at the smallest size so as few as can, in the stylesheet's column count unless only the other
+    // holds them. What is too tall even then is cut at the button's edge; its shape and colour stay.
+    box.classList.add("squeezed");
+    set(given, FIT_MIN);
+    if (spills() && box.children.length > 1) {
+      set(other, FIT_MIN);
+      if (spills()) set(given, FIT_MIN);
+    }
+  }
+}
+
+/** How far the dressing shrinks into a split device's place at most. */
+const DRESS_MIN = 0.3;
+/** The share of the size that fits it may shrink further to, so that no row breaks into a full line and a stray picture. */
+const WHOLE_ROWS = 0.9;
+
+/** The dressing at the page's own size, as a device of its own has it. */
+function unfitDress(dress: HTMLElement): void {
+  dress.style.flex = dress.style.width = dress.style.height = dress.style.transform = "";
+}
+
+/**
+ * The dressing in a split device's place (docs/design/class-and-wall.md,
+ * "Sharing a device"): laid out in a room 1/f the size of the place and
+ * shrunk by f into it, at the largest f at which its parts fit that room,
+ * so the pictures, the animal and the room between them shrink alike and the
+ * menu breaks its rows as it does in a room that size. The menu's breaks are
+ * tuned to the widths a device's own picker has (app.css, `.dress .prow`);
+ * a place's picker can fall between them, so f is made a little smaller
+ * where that keeps a row from a stray picture.
+ */
+function fitDress(dress: HTMLElement): void {
+  unfitDress(dress);
+  const room = dress.parentElement!;
+  const cs = getComputedStyle(room);
+  const W = room.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const H = room.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  // Layout boxes, not what is drawn, so an animal's wiggle doesn't count.
+  const spills = () =>
+    ([...dress.children] as HTMLElement[]).some(
+      (c) => c.offsetTop < -1 || c.offsetLeft < -1 || c.offsetTop + c.offsetHeight > dress.clientHeight + 1 || c.offsetLeft + c.offsetWidth > dress.clientWidth + 1,
+    );
+  const strays = () =>
+    [...dress.querySelectorAll(".prow")].some((r) => {
+      const k = r.children as HTMLCollectionOf<HTMLElement>;
+      return k.length > 2 && k[k.length - 1].offsetTop !== k[k.length - 2].offsetTop;
+    });
+  const set = (f: number) => {
+    dress.style.flex = "none";
+    dress.style.width = `${W / f}px`;
+    dress.style.height = `${H / f}px`;
+    dress.style.transform = f < 1 ? `scale(${f})` : "";
+  };
+  let fit = 1;
+  set(1);
+  if (spills()) {
+    let lo = DRESS_MIN;
+    let hi = 1;
+    for (let i = 0; i < 7; i++) {
+      const mid = (lo + hi) / 2;
+      set(mid);
+      if (spills()) hi = mid;
+      else lo = mid;
+    }
+    fit = lo;
+  }
+  for (let f = fit; f >= fit * WHOLE_ROWS; f *= 0.98) {
+    set(f);
+    if (!spills() && !strays()) return;
+  }
+  set(fit);
 }
