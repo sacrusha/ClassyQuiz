@@ -1,6 +1,6 @@
 // The landing block's words in the four languages it speaks (docs/design/root-page.md,
-// "Languages"): everything above About. The static HTML is English, so an AI's fetcher
-// reads English; home.ts swaps these in. About and below is English: it is
+// "Languages"): everything above the manual, About included. The static HTML is English, so an
+// AI's fetcher reads English; home.ts swaps these in. The manual is English: it is
 // for the AI. The pages a quiz then plays on speak the language chosen here
 // (client/room-text.ts).
 //
@@ -63,6 +63,12 @@ export interface Text extends SiteWords {
   size: (bytes: number) => string;
   /** The film's heading, where it stands for whoever wants to find out more. */
   filmH: string;
+  /** About, the last part for people (docs/design/root-page.md, "Where the part for people ends"): its heading and what the site is. */
+  aboutH: string;
+  about: string;
+  /** About's last line, one link to graculus.ch: the words before and after the maker's name, Graculus (docs/design/identity.md, "The maker's name"). */
+  madeBy: string;
+  madeFor: string;
   /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
   capSheet: string;
   capAi: string;
@@ -147,6 +153,10 @@ const en: Text = {
   download: "Download",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1)} MB`),
   filmH: "From the exercise sheet to the class playing, in one minute",
+  aboutH: "About classyQuiz",
+  about: "classyQuiz is an open-source site for playing quizzes under the MIT license: run for a class or another group on a big screen, played among friends on their own devices, or played on your own. It is designed for your own AI assistant, to make the quiz from your instructions and material, such as exercise sheets or notes, allowing for time saved and for quizzes whose answers can stay a surprise, alone or with friends.",
+  madeBy: "classyQuiz is made by",
+  madeFor: ", personal training in instructing AI.",
   capSheet: "Your exercise sheets",
   capAi: "Your AI",
   capZip: "The .zip, opened here",
@@ -230,6 +240,10 @@ const de: Text = {
   download: "Herunterladen",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`),
   filmH: "Vom Arbeitsblatt zum Quiz in der Klasse, in einer Minute",
+  aboutH: "Über classyQuiz",
+  about: "classyQuiz ist eine Open-Source-Website zum Quizspielen, unter der MIT-Lizenz: für eine Klasse oder eine andere Gruppe auf einem Grossbildschirm geleitet, unter Freunden auf den eigenen Geräten oder allein. Die Website ist für deine eigene KI gemacht, die das Quiz aus deinen Anweisungen und deinem Material macht, etwa aus Arbeitsblättern oder Notizen. Das spart Zeit, und allein oder unter Freunden können die Lösungen eine Überraschung bleiben.",
+  madeBy: "classyQuiz ist von",
+  madeFor: ". Persönliches Training: KI instruieren.",
   capSheet: "Deine Arbeitsblätter",
   capAi: "Deine KI",
   capZip: "Die .zip-Datei, hier geöffnet",
@@ -318,6 +332,10 @@ const fr: Text = {
   download: "Télécharger",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} Ko` : `${(n / 1048576).toFixed(1).replace(".", ",")} Mo`),
   filmH: "De la fiche d'exercices à la classe qui joue, en une minute",
+  aboutH: "À propos de classyQuiz",
+  about: "classyQuiz est un site open source sous licence MIT pour jouer à des quiz : animés pour une classe ou un autre groupe sur grand écran, entre amis sur leurs propres appareils, ou en solo. Le site est conçu pour votre propre IA, qui crée le quiz à partir de vos instructions et de vos documents, comme des fiches d'exercices ou des notes de cours. Cela fait gagner du temps, et en solo ou entre amis, les réponses peuvent rester une surprise.",
+  madeBy: "classyQuiz est réalisé par",
+  madeFor: ", formation individuelle pour instruire l'IA.",
   capSheet: "Vos fiches d'exercices",
   capAi: "Votre IA",
   capZip: "Le .zip, ouvert ici",
@@ -406,6 +424,10 @@ const it: Text = {
   download: "Scarica",
   size: (n) => (n < 1048576 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1).replace(".", ",")} MB`),
   filmH: "Dalla scheda alla classe che gioca, in un minuto",
+  aboutH: "Informazioni su classyQuiz",
+  about: "classyQuiz è un sito open source con licenza MIT per giocare ai quiz: condotti per una classe o un altro gruppo su schermo grande, tra amici sui propri dispositivi, o per conto tuo. Il sito è pensato per la tua IA, che crea il quiz dalle tue istruzioni e dal tuo materiale, come schede o appunti. Così risparmi tempo, e per conto tuo o tra amici le risposte possono restare una sorpresa.",
+  madeBy: "classyQuiz è realizzato da",
+  madeFor: ", formazione individuale per istruire l'IA.",
   capSheet: "Le tue schede",
   capAi: "La tua IA",
   capZip: "Il file .zip, aperto qui",

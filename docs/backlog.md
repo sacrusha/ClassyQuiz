@@ -649,8 +649,7 @@ deployed to the public site.
       on the check's cards, where the way is chosen, and "The .zip is your
       lasting copy.", said nowhere else, joined it there:
       `design/local-check.md`, "The check"). Not said on the page for
-      people: that playing costs nothing, and that the code is open, which
-      only the guidance says, in English. The file's download is on the
+      people: that playing costs nothing. The file's download is on the
       file itself (the design's least surprise, a press on a file downloads
       it; `design/root-page.md`, "Getting a quiz"). The first heading takes
       three lines on a phone in every language, since it says who plays.
@@ -717,6 +716,18 @@ donations could pay for hosting off it instead (`scaling-drawer.md`,
    poller left alone rests"). Open: the
    lifetime of a lobby left waiting, and the stored bytes against a wave of
    looks at the room.
+
+## Graculus's teaching material
+
+classyQuiz serves the owner's Graculus as teaching material, with the
+association visible and a way back to graculus.ch (the owner's purpose:
+`design/identity.md`, "The maker's name").
+
+1. **The maker's name on the root page** — built: About classyQuiz closes
+   the part for people, in the visitor's language, with one line to
+   graculus.ch (`design/root-page.md`, "Where the part for people ends").
+   Open: the German, French and Italian are drafts
+   (`translation-review.md`).
 
 ## Later — Paper and memory
 

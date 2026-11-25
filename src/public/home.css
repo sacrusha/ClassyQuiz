@@ -205,3 +205,11 @@ html:has(.cqf-fs) { overflow: hidden; }
 @media (max-width: 440px) { .resume { grid-template-columns: 1fr; } .resume .back { grid-row: auto; justify-self: start; margin: 5px 0 1px; } }
 
 .landing .sec, .guide { margin: 2.6rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); }
+.guide h1 { font-size: var(--h2); margin-bottom: .5rem; }
+
+/* About's last line: who makes the site (identity.md, "The maker's name"). */
+.maker a { color: var(--muted); text-decoration: none; }
+.maker b { color: var(--fg); }
+.maker .go { color: var(--accent); font-weight: 600; white-space: nowrap; }
+.maker a:hover .go, .maker a:focus-visible .go { text-decoration: underline; }
+.maker .bird svg { height: 1.3em; width: auto; vertical-align: -.3em; margin-right: .35em; }

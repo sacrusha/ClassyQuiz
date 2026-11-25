@@ -90,8 +90,8 @@ has to live with in particular:
 From top to bottom, the part for people is: the header with the code box; a
 quiz to come back to, on a device that has one; the sentence that says what
 this is and who plays; two numbered steps, asking an AI for a quiz and
-opening the file it made; and, below the first screen, the film. The
-guidance for AIs follows.
+opening the file it made; and, below the first screen, the film and About
+classyQuiz. The guidance for AIs follows.
 
 Each thing stands once, where the visitor needs it (backlog, "The page for
 people: dense, not busy"). The first screen shows what you say and what you
@@ -152,7 +152,8 @@ light in dark mode, as a screenshot of the site would.
 ### One page, two readers
 
 An AI that is told the site's name fetches the whole page. The part for
-people is above "About classyQuiz"; from there on it is the guidance.
+people runs through "About classyQuiz"; from the manual's heading (`#site`)
+on it is the guidance.
 
 Parts that must not read as text for an AI are added by the script and are
 not in the HTML:
@@ -170,7 +171,8 @@ with its file's name and size. The tabs' names stay in the HTML, because
 they say what an ask can start from, as the guidance does.
 
 The page has two first-level headings, one for each reader: the sentence
-for people and "About classyQuiz".
+for people and the manual's heading, kept at a second-level heading's size
+because it is long.
 
 ### What this is
 
@@ -359,7 +361,7 @@ page decides about it:
   read.
 - **Every language shows the same quiz.** The owner: the safest, since
   wrong answers in several different examples would linger.
-- **Nothing links from under the film.** Each example's page is linked
+- **No example is linked from under the film.** Each example's page is linked
   beside its file, where the visitor who wants it already is.
 
 ### Languages
@@ -517,11 +519,15 @@ How long a quiz stays resumable: `hosting-and-limits.md`.
 Purpose (backlog v6 item 1f): a person knows that what follows is the
 manual for AIs, so the guidance doesn't read as a second page joined on.
 
-The part for people ends with the film. The manual follows on the same
-ground and the same edge, and its headings say what it is: "About
-classyQuiz", then "The manual, for AIs and for people who like to get their
-hands dirty". A person is welcome to read it; for people it only has to
-show that there are no secrets (`guidance-page.md`). A tinted band would
+The part for people ends with About classyQuiz, after the film: what the
+site is, in the visitor's language, and who makes it (`identity.md`, "The
+maker's name"). What the site is speaks to the visitor, so About belongs to
+their part, not to the manual (the owner). Its English follows the part's
+words ("Words for whoever comes"). The manual follows on the same ground
+and the same edge, and its heading says what it is: "The manual to build
+quizzes, for AIs and for people who like to get their hands dirty". A
+person is welcome to read it; for people it only has to show that there
+are no secrets (`guidance-page.md`). A tinted band would
 mark the second reader and make the guidance read as a second page.
 
 What a person may want to rely on before trying is said where it applies,
@@ -534,8 +540,8 @@ not in a section of its own (backlog, "The page for people", item 2a):
 - that no account is needed: nothing on the page asks for one (the owner:
   no sign-up is obvious).
 
-Not said in the part for people: that playing costs nothing, and that the
-code is open. The guidance says the second, in English.
+Not said in the part for people: that playing costs nothing. That the code
+is open is About's first sentence.
 
 ### The own copy
 

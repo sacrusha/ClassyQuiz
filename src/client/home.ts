@@ -229,7 +229,7 @@ function playExample(ex: Example, zip: HTMLElement): void {
   } else fly();
 }
 
-/** The part for people, everything above About, in language `l`. */
+/** The part for people, everything above the manual, in language `l`. */
 function apply(l: Lang): void {
   lang = l;
   t = TEXT[l];

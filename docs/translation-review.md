@@ -123,6 +123,12 @@ For the read:
   zurückkommt" where "die sie zurückschickt" could be the message. A quiz that is too long names
   the limit as a limit, in English too: "longer than the site takes (at most N KB)".
 - **Italian** has no native reader on the project (`design/root-page.md`, Not known).
+- **About and the maker's line**: German "zum Quizspielen", which avoids the plural; "für eine
+  Klasse … geleitet" with no quizmaster named, which would be gendered. French "notes de cours",
+  as on its tab. Italian "per conto tuo", not "da solo", which is gendered. The
+  maker's line: German takes graculus.ch's German line, "Persönliches Training: KI instruieren.";
+  French "formation individuelle pour instruire l'IA" and Italian "formazione individuale per
+  istruire l'IA" have no Graculus original.
 
 The first screen's words are held to its room: at 360 × 640 the button that opens a file has
 19 px to spare in French and Italian on the first tab, and the tab row 3 px in German

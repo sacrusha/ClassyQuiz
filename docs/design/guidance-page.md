@@ -3,7 +3,7 @@
 ## Purpose
 
 The guidance is the part of the root page (`src/public/index.html`, from the
-heading "About classyQuiz" on) that an AI reads. Someone who wants a quiz
+manual's heading, `#site`, on) that an AI reads. Someone who wants a quiz
 names the site to their own AI, and that must be enough: the AI comes away
 understanding what the site is for, how its quizzes are played, how a quiz is
 built, and how to build one with a human (backlog v1 item 11). That someone is
@@ -177,7 +177,7 @@ which keeps the specification and the parser in step.
 The root URL serves the guidance as static HTML that reads without
 JavaScript; the landing's language switch (`design/root-page.md`) is a script
 over an English block, so a fetcher reads English. The guidance runs from
-"About classyQuiz" through the manual (`#site`), what informs the shape of the
+the manual (`#site`) through what informs the shape of the
 quizzes (`#quizzes`), the format (`#format`) and "How to build with the
 user" (`#with-the-user`, with `#presenting`). The first two
 sections carry the FAQ-kind information (the ways to play, how a room runs,
