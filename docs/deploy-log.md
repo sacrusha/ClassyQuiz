@@ -8,10 +8,10 @@ holds live. Each deploy's contents and checks are in this file's history
 
 ## Live
 
-- Commit 721f33f, deployed 2026-11-19: Pages deployment 9b96ae67 of the
-  project `classyquiz`, version d0f66a7b of the state Worker
+- Commit c56a7fc, deployed 2026-11-25: Pages deployment 5582ec12 of the
+  project `classyquiz`, version 80fbf97d of the state Worker
   `classyquiz-state`. What the repo has that isn't live:
-  `git diff 721f33f -- src/`.
+  `git diff c56a7fc -- src/`.
 - Cloudflare's Free plan, on an account whose limits are shared with other
   projects on it.
 - Set on the live Pages project, not in the repo: `OWNER_KEY`
@@ -65,6 +65,14 @@ changed what it covered.
   site; the Test example's `.zip` and face, and `/example?ex=test`,
   answering, the mock's `.zip`s 404; on the deployment's address and on
   the production one (2026-11-19, 721f33f).
+- A shared device (`design/class-and-wall.md`, "Sharing a device") in
+  headless Edge with touch emulation at 1024x768, over WebSocket, two
+  probe-marked quizzes: the check's switch, three places of one animal
+  added and one closed and added again in the lobby, two overlapping
+  touches pressing two places, no + or × under way and the server refusing
+  both, a reload bringing the three back, an unshared quiz's phone
+  unchanged; on the deployment's address; the production one served the
+  same `play.js`, `screen.js` and `app.css` (2026-11-25, c56a7fc).
 
 ## Not tried live
 
@@ -98,6 +106,9 @@ changed what it covered.
 - An own copy set up end to end by the routes on `/own-copy`.
 - Since 44ee213: the owner's page with the key, and on a phone; a lobby
   left to lapse (`LOBBY_WAIT_MS`).
+- Since c56a7fc: a shared device on a real iPad or any real tablet, on
+  long-poll, at other sizes, and the Remote's switch and a browser's
+  remembered choice (all on a local stack only).
 - Since 2aa154c: a `.txt` or `.md` quiz and a `.zip` named `.quiz` opened
   on the live site (in headless Edge on the built site only), and on a
   phone whose extractor takes a `.zip`.
