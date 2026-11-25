@@ -317,8 +317,8 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .offline-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); background: #2b2b2b; color: #fff; border-radius: 999px; padding: 6px 14px; display: flex; gap: 8px; align-items: center; z-index: 10; max-width: calc(100vw - 32px); box-sizing: border-box; }
 
 /* A device the class shares (docs/design/class-and-wall.md, "Sharing a device"): a column per place, each sized by
-   its own room, not the window's; a + along the edge for one more; a × on each place while another stays. Hands of
-   two or three people are on the glass at once: nothing pinches, scrolls or calls up a menu. */
+   its own room, not the window's; in the lobby a + along the edge for one more and a × on each place. Hands of two or
+   three people are on the glass at once: nothing pinches, scrolls or calls up a menu. */
 body.shared { -webkit-touch-callout: none; }
 .play main.seats { flex-direction: row; height: 100vh; height: 100dvh; padding: 0; gap: 0; touch-action: none; }
 .seats > .seat { flex: 1 1 0; min-width: 0; position: relative; display: flex; overflow: hidden; container: seat / size; }
@@ -337,10 +337,6 @@ body.shared { -webkit-touch-callout: none; }
 .seats .verdict { width: 40cqmin; height: 40cqmin; }
 .seats .verdict-shape .shape { width: 12cqmin; height: 12cqmin; }
 .seats .dress .hero { width: min(44cqw, 58cqh); height: min(44cqw, 58cqh); }
-/* Many avatars away: the choice scrolls up and down within its column, the one thing on a shared page that does. */
-.seats .center { min-height: 0; }
-.seats .choose { max-height: 100%; overflow-y: auto; touch-action: pan-y; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
-.seat.closable .choose { margin-top: 44px; max-height: calc(100% - 44px); }
 @container seat (orientation: portrait) {
   .seats .dress { grid-template: "hero" auto "picker" auto "look" auto / 1fr; align-content: center; gap: 20px; }
   .seats .dress .hero { width: min(62cqw, 30cqh); height: min(62cqw, 30cqh); }

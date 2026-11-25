@@ -285,16 +285,16 @@ export function doorOpen(run: Run, now: number): boolean {
 
 /**
  * beside: a player at the device the new one shares (docs/design/class-and-wall.md,
- * "Sharing a device"), only while the teacher allows sharing and at most
- * MAX_SEATS to a device; the door and the class's caps are the same as for
- * a device of its own.
+ * "Sharing a device"), only in the lobby, while the teacher allows sharing,
+ * and at most MAX_SEATS to a device; the class's caps are the same as for a
+ * device of its own.
  */
 export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number, beside?: Player): Player {
   const run = needRun(g);
   if (run.phase === "final") throw new GameError("This quiz has finished.");
   if (run.waiting) throw new GameError(CLASS_WAITING);
   const device = beside ? deviceOf(beside) : undefined;
-  if (beside && (!run.share || run.peers || beside.removed || seatsAt(run, device!) >= MAX_SEATS)) throw new GameError("not allowed");
+  if (beside && (run.phase !== "lobby" || !run.share || run.peers || beside.removed || seatsAt(run, device!) >= MAX_SEATS)) throw new GameError("not allowed");
   const all = Object.values(run.players);
   if (all.length >= MAX_PLAYERS) throw new GameError(CLASS_FULL);
   const late = !doorOpen(run, now);
@@ -340,24 +340,21 @@ function seatAvatar(run: Run, beside: Player): Avatar | null {
   return c === undefined ? null : { a: animal, c };
 }
 
-/** Devices shared, the teacher's switch on the check. */
 export function setShare(g: Game, on: boolean): void {
   needRun(g).share = on;
 }
 
 /**
- * A player closes their place at a shared device. Before the start there
- * is nothing of theirs to keep, so they are gone and their avatar free;
- * after it they keep their score and are away (the instance stops hearing
- * them), to be picked back. "gone" or "kept"; "refused" for a removed avatar.
+ * A player closes their place at a shared device, in the lobby only: there
+ * is nothing of theirs to keep, so they are gone and their avatar free.
+ * False when refused.
  */
-export function leaveSeat(g: Game, id: string): "gone" | "kept" | "refused" {
+export function leaveSeat(g: Game, id: string): boolean {
   const run = needRun(g);
   const p = playerById(run, id);
-  if (!p || p.removed || run.peers) return "refused";
-  if (run.phase !== "lobby") return "kept";
+  if (!p || p.removed || run.peers || run.phase !== "lobby") return false;
   delete run.players[id];
-  return "gone";
+  return true;
 }
 
 /**

@@ -1,8 +1,6 @@
 // A press on a device several players share (docs/design/class-and-wall.md,
-// "Sharing a device"). A browser makes a click only from a lone touch: a
-// neighbour's finger on the glass at the same moment would swallow the press
-// or start a pinch. There each finger's own lift inside the element presses
-// it. The click a lift may still bring is dropped page-wide, not only on its
+// "Sharing a device"): each finger's own lift inside the element presses it.
+// The click a lift may still bring is dropped page-wide, not only on its
 // element: a press that closes a place moves the others under the finger,
 // and the click would land on whatever is there now. Elsewhere the click
 // alone presses, as it always did.

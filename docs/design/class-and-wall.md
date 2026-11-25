@@ -147,6 +147,14 @@ Situation:
   closing places (the owner).
 - A place nobody sits at would hold up Last call's early close and stand
   on the wall (Coming back, above).
+- Adding or closing a place while a question is up resizes every column
+  under the others' fingers, and the + sits beside the rightmost column's
+  answers: the owner, high risk for low reward. What it would serve under
+  way has a way round: a latecomer plays with a neighbour as one player; a
+  dead shared device's players find at most the room the others' places
+  leave (6 × 3 = 18 places for 16); for a place whose person left, Last
+  call closes answering after its 15 s, as for a tablet of its own left on
+  a desk.
 - The places size themselves by their column, with container units, which
   Safari has from 16. The owner: for a nice-to-have, Safari 16 may be its
   floor.
@@ -162,40 +170,31 @@ How the site meets it:
   short lesson after lesson). Off, no device offers a place; places
   already there stay.
 - **A player's device splits** (`client/play.ts`): its place becomes a
-  column, with a + along the edge that adds another, up to `MAX_SEATS` (3,
-  `shared/limits.ts`). No words: a + and a person. A new column stands at
-  the end, beside the +, and keeps its place across a reload. It is a new
-  player beside the device's others (`newPlayer` with `beside`), joining
-  only when the + is tapped, so no place stands on the wall empty. Under
-  way it offers the avatars whose devices are away, scrolling when they
-  don't fit the column, as any device without a player does. The door and
-  the class's caps are any device's.
-- **A × closes a place** while the device keeps a player in another, so
-  closing places neither leaves it without one nor rerolls its animal; not
-  at the final
-  ranking, where a place only shows how its player did. Before the start
-  its player is gone and the avatar free; after it the player keeps their
-  score and is away at once, not after `FRESH_MS`, to be picked back
-  (`leaveSeat`, `server/game.ts`).
-- **One animal per device**, each place in its own colour: the same animal
-  as the device's other players, so adding and closing places rerolls no
-  animal; the colour from a family the device doesn't wear yet (yellow;
-  blue, navy and purple; red and pink; teal and green), the first free in a
-  fixed order, so a place closed and added again comes back with the avatar
-  it had, and three players of one animal stay apart for most colour-blind
-  eyes (`seatAvatar`). On the wall a shared device reads as one animal in
-  up to three colours; the first dozen devices, not players, differ by
-  animal.
-- **Each place has its own line** and keeps its player under its own key
-  (`seatKey`, `client/dom.ts`; `client/seat.ts`), so a reload brings every
-  place back. The page's dot and offline banner show the worst of its
-  lines; its places sleep and wake together (`connections.md`, "Devices
-  left on").
+  column, and in the lobby a + along the edge adds another, up to
+  `MAX_SEATS` (3, `shared/limits.ts`). No words: a + and a person. A new
+  column stands at the end, beside the +, and keeps its place across a
+  reload. It is a new player beside the device's others (`newPlayer` with
+  `beside`), joining only when the + is tapped, so no place stands on the
+  wall empty. The class's caps are any device's.
+- **In the lobby a × closes a place** while the device keeps a player in
+  another, so closing places neither leaves it without one nor rerolls its
+  animal. Its player is gone and the avatar free (`leaveSeat`,
+  `server/game.ts`).
+- **Under way the places stay as they are**, with neither + nor ×; the
+  server takes neither then. A place without a player under way, turned
+  away or its avatar picked back on another device, closes by itself.
+- **One animal per device**, so adding and closing places rerolls no
+  animal; each place's colour from a family the device doesn't wear yet,
+  in a fixed order, so a place added again comes back as it was and three
+  of one animal stay apart for colour-blind eyes too (`seatAvatar`). On the
+  wall a shared device is one animal in up to three colours; the first
+  dozen devices, not players, differ by animal.
+- **Each place has its own line and player** (`client/seat.ts`), so a
+  reload brings every place back; the page's places sleep and wake
+  together (`connections.md`, "Devices left on").
 - **Every finger presses for itself** while the page is split
-  (`client/tap.ts`): a finger's lift inside a button presses it, and the
-  click that may follow is dropped page-wide, since closing a place moves
-  another under the finger. The split page doesn't pinch, scroll or call up
-  a menu. A device of its own presses by click as before.
+  (`client/tap.ts`), and the split page doesn't pinch, scroll or call up a
+  menu. A device of its own presses by click as before.
 - **Sizes follow the column** (`.seats` in `app.css`): the dressing stacks
   and text answers stand one under the other in a column taller than wide.
   A browser without container units (Safari before 16) offers no + and

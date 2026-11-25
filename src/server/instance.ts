@@ -176,12 +176,6 @@ export class Instance extends DurableObject<Env> {
   /** Last poll per player id, or per "screen:<token>" / "remote:<token>". */
   private lastPoll = new Map<string, number>();
   /**
-   * Players whose place at a shared device closed once the quiz was under
-   * way: away at once, so a poll of theirs still held as they left doesn't
-   * count them as heard. Picked back, they are heard again.
-   */
-  private left = new Set<string>();
-  /**
    * What each student device was last sent. A student's view only changes
    * with their own answer or the teacher's steps, not with classmates'
    * answers; sending only changes keeps a polling class from waking 25
@@ -776,9 +770,8 @@ export class Instance extends DurableObject<Env> {
   }
 
   private notePoll(session: Session): void {
-    if (session.role === "player") {
-      if (!this.left.has(session.player)) this.lastPoll.set(session.player, Date.now());
-    } else if (session.role === "screen" || session.role === "remote") this.lastPoll.set(`${session.role}:${session.token}`, Date.now());
+    if (session.role === "player") this.lastPoll.set(session.player, Date.now());
+    else if (session.role === "screen" || session.role === "remote") this.lastPoll.set(`${session.role}:${session.token}`, Date.now());
   }
 
   /** Holds a long-poll until the tab's view changes, or POLL_HOLD_MS. */
@@ -1126,7 +1119,6 @@ export class Instance extends DurableObject<Env> {
         const p = G.playerById(run, cmd.player);
         if (!p || p.removed || !this.awayPlayers().includes(p)) return { direct: [ack(false, "That avatar is taken.")] };
         p.token = randomToken();
-        this.left.delete(p.id);
         await this.persist(["run"]);
         return { direct: [ack(true), { t: "welcome", player: p.id, token: p.token }], session: { role: "player", player: p.id } };
       }
@@ -1141,22 +1133,11 @@ export class Instance extends DurableObject<Env> {
           return { direct: [ack(outcome !== "refused")] };
         }
         if (cmd.op === "leave") {
-          // A place closed at a shared device (docs/design/class-and-wall.md, "Sharing a device").
-          const outcome = G.leaveSeat(game, session.player);
-          if (outcome === "refused") return { direct: [ack(false, "not allowed")] };
-          // Away at once, not after FRESH_MS: Last call doesn't wait for a place nobody sits at.
-          this.lastPoll.delete(session.player);
-          ws?.serializeAttachment({ role: null } satisfies Session);
-          if (outcome === "gone") {
-            this.unwritten.delete(session.player);
-            await this.persist(["run"]);
-          } else {
-            this.left.add(session.player);
-            // What the socket's copy held is written like the input of a line that ended.
-            this.lineEnded(session.player, ws);
-            await this.closeIfAllIn();
-          }
-          this.broadcast();
+          // A place closed at a shared device, in the lobby (docs/design/class-and-wall.md, "Sharing a device").
+          if (!G.leaveSeat(game, session.player)) return { direct: [ack(false, "not allowed")] };
+          this.unwritten.delete(session.player);
+          await this.persist(["run"]);
+          this.broadcast(ws);
           return { direct: [ack(true)], session: { role: null } };
         }
         if (cmd.op === "ready") {
@@ -2242,7 +2223,7 @@ export class Instance extends DurableObject<Env> {
         current: run ? run.current : -1,
         removed: !p || p.removed,
         starts,
-        ...(run?.share && !run.peers && p && !p.removed ? { share: true as const } : {}),
+        ...(run?.share && run.phase === "lobby" && !run.peers && p && !p.removed ? { share: true as const } : {}),
         me: p && s ? { avatar: p.avatar, score: s.score, place: s.place, of: st.length } : p ? { avatar: p.avatar, score: 0, place: 0, of: st.length } : null,
         ...(packs ? { packs } : {}),
         question:

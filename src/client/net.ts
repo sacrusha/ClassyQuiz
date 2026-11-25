@@ -82,7 +82,6 @@ export class Line {
   private flushing = false;
   private seq = 0;
   private asleep = false;
-  /** Stopped for good (forget): nothing of it is kept for a reload. */
   private forgotten = false;
   private lastKey = "";
   /** Out of the allowance: "http" when the site turned requests away, "write" when the quiz couldn't store. */
@@ -214,7 +213,6 @@ export class Line {
     forgetKept(this.keyed());
   }
 
-  /** The instance, with this line's slot: the key of what it keeps across a reload. */
   private keyed(): string {
     return `${this.opts.instance}${this.opts.slot ?? ""}`;
   }

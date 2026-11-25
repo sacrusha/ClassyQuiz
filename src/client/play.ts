@@ -12,9 +12,7 @@
 //   /teacher#63953   asks for the teacher code, except on the device that
 //                    uploaded the quiz, which comes in with the quiz's secret.
 //
-// What a place on the page does, its line and its player, is client/seat.ts.
-// A student's device has one place; while the teacher allows sharing, up to
-// MAX_SEATS side by side (docs/design/class-and-wall.md, "Sharing a device").
+// A place on the page, its line and its player: client/seat.ts.
 
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE } from "../shared/protocol.ts";
 import { MAX_SEATS } from "../shared/limits.ts";
@@ -190,13 +188,13 @@ function showTeacherForm(note: string): void {
 // The places on the page (docs/design/class-and-wall.md, "Sharing a
 // device"). One fills the page, as on every device of its own; while the
 // teacher allows sharing, the page splits into columns, each a place with
-// its own player and line, with a + along the edge for one more and a × on
-// each to close it while the device keeps a player in another.
+// its own player and line. In the lobby a + along the edge adds one, and a
+// × on each closes it while the device keeps a player in another; under
+// way the places stay as they are.
 
 /** The places, in the order they were added. */
 const seats: Seat[] = [];
 const statuses = new Map<Seat, LineStatus>();
-/** A shared page's column for each place: its frame, with the place's own element and its ×. */
 const columns = new Map<Seat, { frame: HTMLElement; body: HTMLElement }>();
 /**
  * The places size themselves by their column (container units); a browser
@@ -226,7 +224,6 @@ function addSeat(slot: number, asTeacher: SeatContext["teacher"] = null): void {
   seat.start();
 }
 
-/** One more place, in the first free slot: its player joins beside the others. */
 function addPlace(): void {
   if (seats.length >= MAX_SEATS) return;
   const used = new Set(seats.map((s) => s.slot));
@@ -235,17 +232,22 @@ function addPlace(): void {
   addSeat(slot);
 }
 
-/**
- * A place can close while the device keeps a player in another, and not at
- * the final ranking, where a place only shows how its player did.
- */
+/** Under way no place is added or closed: either would resize every column under the others' fingers. */
+function underWay(): boolean {
+  return seats.some((s) => s.view && s.view.phase !== "lobby");
+}
+
+/** A place can close in the lobby while the device keeps a player in another. */
 function closable(seat: Seat): boolean {
-  if (seats.length < 2 || seats.some((s) => s.view?.phase === "final")) return false;
+  if (seats.length < 2 || underWay()) return false;
   return !seat.token || seats.some((s) => s !== seat && s.token);
 }
 
 function closePlace(seat: Seat): void {
-  if (!seats.includes(seat) || !closable(seat)) return;
+  if (seats.includes(seat) && closable(seat)) dropPlace(seat);
+}
+
+function dropPlace(seat: Seat): void {
   seats.splice(seats.indexOf(seat), 1);
   statuses.delete(seat);
   columns.get(seat)?.frame.remove();
@@ -255,9 +257,11 @@ function closePlace(seat: Seat): void {
   void seat.close();
 }
 
-/** A place's view or player changed. */
 function changed(): void {
   if (teacher) return;
+  // Under way, a place without a player closes: it was turned away, or its
+  // avatar was picked back on another device, and only the lobby adds one.
+  if (underWay()) for (const s of [...seats]) if (!s.token && seats.some((o) => o !== s && o.token)) dropPlace(s);
   layout();
   // Start pressed: the dressing draws to its end along the top edge, as on the wall, the menu staying where it is.
   const views = seats.map((s) => s.view).filter((v) => v && !v.peers);
@@ -266,9 +270,9 @@ function changed(): void {
   edgeBar("start", v && v.phase === "lobby" ? v.starts : null);
 }
 
-/** The teacher allows sharing, and the quiz takes players: the page offers another place. */
+/** The teacher allows sharing, and the class is in the lobby: the page offers another place. */
 function shareOffered(): boolean {
-  return canSplit && seats.some((s) => s.view?.share && s.view.phase !== "final");
+  return canSplit && seats.some((s) => s.view?.share);
 }
 
 function layout(): void {
@@ -320,7 +324,6 @@ function layout(): void {
 
 let shownStatus: LineStatus | null = null;
 
-/** The page's dot and banner: the worst of its places' lines. */
 function showStatus(): void {
   const all = [...statuses.values()];
   const s: LineStatus = all.includes("offline") ? "offline" : all.includes("connecting") || all.length === 0 ? "connecting" : "live";

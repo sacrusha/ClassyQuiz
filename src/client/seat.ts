@@ -41,7 +41,6 @@ export interface SeatContext {
   status(s: LineStatus): void;
   /** The view or the player changed: what the page lays out around its places may follow. */
   changed(): void;
-  /** A teacher device without a working teacher code: the page's form for it. */
   teacherForm(note: string): void;
 }
 
@@ -103,7 +102,6 @@ export class Seat {
     this.ctx = ctx;
     this.root = ctx.root;
     const saved = ctx.teacher ? null : store.get<Saved>(this.key());
-    // A place of another quiz that had this code is gone already (client/play.ts).
     if (saved && saved.instance === ctx.instance) this.auth = { role: "player", token: saved.token };
     this.order = this.token ? (saved?.at ?? ctx.slot) : Date.now();
   }
@@ -112,7 +110,6 @@ export class Seat {
     return this.ctx.slot;
   }
 
-  /** This place's player, if it is one now. */
   get token(): string | undefined {
     return this.auth.role === "player" ? this.auth.token : undefined;
   }
@@ -137,10 +134,10 @@ export class Seat {
   }
 
   /**
-   * The place closes (docs/design/class-and-wall.md, "Sharing a device"): its
-   * player leaves, gone before the start and away after it, and the device
-   * forgets them. A leave that can't get through in a few seconds is given
-   * up: the line ends anyway, and its player shows as away.
+   * The place closes (docs/design/class-and-wall.md, "Sharing a device"):
+   * its player leaves, which the server takes in the lobby only, and the
+   * device forgets them. A leave that can't get through in a few seconds is
+   * given up: the line ends anyway, and its player shows as away.
    */
   async close(): Promise<void> {
     if (this.closed) return;

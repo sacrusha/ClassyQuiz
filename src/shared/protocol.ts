@@ -81,11 +81,7 @@ export type Command =
   | { op: "endInstance" }
   /** Projector or Remote, while both tabs are there: the wall becomes the steering tab and the steering tab the wall. */
   | { op: "swap" }
-  /**
-   * Projector or Remote: give the role up. A player at a shared device:
-   * close its place there; before the start the player is gone, after it
-   * away, to be picked back.
-   */
+  /** Projector or Remote: give the role up. A player at a shared device, in the lobby: close its place there, the player gone. */
   | { op: "leave" }
   /** Any tab: send me my current view (presence changes with time, not with events). */
   | { op: "tick" }
@@ -392,7 +388,7 @@ export interface PlayerView {
   removed: boolean;
   /** In the lobby once Start is pressed: the dressing ends, and the first question comes, when it runs out. */
   starts: ClockView | null;
-  /** The teacher allows sharing a device: this one offers a place beside its player. */
+  /** The teacher allows sharing a device, and the class is in the lobby: this one offers a place beside its player. */
   share?: true;
   me: { avatar: Avatar; score: number; place: number; of: number } | null;
   /**
