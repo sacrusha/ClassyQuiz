@@ -262,7 +262,10 @@ Cloudflare's edge cache for up to a week (`s-maxage` 7 days, seen on removed
 pictures); the deployment's own address answers 404 for it, so that is where
 a removal is checked. A changed file came back in either version for the
 first two minutes or so after a deploy (2026-11-18), so a change is checked
-on the production address after that.
+on the production address after that. The live site answered a request
+from Python's `urllib` with its default user agent 403, and the same
+request with another user agent 200 (2026-11-25): a walk in Python against
+it sends its own.
 
 `docs/deploy-log.md` is the present, what is live and what of it has been
 tried there; each deploy's record is git's. So whoever deploys updates it
