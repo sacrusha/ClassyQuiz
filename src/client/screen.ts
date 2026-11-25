@@ -10,7 +10,7 @@ import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared
 import { CLASS_WAITING } from "../shared/limits.ts";
 import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabHadRemote, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
-import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
+import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, shareSwitch, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
 import { Presses, atOf, startButton, steeringButtons, type StepState } from "./steps.ts";
 import { edgeBar } from "./clock.ts";
 import { finalHtml, fitFinal } from "./final.ts";
@@ -299,6 +299,7 @@ function renderCheck(v: ScreenView): void {
     </div>
     ${howTo ? `<p class="device cline">${gone}${checkHowTo(v)}</p>` : ""}
     <p class="arrange-call">${T.videoCall}</p>
+    <p class="device cshare">${shareSwitch(t)}</p>
     <p class="cstart"><button class="btn primary big" data-act="show-join">${T.letIn}&nbsp;&#9654;</button></p>
     ${questionList(t, steer.ui)}
     <p class="mfoot"><button class="btn" data-menu>${T.moreMenu}</button></p>

@@ -675,7 +675,9 @@ deployed to the public site.
       cards with their pictures (`docs/film/`), and `/example` has a full
       example per tab, the space run's with its conversation and the AI's
       overview of its questions (`design/example-page.md`). Open: the film
-      draws the first screen on Idea, and the page opens on Sheets.
+      draws the first screen on Idea, and the page opens on Sheets; the
+      film's lobby check has no switch for shared devices
+      (`design/class-and-wall.md`, "Sharing a device").
 
 ## Room on the Free plan
 
@@ -765,18 +767,12 @@ The quiz is already made; it can be more than one activity.
   iPads, generation unknown. Two children on one tablet already works as one
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
-  own. A split screen gives each person at a shared device a seat and a score
-  of their own; the owner's case takes three to a device (6 × 2 don't seat
-  16). The owner: a nice-to-have, and a classroom's problem, so for
-  Quizmaster only, allowed by the teacher on the check, so it stays off where
-  everyone has a device; a seat added on the device can be closed there
-  again; one animal per device, in different colours, so adding and closing
-  seats doesn't reroll the animal; not core, so Safari 16 may be its floor.
-  Open: Solo and Peers as variants (one device, 2–4 players), whose design
-  would differ; whether pupils misuse adding and closing seats (user
-  testing); two hands on one screen, unchecked on a real iPad. Plausible
-  assumption: a browser gives no click for a tap while another finger is
-  down, and two fingers moving zoom the page.
+  own. Built for a Quizmaster: a device shared by up to three, each with a
+  place, an avatar and a score of their own, allowed by the teacher on the
+  check — `design/class-and-wall.md`, "Sharing a device". Open: Solo and
+  Peers as variants (one device, 2–4 players), whose design would differ;
+  whether pupils misuse adding and closing places (user testing); hands on
+  a real iPad (same file, Not known).
 - **Dark mode** — a visitor whose device is dark gets every screen dark;
   the players' screens are light with no reason recorded, probably an
   oversight (the owner: models have dropped dark mode unnoticed before, in

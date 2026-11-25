@@ -17,7 +17,7 @@ import { deviceLang } from "./device-lang.ts";
 import { SITE_WORDS } from "./site-text.ts";
 import { nameLooks } from "./look.ts";
 import type { LineStatus } from "./net.ts";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, ROOM_FULL, ROOM_STARTED, quotaResetAt } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, MAX_SEATS, ROOM_FULL, ROOM_STARTED, quotaResetAt } from "../shared/limits.ts";
 import { TOO_MANY_CODES, WRONG_TEACHER_CODE } from "../shared/protocol.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, SPEED_BONUS, START_MS } from "../shared/tempo.ts";
 
@@ -80,6 +80,9 @@ export interface RoomText {
   endQuiz: string;
   speedSwitch: string;
   speedNote: string;
+  /** The check's switch for devices shared (docs/design/class-and-wall.md, "Sharing a device"), and what it does. */
+  shareSwitch: string;
+  shareNote: string;
   // The steering bar (client/steps.ts): nouns for what the class sees next (docs/design/question-flow.md, "The steering bar").
   choices: string;
   answers: string;
@@ -190,7 +193,7 @@ export interface RoomText {
   typeOn: (site: string, code: string) => string;
   stopSteering: string;
   confirmStopSteering: (site: string, code: string) => string;
-  // The player's device (client/play.ts) and a Peers room (client/peers.ts).
+  // The player's device (client/play.ts, client/seat.ts) and a Peers room (client/peers.ts).
   unreached: string;
   unreachedTell: string;
   needsDigits: string;
@@ -209,6 +212,9 @@ export interface RoomText {
   steerHere: string;
   steerHereSmall: string;
   newAvatar: string;
+  /** A shared device's + and ×, their accessible names. */
+  addPlace: string;
+  closePlace: string;
   onlyYou: string;
   inWithYou: (n: number) => string;
   movesOn: string;
@@ -283,6 +289,8 @@ const en: RoomText = {
   endQuiz: "End the quiz: final ranking",
   speedSwitch: "Points for speed",
   speedNote: `A right answer ${POINTS_RIGHT}, up to ${SPEED_BONUS} more the quicker it comes.`,
+  shareSwitch: "Shared devices",
+  shareNote: `Up to ${MAX_SEATS} people play side by side on one device, each with an avatar of their own. The + at the device's edge adds a place.`,
   choices: "Choices",
   answers: "Answers",
   closesAnswering: "closes answering",
@@ -398,6 +406,8 @@ const en: RoomText = {
   steerHere: "Steer it from here",
   steerHereSmall: "Start, next, the solution",
   newAvatar: "new",
+  addPlace: "Add a place",
+  closePlace: "Close this place",
   onlyYou: "Only you so far.",
   inWithYou: (n) => `${n} in, you among them.`,
   movesOn: "The quiz moves on once everyone has answered.",
@@ -464,6 +474,8 @@ const de: RoomText = {
   endQuiz: "Quiz beenden: Schlussrangliste",
   speedSwitch: "Punkte fürs Tempo",
   speedNote: `Eine richtige Antwort gibt ${POINTS_RIGHT}, bis zu ${SPEED_BONUS} mehr, je schneller sie kommt.`,
+  shareSwitch: "Geteilte Geräte",
+  shareNote: `Bis zu ${MAX_SEATS} Personen spielen nebeneinander an einem Gerät, jede mit eigenem Avatar. Das + am Rand des Geräts fügt einen Platz hinzu.`,
   choices: "Optionen",
   answers: "Antworten",
   closesAnswering: "beendet das Antworten",
@@ -579,6 +591,8 @@ const de: RoomText = {
   steerHere: "Von hier steuern",
   steerHereSmall: "Start, weiter, die Lösung",
   newAvatar: "neu",
+  addPlace: "Platz hinzufügen",
+  closePlace: "Diesen Platz schliessen",
   onlyYou: "Bisher nur du.",
   inWithYou: (n) => `${n} dabei, du auch.`,
   movesOn: "Das Quiz geht weiter, sobald alle geantwortet haben.",
@@ -645,6 +659,8 @@ const fr: RoomText = {
   endQuiz: "Terminer le quiz : classement final",
   speedSwitch: "Points de rapidité",
   speedNote: `Une bonne réponse vaut ${POINTS_RIGHT}, et jusqu'à ${SPEED_BONUS} de plus si elle arrive vite.`,
+  shareSwitch: "Appareils partagés",
+  shareNote: `Jusqu'à ${MAX_SEATS} personnes jouent côte à côte sur un appareil, chacune avec son propre avatar. Le + au bord de l'appareil ajoute une place.`,
   choices: "Propositions",
   answers: "Réponses",
   closesAnswering: "clôt les réponses",
@@ -760,6 +776,8 @@ const fr: RoomText = {
   steerHere: "Le piloter d'ici",
   steerHereSmall: "départ, suite, solution",
   newAvatar: "nouveau",
+  addPlace: "Ajouter une place",
+  closePlace: "Fermer cette place",
   onlyYou: "Personne d'autre pour l'instant.",
   inWithYou: (n) => `${n} dans le quiz, vous compris.`,
   movesOn: "Le quiz avance dès que tout le monde a répondu.",
@@ -826,6 +844,8 @@ const it: RoomText = {
   endQuiz: "Termina il quiz: classifica finale",
   speedSwitch: "Punti per la velocità",
   speedNote: `Una risposta giusta vale ${POINTS_RIGHT}, e fino a ${SPEED_BONUS} in più se arriva in fretta.`,
+  shareSwitch: "Dispositivi condivisi",
+  shareNote: `Fino a ${MAX_SEATS} persone giocano fianco a fianco su un dispositivo, ognuna con il proprio avatar. Il + sul bordo del dispositivo aggiunge un posto.`,
   choices: "Opzioni",
   answers: "Risposte",
   closesAnswering: "chiude le risposte",
@@ -941,6 +961,8 @@ const it: RoomText = {
   steerHere: "Comandalo da qui",
   steerHereSmall: "avvio, avanti, la soluzione",
   newAvatar: "nuovo",
+  addPlace: "Aggiungi un posto",
+  closePlace: "Chiudi questo posto",
   onlyYou: "Per ora ci sei solo tu.",
   inWithYou: (n) => `${n} in gioco, contando te.`,
   movesOn: "Il quiz va avanti appena tutti hanno risposto.",

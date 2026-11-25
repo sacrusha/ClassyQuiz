@@ -6,7 +6,7 @@
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
-import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, roomNotice, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
+import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, roomNotice, shareSwitch, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
 import { steeringButtons } from "./steps.ts";
 import { clockBar, edgeBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
@@ -137,6 +137,7 @@ function lobby(v: TeacherView): string {
       <div class="joined">${T.joined(live("joined", n))}</div>
       <div class="avatars" data-crowd></div>
       <p class="device">${speedSwitch(v)}</p>
+      <p class="device">${shareSwitch(v)}</p>
     </section>
     ${projector}
     ${questionList(v, steer.ui)}`;

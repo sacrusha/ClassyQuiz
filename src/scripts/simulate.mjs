@@ -438,7 +438,7 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
     if (m.t === "choose" && !p.joining) {
       if (claimId) {
         // Coming back: wait until the old avatar is offered (its device
-        // counts as away), asking again now and then like client/play.ts.
+        // counts as away), asking again now and then like client/seat.ts.
         if (!m.avatars.some((a) => a.id === claimId)) {
           refresh ??= setInterval(() => !p.joining && void d.send({ op: "tick" }), 5000);
           return;
@@ -459,7 +459,7 @@ async function joinPlayer(name, mode, claimId = null, acked = {}, timeout = 1500
     }
     if (m.t === "state" && m.view.role === "player") {
       p.view = m.view;
-      // Like client/play.ts: when the answers appeared on this device, per question.
+      // Like client/seat.ts: when the answers appeared on this device, per question.
       const q = m.view.question;
       if (q && q.answering !== "reading" && q.sinceMs !== null && p.shown[q.q] === undefined) p.shown[q.q] = Date.now() - q.sinceMs;
       maybeAnswer(p);
@@ -486,7 +486,7 @@ function learn(p, q, a) {
   p.acked[q] = { choice: r.choice, seq: r.seq, ms };
 }
 
-/** A tap, like client/play.ts: on the view the device shows, with the device's own time. */
+/** A tap, like client/seat.ts: on the view the device shows, with the device's own time. */
 function tap(p, q, choice, i) {
   const seq = Date.now() * 10 + i;
   const ms = p.shown[q] !== undefined ? Date.now() - p.shown[q] : undefined;
@@ -512,12 +512,12 @@ function maybeAnswer(p) {
     const tries = Math.random() < 0.25 ? 2 : 1; // some change their mind
     let last = -1;
     for (let i = 0; i < tries; i++) {
-      // Like client/play.ts: a tap only while the device shows this question,
+      // Like client/seat.ts: a tap only while the device shows this question,
       // naming the view it was made on. A device that is offline still shows it.
       const shown = p.view;
       if (shown.phase !== "question" || shown.question?.q !== q || shown.question.answering !== "open") break;
       const choice = Math.floor(Math.random() * n);
-      // Like client/play.ts: the answer already chosen isn't sent again (the
+      // Like client/seat.ts: the answer already chosen isn't sent again (the
       // server would keep the first tap, and its time, anyway).
       if (choice === last) continue;
       last = choice;
@@ -562,7 +562,7 @@ ghost.d.kill();
 log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} over long-polling), ghost removed`);
 
 // Dressing in the lobby (docs/design/class-and-wall.md). Like
-// client/play.ts: one `dress` in flight per device, the latest pick sent
+// client/seat.ts: one `dress` in flight per device, the latest pick sent
 // next, so a burst of taps sends the first and the last. Every student
 // picks a few looks; the server holds them and the screens hear of them once a second.
 const looks = new Map(); // player id → the look last acknowledged

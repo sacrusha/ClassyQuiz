@@ -67,7 +67,7 @@ is in `backlog.md`, Project. What shapes this file:
   in `hosting-and-limits.md`.
 - No name and no choice. The server assigns an avatar: one of 12 animals in one
   of 8 colours, unique per class (the first dozen players get different
-  animals). The device keeps a player token, so a reload, sleep or dropped
+  animals; at a shared device, below, its players share one). The device keeps a player token, so a reload, sleep or dropped
   Wi-Fi resumes the same avatar and score.
 - Avatars are SVG (`client/look.ts`), not emoji: emoji look different on an
   Android tablet and a Windows laptop, and a child must recognise "the frog on
@@ -79,7 +79,7 @@ is in `backlog.md`, Project. What shapes this file:
   players whose devices are away, plus "+". A child whose tablet died taps
   their own avatar and keeps their score. A child could take someone else's;
   the teacher is in the room. A device without a player asks again every 10 s
-  (`client/play.ts`), so a dead tablet's avatar shows up within about a minute.
+  (`client/seat.ts`), so a dead tablet's avatar shows up within about a minute.
 - A tablet whose avatar another device took back while it was away drops its
   token and offers "+". It does not join by itself: a tablet lying on a desk
   would be a connected phantom that holds up the countdown's early close
@@ -126,6 +126,80 @@ quiz under way.
   teacher who starts and then fetches the tablet cart strands the class); a
   "let more in" control in the teacher's menu (a teacher in front of a class
   does not know to look).
+
+### Sharing a device
+
+Purpose (backlog, "Fewer devices than people"): a class with fewer devices
+than people, each person with a place, an avatar and a score of their own.
+The owner: a nice-to-have, and a classroom's problem, so for a Quizmaster
+only. Two children on one tablet as one player works without it.
+
+Situation:
+
+- The owner's case is 16 people at 6 iPads, generation unknown: two to a
+  device don't seat them, three do.
+- A browser makes a click only from a lone touch. With two or three hands
+  on the glass, a press is lost while a neighbour's finger is down, and
+  two fingers moving pinch the page. Seen in Edge's touch emulation: two
+  overlapping touches on two places pressed neither by click; unchecked on
+  an iPad.
+- Children may try to reroll an avatar they don't like by adding and
+  closing places (the owner).
+- A place nobody sits at would hold up Last call's early close and stand
+  on the wall (Coming back, above).
+- The places size themselves by their column, with container units, which
+  Safari has from 16. The owner: for a nice-to-have, Safari 16 may be its
+  floor.
+
+How the site meets it:
+
+- **The teacher allows it** on the check, under how the screens are
+  arranged, and on the Remote's lobby beside Points for speed: the switch
+  "Shared devices", what it does always under it, the + included, so the
+  teacher can say it to the class (`shareSwitch`, `client/manage.ts`). The
+  browser keeps the last choice (`sharing`, `client/dom.ts`), and a quiz
+  never set takes it (plausible assumption: a class short of devices is
+  short lesson after lesson). Off, no device offers a place; places
+  already there stay.
+- **A player's device splits** (`client/play.ts`): its place becomes a
+  column, with a + along the edge that adds another, up to `MAX_SEATS` (3,
+  `shared/limits.ts`). No words: a + and a person. A new column stands at
+  the end, beside the +, and keeps its place across a reload. It is a new
+  player beside the device's others (`newPlayer` with `beside`), joining
+  only when the + is tapped, so no place stands on the wall empty. Under
+  way it offers the avatars whose devices are away, scrolling when they
+  don't fit the column, as any device without a player does. The door and
+  the class's caps are any device's.
+- **A × closes a place** while the device keeps a player in another, so
+  closing places neither leaves it without one nor rerolls its animal; not
+  at the final
+  ranking, where a place only shows how its player did. Before the start
+  its player is gone and the avatar free; after it the player keeps their
+  score and is away at once, not after `FRESH_MS`, to be picked back
+  (`leaveSeat`, `server/game.ts`).
+- **One animal per device**, each place in its own colour: the same animal
+  as the device's other players, so adding and closing places rerolls no
+  animal; the colour from a family the device doesn't wear yet (yellow;
+  blue, navy and purple; red and pink; teal and green), the first free in a
+  fixed order, so a place closed and added again comes back with the avatar
+  it had, and three players of one animal stay apart for most colour-blind
+  eyes (`seatAvatar`). On the wall a shared device reads as one animal in
+  up to three colours; the first dozen devices, not players, differ by
+  animal.
+- **Each place has its own line** and keeps its player under its own key
+  (`seatKey`, `client/dom.ts`; `client/seat.ts`), so a reload brings every
+  place back. The page's dot and offline banner show the worst of its
+  lines; its places sleep and wake together (`connections.md`, "Devices
+  left on").
+- **Every finger presses for itself** while the page is split
+  (`client/tap.ts`): a finger's lift inside a button presses it, and the
+  click that may follow is dropped page-wide, since closing a place moves
+  another under the finger. The split page doesn't pinch, scroll or call up
+  a menu. A device of its own presses by click as before.
+- **Sizes follow the column** (`.seats` in `app.css`): the dressing stacks
+  and text answers stand one under the other in a column taller than wide.
+  A browser without container units (Safari before 16) offers no + and
+  plays one place.
 
 ### What each screen shows
 
@@ -483,6 +557,15 @@ added, and some teachers want to photograph it. So it has its own screen
 
 ## Not known
 
+- A shared device in real hands, on a real iPad: palm rejection, whether a
+  resting hand presses a button in its own place, the four- and
+  five-finger gestures that leave Safari (on by default, Settings,
+  Multitasking & Gestures); the columns judged headless only, three at
+  768 × 1024, 1024 × 768 and 1180 × 820; whether three side by side at one
+  9.7" iPad works, and an upright iPad's columns of 256 px; whether pupils
+  misuse adding and closing places (user testing, the owner); whether
+  neighbours copying each other's tile matters in a practice quiz; whether
+  a teacher says what the + does.
 - Whether children dress at all, and whether teachers wait for it; whether the
   shapes help a child find their avatar from the back row.
 - Whether Start's time is seen where nobody announces it: a child or a

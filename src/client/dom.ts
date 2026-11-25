@@ -55,6 +55,8 @@ export const store = {
  * opens a Peers room writes it before it joins (client/entry-peers.ts).
  */
 export const playerKey = (code: string): string => `cq.player.${code}`;
+/** The same for each place at a shared device (client/seat.ts): the first where it always was. */
+export const seatKey = (code: string, slot: number): string => (slot ? `${playerKey(code)}.${slot}` : playerKey(code));
 
 export interface SavedQuiz {
   id: string;
@@ -180,6 +182,29 @@ export const arrangement = {
       localStorage.setItem("cq.screens", a);
     } catch {
       /* the choice holds on this page until it reloads */
+    }
+  },
+};
+
+/**
+ * Devices shared, the check's switch (docs/design/class-and-wall.md,
+ * "Sharing a device"), as this browser last set it: a quiz that hasn't been
+ * set takes it. Per browser, as the arrangement: a class short of devices is,
+ * plausibly, short lesson after lesson. Off without storage.
+ */
+export const sharing = {
+  get(): boolean {
+    try {
+      return localStorage.getItem("cq.share") === "1";
+    } catch {
+      return false;
+    }
+  },
+  set(on: boolean): void {
+    try {
+      localStorage.setItem("cq.share", on ? "1" : "0");
+    } catch {
+      /* the quiz has it; the next one starts off */
     }
   },
 };

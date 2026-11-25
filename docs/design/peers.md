@@ -59,7 +59,7 @@ the others (v5 item 6, Peers' room).
 
 Code: `client/entry-peers.ts` (the
 check's card), `client/peers.ts` (the player page's Peers screens, handed
-every view of a Peers room by `client/play.ts`), `client/device.ts` (the
+every view of a Peers room by `client/seat.ts`), `client/device.ts` (the
 question), the game's rules in `server/game.ts` (`peersStep`,
 `startCountdown`, `setReady`, `waitingFor`), the room in `server/instance.ts`.
 

@@ -56,7 +56,7 @@ The film: the check as a first visit finds it, Screen and remote pressed and the
 
 Once the laptop has taken the wall, the phone is the Remote; the film shows only its button, in the bubble of each press. Its lobby's words: the title, the join code; **Let everyone in ▶** until tapped; the address **classyquiz.pages.dev**, the code large **63953**, "**n** joined", avatars, the switch "Points for speed"; "Big screen ✓ · ⇄ Swap" (wall there), else "On the big screen's computer: on classyquiz.pages.dev, type 63953 47."; "A second device, to steer from or to show the quiz on: on classyquiz.pages.dev, type 63953 47."; the questions listed, each one's answers folded. **Start quiz ▶** is pinned at the bottom, "in 10 s" small under it; once pressed, the site gives the dressing ten seconds, a bar draining along the top edge of every screen, before the first question (`docs/design/class-and-wall.md`, "The end of the dressing"). The film leaves that time out: its bubble shows the label alone, and the wall has the first question at the press.
 
-### 3.5 Second device, after typing the teacher code (`play.ts` `enter`)
+### 3.5 Second device, after typing the teacher code (`seat.ts` `enter`)
 Site header (fox + classyQuiz), then the quiz title as big heading ("Big numbers on the number line"), then two buttons:
 - **Show the quiz here** / small: "everyone watches this screen"
 - **Steer it from here** / small: "Start, next, the solution"
@@ -79,7 +79,7 @@ States:
 
 ### 3.8 The question in the film
 Question 1 of the example's `.zip` (`grosse-zahlen-quiz-v2.zip`, `quiz.txt`, translated in the other languages): "**Which number does the arrow show?**", a number line labelled 120 000 · 130 000 · 140 000, a tick each 1000 and a longer one at each 5000, with the arrow at 126 000 (`q01.png`, which the film draws as vector). The film shows the choices in the order the quiz writes them, the right answer first; the site shuffles them. On the wall and tablets, in the site's pairing: red ▲ **126 000** (right) · blue ◆ **125 000** · yellow ● **127 000** · green ■ **120 600**. The split (12 / 6 / 2 / 0) is the film's own (`docs/film/build/film.js`): blue the longer middle tick read as the arrow's, yellow one tick past it; the class code 63953 and the teacher code 63953 47 are the design docs' example (`docs/design/teacher-devices.md`).
-### 3.9 Tablets (`play.ts` `render`, `look.ts`)
+### 3.9 Tablets (`seat.ts` `render`, `look.ts`)
 Top bar when playing: avatar left, "n / total" centre, "★ score" right.
 - **Lobby:** the child's avatar large, three rows of pictures below to dress it (six background shapes, eight hats, six tools to hold); no words. Before joining opens: "Joining opens in a moment." Entering the code: input placeholder "12345", ▶ (aria "go"); wrong code: the code, ✗, the box again.
 - **Question (reading):** top bar and a large **eye** icon. No text.
@@ -96,5 +96,5 @@ Quiz title in the top bar. Podium with the top entries: avatar, place "1.", "★
 - The root page's words in 4 languages, its asks and the Run box: `src/client/landing-text.ts`, `src/public/index.html`; its sizes: `index.html`'s styles and `src/public/site.css`; the face on the file: `src/public/landing/face-idea-<lang>.webp` (`docs/example/faces.py`); the pictures on the check's cards: `src/public/landing/way-*.svg`.
 - The local check: `src/client/open.ts`, `entry-solo.ts`, `entry-peers.ts`, `entry-quizmaster.ts`.
 - The lobby's check, join, wall, ranking: `src/client/screen.ts`, `final.ts`, `manage.ts`, `teach.ts`, `steps.ts`.
-- Second device screen, tablet states: `src/client/play.ts`.
+- Second device screen, tablet states: `src/client/seat.ts`.
 - The screens' design and states: `docs/design/teacher-devices.md`, `docs/design/question-flow.md`.

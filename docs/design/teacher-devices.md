@@ -131,7 +131,8 @@ The tab that uploads is the Projector and steers itself. It opens on the
 (plausible assumption: the count is what most often tells two versions of a
 quiz apart), the join code
 small (with a count once someone has joined), how the screens are arranged
-(below) with the teacher code where a remote is wanted, and the question
+(below) with the teacher code where a remote is wanted, whether players
+share devices (`class-and-wall.md`, "Sharing a device"), and the question
 list with its fixes, open, each question's answers folded: this is the
 first place a Quizmaster sees the questions (Situation), and folded answers
 keep the key off a shared screen until the teacher taps a button that says

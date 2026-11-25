@@ -13,7 +13,7 @@
 
 import type { Quiz } from "../quiz/format.ts";
 import type { LineCounts } from "../shared/line.ts";
-import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS } from "../shared/limits.ts";
+import { CLASS_FULL, CLASS_STARTED, CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_PLAYERS, MAX_SEATS } from "../shared/limits.ts";
 import { MAX_LOOK_CHANGES, sameLook, validLook } from "../shared/looks.ts";
 import { LAST_CALL_MS, POINTS_RIGHT, START_MS, speedBonus } from "../shared/tempo.ts";
 
@@ -75,6 +75,8 @@ export interface Player {
   late?: boolean;
   /** Changes of look stored for this player (MAX_LOOK_CHANGES); absent until the first. */
   looks?: number;
+  /** Joined beside another player at a shared device: the id of that device's first player. Absent: its own device. */
+  device?: string;
 }
 
 export interface AnswerRecord {
@@ -110,6 +112,8 @@ export interface Run {
   closedView?: Record<string, number>;
   /** Points for speed, the teacher's switch on the join screen; fixed at Start. Missing: off. */
   speed?: boolean;
+  /** Devices shared, the teacher's switch on the check (docs/design/class-and-wall.md, "Sharing a device"). Missing: never set, off. */
+  share?: boolean;
   /** Question index → when its answers appeared (server time): answering opened, and the time for speed runs from here. */
   shown?: Record<string, number>;
   /** Question index → its Last call, once pressed. */
@@ -279,17 +283,81 @@ export function doorOpen(run: Run, now: number): boolean {
   return now - run.started < DOOR_OPEN_MS || (run.opened ?? 0) <= 1;
 }
 
-export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number): Player {
+/**
+ * beside: a player at the device the new one shares (docs/design/class-and-wall.md,
+ * "Sharing a device"), only while the teacher allows sharing and at most
+ * MAX_SEATS to a device; the door and the class's caps are the same as for
+ * a device of its own.
+ */
+export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number, beside?: Player): Player {
   const run = needRun(g);
   if (run.phase === "final") throw new GameError("This quiz has finished.");
   if (run.waiting) throw new GameError(CLASS_WAITING);
+  const device = beside ? deviceOf(beside) : undefined;
+  if (beside && (!run.share || run.peers || beside.removed || seatsAt(run, device!) >= MAX_SEATS)) throw new GameError("not allowed");
   const all = Object.values(run.players);
   if (all.length >= MAX_PLAYERS) throw new GameError(CLASS_FULL);
   const late = !doorOpen(run, now);
   if (late && all.filter((p) => p.late).length >= MAX_LATE_JOINERS) throw new GameError(CLASS_STARTED);
-  const p: Player = { id, token, avatar: pickAvatar(run, random), joined: now, removed: false, ...(late ? { late: true } : {}) };
+  const avatar = (beside && seatAvatar(run, beside)) || pickAvatar(run, random);
+  const p: Player = { id, token, avatar, joined: now, removed: false, ...(late ? { late: true } : {}), ...(device ? { device } : {}) };
   run.players[id] = p;
   return p;
+}
+
+/** The device a player sits at, named by its first player's id. */
+function deviceOf(p: Player): string {
+  return p.device ?? p.id;
+}
+
+function seatsAt(run: Run, device: string): number {
+  return activePlayers(run).filter((p) => deviceOf(p) === device).length;
+}
+
+/**
+ * The colours (client/look.ts) in families that look alike: yellow; blue,
+ * navy and purple; red and pink; teal and green. Places at one device take
+ * them from families the device doesn't wear yet, yellow, blue and red
+ * first, so three players of one animal stay apart for most colour-blind
+ * eyes too.
+ */
+const COLOUR_FAMILIES = [[2], [1, 7, 3], [0, 5], [4, 6]];
+
+/**
+ * A player beside another at a shared device: the same animal, so adding
+ * and closing places there doesn't reroll it, in a colour picked by a fixed
+ * order that no other player of that animal wears, so closing a place and
+ * adding it again gives the same avatar back. Null when every colour of
+ * the animal is taken.
+ */
+function seatAvatar(run: Run, beside: Player): Avatar | null {
+  const animal = beside.avatar.a;
+  const device = deviceOf(beside);
+  const taken = new Set(activePlayers(run).filter((p) => p.avatar.a === animal).map((p) => p.avatar.c));
+  const worn = new Set(activePlayers(run).filter((p) => deviceOf(p) === device).map((p) => p.avatar.c));
+  const fresh = COLOUR_FAMILIES.filter((f) => !f.some((c) => worn.has(c)));
+  const c = [...fresh, ...COLOUR_FAMILIES].flat().find((x) => x < COLOUR_COUNT && !taken.has(x));
+  return c === undefined ? null : { a: animal, c };
+}
+
+/** Devices shared, the teacher's switch on the check. */
+export function setShare(g: Game, on: boolean): void {
+  needRun(g).share = on;
+}
+
+/**
+ * A player closes their place at a shared device. Before the start there
+ * is nothing of theirs to keep, so they are gone and their avatar free;
+ * after it they keep their score and are away (the instance stops hearing
+ * them), to be picked back. "gone" or "kept"; "refused" for a removed avatar.
+ */
+export function leaveSeat(g: Game, id: string): "gone" | "kept" | "refused" {
+  const run = needRun(g);
+  const p = playerById(run, id);
+  if (!p || p.removed || run.peers) return "refused";
+  if (run.phase !== "lobby") return "kept";
+  delete run.players[id];
+  return "gone";
 }
 
 /**

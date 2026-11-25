@@ -9,7 +9,7 @@
 // for the others. Whoever opened it also has a ⋯ to fix a solution, remove
 // an avatar and end the quiz early.
 //
-// client/play.ts owns the line and the lobby's dressing menu; it hands
+// client/seat.ts owns the line and the lobby's dressing menu; it hands
 // every view of a Peers room here.
 
 import qrcode from "qrcode-generator";
@@ -30,7 +30,7 @@ type Ack = Extract<ServerMessage, { t: "ack" }>;
 export interface PeersContext {
   main: HTMLElement;
   send(cmd: Command): Promise<Ack>;
-  /** The lobby's dressing menu for this player, built into `into` the first time (client/play.ts). */
+  /** The lobby's dressing menu for this player, built into `into` the first time (client/seat.ts). */
   dress(into: HTMLElement): void;
   /** This device is done with the room: the start page needn't offer it again. */
   forget(): void;

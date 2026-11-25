@@ -29,6 +29,12 @@ export interface LineOptions {
   onStatus?: (s: LineStatus) => void;
   /** The notices' words, in the page's language: the tap that wakes a device asleep, and the day's allowance spent. */
   words: { asleep: string; quota: () => string };
+  /**
+   * Which of the page's lines this is, for what it keeps across a reload:
+   * "" for the page's one line, ".1" and ".2" for the places added at a
+   * shared device (docs/design/class-and-wall.md, "Sharing a device").
+   */
+  slot?: string;
 }
 
 interface Pending {
@@ -52,6 +58,14 @@ const QUOTA_RETRY = 60_000;
 /** The site answered that its daily allowance is spent. */
 class QuotaError extends Error {}
 
+/**
+ * The page's lines. A shared device has one per place, and they sleep and
+ * wake as the page does: one notice, and its tap wakes them all.
+ */
+const pageLines = new Set<Line>();
+/** When a view of the page's last changed, or someone touched the page. */
+let lastChange = Date.now();
+
 export class Line {
   private ws: WebSocket | null = null;
   private mode: "ws" | "poll" = "ws";
@@ -68,8 +82,8 @@ export class Line {
   private flushing = false;
   private seq = 0;
   private asleep = false;
-  /** When the view last changed, or someone touched the page. */
-  private lastChange = Date.now();
+  /** Stopped for good (forget): nothing of it is kept for a reload. */
+  private forgotten = false;
   private lastKey = "";
   /** Out of the allowance: "http" when the site turned requests away, "write" when the quiz couldn't store. */
   private quota: "http" | "write" | null = null;
@@ -87,12 +101,15 @@ export class Line {
 
   constructor(opts: LineOptions) {
     this.opts = opts;
-    this.held = readHeld(opts.instance);
-    this.line = readCounts(opts.instance) ?? emptyLine();
+    this.held = readHeld(this.keyed());
+    this.line = readCounts(this.keyed()) ?? emptyLine();
+    pageLines.add(this);
     this.pollMs = this.line.pollS * 1000;
     // Stored as the page goes too: a reload would otherwise lose what was
     // counted since the last message (the socket that worked, its pings).
-    window.addEventListener("pagehide", () => void this.lineNow());
+    window.addEventListener("pagehide", () => {
+      if (!this.forgotten) void this.lineNow();
+    });
     // Counted, never described: an error's message can carry quiz text.
     const failed = () => {
       this.line.errors++;
@@ -112,12 +129,12 @@ export class Line {
     });
     window.addEventListener("pageshow", kick);
     const touched = () => {
-      this.lastChange = Date.now();
+      lastChange = Date.now();
     };
     document.addEventListener("pointerdown", touched, { passive: true });
     document.addEventListener("keydown", touched);
     window.setInterval(() => {
-      if (!this.stopped && !this.asleep && Date.now() - this.lastChange > SLEEP_AFTER_MS) this.sleep();
+      if (!this.stopped && !this.asleep && Date.now() - lastChange > SLEEP_AFTER_MS) this.sleep();
     }, 60_000);
   }
 
@@ -138,13 +155,15 @@ export class Line {
     }
     pauseAwake(true);
     this.setStatus("offline");
-    showNotice("sleep", this.opts.words.asleep, () => this.wake());
+    showNotice("sleep", this.opts.words.asleep, () => {
+      for (const l of pageLines) l.wake();
+    });
   }
 
   private wake(): void {
     if (!this.asleep) return;
     this.asleep = false;
-    this.lastChange = Date.now();
+    lastChange = Date.now();
     if (this.mode === "poll") this.pollSince = Date.now();
     hideNotice("sleep");
     pauseAwake(false);
@@ -177,10 +196,27 @@ export class Line {
 
   stop(): void {
     this.stopped = true;
+    pageLines.delete(this);
     clearTimeout(this.retryTimer);
     this.clearPing();
     this.ws?.close();
     this.ws = null;
+    this.pollAbort?.abort();
+  }
+
+  /**
+   * Stops for good, and what it kept for a reload goes with it: a place
+   * closed at a shared device, whose slot a new player may take next.
+   */
+  forget(): void {
+    this.stop();
+    this.forgotten = true;
+    forgetKept(this.keyed());
+  }
+
+  /** The instance, with this line's slot: the key of what it keeps across a reload. */
+  private keyed(): string {
+    return `${this.opts.instance}${this.opts.slot ?? ""}`;
   }
 
 
@@ -190,7 +226,7 @@ export class Line {
       if (cmd.op === "tick") return Promise.resolve({ t: "ack", id: "", ok: false, error: "asleep" });
       this.wake();
     }
-    if (cmd.op !== "tick") this.lastChange = Date.now();
+    if (cmd.op !== "tick") lastChange = Date.now();
     return new Promise((resolve) => {
       const p: Pending = { id: `${Date.now().toString(36)}-${(++this.seq).toString(36)}-${Math.random().toString(36).slice(2, 7)}`, cmd, resolve, sent: false };
       this.pending.push(p);
@@ -371,7 +407,7 @@ export class Line {
   private lineNow(ahead: { opened?: number; sent?: number } = {}): { line?: LineCounts } {
     if (this.opts.auth().role === "guest") return {};
     const line: LineCounts = { ...this.line, mode: this.mode, pollS: Math.floor((this.pollMs + (this.pollSince !== null ? Date.now() - this.pollSince : 0)) / 1000) };
-    writeCounts(this.opts.instance, line);
+    writeCounts(this.keyed(), line);
     return { line: { ...line, opened: line.opened + (ahead.opened ?? 0), sent: line.sent + (ahead.sent ?? 0) } };
   }
 
@@ -397,7 +433,7 @@ export class Line {
       const key = m.t === "state" ? viewKey(m.view) : JSON.stringify(m);
       if (key !== this.lastKey) {
         this.lastKey = key;
-        this.lastChange = Date.now();
+        lastChange = Date.now();
       }
     }
     if (m.t === "state") {
@@ -445,7 +481,7 @@ export class Line {
     } else if (cmd.op === "ready") h = { ...h, ready: cmd.q };
     else return;
     this.held = h;
-    writeHeld(this.opts.instance, h);
+    writeHeld(this.keyed(), h);
   }
 
   private flush(): void {
@@ -532,6 +568,8 @@ export class Line {
         if (msgs.length === 0 && took < 1000) await sleep(1500);
         else if (took < MIN_POLL_GAP) await sleep(MIN_POLL_GAP - took);
       } catch (e) {
+        // Stopped: its held poll was let go with it.
+        if (this.stopped) break;
         this.setStatus("offline");
         if (e instanceof QuotaError) {
           this.setQuota("http");
@@ -592,37 +630,46 @@ export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
 }
 
 /** The tab's held input survives a reload (an iPad reloads a tab it put away); not another tab, nor the browser closed. */
-function readHeld(instance: string): DeviceHeld | null {
+function readHeld(key: string): DeviceHeld | null {
   try {
-    const v = JSON.parse(sessionStorage.getItem(`cq.held.${instance}`) ?? "null");
+    const v = JSON.parse(sessionStorage.getItem(`cq.held.${key}`) ?? "null");
     return v && typeof v === "object" && typeof v.token === "string" ? v : null;
   } catch {
     return null;
   }
 }
 
-function writeHeld(instance: string, h: DeviceHeld): void {
+function writeHeld(key: string, h: DeviceHeld): void {
   try {
-    sessionStorage.setItem(`cq.held.${instance}`, JSON.stringify(h));
+    sessionStorage.setItem(`cq.held.${key}`, JSON.stringify(h));
   } catch {
     // Storage blocked: the line still holds it while the page lives.
   }
 }
 
 /** The line's count survives a reload as the input does; numbers only (shared/line.ts). */
-function readCounts(instance: string): LineCounts | null {
+function readCounts(key: string): LineCounts | null {
   try {
-    return readLine(JSON.parse(sessionStorage.getItem(`cq.line.${instance}`) ?? "null"));
+    return readLine(JSON.parse(sessionStorage.getItem(`cq.line.${key}`) ?? "null"));
   } catch {
     return null;
   }
 }
 
-function writeCounts(instance: string, line: LineCounts): void {
+function writeCounts(key: string, line: LineCounts): void {
   try {
-    sessionStorage.setItem(`cq.line.${instance}`, JSON.stringify(line));
+    sessionStorage.setItem(`cq.line.${key}`, JSON.stringify(line));
   } catch {
     // Storage blocked: the count starts again with a reload.
+  }
+}
+
+function forgetKept(key: string): void {
+  try {
+    sessionStorage.removeItem(`cq.held.${key}`);
+    sessionStorage.removeItem(`cq.line.${key}`);
+  } catch {
+    /* nothing was kept */
   }
 }
 

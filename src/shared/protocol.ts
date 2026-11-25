@@ -66,6 +66,8 @@ export type Command =
   | { op: "lastCall"; at: At }
   /** Points for speed on or off, in the lobby (the join screen's switch). */
   | { op: "speed"; value: boolean }
+  /** Devices shared: a player's device offers a place for another beside it (docs/design/class-and-wall.md, "Sharing a device"). */
+  | { op: "share"; value: boolean }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
   | { op: "setCounts"; q: number; counts: boolean[] }
@@ -79,7 +81,11 @@ export type Command =
   | { op: "endInstance" }
   /** Projector or Remote, while both tabs are there: the wall becomes the steering tab and the steering tab the wall. */
   | { op: "swap" }
-  /** Projector or Remote: give the role up. */
+  /**
+   * Projector or Remote: give the role up. A player at a shared device:
+   * close its place there; before the start the player is gone, after it
+   * away, to be picked back.
+   */
   | { op: "leave" }
   /** Any tab: send me my current view (presence changes with time, not with events). */
   | { op: "tick" }
@@ -89,7 +95,8 @@ export type Command =
    * the uploading device (Resume); it needs no digits and isn't limited.
    */
   | { op: "takeRole"; role: RoleName; teacher?: string; secret?: string }
-  | { op: "newPlayer" }
+  /** beside: the token of a player at this device, which the new one shares (docs/design/class-and-wall.md, "Sharing a device"). */
+  | { op: "newPlayer"; beside?: string }
   | { op: "claim"; player: string }
   // a player
   /**
@@ -356,6 +363,8 @@ export interface TeacherView {
   zoom: boolean;
   /** Points for speed, the join screen's switch. */
   speed: boolean;
+  /** Devices shared, the check's switch; null: never set for this quiz, so the browser's last choice may set it. */
+  share: boolean | null;
   /** The open question: its answers hidden, open, or locked in until the reveal; null between questions. */
   answering: Answering | null;
   /** The open question is locked in, its spread on the wall and its key not yet: the next step is the reveal. */
@@ -383,6 +392,8 @@ export interface PlayerView {
   removed: boolean;
   /** In the lobby once Start is pressed: the dressing ends, and the first question comes, when it runs out. */
   starts: ClockView | null;
+  /** The teacher allows sharing a device: this one offers a place beside its player. */
+  share?: true;
   me: { avatar: Avatar; score: number; place: number; of: number } | null;
   /**
    * The answer pictures' small copies, in packs: fetched once, as soon as a

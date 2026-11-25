@@ -305,6 +305,25 @@ test("avatars: the first dozen players all get different animals", () => {
   assert.equal(combos.size, G.MAX_PLAYERS);
 });
 
+test("a shared device: its places wear its animal, a place closed before the start comes back as it was, three at most", () => {
+  const { g, ids } = setup(3);
+  const first = G.playerById(g.run!, ids[0])!;
+  assert.throws(() => G.addPlayer(g, "s1", "ts1", 5, Math.random, first), /not allowed/, "only while the teacher allows it");
+  G.setShare(g, true);
+  const second = G.addPlayer(g, "s1", "ts1", 5, Math.random, first);
+  assert.equal(second.avatar.a, first.avatar.a);
+  assert.notEqual(second.avatar.c, first.avatar.c);
+  assert.equal(G.leaveSeat(g, "s1"), "gone");
+  const again = G.addPlayer(g, "s2", "ts2", 6, Math.random, first);
+  assert.deepEqual(again.avatar, second.avatar, "closing a place and adding it again rerolls nothing");
+  G.addPlayer(g, "s3", "ts3", 7, Math.random, again);
+  assert.throws(() => G.addPlayer(g, "s4", "ts4", 8, Math.random, first), /not allowed/);
+  // Under way, a closed place keeps its player and score, away, to be picked back.
+  begin(g, 10);
+  assert.equal(G.leaveSeat(g, "s3"), "kept");
+  assert.ok(G.playerById(g.run!, "s3"));
+});
+
 test("dressing: a look in the lobby, whole, the same for anyone, until Start's time runs out", () => {
   const { g, ids } = setup(3);
   const before = { ...g.run!.players[ids[0]].avatar };

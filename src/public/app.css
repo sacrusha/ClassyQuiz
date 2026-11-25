@@ -316,6 +316,38 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .choose button.new { background: var(--card); border: 3px dashed var(--rule); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
 .offline-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); background: #2b2b2b; color: #fff; border-radius: 999px; padding: 6px 14px; display: flex; gap: 8px; align-items: center; z-index: 10; max-width: calc(100vw - 32px); box-sizing: border-box; }
 
+/* A device the class shares (docs/design/class-and-wall.md, "Sharing a device"): a column per place, each sized by
+   its own room, not the window's; a + along the edge for one more; a × on each place while another stays. Hands of
+   two or three people are on the glass at once: nothing pinches, scrolls or calls up a menu. */
+body.shared { -webkit-touch-callout: none; }
+.play main.seats { flex-direction: row; height: 100vh; height: 100dvh; padding: 0; gap: 0; touch-action: none; }
+.seats > .seat { flex: 1 1 0; min-width: 0; position: relative; display: flex; overflow: hidden; container: seat / size; }
+.seats > .seat + .seat { border-left: 3px solid var(--rule); }
+.seat-body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 12px; gap: 12px; }
+.seat-close { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; padding: 9px; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--muted); }
+.seat-close .icon { width: 100%; height: 100%; display: block; }
+.seat:not(.closable) > .seat-close { display: none; }
+.seat.closable .top { padding-right: 48px; }
+.addseat { flex: 0 0 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; border: 0; border-left: 3px dashed var(--rule); background: color-mix(in srgb, var(--fg) 4%, transparent); color: var(--muted); }
+.addseat .icon { width: 30px; height: 30px; }
+.seats .hero { width: min(52cqw, 44cqh); height: min(52cqw, 44cqh); }
+.seats .big { font-size: clamp(1.6rem, 9cqmin, 2.4rem); }
+.seats .ansbtn { font-size: clamp(1.1rem, 6cqmin, 2.4rem); min-height: 64px; }
+.seats .ansbtn .shape { width: clamp(36px, 12cqmin, 120px); height: clamp(36px, 12cqmin, 120px); }
+.seats .verdict { width: 40cqmin; height: 40cqmin; }
+.seats .verdict-shape .shape { width: 12cqmin; height: 12cqmin; }
+.seats .dress .hero { width: min(44cqw, 58cqh); height: min(44cqw, 58cqh); }
+/* Many avatars away: the choice scrolls up and down within its column, the one thing on a shared page that does. */
+.seats .center { min-height: 0; }
+.seats .choose { max-height: 100%; overflow-y: auto; touch-action: pan-y; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+.seat.closable .choose { margin-top: 44px; max-height: calc(100% - 44px); }
+@container seat (orientation: portrait) {
+  .seats .dress { grid-template: "hero" auto "picker" auto "look" auto / 1fr; align-content: center; gap: 20px; }
+  .seats .dress .hero { width: min(62cqw, 30cqh); height: min(62cqw, 30cqh); }
+  /* Text answers one under the other: a column a third of a tablet wide is a phone's. */
+  .seats .buttons:not(.pics) { grid-template-columns: 1fr; }
+}
+
 /* Steering: the steering bar at the bottom
    (docs/design/question-flow.md, "The steering bar"). Fixed px: the page's font scales with the
    projector's width, the bar is for the teacher at the laptop. */
@@ -421,6 +453,9 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .arrange-opt small { font-size: .85em; color: var(--muted); }
 .arrange-opt[aria-pressed="true"] { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
 .arrange-call { color: var(--muted); font-size: 16px; margin: 6px 0; }
+/* Devices shared (docs/design/class-and-wall.md, "Sharing a device"): what the switch does stays under it, on or off. */
+.share-note { display: block; color: var(--muted); }
+.check .cshare { text-align: left; font-size: 16px; margin: 14px 0 0; }
 
 /* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
    play it as cards, each with the picture of its way, its own button and what starting it costs; the questions folded under
@@ -694,7 +729,7 @@ body.teach { padding-bottom: 96px; }
 .tile.pic .apic .txt { flex: 0 1 auto; min-width: 0; max-width: 100%; line-height: 1.15; }
 .tiles.pics.veiled .apic > * { visibility: hidden; }
 
-/* The same on a student's device (client/play.ts): the picture on the
+/* The same on a student's device (client/seat.ts): the picture on the
    button's colour, the shape beside or above it. */
 /* The room is what the page leaves, whatever the pictures measure: script sets it in px. */
 .play .buttons.pics { grid-auto-rows: unset; flex: 1 1 0; min-height: 0; }

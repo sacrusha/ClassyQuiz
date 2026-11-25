@@ -136,7 +136,7 @@
     howTo: [['On the second device, open '], ['classyquiz.pages.dev', 'bold'], [' and type '], ['63953 47', 'code'], ['.']],
     call: 'In a video call, the window you share is the screen everyone sees.',
     letIn: 'Let everyone in ▶', more: '⋯ More',
-    // the second device's question (client/play.ts)
+    // the second device's question (client/seat.ts)
     showHere: 'Show the quiz here', showHereSub: 'everyone watches this screen',
     steerHere: 'Steer it from here', steerHereSub: 'Start, next, the solution',
     wait: 'Joining opens in a moment.',

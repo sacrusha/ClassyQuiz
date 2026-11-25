@@ -86,7 +86,9 @@ summary is made, or lost to a hibernation in between: accepted, the
 figures are for orders of magnitude. A teacher role taken by another tab,
 or an avatar picked back on another device, replaces the first device's
 counts. A removed player's device stays among the class's devices: its
-requests were spent all the same.
+requests were spent all the same. A device the class shares
+(`class-and-wall.md`, "Sharing a device") has a line per place, each
+counted as a device, and each counts the page's script errors.
 
 The instance adds what only it knows: the kind of room (Peers; steered with
 a Remote taken; steered from the wall alone), players not removed,

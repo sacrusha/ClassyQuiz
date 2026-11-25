@@ -18,6 +18,8 @@ export const MAX_PLAYERS = 60;
 export const DOOR_OPEN_MS = 5 * 60_000;
 /** New players once the quiz is under way (past DOOR_OPEN_MS and the first question): a latecomer gets in, a stream of strangers with the code doesn't. */
 export const MAX_LATE_JOINERS = 5;
+/** Players at one device when the teacher allows sharing (docs/design/class-and-wall.md, "Sharing a device"): the owner's case, 16 people at 6 iPads, takes three. */
+export const MAX_SEATS = 3;
 /**
  * Changes of mind per student and question; the last accepted tap counts.
  * Answers are held in memory and written with the teacher's steps

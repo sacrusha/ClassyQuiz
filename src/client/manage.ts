@@ -4,7 +4,7 @@
 
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { ROOM_WARN, quotaResetAt } from "../shared/limits.ts";
-import { esc, lines, siteAddress } from "./dom.ts";
+import { esc, lines, sharing, siteAddress } from "./dom.ts";
 import { SITE, T, said } from "./room-text.ts";
 import { ICON, avatarSvg, shapeSvg, syncAvatars } from "./look.ts";
 import type { Line } from "./net.ts";
@@ -178,6 +178,8 @@ export class Steer {
   private view: () => TeacherView | null;
   readonly ui: ManageUI;
   private redraw: () => void;
+  /** This page has given a quiz never set the browser's choice of shared devices. */
+  private shareSent = false;
 
   constructor(line: () => Line | null, view: () => TeacherView | null, ui: ManageUI, redraw: () => void) {
     this.line = line;
@@ -186,9 +188,17 @@ export class Steer {
     this.redraw = redraw;
   }
 
-  /** Call on every view: the moment the step on screen changes is what a press is judged against. */
+  /**
+   * Call on every view: the moment the step on screen changes is what a
+   * press is judged against. A quiz in its lobby that was never set takes
+   * this browser's choice of shared devices.
+   */
   noteStep(v: TeacherView): void {
     this.presses.noteView(stepState(v));
+    if (v.phase === "lobby" && v.share === null && !this.shareSent && sharing.get()) {
+      this.shareSent = true;
+      void this.line()?.send({ op: "share", value: true });
+    }
   }
 
   /** The same as a click on a button with these data attributes (for the ⋯ menu and the keyboard). */
@@ -242,6 +252,10 @@ export class Steer {
         return true;
       case "speed":
         await send({ op: "speed", value: !v.speed });
+        return true;
+      case "share":
+        sharing.set(!v.share);
+        await send({ op: "share", value: !v.share });
         return true;
       case "finish":
         if (confirm(T.confirmFinish)) await send({ op: "finish", at });
@@ -400,4 +414,13 @@ export function addressAndCode(code: string): string {
  */
 export function speedSwitch(v: TeacherView): string {
   return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>${T.speedSwitch}</button><small class="speed-note">${T.speedNote}</small>`;
+}
+
+/**
+ * The check's switch for devices shared (docs/design/class-and-wall.md,
+ * "Sharing a device"): what it does stays in view, since a teacher deciding
+ * whether to turn it on needs that, and says it to the class.
+ */
+export function shareSwitch(v: TeacherView): string {
+  return `<button class="speed-switch" role="switch" aria-checked="${!!v.share}" data-act="share"><span class="knob" aria-hidden="true"></span>${T.shareSwitch}</button><small class="share-note">${T.shareNote}</small>`;
 }

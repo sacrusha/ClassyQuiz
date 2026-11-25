@@ -110,6 +110,10 @@ left on after the lesson stops costing requests all day.
 - The waking tap or key does not reach the page, so it presses nothing and
   cannot advance the quiz from a clicker. Coming back to the tab (a tablet
   switched on) wakes it too.
+- A page with several lines, a device the class shares
+  (`class-and-wall.md`, "Sharing a device"), sleeps and wakes as one: a
+  change on any of its lines keeps them all awake, and the one tap wakes
+  them all.
 - A page's own timers (the `tick` command) neither count as activity nor wake
   it. Any other command is someone at the device and does.
 - It lives in `client/net.ts`, so it covers every page with a line, the
