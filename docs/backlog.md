@@ -761,10 +761,22 @@ The quiz is already made; it can be more than one activity.
   closes on the last student's answer or max time, with fixed, generous
   durations for the result pages — messes with deliberate pauses, so a proper
   design item rather than a quick build.
-- **Pairs and teams** — two children on one tablet already works as one
+- **Fewer devices than people** — the owner's case: a class of 16 with 6
+  iPads, generation unknown. Two children on one tablet already works as one
   player; whether "of 25" and the ranking read sensibly when twelve tablets
   stand for twenty-four children is unchecked, and team play is a mode of its
-  own.
+  own. A split screen gives each person at a shared device a seat and a score
+  of their own; the owner's case takes three to a device (6 × 2 don't seat
+  16). The owner: a nice-to-have, and a classroom's problem, so for
+  Quizmaster only, allowed by the teacher on the check, so it stays off where
+  everyone has a device; a seat added on the device can be closed there
+  again; one animal per device, in different colours, so adding and closing
+  seats doesn't reroll the animal; not core, so Safari 16 may be its floor.
+  Open: Solo and Peers as variants (one device, 2–4 players), whose design
+  would differ; whether pupils misuse adding and closing seats (user
+  testing); two hands on one screen, unchecked on a real iPad. Plausible
+  assumption: a browser gives no click for a tap while another finger is
+  down, and two fingers moving zoom the page.
 - **Dark mode** — a visitor whose device is dark gets every screen dark;
   the players' screens are light with no reason recorded, probably an
   oversight (the owner: models have dropped dark mode unnoticed before, in
