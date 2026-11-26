@@ -9,6 +9,7 @@ import { build, context } from "esbuild";
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { ASKS, LANGS, TEXT } from "../client/landing-text.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -133,9 +134,42 @@ if (address !== DEMO) {
   }
 }
 
+// /en/, /de/, /fr/ and /it/: the root page with its part for people in one
+// language in the static page, which search engines index; the root page
+// they see in English (docs/design/root-page.md, Search and shared links).
+// The manual stays, so an AI given one of these addresses reads it too.
+{
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const at = (path) => `https://${address}${path}`;
+  const alternates = [...LANGS.map((l) => `<link rel="alternate" hreflang="${l.id}" href="${at(`/${l.id}/`)}">`), `<link rel="alternate" hreflang="x-default" href="${at("/")}">`].join("\n");
+  const withAlternates = (html) => html.replace("</head>", () => `${alternates}\n</head>`);
+  const home = await readFile(join(dist, "index.html"), "utf8");
+  await writeFile(join(dist, "index.html"), withAlternates(home));
+  for (const { id } of LANGS) {
+    const t = TEXT[id];
+    const word = (key) => {
+      if (typeof t[key] !== "string") throw new Error(`index.html: landing-text.ts has no ${id} words for ${key}`);
+      return esc(t[key].replaceAll(DEMO, address));
+    };
+    let html = home
+      .replace('<html lang="en">', `<html lang="${id}">`)
+      .replace(/<title>[^<]*<\/title>/, () => `<title>${word("pageTitle")}</title>`)
+      .replace(/(<meta name="description" content=")[^"]*/, (_, a) => `${a}${word("pagePitch")} ${word("pageManual")}`)
+      .replace(/(<meta property="og:description" content=")[^"]*/, (_, a) => a + word("pagePitch"))
+      .replace(/(<link rel="canonical" href=")[^"]*/, (_, a) => a + at(`/${id}/`))
+      .replace(/( data-t="(\w+)"[^>]*>)[^<]*</g, (_, a, key) => `${a}${word(key)}<`)
+      .replace(/(<span class="said" id="ask-(\w+)">)[^<]*/g, (_, a, tab) => a + esc(ASKS[tab](t).replaceAll(DEMO, address)));
+    for (const [attr, kind] of [["aria-label", "aria"], ["title", "title"], ["alt", "alt"]]) {
+      html = html.replace(new RegExp(` ${attr}="[^"]*" data-t-${kind}="(\\w+)"`, "g"), (_, key) => ` ${attr}="${word(key)}" data-t-${kind}="${key}"`);
+    }
+    await mkdir(join(dist, id), { recursive: true });
+    await writeFile(join(dist, id, "index.html"), withAlternates(html));
+  }
+}
+
 // /sitemap.xml: the pages without noindex.
 {
-  const urls = [];
+  const urls = LANGS.map((l) => `https://${address}/${l.id}/`);
   for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html")).sort()) {
     if ((await readFile(join(dist, name), "utf8")).includes('<meta name="robots" content="noindex">')) continue;
     urls.push(`https://${address}/${name === "index.html" ? "" : name.slice(0, -".html".length)}`);

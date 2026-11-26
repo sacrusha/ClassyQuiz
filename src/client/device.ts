@@ -9,7 +9,7 @@ import { ICON, avatarSvg } from "./look.ts";
 import { fillPictures, picImg } from "./pictures.ts";
 import { backdrop, endJump, jump, layQuestion, markTiles, type StageQuestion } from "./stage.ts";
 import { edgeBar } from "./clock.ts";
-import { DOUBLE_MS, SETTLE_MS } from "./steps.ts";
+import { DOUBLE_MS, SETTLE_MS, fitLabels } from "./steps.ts";
 import { T } from "./room-text.ts";
 
 export interface DeviceQuestion extends StageQuestion {
@@ -162,6 +162,7 @@ export class DeviceScreen {
     next.style.visibility = v.next ? "" : "hidden";
     next.tabIndex = v.next ? 0 : -1;
     this.renderCountdown(v.countdown, before?.countdown);
+    fitLabels(next.parentElement!);
   }
 
   private renderCountdown(c: DeviceView["countdown"], before: DeviceView["countdown"]): void {
@@ -262,6 +263,8 @@ export class DeviceScreen {
   }
 
   private resize = (): void => {
+    const bar = this.root.querySelector(".dbar");
+    if (bar) fitLabels(bar);
     // The band is laid out for the old size; the question is laid out again for the new one.
     endJump();
     if (this.view && this.root.querySelector("#stage")) this.show(this.view);

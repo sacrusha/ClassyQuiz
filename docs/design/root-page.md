@@ -108,10 +108,12 @@ title, its description and the social card (`docs/brand/README.md`,
 Rasters); a Peers invite shares `/play#` with its code, which carries the
 preview too. Some platforms link to a page's `og:url` in place of the
 address shared, which would drop the code, so the pages name none.
-Search engines see the page in English: the four languages share one
-address, and a crawler's browser plausibly asks for English. The
-description may also reach AIs' training data, where it tells an AI about
-to make a classyQuiz that this page holds the manual it needs.
+At `/` a crawler's browser plausibly gets English; `/en/`, `/de/`, `/fr/`
+and `/it/` carry the part for people in their language in the static
+page, for search engines, with the manual inline in English, so an AI
+given one of these addresses still reads it. The description may also
+reach AIs' training data, where it tells an AI about to make a classyQuiz
+that this page holds the manual it needs.
 
 ### Files and browsers
 
@@ -131,7 +133,9 @@ to make a classyQuiz that this page holds the manual it needs.
 The part for people is in German, English, French and Italian (Purpose). Three
 of the four have a reader on the project (backlog, "With the owner");
 plausibly they are the likeliest to see use. Each
-device has its own language for the site's words; a quiz's questions and
+device has its own language for the site's words, which the root page
+speaks at `/`; at `/de/` and the others the address sets it, and the
+switch there moves to the other address. A quiz's questions and
 answers show as they were written, and translating them would be a feature
 to design. What the AI reads stays English. The film shows the
 same quiz in every language, since wrong answers in several different
@@ -206,3 +210,6 @@ the question doesn't turn on.
 - Either own-copy route, end to end; "in minutes" and "a while" are the
   estimates. Whether `/own-copy` should say that one copy per
   school, set up once by a colleague or IT, is enough.
+- Whether search engines take `/de/`, `/fr/` and `/it/` for pages in their
+  language, when the English manual is most of each page's text; Search
+  Console shows which searches find which address.

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LANGS, TEXT, askText, chosenLang } from "./landing-text.ts";
+import { ASKS, LANGS, TEXT, askText, chosenLang } from "./landing-text.ts";
 
 test("every language marks the same five parts of its sheets ask, in order, the site's address first", () => {
   for (const { id } of LANGS) {
@@ -83,10 +83,12 @@ test("the static page carries the English table's words", async () => {
     assert.equal(plain(m[1]), en[m[2]], `data-t-title="${m[2]}"`);
     seen.add(m[2]);
   }
-  // the sheets ask is the labelled ask, plain
-  for (const [id, ask] of [["idea", TEXT.en.askIdea], ["sheets", askText(TEXT.en)], ["notes", TEXT.en.askNotes], ["test", TEXT.en.askTest], ["help", TEXT.en.askHelp]]) {
-    assert.ok(html.includes(`<span class="said" id="ask-${id}">${ask}</span>`), `the ${id} ask differs from landing-text.ts's`);
+  for (const [id, ask] of Object.entries(ASKS)) {
+    assert.ok(html.includes(`<span class="said" id="ask-${id}">${ask(TEXT.en)}</span>`), `the ${id} ask differs from landing-text.ts's`);
   }
+  assert.ok(html.includes(`<title>${TEXT.en.pageTitle}</title>`), "title");
+  assert.ok(html.includes(`<meta name="description" content="${TEXT.en.pagePitch} ${TEXT.en.pageManual}">`), "description");
+  assert.ok(html.includes(`<meta property="og:description" content="${TEXT.en.pagePitch}">`), "og:description");
   for (const key of ["what", "tabIdea", "tabSheets", "tabNotes", "tabTest", "unsure", "help", "getH", "which", "gives", "see", "run", "upload"]) assert.ok(seen.has(key), `index.html has no ${key}`);
 });
 

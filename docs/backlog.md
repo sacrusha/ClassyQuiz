@@ -156,9 +156,6 @@ turns whatever the material asks into choices of text and pictures.
   shows the owner's photographs of the printed sheet.
 - **"This file is not a readable .zip archive."** lacks a next step for the
   visitor, where the other errors under the box have one.
-- **Found when searched in German, French or Italian** — only the English
-  page reaches an index (`design/root-page.md`, Search and shared links),
-  while the example class searches in German.
 
 ## The guidance to the AI
 

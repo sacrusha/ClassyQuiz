@@ -8,7 +8,7 @@ import { uploadFormat, type UploadFormat } from "../shared/upload.ts";
 import { $, esc, forgetQuiz, savedQuizzes, store, teacherCode, teacherEntry, type SavedQuiz } from "./dom.ts";
 import { api, readApi } from "./net.ts";
 import { ZipError, listZip, quizTextFromEntries, type ZipEntry } from "./unzip.ts";
-import { LANG_KEY, TEXT, askText, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
+import { ASKS, LANG_KEY, TEXT, chosenLang, isLang, type Lang, type Text } from "./landing-text.ts";
 import type { Example } from "./example-text.ts";
 import { EXAMPLE_FILES } from "./example-files.ts";
 import { codeBox, langSwitch } from "./top.ts";
@@ -30,12 +30,17 @@ void sweepStale();
 const host = location.host || "classyquiz.pages.dev";
 const DEMO = "classyquiz.pages.dev";
 
-let lang: Lang = chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
+// At /de/ and the others the address names the language; at / the device does.
+const atLang = location.pathname.match(/^\/(\w\w)\/$/)?.[1];
+let lang: Lang = isLang(atLang) ? atLang : chosenLang(store.get<string>(LANG_KEY), navigator.languages ?? [navigator.language]);
 let t: Text = TEXT[lang];
 
 codeBox();
 const codeInput = $("#code") as HTMLInputElement;
-const showLang = langSwitch((l) => apply(l));
+const showLang = langSwitch((l) => {
+  if (isLang(atLang)) history.replaceState(history.state, "", `/${l}/`);
+  apply(l);
+});
 
 const runbox = $("#runbox");
 const out = $("#out");
@@ -47,13 +52,7 @@ let reading = false;
 // here: without the script, and for an AI's fetcher, the asks stand one under
 // the other.
 
-const TABS: { id: Example | "help"; ask: (t: Text) => string }[] = [
-  { id: "idea", ask: (t) => t.askIdea },
-  { id: "sheets", ask: (t) => askText(t) },
-  { id: "notes", ask: (t) => t.askNotes },
-  { id: "test", ask: (t) => t.askTest },
-  { id: "help", ask: (t) => t.askHelp },
-];
+const TABS = (["idea", "sheets", "notes", "test", "help"] as const).map((id) => ({ id, ask: ASKS[id] }));
 const tabs = TABS.map((a) => $(`#tab-${a.id}`) as HTMLButtonElement);
 const panels = TABS.map((a) => $(`#ex-${a.id}`));
 const bar = $("#extabs");
@@ -230,8 +229,9 @@ function apply(l: Lang): void {
     const v = t[el.dataset.tTitle as keyof Text];
     if (typeof v === "string") el.title = v;
   }
-  for (const id of ["#landing", "header.top .bar"]) $(id).lang = l;
-  filmLanguage(l); // after #landing's lang: the film is built in the language around it
+  document.title = t.pageTitle;
+  document.documentElement.lang = l;
+  filmLanguage(l); // after the page's lang: the film is built in the language around it
   renderExamples();
   renderResume();
   renderOwnCopy();

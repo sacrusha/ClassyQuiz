@@ -24,7 +24,8 @@
 ### Words
 
 - A teacher must be able to say before a press what will change on the wall and on the tablets. With "answers" for both the tiles and what the class tapped, "show the answers" read as showing the key. The teacher screens, the guidance and the format's messages, which the check also hands to the AI, say **choices** for the tiles a question offers, **answers** for what the class tapped, and **solution** for the key (German teachers say *Lösung*). In the code, `answers` is the name of a question's choices.
-- As labels, "Reveal" and "Ranking" name a thing the class sees, and worked; "Next question" and "Straight to answering" name a motion, and a fast-forward button found no labels that worked. The wall's bar has room for about 13–15 characters per label, and a noun translates without a verb form, gender or word order.
+- As labels, "Reveal" and "Ranking" name a thing the class sees, and worked; "Next question" and "Straight to answering" name a motion, and a fast-forward button found no labels that worked. The wall's bar has room for about 13–15 characters per label, the Remote on a 360 px phone for about 12 per word over two lines; a longer word shrinks to fit (`fitLabels`, down to 70%), as French ones do at 320 px. A noun translates without a verb form, gender or word order.
+- In German, *Optionen* read as settings; quiz shows call the tiles *Antworten*, so the step that closes answering is *Stopp*, which may read as ending the quiz, though less than a second *Antworten* did. Countdown's note says *dann Stopp*: *dann Schluss* read as the quiz's end. *Schlussrangliste* is too long a word for a phone; the final ranking is *Endstand*.
 - An idiom such as "last call" is unknown to many German-speaking teachers; "Countdown" is a loanword in German and Italian.
 
 ## Not known

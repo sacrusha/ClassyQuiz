@@ -1,10 +1,12 @@
 // The root page's words above the manual. The static page is English, for an AI's fetcher; home.ts puts
-// these in. The manual is English: it is for the AI. The asks name
+// these in, and the build writes them into /en/, /de/, /fr/ and /it/ for search engines (scripts/build.mjs).
+// The manual is English: it is for the AI. The asks name
 // classyquiz.pages.dev; the page puts the address the browser opened in its
 // place.
 
 import { SITE_WORDS, type SiteWords } from "./site-text.ts";
 import type { ZipProblem } from "./unzip.ts";
+import type { Example } from "./example-text.ts";
 
 export { LANGS, LANG_KEY, chosenLang, isLang, type Lang } from "./device-lang.ts";
 import type { Lang } from "./device-lang.ts";
@@ -34,6 +36,12 @@ export interface Text extends SiteWords {
   see: string;
   /** The page's h1. */
   what: string;
+  /** The page's title. */
+  pageTitle: string;
+  /** What a search result or a chat's preview says of the page. */
+  pagePitch: string;
+  /** After the pitch in the page's description, for an AI that learned it: the page holds the manual. */
+  pageManual: string;
   /** The first step's heading. */
   getH: string;
   /** Under the ask, over the example's file (or the AI's question back). */
@@ -127,6 +135,9 @@ const en: Text = {
   full: "Full screen",
   see: "The whole example ›",
   what: "Play quizzes your own AI makes: for a class or group, with friends, or on your own.",
+  pageTitle: "classyQuiz · Play quizzes your own AI makes",
+  pagePitch: "Play quizzes your own AI makes from exercise sheets, notes or an idea: on a big screen for a class or group, with friends, or alone. Free, no accounts.",
+  pageManual: "This page holds the manual an AI needs to make a classyQuiz; classyquiz.pages.dev/manual.txt has it as plain text.",
   getH: "Ask your AI for a quiz",
   gives: "The AI's answer:",
   first: "The quiz's first question:",
@@ -214,6 +225,9 @@ const de: Text = {
   full: "Vollbild",
   see: "Das ganze Beispiel ›",
   what: "Spiel das Quiz, das deine KI macht: in der Klasse oder Gruppe, mit Freunden oder allein.",
+  pageTitle: "classyQuiz · Spiel das Quiz, das deine KI macht",
+  pagePitch: "Spiel das Quiz, das deine KI aus Arbeitsblättern, Notizen oder einer Idee macht: auf einem grossen Bildschirm für eine Klasse oder Gruppe, mit Freunden oder allein. Gratis, ohne Konto.",
+  pageManual: "Diese Seite enthält die Anleitung, die eine KI braucht, um ein classyQuiz zu machen. Als reinen Text gibt es sie unter classyquiz.pages.dev/manual.txt.",
   getH: "Frag deine KI nach einem Quiz",
   gives: "Antwort der KI:",
   first: "Die erste Frage des Quiz:",
@@ -284,7 +298,7 @@ const de: Text = {
   offline: "Keine Verbindung zur Seite. Prüf die Internetverbindung und versuch es nochmals. Klappt es weiterhin nicht, sperrt vielleicht das Netz einer Schule oder Firma die Seite.",
   notStarted: "vor der ersten Frage",
   question: (n, t) => `Frage ${n} von ${t}`,
-  finalRanking: "Schlussrangliste",
+  finalRanking: "Endstand",
   back: "Zurück zum Quiz ▶",
   joinCode: "Code zum Beitreten",
   otherDevice: (c) => `Auf einem anderen Gerät: <b>${c}</b> ins Codefeld eingeben.`,
@@ -306,6 +320,9 @@ const fr: Text = {
   full: "Plein écran",
   see: "L'exemple complet ›",
   what: "Jouez aux quiz que votre IA crée : en classe ou en groupe, entre amis, ou en solo.",
+  pageTitle: "classyQuiz · Jouez aux quiz que votre IA crée",
+  pagePitch: "Jouez aux quiz que votre IA crée à partir de fiches d'exercices, de notes ou d'une idée : sur grand écran pour une classe ou un groupe, entre amis, ou en solo. Gratuit, sans compte.",
+  pageManual: "Cette page contient le manuel dont une IA a besoin pour créer un classyQuiz. Il existe aussi en texte brut à l'adresse classyquiz.pages.dev/manual.txt.",
   getH: "Demandez un quiz à votre IA",
   gives: "Réponse de l'IA :",
   first: "La première question du quiz :",
@@ -398,6 +415,9 @@ const it: Text = {
   full: "Schermo intero",
   see: "Tutto l'esempio ›",
   what: "Gioca ai quiz che la tua IA crea: in classe o in gruppo, tra amici o per conto tuo.",
+  pageTitle: "classyQuiz · Gioca ai quiz che la tua IA crea",
+  pagePitch: "Gioca ai quiz che la tua IA crea da schede, appunti o un'idea: su un grande schermo per una classe o un gruppo, tra amici o per conto tuo. Gratis, senza account.",
+  pageManual: "Questa pagina contiene il manuale di cui un'IA ha bisogno per creare un classyQuiz. È disponibile anche come testo semplice su classyquiz.pages.dev/manual.txt.",
   getH: "Chiedi un quiz alla tua IA",
   gives: "Risposta dell'IA:",
   first: "La prima domanda del quiz:",
@@ -483,3 +503,12 @@ export const TEXT: Record<Lang, Text> = { de, en, fr, it };
 export function askText(t: Text): string {
   return t.ask.map((p) => p.s).join("");
 }
+
+/** Each tab's ask. */
+export const ASKS: Record<Example | "help", (t: Text) => string> = {
+  idea: (t) => t.askIdea,
+  sheets: askText,
+  notes: (t) => t.askNotes,
+  test: (t) => t.askTest,
+  help: (t) => t.askHelp,
+};

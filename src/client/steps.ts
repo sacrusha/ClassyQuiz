@@ -65,6 +65,39 @@ export function steeringButtons(v: TeacherView): string {
     <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}${label(play ? play.label : "", play?.note)}</button>`;
 }
 
+/** How far a steering button's words shrink before they are cut instead. */
+const FIT_MIN = 0.7;
+
+/**
+ * The steering buttons in `root` keep their size and place whatever they
+ * say, so their words are set at the largest size, down to FIT_MIN, at which
+ * no word is cut and no line falls out of the button.
+ */
+export function fitLabels(root: ParentNode): void {
+  for (const lbl of root.querySelectorAll<HTMLElement>(".bar-play > .lbl, .bar-last > .lbl, .bar-exit > .lbl")) {
+    const btn = lbl.parentElement!;
+    const cs = getComputedStyle(btn);
+    const room = btn.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const spills = () => [...lbl.children].some((e) => e.scrollWidth > e.clientWidth) || lbl.scrollHeight > room + 0.5;
+    const set = (f: number) => {
+      lbl.style.fontSize = f === 1 ? "" : `${f}em`;
+    };
+    set(1);
+    if (!spills()) continue;
+    let lo = FIT_MIN;
+    let hi = 1;
+    set(lo);
+    if (spills()) continue;
+    for (let i = 0; i < 6; i++) {
+      const mid = (lo + hi) / 2;
+      set(mid);
+      if (spills()) hi = mid;
+      else lo = mid;
+    }
+    set(lo);
+  }
+}
+
 export function startButton(cls: string, attr: string, label: string, pressed: boolean): string {
   return `<button class="btn primary start ${cls}" type="button" ${attr}${pressed ? " disabled" : ""}><span class="lbl"><span>${label}</span><small>${T.startsIn}</small></span></button>`;
 }

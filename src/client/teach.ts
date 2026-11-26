@@ -7,7 +7,7 @@ import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
 import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabRole, teacherCode, teacherEntry, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg } from "./look.ts";
 import { Steer, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, roomNotice, shareSwitch, speedSwitch, syncCrowd, steerItems, thumb, toast, type MenuItem } from "./manage.ts";
-import { steeringButtons } from "./steps.ts";
+import { fitLabels, steeringButtons } from "./steps.ts";
 import { clockBar, edgeBar, localEnd } from "./clock.ts";
 import { Line } from "./net.ts";
 import { fillPictures } from "./pictures.ts";
@@ -15,6 +15,7 @@ import { LINE_WORDS, T, lang, said } from "./room-text.ts";
 
 const main = $("#main");
 const actions = $("#actions");
+addEventListener("resize", () => fitLabels(actions));
 const dot = $("#dot");
 document.documentElement.lang = lang;
 document.title = `classyQuiz · ${T.remote}`;
@@ -113,6 +114,7 @@ function render(): void {
   if (buttons !== lastButtons) {
     lastButtons = buttons;
     actions.innerHTML = buttons;
+    fitLabels(actions);
   }
   steer.noteStep(v);
 }

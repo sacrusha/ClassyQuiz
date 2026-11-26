@@ -6,7 +6,7 @@ import { CLASS_WAITING } from "../shared/limits.ts";
 import { $, arrangement, esc, keepAwake, lines, rolePage, siteAddress, statusDot, tabHadRemote, tabLobby, tabRole, teacherCode, teacherEntry, type Arrangement, type HeldRole } from "./dom.ts";
 import { ICON, avatarSvg, syncAvatars } from "./look.ts";
 import { Steer, roomNotice, addressAndCode, answersBlock, live, newUI, openMenu, patch, playersRow, questionList, shareSwitch, speedSwitch, steerItems, syncCrowd, toast, type MenuItem } from "./manage.ts";
-import { Presses, atOf, startButton, steeringButtons, type StepState } from "./steps.ts";
+import { Presses, atOf, fitLabels, startButton, steeringButtons, type StepState } from "./steps.ts";
 import { edgeBar } from "./clock.ts";
 import { finalHtml, fitFinal } from "./final.ts";
 import { Line } from "./net.ts";
@@ -585,6 +585,7 @@ function renderBar(v: ScreenView, managing: boolean): void {
   if (html !== lastBar) {
     lastBar = html;
     sbar.innerHTML = html;
+    fitLabels(sbar);
   }
   if (v.steer) steer.noteStep(v.steer);
   else wallPresses.noteView(screenState(v));
@@ -754,6 +755,7 @@ document.addEventListener("fullscreenchange", () => {
   if (view) renderBar(view, !!view.steer && view.phase === "lobby");
 });
 window.addEventListener("resize", () => {
+  fitLabels(sbar);
   // The band is laid out for the old size; it doesn't come back for this key.
   endJump();
   // A window dragged to the projector screen: fit the question to its size.

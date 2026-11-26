@@ -46,6 +46,9 @@ translated (`client/room-text.test.ts` lists the missing ones).
   class can pick up an old rule and a bare new rule can land on another page.
 - `dist/manual.txt`: the manual as plain text, made by `build.mjs` from the
   built root page; an element it doesn't know fails the build.
+- `dist/en/`, `de/`, `fr/`, `it/`: the root page with the words of its
+  `data-t` elements and asks from `client/landing-text.ts`, written by
+  `build.mjs`.
 
 The site is two Cloudflare deployables. The state Worker
 (`classyquiz-state`) holds the Durable Objects (`Instance`, `JoinCode`,

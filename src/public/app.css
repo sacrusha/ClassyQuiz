@@ -224,7 +224,7 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .steerbar .btn.bar-exit { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 12em; height: 50px; min-height: 0; padding: .3em .6em; }
 /* On the Remote: between ⋯ and a spacer as wide, so it is centred too. */
 .teach .actions .btn.bar-exit { flex: 0 1 14em; height: 68px; margin: 0 auto; padding: .3em .6em; }
-.teach .actions .wrap.ending::after { content: ""; flex: 0 0 56px; }
+.teach .actions .wrap.ending::after { content: ""; flex: 0 0 48px; }
 .btn.bar-exit .lbl { display: flex; flex-direction: column; line-height: 1.1; text-align: center; }
 .btn.bar-exit .lbl small { font-size: .62em; font-weight: 500; line-height: 1.3; opacity: .85; }
 /* Start (client/steps.ts, startButton): under its label, when the quiz comes. */
@@ -598,11 +598,12 @@ body.teach { padding-bottom: 96px; }
 .teach .actions .wrap { display: flex; gap: 10px; padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
 .teach .actions .btn { flex: 1; }
 .teach .actions .btn.primary { flex: 2; }
-.teach .actions .btn.more { flex: 0 0 56px; padding: 0; font-size: 1.3rem; }
-/* The steering bar (client/steps.ts): Countdown and Play keep their size and place whatever they say. */
-.teach .actions .btn.bar-last { flex: 0 0 38%; min-width: 0; height: 68px; padding: .3em .4em; gap: .3em; font-size: .95rem; }
+.teach .actions .btn.more { flex: 0 0 48px; padding: 0; font-size: 1.3rem; }
+/* The steering bar (client/steps.ts): Countdown and Play keep their size and place whatever they say.
+   Play, pressed at every step, has the larger share; Countdown's words go under its icon. */
+.teach .actions .btn.bar-last { flex: 0 0 30%; flex-direction: column; min-width: 0; height: 68px; padding: .3em .4em; gap: 0; font-size: .95rem; }
 .teach .actions .btn.bar-play { flex: 1 1 0; min-width: 0; height: 68px; padding: .3em .5em; gap: .35em; font-size: 1.15rem; }
-/* A narrow phone: a label takes two lines rather than being cut. */
+/* A narrow phone: a label takes two lines, and shrinks (fitLabels) rather than being cut. */
 .teach .actions .btn.bar-last span, .teach .actions .btn.bar-play span { white-space: normal; line-height: 1.15; text-overflow: clip; }
 .joinbox { text-align: center; padding: 8px 0 4px; }
 .joinbox .addr { color: var(--muted); font-weight: 600; }
