@@ -28,7 +28,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { DAY_FOR_CLASSES, DAY_FOR_JOINS, DAY_ROWS_FOR_UPLOADS, MAX_LIVE_BYTES, NEARLY_FULL, type ClassFull, type Cost, type SiteFull } from "../shared/limits.ts";
 import { NO_COST, add, asCost, fullness, moved, within } from "./rows.ts";
-import type { Env } from "./env.ts";
+import { emptyOutsideEu, type Env } from "./env.ts";
 import { DAY_MS, FULL_KEEP_DAYS, countFull, dayOf } from "./fulldays.ts";
 import { EDGES, MONTHS_KEPT, addClass, foldDay, monthOf, type ClassUse, type DayRecord, type DayUse, type MonthRecord, type OwnerView, type Refused } from "./telemetry.ts";
 
@@ -86,8 +86,15 @@ export class SiteBudget extends DurableObject<Env> {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     void ctx.blockConcurrencyWhile(async () => {
+      await emptyOutsideEu(ctx, env.BUDGET, "site");
       this.kept = await ctx.storage.list();
     });
+  }
+
+  /** From before the EU (`emptyOutsideEu`). */
+  async forget(): Promise<void> {
+    await this.ctx.storage.deleteAll();
+    this.kept = new Map();
   }
 
   private get<T>(key: string): T | undefined {

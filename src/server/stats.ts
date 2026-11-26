@@ -4,7 +4,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { DAY_ATTEMPTS_PER_FORMAT } from "../shared/limits.ts";
 import type { UploadFormat } from "../shared/upload.ts";
-import type { Env } from "./env.ts";
+import { emptyOutsideEu, type Env } from "./env.ts";
 
 interface Tally {
   count: number;
@@ -17,6 +17,16 @@ interface Tally {
 }
 
 export class UploadStats extends DurableObject<Env> {
+  constructor(ctx: DurableObjectState, env: Env) {
+    super(ctx, env);
+    void ctx.blockConcurrencyWhile(() => emptyOutsideEu(ctx, env.STATS, "uploads"));
+  }
+
+  /** From before the EU (`emptyOutsideEu`). */
+  async forget(): Promise<void> {
+    await this.ctx.storage.deleteAll();
+  }
+
   async count(format: UploadFormat): Promise<void> {
     const key = `f:${format}`;
     const day = new Date().toISOString().slice(0, 10);

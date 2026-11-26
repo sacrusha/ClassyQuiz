@@ -24,14 +24,15 @@
 import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TEACHER_CODE, TOO_MANY_CODES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
 import { isQuotaError } from "../../shared/limits.ts";
-import type { Env } from "../../server/env.ts";
+import { inEu, type Env } from "../../server/env.ts";
 
 interface Ctx {
   request: Request;
   env: Env;
 }
 
-export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
+export const onRequest = async ({ request, env: bound }: Ctx): Promise<Response> => {
+  const env = inEu(bound);
   const url = new URL(request.url);
   const parts = url.pathname.replace(/^\/api\//, "").split("/");
   try {

@@ -28,7 +28,7 @@ import type {
   View,
 } from "../shared/protocol.ts";
 import { MAX_IMAGES, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey, type ClockView, type UploadResult } from "../shared/protocol.ts";
-import type { Env } from "./env.ts";
+import { inEu, type Env } from "./env.ts";
 import type { Booked } from "./budget.ts";
 import { randomCode, randomDigits, randomToken } from "./random.ts";
 import { AWAY_WAIT_MS, CLASS_FULL, CLASS_STARTED, DAY_FOR_CLASSES, FEW_PLAYERS, JOIN_AGAIN_MS, JOIN_NO_ROOM, LINE_WRITE_MS, LOBBY_WAIT_MS, MAX_LINE_WRITES, ROOM_FULL, ROOM_STARTED, ROOM_WARN, SLEEP_AFTER_MS, classesFullMessage, isQuotaError, roomsFullMessage, siteFullMessage, type ClassFull, type Cost, type SiteFull } from "../shared/limits.ts";
@@ -179,6 +179,7 @@ interface Waiter {
 }
 
 export class Instance extends DurableObject<Env> {
+  private readonly eu = inEu(this.env);
   private meta: Meta | null = null;
   private quizRecord: QuizRecord | null = null;
   private game: G.Game | null = null;
@@ -456,7 +457,7 @@ export class Instance extends DurableObject<Env> {
   }
 
   private budget() {
-    return this.env.BUDGET.get(this.env.BUDGET.idFromName("site"));
+    return this.eu.BUDGET.get(this.eu.BUDGET.idFromName("site"));
   }
 
   /**
@@ -1926,7 +1927,7 @@ export class Instance extends DurableObject<Env> {
     const id = this.ctx.id.toString();
     for (let i = 0; i < 20; i++) {
       const code = randomCode(5);
-      const stub = this.env.JOIN.get(this.env.JOIN.idFromName(code));
+      const stub = this.eu.JOIN.get(this.eu.JOIN.idFromName(code));
       if (await stub.claim(id, until)) return code;
     }
     throw new Error("No free code was found.");
@@ -1938,7 +1939,7 @@ export class Instance extends DurableObject<Env> {
     const end = meta.lastActivity + INSTANCE_IDLE_MS;
     if (meta.codeUntil > end + CODE_SLACK_MS / 2) return;
     const until = end + CODE_SLACK_MS;
-    const stub = this.env.JOIN.get(this.env.JOIN.idFromName(meta.code));
+    const stub = this.eu.JOIN.get(this.eu.JOIN.idFromName(meta.code));
     if (await stub.claim(this.ctx.id.toString(), until)) meta.codeUntil = until;
     // The site's booking of this quiz's storage lives as long.
     await this.budget().renew(this.ctx.id.toString(), until).catch(() => {});
@@ -1946,7 +1947,7 @@ export class Instance extends DurableObject<Env> {
 
   private async releaseCode(): Promise<void> {
     if (!this.meta) return;
-    const stub = this.env.JOIN.get(this.env.JOIN.idFromName(this.meta.code));
+    const stub = this.eu.JOIN.get(this.eu.JOIN.idFromName(this.meta.code));
     await stub.release(this.ctx.id.toString());
   }
 

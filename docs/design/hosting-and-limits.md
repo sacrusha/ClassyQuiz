@@ -58,6 +58,16 @@ name needs the whole address. Shared subdomains such as `*.pages.dev` are
 sometimes blocked by school filters because of phishing abuse; an own domain
 would be the remedy.
 
+### Where the data is
+
+A school's IT and teacher portals ask where a tool keeps its data. The
+site's objects (rooms, join codes, the counts) are in Cloudflare's EU
+jurisdiction (`server/env.ts`, `inEu`): Cloudflare runs and stores them in
+EU data centres only. The pages and the `/api` function run in the data
+centre nearest each visitor and keep nothing. A class far from Europe
+waits a round trip to the EU for each message: typically about 0.1 s from
+the US east coast to 0.3 s from Australia, not measured here.
+
 ### What a class costs
 
 Estimated for 25 over 15 questions; nothing measured yet (`telemetry.md`).
