@@ -1,8 +1,5 @@
-// Peers (backlog v5 items 3 and 7; docs/design/peers.md): friends play the
-// quiz together, each on their own device, and nobody runs it, so whoever
-// opened it plays too. Opening it uploads the quiz as a room that runs on
-// its own; this tab comes in as the room's first player, on the player
-// page, where the code for the others is.
+// Peers: the quiz goes up as a room that runs on its
+// own, and this tab joins it as its first player.
 
 import { esc, playerKey, store } from "./dom.ts";
 import type { Entry } from "./entries.ts";

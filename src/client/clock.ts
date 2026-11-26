@@ -1,11 +1,7 @@
-// Last call's bar. It drains smoothly with no digits, along an edge, so it
-// reads from the back row and takes no room from the question, its picture
-// or the tiles.
-//
-// Device clocks aren't synchronised, so a device runs it from when the view
-// reached it: `leftMs` is what was left when the server made the view. It
+// Last call's bar. Device clocks aren't synchronised, so a device runs it
+// from when the view reached it: `leftMs` is what was left when the server made the view. It
 // ends a moment after the server's, never before, and a tap the device still
-// showed as open counts (docs/design/question-flow.md, "When a tap counts").
+// showed as open counts.
 
 import type { ClockView } from "../shared/protocol.ts";
 import { T } from "./room-text.ts";
@@ -29,7 +25,7 @@ export function localEnd(key: string, clock: ClockView): number {
 /**
  * The bar for a Last call of `ms` ending at `end`. One CSS animation with a
  * negative delay: it starts where Last call is, and a redraw picks up
- * where it was, without a timer in the page. The last fifth turns warm.
+ * where it was, without a timer in the page.
  */
 export function clockBar(ms: number, end: number, cls = ""): string {
   const left = Math.max(0, end - performance.now());

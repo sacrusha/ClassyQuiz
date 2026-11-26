@@ -1,8 +1,5 @@
-// The root page's messages that the pages a quiz plays on say too: the
-// site full or its allowance spent, an upload not taken, the way to an own
-// copy, what to tell IT. One wording for both: landing-text.ts takes them
-// from here, and so do the room pages (client/room-text.ts), which leave the
-// rest of the root page's words out of their scripts.
+// The root page's messages that the pages a quiz plays on say too, apart so
+// that those pages leave the rest of the root page's words out of their scripts.
 
 import type { Lang } from "./landing-text.ts";
 import type { SiteFull } from "../shared/limits.ts";

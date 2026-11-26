@@ -1,11 +1,6 @@
-// Solo (backlog v5 item 2; docs/design/solo.md): someone plays the quiz on
-// their own, to learn or review, in this page. Nothing goes to the site and
-// nothing is kept: closing the tab, or a reload, ends it. The avatar is
-// dressed first, as in a room's lobby; each answer shows the key at once,
-// and a right one makes the avatar jump; the result cheers whatever the
-// score, and hands the run to the player's AI on request.
-//
-// The run takes over the check's page; Back gives the check back as it was.
+// Solo: the quiz played alone, in this page. Nothing
+// goes to the site and nothing is kept: closing the tab, or a reload, ends
+// it. The run takes over the check's page; Back gives the check back as it was.
 
 import type { Avatar } from "../shared/protocol.ts";
 import { pickLook, sameLook, type Look, type LookPart } from "../shared/looks.ts";
@@ -84,8 +79,6 @@ class SoloRun {
     this.shownAt = performance.now();
   }
 
-  // The start: the avatar and the dressing menu, as in a room's lobby, and Start.
-
   private lobby(): void {
     const q = this.quiz.quiz;
     const n = this.game.fixes.filter((f) => !f.skip).length;
@@ -128,8 +121,6 @@ class SoloRun {
     kept = soloAvatar(this.game);
     this.drawLook();
   }
-
-  // The questions.
 
   private begin(): void {
     soloStart(this.game, Date.now());
@@ -186,8 +177,6 @@ class SoloRun {
     this.draw();
   }
 
-  // The result: the avatar cheers whatever the score, the score, a bar per question.
-
   private result(): void {
     this.screen?.leave();
     const r = soloResult(this.game);
@@ -229,7 +218,7 @@ class SoloRun {
     if (this.done) return;
     // A tap on a page that has just come was aimed at what was there before:
     // the second of a double on ▶ Result, whose place a phone gives to the
-    // result's buttons, or on the check's Play ▶ (docs/design/question-flow.md, "Presses").
+    // result's buttons, or on the check's Play ▶.
     if (performance.now() - this.shownAt < SETTLE_MS) return;
     const t = e.target as HTMLElement;
     const pick = t.closest<HTMLElement>(".dress .pick");

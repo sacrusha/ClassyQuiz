@@ -1,11 +1,7 @@
-// /own-copy in this device's language (client/device-lang.ts); the static
-// HTML is English, for a browser without scripts. The ask is the visitor's own
-// words to their AI, "du", "tu", "tu" as the root page's asks.
-
 import { deviceLang, speak } from "./device-lang.ts";
 import type { Lang } from "./landing-text.ts";
 
-const N = " "; // French: a thin no-break space before ? : ; !, as on the root page
+const N = " "; // French: a thin no-break space before ? : ; !
 
 const WORDS: Record<Exclude<Lang, "en">, Record<string, string>> = {
   de: {

@@ -1,6 +1,3 @@
-// The steering bar's buttons and the rules for presses
-// (docs/design/question-flow.md, "The steering bar" and "Presses").
-
 import type { Answering, At, TeacherView } from "../shared/protocol.ts";
 import { ICON } from "./look.ts";
 import { T } from "./room-text.ts";
@@ -32,9 +29,7 @@ const PLAY = "&#9654;";
 /**
  * Where Play goes from s: its label, a small line where the step has a
  * consequence the label doesn't name, and the state it leads to; null where
- * there is no Play (lobby, final). Labels are nouns for what the class sees
- * next, in the bar's vocabulary: choices (the tiles), answers (what the class
- * tapped), solution (the key) (docs/design/question-flow.md, "The steering bar").
+ * there is no Play (lobby, final).
  */
 export function playStep(s: StepState): { label: string; note?: string; to: StepState } | null {
   const at = (to: Partial<StepState>): StepState => ({ ...s, answering: null, votes: false, lastCall: false, ...to });
@@ -49,18 +44,15 @@ export function playStep(s: StepState): { label: string; note?: string; to: Step
   return null;
 }
 
-/** Countdown (`lastCall`) is there while the question is up and not locked in; once running it waits, greyed. */
 function lastCallState(s: StepState): "on" | "running" | "off" {
   if (s.phase !== "question" || s.answering === null || s.answering === "closed") return "off";
   return s.lastCall ? "running" : "on";
 }
 
 /**
- * The two buttons, for the Remote's bottom bar and the wall's steering bar:
- * Countdown, then Play. Both always drawn, so neither moves: Countdown is
+ * Countdown and Play are both always drawn, so neither moves: Countdown is
  * kept invisible where it doesn't apply. At the final ranking only Exit, in
- * the middle of the bar: where Play was, a press lands on nothing
- * (docs/design/question-flow.md, "The steering bar").
+ * the middle of the bar: where Play was, a press lands on nothing.
  */
 export function steeringButtons(v: TeacherView): string {
   const s = stepState(v);
@@ -73,12 +65,6 @@ export function steeringButtons(v: TeacherView): string {
     <button class="btn primary bar-play" data-act="play"${play ? "" : " disabled"}>${PLAY}${label(play ? play.label : "", play?.note)}</button>`;
 }
 
-/**
- * Start, with what its press does under it: the first question comes
- * START_MS later, the dressing drawing to its end meanwhile
- * (docs/design/class-and-wall.md, "Dressing the avatar"). Greyed once
- * pressed, as Countdown is while it runs.
- */
 export function startButton(cls: string, attr: string, label: string, pressed: boolean): string {
   return `<button class="btn primary start ${cls}" type="button" ${attr}${pressed ? " disabled" : ""}><span class="lbl"><span>${label}</span><small>${T.startsIn}</small></span></button>`;
 }
@@ -90,7 +76,11 @@ export const DOUBLE_MS = 450;
 /** A press this soon after the screen moved was aimed at the previous screen; counted from the view arriving, not from the press. */
 export const SETTLE_MS = 400;
 
-// docs/design/question-flow.md, "Presses".
+/**
+ * A press in flow does what the teacher meant; a bounce, or a press landing
+ * on a screen that just moved, does nothing; a deliberate double press
+ * fast-forwards, but never past the start of a question.
+ */
 export class Presses {
   private stepKey = "";
   private movedAt = 0;

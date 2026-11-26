@@ -1,8 +1,3 @@
-// Solo plays the quiz as the local check left it, with the key after each
-// answer and the result as right out of the questions that counted; what it
-// hands the player's AI names every question played, the answer chosen and
-// the solution (docs/design/solo.md).
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";

@@ -1,6 +1,7 @@
 # Known bugs
 
-Bugs in what is built, as distinct from what the backlog hasn't built yet.
-
 - Where no layout fits a question's text answers (`layQuestion`, `client/stage.ts`), the squeezed tiles break words anywhere, a number inside its digit group too ("646 00" over "0"): the no-break space between digit groups doesn't stop it.
-- In a room someone steers, after the teacher's Exit, the tab lands on the start page, whose resume card asks `/api/i/<id>/info` after the quiz it uploaded (`findOpen`, `client/home.ts`), gets a 404 because the quiz has just ended, logs it and forgets the quiz. Harmless: one request, nothing shown. The player page forgets a quiz it hears is gone, so a Peers room's opener no longer asks; the teacher's pages (`client/screen.ts`, `client/teach.ts`, their "gone") could forget it the same way (`forgetQuiz`, `client/dom.ts`).
+- A 320 px wall clips the ranking.
+- In a Peers room, while a question is up, the connection dot sits under the foot bar, so only the offline banner shows a dropped line.
+- In a Peers room on long-poll, the room ends 10–15 minutes after its last device was touched, while the podium is still showing on it: a device at rest counts as having left.
+- After the teacher's Exit, the start page's resume card asks `/api/i/<id>/info` for the quiz that just ended, logs the 404 and forgets it (`findOpen`, `client/home.ts`); nothing shows. The teacher's pages could forget the quiz on hearing it is gone, as the player page does (`forgetQuiz`, `client/dom.ts`).

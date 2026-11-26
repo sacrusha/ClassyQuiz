@@ -1,12 +1,7 @@
-// A question laid out on a stage: its text, its picture and the answer
-// tiles, in whatever room the stage has. The wall lays it out here
-// (client/screen.ts), and so does a player's own device (client/device.ts),
-// so a question looks on a laptop as it will on the projector
-// (docs/design/class-and-wall.md, "Tiles do not move at the reveal";
-// docs/design/solo.md, "The device screen").
-//
-// One stage per page: the parts carry ids (#qtext, #figure, #tiles) that
-// the page's styles and the winners' band look for.
+// The wall and a player's own device lay a question out here alike, so a
+// question looks on a laptop as it will on the projector. One stage per
+// page: the parts carry ids (#qtext, #figure, #tiles) that the page's styles
+// and the winners' band look for.
 
 import type { Avatar, ImageRef } from "../shared/protocol.ts";
 import { chooseGrid, type Chrome, type Orient } from "./answergrid.ts";
@@ -14,7 +9,6 @@ import { esc, lines } from "./dom.ts";
 import { ICON, avatarSvg, partySize, shapeSvg } from "./look.ts";
 import { fillPictures, picImg } from "./pictures.ts";
 
-/** What the layout needs of a question: its text, the answers in the order on screen, the pictures. */
 export interface StageQuestion {
   text: string;
   /** In the order on screen; "" for a picture answer. */
@@ -31,8 +25,7 @@ export interface StageOptions {
    * A player's own device. Held upright (the stage taller than wide), its
    * tiles keep room for the mark only, without the count (app.css,
    * `dupright`), and a question with picture answers gives its text less of
-   * the height, since the answers are what is tapped. Otherwise it is laid
-   * out as the wall is (docs/design/solo.md, "Where a device differs").
+   * the height. Otherwise it is laid out as the wall is.
    */
   device?: boolean;
 }
@@ -47,19 +40,16 @@ const SHRINK_MIN = 0.3;
 /** A layout within this of the best is taken when it comes earlier: two columns, then a picture beside, then one column. */
 const FAMILIAR = 0.03;
 
-/** Whether the stage is laid out as an upright device's rather than as the wall's; its tiles then carry `dupright`. */
 function upright(stage: HTMLElement, o: StageOptions): boolean {
   return !!o.device && stage.clientHeight > stage.clientWidth;
 }
 
-/** One tile's element: a button where a player taps it, a block on the wall. */
 function tile(i: number, cls: string, inner: string, o: StageOptions): string {
   return o.buttons
     ? `<button type="button" class="tile ${cls}" data-i="${i}">${inner}</button>`
     : `<div class="tile ${cls}">${inner}</div>`;
 }
 
-/** Font size (em) for the question by its length; smaller when it shares the screen with a picture. */
 function questionSize(len: number, withPicture: boolean): number {
   if (withPicture) return len <= 40 ? 3 : len <= 90 ? 2.5 : len <= 160 ? 2.1 : 1.8;
   return len <= 40 ? 3.6 : len <= 90 ? 3 : len <= 160 ? 2.4 : 1.9;
@@ -75,9 +65,7 @@ interface Layout {
 }
 
 /**
- * The question, its picture and the tiles in the stage's room
- * (docs/design/class-and-wall.md, "How a question fills the screen"). Each
- * part has a full size: the question's type and the answers' by their
+ * Each part has a full size: the question's type and the answers' by their
  * length, the picture as large as its place allows. The tiles go in two
  * columns or one; a picture goes between the question and the tiles or
  * beside both. In each such layout the parts that don't fit shrink alike
@@ -186,11 +174,9 @@ export function layQuestion(stage: HTMLElement, q: StageQuestion, o: StageOption
 }
 
 /**
- * Pictures as answers (docs/design/pictures.md): tiles arranged by the
- * pictures' shape (answergrid.ts), the question's own picture beside its text
- * or between text and tiles, the room shared so that it and the smallest
- * answer picture come out about alike. A text answer among them takes a
- * picture's place.
+ * Tiles arranged by the pictures' shape, the question's own picture beside
+ * its text or between text and tiles, the room shared so that it and the
+ * smallest answer picture come out about alike.
  */
 function layPictureAnswers(stage: HTMLElement, q: StageQuestion, pics: (ImageRef | null)[], o: StageOptions, up: boolean): void {
   const at = (sel: string) => stage.querySelector<HTMLElement>(sel)!;
@@ -279,7 +265,7 @@ function layPictureAnswers(stage: HTMLElement, q: StageQuestion, pics: (ImageRef
   fillPictures(stage);
 }
 
-/** A text answer among picture answers: the largest font, from `start` down, that fits its card. */
+/** A text answer among picture answers. */
 function fitCardTexts(box: HTMLElement, start: number): void {
   const texts = [...box.querySelectorAll<HTMLElement>(".apic.text .txt")];
   if (texts.length === 0) return;
@@ -294,14 +280,12 @@ function fitCardTexts(box: HTMLElement, start: number): void {
   }
 }
 
-/** Whether an answer overflows its tile, or a word in it is cut. */
 function tilesOverflow(box: HTMLElement): boolean {
   return [...box.querySelectorAll<HTMLElement>(".tile")].some(
     (t) => t.scrollHeight > t.clientHeight + 1 || [...t.querySelectorAll<HTMLElement>(".txt")].some((x) => x.scrollWidth > x.clientWidth + 1),
   );
 }
 
-/** Largest font, from `start` down, that keeps the question within `limit` pixels of height. */
 function fitText(el: HTMLElement, start: number, limit: number): number {
   let size = start;
   el.style.fontSize = `${size}em`;
@@ -322,13 +306,7 @@ export interface TileMarks {
   mine?: number | null;
 }
 
-/**
- * The votes, then the reveal, on the tiles. The votes: how many
- * picked each, with a bar, and no answer marked or faded. The reveal adds a
- * tick on the ones that count and fades the others; the bars stay. The mark
- * and count have their place at the right of every tile from the start, so
- * neither step moves any answer text.
- */
+/** The mark and count have their place at the right of every tile from the start, so neither the votes nor the reveal moves any answer text. */
 export function markTiles(root: ParentNode, m: TileMarks): void {
   const { counts, dist } = m;
   const mine = m.mine ?? null;
@@ -359,11 +337,6 @@ export function markTiles(root: ParentNode, m: TileMarks): void {
   });
 }
 
-// The winners jump: after a reveal, the avatars of those whose answer
-// counts jump for a few seconds in a band over the top of the stage; the
-// tiles with the key stay in view (look.ts, partySize). Whoever calls it
-// decides when (once per key: docs/design/class-and-wall.md, "The winners jump").
-
 /** How long they jump, before the band goes (ms); app.css times the jumps. */
 export const PARTY_MS = 4200;
 let partyTimer: number | undefined;
@@ -373,7 +346,7 @@ export function endJump(): void {
   document.getElementById("party")?.remove();
 }
 
-/** The band over the top of the stage, these avatars jumping in it in this order; it goes by itself. */
+/** The band goes by itself after PARTY_MS; whoever calls it decides when it starts. */
 export function jump(stage: HTMLElement, winners: { id: string; avatar: Avatar }[]): void {
   endJump();
   if (winners.length === 0) return;
@@ -412,10 +385,6 @@ export function jump(stage: HTMLElement, winners: { id: string; avatar: Avatar }
   }, PARTY_MS);
 }
 
-/**
- * A background behind the whole screen, under a light veil so the question
- * and tiles read from the back row; null takes it away.
- */
 export function backdrop(bg: ImageRef | null): void {
   let el = document.getElementById("backdrop");
   document.body.classList.toggle("has-backdrop", !!bg);

@@ -1,6 +1,6 @@
 // A burst of taps on a player device (a child hammering a button) sends its
 // first and then its latest, one at a time and at most every INPUT_GAP_MS;
-// the taps in between are never sent (shared/limits.ts, INPUT_GAP_MS).
+// the taps in between are never sent.
 
 import { INPUT_GAP_MS } from "../shared/limits.ts";
 

@@ -1,5 +1,5 @@
 """The wordmark: "classyQuiz" in Rubik Bold (SIL OFL 1.1), set as outlines.
-Tracking -12/1000, Rubik's own kern for "sy" (-21), plus optical pair adjustments (font units)."""
+Tracking -12/1000, Rubik's own kern for "sy" (-21)."""
 import os
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
@@ -14,7 +14,7 @@ GS, CMAP = FONT.getGlyphSet(), FONT.getBestCmap()
 TEXT = "classyQuiz"
 TRACK = -12
 KERN = {("s", "y"): -21}
-OPTICAL = {}          # filled after looking: {("y", "Q"): -n, ...}
+OPTICAL = {}
 CAP, XH = 700, 520
 
 

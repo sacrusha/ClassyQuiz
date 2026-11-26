@@ -1,12 +1,3 @@
-// The local check, /open (docs/design/local-check.md): a quiz read from its
-// .zip in this browser, before anything of it goes to the site. The person picks how it will be played
-// (client/entries.ts); the questions and their fixes are folded away, since
-// whoever will play mustn't have to see them to get there.
-//
-// The quiz arrives from the root page through handoff.ts (/open#<key>), or
-// is one of the root page's examples, fetched here (/open?example=<lang>&ex=<example>). Nothing of it
-// is kept: a reload of a handed-over quiz finds nothing, and says so.
-
 import * as G from "../server/game.ts";
 import type { Problem } from "../quiz/format.ts";
 import type { TeacherQuestion } from "../shared/protocol.ts";
@@ -23,14 +14,11 @@ import { listZip, quizTextFromEntries } from "./unzip.ts";
 
 const main = $("#main");
 document.documentElement.lang = lang;
-/** The root page's words for what it shares with this page: reading the quiz, its problems, no connection. */
 const PAGE = TEXT[lang];
 const ui = newUI();
 let opened: OpenedQuiz | null = null;
-/** The fixes go through the game's own rules (server/game.ts), as the server applies them at upload. */
 let game: G.Game | null = null;
 let foldOpen = false;
-/** An entry is starting: other presses wait. */
 let busy = false;
 
 async function arrive(): Promise<void> {
@@ -42,7 +30,6 @@ async function arrive(): Promise<void> {
   else void sweepStale();
   let files: QuizFiles | null = null;
   if (isLang(example)) {
-    // The root page's examples (docs/design/root-page.md, "Getting a quiz"): ?ex= names one; without it, the worked example's.
     files = await exampleFiles(exampleZip(exampleOf(new URLSearchParams(location.search)), example));
     if (!files) return;
   } else if (key) {
@@ -63,7 +50,7 @@ async function arrive(): Promise<void> {
   renderCheck();
 }
 
-/** The worked example's .zip, read as a teacher's is (docs/design/example-page.md): one path, so it can't run differently. */
+/** Read as a teacher's .zip is: one path, so an example can't run differently. */
 async function exampleFiles(name: string): Promise<QuizFiles | null> {
   main.innerHTML = `<p class="muted">${esc(PAGE.reading)}</p>`;
   let buf: ArrayBuffer;
@@ -99,18 +86,13 @@ function cantRun(errors: Problem[]): void {
     <p><a class="btn" href="/">${esc(T.toStart)}</a></p>`;
 }
 
-/**
- * The check: the title and the count (what tells two versions of a quiz
- * apart), the entries, and the questions folded away under a line that
- * warns whoever will play.
- */
 function renderCheck(): void {
   const q = opened!;
   const n = q.quiz.questions.length;
   document.title = `${q.quiz.title || "Quiz"} · classyQuiz`;
   const notes = q.warnings.length;
   const plays = ENTRIES.some((e) => e.plays);
-  // An entry that played in this page (Solo) gives it back: the check's own page, as open.html has it.
+  // An entry that played in this page (Solo) gives it back: as open.html has it.
   document.body.className = "follows-dark";
   main.className = "check open-check";
   main.innerHTML = `<div class="checkhead"><h1 class="ctitle counted">${lines(q.quiz.title || "Quiz")} <span class="cnum">${T.questions(n)}</span></h1></div>
@@ -129,12 +111,6 @@ function renderCheck(): void {
   if (foldOpen) renderList();
 }
 
-/**
- * An entry's card: the picture of its way, its name, the sentence, the
- * button and what starting it costs. No button is the primary one: a teacher
- * in a hurry who means to run the quiz would press the one that stands out,
- * and the first is Solo's (docs/design/local-check.md, "The check").
- */
 function entryCard(e: Entry, i: number): string {
   return `<section class="open-entry">
     <img class="open-way" src="${esc(e.picture)}" alt="${esc(e.pictureAlt)}" width="640" height="400">
@@ -146,7 +122,6 @@ function entryCard(e: Entry, i: number): string {
   </section>`;
 }
 
-/** The question list, drawn only while the fold is open, so a closed check holds no question in the page. */
 function renderList(): void {
   const box = document.getElementById("qs");
   if (!box || !opened) return;
@@ -154,7 +129,6 @@ function renderList(): void {
   fillPictures(box);
 }
 
-/** The check's questions as the lobby lists them (client/manage.ts), in the text's order: no run, so no shuffle yet. */
 function questionsView(q: OpenedQuiz): QuestionsView {
   const quiz = q.quiz;
   return {
@@ -176,7 +150,6 @@ function questionsView(q: OpenedQuiz): QuestionsView {
   };
 }
 
-/** A fix on the check: the same rules as the lobby's (server/game.ts), here before anything goes up. */
 function fix(el: HTMLElement): void {
   const g = game!;
   const q = Number(el.dataset.q);

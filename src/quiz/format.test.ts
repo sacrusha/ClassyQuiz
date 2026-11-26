@@ -287,13 +287,13 @@ test("empty input", () => {
 });
 
 test("missing title, duplicate answers, long answers are warnings", () => {
-  const long = "x".repeat(90);
+  const long = "x".repeat(250);
   const r = parseQuiz(`1. Q?\n+ a\n- a\n- ${long}\n`);
   assert.equal(r.ok, true);
   const text = r.warnings.map((w) => w.message).join("\n");
   assert.match(text, /no title/);
   assert.match(text, /twice/);
-  assert.match(text, /90 characters long/);
+  assert.match(text, /250 characters long/);
 });
 
 const withImage = (line: string) => `Title: T\n\n1. Wie gross ist der Winkel?\n${line}\n- 30°\n+ 45°\n\n2. Q2?\n+ a\n- b\n`;

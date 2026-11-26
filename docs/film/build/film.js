@@ -1,20 +1,11 @@
-/* classyQuiz film (animatic): about 68 s, without sound, flat SVG.
+/* classyQuiz film (animatic): flat SVG, no sound (docs/film/README.md).
 
-   Purpose: a teacher who has never seen a classroom quiz sees what they would
-   type to their AI, how the .zip reaches the site, and what the class does:
-   the question on the wall only, the choices on every tablet, a tap that shows
-   up on the wall, the teacher's phone setting the pace, the split before the
-   solution as the moment to talk, avatars instead of names.
-   (docs/film/README.md; screen words from the repo, film-text.md.)
-
-   Built to port: one script, no outside fonts or libraries; every word the
-   film shows is in "words" below (the root page's own from landing-text.ts,
-   filled in at build time) and drawn at play time in the page's language,
-   none in the page's HTML. build.py makes two of it: the artifact (ASSETS as
+   Every word the film shows is in "words" below (the root page's own from
+   landing-text.ts, filled in at build time) and drawn at play time in the
+   page's language. build.py makes two of it: the standalone page (ASSETS as
    data: URIs, inlined) and the site's /js/film.js (sitebuild.py: ASSETS as
-   the site's own /landing files and the brand SVGs as text, the font from
-   site.css; no data: anywhere). On the site the page holds the poster frame
-   as a picture until ▶ (build() below).
+   the site's own files). On the site the page holds the poster frame as a
+   picture until ▶ (build() below).
 
    The whole picture is a function of film time t (render(t)); nothing is
    chained on timers, so seeking, pausing and the poster frame are the same
@@ -29,19 +20,14 @@
   const W = 1600, H = 900, DUR = 68, POSTER = 55.3;
 
   // ---------------------------------------------------------------- words
-  // The words on the film's screens, each in the language the real screen has (film-text.md 0.7):
-  // the teacher's chat with their AI and the quiz it makes are in the teacher's language, the
-  // page's (de en fr it), and so is the root page; the site's own screens after the upload (the
-  // check, the second device's choice, the wall's chrome, the Remote, the tablets) are the site's
-  // words (SITE below). One quiz in every language: the example's 126 000 arrow
-  // question, translated, so every language shows the same film.
+  // The words on the film's screens, each in the language the real screen has: the teacher's chat
+  // with their AI, the quiz it makes and the root page in the page's; the site's own screens after
+  // the upload in the site's words (SITE below). One quiz in every language: the example's
+  // 126 000 arrow question, translated.
 
-  /** The root page's words from client/landing-text.ts, filled in by build.py: per language the sheets ask, which the
-      film types ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what,
-      getH, which, the tabs' names tabIdea, tabSheets, tabNotes, tabTest and unsure, the first tab's ask askIdea, gives,
-      playThis, see, run, upload, drop) and reading, the first tab's file as the page names it (zipIdea, its name, and
-      sizeIdea, its size, from client/example-files.ts), the chapters' names (capSheet, capAi, capZip, capWall, capTap) and
-      the player's (play, pause, speed, seek). */
+  /** The root page's words per language from client/landing-text.ts, filled in by build.py (LANDING_KEYS there): the
+      sheets ask, which the film types ({ s, l }: l 0 the site's address, any other l a labelled part), and the first tab's
+      file as the page names it (zipIdea, sizeIdea, from client/example-files.ts). */
   const LANDING = /*@LANDING@*/ {};
 
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
@@ -50,8 +36,7 @@
      (status1) and the step it shows after the second ask (status2), the .zips it hands over (the chips'
      titles, the first answer's and the second's, and the second's file name), the quiz's title and its
      question 1. docs/example/build.py holds the example's words to them (docs/example/text.py, FILM).
-     de is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
-     to be replaced by the translators' (build.py and sitecheck.py name them). */
+     de is the real example's. sitecheck.py names the languages marked draft. */
   const CONTENT = {
     en: {
       draft: true,
@@ -111,7 +96,7 @@
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
-  /** The words the film quotes from the site's own screens, as the site has them (film-text.md 0.7): the local check, the
+  /** The words the film quotes from the site's own screens, as the site has them: the local check, the
       lobby's check, the second device's question, the wall before anyone is let in, the Remote's buttons. client/film.test.ts holds
       them to the site's sources, so a screen that changes its words fails the tests until the film follows. A piece of the how-to
       with a kind is the site's address or the teacher code, which the screen fills in. */
@@ -221,7 +206,7 @@
     // Every teacher press on the phone, and when its change lands on the wall.
     const PRESS = [35.4, 43.0, 46.0, 52.0, 58.0, 64.3];
     const LAG = 0.25;
-    // The upload carries the two choices a newcomer must follow (README, Purpose): which way to play, on the local check, and how
+    // The upload carries the two choices a newcomer must follow: which way to play, on the local check, and how
     // the second device comes in, on the lobby's check. Each gets a hold at full width, then the camera moves in on what is read
     // there (Quizmaster's card; the how-to with the teacher code), and the laptop then does what the how-to said.
     const T = {
@@ -775,7 +760,7 @@
       on((t) => { if (worldOn(t)) wall.update(t); });
       // the desk
       G(world, `<path d="M-200 562 L640 562 L660 690 L-200 690Z" fill="#c89f72"/><rect x="-200" y="690" width="870" height="120" fill="#a77c50"/><rect x="-200" y="810" width="870" height="120" fill="#7f5c3a"/>`);
-      // mug: set dressing only, no clock (owner)
+      // mug
       G(world, `<rect x="28" y="548" width="44" height="54" rx="8" fill="#2f7f86"/><path d="M72 560 q18 2 16 18 q-2 14 -16 14" fill="none" stroke="#2f7f86" stroke-width="7"/><ellipse cx="50" cy="550" rx="22" ry="5" fill="#215c61"/>`);
       // the two sheets, laid down
       const sheets = [1, 2].map((n) => G(world, `<g><rect x="2" y="4" width="66" height="92" fill="#000" opacity=".12"/><image href="${ASSETS['sheet' + n] || ''}" x="0" y="0" width="66" height="92" preserveAspectRatio="none"/><rect width="66" height="92" fill="none" stroke="#d9d2c4" stroke-width="1"/></g>`));
@@ -814,8 +799,7 @@
     function makePhone(parent) {
       const g = G(parent);
       // The AI app on the home screen: one white tile with the letters the page's language uses for an AI (AI, KI, IA),
-      // the chapter's name under it as a home screen names its apps. (A ring of invented app icons stood here first;
-      // the owner, watching: nothing said AI.) The tile opens into the white chat.
+      // the chapter's name under it as a home screen names its apps. The tile opens into the white chat.
       g.innerHTML = `<rect width="300" height="600" rx="40" fill="#1b1b1d"/><rect x="14" y="22" width="272" height="556" rx="28" fill="#000" class="ph-scr"/>
         <g class="ph-cam"><image class="ph-sheet" x="40" y="90" width="220" height="311" preserveAspectRatio="none"/><circle cx="150" cy="510" r="34" fill="#fff"/><circle cx="150" cy="510" r="27" fill="none" stroke="#000" stroke-width="3"/>
           <g class="ph-th1"><image href="${ASSETS.sheet1 || ''}" width="44" height="62"/></g><g class="ph-th2"><image href="${ASSETS.sheet2 || ''}" width="44" height="62"/></g>
@@ -936,12 +920,11 @@
       return { update };
     }
 
-    // ---------------------------------------------------------------- the opening (owner's sketch): over the teacher's head onto the desk
+    // ---------------------------------------------------------------- the opening: over the teacher's head onto the desk
     const PO = { x: 810, y: 500, s: 0.44 };             // the phone held up, centre and scale (phone drawn 300 x 600)
     const OLAP = { x: 1730, y: 250, w: 330, s: 330 / 960 };
     let opening, ocam = [800, 450, 1];
-    // After the site has shrunk back into the phone, a cut to the laptop's screen (two keys at one time): the laptop is a
-    // second device, and a pan across the desk to it only said so with a swoop (owner: unnecessary, too busy).
+    // After the site has shrunk back into the phone, a cut to the laptop's screen (two keys at one time).
     // On the laptop the root page shows whole, then the camera moves in on the header's code box for the teacher code to be read as
     // it is typed (at the page's own size it would be about 6 px on a phone), and cuts back to the whole screen as the screen changes.
     const OLAP_FULL = [OLAP.x + OLAP.w / 2, OLAP.y + OLAP.w * 600 / 1920, 1484 / OLAP.w];
@@ -964,7 +947,7 @@
         <rect x="-900" y="250" width="3800" height="10" fill="#e3d8c6"/>
         <path d="M-900 400 H2900 V660 H-900Z" fill="#c89f72"/><rect x="-900" y="396" width="3800" height="6" fill="#b48a5e"/>
         <rect x="-900" y="660" width="3800" height="16" fill="#b48a5e"/><rect x="-900" y="676" width="3800" height="700" fill="#7f5c3a"/>`);
-      // the mug on the far edge, left (set dressing only, no clock)
+      // the mug on the far edge, left
       G(cg, `<path d="M168 318 V408 A38 11 0 0 0 244 408 V318Z" fill="#2f7f86"/><ellipse cx="206" cy="318" rx="38" ry="11" fill="#256a70"/><ellipse cx="206" cy="318" rx="31" ry="8" fill="#3b2a1e"/>`);
       // the two sheets, fanned out on the desk, seen at a slant from above
       const sheet = (n) => `<g><rect x="6" y="8" width="250" height="353" fill="#000" opacity=".12"/><image href="${ASSETS['sheet' + n] || ''}" width="250" height="353" preserveAspectRatio="none"/><rect width="250" height="353" fill="none" stroke="#d9d2c4" stroke-width="2"/></g>`;
@@ -1016,7 +999,7 @@
     }
 
     // ---------------------------------------------------------------- the root page, as it opens
-    // The page a visitor meets above the film (docs/design/root-page.md, "One column"), drawn once per screen that shows it (the
+    // The page a visitor meets above the film, drawn once per screen that shows it (the
     // phone's site, the laptop), in CSS px of a window wider than the column: x from the column's left edge (the header's bar
     // runs 16 px beyond it on either side, the step numbers hang 41 px left of it), y from the page's top. The sizes and
     // spacings are the page's own (src/public/index.html, site.css) at a desktop's width, where the column is 672 px; the lines
@@ -1410,7 +1393,7 @@
     // The root page as it opens, in on its box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
     // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check, where Screen and remote
     // is pressed and the how-to gives the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
-    // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too (film-text.md 0.8); what
+    // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too; what
     // doesn't fit lies below it. On each check the camera moves in on what is read there.
     let web;
     function makeWeb() {
@@ -1474,7 +1457,7 @@
       const viewOf = (v, k) => [lerp(0, -v[0] * v[2], k), lerp(0, -v[1] * v[2], k), lerp(1, v[2], k)];
       const inView = (v, x, y) => [(x - v[0]) * v[2], (y - v[1]) * v[2]];
       // The lobby's check as it opens on a first visit: Screen and remote pressed, so the how-to with the teacher code is there,
-      // and the questions listed under it, no fold, each with its answers folded (teacher-devices.md, "How the screens are arranged"). The join
+      // and the questions listed under it, no fold, each with its answers folded. The join
       // code small; on a phone, so without the line on a second screen in a new window.
       const jc = measure(TX.code, 32, 'b') + 8, jl = measure(TX.joinCode.trim(), 30, '') + 12;
       const lobby = G(page, `<rect y="-300" width="${W}" height="${H + 600}" fill="${C.paper}"/>`);
@@ -1634,10 +1617,10 @@
     }
 
     // ---------------------------------------------------------------- camera and layers
-    // The room from "Let everyone in" on: the wall, the class and the teacher; the mug and the sheets may leave the frame (owner).
+    // The room from "Let everyone in" on: the wall, the class and the teacher.
     const ROOM = [850, 455, 1.06], SPLIT = [840, 425, 1.15];
-    // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
-    // ("Let everyone in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
+    // The room opens with a cut from the laptop's screen to the teacher beside it, and holds, so the one press that follows
+    // ("Let everyone in") is the only thing moving.
     const CAM = [
       [T.cut, [431, 537, 2.3]], [36.1, [431, 537, 2.3]], [37.4, ROOM],
       [52.3, ROOM], [53.6, SPLIT], [57.6, SPLIT], [58.3, ROOM],

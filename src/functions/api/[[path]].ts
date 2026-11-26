@@ -19,7 +19,7 @@
 //   GET  /api/stats                           upload attempts by format
 //   GET  /api/site                            on how many of the last 30 days the site was full (the landing's own-copy line)
 //   GET  /api/site/use                        the owner's, with Authorization: Bearer <OWNER_KEY>: the days' and the months'
-//                                             records (classes, rows, telemetry), docs/design/telemetry.md
+//                                             records (classes, rows, telemetry)
 
 import { JOIN_CODE, MAX_QUIZ_BYTES, MAX_UPLOAD_BYTES, TEACHER_CODE, TOO_MANY_CODES, type UploadResult } from "../../shared/protocol.ts";
 import { isUploadFormat } from "../../shared/upload.ts";
@@ -39,11 +39,9 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     if (parts[0] === "echo") return echo(request);
     if (parts[0] === "stats" && request.method === "GET") return json(await stats(env).read());
     if (parts[0] === "site" && parts.length === 1 && request.method === "GET") {
-      // The landing's own-copy line (docs/design/root-page.md, "The own copy").
       return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).site());
     }
     if (parts[0] === "site" && parts.length === 2 && parts[1] === "use" && request.method === "GET") {
-      // The owner's figures (docs/design/telemetry.md, "Who reads it"): nothing without a key set and given.
       if (!ownerKey(request, env)) return json({ error: "not found" }, 404);
       return json(await env.BUDGET.get(env.BUDGET.idFromName("site")).owner());
     }
@@ -62,10 +60,10 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
     return json({ error: "not found" }, 404);
   } catch (e) {
     // The account's daily allowance is spent (a best reading of an
-    // undocumented error, docs/design/hosting-and-limits.md, "When the allowance runs out anyway"): the page says so and when it comes
-    // back, instead of looking like a network problem.
+    // undocumented error): the page says so and when it comes back, instead
+    // of looking like a network problem.
     if (isQuotaError(e)) return json(parts[0] === "quiz" ? { ok: false, errors: [], warnings: [], error: "quota" } : { error: "quota" }, 503);
-    // No request content in logs (docs/design/hosting-and-limits.md, "What lives, and for how long"); the message only.
+    // No request content in logs, the message only.
     console.error("api error", parts[0], e instanceof Error ? e.message : "unknown");
     return json({ error: "Something went wrong on the server. Try again." }, 500);
   }
@@ -76,9 +74,8 @@ async function upload(env: Env, body: Record<string, unknown>): Promise<Response
   // Parsed in the Durable Object, which has the CPU time for a long quiz;
   // with errors, nothing is stored and the id is never used again.
   const id = env.INSTANCE.newUniqueId();
-  // The simulators and probes say so, and their classes are kept apart
-  // (docs/design/telemetry.md). The route can't tell: the page uploads a
-  // quiz without pictures this way too.
+  // The simulators and probes say so, and their classes are kept apart. The
+  // route can't tell: the page uploads a quiz without pictures this way too.
   const r = await env.INSTANCE.get(id).create(body.text, [], body.leaveOut === "missing", [], body.fixes ?? null, body.mode ?? null, body.probe === true);
   if (!r.ok) return json({ ok: false, errors: r.errors, warnings: r.warnings, missingImages: r.missingImages, error: r.error, full: r.full } satisfies UploadResult);
   return json({ ok: true, id: id.toString(), secret: r.secret, code: r.code, teacher: r.teacher, token: r.token, ...(r.player ? { player: r.player } : {}) } satisfies UploadResult);
@@ -95,12 +92,7 @@ async function uploadWithImages(request: Request, env: Env): Promise<Response> {
   return env.INSTANCE.get(env.INSTANCE.newUniqueId()).fetch(request);
 }
 
-/**
- * The code box: five digits are the class code; seven are the teacher code,
- * the class code and two digits the quiz checks (docs/design/teacher-devices.md, "One entry: the teacher code").
- * The device's address goes to the quiz for its limit on wrong teacher
- * codes, and nowhere else.
- */
+/** The device's address goes to the quiz for its limit on wrong teacher codes, and nowhere else. */
 async function join(env: Env, body: Record<string, unknown>, ip: string | null): Promise<Response> {
   const typed = typeof body.code === "string" ? body.code.replace(/\D/g, "") : "";
   const teacher = TEACHER_CODE.test(typed);
@@ -144,7 +136,6 @@ async function toInstance(request: Request, env: Env, id: string, action: string
 /** Largest body the Function forwards to an instance (a command, a poll, info), whatever its Content-Length says. */
 const MAX_COMMAND_BYTES = 20_000;
 
-/** The body as text, or null past `max` bytes, whatever the request says its length is. */
 async function readCapped(request: Request, max: number): Promise<string | null> {
   const len = Number(request.headers.get("content-length") ?? "0");
   if (len > max) return null;
@@ -171,7 +162,6 @@ async function readCapped(request: Request, max: number): Promise<string | null>
   return new TextDecoder().decode(all);
 }
 
-/** The request carries the Pages project's OWNER_KEY; false when none is set. */
 function ownerKey(request: Request, env: Env): boolean {
   const key = env.OWNER_KEY;
   if (!key) return false;

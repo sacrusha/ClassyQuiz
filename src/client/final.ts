@@ -1,9 +1,5 @@
-// The final ranking on the wall (docs/design/class-and-wall.md, "The final
-// ranking"): its own screen, not the intermediate ranking with a trophy.
-// Places 1 to 3 on a podium, everyone else in front of it as a crowd (no
-// rank below the podium; look.ts, crowdPlaces), the class's result beside
-// it, and all of them jumping. It stays as it is until the teacher's Exit, so it can be
-// photographed.
+// The final ranking on the wall: a podium, everyone else in front of it as a crowd (look.ts,
+// crowdPlaces), and the class's result.
 
 import type { Avatar, RankingView, ScreenView } from "../shared/protocol.ts";
 import { esc } from "./dom.ts";

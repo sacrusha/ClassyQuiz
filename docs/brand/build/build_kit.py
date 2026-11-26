@@ -1,7 +1,6 @@
 """Builds the classyQuiz logo kit's vector files into ../ (svg/, web/) from fox.py, small.py, word.py, lockup.py.
 Run: python -I build_kit.py [out_dir]   (needs fontTools and Rubik Bold 1.100 as a TTF, see word.py)
-It renders no rasters: the site's favicon.ico and apple-touch-icon.png are renders of the sources in web/
-(guidelines.md, "Browser icons")."""
+It renders no rasters: the site's favicon.ico and apple-touch-icon.png are renders of the sources in web/."""
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -160,7 +159,7 @@ def main():
         return svg_doc(body, 256, 256)
     out.append(write("web/touch-icon.svg", tile(0.70, up=2)))
 
-    # ---- link preview card 1200x630 (no page names it yet: backlog, v4 item 14)
+    # ---- link preview card 1200x630 (no page names it yet)
     b, w, h = lockup.stacked("colour", COLOUR_LIGHT, INK, ratio=S_RATIO, gap=S_GAP)
     sc = 470 / h
     og = (f'<rect width="1200" height="630" fill="{PAPER}"/>'

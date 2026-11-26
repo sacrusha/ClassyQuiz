@@ -1,7 +1,4 @@
-// The ways a quiz can be played, offered on the local check
-// (docs/design/local-check.md, "The entries"). Only what is built is listed
-// here: the site never promises what isn't (backlog v5). The order is the
-// page's; the buttons look alike, so none is pressed for standing out.
+// The ways a quiz can be played, offered on the local check in this order.
 
 import type { OpenedQuiz } from "./opening.ts";
 import { peers } from "./entry-peers.ts";
@@ -22,22 +19,17 @@ export interface EntryContext {
 }
 
 export interface Entry {
-  /** The entry's name, the owner's: Solo, Peers, Quizmaster. */
   name: string;
-  /** Under the name: who it is for and how it plays, one sentence. */
   line: string;
-  /** The picture of the way being played (docs/ways/), on its card: the setting seen where the way is chosen. */
+  /** The card's picture of the way being played (source: docs/ways/). */
   picture: string;
-  /** What the picture shows, in the device's language: its accessible name. */
   pictureAlt: string;
-  /** The button that starts it. */
   button: string;
   /** A quiet line under the button, e.g. what starting it costs; optional. */
   note?: string;
   /**
    * Whoever starts it plays the quiz, so mustn't have to see the questions
-   * on the way: the check then says so beside its question list (backlog v5
-   * item 5).
+   * on the way: the check then says so beside its question list.
    */
   plays: boolean;
   /**
@@ -48,7 +40,4 @@ export interface Entry {
   start(quiz: OpenedQuiz, ctx: EntryContext): Promise<void>;
 }
 
-// Solo first: a newcomer's first use is plausibly Solo or a look at the
-// example quiz (docs/design/local-check.md, Situation). Then by the size of
-// the group: friends, then a crowd someone runs it for.
 export const ENTRIES: Entry[] = [solo, peers, quizmaster];

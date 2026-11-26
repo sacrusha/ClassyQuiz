@@ -1,5 +1,3 @@
-// The own-copy line's count of full days.
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { countFull, dayOf } from "./fulldays.ts";

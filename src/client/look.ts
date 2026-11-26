@@ -1,11 +1,9 @@
-// Avatars and answer marks, drawn as SVG, not emoji, so a child's fox looks the
-// same on an Android tablet as on the school laptop's projector
-// (docs/design/class-and-wall.md, "Dressing the avatar").
+// Avatars and answer marks, drawn as SVG, not emoji, which look different
+// from one device to the next.
 
 import type { Avatar } from "../shared/protocol.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, TOOL_COUNT } from "../shared/looks.ts";
 
-/** Disc colours of avatars, told apart by the class: "the frog on purple". */
 const AVATAR_COLOURS = ["#e5484d", "#3e7bfa", "#f5c518", "#8e4ec6", "#12a594", "#e93d82", "#7cb518", "#1f3a8a"];
 const ANIMAL_NAMES = ["cat", "dog", "fox", "bear", "rabbit", "owl", "frog", "pig", "mouse", "lion", "panda", "penguin"];
 
@@ -42,7 +40,7 @@ const ANIMALS: (() => string)[] = [
   () =>
     `<path d="M24 34 L28 16 L40 30Z M76 34 L72 16 L60 30Z" fill="#8c6b4f"/><ellipse cx="50" cy="56" rx="28" ry="29" fill="#8c6b4f"/><ellipse cx="50" cy="64" rx="17" ry="18" fill="#d9bf9c"/>` +
     `<circle cx="38" cy="48" r="11" fill="#fff"/><circle cx="62" cy="48" r="11" fill="#fff"/>${EYE(38, 48, 6)}${EYE(62, 48, 6)}<path d="M45 57 L55 57 L50 66Z" fill="#f29a1d"/>`,
-  // frog: the eyes at the sides and the head a dome, so a hat sits on top as on the others
+  // frog
   () =>
     `<ellipse cx="50" cy="59" rx="32" ry="26" fill="#4caf50"/>` +
     `<path d="M33 66 Q50 79 67 66" stroke="#1b1b1f" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="30" cy="63" r="3.5" fill="#f2a7b5" opacity=".7"/><circle cx="70" cy="63" r="3.5" fill="#f2a7b5" opacity=".7"/>` +
@@ -85,8 +83,7 @@ const ring = (n: number, cx: number, cy: number, d: number, r: number, attrs = "
 
 /**
  * In the order of shared/looks.ts; 0 is the disc. No triangle, square or
- * rhombus: those are the answer marks, and avatars pop up above the answer
- * tiles while the class answers (docs/design/class-and-wall.md, "Dressing the avatar").
+ * rhombus: those are the answer marks, and avatars show over the answer tiles.
  */
 const BACKGROUNDS: ((c: string) => string)[] = [
   (c) => `<circle cx="50" cy="50" r="49" fill="${c}"/>`,
@@ -171,7 +168,6 @@ const HATS: { name: string; svg: string; height: number; box: string }[] = [
     box: "-26 -27 52 32",
   },
   {
-    // With the top hat and the bow tie, the dapper register (identity.md: the mark is the fox in a top hat).
     name: "bowler",
     svg:
       `<path d="M-13.5 -2 C-13.5 -15.5 -8 -22.5 0 -22.5 C8 -22.5 13.5 -15.5 13.5 -2Z" fill="#23262e"/><rect x="-13.5" y="-7.3" width="27" height="3.8" fill="#5d636e"/>` +
@@ -183,8 +179,7 @@ const HATS: { name: string; svg: string; height: number; box: string }[] = [
 
 /**
  * Where a hat sits on each animal (order of ANIMAL_NAMES): the brim's centre
- * x and y, its width, and how much hats grow beyond it. A hat never reaches
- * past the top of the picture. Smaller on the penguin.
+ * x and y, its width, and how much hats grow beyond it.
  */
 const SEATS: [number, number, number, number][] = [
   [50, 35, 30, 1.3], // cat
@@ -210,22 +205,16 @@ function hatOn(animal: number, hat: number): string {
 }
 
 /**
- * The row beside the hats: things held, worn or set before the animal, in the
- * order of shared/looks.ts (0: none), each drawn round (0, 0); `at` says where
- * it goes (toolOn), `box` shows it alone in the picker. Each is a solid blob,
- * since at the who-answered bar's 21 to 36 px a line is a pixel wide and gone,
- * and dark or coloured where it passes the disc's edge, since white is lost
- * on the wall's paper there. No answer's colour in an answer's shape
- * (docs/design/class-and-wall.md, "Dressing the avatar"). The types are
- * inferred: docs/film/build/build.py lifts this part of the file into the
- * film as plain JavaScript.
+ * Things held, worn or set before the animal, in the order of shared/looks.ts
+ * (0: none), each drawn round (0, 0); `at` says where it goes (toolOn), `box`
+ * shows it alone in the picker. Avatars show as small as 21 px, where a thin
+ * line is gone; no answer's colour in an answer's shape, for the reason BACKGROUNDS gives.
+ * The types are inferred: docs/film/build/build.py lifts this
+ * part of the file into the film as plain JavaScript.
  */
 const TOOLS = [
   { name: "", svg: "", box: "0 0 1 1", at: "hand" },
   {
-    // The animal behind its open laptop, seen from the lid's side: low in the
-    // middle, not a small laptop at the corner, where a list of players would
-    // read it as the device the player is on.
     name: "laptop",
     svg:
       `<rect x="-18" y="-9" width="36" height="17" rx="2" fill="#aeb4bd" stroke="#5d636e" stroke-width="1.4"/><circle cx="0" cy="-0.5" r="2.8" fill="#e8e6e1"/>` +
@@ -282,7 +271,6 @@ const TOOLS = [
     at: "hand",
   },
   {
-    // The top hat's own register (identity.md: the mark is the fox in a top hat).
     name: "bow tie",
     svg:
       `<path d="M-2 0 L-13 -7.5 Q-16.5 0 -13 7.5Z M2 0 L13 -7.5 Q16.5 0 13 7.5Z" fill="#fff" stroke="#fff" stroke-opacity=".6" stroke-width="3.2" stroke-linejoin="round"/>` +
@@ -293,15 +281,9 @@ const TOOLS = [
   },
 ];
 
-/** Where a bow tie sits on each animal (order of ANIMAL_NAMES): just under the chin. */
+/** Where a bow tie sits on each animal (order of ANIMAL_NAMES). */
 const NECKS = [86, 83, 85, 85, 86, 88, 88, 86, 86, 86, 86, 89];
 
-/**
- * Where each goes: a thing held, low on the right, the same for every animal,
- * over the cheek and past the disc's edge, so it changes the outline on that
- * side; a bow tie under the chin; a laptop low in the middle, below every
- * animal's mouth.
- */
 const toolOn = (animal = 0, tool = 0) => {
   const it = TOOLS[tool];
   if (!it?.svg) return "";
@@ -314,8 +296,7 @@ const lookIndex = (i: number | undefined, n: number): number => (typeof i === "n
 export function avatarSvg(av: Avatar, label = true): string {
   const colour = AVATAR_COLOURS[av.c % AVATAR_COLOURS.length];
   const a = av.a % ANIMALS.length;
-  // The drawings' own counts, which the menu's equal (look.test.ts), so the
-  // film's copy of this function needs no count (docs/film/build/build.py).
+  // The drawings' own counts, not the menu's (look.test.ts holds them equal), so the film's copy needs none.
   const b = lookIndex(av.b, BACKGROUNDS.length);
   const h = lookIndex(av.h, HATS.length);
   const t = lookIndex(av.t, TOOLS.length);
@@ -329,22 +310,15 @@ export function backgroundSvg(b: number, colour: number): string {
   return `<svg viewBox="0 0 100 100" role="img" aria-label="${BACKGROUND_NAMES[b]}">${BACKGROUNDS[b](AVATAR_COLOURS[colour % AVATAR_COLOURS.length])}</svg>`;
 }
 
-/** A hat alone, for the lobby's picker. */
 export function hatSvg(h: number): string {
   return `<svg viewBox="${HATS[h].box}" role="img" aria-label="${HATS[h].name}">${HATS[h].svg}</svg>`;
 }
 
-/** A tool alone, for the lobby's picker. */
 export function toolSvg(t: number): string {
   return `<svg viewBox="${TOOLS[t].box}" role="img" aria-label="${TOOLS[t].name}">${TOOLS[t].svg}</svg>`;
 }
 
-/**
- * The dressing menu's rows, without words (docs/design/class-and-wall.md,
- * "Dressing the avatar"): the shapes in the player's colour, the hats, the
- * tools; each picture a button with data-part (shared/looks.ts, LookPart)
- * and data-i.
- */
+/** The dressing menu's rows: each picture a button with data-part (shared/looks.ts, LookPart) and data-i. */
 export function pickerRows(colour: number): string {
   const row = (part: string, from: number, to: number, svg: (i: number) => string) =>
     `<div class="prow prow-${part}">${Array.from({ length: to - from }, (_, k) => `<button class="pick" type="button" data-part="${part}" data-i="${from + k}">${svg(from + k)}</button>`).join("")}</div>`;
@@ -359,7 +333,6 @@ export function wiggle(el: HTMLElement): void {
   el.addEventListener("animationend", () => el.classList.remove("wiggle"), { once: true });
 }
 
-/** What an avatar's drawing depends on: a changed key is a changed look. */
 export const lookKey = (av: Avatar): string => `${av.a}.${av.c}.${av.b ?? 0}.${av.h ?? 0}.${av.t ?? 0}`;
 
 /**
@@ -421,13 +394,9 @@ export const JUMP = 0.5;
 /**
  * The winners' band on the wall (client/screen.ts, renderParty), for n of
  * them over a stage w wide and h high, with `room` above its first tile:
- * the band never reaches the tiles, where the key is. Ten as large as the
- * band allows and apart: in one row on a wide wall, the band no more than
- * three tenths of the stage; in two or three rows on a narrow one, where
- * one row would leave them tiny. More than ten get smaller, down to two
- * thirds of ten's size, then overlap in their rows: twenty blur together,
- * and that is accepted. The band is as high as ten's,
- * so it covers the same whatever the count.
+ * the band never reaches the tiles, where the key is. It is sized for ten,
+ * whatever the count; more than ten get smaller, down to two thirds of
+ * ten's size, then overlap in their rows.
  */
 export function partySize(n: number, w: number, h: number, room = Infinity): PartyLayout {
   const gap = Math.max(4, Math.round(w * 0.008));
@@ -485,8 +454,7 @@ export function crowdHeight(n: number, w: number, s: number): number {
  * Sizes for a stage w by h with n in the crowd: the crowd's avatar s as
  * large as its rows allow while the first place stays LEAD times larger;
  * the podium (first place's avatar a) takes the height the crowd leaves,
- * within a third of the width per step. A small class stands large, a
- * class of 60 in rows of small ones that still read as avatars.
+ * within a third of the width per step.
  */
 export function finalSize(n: number, w: number, h: number): { a: number; s: number } {
   const widest = (0.85 * w) / 3;
@@ -515,10 +483,7 @@ export interface CrowdPlace {
 }
 
 /**
- * The crowd in front of the podium, like a crowd rather than a grid
- * (owner: "a South Park crowd"): rows that overlap, the back ones higher
- * and a little smaller, each row shifted against the next, every avatar
- * a little off its place and size. Neighbours in the lobby's order go to
+ * The crowd in front of the podium. Neighbours in the lobby's order go to
  * different rows, so the order doesn't read along a row. Places are from
  * the crowd box's top left, within w across and crowdHeight down.
  */
@@ -551,7 +516,7 @@ export function crowdPlaces(ids: string[], w: number, s: number): CrowdPlace[] {
 /** For the test that the drawings match shared/looks.ts. */
 export const LOOK_DRAWINGS = { backgrounds: BACKGROUNDS.length, hats: HATS.length, tools: TOOLS.length, seats: SEATS.length, animals: ANIMALS.length };
 
-// Answer marks: colour plus shape, so colour-blind students can tell them apart.
+// Answer marks: colour plus shape, so colour-blind players can tell them apart.
 // The colours are in app.css (.a0 to .a3).
 
 const SHAPES = [
@@ -589,9 +554,7 @@ export const ICON = {
   plus: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
   void: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M5.6 18.4L18.4 5.6" stroke="currentColor" stroke-width="2.5"/></svg>`,
   trophy: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 01-10 0zM5 4H2v2a4 4 0 004 4M19 4h3v2a4 4 0 01-4 4M10 14h4v3h3v3H7v-3h3z" fill="currentColor"/></svg>`,
-  /** The votes: how the class answered, before the key. */
   bars: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V13M10 20V6M16 20v-9M21 20H3" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
-  /** Last call, and its time up. */
   timer: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 13.5V9M9.5 2.5h5M19 6l-1.6 1.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
   wifi: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0120 0M5.5 12.5a10 10 0 0113 0M9 16a5 5 0 016 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="19.5" r="1.6" fill="currentColor"/></svg>`,
 };

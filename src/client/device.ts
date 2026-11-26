@@ -1,17 +1,7 @@
-// The question on a player's own device (docs/design/solo.md, "The device
-// screen"; backlog v5 item 6): the question, its picture and the tiles,
-// laid out as the wall lays them out (client/stage.ts) in the room the
-// device has, the tiles to tap; then the key on them. Solo is the first to
-// stand on it; a room without a wall (Peers, a Quizmaster's devices-only
-// room) drives it from its views the same way.
-//
-// The frame: a bar at the top (where the question stands, a verdict, the
-// player's avatar and score), the stage, and a bar at the foot with one
-// button, the next step, always in the same place and kept there invisible
-// when there is none, so a hand in flow always finds it and a double tap
-// never lands on something new (docs/design/question-flow.md, "The steering
-// bar"); a room with a Countdown has it left of that button, kept in place
-// the same way.
+// The question on a player's own device where no wall shows it (Solo,
+// Peers), laid out as the wall lays it out (client/stage.ts). The foot's
+// button and Countdown keep their place, invisible, when there is none, so a
+// double tap never lands on something new.
 
 import type { Answering, Avatar, ImageRef } from "../shared/protocol.ts";
 import { esc } from "./dom.ts";
@@ -42,7 +32,7 @@ export interface DeviceView {
   mine: number | null;
   /**
    * A room's tap still on its way: outlined dashed until the room has it
-   * stored (docs/design/question-flow.md, "When a tap counts").
+   * stored.
    */
   sending?: boolean;
   /** The key once it shows: which answers count. */
@@ -57,7 +47,7 @@ export interface DeviceView {
   dist?: number[] | null;
   /** The player: the avatar in the bar and the score beside it. */
   me: { avatar: Avatar; score: number } | null;
-  /** The foot's button: a noun for what comes next (the bar's vocabulary); null keeps its place, empty. */
+  /** The foot's button's label; null keeps its place, empty. */
   next: string | null;
   /** Beside the foot's button, as HTML, in place of the title: what a room waits for. */
   foot?: string;
@@ -65,8 +55,7 @@ export interface DeviceView {
    * Countdown, left of the foot's button, for a room that has one (absent:
    * no place for it). null keeps its place, invisible; without `running` a
    * press starts it; running, it is greyed with the avatar of whoever
-   * started it, and its bar drains along the top edge
-   * (docs/design/peers.md, "Countdown").
+   * started it, and its bar drains along the top edge.
    */
   countdown?: { note: string; running: { key: string; ms: number; leftMs: number; by: Avatar } | null } | null;
   /** In the top bar, as HTML, in place of the player's avatar and score: how a room stands. */
@@ -185,7 +174,6 @@ export class DeviceScreen {
     btn.disabled = !!run;
     btn.classList.toggle("running", !!run);
     this.set("#dlast", c ? `${run ? `<span class="dby">${avatarSvg(run.by)}</span>` : ICON.timer}<span class="lbl"><span>${T.countdown}</span><small>${esc(c.note)}</small></span>` : "");
-    // Its bar along the top edge, as on the wall.
     edgeBar(run?.key ?? "", run);
   }
 
@@ -214,7 +202,7 @@ export class DeviceScreen {
     }
     if (t.closest("#dlast")) {
       // Not the second tap of a double on the foot's button, nor one aimed at
-      // what was there before Countdown came (question-flow.md, "Presses").
+      // what was there before Countdown came.
       const now = performance.now();
       if (this.view.countdown && !this.view.countdown.running && now - this.nextAt > DOUBLE_MS && now - this.countdownAt >= SETTLE_MS) this.onCountdown?.();
       return;
@@ -248,7 +236,6 @@ export class DeviceScreen {
       if (v.question.image) this.zoom(true);
       return;
     }
-    // 1 to 4: the tiles in the order on screen, for a keyboard.
     const n = Number(e.key);
     if (this.answerable() && Number.isInteger(n) && n >= 1 && n <= v.question.answers.length) {
       e.preventDefault();
@@ -268,7 +255,7 @@ export class DeviceScreen {
    * A tap answers while answering is open, except on tiles that have just
    * appeared: it was aimed at what was there before (the second tap of a
    * double on Start, or on the button that brought the question), as on the
-   * wall's steering bar (docs/design/question-flow.md, "Presses").
+   * wall's steering bar.
    */
   private answerable(): boolean {
     return this.view?.answering === "open" && performance.now() - this.laidAt >= SETTLE_MS;

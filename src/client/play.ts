@@ -1,19 +1,3 @@
-// A tab that came with a code from the code box, which routes by length
-// (docs/design/teacher-devices.md):
-//
-//   /play#63953      the class code: a student's device, straight to an
-//                    avatar, then colours. It never reaches a teacher role.
-//   /play#6395347    the teacher code, the class code and two digits: a
-//                    teacher device. When one tab shows and steers, it asks
-//                    "Show the quiz here, or steer it from here?"; otherwise
-//                    it takes the role that is free.
-//   /play?win=1#…    the same from "open a second screen in a new window": a window opened by
-//                    a teacher tab, whose copy of that tab's role isn't its own.
-//   /teacher#63953   asks for the teacher code, except on the device that
-//                    uploaded the quiz, which comes in with the quiz's secret.
-//
-// A place on the page, its line and its player: client/seat.ts.
-
 import { JOIN_CODE, TEACHER_CODE, TOO_MANY_CODES, WRONG_TEACHER_CODE } from "../shared/protocol.ts";
 import { MAX_SEATS } from "../shared/limits.ts";
 import { $, esc, findQuiz, keepAwake, savedQuizzes, seatKey, siteHead, statusDot, store, tabRole, rolePage } from "./dom.ts";
@@ -33,22 +17,16 @@ const typed = (location.hash.slice(1) || params.get("c") || "").replace(/\D/g, "
 /** The old address, /teacher: it asks for the teacher code. */
 const oldAddress = location.pathname.startsWith("/teacher");
 const code = TEACHER_CODE.test(typed) ? typed.slice(0, 5) : typed;
-/** The teacher code's two digits, when they were typed. */
 const digits = TEACHER_CODE.test(typed) ? typed.slice(5) : "";
-/** The uploading device needs no digits: it has the quiz's secret (Resume, or an old /teacher link). */
+/** The uploading device needs no digits: it has the quiz's secret. */
 const savedHere = JOIN_CODE.test(code) ? (savedQuizzes().find((q) => q.code === code) ?? null) : null;
 const teacher = !!digits || (oldAddress && !!savedHere);
-/** Opened by "open a second screen in a new window" or "open the projector window" from a teacher tab. */
+/** A window opened from a teacher tab. */
 const fromWindow = params.get("win") === "1";
 
 let instanceId = "";
 let offlineTimer: number | undefined;
 let unreachedTimer: number | undefined;
-
-// A device that reaches the page but not the quiz (docs/design/root-page.md, "Network help, where failure shows"): after a
-// while, plain words for the student, who tells the teacher; the teacher's
-// side is the wall's "Nobody in yet?" line. A teacher device is told only
-// what is wrong. Gone once the line is back.
 
 const UNREACHED_MS = 15_000;
 const unreachedText = (): string => (teacher ? T.unreached : T.unreachedTell);
@@ -71,7 +49,6 @@ async function start(): Promise<void> {
   showWaiting();
   let instance = "";
   const joinFrom = Date.now();
-  /** No answer, or one that isn't the site's. */
   const notReached = (): void => {
     const words = document.getElementById("unreached");
     if (words && Date.now() - joinFrom >= UNREACHED_MS) {
@@ -99,7 +76,6 @@ async function start(): Promise<void> {
         return;
       }
       if (r.body.quota) {
-        // The site's daily allowance is spent: say so, and ask again rarely.
         main.innerHTML = `<div class="center"><p class="muted" style="max-width:36rem">${esc(quotaNotice())}</p></div>`;
         await new Promise((res) => setTimeout(res, 60_000));
         continue;
@@ -126,7 +102,6 @@ async function start(): Promise<void> {
     addSeat(0, { digits, secret: () => findQuiz(instanceId)?.secret ?? savedHere?.secret, fromWindow });
     return;
   }
-  // The places this device had in the quiz come back; a device without one joins.
   // A place kept from another quiz that had this code is forgotten.
   const had = [];
   for (let slot = 0; slot < MAX_SEATS; slot++) {
@@ -141,7 +116,6 @@ function showWaiting(): void {
   main.innerHTML = `<div class="center"><div class="dot" data-status="connecting" style="width:28px;height:28px"></div><p class="muted" id="unreached" hidden></p></div>`;
 }
 
-/** The code box again, as on the root page: five digits for a student, seven for a teacher; it routes by length. */
 function codeForm(value = "", placeholder = "12345"): string {
   return `<form class="codeform" id="codeform"><input class="code-input" id="c" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="${placeholder}" aria-label="${T.quizCode}" value="${esc(value)}"><button class="btn primary" aria-label="${T.go}">&#9654;</button></form>`;
 }
@@ -176,11 +150,7 @@ function showNoQuiz(): void {
   wireCodeForm();
 }
 
-/**
- * A teacher device without a working teacher code: the old /teacher
- * address, a wrong code, or too many wrong ones. The box takes the class
- * code too, for a student who ends up here.
- */
+/** The box takes the class code too, for a student who ends up here. */
 function showTeacherForm(note: string): void {
   document.body.classList.add("follows-dark");
   document.title = `classyQuiz · ${T.showOrSteer}`;
@@ -194,14 +164,6 @@ function showTeacherForm(note: string): void {
   wireCodeForm();
 }
 
-// The places on the page (docs/design/class-and-wall.md, "Sharing a
-// device"). One fills the page, as on every device of its own; while the
-// teacher allows sharing, the page splits into columns, each a place with
-// its own player and line. In the lobby a + along the edge adds one, and a
-// × on each closes it while the device keeps a player in another; under
-// way the places stay as they are.
-
-/** The places, in the order they were added. */
 const seats: Seat[] = [];
 const statuses = new Map<Seat, LineStatus>();
 const columns = new Map<Seat, { frame: HTMLElement; body: HTMLElement }>();
@@ -246,7 +208,6 @@ function underWay(): boolean {
   return seats.some((s) => s.view && s.view.phase !== "lobby");
 }
 
-/** A place can close in the lobby while the device keeps a player in another. */
 function closable(seat: Seat): boolean {
   if (seats.length < 2 || underWay()) return false;
   return !seat.token || seats.some((s) => s !== seat && s.token);
@@ -272,14 +233,12 @@ function changed(): void {
   // avatar was picked back on another device, and only the lobby adds one.
   if (underWay()) for (const s of [...seats]) if (!s.token && seats.some((o) => o !== s && o.token)) dropPlace(s);
   layout();
-  // Start pressed: the dressing draws to its end along the top edge, as on the wall, the menu staying where it is.
   const views = seats.map((s) => s.view).filter((v) => v && !v.peers);
   if (views.length === 0) return;
   const v = views.find((x) => !x!.removed);
   edgeBar("start", v && v.phase === "lobby" ? v.starts : null);
 }
 
-/** The teacher allows sharing, and the class is in the lobby: the page offers another place. */
 function shareOffered(): boolean {
   return canSplit && seats.some((s) => s.view?.share);
 }

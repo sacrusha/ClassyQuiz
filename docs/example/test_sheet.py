@@ -1,11 +1,11 @@
-"""Builds the marked test that the Test example attaches (docs/design/root-page.md, "Getting a quiz").
+"""Builds the marked test that the Test example attaches.
 
 The test is a two-page biology test on the cell. A pupil has answered it and a teacher has marked it with
-21 of 30 points. It is invented, because a real test would show a real pupil's work.
+21 of 30 points.
 
 test_sheet.html is the sheet. It has three layers: the printed test, the pupil's handwriting and the teacher's
 red marks. The red marks are ticks, crosses and points only. The teacher does not write the right answers,
-so that the sheet is representative of the tests visitors have (the owner).
+so that the sheet is representative of the tests visitors have.
 
 This file holds the words in the root page's four languages. Every language has the same questions and the
 same mistakes:

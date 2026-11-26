@@ -1,6 +1,4 @@
-// Does this network let the quiz through? Run on the school laptop and one
-// tablet before relying on the site (docs/design/root-page.md, "Network
-// help, where failure shows"). Tests what the quiz uses: the site's API over HTTP, and a live
+// Whether this network lets the quiz through: the site's API over HTTP, and a
 // WebSocket. Without WebSockets the quiz still runs, over HTTP.
 
 import { $, esc } from "./dom.ts";
@@ -89,8 +87,6 @@ async function main(): Promise<void> {
       : `<p>${ICON.check} ${esc(t.slower)}</p>${forIt(t.nowSlow)}`;
 }
 
-// The page in this device's language; the part for a network that blocks the
-// site entirely names this site's address.
 document.documentElement.lang = lang;
 speak(t as unknown as Record<string, unknown>);
 $("#forit").textContent = t.forIt(location.host, "");

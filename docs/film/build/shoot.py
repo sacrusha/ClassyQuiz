@@ -6,7 +6,7 @@ Run: py -I shoot.py [--page FILE] [--lang de|en|fr|it] [--out DIR] [phone|desk] 
 """
 import sys, pathlib
 HERE = pathlib.Path(__file__).resolve().parent
-sys.dont_write_bytecode = True  # no __pycache__ in the tree
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(HERE))
 from build import PAGE, ROOT, film_length, launch  # noqa: E402
 from playwright.sync_api import sync_playwright

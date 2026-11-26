@@ -1,6 +1,5 @@
 // Local development: the state Worker and the site, as on Cloudflare, with
-// the client rebuilt on change. Open http://localhost:8788. DEVELOPING.md,
-// "Running locally".
+// the client rebuilt on change. Open http://localhost:8788.
 
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";

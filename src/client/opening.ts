@@ -1,8 +1,6 @@
-// Opening a quiz file (docs/design/local-check.md): the .zip is read and
-// checked in this browser, by the parser and the picture checks the server
-// runs at upload, so looking at a quiz, or playing it alone, costs the shared
-// site nothing. Only opening a room uploads it, and the server checks it all
-// again there: the browser isn't trusted.
+// The .zip is checked in this browser by the parser and the picture checks
+// the server runs at upload, so looking at a quiz, or playing it alone,
+// costs the shared site nothing. The server checks it all again at upload.
 
 import { imageKey, parseQuiz, type Problem, type Quiz } from "../quiz/format.ts";
 import { matchImages, type StoredImage } from "../server/images.ts";
@@ -14,7 +12,6 @@ import { prepareImages, uploadQuiz, type PreparedImage } from "./images.ts";
 import { own } from "./pictures.ts";
 import type { ZipEntry } from "./unzip.ts";
 
-/** A quiz as read from its .zip: the text and its pictures redrawn (client/images.ts), as they go up when a room opens. */
 export interface QuizFiles {
   text: string;
   images: PreparedImage[];
@@ -24,15 +21,10 @@ export interface QuizFiles {
 
 export type Reading =
   | { ok: true; files: QuizFiles }
-  /** pictures: the problems are pictures that can't come along; the person may go on without them (leaveOut). */
+  /** pictures: the problems are pictures that can't come along, which the person may leave out. */
   | { ok: false; errors: Problem[]; pictures: boolean };
 
-/**
- * The quiz text and the pictures it names, read from the archive, or what is
- * wrong, in the order a fix is worth making: the text first, then the
- * pictures (which the person may leave out), then the server's own picture
- * checks.
- */
+/** Problems come in the order a fix is worth making: the text, then the pictures, then the server's own picture checks. */
 export async function readQuiz(text: string, archive: ZipEntry[], leaveOut: boolean, progress?: (done: number, of: number) => void): Promise<Reading> {
   const parsed = parseQuiz(text);
   if (!parsed.ok) return { ok: false, errors: parsed.errors, pictures: false };
@@ -43,39 +35,27 @@ export async function readQuiz(text: string, archive: ZipEntry[], leaveOut: bool
   return checked.ok ? { ok: true, files } : { ok: false, errors: checked.errors, pictures: false };
 }
 
-/** What the server will make of these files at upload: the same parse and the same picture matching. */
+/** The same parse and picture matching as the server's at upload. */
 async function check(files: QuizFiles): Promise<{ ok: true; quiz: Quiz; warnings: Problem[]; index: Record<string, StoredImage> } | { ok: false; errors: Problem[] }> {
   const r = parseQuiz(files.text);
   if (!r.ok) return { ok: false, errors: r.errors };
   const uploaded = await Promise.all(files.images.map(async (im) => ({ name: im.name, bytes: new Uint8Array(await im.blob.arrayBuffer()) })));
-  // Takes the pictures left out off the quiz, with a warning each, as the server does.
   const m = matchImages(r.quiz, uploaded, files.leaveOut);
   if (!m.ok) return { ok: false, errors: m.errors };
   return { ok: true, quiz: r.quiz, warnings: [...r.warnings, ...m.warnings], index: m.index };
 }
 
-/**
- * The quiz open on the local check, as an entry receives it
- * (client/entries.ts). Nothing of it has gone to the site.
- */
 export interface OpenedQuiz {
-  /** What goes up when a room opens: the server parses the text again. */
   files: QuizFiles;
-  /** As it will run: the pictures left out are off it. Questions and answers in the text's order (no shuffle yet). */
+  /** The pictures left out are off it; questions and answers in the text's order. */
   quiz: Quiz;
-  /** The parser's and the pictures' warnings, as the lobby would list them. */
   warnings: Problem[];
-  /**
-   * The fixes made on the check, one per question in the text's order
-   * (server/game.ts, Fix: which choices count, void, skip, hidePicture).
-   * Kept up to date while the check is open; they go up with the room.
-   */
+  /** One per question in the text's order; kept up to date while the check is open, and they go up with the room. */
   fixes: G.Fix[];
-  /** A picture the quiz names (an Image:, Background: or picture choice), as a blob URL on this page with its size; null for none or one left out. */
+  /** A blob URL on this page with its size; null for none or one left out. */
   picture(name: string): ImageRef | null;
 }
 
-/** The files opened for the check: checked as the server will, with the pictures as blob URLs on this page. */
 export async function openQuiz(files: QuizFiles): Promise<{ ok: true; quiz: OpenedQuiz } | { ok: false; errors: Problem[] }> {
   const c = await check(files);
   if (!c.ok) return c;
@@ -99,18 +79,12 @@ export async function openQuiz(files: QuizFiles): Promise<{ ok: true; quiz: Open
 
 export type RoomResult = Awaited<ReturnType<typeof uploadQuiz>>;
 
-/**
- * Opening a room: the upload, with the check's fixes and how it will play
- * (`mode`). Fails by throwing when the site can't be reached. On success
- * the device keeps the quiz to come back to (the root page's resume card)
- * and counts the day.
- */
+/** Throws when the site can't be reached. */
 export async function openRoom(q: OpenedQuiz, mode?: "peers"): Promise<RoomResult> {
   const r = await uploadQuiz(q.files.text, q.files.images, q.files.leaveOut, q.fixes, mode);
   if (!r.ok) return r;
   // One quiz that hasn't started per device: the previous room ends if it
-  // never started (docs/design/hosting-and-limits.md, "Running classes
-  // finish"). keepalive: it outlives the page's change that follows.
+  // never started. keepalive: it outlives the page's change that follows.
   const previous = savedQuizzes()[0];
   if (previous && previous.id !== r.id) {
     void fetch(`/api/i/${previous.id}/replaced`, { method: "POST", keepalive: true, headers: { "content-type": "application/json" }, body: JSON.stringify({ secret: previous.secret }) }).catch(() => {});

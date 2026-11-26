@@ -1,18 +1,16 @@
-// What a class books of the day's allowances (docs/design/hosting-and-limits.md,
-// Situation, "What a class costs", and "Running classes finish"): rows,
-// requests and the seconds its object is kept awake.
+// What a class books of the day's allowances: rows, requests and the seconds
+// its object is kept awake.
 //
-// Rows have a most a class can write, and are booked at it. Every write of
-// the instance stores its meta with what changed, so a stored change is two
-// rows. Answers and looks are held in memory and ride on the writes counted
-// here (docs/design/open-period-in-memory.md), so a class books writes, not
-// taps.
+// Rows have a most a class can write, and are booked at it. Every write of the
+// instance stores its meta with what changed, so a stored change is two rows.
+// Answers and looks are held in memory and ride on the writes counted here, so
+// a class books writes, not taps.
 //
 // Requests and duration have no most: they grow with the time devices stay
 // on. A class books an estimate of them from what is known when it books,
 // and books again when what it shows outgrows that (a device falling back to
-// long-poll). The figures below are estimates from docs/scaling-drawer.md
-// ("Requests", "Duration"), not measurements; telemetry is to replace them.
+// long-poll). The figures below are estimates (docs/design/hosting-and-limits.md, "What a class costs"), not
+// measurements; telemetry is to replace them.
 
 import type { LineCounts } from "../shared/line.ts";
 import { MAX_LATE_JOINERS, MAX_LINE_WRITES, MAX_PLAYERS, REST_AFTER_MS, REST_EVERY_MS, SLEEP_AFTER_MS, type Cost } from "../shared/limits.ts";
@@ -32,14 +30,11 @@ const PER_STAGE_LINES = 2 * MAX_LINE_WRITES;
 /** Roles taken, the speed switch, removals. */
 const FIXED = 50;
 
-/**
- * Requests are estimated for the example class when the class isn't
- * there yet (backlog, Project): a larger one books more once it is, at Start.
- * The teacher's devices: a wall, and a Remote often enough to count it.
- */
-const DESIGN_CLASS = 25;
+/** Stands in for the class's size until the class is there; a larger one books more at Start. */
+const ASSUMED_CLASS_SIZE = 25;
+/** A wall, and a Remote often enough to count it. */
 const TEACHER_DEVICES = 2;
-/** A device's sockets, each an upgrade: the first plus about three reconnects (lock, recess, a network switch; scaling-drawer.md, a guess). */
+/** A device's sockets, each an upgrade: the first plus about three reconnects (lock, recess, a network switch; a guess). */
 const REQUESTS_PER_DEVICE = 4;
 /** A WebSocket device's messages over a question, twenty to a request: about 250 for a class of 25 over 15 questions. */
 const REQUESTS_PER_QUESTION_WS = 0.5;
@@ -51,9 +46,8 @@ const SECONDS_PER_QUESTION = 180;
 const POLL_HOLD_S = 25;
 /**
  * Before the class is there, its devices' lines aren't known. Plausible
- * assumptions, kept pessimistic against "Which devices poll"
- * (hosting-and-limits.md, Situation): a tenth of devices poll, and four
- * classes in ten have at least one poller, which keeps the object awake.
+ * assumptions, kept pessimistic: a tenth of devices poll, and four classes
+ * in ten have at least one poller, which keeps the object awake.
  * Telemetry: `polled` of `devices`, and the classes with a poller.
  */
 const POLLING_DEVICES = 0.1;
@@ -63,7 +57,7 @@ const NONE: Cost = { rows: 0, requests: 0, awakeS: 0 };
 
 /** Letting the class in (a Peers room: opening it): the class isn't known yet. Rows: the most players a class can have; the rest an estimate. */
 export function atLetIn(questions: number): Cost {
-  const devices = DESIGN_CLASS + TEACHER_DEVICES;
+  const devices = ASSUMED_CLASS_SIZE + TEACHER_DEVICES;
   return {
     rows: FIXED + PER_STAGE_LINES + questions * (PER_QUESTION_STEPS + PER_STAGE_LINES) + MAX_PLAYERS * PER_PLAYER_LOBBY,
     requests: Math.ceil(devices * REQUESTS_PER_DEVICE + requestsOver(devices, devices * POLLING_DEVICES, questions)),
@@ -110,9 +104,9 @@ export function tail(pollers: number): Cost {
 }
 
 /**
- * What the class has spent, from its devices' own counts (docs/design/telemetry.md,
- * "What is counted, and by whom"): each HTTP request and socket one,
- * messages twenty to one; awake for as long as its longest poller polled.
+ * What the class has spent, from its devices' own counts: each HTTP request and
+ * socket one, messages twenty to one; awake for as long as its longest poller
+ * polled.
  */
 export function spent(lines: LineCounts[], rowsWritten: number): Cost {
   let requests = 0;
@@ -141,12 +135,10 @@ export function moved(ledger: Cost, from: Cost, to: Cost): Cost {
   };
 }
 
-/** Whether `ledger` holds no more than `share` in every allowance. */
 export function within(ledger: Cost, share: Cost): boolean {
   return ledger.rows <= share.rows && ledger.requests <= share.requests && ledger.awakeS <= share.awakeS;
 }
 
-/** How full the ledger is, in the fullest allowance: 1 is the whole share. */
 export function fullness(ledger: Cost, share: Cost): number {
   return Math.max(ledger.rows / share.rows, ledger.requests / share.requests, ledger.awakeS / share.awakeS);
 }

@@ -1,13 +1,11 @@
-// The owner page's arithmetic (docs/design/owner-page.md): what the figures
-// at /api/site/use come to against the Free plan, read as docs/design/
-// telemetry.md, "Reading it", says. Pure, so it runs under Node.
+// The owner page's arithmetic, apart from the page so that it runs under Node.
 
 import type { DayRecord, MonthRecord, Use } from "../server/telemetry.ts";
 
-/** Cloudflare's Free plan, per UTC day (hosting-and-limits.md, Situation): the totals of the whole account, which this page can only partly see. */
+/** Cloudflare's Free plan, per UTC day: the totals of the whole account, which this page can only partly see. */
 export const PLAN = { objectRequests: 100_000, gbSeconds: 13_000 };
 
-/** What a held poll costs the object it keeps awake, per second (measured, scaling-drawer.md, "Duration"). */
+/** What a held poll costs the object it keeps awake, per second (measured: docs/design/hosting-and-limits.md, "The plan"). */
 export const GB_S_PER_POLL_S = 0.128;
 
 /**
@@ -35,7 +33,6 @@ export function realClasses(d: DayRecord): number {
   return d.classes - (d.probes ?? 0);
 }
 
-/** A bucket's name from the lower edges: "0–1", "2–4", … "30+". */
 export function bucketLabels(edges: number[]): string[] {
   return edges.map((lo, i) => {
     if (i === edges.length - 1) return `${lo}+`;
@@ -44,7 +41,6 @@ export function bucketLabels(edges: number[]): string[] {
   });
 }
 
-/** The days' `use` added together; undefined when none has any. */
 export function sumUse(uses: (Use | undefined)[]): Use | undefined {
   let out: Use | undefined;
   for (const u of uses) {

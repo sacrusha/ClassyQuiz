@@ -1,8 +1,6 @@
-// The site's four languages, and this device's among them: the one the root
-// page speaks on it (its switch, kept as LANG_KEY, else the browser's first
-// of the four, else English: chosenLang). The pages after the root page and
-// /example speak it; they have no switch of their own. Apart from the words,
-// so that every page can load it.
+// The site's four languages and this device's among them, which the root
+// page's switch sets and the pages without a switch of their own speak. Kept
+// apart from the words, so every page can load it without them.
 
 export type Lang = "de" | "en" | "fr" | "it";
 export const LANGS: { id: Lang; name: string }[] = [

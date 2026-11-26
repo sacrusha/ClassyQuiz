@@ -1,8 +1,5 @@
-// The owner's page (docs/design/owner-page.md): asks for the key once, keeps
-// it in this browser, and reads GET /api/site/use with it. The key goes
-// nowhere else: not in an address, not in a form's fields, not on the page
-// after it is typed. Until the site has accepted a key the page shows nothing
-// but the box for it.
+// The key goes only into the request's header and this browser's storage:
+// not in an address, not in a form's fields, not on the page after it is typed.
 
 import { $, esc, store } from "./dom.ts";
 import { GB_S_PER_POLL_S, PLAN, bucketLabels, objectRequests, pollGbSeconds, realClasses, sumUse, turnedAway } from "./owner-figures.ts";
@@ -23,7 +20,6 @@ function say(text: string, bad = false): void {
 }
 
 const n = (x: number): string => Math.round(x).toLocaleString("en-US");
-/** GB-s: a tenth shown while small. */
 const g = (x: number): string => (x < 10 ? x.toFixed(1) : n(x));
 const pct = (a: number, b: number): string => (b > 0 ? `${Math.round((100 * a) / b)} %` : "–");
 const cell = (x: number | string, zeroDim = true): string => `<td${zeroDim && x === 0 ? ' class="zero"' : ""}>${typeof x === "number" ? n(x) : esc(x)}</td>`;
@@ -35,7 +31,6 @@ function awayText(r: DayRecord["refused"]): string {
   return [r.uploads && `uploads ${r.uploads}`, r.bytes && `bytes ${r.bytes}`, r.rows && `rows ${r.rows}`].filter(Boolean).join(" · ");
 }
 
-/** A figure with no limit to measure it against: what the site has, not what the plan allows. */
 function figure(name: string, value: number, note: string): string {
   return `<div class="gauge"><div class="name">${esc(name)}</div><div class="val">${n(value)}</div><div class="of">${esc(note)}</div></div>`;
 }
@@ -185,7 +180,7 @@ function toolbar(): void {
   });
 }
 
-/** Reads the figures with `key`. `typed`: the key was just given (it is kept only once the site accepts it). */
+/** `typed`: the key was just given, and is kept only once the site accepts it. */
 async function load(typed: boolean): Promise<void> {
   if (busy) return;
   busy = true;
@@ -200,8 +195,7 @@ async function load(typed: boolean): Promise<void> {
       return;
     }
     // The site answers in JSON. A page comes from elsewhere: a filter, or
-    // Cloudflare in the Function's place once the day's requests are spent,
-    // a day the owner has reason to look here.
+    // Cloudflare in the Function's place once the day's requests are spent.
     const fromSite = (r.headers.get("content-type") ?? "").includes("json");
     if (r.status === 404 && fromSite) {
       // The site answers 404 to a wrong key and to no key set alike.

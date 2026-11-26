@@ -1,11 +1,7 @@
-// Quiz text format: the parser.
+// The quiz text format's parser. The specification is on the guidance page
+// (src/public/index.html, "Format"), where AIs and teachers read it.
 //
-// The specification lives on the guidance page (src/public/index.html,
-// "Format"), because that is where AIs and teachers read it.
-// This module implements it; keep the two in step.
-//
-// Design (docs/design/quiz-format.md): the correct answer is marked on its own line;
-// the parser forgives what AIs typically add or vary and rejects only what it
+// The parser forgives what AIs typically add or vary and rejects only what it
 // cannot read unambiguously; error messages name the question and are written
 // so a teacher can paste them back to the AI.
 
@@ -84,7 +80,6 @@ export function pictureRefs(quiz: Quiz): PictureRef[] {
   return refs;
 }
 
-/** Takes a picture off the quiz, for a quiz that runs without it. */
 export function dropPicture(quiz: Quiz, ref: PictureRef): void {
   if (ref.question === null) quiz.background = "";
   else if (ref.kind === "answer") quiz.questions[ref.question].answers[ref.answer!].image = "";
@@ -97,7 +92,6 @@ export interface Problem {
 }
 
 export interface ParseResult {
-  /** True when the quiz can be run: no errors (warnings are allowed). */
   ok: boolean;
   quiz: Quiz;
   errors: Problem[];
@@ -118,8 +112,8 @@ const INVISIBLES = /[​⁠﻿]/g;
 // in right-to-left text is still recognised.
 const LEADING_BIDI = /^[‎‏؜‪-‮⁦-⁩]+/;
 // The format's required first line is a comment that carries the manual's
-// address into summaries of the page (docs/design/quiz-format.md); comments
-// are dropped wherever they stand.
+// address into summaries of the page; comments are dropped wherever they
+// stand.
 const COMMENT = /^\s*\/\//;
 
 type Keyword = "title" | "note" | "image" | "background" | "order" | "tempo" | "time";
@@ -349,9 +343,8 @@ export function parseQuiz(input: string): ParseResult {
             );
           } else warn(`A second title line was ignored: "${excerpt(c.value)}".`);
         } else if (c.key === "note") {
-          // The quiz carries no messages from the AI to the teacher
-          // (docs/design/quiz-format.md, "The quiz carries no notes"); one an
-          // AI still writes is dropped, not a failed paste.
+          // The quiz carries no messages from the AI to the teacher; one an AI
+          // still writes is dropped, not a failed paste.
           if (block !== null) block.noted = true;
         } else if (c.key === "tempo" || c.key === "time") {
           // "Tempo:" and "Time:" are not format lines (the pace is the
@@ -564,7 +557,7 @@ export function parseQuiz(input: string): ParseResult {
   });
 
   // Where the key sits in the text isn't checked: the site shuffles the
-  // answers (docs/design/quiz-format.md, "Answers are shuffled; `Order: fixed` keeps an order").
+  // answers.
   if (quizKeepOrder) for (const q of questions) q.keepOrder = true;
 
   if (title === null || title === "") warn(`The quiz has no title.`);

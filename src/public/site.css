@@ -1,11 +1,8 @@
 /* classyQuiz's look, shared by every page: the colours, the two typefaces and
-   the site's header (docs/design/identity.md). Each page links this first;
-   app.css (the app pages), home.css (the root page) and a page's own <style>
-   build on these tokens and don't define their own. */
+   the site's header. */
 
 /* Rubik Bold 1.100, OFL (fonts/OFL.txt), subset to Latin: the wordmark's
-   lettering. Only the site's own words use it (the name, codes, headings,
-   the wall's numbers); a quiz's own text stays in the reading face. */
+   lettering. */
 @font-face {
   font-family: "Rubik";
   src: url("/fonts/rubik-bold-1.100.woff2") format("woff2");
@@ -15,7 +12,6 @@
 }
 
 :root {
-  /* Paper and ink. */
   --bg: #fbf8f2;
   --fg: #1d1d1b;
   --muted: #5d5c57;
@@ -30,15 +26,11 @@
      answer colours (red, blue, yellow, green: .a0–.a3 in app.css). */
   --control: #1d1d1b;
   --control-ink: #fbf8f2;
-  /* The fox's orange, darkened for text: links, labels, highlights. Never a
-     control's fill. */
+  /* The fox's orange, darkened for text. */
   --accent: #a8471a;
   --accent-ink: #ffffff;
-  --bubble: #f4ebe1; /* the example asks on the landing */
-  /* The edge of a place to drop a file, dashed: the landing's box that opens one. */
+  --bubble: #f4ebe1;
   --dash: #b9b3a5;
-  /* A tab not chosen (the landing's examples): a ground a step off the
-     paper, and an edge where that step alone doesn't hold it apart (dark). */
   --tab: #f1eee6;
   --tab-edge: transparent;
   --bad: #c62828;
@@ -48,10 +40,9 @@
   --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-brand: "Rubik", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
-  /* App screens are set tight; pages read top to bottom get more air. */
   --leading: 1.45;
   --leading-prose: 1.55;
-  --h1: clamp(1.45rem, 1.1rem + 1.6vw, 1.75rem); /* smaller on a phone */
+  --h1: clamp(1.45rem, 1.1rem + 1.6vw, 1.75rem);
   --h2: 1.3rem;
   --h3: 1.05rem;
   color-scheme: light;
@@ -93,13 +84,10 @@ a { color: var(--accent); }
 h1, h2, h3 { font-family: var(--font-brand); font-weight: 700; }
 ::placeholder { color: var(--placeholder); opacity: 1; }
 
-/* A code a person reads or types: the class code, the teacher code. */
 .digits { font-family: var(--font-brand); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .05em; white-space: nowrap; }
 
-/* The mark and the name, inline (public/brand/, written in by the build):
-   the root page's header and the small header of the pages a teacher
-   reaches from it. The lockup is drawn for exactly 32 px, phones included;
-   its hat and name take the ink. */
+/* The brand marks, written inline by the build; the lockup is drawn for
+   exactly 32 px. */
 .brand { display: inline-flex; align-items: center; color: var(--fg); text-decoration: none; }
 .brand svg, .brand img { display: block; height: 32px; width: auto; flex: none; }
 .site-head { border-bottom: 1px solid var(--rule); }
@@ -120,7 +108,7 @@ header.top .lang:focus-within { outline: 2px solid var(--accent); }
   header.top .join label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   header.top .join input { width: 6.4em; font-size: 1.1rem; letter-spacing: .1em; }
 }
-/* A phone held upright: the code box and the language need the row, so the fox stands alone, still named for a screen reader (its aria-label). */
+/* A phone held upright: the code box and the language need the row, so the fox stands alone. */
 header.top .symbol { display: none; }
 @media (max-width: 440px) {
   header.top .lockup { display: none; }

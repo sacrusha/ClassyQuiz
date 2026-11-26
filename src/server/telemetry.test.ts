@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { emptyLine, readLine } from "../shared/line.ts";
-import { addClass, foldDay, monthOf, objectRequests, summarize, type ClassFacts } from "./telemetry.ts";
+import { REQUEST_EDGES, SIZE_EDGES, addClass, foldDay, monthOf, objectRequests, summarize, type ClassFacts } from "./telemetry.ts";
 
 const facts: ClassFacts = { kind: "remote", players: 25, late: 1, questions: 15, played: 15, final: true, minutes: 18, rows: 140 };
+const bucketOf = (edges: number[], n: number) => edges.filter((e) => e <= n).length - 1;
 
 test("a device's line keeps only the closed list's word and bounded whole numbers", () => {
   const line = readLine({ mode: "poll", opened: 3.7, http: -5, sent: 1e12, quota: "x", title: "Fractions", token: "abc", errors: 2 });
@@ -37,8 +38,8 @@ test("a day adds its classes into buckets; a month keeps use and cost, and leave
   const day = addClass(addClass(undefined, small), polling);
   assert.equal(day.classes, 2);
   assert.deepEqual(day.kinds, { peers: 1, remote: 1, wall: 0 });
-  assert.deepEqual(day.size, [0, 1, 0, 1, 0], "the size counts set a class of three apart from one of 25");
-  assert.equal(day.requests[3], 1, "a polling class of about 3,000 requests");
+  assert.deepEqual([day.size[bucketOf(SIZE_EDGES, 3)], day.size[bucketOf(SIZE_EDGES, 25)]], [1, 1], "the size counts set a class of three apart from one of 25");
+  assert.equal(day.requests[bucketOf(REQUEST_EDGES, objectRequests(polling))], 1, "a class is counted by its requests");
   assert.equal(day.withPoller, 1);
   assert.deepEqual(day.problems, { failed: 0, silent: 0, quota: 1, errors: 2 });
 

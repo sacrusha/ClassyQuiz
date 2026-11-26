@@ -1,6 +1,4 @@
-/* classyQuiz app pages: projector, student, remote, the teacher's entrance,
-   network check, the worked example. The colours, typefaces and base styles
-   are site.css's, linked before this. */
+/* classyQuiz app pages. */
 
 * { box-sizing: border-box; }
 html { height: 100%; }
@@ -111,11 +109,9 @@ body.screen:not(.steering):not(.manage) main { padding-bottom: calc(2.2vh + 34px
 #qbar .strip .av.still { animation: none; }
 #qbar .strip .av svg { width: 100%; height: 100%; display: block; }
 
-/* The winners jump (client/stage.ts, jump): a
-   band over the top of the stage after the reveal, stopping above the
-   tiles, so the key stays in view. Each avatar pops in, then jumps five
-   times, crouching before and landing after each, up to half its size
-   (client/look.ts, JUMP); neighbours out of step. */
+/* The winners jump (client/stage.ts, jump): a band over the top of the
+   stage after the reveal, stopping above the tiles, so the key stays in
+   view. */
 #party {
   position: fixed; z-index: 4; pointer-events: none; border-radius: 18px 18px 0 0;
   /* A veil over the question, its foot soft above the tiles. */
@@ -181,8 +177,7 @@ body.screen.has-backdrop .bar { background: rgba(255, 255, 255, .85); border-rad
 .classres .bars i { display: block; width: 100%; background: var(--good); }
 
 /* The final ranking (client/final.ts): places 1 to 3 on a podium, everyone
-   else in front of it, all jumping, the class's result beside. Ties share a
-   step and shrink to fit it. */
+   else in front of it; ties share a step. */
 .final { flex: 1; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 3vw; min-height: 0; padding-bottom: 1vh; }
 .final .classres { align-self: center; }
 /* Sized by client/final.ts (finalSize) from its own box: --a the first
@@ -269,8 +264,8 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .verdict.right { background: var(--good); }
 .verdict.wrong { background: var(--bad); }
 .verdict.none, .verdict.void { background: #8a8f98; }
-/* The lobby: the child's animal and the pictures to dress it (docs/design/class-and-wall.md). Beside each other on a tablet held sideways,
-   one above the other when upright. No words. */
+/* The lobby: the child's animal and the pictures to dress it, beside each other on a tablet held sideways, one above
+   the other when upright. */
 .play .dress { flex: 1; display: grid; gap: 16px; align-items: center; justify-items: center; grid-template: "hero picker" 1fr "look picker" auto / auto 1fr; }
 .dress .hero { grid-area: hero; width: min(44vw, 58vh); height: min(44vw, 58vh); }
 .dress .picker { grid-area: picker; display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 610px; container-type: inline-size; }
@@ -320,7 +315,7 @@ body.play { min-height: 100vh; min-height: 100dvh; user-select: none; -webkit-us
 .choose button.new { background: var(--card); border: 3px dashed var(--rule); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
 .offline-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); background: #2b2b2b; color: #fff; border-radius: 999px; padding: 6px 14px; display: flex; gap: 8px; align-items: center; z-index: 10; max-width: calc(100vw - 32px); box-sizing: border-box; }
 
-/* A device the class shares (docs/design/class-and-wall.md, "Sharing a device"): a column per place, each sized by
+/* A device the class shares: a column per place, each sized by
    its own room, not the window's; in the lobby a + along the edge for one more and a × on each place. Hands of two or
    three people are on the glass at once: nothing pinches, scrolls or calls up a menu. */
 body.shared { -webkit-touch-callout: none; }
@@ -374,8 +369,7 @@ body.shared { -webkit-touch-callout: none; }
   .seats .buttons:not(.pics) { grid-template-columns: 1fr; }
 }
 
-/* Steering: the steering bar at the bottom
-   (docs/design/question-flow.md, "The steering bar"). Fixed px: the page's font scales with the
+/* The steering bar at the bottom. Fixed px: the page's font scales with the
    projector's width, the bar is for the teacher at the laptop. */
 body.screen.steering main { height: calc(100vh - 64px); height: calc(100dvh - 64px); }
 .steerbar {
@@ -387,7 +381,7 @@ body.screen.steering main { height: calc(100vh - 64px); height: calc(100dvh - 64
 .steerbar .codeline { color: var(--muted); }
 .steerbar .btn { min-height: 46px; padding: .3em 1.2em; }
 .steerbar .btn.more { width: 52px; padding: 0; font-size: 1.3em; }
-/* "Remote gone" and "Allow a device to join" (docs/design/teacher-devices.md, "When a device is gone"). */
+/* "Remote gone" and "Allow a device to join". */
 .steerbar .joinchip { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--muted); }
 .steerbar .joinchip .btn { min-height: 40px; padding: .2em .8em; }
 .drag-hint {
@@ -395,9 +389,8 @@ body.screen.steering main { height: calc(100vh - 64px); height: calc(100dvh - 64
   background: var(--control); color: var(--control-ink); font-size: 22px; font-weight: 700; text-align: center;
 }
 
-/* The lobby while the Projector steers itself (docs/design/teacher-devices.md,
-   "The single tab: check, then join"): the class's part fills
-   the first screen like the class lobby; Start and the teacher's questions
+/* The lobby while the Projector steers itself: the class's part fills the
+   first screen like the class lobby; Start and the teacher's questions
    below. The page scrolls. */
 body.screen.manage { overflow: auto; height: auto; }
 body.screen.manage main { height: auto; display: block; padding: 0; }
@@ -418,8 +411,8 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .howto .logo { flex: 1; display: flex; align-items: center; }
 .howto .logo img { height: 1.6em; width: auto; display: block; }
 /* The lockup is 1.6em = 6.72cqi of the drawing: from 48 px (a drawing 715 px
-   wide) the colour master instead of the 32-grid file (docs/brand/guidelines.md,
-   minimum sizes). The master carries its clear space; its height and margins
+   wide) the colour master instead of the 32-grid file (docs/brand/README.md).
+   The master carries its clear space; its height and margins
    put its fox where the 32-grid fox is (y 1..31 of 32). Lazy, so the file
    that isn't shown isn't fetched. */
 .howto .logo .master { display: none; }
@@ -450,8 +443,8 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .joinnav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 28px; margin: 4px 0 0; font-size: 16px; }
 .joinnav .link { color: var(--muted); }
 
-/* The single tab's check (docs/design/teacher-devices.md, "The single tab: check, then join"): the teacher's page, at a
-   reading size rather than the wall's; private until the teacher shares it. */
+/* The single tab's check: the teacher's page, at a reading size rather than the wall's; private until the teacher
+   shares it. */
 .check { max-width: 50rem; margin: 0 auto; padding: 20px 16px 64px; font-size: 18px; }
 .has-backdrop .check { background: var(--bg); }
 .checkhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
@@ -470,8 +463,7 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .cstart .btn.big { width: auto; padding: 0 1.4em; }
 .roomnote { border-left: 3px solid var(--rule); padding: 4px 12px; margin: 14px 0 0; }
 .check .cline { text-align: left; font-size: 16px; margin: 6px 0; }
-/* How the screens are arranged (docs/design/teacher-devices.md, "How the screens are arranged"): a toggle of two, each
-   side saying what it means; the remote's how-to follows only under "Screen and remote". */
+/* How the screens are arranged: a toggle of two; the remote's how-to follows only under "Screen and remote". */
 .arrange-ask { font-size: 1em; margin: 1.2em 0 .5em; }
 .arrange { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 10px; }
 .arrange-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; font: inherit; color: var(--fg);
@@ -479,7 +471,7 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .arrange-opt small { font-size: .85em; color: var(--muted); }
 .arrange-opt[aria-pressed="true"] { border-color: var(--control); background: color-mix(in srgb, var(--control) 8%, var(--card)); }
 .arrange-call { color: var(--muted); font-size: 16px; margin: 6px 0; }
-/* Split screen (docs/design/class-and-wall.md, "Sharing a device"): the switch with what it does under it, on or off, and
+/* Split screen: the switch with what it does under it, on or off, and
    beside them a player's device as the switch makes it, muted while off. */
 .share { display: flex; align-items: center; gap: 14px; text-align: left; }
 .share-text { flex: 1; min-width: 0; }
@@ -497,12 +489,9 @@ body.screen.manage main { height: auto; display: block; padding: 0; }
 .sharepic .add .icon + .icon { width: 11px; height: 11px; }
 .check .cshare { font-size: 16px; margin: 22px 0 0; }
 
-/* The local check, /open (docs/design/local-check.md): the quiz read in the browser, nothing on the site yet. The ways to
-   play it as cards, each with the picture of its way, its own button and what starting it costs; the questions folded under
-   them, closed by default, so whoever will play gets to playing without passing them. Side by side from 44rem, the picture
-   on top, each card's button on one line; narrower, one under the other, the picture beside the name, 96 px, near the
-   smallest it is drawn for (docs/ways/README.md), and the cards set tighter, so the next card's setting shows sooner to
-   whoever scrolls for their way (local-check.md, "The check"). */
+/* The local check, /open: the quiz read in the browser, nothing on the site yet. The ways to play it as cards, the
+   questions folded under them. Side by side from 44rem; narrower, one under the other, the picture beside the name at
+   96 px, near the smallest it is drawn for (docs/ways/). */
 .open-check .ctitle + p, .open-check > p { margin: .6em 0; }
 .open-ask { font-size: 1em; margin: 1.4em 0 0; }
 .open-entries { display: grid; gap: 12px; margin: 16px 0 8px; }
@@ -640,7 +629,7 @@ body.teach { padding-bottom: 96px; }
 .codeform { display: flex; gap: 8px; width: min(100%, 340px); }
 .codeform .code-input { flex: 1; min-width: 0; }
 .codeform .btn { width: 64px; font-size: 1.3rem; }
-/* A teacher device's one question (docs/design/teacher-devices.md, "A second device: one question, only when needed"): what it will do, in plain words. */
+/* A teacher device's one question. */
 .entry-roles { display: grid; grid-template-columns: 1fr; gap: 12px; width: min(100%, 420px); }
 .btn.role { flex-direction: column; gap: 4px; min-height: 120px; font-size: 1.35rem; }
 .btn.role:not(:disabled) { border-color: var(--control); }
@@ -660,8 +649,7 @@ body.teach { padding-bottom: 96px; }
 }
 
 /* The lobby's join column (both lobbies of the wall). The class's part is one
-   screen (docs/design/teacher-devices.md, "The single tab: check, then join"):
-   the lobby gets the height the title and Start leave, and QR, address and
+   screen: the lobby gets the height the title and Start leave, and QR, address and
    code are sized from the join column's own box. The page's font scales with
    the width, so em sizes alone overflow a wide, short window (a laptop with
    its browser bars), push Start below the fold and break the address. The
@@ -751,8 +739,7 @@ body.teach { padding-bottom: 96px; }
 /* Its room is kept while off, so the switch doesn't move the screen. */
 .speed-switch[aria-checked="false"] + .speed-note { visibility: hidden; }
 
-/* Pictures as answers (docs/design/pictures.md; client/stage.ts,
-   layPictureAnswers). The picture sits on the tile's colour, which shows where
+/* Pictures as answers (client/stage.ts, layPictureAnswers). The picture sits on the tile's colour, which shows where
    it is transparent. Its shape and the room for the votes' count and tick sit
    beside the picture ("row") or above it ("col"), reserved from the start so
    the votes and the reveal move nothing. The script sets the grid and the

@@ -1,5 +1,3 @@
-// The landing block's words (client/landing-text.ts).
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LANGS, TEXT, askText, chosenLang } from "./landing-text.ts";
@@ -28,8 +26,7 @@ test("every language's other asks name the site's address, for the page to repla
   }
 });
 
-// French puts a narrow no-break space (U+202F) before : ; ? !, so a mark never starts a line: on the root page and on
-// /example alike, a visitor going from one to the other.
+// French puts a narrow no-break space (U+202F) before : ; ? !, so a mark never starts a line.
 test("French has no plain space before : ; ? ! on the root page or /example", async () => {
   const { EXAMPLE_TEXT, PDF_TEXT } = await import("./example-text.ts");
   const bad: string[] = [];
@@ -45,8 +42,6 @@ test("French has no plain space before : ; ? ! on the root page or /example", as
   assert.deepEqual(bad, []);
 });
 
-// The page's tabs are its examples, in the order example-text.ts has them, then the help ask (docs/design/root-page.md,
-// "Getting a quiz"); each example's file on the static page is the English one, with its size.
 test("the page's tabs are the examples', and each shows its own file", async () => {
   const { readFile } = await import("node:fs/promises");
   const { EXAMPLES } = await import("./example-text.ts");
@@ -65,8 +60,7 @@ test("the page's tabs are the examples', and each shows its own file", async () 
   }
 });
 
-// The static page is what an AI's fetcher reads, and what stands until the script has run: it says what the
-// English table says (docs/design/root-page.md, "One page, two readers", "Languages").
+// The static page is what an AI's fetcher reads, and what stands until the script has run.
 test("the static page carries the English table's words", async () => {
   const { readFile } = await import("node:fs/promises");
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
@@ -89,16 +83,15 @@ test("the static page carries the English table's words", async () => {
     assert.equal(plain(m[1]), en[m[2]], `data-t-title="${m[2]}"`);
     seen.add(m[2]);
   }
-  // the Quizmaster's ask is the labelled ask, plain; the others as the table has them
+  // the sheets ask is the labelled ask, plain
   for (const [id, ask] of [["idea", TEXT.en.askIdea], ["sheets", askText(TEXT.en)], ["notes", TEXT.en.askNotes], ["test", TEXT.en.askTest], ["help", TEXT.en.askHelp]]) {
     assert.ok(html.includes(`<span class="said" id="ask-${id}">${ask}</span>`), `the ${id} ask differs from landing-text.ts's`);
   }
   for (const key of ["what", "tabIdea", "tabSheets", "tabNotes", "tabTest", "unsure", "help", "getH", "which", "gives", "see", "run", "upload"]) assert.ok(seen.has(key), `index.html has no ${key}`);
 });
 
-// The film (public/js/film.js) types the sheets ask, shows the words of the page's first screen and its first tab's file, and names its chapters and controls as this file has them, copied in when
-// docs/film/build/sitebuild.py builds it; its pictures are rendered then too. A change here without a rebuild would leave
-// the film saying the old words: this fails until sitebuild.py has run.
+// The film (public/js/film.js) has these words copied in when docs/film/build/sitebuild.py builds it: a change here
+// fails this until it has run.
 test("the built film carries this file's ask, the first screen's words and its own names", async () => {
   const { readFile } = await import("node:fs/promises");
   const { EXAMPLE_FILES } = await import("./example-files.ts");

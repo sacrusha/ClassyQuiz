@@ -1,17 +1,10 @@
-"""The words of the test run's conversation in four languages, side by side for review.
-The root page's "Test" tab and /example?ex=test show this conversation as a picture.
+"""The words of the test run's conversation in four languages (the root page's "Test" tab, /example?ex=test).
 
-The owner ran it on 19 Nov 2026 in French with Claude Opus 5.5. He attached the French marked test
-(src/public/examples/test-fr.pdf, written by test_sheet.py). The screenshot of the run is
-test-conversation-original.webp in this folder.
-
-- fr holds the AI's words from the run. One change: the site's name is spelled "classyQuiz".
-- en, de and it are draft translations. They use the same school terms as the test
-  sheet and the quiz in that language (test_sheet.py, test_zips.py).
+- fr holds the AI's words from the run.
+- en, de and it use the same school terms as the test sheet and the quiz in that language (test_sheet.py,
+  test_zips.py).
 - The pupil's message is not in this file. build.py reads it from askTest in src/client/landing-text.ts, so the
   root page and the picture always show the same message.
-- During the run the app displayed its own interface words in English. fr keeps them in English; the other
-  languages show them translated.
 
 Markup: {zip} stands for the name of the .zip file in that language (EXAMPLES in faces.py). In fr, build.py turns
 the space before : ; ? ! into a no-break space.

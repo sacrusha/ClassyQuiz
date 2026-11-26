@@ -1,11 +1,10 @@
-// Input on a device several players share (docs/design/class-and-wall.md,
-// "Sharing a device"). A browser makes a click only from a lone touch, so
-// while the page is split each finger or pen presses for itself: lifted
-// soon, over the element it went down on. The click a lift may still bring
-// is dropped page-wide, not only on its element: a press that closes a
-// place moves the others under the finger, and the click would land on
-// whatever is there now. Elsewhere, and from a mouse, the click alone
-// presses, as it always did.
+// Input on a device several players share. A browser makes a click only
+// from a lone touch, so while the page is split each finger or pen presses
+// for itself: lifted soon, over the element it went down on. The click a
+// lift may still bring is dropped page-wide, not only on its element: a
+// press that closes a place moves the others under the finger, and the click
+// would land on whatever is there now. Elsewhere, and from a mouse, the
+// click alone presses.
 
 /** Whether the page is shared between players now (client/play.ts sets the class). */
 const shared = (): boolean => document.body.classList.contains("shared");

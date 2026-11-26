@@ -1,9 +1,4 @@
-// The Projector: what the class sees. While no
-// Remote is there it steers itself: in the lobby it is the single tab's two
-// screens, the teacher's check and then, one tap on, the class's join screen
-// (docs/design/teacher-devices.md, "The single tab: check, then join"); during
-// the quiz the steering bar. A clicker or the keyboard moves the quiz on
-// during the quiz; the quiz's code stays in a corner throughout.
+// The Projector: what the class sees. While no Remote is there it steers itself.
 
 import qrcode from "qrcode-generator";
 import type { ImageRef, ScreenView, ServerMessage, TeacherView } from "../shared/protocol.ts";
@@ -27,7 +22,7 @@ document.title = `classyQuiz · ${T.projector}`;
 const params = new URLSearchParams(location.search);
 const instance = params.get("q") ?? "";
 const held: HeldRole | null = instance ? tabRole.get(instance) : null;
-/** Opened from the lobby's "Open the projector window": say where it goes. */
+/** Opened by "Open the projector window": say where it goes. */
 const dragHint = params.get("drag") === "1";
 
 let line: Line | null = null;
@@ -35,11 +30,9 @@ let view: ScreenView | null = null;
 let lastBar = "";
 let wasFull = false;
 let tickTimer: number | undefined;
-/** The single tab's lobby screen: the teacher's check, or the class's join screen. */
 let lobbyScreen: "check" | "join" = instance ? tabLobby.get(instance) : "join";
-/** How the screens are arranged, the check's toggle: it decides which how-to the lobby shows, nothing else. */
 let arranged: Arrangement = arrangement.get();
-/** A Remote has been in this quiz (tabHadRemote): a run that ends without one teaches the browser One screen. */
+/** A run that ends without a Remote sets the browser's arrangement to One screen. */
 let hadRemote = instance ? tabHadRemote.get(instance) : false;
 const steer = new Steer(() => line, () => view?.steer ?? null, newUI(), () => render());
 
@@ -67,18 +60,15 @@ function onMessage(m: ServerMessage): void {
   if (m.t === "state" && m.view.role === "screen") {
     const before = view;
     view = m.view;
-    // Every picture of the quiz, fetched ahead: the one on screen first.
     if (view.question?.image) void load(view.question.image.src, true);
     preload(view.pictures);
     // A wall that takes the steering back in the lobby (its steering tab left
     // or went away) keeps showing the class's screen, not the check.
     if (before && !before.steer && view.steer && view.phase === "lobby" && !view.waiting) setLobby("join", false);
-    // How the screens are arranged, learnt from what happens
-    // (docs/design/teacher-devices.md, "How the screens are arranged"). A
-    // Remote, whether it came before this tab or after it: this host steers
-    // from a second device, and the next check here says how. Only as it
-    // comes, so a tap on One screen while a Remote is away holds. A run that
-    // reached its end without one: this host has one screen.
+    // How the screens are arranged, learnt from what happens: a Remote,
+    // before this tab or after it, means a second device; a run that reached
+    // its end without one, one screen. Only as the Remote comes, so a tap on
+    // One screen while it is away holds.
     const firstRemote = view.remote !== "none" && !hadRemote;
     if (firstRemote) {
       hadRemote = true;
@@ -141,7 +131,6 @@ function render(): void {
   document.body.classList.toggle("manage", managing);
   document.body.classList.toggle("steering", !!v.steer && !managing);
   if (v.phase !== "question" && v.phase !== "reveal") questionKey = "";
-  // The lobby's wait for the first avatar ends with the start (nobodyYet).
   if (v.phase !== "lobby") forgetJoinWait();
   if (managing) renderManagedLobby(v);
   else if (v.phase === "lobby") renderLobby(v);
@@ -160,11 +149,6 @@ function render(): void {
   renderParty(v);
 }
 
-/**
- * "Change the solution" from ⋯ during the quiz: the question's answers in
- * a sheet over the wall, tappable. On a mirrored laptop the class sees it;
- * the menu item says so.
- */
 function renderFix(v: ScreenView): void {
   const t = v.steer;
   const i = steer.ui.fixing;
@@ -208,36 +192,23 @@ function qrSvg(code: string): string {
   return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
 }
 
-/** The teacher code's two digits: the view's, else what the tab was given. */
 function teacherDigits(): string {
   return view?.teacher || held?.teacher || "";
 }
 
-/** The way back in for a tab that lost its role. */
 function comeBack(): string {
   const d = teacherDigits();
   return d ? teacherEntry(held!.code, d) : `/teacher#${held!.code}`;
 }
 
-/**
- * The second device's how-to, in one sentence naming both needs
- * (docs/design/teacher-devices.md, "The single tab: check, then join"); it doesn't guess which device this is. "Open a second
- * screen in a new window" opens a window that asks the same question as any other
- * device; it is always there, so a laptop that gains its second screen after
- * the check finds it where it was (hidden on a phone). This is the sheet's
- * and the menu's; the check says it under "Screen and remote", which has
- * already named both needs (checkHowTo).
- */
 function secondDevice(v: ScreenView): string {
   return `${T.secondDevice(esc(siteAddress()), esc(teacherCode(v.code, v.teacher)))}<span class="twoscreens">${T.secondDeviceWindow(`<button class="link" data-act="projector-window">${T.newWindowLink}</button>`)}</span>`;
 }
 
-/** The how-to under the check's "Screen and remote". */
 function checkHowTo(v: ScreenView): string {
   return `${T.checkHowTo(esc(siteAddress()), esc(teacherCode(v.code, v.teacher)))}<span class="twoscreens">${T.checkHowToWindow(`<button class="link" data-act="projector-window">${T.newWindowLink}</button>`)}</span>`;
 }
 
-/** The single tab's lobby screen; the class never sees the check unless the teacher shares it. */
 function setLobby(screen: "check" | "join", draw = true): void {
   if (lobbyScreen === screen) return;
   lobbyScreen = screen;
@@ -254,7 +225,6 @@ function renderManagedLobby(v: ScreenView): void {
   else renderJoin(v);
 }
 
-/** The check's toggle (docs/design/teacher-devices.md, "How the screens are arranged"); remembered in this browser. */
 function arrange(a: Arrangement, draw = true): void {
   // Written even when this page already has it: another tab of the browser may have set the other.
   arrangement.set(a);
@@ -263,22 +233,10 @@ function arrange(a: Arrangement, draw = true): void {
   if (draw) render();
 }
 
-/** One side of the toggle: its name and what it means, pressed when it is the arrangement. */
 function arrangeOption(a: Arrangement, name: string, line: string): string {
   return `<button class="arrange-opt" type="button" data-act="arrange" data-to="${a}" aria-pressed="${arranged === a}"><strong>${name}</strong><small>${line}</small></button>`;
 }
 
-/**
- * The check: the host's page before anyone joins
- * (docs/design/teacher-devices.md, "The single tab: check, then join"). It
- * asks how the screens are arranged and gives the remote's how-to only to a
- * host who has one; it lists the questions, their answers folded: the local
- * check keeps them closed for whoever plays, so this is where whoever runs
- * the quiz sees them and catches a wrong key before the wall. The join code is
- * small; a second device can use it with the two more digits, the players
- * only once "Let everyone in" is tapped: the one tap to the join screen,
- * which lets them in.
- */
 function renderCheck(v: ScreenView): void {
   const t = v.steer!;
   const n = v.players.length;
@@ -309,19 +267,8 @@ function renderCheck(v: ScreenView): void {
   steer.noteStep(t);
 }
 
-// Nobody in yet (docs/design/root-page.md, "Network help, where failure shows"): the laptop got
-// through, the tablets may not (a student network with a stricter filter).
-// After NOBODY_MS with the class's join screen up and nobody in, one muted
-// line under the avatars; gone with the first avatar. It shows on a mirrored
-// laptop, in front of the class: harmless text, at the moment the class
-// watches the teacher wait. The link opens a new tab, so the wall stays.
-
 const NOBODY_MS = 90_000;
-/**
- * When this tab first let the class in to an empty lobby; the wait
- * counts from there, across ‹ Back and the join screen again. It goes with the first
- * avatar and with the quiz's start.
- */
+/** The wait for the first avatar counts across ‹ Back and the join screen again. */
 let joinSince: { code: string; at: number } | null = null;
 let nobodyTimer: number | undefined;
 
@@ -343,14 +290,6 @@ function nobodyYet(v: ScreenView): boolean {
   return false;
 }
 
-/**
- * Where the code goes (docs/design/class-and-wall.md, "Getting in"): first
- * users typing the address didn't find the code box in the landing page's
- * header. A wordless picture of a tablet's top: the address in the browser's
- * field, the site's header with this class's code in its box. Wordless, so
- * it matches the landing page in any language and at any width. Shown until
- * the first avatar; after that the class shows each other.
- */
 function howTo(code: string): string {
   return `<div class="howto" aria-hidden="true"><div class="scr">
     <div class="url">${esc(siteAddress())}</div>
@@ -360,12 +299,9 @@ function howTo(code: string): string {
 }
 
 /**
- * The address the class types, the mark before it: the fox the tablets then
- * find in the landing page's header (docs/design/identity.md). The wall stays
- * light, so the light-ground files: the full drawing from 48 px, which beside
- * a pages.dev address the mark reaches on a 1920 x 1080 wall (the join
- * column's height caps it), the drawing for 24 to 47 px below that. --chars
- * is the address's length plus the mark's room (app.css, the join column).
+ * The full drawing from 48 px, which beside a pages.dev address the mark
+ * reaches on a 1920 x 1080 wall; the drawing for 24 to 47 px below that.
+ * --chars is the address's length plus the mark's room.
  */
 function joinAddress(): string {
   return `<div class="addr" style="--chars:${siteAddress().length + 3}"><picture><source media="(min-width: 1600px) and (min-height: 960px)" srcset="/brand/classyquiz-symbol-colour.svg"><img class="mark" src="/brand/classyquiz-symbol-32.svg" alt="" width="32" height="32"></picture>${esc(siteAddress())}</div>`;
@@ -375,12 +311,6 @@ function nobodyLine(): string {
   return T.nobodyYet(esc(siteAddress()), `<a href="/check#it" target="_blank" rel="noopener">${esc(SITE.whatToTellIt)}</a>`);
 }
 
-/**
- * The join screen, everyone's: QR, code, avatars and Start. The part
- * everyone sees ends at the fold; "‹ Back" goes back to the check, and
- * with a remote "A second device ›" shows its how-to in a sheet (on one
- * screen it is in ⋯ only).
- */
 function renderJoin(v: ScreenView): void {
   const t = v.steer!;
   const n = v.players.length;
@@ -448,7 +378,6 @@ function renderLobby(v: ScreenView): void {
   }
   $("#nobody").hidden = !nobodyYet(v);
   $("#howto").hidden = v.players.length > 0;
-  // Newcomers pop in once; a changed look wiggles (the child dressing it).
   syncAvatars($("#crowd"), v.players, () => ({ tag: "div", className: "av" }));
   $("#count").textContent = String(v.players.length);
 }
@@ -461,9 +390,8 @@ function renderQuestion(v: ScreenView): void {
   const r = v.reveal;
   // The question is laid out once: while answers come in only the count
   // changes, and the reveal only marks the tiles, so neither text nor
-  // picture moves or flickers (docs/design/class-and-wall.md,
-  // "Tiles do not move at the reveal"). The fit depends on the room the bar leaves and
-  // on the window's size, so both are part of the key.
+  // picture moves or flickers. The fit depends on the room the bar leaves
+  // and on the window's size, so both are part of the key.
   const key = JSON.stringify([q.q, q.text, q.answers, q.pics, q.image, !!v.steer, innerWidth, innerHeight]);
   if (key !== questionKey || !main.querySelector("#stage")) {
     questionKey = key;
@@ -500,14 +428,7 @@ function renderQuestion(v: ScreenView): void {
   markTiles(main, { counts: r ? r.counts : null, dist: r ? r.dist : (v.votes ?? null) });
 }
 
-/**
- * Who has answered: each avatar pops into the bar as its answer
- * lands, in the order they arrive. Only those who answered: nobody is shown
- * as missing (the count says how many, the Remote who). The mark says the
- * answer arrived, never which one, and a change of mind changes nothing.
- * The avatars are as large as the bar allows for the whole class in one or
- * more rows, so they don't shrink as the answers come in.
- */
+/** The avatars are sized for the whole class, so they don't shrink as the answers come in. */
 let stripQ = -1;
 let stripFit = "";
 const popped = new Set<string>();
@@ -540,7 +461,6 @@ function renderStrip(q: number, inList: { id: string; avatar: ScreenView["player
   }
 }
 
-/** The largest avatar (px) such that n of them fit in w×h, in as many rows as that takes. */
 function stripSize(n: number, w: number, h: number): number {
   const gap = 4;
   for (let s = Math.floor(h); s >= 8; s--) {
@@ -551,12 +471,7 @@ function stripSize(n: number, w: number, h: number): number {
   return 8;
 }
 
-// The winners jump: after every reveal, the avatars of those whose answer
-// counts jump for a few seconds in a band over the top of the stage; the tiles
-// with the key stay in view (look.ts, partySize). In the lobby's order, so
-// the first isn't the fastest. Once per key: a view that comes again (a tick,
-// a reconnect) doesn't restart it; a fix of the key does, for its new winners.
-
+/** Once per key: a view that comes again (a tick, a reconnect) doesn't restart the jump; a fix of the key does. */
 let partyKey = "";
 
 function renderParty(v: ScreenView): void {
@@ -575,12 +490,7 @@ function renderParty(v: ScreenView): void {
   jump(stage, winners);
 }
 
-/**
- * Last call's bar along the top edge of the wall, over everything: it takes
- * no room from the question, its picture or the tiles. In the lobby, Start's
- * time, the class's dressing drawing to its end. Drawn again only when it
- * starts, stops or runs out; in between, CSS drains it.
- */
+/** Drawn again only when it starts, stops or runs out; in between, CSS drains it. */
 function renderClock(v: ScreenView): void {
   if (v.phase === "lobby") {
     edgeBar("start", v.starts);
@@ -590,11 +500,6 @@ function renderClock(v: ScreenView): void {
   edgeBar(`${q?.q}|${q?.clock?.leftMs === 0}`, q?.clock ?? null);
 }
 
-/**
- * The picture over the whole screen, for the moment the teacher points at
- * it: Z or a click on the picture here, or the Remote. It ends by itself
- * with the next step.
- */
 function renderZoom(v: ScreenView): void {
   const img = v.zoom && (v.phase === "question" || v.phase === "reveal") ? v.question?.image : null;
   let el = document.getElementById("zoom");
@@ -619,11 +524,6 @@ function renderZoom(v: ScreenView): void {
   fillPictures(el);
 }
 
-/**
- * A background behind the whole screen, under a light veil so the question
- * and tiles read from the back row: the question's own (or the quiz's) while
- * a question is up, the quiz's in the lobby and at the rankings.
- */
 function renderBackdrop(v: ScreenView): void {
   backdrop(v.phase === "question" || v.phase === "reveal" ? (v.question?.background ?? null) : v.background);
 }
@@ -656,10 +556,6 @@ function renderRanking(v: ScreenView): void {
   patch(main, html);
 }
 
-/**
- * The bottom line. Steering: ⋯, the code, Countdown and Play (steps.ts). Not steering:
- * the code in a corner, full screen, and ⋯ (steer from here, leave).
- */
 function renderBar(v: ScreenView, managing: boolean): void {
   const full = !!document.fullscreenElement;
   let html: string;
@@ -690,7 +586,6 @@ function renderBar(v: ScreenView, managing: boolean): void {
     lastBar = html;
     sbar.innerHTML = html;
   }
-  // What a press is judged against: when the step on this screen changed.
   if (v.steer) steer.noteStep(v.steer);
   else wallPresses.noteView(screenState(v));
 }
@@ -701,7 +596,7 @@ function menu(v: ScreenView): void {
     items.unshift({ label: v.zoom ? T.zoomBack : T.zoomIn, run: () => toggleZoom() });
   }
   if (v.steer) items.push({ label: T.players, run: () => showPlayers() });
-  // ⇄ Swap while both tabs are there: this wall steers, the steering tab shows the quiz.
+  // ⇄ Swap: this wall steers, the steering tab shows the quiz.
   if (!v.steer && v.remote === "present") items.push({ label: T.swapHere, run: () => void swap() });
   if (v.steer) items.push({ label: T.secondDeviceMenu, run: () => showNote(secondDevice(v)) });
   items.push({ label: T.stopShowing, run: () => void leave() });
@@ -742,7 +637,7 @@ function showNote(html: string): void {
   document.body.appendChild(back);
 }
 
-/** ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): no confirmation, the same tap on either device undoes it. */
+/** No confirmation: the same tap on either device undoes it. */
 async function swap(): Promise<void> {
   const r = await line?.send({ op: "swap" });
   if (r && !r.ok && r.error) toast(said(r.error));
@@ -758,7 +653,6 @@ async function leave(): Promise<void> {
   location.replace("/");
 }
 
-/** Two screens: a new window, which asks the same question as any other device. */
 function projectorWindow(): void {
   const w = window.open(teacherEntry(held!.code, teacherDigits(), "?win=1"), "_blank", "popup,width=1280,height=720");
   if (!w) toast(T.popupBlocked(teacherCode(held!.code, teacherDigits())), 8000);
@@ -793,14 +687,10 @@ for (const area of [main, sbar]) {
   });
 }
 
-// Clicker and keyboard: Space, Enter, →, ↓, PageDown and N are Play, judged
-// like a press of the button (steps.ts, Presses). No key starts the quiz from
-// the lobby: a stray key must not move it (a teacher leaning on the laptop),
-// and Start is pressed once while the class is still joining. A key with
-// Ctrl, Alt or Cmd is a shortcut, not a step. While a Remote steers, the
-// teacher is on the phone and the laptop's big keys (Space, Enter, N) are the
-// likeliest strays; only a clicker's keys (PageDown, →, ↓) move on from here
-// (docs/design/question-flow.md, "The steering bar", Keys).
+// No key starts the quiz from the lobby: a stray key (a teacher leaning on
+// the laptop) must not move it while the class is still joining. While a
+// Remote steers, the laptop's big keys (Space, Enter, N) are the likeliest
+// strays; only a clicker's keys move on from here.
 const PLAY_KEYS = new Set([" ", "Enter", "ArrowRight", "ArrowDown", "PageDown", "n", "N"]);
 const CLICKER = new Set(["PageDown", "ArrowRight", "ArrowDown"]);
 /** The clicker's presses while a Remote steers; while this wall steers, the Steer's own. */
@@ -851,7 +741,6 @@ function toggleZoom(): void {
     if (!r.ok && r.error) toast(said(r.error));
   });
 }
-// The picture beside the question, or the enlarged one: a click toggles.
 document.addEventListener("click", (e) => {
   if ((e.target as HTMLElement).closest("[data-zoom]")) toggleZoom();
 });

@@ -1,8 +1,6 @@
-"""The space quiz in English, French and Italian: the owner's run, weltall-quiz.zip (German, 11 Nov 2026), with its
+"""The space quiz in English, French and Italian: the run's weltall-quiz.zip (German), with its
 quiz.txt translated, title, questions and choices, and the three pictures the AI drew with German words on them
 (sonne-erde.png, tag-nacht.png, umlauf.png) labelled in the language; the photographs and the other drawing are unchanged.
-The root page's "Idea" tab shows this run (docs/design/root-page.md, "Getting a quiz"); its translations are drafts for
-the owner's review, as the sheets example's are (quiz_zips.py).
 
 A label is replaced where it stands: its letters found by their colour, the patch under them painted over from the rows
 above and below it, the new word written in the drawing's own face (DejaVu Sans Bold) at the size that matches the old

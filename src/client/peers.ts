@@ -1,16 +1,5 @@
-// A Peers room on a player's device (backlog v5 items 3 and 7;
-// docs/design/peers.md). There
-// is no wall and nobody steers, so each device shows what a wall would:
-// the code for the others (on the device of whoever opened the room), who
-// is in, the question itself on the device screen (client/device.ts), the
-// spread, the winners and how the friends stand with the solution, and the
-// final ranking. The room moves on once everyone present is done: answered,
-// then done with the solution; a player who is done can start a Countdown
-// for the others. Whoever opened it also has a ⋯ to fix a solution, remove
-// an avatar and end the quiz early.
-//
-// client/seat.ts owns the line and the lobby's dressing menu; it hands
-// every view of a Peers room here.
+// A Peers room on a player's device: there is no wall and nobody steers, so
+// each device shows what a wall would.
 
 import qrcode from "qrcode-generator";
 import type { Command, PeersView, PlayerView, ServerMessage, TeacherQuestion } from "../shared/protocol.ts";
@@ -30,13 +19,12 @@ type Ack = Extract<ServerMessage, { t: "ack" }>;
 export interface PeersContext {
   main: HTMLElement;
   send(cmd: Command): Promise<Ack>;
-  /** The lobby's dressing menu for this player, built into `into` the first time (client/seat.ts). */
+  /** The lobby's dressing menu, built into `into` the first time. */
   dress(into: HTMLElement): void;
   /** This device is done with the room: the start page needn't offer it again. */
   forget(): void;
 }
 
-/** Beyond this many, "waiting for" shows a number for the rest. */
 const WAITING_SHOWN = 6;
 
 export class PeersRoom {
@@ -48,11 +36,10 @@ export class PeersRoom {
   private tap: { q: number; choice: number } | null = null;
   /** "Done" sent for this question, shown at once until the view says so. */
   private readySent = -1;
-  /** The solution the winners last jumped for: once per key, as on the wall. */
+  /** The solution the winners last jumped for. */
   private jumped = "";
-  /** The question whose solution is being changed (⋯ → Change the solution), or null. */
   private fixing: number | null = null;
-  /** The questions' pictures and backgrounds in the packs, as the lobby said: drawn from there once a pack is here. */
+  /** Kept from the view that carried it. */
   private inPacks: NonNullable<PeersView["inPacks"]> = [];
 
   constructor(ctx: PeersContext) {
@@ -84,13 +71,11 @@ export class PeersRoom {
     if (this.view) this.show(this.view);
   }
 
-  // The pictures (docs/design/peers.md, "The pictures"): the packs carry
-  // the answer pictures' small copies and the questions' pictures and
-  // backgrounds, a few requests per device; each is drawn under the
-  // address the views name it by, so the layout doesn't wait or change. A
-  // picture whose pack isn't here when it shows is fetched by itself.
-
-  /** Gives the pictures whose packs are here to the page, under their addresses. */
+  /**
+   * Pictures cut from the packs are seeded under the addresses the views name
+   * them by, so the layout doesn't wait or change; one whose pack isn't here
+   * when it shows is fetched by itself.
+   */
   private fromPacks(): void {
     for (const x of this.inPacks) {
       const url = packPicture(x.pic);
@@ -109,7 +94,6 @@ export class PeersRoom {
     fillPictures();
   }
 
-  /** A page of the room's own in `main`: the device screen steps aside. */
   private page(cls: string): void {
     this.screen.leave();
     document.body.className = cls;
@@ -121,12 +105,7 @@ export class PeersRoom {
     this.main.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div></div>`;
   }
 
-  // The lobby: the code for the others on the opener's device, who is in,
-  // the dressing menu, and Start, the opener's; the others see whose Start
-  // it waits for. Once pressed, the quiz comes START_MS later, its time
-  // draining along the top edge. Built once and patched, so nothing is
-  // replaced under a finger (a picture of the menu, Start).
-
+  /** Built once and patched, so nothing is replaced under a finger (a picture of the menu, Start). */
   private lobby(v: PlayerView, p: PeersView): void {
     let root = this.main.querySelector<HTMLElement>(".plobby");
     if (!root) {
@@ -159,7 +138,6 @@ export class PeersRoom {
     );
   }
 
-  /** The invitation as a link, for friends who can't scan the code (a call): shared where the device shares, else copied. */
   private async invite(): Promise<void> {
     const url = joinUrl(this.view?.peers?.code ?? "");
     if (canShare()) {
@@ -174,7 +152,6 @@ export class PeersRoom {
       await navigator.clipboard.writeText(url);
       toast(T.linkCopied, 2500);
     } catch {
-      // No clipboard: the link to copy by hand, selected.
       const box = this.main.querySelector<HTMLElement>(".plink");
       if (!box) return;
       box.innerHTML = `<input class="plinkbox" readonly value="${esc(url)}" aria-label="${esc(T.copyLink)}">`;
@@ -183,8 +160,6 @@ export class PeersRoom {
       input.select();
     }
   }
-
-  // A question and its solution, on the device screen.
 
   private question(v: PlayerView, p: PeersView): void {
     const q = v.question!;
@@ -218,9 +193,7 @@ export class PeersRoom {
       dist: reveal ? p.dist : null,
       me: { avatar: v.me!.avatar, score: v.me!.score },
       next: reveal && !done ? (p.last ? T.finalRanking : T.question(q.n + 1)) : null,
-      // While this device waits for the others: who.
       foot: doneShown ? waitingLine(p) : undefined,
-      // Every device sees a Countdown that runs, and whose it is; one done with the step can start it for those it waits for.
       countdown: c
         ? { note: reveal ? T.countdownOn : T.countdownNote, running: { key: `${v.phase}|${v.current}`, ms: c.ms, leftMs: c.leftMs, by: c.by } }
         : done && p.waitingFor.length > 0
@@ -246,7 +219,6 @@ export class PeersRoom {
     const q = v?.question;
     if (!v || !q || v.phase !== "question") return;
     const mine = this.tap && this.tap.q === q.q ? this.tap.choice : q.mine;
-    // The same tile again changes nothing; it isn't sent.
     if (mine === i) return;
     const tap = { q: q.q, choice: i };
     this.tap = tap;
@@ -254,7 +226,6 @@ export class PeersRoom {
     this.answers.put({ tap, seq: Date.now(), v: v.v });
   }
 
-  /** Taps go out merged (client/latest.ts): the first of a burst, then the latest. */
   private answers = new Latest<{ tap: { q: number; choice: number }; seq: number; v: number }, Ack>(
     (x) => this.ctx.send({ op: "answer", q: x.tap.q, choice: x.tap.choice, seq: x.seq, v: x.v }),
     (x, a) => {
@@ -265,7 +236,6 @@ export class PeersRoom {
     },
   );
 
-  /** The foot's button at the solution: done with it; the next question comes once everyone present is. */
   private next(): void {
     const v = this.view;
     // A key under the open sheet would tap on, and let the room move under it.
@@ -281,16 +251,12 @@ export class PeersRoom {
     });
   }
 
-  /** Countdown: the room goes on LAST_CALL_MS from now, whoever it still waits for (docs/design/peers.md, "Countdown"). */
+  /** The room goes on LAST_CALL_MS from now, whoever it still waits for. */
   private countdown(): void {
     const v = this.view;
     if (!v || (v.phase !== "question" && v.phase !== "reveal")) return;
     void this.run({ op: "lastCall", at: { phase: v.phase, current: v.current } });
   }
-
-  // The final ranking: the podium as on the wall, cheering; this player's
-  // place; ←, each device leaving when it likes. The room ends once nobody
-  // has been at it for a while (docs/design/peers.md, "The end").
 
   private final(v: PlayerView, p: PeersView): void {
     const me = v.me!;
@@ -304,8 +270,6 @@ export class PeersRoom {
     if (!this.main.querySelector(".pfinal")) this.page("play peers");
     setHtml(this.main, html);
   }
-
-  // The ⋯ of whoever opened the room.
 
   private menu(): void {
     const v = this.view;
@@ -336,7 +300,6 @@ export class PeersRoom {
     if (!a.ok && a.error) toast(said(a.error));
   }
 
-  /** "Change the solution": the open question's choices in a sheet, as the steering screens have it (client/manage.ts). */
   private renderFix(): void {
     const v = this.view;
     const p = v?.peers;
@@ -402,14 +365,13 @@ export class PeersRoom {
   };
 }
 
-/** Puts html into el unless it is already there: a view that changes nothing on this screen replaces nothing under a finger. */
+/** A view that changes nothing on this screen replaces nothing under a finger. */
 function setHtml(el: HTMLElement, html: string): void {
   if (el.dataset.html === html && el.firstChild) return;
   el.dataset.html = html;
   el.innerHTML = html;
 }
 
-/** Straight to the player page, as the QR code. */
 function joinUrl(code: string): string {
   return `${location.origin}/play#${code}`;
 }
@@ -419,7 +381,6 @@ function canShare(): boolean {
   return typeof navigator.share === "function" && matchMedia("(pointer: coarse)").matches;
 }
 
-/** The code for the others, on the device of whoever opened the room: the address, the code, the QR to scan, the link to send. */
 function joinCard(code: string): string {
   const qr = qrcode(0, "M");
   qr.addData(joinUrl(code));
@@ -430,7 +391,6 @@ function joinCard(code: string): string {
     <div class="plink"><button class="btn" type="button" data-peers="invite">${esc(label)}</button></div></div>`;
 }
 
-/** Who the room waits for, as avatars; a number for those beyond WAITING_SHOWN. Empty when it waits for nobody present. */
 function waitingLine(p: PeersView): string {
   const byId = new Map(p.players.map((x) => [x.id, x.avatar]));
   const avatars = p.waitingFor.flatMap((id) => (byId.has(id) ? [byId.get(id)!] : []));
@@ -440,11 +400,6 @@ function waitingLine(p: PeersView): string {
   return `<span class="pwaiting"><span class="pwlabel">${T.waitingFor}</span> <span class="pavs">${shown.map((a) => `<span>${avatarSvg(a)}</span>`).join("")}</span>${more > 0 ? ` +${more}` : ""}</span>`;
 }
 
-/**
- * How the friends stand, for the top bar at the solution: the scores from
- * the highest, each with its avatars, so ties read as one group; this
- * player's avatar marked (docs/design/peers.md, "The solution").
- */
 function standingLine(p: PeersView): string {
   const byId = new Map(p.players.map((x) => [x.id, x.avatar]));
   const groups: { score: number; ids: string[] }[] = [];
@@ -465,10 +420,8 @@ function standingLine(p: PeersView): string {
 }
 
 /**
- * Where the standing doesn't fit the bar (a phone, many friends), avatars
- * give way from the lowest score up, this player's never, each score saying
- * "+n" for its own; scores keep their place while that is enough, and only
- * then the lowest go, but this player's, with "…" for them.
+ * Where the standing doesn't fit the bar, avatars give way from the lowest
+ * score up, then whole scores from the lowest; this player's never.
  */
 function fitStanding(el: HTMLElement | null): void {
   const over = () => !!el && el.scrollWidth > el.clientWidth;

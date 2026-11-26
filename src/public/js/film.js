@@ -1,21 +1,12 @@
-/* classyQuiz film, built by the film project's sitebuild.py from film.js; loaded by client/film-poster.ts on the first ▶. Edit the source, not this. */
-/* classyQuiz film (animatic): about 68 s, without sound, flat SVG.
+/* Built by docs/film/build/sitebuild.py from docs/film/build/film.js; loaded by client/film-poster.ts on the first ▶. */
+/* classyQuiz film (animatic): flat SVG, no sound (docs/film/README.md).
 
-   Purpose: a teacher who has never seen a classroom quiz sees what they would
-   type to their AI, how the .zip reaches the site, and what the class does:
-   the question on the wall only, the choices on every tablet, a tap that shows
-   up on the wall, the teacher's phone setting the pace, the split before the
-   solution as the moment to talk, avatars instead of names.
-   (docs/film/README.md; screen words from the repo, film-text.md.)
-
-   Built to port: one script, no outside fonts or libraries; every word the
-   film shows is in "words" below (the root page's own from landing-text.ts,
-   filled in at build time) and drawn at play time in the page's language,
-   none in the page's HTML. build.py makes two of it: the artifact (ASSETS as
+   Every word the film shows is in "words" below (the root page's own from
+   landing-text.ts, filled in at build time) and drawn at play time in the
+   page's language. build.py makes two of it: the standalone page (ASSETS as
    data: URIs, inlined) and the site's /js/film.js (sitebuild.py: ASSETS as
-   the site's own /landing files and the brand SVGs as text, the font from
-   site.css; no data: anywhere). On the site the page holds the poster frame
-   as a picture until ▶ (build() below).
+   the site's own files). On the site the page holds the poster frame as a
+   picture until ▶ (build() below).
 
    The whole picture is a function of film time t (render(t)); nothing is
    chained on timers, so seeking, pausing and the poster frame are the same
@@ -60,7 +51,7 @@ const ANIMALS = [
   () =>
     `<path d="M24 34 L28 16 L40 30Z M76 34 L72 16 L60 30Z" fill="#8c6b4f"/><ellipse cx="50" cy="56" rx="28" ry="29" fill="#8c6b4f"/><ellipse cx="50" cy="64" rx="17" ry="18" fill="#d9bf9c"/>` +
     `<circle cx="38" cy="48" r="11" fill="#fff"/><circle cx="62" cy="48" r="11" fill="#fff"/>${EYE(38, 48, 6)}${EYE(62, 48, 6)}<path d="M45 57 L55 57 L50 66Z" fill="#f29a1d"/>`,
-  // frog: the eyes at the sides and the head a dome, so a hat sits on top as on the others
+  // frog
   () =>
     `<ellipse cx="50" cy="59" rx="32" ry="26" fill="#4caf50"/>` +
     `<path d="M33 66 Q50 79 67 66" stroke="#1b1b1f" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="30" cy="63" r="3.5" fill="#f2a7b5" opacity=".7"/><circle cx="70" cy="63" r="3.5" fill="#f2a7b5" opacity=".7"/>` +
@@ -103,8 +94,7 @@ const ring = (n, cx, cy, d, r, attrs = "") =>
 
 /**
  * In the order of shared/looks.ts; 0 is the disc. No triangle, square or
- * rhombus: those are the answer marks, and avatars pop up above the answer
- * tiles while the class answers (docs/design/class-and-wall.md, "Dressing the avatar").
+ * rhombus: those are the answer marks, and avatars show over the answer tiles.
  */
 const BACKGROUNDS = [
   (c) => `<circle cx="50" cy="50" r="49" fill="${c}"/>`,
@@ -189,7 +179,6 @@ const HATS = [
     box: "-26 -27 52 32",
   },
   {
-    // With the top hat and the bow tie, the dapper register (identity.md: the mark is the fox in a top hat).
     name: "bowler",
     svg:
       `<path d="M-13.5 -2 C-13.5 -15.5 -8 -22.5 0 -22.5 C8 -22.5 13.5 -15.5 13.5 -2Z" fill="#23262e"/><rect x="-13.5" y="-7.3" width="27" height="3.8" fill="#5d636e"/>` +
@@ -201,8 +190,7 @@ const HATS = [
 
 /**
  * Where a hat sits on each animal (order of ANIMAL_NAMES): the brim's centre
- * x and y, its width, and how much hats grow beyond it. A hat never reaches
- * past the top of the picture. Smaller on the penguin.
+ * x and y, its width, and how much hats grow beyond it.
  */
 const SEATS = [
   [50, 35, 30, 1.3], // cat
@@ -228,22 +216,16 @@ function hatOn(animal, hat) {
 }
 
 /**
- * The row beside the hats: things held, worn or set before the animal, in the
- * order of shared/looks.ts (0: none), each drawn round (0, 0); `at` says where
- * it goes (toolOn), `box` shows it alone in the picker. Each is a solid blob,
- * since at the who-answered bar's 21 to 36 px a line is a pixel wide and gone,
- * and dark or coloured where it passes the disc's edge, since white is lost
- * on the wall's paper there. No answer's colour in an answer's shape
- * (docs/design/class-and-wall.md, "Dressing the avatar"). The types are
- * inferred: docs/film/build/build.py lifts this part of the file into the
- * film as plain JavaScript.
+ * Things held, worn or set before the animal, in the order of shared/looks.ts
+ * (0: none), each drawn round (0, 0); `at` says where it goes (toolOn), `box`
+ * shows it alone in the picker. Avatars show as small as 21 px, where a thin
+ * line is gone; no answer's colour in an answer's shape, for the reason BACKGROUNDS gives.
+ * The types are inferred: docs/film/build/build.py lifts this
+ * part of the file into the film as plain JavaScript.
  */
 const TOOLS = [
   { name: "", svg: "", box: "0 0 1 1", at: "hand" },
   {
-    // The animal behind its open laptop, seen from the lid's side: low in the
-    // middle, not a small laptop at the corner, where a list of players would
-    // read it as the device the player is on.
     name: "laptop",
     svg:
       `<rect x="-18" y="-9" width="36" height="17" rx="2" fill="#aeb4bd" stroke="#5d636e" stroke-width="1.4"/><circle cx="0" cy="-0.5" r="2.8" fill="#e8e6e1"/>` +
@@ -300,7 +282,6 @@ const TOOLS = [
     at: "hand",
   },
   {
-    // The top hat's own register (identity.md: the mark is the fox in a top hat).
     name: "bow tie",
     svg:
       `<path d="M-2 0 L-13 -7.5 Q-16.5 0 -13 7.5Z M2 0 L13 -7.5 Q16.5 0 13 7.5Z" fill="#fff" stroke="#fff" stroke-opacity=".6" stroke-width="3.2" stroke-linejoin="round"/>` +
@@ -311,15 +292,9 @@ const TOOLS = [
   },
 ];
 
-/** Where a bow tie sits on each animal (order of ANIMAL_NAMES): just under the chin. */
+/** Where a bow tie sits on each animal (order of ANIMAL_NAMES). */
 const NECKS = [86, 83, 85, 85, 86, 88, 88, 86, 86, 86, 86, 89];
 
-/**
- * Where each goes: a thing held, low on the right, the same for every animal,
- * over the cheek and past the disc's edge, so it changes the outline on that
- * side; a bow tie under the chin; a laptop low in the middle, below every
- * animal's mouth.
- */
 const toolOn = (animal = 0, tool = 0) => {
   const it = TOOLS[tool];
   if (!it?.svg) return "";
@@ -332,8 +307,7 @@ const lookIndex = (i, n) => (typeof i === "number" && Number.isInteger(i) && i >
 function avatarSvg(av, label = true) {
   const colour = AVATAR_COLOURS[av.c % AVATAR_COLOURS.length];
   const a = av.a % ANIMALS.length;
-  // The drawings' own counts, which the menu's equal (look.test.ts), so the
-  // film's copy of this function needs no count (docs/film/build/build.py).
+  // The drawings' own counts, not the menu's (look.test.ts holds them equal), so the film's copy needs none.
   const b = lookIndex(av.b, BACKGROUNDS.length);
   const h = lookIndex(av.h, HATS.length);
   const t = lookIndex(av.t, TOOLS.length);
@@ -349,19 +323,14 @@ function avatarSvg(av, label = true) {
   const W = 1600, H = 900, DUR = 68, POSTER = 55.3;
 
   // ---------------------------------------------------------------- words
-  // The words on the film's screens, each in the language the real screen has (film-text.md 0.7):
-  // the teacher's chat with their AI and the quiz it makes are in the teacher's language, the
-  // page's (de en fr it), and so is the root page; the site's own screens after the upload (the
-  // check, the second device's choice, the wall's chrome, the Remote, the tablets) are the site's
-  // words (SITE below). One quiz in every language: the example's 126 000 arrow
-  // question, translated, so every language shows the same film.
+  // The words on the film's screens, each in the language the real screen has: the teacher's chat
+  // with their AI, the quiz it makes and the root page in the page's; the site's own screens after
+  // the upload in the site's words (SITE below). One quiz in every language: the example's
+  // 126 000 arrow question, translated.
 
-  /** The root page's words from client/landing-text.ts, filled in by build.py: per language the sheets ask, which the
-      film types ({ s, l }: l 0 the site's address, any other l a labelled part), the words of its first screen (code, what,
-      getH, which, the tabs' names tabIdea, tabSheets, tabNotes, tabTest and unsure, the first tab's ask askIdea, gives,
-      playThis, see, run, upload, drop) and reading, the first tab's file as the page names it (zipIdea, its name, and
-      sizeIdea, its size, from client/example-files.ts), the chapters' names (capSheet, capAi, capZip, capWall, capTap) and
-      the player's (play, pause, speed, seek). */
+  /** The root page's words per language from client/landing-text.ts, filled in by build.py (LANDING_KEYS there): the
+      sheets ask, which the film types ({ s, l }: l 0 the site's address, any other l a labelled part), and the first tab's
+      file as the page names it (zipIdea, sizeIdea, from client/example-files.ts). */
   const LANDING = {"de": {"ask": [{"s": "Lies "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Kannst du mir ein classyQuiz mit Aufgaben "}, {"s": "wie Nr. 1, 3 und 4", "l": 1}, {"s": " von diesen zwei Blättern machen? "}, {"s": "Für meine 4. Klasse", "l": 2}, {"s": ", "}, {"s": "etwa 12 Fragen", "l": 3}, {"s": ", "}, {"s": "auf Deutsch", "l": 4}, {"s": ". Gerne gegen Schluss etwas schwieriger."}], "code": "Code", "what": "Spiel das Quiz, das deine KI macht: in der Klasse oder Gruppe, mit Freunden oder allein.", "getH": "Frag deine KI nach einem Quiz", "which": "Jedes KI-Abo reicht, sonst Claude gratis.", "tabIdea": "Idee", "tabSheets": "Blätter", "tabNotes": "Notizen", "tabTest": "Prüfung", "unsure": "Unsicher?", "askIdea": "Lies classyquiz.pages.dev. Ich brauche ein classyQuiz über den Weltraum, 4. Klasse, mit Bildern. Die Planetenreihenfolge ist bekannt, Mondnamen wären zu schwierig. Schaffst du 20 Fragen, ohne dass es repetitiv wird? Sonst weniger.", "gives": "Antwort der KI:", "playThis": "Dieses Quiz spielen ↓", "see": "Das ganze Beispiel ›", "run": "Öffne das Quiz deiner KI", "upload": ".zip-Datei auswählen", "drop": "oder hier ablegen", "reading": "Das Quiz wird gelesen…", "capSheet": "Deine Arbeitsblätter", "capAi": "Deine KI", "capZip": "Die .zip-Datei, hier geöffnet", "capWall": "Was die Klasse sieht", "capTap": "Jedes Kind tippt", "play": "Abspielen", "pause": "Pause", "speed": "Tempo", "seek": "Position im Film", "zipIdea": "weltall-quiz.zip", "sizeIdea": "3,5 MB"}, "en": {"ask": [{"s": "Read "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Can you make me a classyQuiz with exercises "}, {"s": "like no. 1, 3 and 4", "l": 1}, {"s": " from these two sheets? "}, {"s": "For my 4th grade class", "l": 2}, {"s": ", "}, {"s": "about 12 questions", "l": 3}, {"s": ", "}, {"s": "in English", "l": 4}, {"s": ". Preferably a bit harder towards the end."}], "code": "Code", "what": "Play quizzes your own AI makes: for a class or group, with friends, or on your own.", "getH": "Ask your AI for a quiz", "which": "Any AI subscription will do, or free Claude.", "tabIdea": "Idea", "tabSheets": "Sheets", "tabNotes": "Notes", "tabTest": "Test", "unsure": "Not sure?", "askIdea": "Read classyquiz.pages.dev. I need a classyQuiz about space, 4th grade, with pictures. The order of the planets is known; moon names would be too hard. Can you manage 20 questions without it getting repetitive? If not, fewer.", "gives": "The AI's answer:", "playThis": "Play this quiz ↓", "see": "The whole example ›", "run": "Open the quiz your AI made", "upload": "Choose the .zip file", "drop": "or drop it here", "reading": "Reading the quiz…", "capSheet": "Your exercise sheets", "capAi": "Your AI", "capZip": "The .zip, opened here", "capWall": "What the class sees", "capTap": "Each student taps", "play": "Play", "pause": "Pause", "speed": "Speed", "seek": "Time in the film", "zipIdea": "space-quiz.zip", "sizeIdea": "3.4 MB"}, "fr": {"ask": [{"s": "Lis "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Tu peux me faire un classyQuiz avec des exercices "}, {"s": "comme les n° 1, 3 et 4", "l": 1}, {"s": " de ces deux fiches ? "}, {"s": "Pour ma classe de CM1", "l": 2}, {"s": ", "}, {"s": "une douzaine de questions", "l": 3}, {"s": ", "}, {"s": "en français", "l": 4}, {"s": ". De préférence un peu plus difficile vers la fin."}], "code": "Code", "what": "Jouez aux quiz que votre IA crée : en classe ou en groupe, entre amis, ou en solo.", "getH": "Demandez un quiz à votre IA", "which": "Tout abonnement IA convient, ou Claude gratuit.", "tabIdea": "Idée", "tabSheets": "Fiches", "tabNotes": "Cours", "tabTest": "Contrôle", "unsure": "Un doute ?", "askIdea": "Lis classyquiz.pages.dev. J'ai besoin d'un classyQuiz sur l'espace, niveau CM1, avec des images. L'ordre des planètes est connu ; les noms des lunes seraient trop difficiles. Tu arrives à faire 20 questions sans que ça devienne répétitif ? Sinon, moins.", "gives": "Réponse de l'IA :", "playThis": "Jouer à ce quiz ↓", "see": "L'exemple complet ›", "run": "Ouvrez le quiz de votre IA", "upload": "Choisir le fichier .zip", "drop": "ou déposez-le ici", "reading": "Lecture du quiz…", "capSheet": "Vos fiches d'exercices", "capAi": "Votre IA", "capZip": "Le .zip, ouvert ici", "capWall": "Ce que voit la classe", "capTap": "Chaque élève répond", "play": "Lire", "pause": "Pause", "speed": "Vitesse", "seek": "Position dans la vidéo", "zipIdea": "quiz-voyage-espace.zip", "sizeIdea": "3,4 Mo"}, "it": {"ask": [{"s": "Leggi "}, {"s": "classyquiz.pages.dev", "l": 0}, {"s": ". Mi puoi fare un classyQuiz con esercizi "}, {"s": "come i n. 1, 3 e 4", "l": 1}, {"s": " di queste due schede? "}, {"s": "Per la mia quarta elementare", "l": 2}, {"s": ", "}, {"s": "una dozzina di domande", "l": 3}, {"s": ", "}, {"s": "in italiano", "l": 4}, {"s": ". Se possibile un po' più difficile verso la fine."}], "code": "Codice", "what": "Gioca ai quiz che la tua IA crea: in classe o in gruppo, tra amici o per conto tuo.", "getH": "Chiedi un quiz alla tua IA", "which": "Va bene ogni abbonamento IA, o Claude gratuito.", "tabIdea": "Idea", "tabSheets": "Schede", "tabNotes": "Appunti", "tabTest": "Verifica", "unsure": "Dubbi?", "askIdea": "Leggi classyquiz.pages.dev. Mi serve un classyQuiz sullo spazio, quarta elementare, con immagini. L'ordine dei pianeti è noto; i nomi delle lune sarebbero troppo difficili. Riesci a fare 20 domande senza che diventi ripetitivo? Altrimenti meno.", "gives": "Risposta dell'IA:", "playThis": "Gioca a questo quiz ↓", "see": "Tutto l'esempio ›", "run": "Apri il quiz della tua IA", "upload": "Scegli il file .zip", "drop": "o trascinalo qui", "reading": "Lettura del quiz…", "capSheet": "Le tue schede", "capAi": "La tua IA", "capZip": "Il file .zip, aperto qui", "capWall": "Cosa vede la classe", "capTap": "Ogni alunno risponde", "play": "Riproduci", "pause": "Pausa", "speed": "Velocità", "seek": "Posizione nel video", "zipIdea": "quiz-viaggio-spazio.zip", "sizeIdea": "3,4 MB"}};
 
   /* The chat's and the quiz's words per language: ai is what the page's language calls an AI, the letters
@@ -370,8 +339,7 @@ function avatarSvg(av, label = true) {
      (status1) and the step it shows after the second ask (status2), the .zips it hands over (the chips'
      titles, the first answer's and the second's, and the second's file name), the quiz's title and its
      question 1. docs/example/build.py holds the example's words to them (docs/example/text.py, FILM).
-     de is the real example's (film-text.md 2). draft: true marks a language whose words are drafts,
-     to be replaced by the translators' (build.py and sitecheck.py name them). */
+     de is the real example's. sitecheck.py names the languages marked draft. */
   const CONTENT = {
     en: {
       draft: true,
@@ -431,7 +399,7 @@ function avatarSvg(av, label = true) {
     // the names on the standalone page; on the site the stage's, ▶'s, the replay's and the full screen button's are the page's, in its language
     ui: { again: 'Play again', full: 'Full screen', film: 'From an exercise sheet to the class: a film without sound' },
   };
-  /** The words the film quotes from the site's own screens, as the site has them (film-text.md 0.7): the local check, the
+  /** The words the film quotes from the site's own screens, as the site has them: the local check, the
       lobby's check, the second device's question, the wall before anyone is let in, the Remote's buttons. client/film.test.ts holds
       them to the site's sources, so a screen that changes its words fails the tests until the film follows. A piece of the how-to
       with a kind is the site's address or the teacher code, which the screen fills in. */
@@ -541,7 +509,7 @@ function avatarSvg(av, label = true) {
     // Every teacher press on the phone, and when its change lands on the wall.
     const PRESS = [35.4, 43.0, 46.0, 52.0, 58.0, 64.3];
     const LAG = 0.25;
-    // The upload carries the two choices a newcomer must follow (README, Purpose): which way to play, on the local check, and how
+    // The upload carries the two choices a newcomer must follow: which way to play, on the local check, and how
     // the second device comes in, on the lobby's check. Each gets a hold at full width, then the camera moves in on what is read
     // there (Quizmaster's card; the how-to with the teacher code), and the laptop then does what the how-to said.
     const T = {
@@ -1095,7 +1063,7 @@ function avatarSvg(av, label = true) {
       on((t) => { if (worldOn(t)) wall.update(t); });
       // the desk
       G(world, `<path d="M-200 562 L640 562 L660 690 L-200 690Z" fill="#c89f72"/><rect x="-200" y="690" width="870" height="120" fill="#a77c50"/><rect x="-200" y="810" width="870" height="120" fill="#7f5c3a"/>`);
-      // mug: set dressing only, no clock (owner)
+      // mug
       G(world, `<rect x="28" y="548" width="44" height="54" rx="8" fill="#2f7f86"/><path d="M72 560 q18 2 16 18 q-2 14 -16 14" fill="none" stroke="#2f7f86" stroke-width="7"/><ellipse cx="50" cy="550" rx="22" ry="5" fill="#215c61"/>`);
       // the two sheets, laid down
       const sheets = [1, 2].map((n) => G(world, `<g><rect x="2" y="4" width="66" height="92" fill="#000" opacity=".12"/><image href="${ASSETS['sheet' + n] || ''}" x="0" y="0" width="66" height="92" preserveAspectRatio="none"/><rect width="66" height="92" fill="none" stroke="#d9d2c4" stroke-width="1"/></g>`));
@@ -1134,8 +1102,7 @@ function avatarSvg(av, label = true) {
     function makePhone(parent) {
       const g = G(parent);
       // The AI app on the home screen: one white tile with the letters the page's language uses for an AI (AI, KI, IA),
-      // the chapter's name under it as a home screen names its apps. (A ring of invented app icons stood here first;
-      // the owner, watching: nothing said AI.) The tile opens into the white chat.
+      // the chapter's name under it as a home screen names its apps. The tile opens into the white chat.
       g.innerHTML = `<rect width="300" height="600" rx="40" fill="#1b1b1d"/><rect x="14" y="22" width="272" height="556" rx="28" fill="#000" class="ph-scr"/>
         <g class="ph-cam"><image class="ph-sheet" x="40" y="90" width="220" height="311" preserveAspectRatio="none"/><circle cx="150" cy="510" r="34" fill="#fff"/><circle cx="150" cy="510" r="27" fill="none" stroke="#000" stroke-width="3"/>
           <g class="ph-th1"><image href="${ASSETS.sheet1 || ''}" width="44" height="62"/></g><g class="ph-th2"><image href="${ASSETS.sheet2 || ''}" width="44" height="62"/></g>
@@ -1256,12 +1223,11 @@ function avatarSvg(av, label = true) {
       return { update };
     }
 
-    // ---------------------------------------------------------------- the opening (owner's sketch): over the teacher's head onto the desk
+    // ---------------------------------------------------------------- the opening: over the teacher's head onto the desk
     const PO = { x: 810, y: 500, s: 0.44 };             // the phone held up, centre and scale (phone drawn 300 x 600)
     const OLAP = { x: 1730, y: 250, w: 330, s: 330 / 960 };
     let opening, ocam = [800, 450, 1];
-    // After the site has shrunk back into the phone, a cut to the laptop's screen (two keys at one time): the laptop is a
-    // second device, and a pan across the desk to it only said so with a swoop (owner: unnecessary, too busy).
+    // After the site has shrunk back into the phone, a cut to the laptop's screen (two keys at one time).
     // On the laptop the root page shows whole, then the camera moves in on the header's code box for the teacher code to be read as
     // it is typed (at the page's own size it would be about 6 px on a phone), and cuts back to the whole screen as the screen changes.
     const OLAP_FULL = [OLAP.x + OLAP.w / 2, OLAP.y + OLAP.w * 600 / 1920, 1484 / OLAP.w];
@@ -1284,7 +1250,7 @@ function avatarSvg(av, label = true) {
         <rect x="-900" y="250" width="3800" height="10" fill="#e3d8c6"/>
         <path d="M-900 400 H2900 V660 H-900Z" fill="#c89f72"/><rect x="-900" y="396" width="3800" height="6" fill="#b48a5e"/>
         <rect x="-900" y="660" width="3800" height="16" fill="#b48a5e"/><rect x="-900" y="676" width="3800" height="700" fill="#7f5c3a"/>`);
-      // the mug on the far edge, left (set dressing only, no clock)
+      // the mug on the far edge, left
       G(cg, `<path d="M168 318 V408 A38 11 0 0 0 244 408 V318Z" fill="#2f7f86"/><ellipse cx="206" cy="318" rx="38" ry="11" fill="#256a70"/><ellipse cx="206" cy="318" rx="31" ry="8" fill="#3b2a1e"/>`);
       // the two sheets, fanned out on the desk, seen at a slant from above
       const sheet = (n) => `<g><rect x="6" y="8" width="250" height="353" fill="#000" opacity=".12"/><image href="${ASSETS['sheet' + n] || ''}" width="250" height="353" preserveAspectRatio="none"/><rect width="250" height="353" fill="none" stroke="#d9d2c4" stroke-width="2"/></g>`;
@@ -1336,7 +1302,7 @@ function avatarSvg(av, label = true) {
     }
 
     // ---------------------------------------------------------------- the root page, as it opens
-    // The page a visitor meets above the film (docs/design/root-page.md, "One column"), drawn once per screen that shows it (the
+    // The page a visitor meets above the film, drawn once per screen that shows it (the
     // phone's site, the laptop), in CSS px of a window wider than the column: x from the column's left edge (the header's bar
     // runs 16 px beyond it on either side, the step numbers hang 41 px left of it), y from the page's top. The sizes and
     // spacings are the page's own (src/public/index.html, site.css) at a desktop's width, where the column is 672 px; the lines
@@ -1730,7 +1696,7 @@ function avatarSvg(av, label = true) {
     // The root page as it opens, in on its box, the OS's file sheet, then the local check (the .zip read in the browser, nothing gone up yet:
     // Solo, Peers and Quizmaster), whose "Open the lobby" puts the quiz up and opens the lobby's check, where Screen and remote
     // is pressed and the how-to gives the teacher code, which the laptop then types. Both checks are drawn as a laptop-wide
-    // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too (film-text.md 0.8); what
+    // window shows them (client/open.ts, client/screen.ts), scaled to the frame, on a phone too; what
     // doesn't fit lies below it. On each check the camera moves in on what is read there.
     let web;
     function makeWeb() {
@@ -1794,7 +1760,7 @@ function avatarSvg(av, label = true) {
       const viewOf = (v, k) => [lerp(0, -v[0] * v[2], k), lerp(0, -v[1] * v[2], k), lerp(1, v[2], k)];
       const inView = (v, x, y) => [(x - v[0]) * v[2], (y - v[1]) * v[2]];
       // The lobby's check as it opens on a first visit: Screen and remote pressed, so the how-to with the teacher code is there,
-      // and the questions listed under it, no fold, each with its answers folded (teacher-devices.md, "How the screens are arranged"). The join
+      // and the questions listed under it, no fold, each with its answers folded. The join
       // code small; on a phone, so without the line on a second screen in a new window.
       const jc = measure(TX.code, 32, 'b') + 8, jl = measure(TX.joinCode.trim(), 30, '') + 12;
       const lobby = G(page, `<rect y="-300" width="${W}" height="${H + 600}" fill="${C.paper}"/>`);
@@ -1954,10 +1920,10 @@ function avatarSvg(av, label = true) {
     }
 
     // ---------------------------------------------------------------- camera and layers
-    // The room from "Let everyone in" on: the wall, the class and the teacher; the mug and the sheets may leave the frame (owner).
+    // The room from "Let everyone in" on: the wall, the class and the teacher.
     const ROOM = [850, 455, 1.06], SPLIT = [840, 425, 1.15];
-    // The room opens with a cut from the laptop's screen to the teacher beside it, and holds: the one press that follows
-    // ("Let everyone in") should be the only thing moving (the zoom out from the screen was the same swoop as above).
+    // The room opens with a cut from the laptop's screen to the teacher beside it, and holds, so the one press that follows
+    // ("Let everyone in") is the only thing moving.
     const CAM = [
       [T.cut, [431, 537, 2.3]], [36.1, [431, 537, 2.3]], [37.4, ROOM],
       [52.3, ROOM], [53.6, SPLIT], [57.6, SPLIT], [58.3, ROOM],

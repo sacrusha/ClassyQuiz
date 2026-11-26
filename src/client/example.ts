@@ -1,11 +1,8 @@
-// /example (docs/design/example-page.md): the shared header, and the page in
-// the visitor's language. The static HTML is English and shows the sheets
-// example, for an AI that reads it. This script puts the words, the
-// conversation's picture, the .zip and the start link in the page's language.
-// The root page's link passes ?lang=; without it, the device's choice. ?ex=
-// names the example. The idea example attached nothing, so its first step is
-// removed. The notes and test examples attached a two-page PDF and have no
-// overview.
+// /example. The static page is English and
+// shows the sheets example, for an AI that reads it; this script makes it
+// the example ?ex= names, in ?lang= or else the device's language. The idea
+// example attached nothing, so it has no first step; the notes and test
+// examples attached a two-page PDF and have no overview.
 
 import { $, store } from "./dom.ts";
 import { LANG_KEY, TEXT, chosenLang, isLang, type Lang } from "./landing-text.ts";

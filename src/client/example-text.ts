@@ -1,8 +1,6 @@
-// /example's words in the four languages (docs/design/example-page.md). The
-// static HTML is English, so an AI's fetcher reads English; example.ts swaps
-// these in. The header's words (code, join, language) are the root page's,
-// from landing-text.ts. de, fr and it are drafts for the owner's review;
-// the voice is the root page's.
+// /example's words. The static page is English,
+// for an AI's fetcher; example.ts puts these in. The header's words are the
+// root page's (landing-text.ts).
 
 import type { Lang } from "./landing-text.ts";
 import { EXAMPLE_FILES } from "./example-files.ts";
@@ -147,7 +145,7 @@ export const PDF_TEXT: Record<"notes" | "test", Record<Lang, PdfText>> = {
   },
 };
 
-/** The root page's examples, in its tabs' order, each named by what the visitor starts from (docs/design/root-page.md, "Getting a quiz"). */
+/** The root page's examples, in its tabs' order. */
 export const EXAMPLES = ["idea", "sheets", "notes", "test"] as const;
 export type Example = (typeof EXAMPLES)[number];
 export const isExample = (x: unknown): x is Example => EXAMPLES.includes(x as Example);

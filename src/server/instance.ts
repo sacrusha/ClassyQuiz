@@ -1,8 +1,7 @@
-// One uploaded quiz and its class (docs/design/hosting-and-limits.md, "What lives, and
-// for how long"; docs/design/teacher-devices.md for the roles). Holds the game state and the
-// quiz's code, talks to every tab of the class over WebSockets (hibernating,
-// so an idle instance costs nothing) or long-polling, and deletes everything
-// when the instance ends.
+// One uploaded quiz and its class. Holds the game state and the quiz's code,
+// talks to every tab of the class over WebSockets (hibernating, so an idle
+// instance costs nothing) or long-polling, and deletes everything when the
+// instance ends.
 
 import { DurableObject } from "cloudflare:workers";
 import { imageKey, parseQuiz, type Quiz, type Problem } from "../quiz/format.ts";
@@ -43,31 +42,27 @@ import { LOOK_SHOW_MS } from "../shared/looks.ts";
  * step, a role taken). Keeping it serves one purpose: a device that lost its
  * connection gets back into the quiz. Three hours span the longest break a
  * lesson plausibly resumes after, lunch, and the same three hours everywhere
- * are easy to say (docs/design/hosting-and-limits.md, "What lives, and for
- * how long").
+ * are easy to say.
  */
 export const INSTANCE_IDLE_MS = 3 * 3600_000;
 /**
- * A Peers room ends once no device has been at its final ranking for this
- * long: nobody ends it there, each device just goes, and a device that left
- * is told apart from one that slept only by time. Plausible
- * assumption: friends who look at the podium again do so while still
- * together, within minutes (docs/design/peers.md, "The end").
+ * A Peers room ends once no device has been at its final ranking for this long:
+ * nobody ends it there, each device just goes, and a device that left is told
+ * apart from one that slept only by time. Plausible assumption: friends who
+ * look at the podium again do so while still together, within minutes.
  */
 const PEERS_EMPTY_MS = 10 * 60_000;
-/** A long-poll is answered after this long even when nothing changed. */
 const POLL_HOLD_MS = 25_000;
 /**
- * A tab not heard from for this long is away: the device died or slept
- * without its socket closing (clients ping every 20 s; the runtime answers
- * without waking the object and notes the time). A role whose tab is away is
- * free for another tab (docs/design/teacher-devices.md, "When a device is gone").
+ * A tab not heard from for this long is away: the device died or slept without
+ * its socket closing (clients ping every 20 s; the runtime answers without
+ * waking the object and notes the time). A role whose tab is away is free for
+ * another tab.
  */
 const FRESH_MS = 45_000;
 /**
- * A teacher's tab at rest not heard from for this long is away: past a
- * minute, since a browser may slow a hidden tab's asking to once a minute
- * (docs/design/connections.md, "A poller left alone rests").
+ * A teacher's tab at rest not heard from for this long is away: past a minute,
+ * since a browser may slow a hidden tab's asking to once a minute.
  */
 const REST_FRESH_MS = 75_000;
 /**
@@ -81,8 +76,7 @@ const QUIET_MS = 25_000;
  * within GUESS_WINDOW_MS refuse that device's teacher codes for GUESS_LOCK_MS.
  * Per quiz: at most QUIZ_GUESSES, one more allowed every QUIZ_GUESS_EVERY_MS;
  * used up, every teacher code is refused, the right one too. The uploading
- * device's secret is exempt. Why, and what a device is:
- * docs/design/teacher-devices.md, "Wrong teacher codes".
+ * device's secret is exempt.
  */
 const GUESS_MAX = 5;
 const GUESS_WINDOW_MS = 60_000;
@@ -128,28 +122,22 @@ interface Guesses {
 interface Meta {
   /** Kept by the device that pasted the quiz: it may delete it from the root page. */
   secret: string;
-  /** The quiz's code, for its whole life. */
   code: string;
   /** Until when the code is claimed in its JoinCode object. */
   codeUntil: number;
-  /** The token of the tab holding each role. */
   roles: Record<RoleName, string | null>;
-  /**
-   * The teacher code's two digits after the class code (docs/design/teacher-devices.md,
-   * "One entry: the teacher code"). Drawn at upload.
-   */
+  /** The teacher code's two digits after the class code. */
   teacher: string;
   lastActivity: number;
   v: number;
   /**
-   * The class's booking of the day's allowances, from letting it in
-   * (docs/design/hosting-and-limits.md, "Running classes finish"), and the
-   * rows it wrote since. booked: what the site's ledger holds for it (absent
-   * on a booking from before requests and duration were booked); at: when it
-   * was booked; lapsed: the booking holds only what was spent (`lapseAt`;
-   * none there at the start; a Peers room from its opening until its first
-   * friend), until a student comes, the quiz starts with one, or a player's
-   * device comes back (`heardFrom`); settled: done at the final ranking.
+   * The class's booking of the day's allowances, from letting it in, and the
+   * rows it wrote since. booked: what the site's ledger holds for it (absent on
+   * a booking from before requests and duration were booked); at: when it was
+   * booked; lapsed: the booking holds only what was spent (`lapseAt`; none
+   * there at the start; a Peers room from its opening until its first friend),
+   * until a student comes, the quiz starts with one, or a player's device comes
+   * back (`heardFrom`); settled: done at the final ranking.
    */
   rows?: { written: number; booked?: Cost; at?: number; lapsed?: true; settled?: true };
   /**
@@ -160,15 +148,15 @@ interface Meta {
    */
   day?: Cost;
   dayStays?: Cost;
-  /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): its class is kept apart in the telemetry (docs/design/telemetry.md). */
+  /** Uploaded by a simulator or a probe, which said so (`probe` on the upload): its class is kept apart in the telemetry. */
   probe?: true;
 }
 
 /**
- * Teacher tabs that said they are at rest (docs/design/connections.md, "A
- * poller left alone rests"), stored as `rest`: the tab's token, and until
- * when its word stands, which is past its page's sleep. Written when a tab
- * goes to rest, when it stops and when it is found gone, a row each.
+ * Teacher tabs that said they are at rest, stored as `rest`: the tab's token,
+ * and until when its word stands, which is past its page's sleep. Written
+ * when a tab goes to rest, when it stops and when it is found gone, a row
+ * each.
  */
 type Rests = Partial<Record<RoleName, { token: string; until: number }>>;
 
@@ -223,9 +211,8 @@ export class Instance extends DurableObject<Env> {
   private moved = new Map<string, ServerMessage>();
   /**
    * Players whose input (a look, an answer, a Peers tap on) the server holds
-   * and storage doesn't have yet (docs/design/open-period-in-memory.md). Any
-   * write of the run carries it; a line ending with input here writes it
-   * sooner (`lineEnded`).
+   * and storage doesn't have yet. Any write of the run carries it; a line
+   * ending with input here writes it sooner (`lineEnded`).
    */
   private unwritten = new Set<string>();
   /**
@@ -284,11 +271,10 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * The instance as stored, with the input the players' sockets keep a copy
-   * of (a hibernating object loses its memory, not its sockets); also after
-   * a write failed, so nothing shows that isn't stored or held. A poller's
-   * input comes back with its next poll, any device's with its next hello
-   * (docs/design/open-period-in-memory.md).
+   * The instance as stored, with the input the players' sockets keep a copy of
+   * (a hibernating object loses its memory, not its sockets); also after a
+   * write failed, so nothing shows that isn't stored or held. A poller's input
+   * comes back with its next poll, any device's with its next hello.
    */
   private async load(): Promise<void> {
     await this.loadStored();
@@ -334,10 +320,7 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * Parses the uploaded text here rather than in the API function: a Durable
-   * Object has far more CPU time per request than a Function on the Free
-   * plan. Nothing is stored when the quiz has errors. On success the quiz
-   * has its code and its first class's lobby, and the tab that pasted it
-   * holds the Projector (docs/design/teacher-devices.md, "The single tab: check, then join").
+   * Object has far more CPU time per request than a Function on the Free plan.
    */
   async create(
     text: string,
@@ -348,7 +331,7 @@ export class Instance extends DurableObject<Env> {
     smalls: UploadedImage[] = [],
     /** The fixes made on the local check before the upload, as the browser sent them (G.applyFixes checks them). */
     fixes: unknown = null,
-    /** "peers": a room that runs on its own, its opener a player (docs/design/peers.md); anything else: a room someone steers. */
+    /** "peers": a room that runs on its own, its opener a player; anything else: a room someone steers. */
     mode: unknown = null,
     /** The upload said it is a simulator's or a probe's; a page never says so. */
     probe = false,
@@ -432,9 +415,10 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * The upload with pictures, as multipart/form-data: "text", "leaveOut",
-   * "fixes" (JSON, the local check's), "mode", and per picture an "image" file with its "imageName" (a text field: a
-   * non-ASCII file name in a multipart header isn't decoded reliably); per
-   * answer picture also a "small" file with its "smallName".
+   * "fixes" (JSON, the local check's), "mode", and per picture an "image"
+   * file with its "imageName" (a text field: a non-ASCII file name in a
+   * multipart header isn't decoded reliably); per answer picture also a
+   * "small" file with its "smallName".
    */
   private async createFromForm(req: Request): Promise<Response> {
     const fail = (message: string) => json({ ok: false, errors: [{ message }], warnings: [] } satisfies UploadResult);
@@ -526,7 +510,6 @@ export class Instance extends DurableObject<Env> {
     });
   }
 
-  /** Where a question's picture is fetched, and its size, for the views. */
   private imageRef(name: string): ImageRef | null {
     const record = this.quizRecord;
     const info = name ? record?.images[imageKey(name)] : undefined;
@@ -538,7 +521,6 @@ export class Instance extends DurableObject<Env> {
     return `/api/i/${this.ctx.id.toString()}/img/${record.imageSecret}/${n}`;
   }
 
-  /** The packs of answer pictures' small copies, for the students' devices; absent without picture answers. */
   private packUrls(): string[] | undefined {
     const record = this.quizRecord;
     if (!record?.packs || !record.packSecret) return undefined;
@@ -546,10 +528,10 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * A Peers device's packs (docs/design/peers.md, "The pictures"): the
-   * answer pictures' small copies as a tablet gets them, then the bundles
-   * of the questions' pictures and backgrounds. `inPacks`: where each
-   * bundled picture sits, under the address its views name it by.
+   * A Peers device's packs: the answer pictures' small copies as a tablet
+   * gets them, then the bundles of the questions' pictures and backgrounds.
+   * `inPacks`: where each bundled picture sits, under the address its views
+   * name it by.
    */
   private peersPacks(): { packs: string[]; inPacks: { src: string; pic: PackPic }[] } {
     const record = this.quizRecord!;
@@ -624,7 +606,6 @@ export class Instance extends DurableObject<Env> {
     return Math.min(QUIZ_GUESSES, g.left + grown);
   }
 
-  /** Devices whose count has run out are forgotten; true when one was. */
   private pruneGuesses(now: number): boolean {
     let changed = false;
     for (const [k, d] of Object.entries(this.guesses.devs)) {
@@ -810,10 +791,9 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * The device that uploaded this quiz uploaded another: a device holds one
-   * quiz that hasn't started (docs/design/hosting-and-limits.md, "Running
-   * classes finish"), so this one ends if it never left the lobby, with its
-   * booking. A started quiz stays, so one paused over lunch survives a new
-   * zip tried on the same laptop.
+   * quiz that hasn't started, so this one ends if it never left the lobby,
+   * with its booking. A started quiz stays, so one paused over lunch survives
+   * a new zip tried on the same laptop.
    */
   private async replaced(secret: unknown): Promise<Response> {
     if (!this.live() || typeof secret !== "string" || !safeEqual(secret, this.meta!.secret)) return json({ error: "gone" }, 404);
@@ -901,10 +881,9 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * No class is in the quiz, so a poller left alone may rest
-   * (docs/design/connections.md, "A poller left alone rests"). A lapsed
-   * booking with students in isn't at rest: a class waiting long in the
-   * lobby with its tablets locked is there.
+   * No class is in the quiz, so a poller left alone may rest. A lapsed booking
+   * with students in isn't at rest: a class waiting long in the lobby with its
+   * tablets locked is there.
    */
   private atRest(): boolean {
     const run = this.game?.run;
@@ -912,7 +891,6 @@ export class Instance extends DurableObject<Env> {
     return !!this.meta?.rows?.lapsed && this.students().length === 0;
   }
 
-  /** Holds a long-poll until the tab's view changes, or POLL_HOLD_MS. */
   private hold(session: Session, chooseKey?: string): Promise<ServerMessage[]> {
     return new Promise<ServerMessage[]>((resolve) => {
       const w: Waiter = { session, resolve, chooseKey };
@@ -1094,7 +1072,6 @@ export class Instance extends DurableObject<Env> {
     return p === "quiet" ? "present" : p;
   }
 
-  /** The Projector steers while no Remote is there (docs/design/teacher-devices.md, "When a device is gone"). */
   private steering(exclude?: WebSocket): boolean {
     const p = this.presence("remote", exclude);
     return p === "none" || p === "away";
@@ -1117,11 +1094,11 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * What a teacher device coming in with the teacher code does
-   * (docs/design/teacher-devices.md, "A second device: one question, only when needed"): the question when one tab shows and steers;
-   * the role whose tab is gone; "screen", to do both, when nothing is there;
-   * nothing when both tabs are there. The class code never reaches a role,
-   * so this holds before and after the first student alike.
+   * What a teacher device coming in with the teacher code does: the question
+   * when one tab shows and steers; the role whose tab is gone; "screen", to
+   * do both, when nothing is there; nothing when both tabs are there. The
+   * class code never reaches a role, so this holds before and after the first
+   * student alike.
    */
   private entry(): Entry {
     const s = this.there("screen");
@@ -1247,7 +1224,7 @@ export class Instance extends DurableObject<Env> {
         const run = game.run;
         if (!run || run.phase === "final") return { direct: [ack(false, "This quiz has finished."), this.chooseMessage()] };
         // Joining after the start may be a student whose device lost its
-        // player; they can pick their avatar back (docs/design/class-and-wall.md, "Coming back").
+        // player; they can pick their avatar back.
         if (cmd.op === "newPlayer") {
           // A join resent after its answer was lost gets the same player.
           const earlier = typeof id === "string" && run.joins && Object.hasOwn(run.joins, id) ? G.playerById(run, run.joins[id]) : null;
@@ -1279,14 +1256,13 @@ export class Instance extends DurableObject<Env> {
       if (session.role === "player") {
         if (cmd.op === "tick") return { direct: [ack(true)] };
         if (cmd.op === "dress") {
-          // In the lobby: the child's look, held until Start writes the class's
-          // looks (docs/design/open-period-in-memory.md).
+          // In the lobby: the child's look, held until Start writes the class's looks.
           const outcome = G.dress(game, session.player, cmd.b, cmd.h, cmd.t);
           if (outcome === "stored") await this.took(session.player, ws);
           return { direct: [ack(outcome !== "refused")] };
         }
         if (cmd.op === "leave") {
-          // A place closed at a shared device, in the lobby (docs/design/class-and-wall.md, "Sharing a device").
+          // A place closed at a shared device, in the lobby.
           if (!G.leaveSeat(game, session.player)) return { direct: [ack(false, "not allowed")] };
           this.unwritten.delete(session.player);
           await this.persist(["run"]);
@@ -1342,14 +1318,12 @@ export class Instance extends DurableObject<Env> {
         const view = typeof cmd.v === "number" ? cmd.v : Infinity;
         // The tablet names the answer by its place on screen; it is stored by its place in the text.
         const choice = Number.isInteger(cmd.choice) ? (G.orderOf(game, cmd.q)[cmd.choice] ?? -1) : -1;
-        // Held in memory, written with the lock-in or the next step
-        // (docs/design/open-period-in-memory.md).
+        // Held in memory, written with the lock-in or the next step.
         const outcome = G.answerOutcome(game, session.player, cmd.q, choice, cmd.seq, view, now, typeof cmd.ms === "number" ? cmd.ms : undefined);
         if (outcome === "recorded") await this.took(session.player, ws);
         // The acknowledgement carries what is held for this question now,
         // in screen order: the one fact the tablet shows as accepted and the
-        // one that scores, whatever this tap's fate (docs/design/question-flow.md,
-        // "When a tap counts"). Its own view says the same.
+        // one that scores, whatever this tap's fate. Its own view says the same.
         return { direct: [ack(outcome !== "refused", undefined, { q: cmd.q, record: this.recordOnScreen(cmd.q, session.player) } satisfies AnswerAck)] };
       }
 
@@ -1385,9 +1359,9 @@ export class Instance extends DurableObject<Env> {
         }
       }
       if (cmd.op === "swap") {
-        // ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): the wall becomes the steering tab
-        // and the steering tab the wall, at once, from either; the same tap
-        // undoes it. Both get new tokens, as a role handed over always does.
+        // ⇄ Swap: the wall becomes the steering tab and the steering tab the
+        // wall, at once, from either; the same tap undoes it. Both get new
+        // tokens, as a role handed over always does.
         const other: RoleName = session.role === "screen" ? "remote" : "screen";
         const otherToken = roles[other];
         if (!otherToken || !this.there(other)) return { direct: [ack(false, "There is no other screen to swap with.")] };
@@ -1485,8 +1459,8 @@ export class Instance extends DurableObject<Env> {
         return { direct: [ack(false, words)] };
       }
       // The account's daily allowance is spent: the tab says so rather than
-      // looking offline (docs/design/hosting-and-limits.md, "When the allowance runs out anyway"). What's in memory may be
-      // ahead of storage now; reload it, so nothing shows that isn't stored.
+      // looking offline. What's in memory may be ahead of storage now; reload
+      // it, so nothing shows that isn't stored.
       if (isQuotaError(e)) {
         await this.load().catch(() => {});
         return { direct: [ack(false, "quota"), { t: "quota" }] };
@@ -1622,7 +1596,7 @@ export class Instance extends DurableObject<Env> {
     return { room: now, ...(without >= (now === 0 ? 1 : ROOM_WARN) ? { roomHeld: true as const } : {}) };
   }
 
-  /** The class as it is now, for what is ahead of it. extra: a student about to join. */
+  /** extra: a student about to join. */
   private classNow(extra = 0): ClassNow {
     const game = this.game!;
     const run = game.run!;
@@ -1639,7 +1613,6 @@ export class Instance extends DurableObject<Env> {
     };
   }
 
-  /** What the class has spent so far, by its devices' counts and its rows written. */
   private spent(): Cost {
     return spent(Object.values(this.game?.run?.lines ?? {}), this.meta?.rows?.written ?? 0);
   }
@@ -1694,13 +1667,12 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * When the booking gives back all but what was spent
-   * (docs/design/hosting-and-limits.md, "Running classes finish"), for the
-   * alarm; null: not due. A let-in lobby still waiting LOBBY_WAIT_MS after it
-   * was booked or its latest student joined, until a student comes
-   * (`bookAgain`) or the quiz starts (`bookAhead`). A started quiz of at
-   * most FEW_PLAYERS none of whose players' devices was heard from for
-   * AWAY_WAIT_MS, until one comes back (`heardFrom`).
+   * When the booking gives back all but what was spent, for the alarm; null:
+   * not due. A let-in lobby still waiting LOBBY_WAIT_MS after it was booked or
+   * its latest student joined, until a student comes (`bookAgain`) or the quiz
+   * starts (`bookAhead`). A started quiz of at most FEW_PLAYERS none of whose
+   * players' devices was heard from for AWAY_WAIT_MS, until one comes back
+   * (`heardFrom`).
    */
   private lapseAt(): number | null {
     const rows = this.meta?.rows;
@@ -1729,8 +1701,7 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * A device's count of its line (docs/design/telemetry.md, "What is
-   * counted, and by whom"): the newest replaces the one before, in memory
+   * A device's count of its line: the newest replaces the one before, in memory
    * and in the run, which stores it with its next write; on a socket also in
    * the attachment, so a wake gets it back. Never a write of its own.
    */
@@ -1746,7 +1717,6 @@ export class Instance extends DurableObject<Env> {
     if (s && lineKey(s) === key) ws.serializeAttachment({ ...s, line });
   }
 
-  /** The class as one summary of numbers, for its settle (docs/design/telemetry.md, "What reaches storage"). */
   private classUse(): ClassUse | undefined {
     const game = this.game;
     const run = game?.run;
@@ -1806,11 +1776,11 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * A player's input changed what the server holds (docs/design/open-period-in-memory.md):
-   * the class sees it now, storage gets it with the run's next write, and
-   * the player's socket keeps a copy. on: the socket it came on. In a Peers
-   * room it may be the last the room waited for, and the room steps on; in
-   * Last call the last answer of everyone present locks in.
+   * A player's input changed what the server holds: the class sees it now,
+   * storage gets it with the run's next write, and the player's socket keeps a
+   * copy. on: the socket it came on. In a Peers room it may be the last the
+   * room waited for, and the room steps on; in Last call the last answer of
+   * everyone present locks in.
    */
   private async took(player: string, on?: WebSocket): Promise<void> {
     const game = this.game!;
@@ -2029,13 +1999,11 @@ export class Instance extends DurableObject<Env> {
     const game = this.game!;
     const deadline = G.deadline(game);
     if (deadline != null && now >= deadline && game.run?.phase === "lobby") {
-      // Start's time ran out: the first question.
       if (G.startOut(game, now)) {
         await this.bookAhead();
         await this.afterTeacherChange(["run"]);
       }
     } else if (deadline != null && now >= deadline && G.isPeers(game)) {
-      // A friend's Countdown ran out: the room goes on, whoever it still waits for.
       if (G.countdownOut(game, now, this.nextView())) {
         await this.afterTeacherChange(["run"]);
         if (game.run?.phase === "final") await this.settleRows();
@@ -2067,9 +2035,8 @@ export class Instance extends DurableObject<Env> {
 
   /**
    * Peers: a player's change is held, and when everyone present is done the
-   * room steps on, the step's write carrying it (docs/design/peers.md,
-   * "Nobody steers"). A step is the room's use, as a teacher's step is: it
-   * keeps the quiz alive.
+   * room steps on, the step's write carrying it. A step is the room's use, as a
+   * teacher's step is: it keeps the quiz alive.
    */
   private async peersStore(): Promise<void> {
     const game = this.game!;
@@ -2117,8 +2084,8 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * Everything goes: quiz, class, players, answers, pictures (docs/design/hosting-and-limits.md, "What lives, and for how long").
-   * ackId: the teacher ended it, and every device goes to the root page (docs/design/question-flow.md, "The steering bar": Exit).
+   * Everything goes: quiz, class, players, answers, pictures.
+   * ackId: the teacher ended it (Exit), and every device goes to the root page.
    */
   private async endInstance(ackId?: string): Promise<void> {
     await this.releaseCode().catch(() => {});
@@ -2153,13 +2120,11 @@ export class Instance extends DurableObject<Env> {
     await this.ctx.storage.deleteAll();
   }
 
-  /** Players whose device was heard from recently: an open socket that still pings, or a recent poll. */
   private connectedPlayers(exclude?: WebSocket): Set<string> {
     const now = Date.now();
     return new Set([...this.lastHeard(exclude)].filter(([, t]) => now - t < FRESH_MS).map(([id]) => id));
   }
 
-  /** When each player's device was last heard from: an open socket's ping or hello, or a poll. */
   private lastHeard(exclude?: WebSocket): Map<string, number> {
     const at = new Map<string, number>();
     const note = (id: string, t: number) => at.set(id, Math.max(at.get(id) ?? 0, t));
@@ -2231,12 +2196,10 @@ export class Instance extends DurableObject<Env> {
     return true;
   }
 
-  /** Last call as the screens draw it, while it runs; null without one, or once answering is locked in. */
   private clockView(): ClockView | null {
     return drawn(this.game ? G.runningClock(this.game) : null);
   }
 
-  /** Start's time in the lobby, as every screen draws it; null before Start. */
   private startsView(): ClockView | null {
     return drawn(this.game ? G.startClock(this.game) : null);
   }
@@ -2273,7 +2236,6 @@ export class Instance extends DurableObject<Env> {
     return out;
   }
 
-  /** Question i's picture as the class sees it: none once hidden by a fix. */
   private shownImage(i: number): string {
     return this.game!.fixes[i].hidePicture ? "" : this.game!.quiz.questions[i].image;
   }
@@ -2486,8 +2448,8 @@ export class Instance extends DurableObject<Env> {
   }
 
   /**
-   * Peers (docs/design/peers.md): what a wall would show, on each device,
-   * and what the room's opener needs to start, fix and remove.
+   * Peers: what a wall would show, on each device, and what the room's
+   * opener needs to start, fix and remove.
    */
   private peersViews(here?: string): (player: string) => PeersView {
     const game = this.game!;
@@ -2524,7 +2486,6 @@ export class Instance extends DurableObject<Env> {
     return (player: string): PeersView => ({ ...shared, player, host: player === run.peers!.host, ready: G.isReady(game, player) });
   }
 
-  /** A Peers room's Countdown as the devices draw it, with whose it is; null while none runs. */
   private peersCountdownView(): PeersView["countdown"] {
     const game = this.game!;
     const c = G.peersCountdown(game);
@@ -2572,7 +2533,6 @@ export class Instance extends DurableObject<Env> {
     send(ws, { t: "state", view });
   }
 
-  /** Sends every connected tab its newest view (or choice), where it changed. */
   private broadcast(exclude?: WebSocket, onlyStaff = false): void {
     if (!this.live()) return;
     const cache: ViewCache = {};
@@ -2620,10 +2580,8 @@ export class Instance extends DurableObject<Env> {
 
 type ViewCache = { screen?: ScreenView; teacher?: TeacherView; player?: (id: string) => PlayerView };
 
-/** What a polling device was last sent: the view's key, its pollKey, its version. */
 type Sent = { key: string; poll: string; v: number };
 
-/** A clock as the screens draw it: how long it runs and how much was left when the view was made. */
 function drawn(clock: G.Clock | null): ClockView | null {
   return clock ? { ms: clock.ms, leftMs: Math.max(0, clock.at + clock.ms - Date.now()) } : null;
 }
@@ -2633,27 +2591,24 @@ function sent(view: PlayerView): Sent {
 }
 
 /**
- * What ends a held poll: the view without who is in and who a Peers room
- * waits for (docs/design/hosting-and-limits.md, "What a Peers room costs").
- * Those change with every friend's answer, look and line; a poll answered
- * for each would cost a Function and a Durable Object request per device
- * and answer. They come with the poll's end instead, at most POLL_HOLD_MS
- * late; the room's steps and the device's own changes end it at once. In a
- * room someone steers it is the view's key.
+ * What ends a held poll: the view without who is in and who a Peers room waits
+ * for. Those change with every friend's answer, look and line; a poll answered
+ * for each would cost a Function and a Durable Object request per device and
+ * answer. They come with the poll's end instead, at most POLL_HOLD_MS late; the
+ * room's steps and the device's own changes end it at once. In a room someone
+ * steers it is the view's key.
  */
 function pollKey(view: PlayerView): string {
   if (!view.peers) return viewKey(view);
   return viewKey({ ...view, peers: { ...view.peers, players: [], waitingFor: [] } });
 }
 
-/** Where a device's last poll is noted (`lastPoll`): a player by id, a teacher's tab by its role and token; a guest's isn't. */
 function noteKey(s: Session): string | null {
   if (s.role === "player") return s.player;
   if (s.role === "screen" || s.role === "remote") return `${s.role}:${s.token}`;
   return null;
 }
 
-/** Where a device's line is kept in the run: a player by id, a teacher's tab by its role; a guest's isn't. */
 function lineKey(s: Session): string | null {
   if (s.role === "player") return `p:${s.player}`;
   if (s.role === "screen" || s.role === "remote") return s.role;
@@ -2679,7 +2634,6 @@ function safeEqual(a: string, b: string): boolean {
   return d === 0;
 }
 
-/** The upload's "fixes" field (JSON text), or null when it isn't there or isn't JSON; G.applyFixes checks the rest. */
 function readFixes(field: unknown): unknown {
   if (typeof field !== "string") return null;
   try {

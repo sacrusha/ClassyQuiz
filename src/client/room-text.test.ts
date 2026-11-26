@@ -1,6 +1,3 @@
-// The pages a quiz plays on speak the device's language (client/room-text.ts),
-// the server's messages included, which come in English.
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";

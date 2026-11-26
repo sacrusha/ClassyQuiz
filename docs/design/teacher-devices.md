@@ -2,345 +2,97 @@
 
 ## Purpose
 
-The teacher steers a quiz while the class watches the projector and plays on
-their own tablets. The site gives the teacher two jobs, each held by a tab:
+The teacher steers a quiz while the class watches the big screen, the
+**Projector**, and plays on its tablets; the teacher's own steering view is
+the **Remote**.
 
-- the **Projector** (role `screen`) is what the class sees;
-- the **Remote** (role `remote`) is the teacher's own steering view.
+Bringing in a second teacher device: easy to go right, hard to go wrong. A
+teacher who starts on the phone and ends on the
+laptop, or the other way round, or whose phone died, gets the quiz onto the
+device they want without learning terms or steps, and a misclick is
+recoverable from either device. Outside scripts must not be able
+to take the steering of a quiz because they know its class code.
 
-Connecting a second teacher device has one purpose, in the owner's words:
-"easy to go right, hard to go wrong". A teacher who starts on the phone and
-ends on the laptop, or the other way round, or whose phone died, gets the
-quiz onto the device they want without learning terms or steps. Outside
-scripts are the real attacker: they must not be able to take the steering of
-a quiz just because they know its class code.
-
-Before the class joins, the teacher also needs to see at once that this is the
-right quiz and to spot a wrong key: with break-time authoring the run is the
-review (`question-flow.md`), and the lobby's check is where a wrong key is
-caught before it reaches the wall. The local check can't be that place for
-a Quizmaster: it keeps the questions closed, since whoever plays mustn't
-see them (`local-check.md`).
+Before the class joins, the teacher sees at once that this is the right quiz
+and can spot a wrong key: the run is the review (backlog, Project), and the
+lobby's check is where a wrong key is caught
+before it reaches the wall.
 
 The same screens serve a host who runs a quiz for a crowd that isn't a class
-— a pub, a family, a training room, a video call (backlog v5 item 4,
-Quizmaster). Such a host needs the screens to read as theirs, and only the
-setup they have explained: some steer from a phone, many from the one screen
+(Quizmaster): a pub, a family, a training room, a video
+call. Such a host needs the screens to read as theirs, and to be shown only
+the setup they have: some steer from a phone, many from the one screen
 everyone sees.
 
 ## Situation
 
-Who teaches and with which devices is in `backlog.md` (Project, Constraints).
-What matters here:
+Who teaches and with which devices is in `backlog.md` (Project,
+Constraints). What bears on this part:
 
-- **A teacher has one to three devices:** a laptop that is also the
-  projector (shared or mirrored), a phone, sometimes a tablet. Owner:
-  "Sharing and not sharing a screen is a button press, sometimes with the
-  added fn modifier. Less technically adept users use the cable or the
-  button on the big screen. Every teacher uses the laptop for shared and not
-  shared sections." So a private screen exists on the laptop even when it is
-  the projector.
-- **Both workflows are real.** Owner: "snapping pictures of hand-drawn
-  notes, feeding them into the AI, downloading the zip, opening the quiz all
-  on the phone, then connecting the projector is a powerful workflow. But so
-  is doing the same with a pdf or doc from the laptop that serves as
-  projector or hybrid." A way in that works in one direction only is not
-  enough. Some teachers set up before the students are involved, some join
-  the remote on the last screen in parallel with them.
-- **The site cannot sense the setup.** Owner: "Second screen detection is
-  unreliable so it needs to add real value. Unsure how it currently works
-  with phones and Miracast. Laptops might gain the second screen only after
-  the check, and there's the issue of window size vs screen size. Tablets
-  sitting in between and sharing all of these complications." So no role,
-  screen or wording depends on what the browser reports about screens; the
-  window's width changes layout only.
-- **Drops are rare and teachers are not trained for them** (backlog v2 item
-  8). What the owner expects: a device loses its connection and comes back
+- **One to three devices:** a laptop that is also the projector (shared or
+  mirrored), a phone, sometimes a tablet. Sharing and not sharing a screen
+  is a button press, sometimes with the fn modifier; less technically adept
+  users use the cable or the button on the big screen. Every teacher uses
+  the laptop for shared and not shared sections. A big all-in-one touch screen as the wall leaves nothing private.
+- **Both directions are real.** Snapping pictures of hand-drawn notes,
+  feeding them into the AI, downloading the zip and opening the quiz all on
+  the phone, then connecting the projector, is a powerful workflow; so is
+  doing the same with a PDF or document from the laptop that serves as
+  projector or hybrid. Some teachers set up before the students are
+  involved, some join the remote on the last screen in parallel with them.
+  By the time a second device arrives, the teacher knows projector and
+  remote and which this device is.
+- **The site cannot sense the setup.** Second-screen detection is
+  unreliable; how it works with phones and Miracast is unknown. Laptops
+  might gain the second screen only after the check, and window size
+  differs from screen size. Tablets sit in between and share all of these
+  complications.
+- **Drops are rare and teachers are not trained for them.** Expected: a
+  device loses its connection and comes back
   with its role; a phone's battery dies and the teacher carries on from the
   laptop; a dead projector means reading the questions off the remote and
-  improvising. Both devices dying is "oh well, quiz is over", though a new
-  device can still take over (below).
-- **Who the attacker is** (owner): hardening against outside attackers and
-  14-year-olds writing automated scripts is real; a child in the room "can
-  just steal the projector's power plug", and a pupil sabotaging class "is
-  not a technical problem". The room is the teacher's to manage. What the
-  site avoids is handing the code to the room unasked: "be careful of
-  children accidentally taking the remote" (owner).
-- **A school shares one address.** Everyone behind the school's NAT looks
-  like one device. A limit keyed on the address therefore also catches the
-  teacher's second device when pupils on the same Wi-Fi try codes.
-- **A big all-in-one touch screen as the wall** leaves the teacher unable to
-  unshare; nothing is private there.
-- **Three arrangements of screens**: a
-  screen and a remote (the example class's: the laptop on the
-  projector, the teacher's phone); one screen that steers itself, by its bar,
-  the keyboard or a clicker (built: `question-flow.md`); and devices only,
-  the question on each player's device and no wall (not built for a room;
-  Peers builds the room with the question on each device, v5 items 3 and 6).
-  A video call that shares a window has a big screen: the shared window.
-  Only some hosts have a remote; a teacher at a mirrored laptop, a pub host
-  at the TV and a trainer in a call need none.
-- **Words that name the classroom's roles** (teacher, class, students,
-  "your teacher") tell a host who isn't a teacher that the screens are
-  someone else's. Which word stands where "teacher" stood, on the screens,
-  the README, the landing and the guidance, is decided once for all
-  entries, with what the words live with: `root-page.md`, "Words for
-  whoever comes".
+  improvising. Both devices dying ends the quiz.
+- **The attacker** is the backlog's (Project). Children may take the remote
+  by accident: whatever the wall shows, a pupil can type.
+- **Addresses.** Everyone behind a school's NAT shares one address, the
+  teacher's own devices included. Cloudflare sets `cf-connecting-ip`, and a
+  request that sets it itself gets Cloudflare's 403 (seen on a copy of the
+  site, 2026-11-09).
+- **Arrangements of screens:** a screen and a remote (the example class's
+  laptop on the projector and the teacher's phone); one screen that steers
+  itself, by its bar, the keyboard or a clicker; devices only, the question
+  on each player's device and no wall (Peers' room, `peers.md`; not
+  built for a steered room). A video call that shares a window has a big
+  screen: the shared window. A teacher at a mirrored laptop, a pub host at
+  the TV and a trainer in a call need no remote.
+- **Words that name the classroom's roles** (teacher, class, "your
+  teacher") tell a host who isn't a teacher that the screens are someone
+  else's (`root-page.md`, "Words for whoever comes"). This file speaks of
+  the example class.
 - **A Quizmaster reaches the lobby, as a rule, without having seen the
-  questions:** the local check folds them for every entry, under a line
-  telling whoever will play to leave them closed, since the page can't know
-  which entry a person will press. A host who opened the fold there and
-  fixed a key finds the fixes on the lobby's check, since they go up with
-  the quiz.
-
-## How the site meets it
-
-### One entry: the teacher code
-
-The class code (five digits) never reaches a teacher role; typed by a
-student it leads to an avatar. The **teacher code** is the class code plus
-two digits, shown as "63953 47" on teacher screens and typed in the same code
-box the students use (root page, `/play`). The box routes by length: five
-digits are a student, seven a teacher device (`TEACHER_CODE` in
-`shared/protocol.ts`; `/play#6395347`). One entry serves both workflows from
-either device; a QR code would serve one direction only.
-
-The two digits are drawn at upload and kept in the quiz's `meta.teacher`
-(`server/instance.ts`). The first five find the quiz; the quiz checks the
-last two, at `/api/join` and again in `takeRole`, whatever the page did.
-
-The device that uploaded holds the quiz's secret (kept in the browser; Resume
-and Delete use it) and needs no digits: Resume goes in with the secret.
-`/teacher` is kept only for old links; on a device that did not upload, it
-asks for the teacher code.
-
-Where the code is shown: on the teacher's own screens at rest (the check
-once a remote is wanted, below; the steering tab), behind "A second device"
-on the join screen (likewise) and in the wall's menu in the lobby and during
-the quiz, on the uploading device's Resume card, and in Leave's
-confirmation. It is not in the steering bar in front of the class: when the
-Remote is away the bar says only that the Remote is gone and points to the
-menu, because the bar is in front of the class exactly when the Remote is
-likeliest away, and a tablet that read the code there could take the
-steering.
-
-### The single tab: check, then join
-
-The tab that uploads is the Projector and steers itself. It opens on the
-**check**, the teacher's private screen: title and number of questions
-(plausible assumption: the count is what most often tells two versions of a
-quiz apart), the join code
-small (with a count once someone has joined), how the screens are arranged
-(below) with the teacher code where a remote is wanted, whether players
-share devices (`class-and-wall.md`, "Sharing a device"), and the question
-list with its fixes, open, each question's answers folded: this is the
-first place a Quizmaster sees the questions (Situation), and folded answers
-keep the key off a shared screen until the teacher taps a button that says
-it shows them. One tap,
-"Let everyone in", leads to the **join screen** and lets the class in:
-teacher devices come in at any time, student devices only from that tap (or
-Start) on, and one that arrives earlier waits and joins by itself. Letting
-the class in is the moment the quiz starts to cost the day's allowance
-(`hosting-and-limits.md`, "Running classes finish"). With a Remote, the Remote's lobby has the same
-button until it is tapped, and the wall shows the title without the code. The
-**join screen** is the class's: address, code, QR, avatars, Start. The class's screen
-ends at the fold; a quiet line goes back to the check ("‹ Back": it holds
-more than the questions) or, where a remote is wanted, opens the
-second-device sheet.
-
-Which of the two a tab shows is kept per tab (`tabLobby` in `client/dom.ts`,
-sessionStorage), so a reload stays; a wall that takes the steering back in the
-lobby shows the join screen, not the check. With two tabs the work splits: the
-wall shows only join; the steering tab shows the check with class code, count
-and Start.
-
-The worked example's "Start the example quiz" (`example-page.md`) opens
-the local check; its "Open the lobby" is an upload like any, and leads to
-this same check, with codes and fixes.
-
-### How the screens are arranged
-
-The owner's sequence for a Quizmaster: the choice first (the local check's
-card, `local-check.md`), then how the screens are arranged, as a toggle with
-an explanation, and the remote's how-to only where it applies. The toggle
-sits where its answer can show what it means at once: on the lobby's check,
-Screen and remote puts the teacher code in front of the host the moment it
-is tapped. On the local check's card the code doesn't exist yet (it is drawn
-at upload), so the same toggle could only promise it for later, and a toggle
-whose explanation has to say "you'll see the code later" tells less than
-one that shows it.
-
-- **Two values:** *One screen* ("It shows the quiz and steers it: the
-  buttons under the quiz, the keyboard or a clicker.") and *Screen and
-  remote* ("One device shows the quiz, another steers it: a phone, say.").
-  Under Screen and remote, the how-to: "On the second device, open
-  classyquiz.pages.dev and type 63953 47", and on a laptop the second
-  screen's window. It names neither device's role, since either may be the
-  one in hand (the phone-first and the laptop-first lesson). Under both, a
-  video call: "the window you share is the screen everyone sees".
-- **It changes words, not what a device can do.** A second device still
-  comes in by the same teacher code, whatever the toggle says, and ⋯ →
-  A second device… has it on every steering wall; with One screen it is
-  only there, off the check and the join screen. A Remote that was there
-  and is gone brings the how-to back after "Remote gone.", whatever the
-  toggle says. The server isn't told: nothing it does depends on it.
-- **Screen and remote unless this browser has run a quiz without one.** The
-  example class's teacher steers from the phone and has to find the
-  remote's how-to on a first visit, on the screen in front of them before
-  the class is let in. One screen first would hide it there, and where it
-  is needed most: a phone that uploads first (the phone-first lesson) is,
-  as a plausible assumption, nearly never the one screen (a host with no
-  big screen at all is the exception, below), so its default would be wrong for
-  it; and a teacher who reads the code the check does show, the join code,
-  and types it on the laptop gets an avatar, not the wall. Screen and remote first
-  costs a host with one screen a how-to they don't need, until the browser
-  knows better. The choice is kept per browser (`arrangement`,
-  `client/dom.ts`): a tap on the toggle sets it; a browser that has had a
-  Remote, on either side and whichever arrived first, is set to Screen and
-  remote; one whose Projector reached the final ranking with no Remote in
-  the quiz is set to One screen (`tabHadRemote`, kept per tab, so a reload
-  after the Remote left doesn't forget it). So the example class's teacher
-  makes the choice once, or not at all, and so does a host at one screen,
-  after the first quiz. Plausible assumption: a laptop or phone is used the
-  same way lesson after lesson; on a shared school laptop the next teacher
-  at worst finds the toggle on the other value and taps it.
-- **Devices only is not offered.** For a Quizmaster it would be a host who
-  steers with nobody watching a common screen: a call shares a window, a
-  table of friends is Peers, and a host without any wall can already be the
-  one screen that steers and read the questions aloud, the players'
-  devices showing the choices' text. What it would take: the room with the question on each
-  device that Peers builds, steered by this site's Remote, with the join
-  code on the host's device; cheap now that Peers has that room, if a host
-  turns out to want it.
-
-### Words for any crowd
-
-From the check on, the screens' words read as a class's and as a pub's:
-"Let everyone in", "Join code", "Joining opens in a moment.", "Ask whoever
-runs it.", "everyone watches this screen", "everyone reads the question",
-"The last two digits don't match this quiz." What the owner said about
-naming who runs it: `root-page.md`, "Words for whoever comes". The device
-that steers is the "Remote"; the one that shows the quiz is "the big
-screen", the root page's word, on the Remote, in the tab's title and on the
-page for an address that isn't one, since a television, a touch board or a
-shared window shows a quiz as a projector does. These docs keep "teacher",
-"class", "teacher code" and "Projector" (the role `screen`): they speak of
-the example class.
-
-### A second device: one question, only when needed
-
-`entry()` in `server/instance.ts` decides what a device arriving with the
-teacher code does, by what is there, never by the device:
-
-| Present | What happens |
-|---|---|
-| One tab shows and steers (the usual case) | The device is asked: show the quiz here, or steer it from here. The first tab becomes the other role. |
-| Projector and Remote, one of them gone | No question; it takes the free role. |
-| Both tabs there | "full": a tab that is there is never pushed aside. |
-| Nothing there | No question; it shows and steers, as a tab that just uploaded. A gone Remote's token goes with it, so the next device is asked. |
-
-The device acts once, on arrival; one left on the question or on "full" never
-takes a role later by itself ("Try again" asks anew). One tap is what not
-guessing costs; by then the teacher knows projector and remote and which this
-device is (owner). Phone casting by Miracast, a tablet, a second window all
-answer the same question, so none needs detecting. On a laptop, "open a
-second screen in a new window" opens a window that asks the same question
-(a browser may block it; the page says so).
-
-A Remote is held only while its tab is **present**. After `QUIET_MS` (25 s)
-without a sign, or once its line has closed and not come back, it is quiet,
-and the teacher code takes it at once; its old tab hears "lost" if it returns.
-Otherwise a teacher who closed the steering tab and typed the code again was
-told "full" for most of a minute. "Full" still says: if one of them was on
-this device a moment ago, try again in half a minute. A polling tab on the
-HTTP fallback whose poll is held counts as heard from now.
-
-**Swap** (`swap` in `server/instance.ts`): while both tabs are there, either
-can exchange the roles at once, with no confirmation; the same tap undoes it.
-It exists because the question is one tap and a misclick has to be recoverable
-from either device (owner). Both tabs get new tokens; the other hears its new
-role. In the lobby it is a quiet line on both; during the quiz it is in the
-menu on both.
-
-### When a device is gone
-
-Presence changes with time, not events, so teacher pages send a periodic
-`tick`; a tab heard from again after it read as gone is told at once.
-
-- **The Remote gone.** The wall steers again `FRESH_MS` (45 s) after the last
-  sign from the Remote and says "Remote gone". When the phone comes back with
-  its tab it is the Remote again. A new phone, a closed tab, a dead battery:
-  the teacher code takes the steering, before and after the first student
-  alike.
-- **The Projector gone.** The Remote says so and how to bring it back: the
-  teacher code on the projector computer, which takes the free Projector
-  without a question. A free Projector while a Remote steers is open to any
-  device with the code.
-- **A clicker or the keyboard** works on any Projector during the quiz, also
-  while a Remote steers. Other commands from a Projector that does not steer
-  are refused.
-- **A tab at rest on long-poll is there**: `connections.md`, "A poller
-  left alone rests".
-- **Leave** drops a role; the device comes back with the code.
-- Roles belong to tabs, not devices: each tab keeps its token in
-  sessionStorage, so a reload, sleep or a dropped connection resumes the
-  role, and a two-screen laptop holds both in two windows.
-
-### Wrong teacher codes
-
-Two digits are 100 possibilities, so guesses are limited. The counts live in
-the instance's storage (`guesses`), so an idle instance does not forget them.
-
-- **Per device** (`GUESS_MAX` 5 within `GUESS_WINDOW_MS` 1 min): the fifth
-  wrong ending refuses that device's teacher codes for this quiz for
-  `GUESS_LOCK_MS` (10 min). A device is its address as a hash salted with a
-  salt drawn per quiz and stored with the upload; the hash is stored only
-  while it counts and the alarm deletes it afterwards. The address is the
-  `cf-connecting-ip` header Cloudflare sets; a request that sets it itself
-  gets Cloudflare's 403 page (seen on a copy of the site, 2026-11-09), so a
-  device can't name another address. With no address (local
-  development) the device is the quiz. Owner: the "no IP addresses" decision
-  is about logs and retention, not about detecting attacks.
-- **Per quiz, whatever the addresses** (`QUIZ_GUESSES` 10, one more every
-  `QUIZ_GUESS_EVERY_MS` 6 min): covers many addresses (an IPv6 range, a
-  botnet). Used up, every teacher code for the quiz is refused, the right one
-  too, since otherwise the answers would tell it. A sweep of the 100 endings
-  takes about nine hours, about half that to hit on average; a quiz lives
-  3 hours past the teacher's last step.
-- **Not counted:** an attempt without two digits (the class code alone) is no
-  guess at them; a right code; a refusal. **Exempt:** the uploading device's
-  secret.
-- The answer is `TOO_MANY_CODES` ("Too many wrong codes for this quiz. Try
-  again in a few minutes."), HTTP 429 at `/api/join`, an ack at `takeRole`.
-- **The cost.** A script, or a class typing seven-digit codes, can keep the
-  teacher's second device out, a try at a time every six minutes. Behind a
-  school's NAT, a pupil's five wrong codes lock the teacher's second device
-  out for ten minutes. The uploading device (Resume) is the teacher's way in
-  then.
-- Class codes are not limited here: a wrong class code finds no instance to
-  count in, and a guessed class code wins only an avatar. Other caps:
-  `hosting-and-limits.md`.
+  questions:** the local check keeps them folded for whoever will play
+  (`local-check.md`).
+- Plausible assumptions the lobby rests on: the number of questions is what
+  most often tells two versions of a quiz apart; a phone that uploads first
+  is nearly never the one screen, and a laptop or phone is used the same way
+  lesson after lesson (the arrangement defaults to a remote and is
+  remembered per browser).
 
 ## Not known
 
-- Whether teachers read "63953 47" as theirs and "63953" as the class's.
-- Whether the words (Big screen, Remote, Show the quiz here, Steer it from
-  here, A second device, Swap) are the ones teachers reach for.
-- Whether hosts read the toggle as a question about their setup, and
-  whether a host at one screen, on a first visit, reads the how-to under
-  Screen and remote as a step they have to take before letting everyone in.
-- Whether "‹ Back" says where it leads.
-- Whether "Join code", "Let everyone in" and "Ask whoever runs it" read
-  naturally to a teacher, a child's helper and a pub host; no one outside
+- Whether teachers read "63953 47" as theirs and "63953" as the class's,
+  and whether the words (Big screen, Remote, Show the quiz here, Steer it
+  from here, A second device, Swap, ‹ Back, Join code, Let everyone in, Ask
+  whoever runs it) are the ones teachers and hosts reach for; no one outside
   the project has read them.
-- Whether "another device via the menu" is read as meant on a wall.
-- How a phone's browser behaves while casting by Miracast (sleeps, drops the
-  page).
-- Whether 45 s is right once a phone in a pocket has been seen in a lesson,
-  and whether a throttled hidden projector tab is wrongly counted away.
-- How often teachers upload at the front with the class waiting, the case
-  where opening on the check costs a tap every lesson.
-- Whether the limit works against a real attacker on Cloudflare (which
-  count applies).
-- That the alarm clears a device's hash once its count runs out (known from
-  the code, not observed).
+- Whether hosts read the arrangement toggle as a question about their
+  setup, and whether a host at one screen takes the remote's how-to for a
+  step they must take.
+- How a phone's browser behaves while casting by Miracast; whether 45 s
+  without a sign from the Remote, after which the wall steers again
+  (`FRESH_MS`), suits a phone in a pocket in a lesson, and whether a throttled hidden
+  projector tab is wrongly counted away.
+- How often teachers upload at the front with the class waiting, where
+  opening on the check costs a tap every lesson.
+- Whether the limit on wrong teacher codes works against a real attacker on
+  Cloudflare.

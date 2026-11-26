@@ -1,7 +1,5 @@
-// The root page says of each example's file what the file holds (client/example-files.ts, written by
-// docs/example/faces.py), and shows its first question as its face (docs/design/root-page.md, "Getting a quiz"). A file
-// changed without a run of faces.py would leave the page naming the old size and question, and its face showing the old
-// quiz: this fails until it has run.
+// An example's .zip changed without a run of docs/example/faces.py would leave the root page naming its old size and
+// first question and showing its old face: this fails until it has run.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

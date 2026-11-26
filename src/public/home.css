@@ -9,14 +9,14 @@ li { margin: .2rem 0; }
 pre { background: var(--code-bg); padding: .75rem 1rem; overflow-x: auto; border-radius: 6px; font-size: .9rem; line-height: 1.45; }
 code { font-family: var(--font-mono); }
 
-/* The part for people (root-page.md, "One column"). */
+/* The part for people. */
 header.top { --page-w: 42rem; }
 .landing { max-width: 42rem; margin: 0 auto; padding: 0 16px; }
 .landing h1 { font-size: clamp(1.3rem, 1rem + 1.7vw, 1.8rem); line-height: 1.18; margin: .9rem 0 1rem; text-wrap: balance; }
 .landing h2 { border: 0; padding: 0; margin: 0 0 .4rem; font-size: 1.2rem; line-height: 1.25; }
 
-/* The film (root-page.md, "The film"; docs/film/). --film-h: at most 62% of the viewport's height, so a phone held
-   sideways shows it whole; svh: the viewport with a phone browser's bars shown. */
+/* The film (docs/film/). --film-h: at most 62% of the viewport's height, so a phone held sideways shows it whole;
+   svh: the viewport with a phone browser's bars shown. */
 .film { margin: .7rem 0 0; }
 .film { --film-h: 62svh; }
 .cqf-film { width: 100%; max-width: calc(var(--film-h) * 16 / 9); margin: 0 auto; container-type: inline-size; }
@@ -72,17 +72,17 @@ html:has(.cqf-fs) { overflow: hidden; }
 .cqf-stage .ts { font-weight: 600; }
 .cqf-stage .tn { font-variant-numeric: tabular-nums; }
 
-/* The two steps (root-page.md, "Two steps"): the numbers are drawn, not text, so a fetcher reads the headings alone. */
+/* The two steps: the numbers are drawn, not text, so a fetcher reads the headings alone. */
 .steps { counter-reset: step; }
 .step { position: relative; counter-increment: step; }
 .step h2::before { content: counter(step); display: inline-block; width: 1.45rem; height: 1.45rem; margin-right: .5rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .85rem/1.45rem var(--font-text); text-align: center; vertical-align: .12em; }
 .step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
 .landing .step-head h2 { margin: 0; }
 .which { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.4; }
-/* A stand-in's label (backlog, "The page for people", item 1), made by client/home.ts in the page's language. */
+/* A stand-in's label, made by client/home.ts in the page's language. */
 .mock { margin-left: auto; font: 600 .72rem/1.5 var(--font-text); color: var(--muted); border: 1px dashed var(--muted); border-radius: 6px; padding: 0 6px; }
 
-/* The examples' tabs (root-page.md, "Getting a quiz"). Where a language's names don't fit the row (a phone under about
+/* The examples' tabs. Where a language's names don't fit the row (a phone under about
    360 px), the row scrolls sideways under a fade at the edge it has more tabs beyond, and the page itself doesn't. */
 .extabs-wrap { position: relative; margin: .55rem 0 0; z-index: 1; }
 .extabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
@@ -153,7 +153,7 @@ html:has(.cqf-fs) { overflow: hidden; }
   .runbox::before { content: ""; position: absolute; left: calc(-2.55rem - 2px + .725rem - 1px); top: -2px; height: calc(50% - 1.1rem + 2px); width: 2px; border-radius: 1px; background: var(--rule); }
 }
 
-/* A phone: tighter, so the button that opens a file is in the first screen (root-page.md, "One column"). */
+/* A phone: tighter, so the button that opens a file is in the first screen. */
 @media (max-width: 600px) {
   .landing h1 { font-size: min(1.25rem, 5.25vw); margin: .6rem 0 .6rem; }
   .landing h2 { font-size: 1.1rem; }
@@ -194,7 +194,7 @@ html:has(.cqf-fs) { overflow: hidden; }
 .problem button.primary { background: var(--control); border-color: var(--control); color: var(--control-ink); }
 .owncopy { color: var(--muted); font-size: .95rem; margin: 12px 0 0; }
 
-/* A quiz to come back to (root-page.md, "Coming back"). */
+/* A quiz to come back to. */
 .resume { border: 2px solid var(--accent); border-radius: 14px; padding: 10px 14px; margin: 12px 0 0; display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; align-items: center; }
 .resume p { margin: 0; }
 .resume .title { font-weight: 700; overflow-wrap: anywhere; }

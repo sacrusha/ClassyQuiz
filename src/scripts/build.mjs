@@ -15,21 +15,16 @@ const dist = join(root, "dist");
 const watch = process.argv.includes("--watch");
 const pages = ["home", "example", "open", "teach", "screen", "play", "check", "owner", "own-copy", "notfound"];
 
-// Security headers for every page; scripts are revalidated so a deploy shows
-// up on the next load. A font is kept a year: its file name carries the
-// font's version, so a new font is a new name.
+// Scripts are revalidated so a deploy shows up on the next load; a font's
+// file name carries its version, so it can be kept a year.
 //
-// The Content-Security-Policy is a second layer behind escaping: quiz text is
-// the teacher's AI's, shown on every screen of the class, and a slip in any
-// page that builds HTML from it must not run as script. Scripts only from the
-// site's own files; pictures also as blob: (the projector fetches the quiz's
-// pictures into object URLs). Styles stay open (the pages set many inline),
-// and so do WebSocket addresses, for one reason only: Safari before 16 (every
-// browser on an iOS 15 device) doesn't let 'self' match same-origin wss:
-// (WebKit bugs 201591, 235873), and the target schools have iPads stuck on
-// iOS 15. A static header can't target a version, so the rule is wider than
-// its reason: reassess it (design/hosting-and-limits.md, "Not known") when
-// iOS 15 stops mattering, and by November 2028 at the latest.
+// The Content-Security-Policy is a second layer behind escaping: quiz text
+// comes from the teacher's AI. Pictures also come as blob: (the projector
+// fetches the quiz's pictures into object URLs); styles stay open because the
+// pages set many inline. WebSocket addresses stay open only because Safari
+// before 16 (every browser on iOS 15) doesn't let 'self' match same-origin
+// wss: (WebKit bugs 201591, 235873), and school iPads stuck on iOS 15 are
+// plausible.
 const csp = [
   "default-src 'self'",
   "script-src 'self'",
@@ -58,16 +53,12 @@ await mkdir(dist, { recursive: true });
 await cp(join(root, "public"), dist, { recursive: true });
 await writeFile(join(dist, "_headers"), headers);
 
-// The mark and the name are written into a page inline, so the hat and the
-// name take the page's ink (currentColor), dark mode included; an <img>
-// can't. One file in public/brand/ feeds every page that shows it
-// (docs/design/identity.md).
+// The brand marks are written into the pages inline, so they take the
+// page's ink (currentColor), which an <img> can't.
 //   <!--#brand file.svg-->      the file, where the marker is.
 //   <!--#brand-use file.svg-->  a small <svg> that <use>s the file, whose
 //                               drawing is written once where the page says
-//                               <!--#brand-defs-->. The root page puts that
-//                               after the guidance, so AIs reading the page
-//                               reach the guidance before any path data.
+//                               <!--#brand-defs-->.
 for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
   const page = join(dist, name);
   const html = await readFile(page, "utf8");
@@ -99,11 +90,9 @@ for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
   await writeFile(page, out);
 }
 
-// site.css (the shared look) arrives with what a page already loads, so a
-// device opening a page at lesson start waits for one stylesheet at most: in
-// front of app.css for the app pages and of home.css for the root page,
-// written into the page for those with their own <style>. A page links
-// /site.css first in public/, which also works opened straight from there.
+// site.css is merged into what a page already loads (app.css, home.css, or
+// an inline <style>), so a page waits for one stylesheet at most. The pages
+// in public/ link /site.css so they also work opened straight from there.
 {
   const site = await readFile(join(dist, "site.css"), "utf8");
   const sheets = ["app.css", "home.css"];
@@ -122,13 +111,9 @@ for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
   await rm(join(dist, "site.css"));
 }
 
-// The site's address in the guidance page: the demo's in the source; a copy
-// under another name (wrangler.toml's `name`, or SITE_ADDRESS when the
-// address is something else) names its own, so the teacher's AI is sent to
-// it rather than to the demo. The page's script shows the address the
-// browser opened anyway; this is for AIs, which read the page without it.
-// /check's part for a network that blocks the site is read the same way,
-// often without its script (the page may be saved, or read elsewhere).
+// The source names the demo's address; a copy deployed under another name
+// (wrangler.toml's `name`, or SITE_ADDRESS) names its own, for readers that
+// don't run the pages' scripts: AIs reading the guidance, a saved /check.
 const DEMO = "classyquiz.pages.dev";
 const project = (await readFile(join(root, "wrangler.toml"), "utf8")).match(/^name\s*=\s*"([^"]+)"/m)?.[1];
 const address = (process.env.SITE_ADDRESS || (project ? `${project}.pages.dev` : DEMO)).replace(/^https?:\/\//, "").replace(/\/+$/, "");
@@ -139,10 +124,8 @@ if (address !== DEMO) {
   }
 }
 
-// The manual as plain text, /manual.txt, from the built page so that it
-// names the same address. A fetch tool may hand an AI a small model's summary
-// of the page; an AI with a shell can fetch this text itself
-// (docs/design/guidance-page.md, "Situation").
+// /manual.txt: the guidance as plain text, for an AI whose fetch tool would
+// otherwise hand it a small model's summary of the page.
 {
   const html = await readFile(join(dist, "index.html"), "utf8");
   const start = html.indexOf('<div class="guide">');
@@ -151,8 +134,7 @@ if (address !== DEMO) {
   await writeFile(join(dist, "manual.txt"), `${manualText(html.slice(start + '<div class="guide">'.length, end), `https://${address}`)}\n`);
 }
 
-// Turns the guidance's markup into Markdown-like text. It knows the elements
-// the guidance uses and refuses others, so a new one is a build error rather
+// Refuses elements it doesn't know, so a new one is a build error rather
 // than a hole in the text.
 function manualText(src, origin) {
   const named = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'", nbsp: " ", rsaquo: "›", lsaquo: "‹", times: "×", hellip: "…", mdash: "—", ndash: "–", rarr: "→", darr: "↓" };
@@ -186,7 +168,6 @@ function manualText(src, origin) {
     throw new Error(`manual.txt: <${n.tag}> inside text`);
   };
   const isBlock = (n) => typeof n !== "string" && ["p", "ul", "ol", "pre", "blockquote", "h1", "h2", "h3"].includes(n.tag);
-  // A node's children as blocks; text and inline elements between blocks form a paragraph.
   const blocks = (n) => {
     const out = [];
     let run = [];

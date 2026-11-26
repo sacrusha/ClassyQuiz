@@ -1,9 +1,7 @@
-// Pictures as answers: how a question's answer tiles are
-// arranged, on the wall and on a student's device. Square pictures go two
-// by two, wide strips (number lines) one under the other, tall ones side by
-// side: whichever arrangement shows the smallest of the pictures largest.
-// Colour and shape tell the answers apart, not their place, so the wall and
-// a tablet may arrange the same answers differently.
+// How a question's answer tiles are arranged, on the wall and on a device:
+// whichever arrangement shows the smallest picture largest. Colour and shape
+// tell the answers apart, not their place, so the wall and a device may
+// arrange the same answers differently.
 
 /** What a tile takes around its picture: the tile's size minus its card's. */
 export interface Chrome {
@@ -49,7 +47,6 @@ export function chooseGrid(aspects: (number | null)[], W: number, H: number, gap
     for (const orient of ["row", "col"] as Orient[]) {
       const cw = tw - chrome[orient].w;
       const ch = th - chrome[orient].h;
-      // A card too flat or too narrow for anything is no option.
       if (cw < 24 || ch < 24) continue;
       const score = Math.min(...all.map((a) => contained(a, cw, ch)));
       const g = { cols, rows, orient, score };
@@ -57,7 +54,7 @@ export function chooseGrid(aspects: (number | null)[], W: number, H: number, gap
       if (cols === 2 && n > 2 && (!twoByTwo || score > twoByTwo.score)) twoByTwo = g;
     }
   }
-  // Two by two is what a class knows from the text tiles: kept unless another shows the pictures clearly larger.
+  // Two by two, as the text tiles are, unless another shows the pictures clearly larger.
   if (best && twoByTwo && twoByTwo.score >= 0.85 * best.score) return twoByTwo;
   return best ?? { cols: Math.min(2, n), rows: Math.ceil(n / Math.min(2, n)), orient: "col", score: 0 };
 }

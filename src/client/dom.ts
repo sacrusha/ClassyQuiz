@@ -1,5 +1,4 @@
-// Helpers shared by the pages. Browser storage may be missing (private
-// windows, managed school browsers); every access here is guarded.
+// Browser storage may be missing (private windows, managed school browsers).
 
 import type { LineStatus } from "./net.ts";
 
@@ -88,7 +87,7 @@ export function findQuiz(id: string): SavedQuiz | null {
   return savedQuizzes().find((x) => x.id === id) ?? null;
 }
 
-// The teacher code (docs/design/teacher-devices.md, "One entry: the teacher code"): the class code and two
+// The teacher code: the class code and two
 // digits, typed in the students' box, which routes by length.
 
 /** "63953 47", as the teacher reads it: the class's code, then their own two digits. */
@@ -101,7 +100,7 @@ export function teacherEntry(code: string, teacher: string, extra = ""): string 
   return `/play${extra}#${code}${teacher}`;
 }
 
-// The role this tab holds (docs/design/teacher-devices.md). Per tab, not per
+// The role this tab holds. Per tab, not per
 // device: two windows of one browser may hold the Projector and the Remote.
 // sessionStorage survives a reload of the tab and goes with it when it's closed.
 
@@ -137,9 +136,8 @@ export const tabRole = {
 };
 
 /**
- * Which of its two lobby screens the single tab shows (docs/design/teacher-devices.md,
- * "The single tab: check, then join"): the teacher's check, or the class's join screen. Per tab, so a reload
- * stays where it was; the tab that uploaded starts on the check.
+ * Which of its two lobby screens the single tab shows:
+ * the teacher's check, or the class's join screen. Per tab, so a reload stays where it was.
  */
 export const tabLobby = {
   get(instance: string): "check" | "join" {
@@ -159,14 +157,12 @@ export const tabLobby = {
 };
 
 /**
- * How the screens are arranged, as the single tab's check asks it
- * (docs/design/teacher-devices.md, "How the screens are arranged"): one
- * screen that shows and steers, or a screen and a remote. It changes only
+ * How the screens are arranged, as the single tab's check asks it: one screen
+ * that shows and steers, or a screen and a remote. It changes only
  * which how-to the check shows; every device still comes in by the same
- * code. Per browser, not per quiz: a host who steers from the phone does so
- * each time. A screen and a remote until the host taps One screen or this
- * browser runs a quiz without a Remote, so the example class's teacher finds
- * the remote's how-to on a first visit; without storage it stays so.
+ * code. Per browser, not per quiz: plausibly, a host who steers from the
+ * phone does so each time. A screen and a remote until the host taps One
+ * screen or this browser runs a quiz without a Remote.
  */
 export type Arrangement = "one" | "remote";
 export const arrangement = {
@@ -187,8 +183,7 @@ export const arrangement = {
 };
 
 /**
- * Devices shared, the check's switch (docs/design/class-and-wall.md,
- * "Sharing a device"), as this browser last set it: a quiz that hasn't been
+ * Devices shared, the check's switch, as this browser last set it: a quiz that hasn't been
  * set takes it. Per browser, as the arrangement: a class short of devices is,
  * plausibly, short lesson after lesson. Off without storage.
  */
@@ -265,11 +260,9 @@ export function keepAwake(): void {
 }
 
 /**
- * The small header of a teacher's page (site.css, .site-head): the mark and
- * the name, back to the root page, as the static pages write it. Here the
- * lockup is a picture, not inline: this script is also the students', and
- * every tablet would carry the drawing for screens only a teacher sees.
- * The picture follows the device's dark mode, as these screens do.
+ * A teacher's page header, as the static pages write it. The lockup is a
+ * picture, not inline: this script is also the students', and every device
+ * would carry the drawing for screens only a teacher sees.
  */
 export function siteHead(): string {
   return `<header class="site-head"><div class="in"><a class="brand" href="/"><picture><source media="(prefers-color-scheme: dark)" srcset="/brand/classyquiz-horizontal-32-dark.svg"><img src="/brand/classyquiz-horizontal-32.svg" alt="classyQuiz" width="134" height="32"></picture></a></div></header>`;

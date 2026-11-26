@@ -1,7 +1,6 @@
-// This device's history with the site, for the own-copy line
-// (docs/design/root-page.md, "The own copy"): the days it uploaded a quiz, kept on the device
-// and never sent. Dates only: no titles, no codes. cq.quizzes can't serve,
-// it keeps 20 entries and forgets finished quizzes.
+// The days this device uploaded a quiz, for the own-copy line: kept on the device and never
+// sent. cq.quizzes can't serve, it keeps only the latest entries and forgets
+// finished quizzes.
 
 import { store } from "./dom.ts";
 

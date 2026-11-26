@@ -7,46 +7,14 @@ The site as the working tree has it (src/, film included, copied to .tmp/siteche
 site as it is on `main` (before this change), `main` as `git archive` gives it (.tmp/sitecheck/main; nothing in git changes).
 Both get the working tree's src/node_modules (a junction; npm ci only if the lock files differ or there is none).
 The working copy: `npm run check`, the tests and the site's build; the baseline: the build. dist/ is
-served with the headers the build writes (dist/_headers, the CSP among them); then Edge, desktop and phone:
-
-  - before any press: the poster picture shows, film.js is not fetched, the
-    page's HTML holds none of the film's words, nothing is a data: URI; the speed
-    button cycles without loading anything;
-  - ▶: film.js loads, the picture is replaced, the film plays; the live poster
-    frame against the picture (mean difference per pixel);
-  - the time bar moved as the first press loads the film and shows that moment, paused; the player's
-    names are the page's (German); its chapter ticks are there once;
-  - a German page shows the German poster (src and srcset) before any press; the film built there is
-    German, its ask the page's; a switch to French while it plays goes back to the poster, in French,
-    the bar at 0, and the next press builds one French film (nothing of the German left or doubled);
-  - film.js blocked: the picture stays, a later press loads it;
-  - scripts off: the picture still shows;
-  - film.js loads but can't draw the film once: the picture stays, the next press draws it;
-  - desktop: ▶ by keyboard leaves the focus on the bar's play/pause; the time bar's name and spoken
-    value (time and chapter), the address the browser opened; one animation loop however often the bar
-    is moved and played; a drag shows the chapter's name over the thumb, the release hides it; Space on
-    the page and in the code box and the arrows on the examples' tabs stay theirs, the stage and the time bar
-    take the film's keys; scrolled out
-    of view or in a hidden tab it pauses and stays paused; at the end the page's replay icon (named in German)
-    stands in the band under the end card's address and plays it from the start, the focus on play/pause;
-  - the arrangement: desktop, upright phone and a phone held sideways (844 x 390, 740 x 360, 915 x 412): the bar under
-    the film and as wide, on one row as on a desktop except on the upright phone, where the time bar has a row of its
-    own; the time bar at least 150 px wide; no sideways scroll;
-  - full screen, desktop and phone, the browser's and the fallback fixed over the viewport (forced by hiding the
-    Fullscreen API): the film letterboxed 16:9 as large as the screen allows, the bar under it, the focus on the stage,
-    the page under it not scrolling, the film's keys working, Tab going round the player; ended by Esc (the fallback),
-    by the browser (the API's exitFullscreen, as its Esc does) or by the button, the page back where it was and the focus
-    on the button; the phone turned sideways in it gives the big film;
-  - every language (desktop): each ask typed out before its send, no line wider than its box, no
-    fitted text shrunk below 3/4; languages whose film words are drafts are named;
-  - the page around the film (the two steps, the guidance) is unchanged against
-    `main`'s: every element's computed style;
-  - no CSP violation, console error or page error anywhere.
+served with the headers the build writes (dist/_headers, the CSP among them); then Edge, desktop and phone,
+through the poster, the player, its keys, full screen and every language, and the page around the film against
+`main`'s computed styles. A CSP violation, console error or page error anywhere is a problem too.
 """
 import http.server, io, json, os, pathlib, re, shutil, subprocess, sys, tarfile, threading
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = pathlib.Path(__file__).resolve().parent
-sys.dont_write_bytecode = True  # no __pycache__ in the tree
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(HERE))
 from build import ROOT, film_length, launch  # noqa: E402
 from PIL import Image, ImageChops, ImageStat
@@ -225,7 +193,7 @@ def check(url, mode):
         ctx, pg, log = page(b, mode)
         pg.goto(url + '/'); pg.wait_for_load_state('networkidle')
         # The faces of the examples' files are named by each quiz's first question, the sheets example's being the film's
-        # question 1: the page's own words for a picture, made by the script (docs/design/root-page.md, "Getting a quiz").
+        # question 1: alt text made by the page's script, not the film's words.
         html = pg.evaluate("(() => { const d = document.documentElement.cloneNode(true); d.querySelectorAll('.face img').forEach((i) => i.removeAttribute('alt')); return d.outerHTML; })()")
         for w in FILM_WORDS:
             if w in html: problems.append(f'{mode}: the page HTML holds the film\'s words "{w}"')
@@ -479,8 +447,7 @@ ARRANGEMENTS = [('desk', (1300, 900), False, 1), ('desk-short', (1024, 600), Fal
 
 
 def arrangement(b, url):
-    """The bar under the film and as wide, on the rows given (root-page.md, "The film": a phone held sideways as a desktop),
-    its time bar wide enough to drag, and no sideways scroll."""
+    """The bar under the film and as wide, on the rows given, its time bar wide enough to drag, and no sideways scroll."""
     for name, (w, h), phone, rows in ARRANGEMENTS:
         ctx = b.new_context(viewport={'width': w, 'height': h}, **({'device_scale_factor': 3, 'is_mobile': True, 'has_touch': True} if phone else {}))
         pg = ctx.new_page()

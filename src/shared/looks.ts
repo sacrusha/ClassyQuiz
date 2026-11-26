@@ -1,9 +1,6 @@
-// How a player dresses their animal in the lobby
-// (docs/design/class-and-wall.md, "Dressing the avatar"): a background shape,
-// a hat and a thing beside it, from one menu that is the same for everybody
-// and every room, a class's or a training room's. The animal and its colour
-// stay assigned and tell the players apart; the look is the player's own and
-// is never scarce. The drawings are in client/look.ts, in this order.
+// How a player dresses their animal in the lobby: a background shape, a hat
+// and a tool, from one menu. The drawings are in client/look.ts, in this
+// order.
 
 /** Background shapes: 0 is the plain disc, the default. */
 export const BACKGROUND_COUNT = 6;
@@ -12,11 +9,9 @@ export const HAT_COUNT = 10;
 /** The row beside the hats, held, worn at the neck or set before the animal ("tools"): 0 is none, the default. */
 export const TOOL_COUNT = 8;
 /**
- * Changes of look a player can make in one class. The looks are held in
- * memory and written at Start (docs/design/open-period-in-memory.md), so a
- * change costs no row and the cap is not part of what a class books. It
- * discourages an accidental flood of requests, and is far more than
- * exploring the menu takes.
+ * Changes of look a player can make in one class: against an accidental flood
+ * of requests, far more than exploring the menu takes. Looks are written only
+ * at Start, so a change costs no row.
  */
 export const MAX_LOOK_CHANGES = 100;
 /** The screens hear of the class's changed looks at most this often: one round of views for every child who changed in between. */
@@ -29,7 +24,6 @@ export interface Look {
   t?: number;
 }
 
-/** A background, a hat and a tool the menu has. */
 export function validLook(b: unknown, h: unknown, t: unknown): boolean {
   const inRange = (x: unknown, n: number) => Number.isInteger(x) && (x as number) >= 0 && (x as number) < n;
   return inRange(b, BACKGROUND_COUNT) && inRange(h, HAT_COUNT) && inRange(t, TOOL_COUNT);

@@ -1,6 +1,6 @@
 // What travels between the browser and the quiz instance. The same messages go
-// over a WebSocket or, when a school network breaks WebSockets, over plain
-// HTTP long-polling (docs/design/connections.md, "Transport: WebSocket first, long-polling when the network breaks it").
+// over a WebSocket or, when a school network breaks WebSockets, over plain HTTP
+// long-polling.
 //
 // The server sends each tab a complete view of what it should show, never a
 // diff, so a tab that slept or lost its connection just draws the newest
@@ -8,12 +8,12 @@
 // were given in and are ignored when it has moved on; answers carry a sequence
 // number; fixes set a value rather than toggle one.
 //
-// Roles (docs/design/teacher-devices.md): one code per quiz. A tab with the code is a
-// guest until it plays (a player) or takes one of the two teacher roles, the
-// Projector ("screen", the wall) or the Remote (the steering tab). Each role
-// is held by one tab at a time, named by a token the tab keeps for its
-// lifetime (sessionStorage). A teacher role takes the teacher code, the class
-// code plus two digits (docs/design/teacher-devices.md, "One entry: the teacher code"), or the quiz's secret.
+// Roles: one code per quiz. A tab with the code is a guest until it plays (a
+// player) or takes one of the two teacher roles, the Projector ("screen", the
+// wall) or the Remote (the steering tab). Each role is held by one tab at a
+// time, named by a token the tab keeps for its lifetime (sessionStorage). A
+// teacher role takes the teacher code, the class code plus two digits, or the
+// quiz's secret.
 
 import type { LineCounts } from "./line.ts";
 import type { Answering, Avatar, Phase } from "../server/game.ts";
@@ -61,12 +61,12 @@ export type Command =
   /**
    * Last call: the answers shown if they weren't, and LAST_CALL_MS later
    * answering locks in by itself. In a Peers room any player done with the
-   * room's step sends it: LAST_CALL_MS later the room goes on (docs/design/peers.md, "Countdown").
+   * room's step sends it: LAST_CALL_MS later the room goes on.
    */
   | { op: "lastCall"; at: At }
   /** Points for speed on or off, in the lobby (the join screen's switch). */
   | { op: "speed"; value: boolean }
-  /** Devices shared: a player's device offers a place for another beside it (docs/design/class-and-wall.md, "Sharing a device"). */
+  /** Devices shared: a player's device offers a place for another beside it. */
   | { op: "share"; value: boolean }
   | { op: "finish"; at: At }
   | { op: "skipCurrent"; at: At }
@@ -91,7 +91,7 @@ export type Command =
    * the uploading device (Resume); it needs no digits and isn't limited.
    */
   | { op: "takeRole"; role: RoleName; teacher?: string; secret?: string }
-  /** beside: the token of a player at this device, which the new one shares (docs/design/class-and-wall.md, "Sharing a device"). */
+  /** beside: the token of a player at this device, which the new one shares. */
   | { op: "newPlayer"; beside?: string }
   | { op: "claim"; player: string }
   // a player
@@ -105,20 +105,19 @@ export type Command =
   | { op: "dress"; b: number; h: number; t?: number }
   /**
    * Peers: done with question q's solution; the next comes once everyone
-   * present is (docs/design/peers.md). The player who opened the room also
-   * sends begin, finish, setCounts, setVoid and remove.
+   * present is. The player who opened the room also sends begin, finish,
+   * setCounts, setVoid and remove.
    */
   | { op: "ready"; q: number };
 
 /**
- * A player device's input as the server last took it (docs/design/open-period-in-memory.md):
- * the look its `dress` was acknowledged with, the answer tap whose
- * acknowledgement carried it as the record (the tap as sent: choice in
- * screen order, its seq, view and time), and in a Peers room the question
- * whose solution its `ready` was acknowledged for. Sent with every hello and poll; the
- * server takes it as the commands again, which changes nothing unless the
- * instance lost its memory. token: the player it was taken for; another
- * player's isn't sent.
+ * A player device's input as the server last took it: the look its `dress` was
+ * acknowledged with, the answer tap whose acknowledgement carried it as the
+ * record (the tap as sent: choice in screen order, its seq, view and time), and
+ * in a Peers room the question whose solution its `ready` was acknowledged for.
+ * Sent with every hello and poll; the server takes it as the commands again,
+ * which changes nothing unless the instance lost its memory. token: the player
+ * it was taken for; another player's isn't sent.
  */
 export interface DeviceHeld {
   token: string;
@@ -129,12 +128,11 @@ export interface DeviceHeld {
 
 /**
  * held: a player device's (DeviceHeld); the long-poll's body carries it beside auth and v.
- * line: the device's own count of its line (docs/design/telemetry.md), with
- * the hello, every command and every poll; the newest replaces the one before.
- * rest: a long-poll's own (docs/design/connections.md, "A poller left alone rests").
- * In its answer, beside `messages`: no class is in the quiz, so a device
- * left alone may rest. In its body: the device is at rest, and this poll is
- * answered at once with what the device would show.
+ * line: the device's own count of its line, with the hello, every command and
+ * every poll; the newest replaces the one before.
+ * rest: a long-poll's own. In its answer, beside `messages`: no class is in
+ * the quiz, so a device left alone may rest. In its body: the device is at
+ * rest, and this poll is answered at once with what the device would show.
  */
 export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld; line?: LineCounts } | { t: "cmd"; id: string; cmd: Command; line?: LineCounts };
 
@@ -142,7 +140,7 @@ export type ClientMessage = { t: "hello"; auth: Auth; held?: DeviceHeld; line?: 
  * The result of a tap's acknowledgement: what the server holds for this player
  * and question now, the choice in the order on screen; null for nothing.
  * Whether this tap was taken or not, the tablet shows this as its accepted
- * answer, the same record that scores (docs/design/question-flow.md, "When a tap counts").
+ * answer, the same record that scores.
  */
 export interface AnswerAck {
   q: number;
@@ -150,8 +148,7 @@ export interface AnswerAck {
 }
 
 /**
- * What a teacher device that comes in with the teacher code does
- * (docs/design/teacher-devices.md, "A second device: one question, only when needed"):
+ * What a teacher device that comes in with the teacher code does:
  * - ask: one tab does both (the wall steers itself): "Show the quiz here, or
  *   steer it from here?";
  * - screen / remote: that role is free, or its tab is gone: it takes it
@@ -285,7 +282,7 @@ export interface ScreenView {
   v: number;
   title: string;
   code: string;
-  /** The teacher code's two digits after the class code: a second device types both (docs/design/teacher-devices.md, "One entry: the teacher code"). */
+  /** The teacher code's two digits after the class code: a second device types both. */
   teacher: string;
   /** The quiz's background (a question's own is in `question`). */
   background: ImageRef | null;
@@ -340,7 +337,6 @@ export interface TeacherView {
   id: string;
   title: string;
   code: string;
-  /** The teacher code's two digits after the class code. */
   teacher: string;
   background: ImageRef | null;
   warnings: Problem[];
@@ -349,7 +345,6 @@ export interface TeacherView {
   current: number;
   /** In the lobby, the class not let in yet: the steering screens offer "Let the class in". */
   waiting: boolean;
-  /** In the lobby once Start is pressed: the first question comes when it runs out. */
   starts: ClockView | null;
   /**
    * Before the class is let in: how many classes like this one still fit,
@@ -366,7 +361,6 @@ export interface TeacherView {
   roomHeld?: true;
   screen: Presence;
   remote: Presence;
-  /** The question's picture fills the projector. */
   zoom: boolean;
   /** Points for speed, the join screen's switch. */
   speed: boolean;
@@ -421,7 +415,6 @@ export interface PlayerView {
     n: number;
     total: number;
     answers: string[];
-    /** Pictures as answers, in the order on screen, null for a text answer; absent when the question has none. */
     pics?: (PackPic | null)[];
     mine: number | null;
     answering: Answering;
@@ -437,10 +430,9 @@ export interface PlayerView {
 }
 
 /**
- * Peers (docs/design/peers.md): there is no wall, so each device gets the
- * question itself, the code to join, who is in, the spread, the winners,
- * how the friends stand and the final ranking. Every list of answers is in
- * the order on screen.
+ * Peers: there is no wall, so each device gets the question itself, the code to
+ * join, who is in, the spread, the winners, how the friends stand and the final
+ * ranking. Every list of answers is in the order on screen.
  */
 export interface PeersView {
   /** This device's player, as in `players` and the ranking. */
@@ -493,17 +485,15 @@ export function viewKey(view: View): string {
 }
 
 export const JOIN_CODE = /^\d{5}$/;
-/** The teacher code: the class code and two digits, typed in the same box (docs/design/teacher-devices.md, "One entry: the teacher code"). */
+/** The teacher code: the class code and two digits, typed in the same box. */
 export const TEACHER_CODE = /^\d{7}$/;
-/** Said to a device whose teacher code's last two digits are wrong. */
 export const WRONG_TEACHER_CODE = "The last two digits don't match this quiz.";
-/** Said to a device after too many wrong teacher codes. */
 export const TOO_MANY_CODES = "Too many wrong codes for this quiz. Try again in a few minutes.";
 export const MAX_QUIZ_BYTES = 200_000;
 
-// Pictures (docs/design/pictures.md, "At upload"). The browser redraws each
-// one at upload to at most IMAGE_LONG_SIDE (BACKGROUND_LONG_SIDE) pixels; the server checks the rest.
-// A Durable Object value holds at most 2 MB.
+// Pictures. The browser redraws each one at upload to at most IMAGE_LONG_SIDE
+// (BACKGROUND_LONG_SIDE) pixels; the server checks the rest. A Durable Object
+// value holds at most 2 MB.
 export const IMAGE_LONG_SIDE = 1600;
 /** A background fills the projector, 1920 pixels wide at most. */
 export const BACKGROUND_LONG_SIDE = 1920;
@@ -545,18 +535,17 @@ export interface QuizInfo {
   /** The teacher code's two digits: Resume goes in with them, and another device types them. */
   teacher: string;
   /**
-   * Where the quiz stands, for the resume line (docs/design/root-page.md,
-   * "Coming back: the resume card"): the class's phase ("lobby": waiting for the class; "final": finished), and the
-   * question on screen as n of total among those not skipped (n 0 before
-   * the first).
+   * Where the quiz stands, for the resume line: the class's phase ("lobby":
+   * waiting for the class; "final": finished), and the question on screen as n
+   * of total among those not skipped (n 0 before the first).
    */
   stands: { phase: Phase | "idle"; n: number; total: number };
   /** A Peers room: the device comes back as its player, not as a teacher device. */
   peers?: true;
   /**
-   * New with each start of the instance's object (a hibernation, a restart,
-   * a deploy), random: scripts/simulate-memory.mjs compares it to know the
-   * memory was in fact lost (docs/design/open-period-in-memory.md).
+   * New with each start of the instance's object (a hibernation, a restart, a
+   * deploy), random: scripts/simulate-memory.mjs compares it to know the memory
+   * was in fact lost.
    */
   memory?: string;
 }

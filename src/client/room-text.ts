@@ -1,16 +1,6 @@
-// The words of the pages a quiz plays on, in the four languages of the root
-// page: the local check and Solo (/open), the Projector, the Remote, the
-// player's device and a Peers room, and the server's messages as they show
-// there. A device speaks its own language, the one the root page speaks on
-// it (landing-text.ts, chosenLang): the Projector the quizmaster's, a
-// player's device its own browser's.
-//
-// What an AI reads stays English and is not here: the quiz's problems and
-// warnings, and the text copied for the AI.
-//
-// The server says its messages in English, the words the pages match on
-// (shared/limits.ts, shared/protocol.ts, server/game.ts); said() puts them in
-// this device's language. One that has no entry here shows as it came.
+// The server says its messages in English, the words the pages match on;
+// said() puts them in this device's language. One that has no entry here
+// shows as it came.
 
 import type { Lang } from "./landing-text.ts";
 import { deviceLang } from "./device-lang.ts";
@@ -24,28 +14,27 @@ import { LAST_CALL_MS, POINTS_RIGHT, SPEED_BONUS, START_MS } from "../shared/tem
 /** Most strings are text; the few with markup say so, and take their parts as HTML already escaped. */
 export interface RoomText {
   // Every page.
-  /** The line's dot, its title (client/dom.ts, statusDot). */
+  /** The line's dot, its title. */
   status: Record<LineStatus, string>;
   connecting: string;
-  /** The notice over a device asleep after a long while without a change (client/net.ts). */
   tapToContinue: string;
   /** The countdown's bar, its accessible name; also the label of its button. */
   countdown: string;
   questions: (n: number) => string;
   /** A question's number among those shown, as the next step's label. */
   question: (n: number) => string;
-  /** The way to an own copy, as a sentence after a refusal; `site` is this site's address. */
+  /** The way to an own copy, as a sentence after a refusal. */
   ownCopy: (site: string) => string;
-  /** Classes and groups are let in for the day's rows (shared/limits.ts, classesFullMessage); at: the time in Swiss time, or null. */
+  /** No more classes for the day; at: the time in Swiss time, or null. */
   classesFull: (at: string | null) => string;
-  /** A Peers room refused as it opens (roomsFullMessage). */
+  /** A Peers room refused as it opens. */
   roomsFull: (at: string | null) => string;
-  /** The same two when the quizzes open now hold the room and give it back (shared/limits.ts, ClassFull "now"). */
+  /** The same two when the quizzes open now hold the room and will give it back. */
   classesFullNow: string;
   roomsFullNow: string;
-  /** The day nearly full, on the check before the players are let in (client/manage.ts, roomNotice). */
+  /** The day nearly full, on the check before the players are let in. */
   nearlyFull: (room: number) => string;
-  /** Nearly full of what the quizzes open now hold (shared/protocol.ts, `roomHeld`). */
+  /** Nearly full of what the quizzes open now hold. */
   nearlyFullNow: (room: number) => string;
   close: string;
   more: string;
@@ -54,7 +43,7 @@ export interface RoomText {
   remove: string;
   picture: string;
   background: string;
-  /** The ⋯ menu's and the solution sheet's words (client/manage.ts). */
+  // The ⋯ menu and the solution sheet.
   tagNow: string;
   tagDone: string;
   tagSkipped: string;
@@ -85,10 +74,10 @@ export interface RoomText {
   endQuiz: string;
   speedSwitch: string;
   speedNote: string;
-  /** The switch for a split screen at the players' devices (docs/design/class-and-wall.md, "Sharing a device"), and what it does. */
+  /** The switch for a split screen at the players' devices, and what it does. */
   shareSwitch: string;
   shareNote: string;
-  // The steering bar (client/steps.ts): nouns for what the class sees next (docs/design/question-flow.md, "The steering bar").
+  // The steering bar: nouns for what the class sees next.
   choices: string;
   answers: string;
   closesAnswering: string;
@@ -103,7 +92,7 @@ export interface RoomText {
   startsIn: string;
   exit: string;
   exitNote: string;
-  // The local check (client/open.ts) and its entries.
+  // The local check and its entries.
   nothingOpenH: string;
   nothingOpen: string;
   toStart: string;
@@ -111,7 +100,7 @@ export interface RoomText {
   foldName: string;
   notes: (n: number) => string;
   foldHint: string;
-  /** What each way's picture shows (docs/ways/README.md), on its card: its accessible name. */
+  /** Each way's picture on its card: its accessible name. */
   picQuizmaster: string;
   picPeers: string;
   picSolo: string;
@@ -126,7 +115,7 @@ export interface RoomText {
   /** Peers' card: the room ends by itself after the final ranking, as nobody ends it there. */
   peersRoomNote: string;
   peersNotHere: string;
-  // Solo (client/entry-solo.ts).
+  // Solo.
   start: string;
   result: string;
   playAgain: string;
@@ -134,7 +123,7 @@ export interface RoomText {
   copiedAnswers: string;
   soloAi: string;
   backArrow: string;
-  // The Projector (client/screen.ts) and the Remote (client/teach.ts).
+  // The Projector and the Remote.
   projector: string;
   remote: string;
   remoteConnected: string;
@@ -187,7 +176,7 @@ export interface RoomText {
   zoomBackProjector: string;
   zoomInProjector: string;
   notCounted: string;
-  /** HTML: the numbers come as live spans, patched in place (client/manage.ts, patch), so no word may agree with them. */
+  /** HTML: the numbers come as live spans, patched in place, so no word may agree with them. */
   answered: (answered: string, present: string, away: string | null) => string;
   reading: string;
   locked: string;
@@ -198,7 +187,7 @@ export interface RoomText {
   typeOn: (site: string, code: string) => string;
   stopSteering: string;
   confirmStopSteering: (site: string, code: string) => string;
-  // The player's device (client/play.ts, client/seat.ts) and a Peers room (client/peers.ts).
+  // The player's device and a Peers room.
   unreached: string;
   unreachedTell: string;
   needsDigits: string;
@@ -235,7 +224,7 @@ export interface RoomText {
   copyLink: string;
   shareLink: string;
   linkCopied: string;
-  // The avatars' and the tiles' accessible names (client/look.ts), in the order of their drawings.
+  // The avatars' and the tiles' accessible names, in the order of their drawings.
   animals: string[];
   backgrounds: string[];
   hats: string[];
@@ -1122,21 +1111,17 @@ export const ROOM_TEXT: Record<Lang, RoomText> = { de, en, fr, it };
 
 export const lang: Lang = deviceLang();
 export const T: RoomText = ROOM_TEXT[lang];
-/** The messages these pages share with the root page, in this device's language (client/site-text.ts). */
 export const SITE = SITE_WORDS[lang];
 
 // The avatars' and the tiles' names, which the shared drawings say in English.
 nameLooks(T);
 
-/** The site's own address, as the refusals name it. */
 const site = (): string => (typeof location === "undefined" ? "classyquiz.pages.dev" : location.host);
 
 /**
- * A message from the server, or one of the server's rules run here (a fix on
- * the check), in this device's language. The day's caps are said again
- * here, with the time this browser works out; the server's wording is
- * recognised by its start. Anything else comes back as it was. l: another
- * language than the device's, for the test of those starts.
+ * The day's caps are said again here, with the time this browser works out;
+ * the server's wording is recognised by its start. l: another language than
+ * the device's, for the test of those starts.
  */
 export function said(msg: string, l: Lang = lang): string {
   if (l === "en") return msg;
@@ -1150,10 +1135,9 @@ export function said(msg: string, l: Lang = lang): string {
 }
 
 /**
- * The site's refusal for want of room or allowance, known by the start of
- * the server's wording, without the way to an own copy that the server ends
- * it with: said() spells that out as an address, a page that can link
- * there links (client/refusal.ts). null: another message.
+ * The site's refusal for want of room or allowance, without the way to an
+ * own copy that the server ends it with: said() spells that out as an
+ * address, a page that can link there links. null: another message.
  */
 export function fullWords(msg: string, l: Lang = lang): string | null {
   const t = ROOM_TEXT[l];
@@ -1169,10 +1153,8 @@ export function fullWords(msg: string, l: Lang = lang): string | null {
   return null;
 }
 
-/** The day's allowance spent, as the notice over every page says it (client/net.ts). */
 export function quotaNotice(): string {
   return `${SITE.quota(quotaResetAt())} ${T.ownCopy(site())}`;
 }
 
-/** What a page's line to its quiz says over the page (client/net.ts, Line). */
 export const LINE_WORDS = { asleep: T.tapToContinue, quota: quotaNotice };

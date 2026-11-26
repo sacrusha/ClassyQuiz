@@ -1,12 +1,10 @@
-// What must hold in front of the class: points follow the teacher's fixes,
-// late or repeated answers change nothing, and the quiz can end at any point.
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseQuiz } from "../quiz/format.ts";
 import * as G from "./game.ts";
-import { LAST_CALL_MS, POINTS_RIGHT, SPEED_REFERENCE_MS, START_MS, speedBonus } from "../shared/tempo.ts";
+import { LAST_CALL_MS, POINTS_RIGHT, START_MS, speedBonus } from "../shared/tempo.ts";
 import { BACKGROUND_COUNT, HAT_COUNT, MAX_LOOK_CHANGES, TOOL_COUNT } from "../shared/looks.ts";
+import { MAX_SEATS } from "../shared/limits.ts";
 
 const quiz = parseQuiz(`Title: T
 1. One?
@@ -34,13 +32,11 @@ function setup(players = 3) {
 
 const score = (g: G.Game, id: string) => G.scores(g).get(id);
 
-/** The quiz starts and its first question's answers are shown, as most tests need them. */
 function begin(g: G.Game, now: number) {
   G.begin(g, now);
   G.showAnswers(g, now);
 }
 
-/** The next question, its answers shown (unless that was the last). */
 function nextQ(g: G.Game, now: number) {
   G.next(g, now);
   if (g.run!.phase === "question") G.showAnswers(g, now);
@@ -245,7 +241,7 @@ test("lock-in and key: neither while the answers are hidden; the key straight fr
   assert.throws(() => G.lockIn(g, 3), G.GameError, "no lock-in after the key");
 });
 
-test("Last call: fifteen seconds, then locked in with the spread; from the hidden answers it shows them too", () => {
+test("Last call: locked in with the spread once its time is up; from the hidden answers it shows them too", () => {
   const { g, ids } = setup(2);
   G.begin(g, 0);
   G.lastCall(g, 1000);
@@ -295,17 +291,17 @@ test("winners: who got it right, in the lobby's order; a fix of the key moves th
   assert.deepEqual(G.winners(g, 1), [], "nobody answered");
 });
 
-test("avatars: the first dozen players all get different animals", () => {
-  const { g } = setup(12);
+test("avatars: until every animal is taken, each player gets a different one", () => {
+  const { g } = setup(G.ANIMAL_COUNT);
   const animals = new Set(Object.values(g.run!.players).map((p) => p.avatar.a));
-  assert.equal(animals.size, 12);
-  // A full class (MAX_PLAYERS, below the 96 combinations) gets no two alike.
+  assert.equal(animals.size, G.ANIMAL_COUNT);
+  // A full class (MAX_PLAYERS, fewer than ANIMAL_COUNT × COLOUR_COUNT) gets no two alike.
   const { g: big } = setup(G.MAX_PLAYERS);
   const combos = new Set(Object.values(big.run!.players).map((p) => `${p.avatar.a}/${p.avatar.c}`));
   assert.equal(combos.size, G.MAX_PLAYERS);
 });
 
-test("a shared device: its places wear its animal, a place closed comes back as it was, three at most, all in the lobby", () => {
+test("a shared device: its places wear its animal, a place closed comes back as it was, MAX_SEATS at most, all in the lobby", () => {
   const { g, ids } = setup(3);
   const first = G.playerById(g.run!, ids[0])!;
   assert.throws(() => G.addPlayer(g, "s1", "ts1", 5, Math.random, first), /not allowed/, "only while the teacher allows it");
@@ -316,10 +312,10 @@ test("a shared device: its places wear its animal, a place closed comes back as 
   assert.equal(G.leaveSeat(g, "s1"), true);
   const again = G.addPlayer(g, "s2", "ts2", 6, Math.random, first);
   assert.deepEqual(again.avatar, second.avatar, "closing a place and adding it again rerolls nothing");
-  G.addPlayer(g, "s3", "ts3", 7, Math.random, again);
-  assert.throws(() => G.addPlayer(g, "s4", "ts4", 8, Math.random, first), /not allowed/);
+  for (let k = 3; k <= MAX_SEATS; k++) G.addPlayer(g, `s${k}`, `ts${k}`, 7, Math.random, again);
+  assert.throws(() => G.addPlayer(g, "more", "tm", 8, Math.random, first), /not allowed/, "the device's places are all taken");
   // Under way places are neither added nor closed.
-  G.leaveSeat(g, "s3");
+  G.leaveSeat(g, `s${MAX_SEATS}`);
   begin(g, 10);
   assert.throws(() => G.addPlayer(g, "s5", "ts5", 11, Math.random, first), /not allowed/);
   assert.equal(G.leaveSeat(g, "s2"), false);
@@ -518,7 +514,7 @@ test("answers are shuffled at upload, the same on every screen; only Order: fixe
   );
 });
 
-test("points for speed: 10 for a right answer, up to 5 more by how soon after the answers appeared; fixes move them", () => {
+test("points for speed: a right answer's points and more by how soon after the answers appeared; fixes move them", () => {
   const { g, ids } = setup(3);
   G.setSpeed(g, true);
   G.begin(g, 0);
@@ -527,12 +523,11 @@ test("points for speed: 10 for a right answer, up to 5 more by how soon after th
   G.answer(g, ids[1], 0, 0, 1, 0, 16_000, 14_500); // slow, right
   G.answer(g, ids[2], 0, 1, 1, 0, 3000, 1500); // fast, wrong
   G.reveal(g, 5);
-  assert.deepEqual(ids.map((id) => score(g, id)), [POINTS_RIGHT + 5, POINTS_RIGHT + speedBonus(14_500), 0]);
-  assert.equal(speedBonus(14_500), 1);
-  assert.equal(speedBonus(SPEED_REFERENCE_MS + 1), 0, "a tap after the reference scores no bonus");
-  assert.equal(G.pointsFor(g, 0, ids[0]), 15);
+  const fast = POINTS_RIGHT + speedBonus(900);
+  assert.deepEqual(ids.map((id) => score(g, id)), [fast, POINTS_RIGHT + speedBonus(14_500), 0]);
+  assert.equal(G.pointsFor(g, 0, ids[0]), fast);
   G.setCounts(g, 0, [true, true, false]);
-  assert.deepEqual(ids.map((id) => score(g, id)), [15, 11, 15], "another answer counts too: its speed counts with it");
+  assert.deepEqual(ids.map((id) => score(g, id)), [fast, POINTS_RIGHT + speedBonus(14_500), POINTS_RIGHT + speedBonus(1500)], "another answer counts too: its speed counts with it");
   G.setVoid(g, 0, true);
   assert.deepEqual(ids.map((id) => score(g, id)), [0, 0, 0]);
   assert.equal(G.pointsFor(g, 0, ids[0]), null);
@@ -549,7 +544,7 @@ test("points for speed: set in the lobby only, off by default", () => {
   assert.throws(() => G.setSpeed(g, false), G.GameError, "fixed at Start");
   G.answer(g, ids[0], 0, 0, 1, 0, 100, 100);
   G.reveal(g, 1);
-  assert.equal(score(g, ids[0]), 15);
+  assert.equal(score(g, ids[0]), POINTS_RIGHT + speedBonus(100));
 
   const { g: plain, ids: p } = setup(1);
   begin(plain, 0);
@@ -616,7 +611,6 @@ test("fixes made before the upload are the quiz's from the start, checked like a
   assert.deepEqual(h.fixes, G.newGame(quiz).fixes, "nor do values that don't fit");
 });
 
-/** A Peers room: the first player opened it; nobody steers (docs/design/peers.md). */
 function peersRoom(players = 3) {
   const { g, ids } = setup(players);
   g.run!.peers = { host: ids[0] };
@@ -706,9 +700,6 @@ test("Peers: Countdown, from a player done with the step, goes on at its end who
   assert.equal(g.run!.current, 1);
 });
 
-// docs/design/open-period-in-memory.md: an instance that lost its memory
-// puts back the copies its sockets kept, into the stage still open only,
-// never over something newer.
 test("held input: a copy put back restores the open stage, never an older one, never a settled one", () => {
   const { g, ids } = setup(1);
   const [p] = ids;

@@ -1,26 +1,11 @@
-// The landing block's words in the four languages it speaks (docs/design/root-page.md,
-// "Languages"): everything above the manual, About included. The static HTML is English, so an
-// AI's fetcher reads English; home.ts swaps these in. The manual is English: it is
-// for the AI. The pages a quiz then plays on speak the language chosen here
-// (client/room-text.ts).
-//
-// German, French and Italian say the same as the English in their own
-// sentences (docs/design/root-page.md, "Languages").
-//
-// The example asks, one per thing a visitor starts from (docs/design/root-page.md,
-// "Getting a quiz"): the idea's is the owner's run, tidied, German its original;
-// the sheets ask is the first ask of the owner's run (19 Nov 2026, German its
-// original), the film typing it;
-// the notes' is the owner's run's (12 Nov 2026, English); the test's is
-// from the owner's run (19 Nov 2026, French); the help ask has nothing decided, and the AI's
-// question back is the guidance's "How to build with the user". The help reply
-// is a mock until the owner's run. The site's address in every ask
-// is replaced by the one the browser opened.
+// The root page's words above the manual. The static page is English, for an AI's fetcher; home.ts puts
+// these in. The manual is English: it is for the AI. The asks name
+// classyquiz.pages.dev; the page puts the address the browser opened in its
+// place.
 
 import { SITE_WORDS, type SiteWords } from "./site-text.ts";
 import type { ZipProblem } from "./unzip.ts";
 
-// The four languages and the device's choice among them live in device-lang.ts, which every page can load without these words.
 export { LANGS, LANG_KEY, chosenLang, isLang, type Lang } from "./device-lang.ts";
 import type { Lang } from "./device-lang.ts";
 
@@ -31,7 +16,7 @@ export interface Text extends SiteWords {
   code: string;
   join: string;
   language: string;
-  /** The film's accessible name (its stage), in the place the strip had: what it shows, and that it has no sound. */
+  /** The film stage's accessible name. */
   film: string;
   /** The film's ▶, on the stage and on its bar. */
   play: string;
@@ -41,44 +26,41 @@ export interface Text extends SiteWords {
   speed: string;
   /** The film's time bar. */
   seek: string;
-  /** The name of the replay icon on the film's end card, once it has played to the end: from the start again. */
+  /** The replay icon on the film's end card. */
   again: string;
-  /** The name of the film's full screen button, a toggle (aria-pressed says whether it is on). */
+  /** The film's full screen button, a toggle. */
   full: string;
   /** Beside an example's file, to its full example (/example). */
   see: string;
-  /** The page's first sentence, its h1: what the site does for whoever reads it (docs/design/root-page.md, "What this is"). */
+  /** The page's h1. */
   what: string;
-  /** The first of the two steps: its heading, over the tabs and the chat that shows the example ask. */
+  /** The first step's heading. */
   getH: string;
-  /** Under the ask: that an answer comes back, over the example's file (or the AI's question back). */
+  /** Under the ask, over the example's file (or the AI's question back). */
   gives: string;
-  /** The file's face is the quiz's first question as the site shows it: its accessible name, this and the question. */
+  /** The file's face's accessible name: this, then the question. */
   first: string;
-  /** The file's name and size on its card are a link that downloads it, as a file in a chat is: its tooltip. */
+  /** The tooltip of the file's name and size, a link that downloads it. */
   download: string;
-  /** The file's size beside its name, in the language's units and decimal sign, counted as a browser's downloads count it (1 KB = 1024 bytes). */
+  /** Counted as a browser's downloads count it (1 KB = 1024 bytes). */
   size: (bytes: number) => string;
-  /** The film's heading, where it stands for whoever wants to find out more. */
   filmH: string;
-  /** About, the last part for people (docs/design/root-page.md, "Where the part for people ends"): its heading and what the site is. */
   aboutH: string;
   about: string;
-  /** About's last sentence, the words around the maker's name, Graculus, which links to graculus.ch (docs/design/identity.md, "The maker's name"). */
+  /** The words before and after the maker's name, Graculus, which links to graculus.ch. */
   madeBy: string;
   madeFor: string;
   /** The film's chapters, named over its time bar while it is moved and in the bar's spoken value (docs/film/build/film.js). */
   capSheet: string;
   capAi: string;
-  /** The .zip going up to the site, the film's third chapter. */
   capZip: string;
   capWall: string;
   capTap: string;
-  /** The second step's heading: for whoever has the quiz their AI made (docs/design/root-page.md, "Two steps"). */
+  /** The second step's heading. */
   run: string;
-  /** The button that opens the file picker: what it opens. */
+  /** The button that opens the file picker. */
   upload: string;
-  /** The tabs over the chat, named by what the visitor starts from, one word each (docs/design/root-page.md, "Getting a quiz"): an idea, sheets, notes, a test. */
+  /** The tabs over the chat. */
   tabIdea: string;
   tabSheets: string;
   tabNotes: string;
@@ -87,14 +69,14 @@ export interface Text extends SiteWords {
   askIdea: string;
   askNotes: string;
   askTest: string;
-  /** The fifth tab, for whoever recognises none of the four: its name (unsure), its tooltip (help), the ask that takes no knowing how to ask, and the AI's question back (a mock until a run gives one). */
+  /** The fifth tab: its name (unsure), its tooltip (help), its ask, and the AI's question back. */
   unsure: string;
   help: string;
   askHelp: string;
   helpReply: string;
   /** Which AI, beside the first step's heading. */
   which: string;
-  /** Beside the first step's heading while the chosen tab's example is a stand-in, until the owner's run (backlog, "The page for people", item 1). */
+  /** Beside the first step's heading while the chosen tab's example is a stand-in. */
   mock: string;
   /** On the example's file: opens it in the box below, as a file of one's own is opened. */
   playThis: string;
@@ -118,13 +100,13 @@ export interface Text extends SiteWords {
   aiFixes: string;
   copyForAi: string;
   without: string;
-  /** The upload's request failed: the network names itself as a possible cause (docs/design/root-page.md, "Network help, where failure shows"). */
+  /** The upload's request failed. */
   offline: string;
   notStarted: string;
   question: (n: number, total: number) => string;
   finalRanking: string;
   back: string;
-  /** The code others join with, on the resume card: the screens' "Join code", for a class, a group or friends. */
+  /** The code others join with, on the resume card. */
   joinCode: string;
   otherDevice: (code: string) => string;
   untitled: string;
@@ -497,7 +479,7 @@ const it: Text = {
 
 export const TEXT: Record<Lang, Text> = { de, en, fr, it };
 
-/** The example asks as plain text, for checking the labelled parts and the address. */
+/** The sheets ask as plain text. */
 export function askText(t: Text): string {
   return t.ask.map((p) => p.s).join("");
 }

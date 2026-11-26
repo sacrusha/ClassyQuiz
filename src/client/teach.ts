@@ -1,6 +1,6 @@
 // The Remote: the teacher's own view for steering, usually on the phone, or
-// the laptop's screen when the projector is a second window
-// (docs/design/teacher-devices.md). One card and the steering bar (Last call,
+// the laptop's screen when the projector is a second window.
+// One card and the steering bar (Last call,
 // Play); everything else is in the ⋯ menu.
 
 import type { ServerMessage, TeacherView } from "../shared/protocol.ts";
@@ -39,8 +39,7 @@ function start(): void {
     return;
   }
   keepAwake();
-  // This browser steers from a second device: a check it opens later says how
-  // (docs/design/teacher-devices.md, "How the screens are arranged").
+  // This browser steers from a second device: a check it opens later says how.
   arrangement.set("remote");
   line = new Line({
     instance,
@@ -123,7 +122,7 @@ function teacherDigits(): string {
   return view?.teacher || held?.teacher || "";
 }
 
-/** The steering tab's lobby is the check (docs/design/teacher-devices.md, "The single tab: check, then join"). */
+/** The steering tab's lobby is the check. */
 function lobby(v: TeacherView): string {
   const n = v.run?.players.length ?? 0;
   const projector =
@@ -242,7 +241,7 @@ function menu(v: TeacherView): void {
   openMenu(items);
 }
 
-/** ⇄ Swap (docs/design/teacher-devices.md, "A second device: one question, only when needed"): no confirmation, the same tap on either device undoes it. */
+/** ⇄ Swap: no confirmation, the same tap on either device undoes it. */
 async function swap(): Promise<void> {
   const r = await line?.send({ op: "swap" });
   if (r && !r.ok && r.error) toast(said(r.error));

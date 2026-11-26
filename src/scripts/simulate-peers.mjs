@@ -1,27 +1,10 @@
-// A Peers room (docs/design/peers.md) against a running site, local or
-// deployed:
+// A Peers room against a running site, local or deployed:
 //
 //   node scripts/simulate-peers.mjs [base-url] [--empty]
 //
-// Four friends: whoever uploads comes in as the room's first player, three
-// join with the code, one of them over HTTP long-polling, whose polls the
-// others' answers don't answer (who the room waits for comes with the
-// poll's end). Nobody steers.
-// Each question closes once everyone present has answered and the next
-// comes once everyone present is done with the solution; resends change
-// nothing. A phone goes silent with its socket open (a battery dying): after
-// FRESH_MS the room moves on without it, by the instance's alarm, and when
-// it comes back the room waits for it again. A tab that closes its socket
-// is let go at once. Whoever opened the room changes a solution and removes
-// an avatar; the others can't. Start's time runs on every device, the
-// polling one included, a friend dressing on meanwhile, before the first
-// question comes. A friend who is done starts a Countdown, on
-// the question and on its solution: the polling device it waits for hears
-// of it at once, and the room goes on at its end, not before. At the end
-// every score must be what the answers and the fixes give, and nobody ends
-// the room. Takes about two and a half minutes (the silent phone, the poll's
-// end, Start's time, two Countdowns). With --empty it then leaves the final ranking and
-// waits for the room to end by itself, ten minutes more.
+// Four friends, one of them over HTTP long-polling; nobody steers. Takes
+// about two and a half minutes; with --empty it then waits for the room to
+// end by itself, ten minutes more.
 
 const BASE = (process.argv[2]?.startsWith("http") ? process.argv[2] : "http://127.0.0.1:8788").replace(/\/+$/, "");
 const EMPTY = process.argv.includes("--empty");
@@ -231,8 +214,7 @@ async function readyAll(devices, q) {
 
 // --- Question 1: closes once all four answered; resends change nothing.
 //     The polling device isn't woken by the others' answers: who the room
-//     waits for comes with its poll's end (docs/design/hosting-and-limits.md,
-//     "What a Peers room costs").
+//     waits for comes with its poll's end.
 
 await answerAll([ben], "a");
 await ben.until((v) => v.question?.mine !== null, "ben's answer stored, on his device");

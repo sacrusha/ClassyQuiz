@@ -1,8 +1,5 @@
-// The network check's words (/check, client/check.ts) in the four languages,
-// in the device's language as on the room pages (client/room-text.ts). The
-// static HTML is English, for a browser without scripts. The message for IT
-// is the one a visitor sends to whoever looks after the network, so it is in
-// the visitor's language and says what is asked without the site's own words.
+// /check's words. The static page is English, for a browser without scripts;
+// check.ts puts these in the device's language.
 
 import type { Lang } from "./landing-text.ts";
 
@@ -13,7 +10,6 @@ export interface CheckText {
   again: string;
   back: string;
   itH: string;
-  /** Before the message: why nothing of the site opens, and that IT can change it. */
   itLede: string;
   /** The message for IT; `host` is this site's address, `now` what this device found, or "". */
   forIt: (host: string, now: string) => string;

@@ -1,12 +1,10 @@
 """Translates the quiz of the test run into German, English and Italian.
 
-The AI handed over classyquiz-cellule.zip in French (19 Nov 2026). That file is in src/public/examples/ unchanged.
+The AI handed over classyquiz-cellule.zip in French. That file is in src/public/examples/ unchanged.
 This script writes three more .zip files beside it. In each one, quiz.txt has a translated title, translated
 questions and translated choices. The two drawings contain no words and are copied unchanged.
 
-The translations use the same school terms as the test sheet in that language (test_sheet.py). They are drafts
-that the owner has not reviewed. The root page's "Test" tab offers these files
-(docs/design/root-page.md, "Getting a quiz").
+The translations use the same school terms as the test sheet in that language (test_sheet.py).
 
     py -I docs/example/test_zips.py      (from anywhere)
 """

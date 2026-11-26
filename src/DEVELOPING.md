@@ -1,283 +1,193 @@
 # Developing classyQuiz
 
-For whoever changes the code: where things are, how to run the site on your own
-computer, how a change reaches Cloudflare, and the traps that cost earlier
-implementers time. Setting up your own instance (account, token, name, first
-deploy) is in the README, "Your own instance"; it is not repeated here. What the
-site is for and what it must withstand is in `docs/backlog.md` (Project,
-Constraints); what each part of the site is for, in `docs/design/`.
-
-All commands run in `src/` unless said otherwise.
+Where things are, running the site locally, deploying, and the traps.
+Setting up an own instance is in the README, "Your own instance". Commands
+run in `src/` unless said otherwise.
 
 ## Layout
 
-- `quiz/`: the quiz format and its parser. Pure, so it runs unchanged in the
-  browser, on Workers and on Node.
-- `server/`: game logic and the Durable Objects, and the state Worker's config
+- `quiz/`: the quiz format and its parser, pure: it runs in the browser, on
+  Workers and on Node.
+- `server/`: game logic, the Durable Objects, and the state Worker's config
   (`server/wrangler.toml`).
 - `functions/`: the Pages functions, the `/api` routes.
-- The Cloudflare-specific code stays in the Durable Object classes and the
-  `/api` router, with the logic they call kept pure (`server/game.ts`,
-  `server/images.ts`, `quiz/`, `shared/`). A school converts the server to its
-  own with an AI, and converts again to take an update (README, "On a
-  school's or company's own server"); code that spreads the platform further makes every
-  conversion bigger. The local check (`client/open.ts`, `client/opening.ts`)
-  runs `quiz/`, `server/images.ts` (`matchImages`) and `server/game.ts` (the
-  fixes) in the browser, to check a quiz as the server will before anything
-  goes up, and Solo plays a quiz on `server/game.ts` there
-  (`client/solo.ts`); they stay free of platform code for that too.
-- `shared/`: the protocol types and the constants that are tuned (`limits.ts`,
+- `shared/`: the protocol types and the tuned constants (`limits.ts`,
   `tempo.ts`).
-- `client/`: the page scripts, plain DOM without a framework, bundled per page
-  by esbuild to ES2020 because school devices are not always current.
-- The pages' words, in the root page's four languages: `client/landing-text.ts`
-  (the root page), `client/room-text.ts` (the pages a quiz plays on),
-  `client/site-text.ts` (what both say), `client/check-text.ts`, and the
-  tables in `client/own-copy.ts` and `client/notfound.ts`
-  (`docs/design/root-page.md`, "Languages"). The server says its messages in
-  English; the pages show them through `said()` (`client/room-text.ts`),
-  which knows them by their English words, so a new or reworded one shows
-  in English until its words are there (`client/room-text.test.ts` lists
-  the ones missing).
-- `public/`: pages and stylesheet; `scripts/`: build, dev, deploy, simulate.
-- `public/brand/`: the mark, copies of `docs/brand/svg/` (the masters, their
-  rules and the scripts that draw them). A page writes `<!--#brand file.svg-->`
-  where the mark goes inline, or `<!--#brand-use file.svg-->` with the
-  drawing once at `<!--#brand-defs-->`, and `build.mjs` writes it in. Opened
-  straight from `public/`, a page shows no mark. Which file goes where:
-  `docs/design/identity.md`.
-- `public/site.css`: the shared look. Every page links it first; in `dist/`
-  it is the front of `app.css` and `home.css`, or written into a page
-  without either (`build.mjs`), so there is no `dist/site.css`.
-- `public/home.css`: the root page's styles, a file rather than the page's
-  own `<style>`, so that `index.html`, where the manual is written, holds
-  markup and text.
-- `dist/manual.txt`: the manual as plain text, made by `build.mjs` from the
-  built page; it knows the elements the guidance uses and fails the build on
-  another.
-- `public/app.css`: one namespace for every app page and `/example`, so a
-  new class can pick up an old rule (`.device` is the network check's line)
-  and a bare new rule can land on another page (`docs/backlog.md`,
-  Housekeeping).
+- `client/`: the page scripts, plain DOM, bundled per page by esbuild to
+  ES2020, since school devices are not always current.
+- `public/`: pages and stylesheets; `scripts/`: build, dev, deploy,
+  simulate.
 
-The site is two Cloudflare deployables. The state Worker (`classyquiz-state`)
-holds the Durable Objects (`Instance`, `JoinCode`, `UploadStats`, `SiteBudget`).
-The Pages project (`classyquiz`) serves `dist/` and the `/api` functions, which
-reach the objects through bindings by script name. Pages cannot host Durable
-Objects itself, hence the split. Only SQLite-backed Durable Objects exist on the
-Free plan, so migrations in `server/wrangler.toml` use `new_sqlite_classes`.
-The state Worker has observability off and no public address.
+Cloudflare-specific code is only in the Durable Object classes and the `/api`
+router; the logic they call (`server/game.ts`, `server/images.ts`, `quiz/`,
+`shared/`) is platform-free. A school converts the server to its own with an
+AI, again for each update (README, "On a school's or company's own server"),
+and the local check (`client/open.ts`, `client/opening.ts`) and Solo
+(`client/solo.ts`) run that logic in the browser.
+
+The pages' words, in the root page's four languages: `client/landing-text.ts`
+(the root page), `client/room-text.ts` (the pages a quiz plays on),
+`client/site-text.ts` (both), `client/check-text.ts`, and the tables in
+`client/own-copy.ts` and `client/notfound.ts`. The server speaks English; the
+pages show its messages through `said()` (`client/room-text.ts`), keyed by
+their English words, so a new or reworded message shows in English until
+translated (`client/room-text.test.ts` lists the missing ones).
+
+- `public/brand/`: copies of `docs/brand/svg/`. A page writes
+  `<!--#brand file.svg-->` where the mark goes inline, or
+  `<!--#brand-use file.svg-->` with the drawing once at `<!--#brand-defs-->`,
+  and `build.mjs` writes it in; opened straight from `public/`, a page shows
+  no mark.
+- `public/site.css`: the shared look, linked first by every page; in `dist/`
+  it is the front of `app.css` and `home.css`, or written into a page
+  without either, so there is no `dist/site.css`.
+- `public/home.css`: the root page's styles.
+- `public/app.css`: one namespace for every app page and `/example`, so a new
+  class can pick up an old rule and a bare new rule can land on another page.
+- `dist/manual.txt`: the manual as plain text, made by `build.mjs` from the
+  built root page; an element it doesn't know fails the build.
+
+The site is two Cloudflare deployables. The state Worker
+(`classyquiz-state`) holds the Durable Objects (`Instance`, `JoinCode`,
+`UploadStats`, `SiteBudget`); Pages can't host Durable Objects. The Pages
+project (`classyquiz`) serves `dist/` and the `/api` functions, which reach
+the objects through bindings by script name. The Free plan has only
+SQLite-backed Durable Objects, so migrations use `new_sqlite_classes`. The
+state Worker has no public address. What is logged:
+`docs/design/hosting-and-limits.md`, "The plan".
 
 ## Toolchain
 
-- TypeScript is restricted to syntax Node can strip (`erasableSyntaxOnly`): Node
-  runs `.ts` directly, and `tsc` only checks. Node 22.18 or newer; 24 is
-  recommended.
-- Tests use Node's built-in runner: `npm test` (the parser, game logic, and
-  some client logic). A test pins a promise the design docs make, not an
-  implementation detail, the language or the runtime: anything else breaks on
-  harmless changes and reads as cover it doesn't give. A feature that
-  shouldn't exist is removed, not tested for staying off.
-- A comment says what the code can't: a reason, a trap, an invariant, a
-  pointer to a design doc. Where a decision came from is git's.
-- `npm run check` runs both tsconfigs (`tsconfig.json` for client, shared and
-  quiz; `tsconfig.server.json` for the rest).
-- Dev dependencies (`wrangler`, `esbuild`, `typescript`,
-  `@cloudflare/workers-types`) are pinned to exact versions. Wrangler is kept
-  current: it is the tool that holds the deploy token, and the older versions'
-  bundled undici carries advisories, one of them about TLS certificate
-  validation.
-- The one runtime dependency is `qrcode-generator` (MIT, no dependencies of its
-  own), bundled into the projector page: a QR encoder is too error-prone to
-  hand-write. Zip reading in the browser uses `DecompressionStream`, no library.
-- `npm run build` writes `dist/` (git-ignored). `SITE_ADDRESS` overrides the
-  address built into the pages; otherwise it is derived from the `name` in
-  `wrangler.toml`.
+- Node 22.18 or newer (24 recommended) runs `.ts` directly, so TypeScript is
+  limited to erasable syntax (`erasableSyntaxOnly`); `tsc` only checks:
+  `npm run check` runs both tsconfigs.
+- `npm test`: Node's built-in runner.
+- Dev dependencies are pinned to exact versions. Wrangler holds the deploy
+  token, and older versions' bundled undici has advisories, one about TLS
+  certificate validation.
+- The one runtime dependency is `qrcode-generator` (MIT), bundled into the
+  projector page. Zip reading uses `DecompressionStream`.
+- `npm run build` writes `dist/` (git-ignored), with the site's address
+  built in (`SITE_ADDRESS`, `secrets/README.md`).
 
 ## Running locally
 
 `npm run dev` builds, starts the state Worker on port 8787, then the site on
 8788 (`wrangler pages dev`) and `build.mjs --watch`. Open
-http://127.0.0.1:8788. The site starts only after the state Worker reports
-"Ready on"; started together, it can come up unable to reach the Durable
-Objects. The site finds the objects through wrangler's local dev registry, the
-way it finds them by script name when deployed.
+http://127.0.0.1:8788. The site finds the objects through wrangler's local
+dev registry; started before the state Worker reports "Ready on", it can come
+up unable to reach them.
 
-`GET /api/site/use`, the owner's figures (`docs/design/telemetry.md`),
-answers 404 unless the site has an `OWNER_KEY`; locally, put
-`OWNER_KEY=<any string>` in `src/.dev.vars` (git-ignored), which
-`wrangler pages dev` reads, and send it as `Authorization: Bearer <key>`,
-or open `/owner` and type the key (`docs/design/owner-page.md`).
+The owner's figures (`docs/design/owner-page.md`) need an `OWNER_KEY`;
+locally, put `OWNER_KEY=<any string>` in `src/.dev.vars` (git-ignored) and
+open `/owner` and type it.
 
-`node scripts/simulate.mjs [base-url] [players] [--all-poll] [--speed]` plays a
-class of bad-Wi-Fi devices against a running site, local or deployed. Its header
-comment says what it exercises. It is the check that the whole flow holds; run
-it after changes to the game, the protocol or the transport.
-`node scripts/simulate-peers.mjs [base-url] [--empty]` is the same for a
-Peers room (`docs/design/peers.md`): friends, nobody steering, a phone
-going silent, Start's ten seconds, two Countdowns; about two and a half
-minutes, most of it waiting for that phone to count as away, for a held
-poll's end, for Start's time and for the Countdowns. `--empty` then leaves the final ranking and waits for the room
-to end by itself, ten minutes more.
-`node scripts/simulate-memory.mjs [base-url] --restart "<command>"` (or
-`--quiet <seconds>`) plays a small class whose instance loses its memory
-before the class is let in (under a Remote at rest), in the lobby and with
-each question open, by the command (one that
-restarts the local state Worker in place, keeping its `--persist-to`) or
-by going quiet long enough to hibernate (40 s does it locally, 90 s on
-Cloudflare, where 20 s didn't); it fails when the memory wasn't in fact
-lost, as a quiet spell too short leaves it (3 s does locally). Run it
-after changes to what the instance holds in memory
-(`docs/design/open-period-in-memory.md`). A local stack restarted in place
-is the stop and start of "A second local stack" below, with the same
-persist directories. On Cloudflare a deploy is no such command: a running
-instance takes up new code when it next hibernates, or resets 300 s after
-the deploy if still active (`open-period-in-memory.md`, Situation), and
-the script stands still while its command runs, so the run fails as
-"nothing was tested there". A deploy's crossing is `--quiet 90` against a
-copy of the site, with the copy deployed during the first quiet spell;
-the reset at 300 s the script can't make there.
+The simulators play against a running site, local or deployed; each one's
+header says what it exercises and how to run it.
 
-Things that bite:
+- `scripts/simulate.mjs`: a class of bad-Wi-Fi devices; the check that the
+  whole flow holds, after changes to the game, the protocol or the
+  transport.
+- `scripts/simulate-peers.mjs`: a Peers room.
+- `scripts/simulate-memory.mjs`: a class whose instance loses its memory,
+  after changes to what the instance holds in memory. Going quiet long
+  enough to hibernate took 40 s locally; on Cloudflare,
+  `docs/design/open-period-in-memory.md`, Situation. A restart command is
+  the stop and start of "A second local stack" below, with the same persist
+  directories. On Cloudflare a deploy doesn't lose the memory at once (same
+  file), so as `--restart` command the run fails; a deploy is crossed with
+  `--quiet 90` against a copy of the site, deployed during the first quiet
+  spell.
 
-- Watch mode does not copy `public/`. After a CSS or HTML change run
+Traps:
+
+- Watch mode does not copy `public/`; after a CSS or HTML change run
   `node scripts/build.mjs` once.
-- `wrangler dev` does not reload the state Worker when its folders are replaced
-  by a fresh copy. Restart the stack after copying server code.
-- A stack killed hard can leave a stale entry in wrangler's registry, which the
-  next start keeps using; every API call then fails with "Network connection
-  lost" although the bindings read "[connected]". Restarting the site fixes it.
-- Right after a start the site's calls to the objects can fail for up to about
-  40 s. A probe should wait until `/api/join` stops answering 500, then try one
-  upload before relying on a walk.
+- `wrangler dev` doesn't reload the state Worker when its folders are
+  replaced by a fresh copy; restart the stack.
+- A stack killed hard can leave a stale registry entry that the next start
+  keeps using: every API call fails with "Network connection lost" although
+  the bindings read "[connected]". Restarting the site fixes it.
+- Right after a start the site's calls to the objects can fail for up to
+  about 40 s: wait until `/api/join` stops answering 500, then try one
+  upload.
 - On Windows, `taskkill /T` on the wrangler node processes stops a stack.
-  Stopping only the shell leaves workerd holding the ports; killing only workerd
-  makes wrangler start a new one.
+  Stopping only the shell leaves workerd holding the ports; killing only
+  workerd makes wrangler start a new one.
 
 ## The landing film
 
-The film on the root page is built from its source in `docs/film/build/`
-(`film.js` and the Python that builds and checks it); what it is for and how
-it is made is `docs/film/README.md`. Generated from that source, and not to
-be edited by hand: `public/js/film.js` and the pictures
-`public/landing/film-*.webp` (the poster frames).
-The page side, `client/film-poster.ts`, is ordinary code.
+`public/js/film.js` and `public/landing/film-*.webp` are built from
+`docs/film/build/` (`docs/film/README.md`); `client/film-poster.ts` is
+ordinary code. The film draws parts of the site itself, so it is rebuilt
+(`py -I docs/film/build/sitebuild.py` from the repo root) when they change:
 
-Rebuild with `py -I docs/film/build/sitebuild.py` (from the repo root;
-`--no-poster` writes `film.js` only, without the pictures) when:
+- the root page's words the film draws, from `client/landing-text.ts` and
+  `client/example-files.ts`: `npm test` fails until the rebuild;
+- the words of a screen it draws after the upload, quoted in `SITE` in
+  `docs/film/build/film.js`: `client/film.test.ts` fails until `SITE` and
+  the build follow;
+- the film's length (`DUR`), which `public/index.html`'s time bar carries
+  too: `sitebuild.py` refuses until both agree;
+- the root page's layout or sizes (`makeRootPage` in `film.js`), the
+  layout or sequence of a later screen, the avatars (`client/look.ts`), the
+  brand files or the pictures it shows (`public/landing/sheet-*.webp`,
+  `face-idea-*.webp`, `way-*.svg`): nothing fails, and the film shows the
+  old ones.
 
-- `docs/film/build/film.js` changes;
-- `client/landing-text.ts` changes the sheets ask or the words of the
-  root page's first screen, which the film draws (`ask`, `code`, `what`,
-  `getH`, `which`, `tabIdea`, `tabSheets`, `tabNotes`, `tabTest`, `unsure`,
-  `askIdea`, `gives`, `playThis`, `see`, `run`, `upload`, `drop`, `reading`,
-  `size`), the first tab's file (`client/example-files.ts`), the chapters'
-  names (`capSheet` … `capTap`; `capAi` is also the AI app's name on the
-  phone) or the player's (`play`, `pause`, `speed`,
-  `seek`): the film shows them as they were at its build, and `npm test`
-  fails until it is rebuilt;
-- the root page's first screen changes its layout or its sizes: the film
-  draws it from them (`makeRootPage` in `docs/film/build/film.js`), by
-  hand, and nothing fails; the film shows the page as it was;
-- a screen the film draws after the upload changes its words (the local
-  check and its entries, the lobby's check, the second device's question,
-  the wall before anyone is let in, the Remote's buttons): the film quotes
-  them in `SITE` in `docs/film/build/film.js`, and `client/film.test.ts`
-  fails until that and the build follow; a screen that changes its layout
-  or its sequence fails nothing, and the film shows the old one;
-- the film's length (`DUR`) changes: `public/index.html`'s time bar carries
-  it too, and `sitebuild.py` refuses to build until both agree;
-- `client/look.ts` changes the avatars, which the film draws; no test
-  catches this;
-- the brand files, `public/landing/sheet-*.webp`, the first tab's faces
-  (`public/landing/face-idea-*.webp`) or the ways' pictures
-  (`public/landing/way-*.svg`) change: the film shows them, and its pictures
-  carry them.
+Then `py -I docs/film/build/sitecheck.py` checks the film in the built site
+against `main`'s.
 
 ## The root page's examples
 
-The example files the root page's chat offers and their faces are made
-from the sources in `docs/example/` (`docs/example/README.md`): the
-`.zip` files in `public/examples/`, `client/example-files.ts` and
-`public/landing/face-*.webp`. When an example's `.zip` changes, or the Solo
-screen the faces show, run `py -I docs/example/faces.py` (after
-`npm run build`: it shoots the faces from `dist/`); `npm test` fails while
-`example-files.ts` doesn't match the files. Then rebuild the film, which
-shows the first tab's file and face (above).
-
-Then `py -I docs/film/build/sitecheck.py`: it builds the working tree's site
-and `main`'s in `.tmp/sitecheck/`, serves both with the site's headers and
-checks the film in Edge, desktop and phone; it ends with "no problems" or
-lists them. Its header says what it checks.
-
-The scripts need Python 3 with Playwright for Python and Pillow, and the
-installed Microsoft Edge (they launch it; no browser of Playwright's own is
-needed); `sitecheck.py` also needs Node, npm and git. What they write goes to
-`.tmp/film/` and `.tmp/sitecheck/` at the repo root.
+The example files in `public/examples/`, `client/example-files.ts` and the
+faces `public/landing/face-*.webp` are built from `docs/example/`
+(`docs/example/README.md`, "Rebuilding"). The faces are shot from the Solo
+screen, so a change to it calls for them too; `npm test` fails while
+`example-files.ts` doesn't match the files.
 
 ## A second local stack
 
-For a second developer or agent beside the main stack. Wrangler's dev registry
-is global (`%APPDATA%\xdg.config\.wrangler\registry`) and keyed by Worker name,
-so a second stack that keeps the name `classyquiz-state` overwrites the entry
-the first stack's site binds to.
+Wrangler's dev registry is global (`%APPDATA%\xdg.config\.wrangler\registry`)
+and keyed by Worker name, so a second stack that keeps the name
+`classyquiz-state` overwrites the entry the first stack's site binds to.
 
-- Copy the deployables (`functions`, `server`, `shared`, `quiz`, `dist`, both
-  `wrangler.toml`) to a scratch folder and rename the state Worker in both
-  tomls, e.g. `classyquiz-state-images`, including `script_name` in the site's
-  bindings. The site's name `classyquiz` can stay shared; nothing binds to it.
-- Use other ports and other inspector ports.
-- Give the site and the state Worker different `--persist-to` directories. With
-  the same one, every Durable Object call from the site fails with "Network
+- Copy the deployables (`functions`, `server`, `shared`, `quiz`, `dist`,
+  both `wrangler.toml`) to a scratch folder and rename the state Worker in
+  both tomls, `script_name` in the site's bindings included. The site's name
+  can stay; nothing binds to it.
+- Use other ports and inspector ports.
+- Give the site and the state Worker different `--persist-to` directories;
+  with the same one, every Durable Object call fails with "Network
   connection lost".
-- Start the site after the state Worker's "Ready on". A start script that waits
-  for it in a log must delete the old log first.
-- The first start after stopping a stack failed three times out of three on the
-  Windows machine even with the site started 10 s after the state Worker.
-  Stopping both and starting both again worked each time.
+- Start the site after the state Worker's "Ready on"; a start script that
+  waits for it in a log must delete the old log first.
+- On the Windows machine, the first start after stopping a stack failed
+  three times out of three, even with the site started 10 s after the state
+  Worker; stopping both and starting both again worked each time.
 
 ## Deploying
 
-`npm run deploy` builds, deploys the state Worker, creates the Pages project if
-it does not exist, and deploys `dist/`. It reads `../secrets/cloudflare.env`
-(`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, optional `SITE_ADDRESS`;
-template `src/cloudflare.env.example`, details `secrets/README.md`) through
-Node's `--env-file`. It touches only the two projects named in the tomls.
+`npm run deploy` builds, deploys the state Worker, creates the Pages project
+if it doesn't exist, and deploys `dist/`, touching only the two projects
+named in the tomls. It reads `../secrets/cloudflare.env` through Node's
+`--env-file` (`secrets/README.md`).
 
-Deploy order matters when a Durable Object migration deletes a class that the
-live Pages project still binds to: the script deploys the Worker first, which is
-then refused. In that case deploy Pages first (the new pages no longer bind the
-class), then the Worker. A fresh instance is unaffected.
+- When a Durable Object migration deletes a class the live Pages project
+  still binds to, the Worker deploy is refused: deploy Pages first, then the
+  Worker.
+- After a deploy, pages open in a class keep running the old code until
+  reloaded, and objects and functions take up the new code at different
+  times (`docs/design/open-period-in-memory.md`); so protocol additions are
+  optional, and an object waking on new code reads what the old code stored.
+- A file removed from `dist/` stays on the production address from
+  Cloudflare's edge cache for up to a week (`s-maxage` 7 days); the
+  deployment's own address answers 404 for it. A changed file came back in
+  either version for about two minutes after a deploy.
+- The live site has answered Python's `urllib` default user agent with 403;
+  a Python walk against it sends its own.
 
-Protocol additions are made optional so pages open in a class during a deploy
-keep working until reloaded. The same holds between the Pages functions and
-the Durable Objects, and between the objects: the functions are the new ones
-at once, while a running object keeps its code until it hibernates, for up to
-300 s (`docs/design/open-period-in-memory.md`, Situation), so a call to a
-method or an argument the previous code lacks meets that code meanwhile. An
-object waking on the new code reads what the previous code stored and put on
-its sockets.
+## Outside the repo
 
-A file removed from `dist/` is still served on the production address from
-Cloudflare's edge cache for up to a week (`s-maxage` 7 days, seen on removed
-pictures); the deployment's own address answers 404 for it, so that is where
-a removal is checked. A changed file came back in either version for the
-first two minutes or so after a deploy (2026-11-18), so a change is checked
-on the production address after that. The live site answered a request
-from Python's `urllib` with its default user agent 403, and the same
-request with another user agent 200 (2026-11-25): a walk in Python against
-it sends its own.
-
-`docs/deploy-log.md` is the present, what is live and what of it has been
-tried there; each deploy's record is git's. So whoever deploys updates it
-in the same session ("Live" replaced, what the deploy's checks ran live
-under "Tried live", what it brought that nothing ran live under "Not tried
-live") and writes what the deploy carried and what was checked in that
-commit's message.
-
-## Tooling kept on disk, outside the repo
-
-`.tmp/` at the repo root on the owner's machine is git-ignored and survives
-sessions (the session scratchpad does not); earlier implementers' walks,
-probes and second-stack scripts lie there. None of it is reviewed; read a
-script before running it.
+`.tmp/` at the repo root is git-ignored and survives sessions; earlier
+implementers' walks, probes and scripts lie there, unreviewed.

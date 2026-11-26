@@ -1,5 +1,5 @@
 // A class whose instance loses its memory, against a running site, local or
-// deployed (docs/design/open-period-in-memory.md):
+// deployed:
 //
 //   node scripts/simulate-memory.mjs [base-url] --restart "<command>"
 //   node scripts/simulate-memory.mjs [base-url] --quiet <seconds>
@@ -23,8 +23,7 @@
 // acknowledged, and every score is what the acknowledged answers give.
 //
 // Before them, with the class waiting outside, a Remote at rest on long-poll
-// goes through one loss more: it is there to the wall after it
-// (docs/design/connections.md, "A poller left alone rests").
+// goes through one loss more: it is still there to the wall after it.
 
 import { spawnSync } from "node:child_process";
 
@@ -220,7 +219,7 @@ async function loseMemoryBy(when) {
     log(`the memory goes (${when}): ${RESTART}`);
     const r = spawnSync(RESTART, { shell: true, stdio: "inherit" });
     if (r.status !== 0) throw new Error(`the restart command failed (${r.status})`);
-    // DEVELOPING.md: right after a start the site's calls can fail for a while.
+    // Right after a start the site's calls can fail for a while.
     for (let i = 0; i < 90; i++) {
       const j = await post("/api/join", { code: "00000" }).catch(() => ({ status: 0 }));
       if (j.status === 404) break;
@@ -246,9 +245,7 @@ wall.start();
 await until(() => wall.view, 10_000, "the wall's view");
 const players = [];
 
-// Before the class is let in, a Remote on long-poll at rest: after the loss
-// it is there to the wall (docs/design/connections.md, "A poller left alone
-// rests"), where a memory that just began has heard nothing of it.
+// A memory that just began has heard nothing of the Remote at rest.
 {
   const took = await post(`/api/i/${instance}/cmd`, { auth: { role: "guest" }, cmd: { id: "remote-1", cmd: { op: "takeRole", role: "remote", teacher: up.body.teacher } } });
   const remote = { role: "remote", token: (took.body.messages ?? []).find((m) => m.t === "role")?.token };
@@ -307,7 +304,7 @@ log("the lobby's looks came through");
 
 const at = () => ({ phase: wall.view.phase, current: wall.view.current, reading: wall.view.question?.answering === "reading", votes: !!wall.view.votes });
 check((await wall.send({ op: "begin", at: at() })).ok, "Start");
-// The first question comes START_MS (shared/tempo.ts, 10 s) after Start.
+// The first question comes START_MS (shared/tempo.ts) after Start.
 await until(() => wall.view.phase === "question", 15_000, "the first question");
 
 async function question(q, lose) {

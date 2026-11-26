@@ -115,8 +115,8 @@ Image: q.png
     b.set(pngHeader(320, 320));
     return b;
   };
-  // f's small copy is over the cap and is dropped.
-  const smalls = names.map((n, i) => ({ name: `${n}.png`, bytes: small(n === "f" ? MAX_SMALL_BYTES + 100_000 : 290_000, i + 1) }));
+  // f's small copy is over the cap and is dropped; the others are at it.
+  const smalls = names.map((n, i) => ({ name: `${n}.png`, bytes: small(n === "f" ? MAX_SMALL_BYTES + 100_000 : MAX_SMALL_BYTES - 33, i + 1) }));
   const r = matchImages(
     q,
     names.map((n) => ({ name: `${n}.png`, bytes: pngHeader(600, 600) })),
@@ -126,7 +126,7 @@ Image: q.png
   assert.ok(r.ok);
   assert.equal(Object.keys(r.files).filter((k) => k.startsWith("img:")).length, 7, "seven files, each stored once");
   assert.equal(r.index["f.png"].small, undefined, "a small copy over the cap is dropped");
-  assert.equal(r.packs, 2, "six copies of 290 KB don't fit one pack");
+  assert.equal(r.packs, Math.ceil(6 / Math.floor(PACK_BYTES / MAX_SMALL_BYTES)), "six copies in as few packs as hold them");
   for (let p = 0; p < r.packs; p++) assert.ok(r.files[`pack:${p}`].byteLength <= PACK_BYTES, `pack ${p} within the size cap`);
   for (const { name, bytes } of smalls) {
     const s = r.index[name].small;

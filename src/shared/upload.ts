@@ -1,7 +1,6 @@
-// Upload attempts are counted by format, with content and identity excluded,
-// so whether anyone tries another format is a fact to look up rather than a
-// guess. The format is one word from this closed list;
-// the server stores nothing else.
+// Upload attempts are counted by format, so whether anyone tries another
+// format is a fact to look up rather than a guess. The format is one word from
+// this closed list; the server stores nothing else.
 
 export const UPLOAD_FORMATS = [
   "paste",

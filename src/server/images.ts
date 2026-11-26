@@ -1,14 +1,13 @@
-// Pictures that came with an uploaded quiz (docs/design/pictures.md,
-// "At upload"). The teacher's browser has already redrawn each one as PNG or
-// JPEG, which drops photo metadata and shrinks it; the server takes nothing
-// else, and reads the size it needs for the layout from the file itself.
+// Pictures that came with an uploaded quiz. The teacher's browser has already
+// redrawn each one as PNG or JPEG, which drops photo metadata and shrinks it;
+// the server takes nothing else, and reads the size it needs for the layout
+// from the file itself.
 
 import { dropPicture, imageKey, pictureRefs, type Problem, type Quiz } from "../quiz/format.ts";
 import { MAX_IMAGE_BYTES, MAX_IMAGES, MAX_SMALL_BYTES, PACK_BYTES } from "../shared/protocol.ts";
 
 export type ImageType = "image/png" | "image/jpeg";
 
-/** A picture as uploaded: the file name it came with, and its bytes. */
 export interface UploadedImage {
   name: string;
   bytes: Uint8Array;
@@ -124,14 +123,13 @@ function packSmalls(quiz: Quiz, index: Record<string, StoredImage>, smalls: Uplo
 }
 
 /**
- * Peers (docs/design/peers.md, "The pictures"): every device lays out the
- * question itself, so each fetches the questions' pictures and the
- * backgrounds. They are served in bundles of at most PACK_BYTES, one
- * request per bundle and device, as the answer pictures' small copies come
- * in packs. The grouping follows the stored quiz alone, not the fixes (a
- * picture hidden mid-run moves no other), so a bundle's address names the
- * same pictures for the quiz's whole life. Each bundle lists its pictures'
- * numbers (`img:<n>`), in the quiz's order.
+ * Peers: every device lays out the question itself, so each fetches the
+ * questions' pictures and the backgrounds. They are served in bundles of at
+ * most PACK_BYTES, one request per bundle and device, as the answer pictures'
+ * small copies come in packs. The grouping follows the stored quiz alone, not
+ * the fixes (a picture hidden mid-run moves no other), so a bundle's address
+ * names the same pictures for the quiz's whole life. Each bundle lists its
+ * pictures' numbers (`img:<n>`), in the quiz's order.
  */
 export function bundles(quiz: Quiz, index: Record<string, StoredImage>): number[][] {
   const out: number[][] = [];
@@ -152,11 +150,6 @@ export function bundles(quiz: Quiz, index: Record<string, StoredImage>): number[
   return out;
 }
 
-/**
- * A question whose answer pictures have different proportions: the class
- * can pick by the shape or the crop of a picture rather than by what it
- * shows, e.g. the one cut from the sheet among three drawn ones.
- */
 function proportions(quiz: Quiz, index: Record<string, StoredImage>): Problem[] {
   const out: Problem[] = [];
   quiz.questions.forEach((q, i) => {

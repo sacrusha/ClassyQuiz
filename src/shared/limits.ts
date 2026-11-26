@@ -1,13 +1,11 @@
-// The free plan's shape, and what the site says when it runs out
-// (docs/design/hosting-and-limits.md, "Protecting the day's allowance"). Cloudflare's daily limits are
-// account-wide: one class that spends them spends them for every class on the
-// site. A self-hoster raises any of these.
+// The free plan's shape, and what the site says when it runs out. Cloudflare's
+// daily limits are account-wide: one class that spends them spends them for
+// every class on the site.
 
 /**
  * Players in one class, removed ones included: the run is one stored value,
  * rewritten with every write, and the projector draws every avatar. A
- * larger group is what an own copy of the site is for
- * (docs/design/hosting-and-limits.md, "Protecting the day's allowance").
+ * larger group is what an own copy of the site is for.
  */
 export const MAX_PLAYERS = 60;
 /**
@@ -18,15 +16,14 @@ export const MAX_PLAYERS = 60;
 export const DOOR_OPEN_MS = 5 * 60_000;
 /** New players once the quiz is under way (past DOOR_OPEN_MS and the first question): a latecomer gets in, a stream of strangers with the code doesn't. */
 export const MAX_LATE_JOINERS = 5;
-/** Players at one device when the teacher allows sharing (docs/design/class-and-wall.md, "Sharing a device"): the owner's case, 16 people at 6 iPads, takes three. */
+/** Players at one device when the teacher allows sharing: 16 people at 6 iPads take three. */
 export const MAX_SEATS = 3;
 /**
  * Changes of mind per student and question; the last accepted tap counts.
- * Answers are held in memory and written with the teacher's steps
- * (docs/design/open-period-in-memory.md), so a change costs no row, and the cap is
- * not part of what a class books. It discourages an accidental flood of
- * requests: each recorded answer ends the teacher devices' held long-polls
- * (instance.ts, broadcast).
+ * Answers are written only with the teacher's steps, so a change costs no row
+ * and the cap is not part of what a class books. It discourages an accidental
+ * flood of requests: each recorded answer ends the teacher devices' held
+ * long-polls (instance.ts, broadcast).
  */
 export const MAX_ANSWER_CHANGES = 10;
 /**
@@ -52,34 +49,27 @@ export const LINE_WRITE_MS = 1000;
  */
 export const INPUT_GAP_MS = 300;
 /**
- * Rows a day the uploads may write, across the site (docs/design/hosting-and-limits.md,
- * "Protecting the day's allowance"): an upload writes its quiz, each
- * picture and its small records, and as many again when the quiz is
- * deleted (`uploadRows`, server/rows.ts). Out of what the classes' share
+ * Rows a day the uploads may write, across the site: an upload writes its
+ * quiz, each picture and its small records, and as many again when the quiz
+ * is deleted (`uploadRows`, server/rows.ts). Out of what the classes' share
  * leaves of the plan's 100,000 (DAY_FOR_CLASSES), with some left for the
  * site's small objects. A text quiz is some 15 rows, so about 1,000 uploads a
  * day; one with 15 pictures some 45, about 330. Counted in rows rather than
  * uploads because looks at the room, likely the most common uploads, are
  * no class, and an upload count would let them spend the day's uploads
  * before the classes' allowances bind. The "room for a few dozen classes a
- * day" on the start page and in public/own-copy.html holds only while the
- * caps here (DAY_FOR_CLASSES, MAX_PLAYERS, MAX_LINE_WRITES) stay as they
- * are: the arithmetic is in hosting-and-limits.md, Situation. A self-hoster
- * who changes them makes that sentence untrue.
+ * day" in README.md and public/own-copy.html rests on the caps here
+ * (DAY_FOR_CLASSES, MAX_PLAYERS, MAX_LINE_WRITES); the arithmetic is in
+ * docs/design/hosting-and-limits.md, Situation.
  */
 export const DAY_ROWS_FOR_UPLOADS = 15_000;
-/**
- * Upload attempts counted a day under one format (server/stats.ts), each a
- * row that no booking holds (docs/design/root-page.md, "Upload attempts
- * counted by format").
- */
+/** Upload attempts counted a day under one format (server/stats.ts), each a row that no booking holds. */
 export const DAY_ATTEMPTS_PER_FORMAT = 100;
 /**
  * What a class spends of the day's allowances that a class can run out of
- * mid-lesson (docs/design/hosting-and-limits.md, Situation, "What a class
- * costs"): rows written, Durable Object requests (a class's Function requests
- * are about the same), and seconds its object is kept awake (duration, at
- * about 0.128 GB-s a second).
+ * mid-lesson: rows written, Durable Object requests (a class's Function
+ * requests are about the same), and seconds its object is kept awake (duration,
+ * at about 0.128 GB-s a second).
  */
 export interface Cost {
   rows: number;
@@ -88,47 +78,36 @@ export interface Cost {
 }
 
 /**
- * What the classes may book of each allowance a day (docs/design/hosting-and-limits.md,
- * "Running classes finish"); letting a class in is refused past it, with no
- * child in yet. The Free plan's day is 100,000 rows, 100,000 requests and
- * 13,000 GB-s (about 101,000 awake seconds), account-wide, back at 00:00 UTC.
- * What is left over is for what no class books (uploads, whose quiz and each
- * picture are rows; picture fetches, joins and the landing's requests; the
- * site's small objects) and for estimates that come out low: requests and
- * duration have no most a class can spend, so a class books an estimate.
- * Requests leave more over, since more of them come from outside a class.
+ * What the classes may book of each allowance a day; letting a class in is
+ * refused past it, with no child in yet. The Free plan's day is 100,000 rows,
+ * 100,000 requests and 13,000 GB-s (about 101,000 awake seconds), account-wide,
+ * back at 00:00 UTC. What is left over is for what no class books (uploads,
+ * whose quiz and each picture are rows; picture fetches, joins and the
+ * landing's requests; the site's small objects) and for estimates that come out
+ * low: requests and duration have no most a class can spend, so a class books
+ * an estimate. Requests leave more over, since more of them come from outside a
+ * class.
  */
 export const DAY_FOR_CLASSES: Cost = { rows: 80_000, requests: 75_000, awakeS: 80_000 };
 /**
  * How far a class may reach when its first student comes after its booking
- * lapsed with no student in (docs/design/hosting-and-limits.md, "Running
- * classes finish"): the children are at the tablets then, so refusing them
- * costs more than refusing the teacher at letting in, and less than a class
- * under way failing. Past this the join is refused.
+ * lapsed with no student in: the children are at the tablets then, so refusing
+ * them costs more than refusing the teacher at letting in, and less than a
+ * class under way failing. Past this the join is refused.
  */
 export const DAY_FOR_JOINS: Cost = { rows: 90_000, requests: 87_000, awakeS: 92_000 };
-/**
- * A let-in lobby holds its booking this long after it was let in or its
- * latest student joined; what it rests on: docs/design/hosting-and-limits.md,
- * "Running classes finish".
- */
+/** A let-in lobby holds its booking this long after it was let in or its latest student joined. */
 export const LOBBY_WAIT_MS = 20 * 60_000;
-/**
- * A started quiz of at most FEW_PLAYERS holds its booking while one of its
- * players' devices was heard from within this long; the same section says
- * what they rest on.
- */
+/** A started quiz of at most FEW_PLAYERS holds its booking while one of its players' devices was heard from within this long. */
 export const AWAY_WAIT_MS = 10 * 60_000;
 export const FEW_PLAYERS = 4;
 /**
  * The check warns that the site is nearly full when fewer classes than this
- * still fit today (this one included), with the way to more quizzes; a day
- * whose bookings reached NEARLY_FULL of DAY_FOR_CLASSES (in any allowance) counts as busy
- * on the landing's line beside the full days (docs/design/hosting-and-limits.md,
- * "Running classes finish").
+ * still fit today (this one included); a day whose bookings reached
+ * NEARLY_FULL of DAY_FOR_CLASSES (in any allowance) counts as busy on the
+ * landing's line beside the full days.
  */
 export const ROOM_WARN = 3;
-/** The owner: lower than 80%, half for now. */
 export const NEARLY_FULL = 0.5;
 /** Bytes of quizzes and their pictures stored at once, across the site (the account holds 5 GB in all). */
 export const MAX_LIVE_BYTES = 1_000_000_000;
@@ -138,34 +117,30 @@ export const SLEEP_AFTER_MS = 45 * 60_000;
  * A device on long-poll, in a quiz no class is in, rests once its page has
  * shown no change and felt no touch for REST_AFTER_MS: it holds no poll,
  * which would keep the quiz's object awake, and asks every REST_EVERY_MS
- * instead (docs/design/connections.md, "A poller left alone rests").
+ * instead.
  */
 export const REST_AFTER_MS = 5 * 60_000;
 export const REST_EVERY_MS = 30_000;
 
-/** The self-hosting nudge, appended to every refusal. */
 const OWN_COPY = "For more quizzes, a site of your own, your school's or your company's: classyquiz.pages.dev/own-copy says how.";
 
 /**
- * Why a device can't join (server/game.ts); shown on it. Whoever runs the
- * quiz is in the room and can act on it; the words are for a class and any
- * other crowd (docs/design/teacher-devices.md, "Words for any crowd"). The
- * pages match these strings: a change reaches a page open
- * during a deploy only once it reloads.
+ * Why a device can't join (server/game.ts); shown on it. Whoever runs the quiz
+ * is in the room and can act on it. The pages match these strings: a change
+ * reaches a page open during a deploy only once it reloads.
  */
 export const CLASS_FULL = "This quiz is full. Ask whoever runs it.";
 /** A player's device before the players are let in: it waits, and joins by itself once they are. */
 export const CLASS_WAITING = "Joining opens in a moment.";
 export const CLASS_STARTED = "This quiz has started and takes no more players. Ask whoever runs it.";
-/** The same in a Peers room, where nobody runs it (docs/design/peers.md). */
+/** The same in a Peers room, where nobody runs it. */
 export const ROOM_FULL = "This quiz is full: it takes no more players.";
 export const ROOM_STARTED = "This quiz has started and takes no more players.";
 /**
- * A quiz's first player refused for want of room on the site
- * (docs/design/hosting-and-limits.md, "Running classes finish"): the device
- * waits and asks again every JOIN_AGAIN_MS, and the quiz asks the day's
- * ledger no more often than that, whatever its pages do. Why, and whether
- * for the day, is on the lobby of whoever runs it (`TeacherView.room`).
+ * A quiz's first player refused for want of room on the site: the device waits
+ * and asks again every JOIN_AGAIN_MS, and the quiz asks the day's ledger no
+ * more often than that, whatever its pages do. Why, and whether for the day, is
+ * on the lobby of whoever runs it (`TeacherView.room`).
  */
 export const JOIN_NO_ROOM = "The site is full right now. This device tries again by itself.";
 export const JOIN_AGAIN_MS = 60_000;
@@ -173,11 +148,11 @@ export const JOIN_AGAIN_MS = 60_000;
 /**
  * Which site-wide cap refused an upload (server/budget.ts). They free up
  * differently: the uploads cap at 00:00 UTC, the bytes cap as quizzes end or
- * expire (three hours after the teacher last used them), so each is said as it is.
+ * expire (INSTANCE_IDLE_MS in server/instance.ts), so each is said as it is.
  */
 export type SiteFull = "uploads" | "bytes";
 
-/** When Cloudflare's daily allowance comes back, 00:00 UTC, as Swiss time ("01:00"); null without time zone data. */
+/** When Cloudflare's daily allowance comes back, 00:00 UTC, in Swiss time. */
 export function quotaResetAt(now = new Date()): string | null {
   try {
     const reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
@@ -192,13 +167,10 @@ export function quotaResetAt(now = new Date()): string | null {
  * day's finished classes spent leaves no room for it, until 00:00 UTC.
  * "now": it would fit but for what the quizzes open now hold, which some of
  * them give back as they start, finish or are left waiting; when, and
- * whether to this class or another, isn't known
- * (docs/design/hosting-and-limits.md, "A refused class hears whether to
- * wait").
+ * whether to this class or another, isn't known.
  */
 export type ClassFull = "now" | "day";
 
-/** Letting a class in, refused. */
 export function classesFullMessage(full: ClassFull, now = new Date()): string {
   if (full === "now") return `The free site can't let another group in right now: the quizzes open at the moment hold what it has left for today. It may have room again later today, as they finish. ${OWN_COPY}`;
   const at = quotaResetAt(now);
@@ -212,7 +184,6 @@ export function roomsFullMessage(full: ClassFull, now = new Date()): string {
   return `The free site can't take more quizzes today: today's quizzes have used up what it has for the day. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
-/** What the teacher is told when a site-wide cap refuses an upload; when it frees up depends on the cap. */
 export function siteFullMessage(full: SiteFull, now = new Date()): string {
   if (full === "bytes") {
     return `The free site has no room for another quiz right now. It takes one again once others have ended or expired (three hours after their last use). ${OWN_COPY}`;
@@ -221,11 +192,7 @@ export function siteFullMessage(full: SiteFull, now = new Date()): string {
   return `The free site can't take more quizzes today. It takes new ones again at ${at ? `${at} Swiss time` : "00:00 UTC"}. ${OWN_COPY}`;
 }
 
-/**
- * An error from the platform saying a free-plan limit is spent. The wording
- * is undocumented, so the match is broad (docs/design/hosting-and-limits.md,
- * "Not known").
- */
+/** An error from the platform saying a free-plan limit is spent. The wording is undocumented, so the match is broad. */
 export function isQuotaError(e: unknown): boolean {
   const m = e instanceof Error ? e.message : typeof e === "string" ? e : "";
   return /free[- ]tier|daily limit|quota/i.test(m);

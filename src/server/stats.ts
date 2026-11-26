@@ -1,6 +1,5 @@
-// Upload attempts by format: one tiny Durable Object for
-// the whole site, holding per format a count and the first and last day it
-// was seen. No content, no identity, no time of day.
+// Upload attempts by format, site-wide: per format a count and the first and
+// last day it was seen. No content, no identity, no time of day.
 
 import { DurableObject } from "cloudflare:workers";
 import { DAY_ATTEMPTS_PER_FORMAT } from "../shared/limits.ts";

@@ -5,21 +5,18 @@ Run: py -I sitebuild.py [--no-poster]   (builds the standalone page first; the p
   src/public/js/film.js                the film; assets are the site's own files (no data:)
   src/public/landing/film-<lang>.webp  the poster frame per language (de en fr it), 1600 x 900, rendered from the film,
   src/public/landing/film-<lang>-800.webp    and 800 x 450
-  (src/client/film-poster.ts, the page side, is written by hand: the first ▶ or a move of the time bar loads film.js;
-  it and client/home.ts show the poster of the page's language)
 
 index.html's time bar works before film.js is there, so it carries the film's length (its max, and the length shown
 beside it); this script refuses to build while they differ from film.js's.
 
-The site's CSP (src/scripts/build.mjs): scripts only from its own files, images
-'self' and blob:, fonts from default-src 'self'. sitecheck.py checks it there.
+The site's CSP (src/scripts/build.mjs) allows no data: URIs.
 """
 import json, pathlib, re, sys
 HERE = pathlib.Path(__file__).resolve().parent
-sys.dont_write_bytecode = True  # no __pycache__ in the tree
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(HERE))
 import build  # noqa: E402
-from build import film_length, film_source, PUB, REPO, PAGE, WAYS, FACES, launch  # noqa: E402
+from build import film_length, film_source, PUB, SRC, PAGE, WAYS, FACES, launch  # noqa: E402
 
 
 def film_js():
@@ -33,8 +30,8 @@ def film_js():
     js = film_source(json.dumps(assets))
     if re.search(r'data:[a-z]+/', js):
         raise SystemExit('film.js for the site holds a data: URI')
-    head = ('/* classyQuiz film, built by the film project\'s sitebuild.py from film.js; '
-            'loaded by client/film-poster.ts on the first ▶. Edit the source, not this. */\n')
+    head = ('/* Built by docs/film/build/sitebuild.py from docs/film/build/film.js; '
+            'loaded by client/film-poster.ts on the first ▶. */\n')
     return head + js
 
 
@@ -67,7 +64,7 @@ def frames(lang, times):
 def pictures(widths=(1600, 800), quality=82):
     """Per language: the poster frame, film-<lang>.webp and -800."""
     from PIL import Image
-    land = REPO / 'public/landing'
+    land = SRC / 'public/landing'
     for lang in LANGS:
         im = frames(lang, ['window.cqFilm.poster'])[0]
         for w in widths:
@@ -79,7 +76,7 @@ def pictures(widths=(1600, 800), quality=82):
 def length_on_page():
     """index.html's time bar against film.js: its max and the length shown beside it are the film's DUR."""
     dur = film_length()
-    html = (REPO / 'public/index.html').read_text(encoding='utf-8')
+    html = (SRC / 'public/index.html').read_text(encoding='utf-8')
     want = (f'type="range" min="0" max="{dur}"', f'<span class="cqf-dur"> / {dur // 60}:{dur % 60:02d}</span>')
     missing = [w for w in want if w not in html]
     if missing:
@@ -87,11 +84,11 @@ def length_on_page():
 
 
 def main():
-    (REPO / 'public/js').mkdir(parents=True, exist_ok=True)
-    (REPO / 'public/landing').mkdir(parents=True, exist_ok=True)
+    (SRC / 'public/js').mkdir(parents=True, exist_ok=True)
+    (SRC / 'public/landing').mkdir(parents=True, exist_ok=True)
     length_on_page()
     js = film_js()
-    (REPO / 'public/js/film.js').write_text(js, encoding='utf-8', newline='\n')
+    (SRC / 'public/js/film.js').write_text(js, encoding='utf-8', newline='\n')
     print('film.js', len(js.encode()), 'bytes')
     if '--no-poster' not in sys.argv:
         build.main()   # the pictures come from a fresh standalone page

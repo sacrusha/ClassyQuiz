@@ -3,204 +3,41 @@
 ## Purpose
 
 Someone practises or reviews on their own, with a quiz their AI or their
-teacher's made, without having seen its answers (backlog v5 item 2).
-Nothing is uploaded and nothing counted; closing the tab ends it, which the
-owner finds fine and expected.
-
-The question, its picture and the tiles on the player's own device, then
-the key, are Solo's device screen (v5 item 6), and a room without a wall
-stands on it too: Peers does (`peers.md`); a Quizmaster's devices-only room
-isn't offered (backlog v5 item 4).
+teacher's made, without having seen its answers.
 
 ## Situation
 
-- The quiz is open on the local check (`local-check.md`): read in the
-  browser, its pictures as blob URLs, the check's fixes beside it. The
-  game's rules are pure and run in the browser (`server/game.ts`), and so
-  does the wall's layout of a question.
+- Solo runs on the local check and holds the quiz as the check does
+  (`local-check.md`).
 - Alone, nobody disputes a wrong key, and the learner can't tell a wrong
   solution from their own mistake. The quiz carries no notes
   (`quiz-format.md`); the learner's AI, after the run, is where a doubt
   can go.
-- Observed in the owner's user testing: preteens got excited about seeing
+- Observed in user testing: preteens got excited about seeing
   their avatar celebrate (jump) in solo runs.
-- Plausible assumption (the owner's): Solo is a newcomer's first use of the
-  site, often with the example quiz, so frictionless beats
-  confusing-but-powerful options. Solo therefore has no settings, its card
-  is the check's first, and its button starts it.
-- A reload, a phone's pull to refresh included, loses the quiz: the check
-  holds it in memory only (`local-check.md`, "From the root page to the
-  check").
 - The player may be on a phone held upright, a tablet, or a laptop, and on
-  a laptop it may be the one on the projector. A projector and a laptop are
-  wider than tall; a phone held upright is taller than wide.
-
-## How the site meets it
-
-Code: `client/entry-solo.ts` (the
-pages), `client/solo.ts` (the run, no DOM), `client/device.ts` (the device
-screen), `client/stage.ts` (the question's layout, shared with the wall).
-
-### The entry
-
-On the check, the first card: "On your own, to practise or review. Each
-answer shows the solution right away, and the score comes at the end."
-[Play ▶], and under it "Plays in this tab. Nothing is sent to the site.
-Reloading or closing the tab ends it.", since the reload is the one way to
-lose a run that a hand makes without meaning to. It plays the quiz itself (`plays`), so the fold of questions says that whoever
-will play leaves it closed. One press starts it; it takes over the check's
-page and pushes a step into the tab's history, so Back from any of Solo's
-screens gives the check back as it was, its fold and fixes kept; it ends
-the run without asking.
-
-### The start
-
-The avatar a room would give (an animal and a colour, assigned) and the
-lobby's dressing menu, the same for every room (`class-and-wall.md`,
-"Dressing the avatar"), with Start under it. It is the one step between
-the check and the first question; what it is for is the observation
-above: the avatar that celebrates is the player's own. The look stays for
-Play again, within the page.
-
-The start comes up under the hand that pressed Play ▶ on the check, and
-on a short phone (360x640) a row of the dressing menu stands where Play ▶
-was. So its buttons, like the result's, take no tap for `SETTLE_MS`
-(400 ms) after the page comes: the tap was aimed at what was there before
-(`question-flow.md`, "Presses").
-
-### A question, alone
-
-The run is the game's own (`server/game.ts`): a run with one player, the
-check's fixes applied as the server applies them at upload
-(`applyFixes`). So a skipped question doesn't come up, a changed solution
-is the one that counts, a question not counted shows its key and scores
-nothing, a hidden picture stays hidden, and the answers are shuffled per
-run unless the quiz says "Order: fixed" (`quiz-format.md`).
-
-- The answers show with the question: nobody reads it aloud first, so
-  there is no reading step.
-- A tap is the answer, and the key follows at once on the tiles: the
-  solution ticked, the rest dimmed, the chosen one outlined, with a cross
-  when it doesn't count. Nothing moves (the tiles keep room for the mark
-  from the start). The bar at the top says ✓ or ✗, or ⊘ for a question not
-  counted, and the score.
-- A right answer makes the avatar jump over the question for a few
-  seconds, the wall's winners' band with one winner (`class-and-wall.md`,
-  "The winners jump").
-- The score is right out of the questions that counted, as the ranking
-  counts without points for speed; alone there is no speed to compare.
-- The next step is at the foot: Question 4, then Result.
-
-### The device screen
-
-`client/device.ts`, `DeviceScreen`: a page's main element taken over by a
-bar at the top (where the question stands, a verdict, the player's avatar
-and score), the stage, and a bar at the foot with one button.
-
-- **The stage is the wall's** (`client/stage.ts`, `layQuestion`): the
-  question, its picture between or beside, picture answers arranged by
-  their shapes, laid out in the room the device has, in the same frame
-  as the wall that steers itself (the bar at the top, the foot's bar of
-  the same height). Wider than tall, nothing else differs (the tiles keep
-  the wall's room for the mark and the count too): on a laptop or a
-  projector, Solo shows a question as the wall would in that window. The
-  tiles are buttons at every size.
-- **Where a device differs** (`device` option): held upright, the stage
-  taller than wide, it is read at arm's length in a narrow column, and
-  its answers are what is tapped. Alone, the tiles keep room for the mark
-  only, without the count, and a question with picture answers gives its
-  text 0.7 of the wall's share of the height. The rest is the wall's
-  layout (`class-and-wall.md`, "How a question fills the screen"), which
-  on a phone mostly sets text answers one under the other. The wall itself
-  on a phone (a host with no big screen: `teacher-devices.md`, "How the
-  screens are arranged") is laid out by the same rule.
-- **The foot's button** is the steering bar's Play in another hand: a noun
-  for what comes next, in the same place on every question, kept there
-  invisible while there is none, so a double tap never lands on something
-  new (`question-flow.md`, "The steering bar"). Keys as on the wall: Space,
-  Enter, →, ↓, PageDown and N go on; 1 to 4 answer; Z, or a tap on the
-  picture, enlarges it, and a tap closes it.
-- **Tiles that just appeared take no tap** for `SETTLE_MS` (400 ms): the
-  tap was aimed at what was there before, the second of a double on Start
-  or Play again, which would otherwise answer the first question
-  (`question-flow.md`, "Presses").
-- **What it offers a room** (`DeviceView`): the tiles veiled while a
-  question is read (`answering: "reading"`), open to a tap, or closed; the
-  answer this device chose, and whether it is still on its way to the
-  room (`sending`, outlined dashed); the key; the spread (`dist`: a room
-  that will show it passes it from the question's start, null until it
-  shows, so the tiles keep room for the counts); the avatars that jump
-  (`jump`); the foot's noun, and beside it a line of the room's in place
-  of the title (`foot`: who it waits for); Countdown left of the foot's
-  button, in a place of its own, and its bar along the top edge
-  (`countdown`); a line in the top bar in place of the player's avatar and
-  score (`standing`: how the friends stand); a ⋯ for the room's menu
-  (`menu`). A room drives it from its views as Solo drives it from its
-  run; the join code, the final ranking and the end are the room's own.
-- Light, as the class's screens are; a page of a screen's height has no
-  site header.
-
-### The result
-
-The avatar cheering, whatever the score (the closure the final ranking
-gives a class); ★ right / of; a bar per question, full or empty. Then Play
-again ▶ (a new order, the same avatar), Copy the answers for your AI, and
-← Back. The foot's bar is gone there, as at the final ranking, but the
-buttons stand where the page's height puts them, on a 360 px phone where
-▶ Result was. So they take no tap for `SETTLE_MS` after the result comes,
-and the second of a double tap on Result lands on nothing: it would
-otherwise copy the run, start it again, or end it.
-
-### After the run: the player's AI
-
-"Copy the answers for your AI" puts the run on the clipboard as text: the
-quiz's title, the score, and for each question played its text (and its
-picture's file name), the answer chosen, right or wrong, and the quiz's
-solution, asking the AI to explain the ones got wrong and to say if a
-solution itself looks wrong. The words are the ones the site's other
-messages to an AI use (solution, not key). Where the clipboard is refused,
-the text shows on the page to copy by hand. Nothing else is said about a
-doubtful solution: the quiz has no notes to say it with.
-
-### Preview and the projector alone
-
-One Solo, without settings, appears to serve both, which is the owner's
-lean; neither use is confirmed.
-
-- **The teacher's preview** (v1 item 12, the quiz as the class will see
-  it): Solo on the laptop that will show the quiz lays every question out
-  as the projector at that window's size would, pictures and fitting
-  included; the solutions are the check's fold, without playing. What the
-  wall adds (the question read first with its answers veiled, who has
-  answered, the spread) isn't the quiz's look. A wall steered from the
-  Remote has no foot's bar, so its stage is 30 px taller than the
-  preview's in the same window.
-- **A projector and no student devices**: Solo on the
-  projector shows the question as the wall does; the class answers by hand
-  or with coloured cards, and whoever taps puts the key up. Nothing scores
-  the class, and the one avatar and its result stand for the room. Whether
-  the day's refusal offers it stays the owner's decision.
+  a laptop it may be the one on the projector.
 
 ## Not known
 
 - Whether a tap as the final answer suits learners, or a mis-tap costs too
-  much; whether "I don't know" (the key without answering) is wanted; and
-  whether Back, ending a run without asking, ends runs that were meant to
-  go on.
-- Whether the dressing before the first question is the point for a
-  newcomer or a delay; whether a player alone wants to choose the animal,
-  which a room assigns so that nothing is grabbed.
+  much; whether "I don't know" (the key without answering) is wanted;
+  whether Back, which ends a run without asking, ends runs that were meant
+  to go on.
+- Whether dressing the avatar before the first question is the point for a
+  newcomer or a delay (`local-check.md` has the newcomer's first use);
+  whether a player alone wants to choose the animal, which a room assigns
+  so that nothing is grabbed.
 - Whether learners copy their answers to their AI, and whether the text is
-  enough for it (pictures go only by file name; the AI that made the quiz
-  has them).
+  enough for it (pictures go only by file name).
+- Whether Solo is also the teacher's preview, and whether it serves a class
+  with a projector and no student devices, answering by hand or with
+  coloured cards. Possibly one Solo with no settings absorbs every use
+  alone.
 - Whether a teacher looking for a preview recognises it in "On your own,
   to practise or review"; whether the result's single avatar reads for a
   class at a projector.
-- Pull to refresh is asked off while Solo is on (`overscroll-behavior`);
-  checked headless in Edge only, not on Android or iOS.
-- How much of the question's height an upright device should give up
-  for picture answers (0.7): tuned on the example quiz, a quiz of sentence
-  answers and the picture-answer quiz at 360x740, and seen headless on an
-  upright tablet (800x1280).
-- Whether a tablet on its side, laid out as the wall, taps as well as one
-  held upright; seen headless at 1280x800 only.
+- Whether the refusal when the day's allowance is
+  spent offers Solo on the projector.
+- Seen in headless Edge only: the layouts on upright phones and tablets and
+  on a tablet on its side, and pull to refresh held off while Solo runs.

@@ -1,9 +1,6 @@
-// The root page's part for people (docs/design/root-page.md): code box,
-// language, and the two steps: asking an AI for a quiz, with the examples as
-// the tabs that pick what the chat shows, and the box that opens the AI's
-// .zip. The guidance for AIs below reads without this script, in
-// English; this script puts the part above it in the visitor's language
-// (client/landing-text.ts).
+// The root page's part for people. The guidance
+// for AIs below it reads without this script, in English; this script puts
+// the part above it in the visitor's language.
 
 import type { Problem, QuizInfo } from "../shared/protocol.ts";
 import { JOIN_CODE, MAX_QUIZ_BYTES, TEACHER_CODE } from "../shared/protocol.ts";
@@ -46,17 +43,10 @@ const file = $("#file") as HTMLInputElement;
 /** A quiz is being read, or an example is on its way to the check: another file waits. */
 let reading = false;
 
-// Getting a quiz (docs/design/root-page.md, "Getting a quiz"): the examples
-// are tabs in words under the first step's heading, each named by what the
-// visitor starts from and picking its example in the chat: the ask, and the
-// AI's answer, a file whose face is the quiz's first question, which plays by
-// way of the box below and whose name downloads it. The fifth tab, "Not
-// sure?", holds the ask that needs no knowing how to ask. Made here: without
-// the script, and for an AI's fetcher, the asks stand one under the other.
-// Every visit opens on Sheets, so that a visitor first sees a quiz made from
-// what they attach.
+// The examples as tabs. Made
+// here: without the script, and for an AI's fetcher, the asks stand one under
+// the other.
 
-/** The tabs in the page's order: the four examples, then the help ask. */
 const TABS: { id: Example | "help"; ask: (t: Text) => string }[] = [
   { id: "idea", ask: (t) => t.askIdea },
   { id: "sheets", ask: (t) => askText(t) },
@@ -71,7 +61,7 @@ const bar = $("#extabs");
 const helpAnswer = document.createElement("div");
 helpAnswer.className = "answer";
 helpAnswer.innerHTML = `<p class="gives"></p><p class="said-ai"></p>`;
-/** A marker beside the heading of the first step. It shows while the help tab is chosen, because the answer in that tab is a stand-in. The script adds it, so a fetcher doesn't read it. */
+/** Beside the first step's heading while the help tab, whose answer is a stand-in, is chosen. Made here, so a fetcher doesn't read it. */
 const mock = document.createElement("span");
 mock.className = "mock";
 mock.hidden = true;
@@ -93,8 +83,7 @@ $("#get .step-head").append(mock);
     face.height = 290;
     face.alt = "";
     card.querySelector(".face")!.replaceChildren(face);
-    // The file in the AI's answer opens as a file of one's own does: it goes into the box below. The whole card takes
-    // a pointer's press, as a file in a chat does, except the file's name, which downloads it; the button is the one a
+    // The whole card takes a pointer's press, except the file's name, which downloads it; the button is the one a
     // keyboard reaches, and its press reaches the card too. Made here: without the script it would do nothing.
     const play = document.createElement("button");
     play.type = "button";
@@ -180,12 +169,7 @@ function renderExamples(): void {
   edges();
 }
 
-/**
- * An example played: a copy of its file's name moves into the box that opens
- * a file, the box lights up as it does for a file dragged over it, and the
- * file opens on the local check, as a file of one's own does. With reduced
- * motion the box lights up and nothing flies.
- */
+/** An example played: a copy of its file's name flies into the box that opens a file, and the file opens on the local check. */
 function playExample(ex: Example, zip: HTMLElement): void {
   if (reading) return;
   reading = true;
@@ -281,8 +265,8 @@ runbox.addEventListener("drop", (e) => {
   else if ((e.dataTransfer?.getData("text/plain") ?? "").trim()) notText();
 });
 
-// Nothing invites pasting. A file pasted from the file manager still opens;
-// pasted text is told the site takes a .zip, and counted.
+// A file pasted from the file manager opens; pasted text is told the site
+// takes a .zip, and counted.
 document.addEventListener("paste", (e) => {
   if (e.target === codeInput) return;
   const files = [...(e.clipboardData?.files ?? [])];
@@ -304,7 +288,7 @@ async function fromFiles(files: File[]): Promise<void> {
   const format = uploadFormat(files.map((f) => f.name));
   countAttempt(format);
   // The page asks for a .zip and says nothing else; the same archive named .quiz and the quiz's text
-  // alone open too (docs/design/root-page.md, "Opening: the .zip and nothing else").
+  // alone open too.
   const text = format === "txt" || format === "md";
   if (format !== "zip" && format !== "quiz" && !text) {
     const what = format === "several files" ? "several" : format === "no extension" || format === "other" ? "this" : format;
@@ -327,7 +311,7 @@ async function fromFiles(files: File[]): Promise<void> {
 /**
  * The quiz read and checked here, then handed to the local check (/open),
  * where the person picks how it will be played: nothing goes to the site
- * until a room opens there (docs/design/local-check.md). leaveOut: the
+ * until a room opens there. leaveOut: the
  * person chose to go on without the pictures that can't be read.
  */
 async function toCheck(value: string, archive: ZipEntry[], leaveOut = false): Promise<void> {
@@ -385,7 +369,7 @@ function showProblems(errors: Problem[], pictures: boolean, without: () => void)
   if (pictures) $("#without").addEventListener("click", without);
 }
 
-// Coming back (docs/design/root-page.md, "Coming back: the resume card"): the
+// Coming back: the
 // latest quiz this device started, while it hasn't reached its final ranking.
 
 /** Uploads asked about per visit at most, when the newer ones are gone; each is a request against the site's daily allowance. */
@@ -423,7 +407,7 @@ function renderResume(): void {
   const { info } = open;
   const s = info.stands;
   const stands = s?.phase === "final" ? t.finalRanking : s && s.n > 0 && s.phase !== "lobby" && s.phase !== "idle" ? t.question(s.n, s.total) : t.notStarted;
-  // A Peers room has no teacher devices: this device comes back as its player (docs/design/peers.md).
+  // A Peers room has no teacher devices: this device comes back as its player.
   const href = info.peers ? `/play#${info.code}` : info.teacher ? teacherEntry(info.code, info.teacher) : `/teacher#${info.code}`;
   box.innerHTML = `<div class="resume">
     <p class="title">${esc(info.title || t.untitled)}</p><a class="back" href="${esc(href)}">${esc(t.back)}</a>
@@ -432,7 +416,7 @@ function renderResume(): void {
   </div>`;
 }
 
-// The own copy (docs/design/root-page.md, "The own copy"). The site's state is
+// The own copy. The site's state is
 // asked once per visit, and only from a device that has uploaded.
 
 let fullDays = 0;

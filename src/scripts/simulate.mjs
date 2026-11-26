@@ -8,56 +8,16 @@
 // WebSockets).
 // --speed: points for speed, switched on in the lobby; taps carry the
 // device's own time, and the scores are checked against it.
+// With OWNER_KEY set (the site's), the day's telemetry is checked as well.
 //
-// Every question opens with its answers hidden and is stepped through the
-// steering bar's states: Play (Choices, Answers, Solution, Ranking, Question n)
-// and Countdown (lastCall), which locks in after fifteen seconds or once everyone there
-// has answered. Each press is also sent twice from the same state (a resend:
-// one step), and twice as a deliberate double press (the second from where
-// the first leads: two steps). A tap made offline counts if it arrives while
-// its question is still on screen, and not once the class has left its reveal.
-//
-// The upload's tab is the Projector and steers itself; a phone comes in with
-// the teacher code, is asked, steers from here, and steers from then on
-// (docs/design/teacher-devices.md). 25 students join; a
-// fifth of them only get through over HTTP long-polling (as on a network that
-// blocks WebSockets). During the quiz, devices drop their connection and come
-// back (sleep, Wi-Fi), answers sent just before a drop are resent, one tablet
-// dies silently (its socket just goes quiet) and its student picks their
-// avatar back on another device, a stray avatar is removed, and the teacher
-// changes a key after the reveal, voids one question and skips another. The
-// phone dies silently too, and the Projector takes the steering back.
-//
-// A poll's answer says a poller may rest before the class is let in and at
-// the final ranking, never with the class in or under way; a poll from a
-// device at rest is answered at once (docs/design/connections.md, "A poller
-// left alone rests").
-//
-// At the end, once every device is quiet, every student's score must equal
-// what the server's acknowledgements told their tablet is stored, and the
-// teacher's fixes. That is the constraint "survives school Wi-Fi" made
-// checkable: nothing lost, nothing counted twice.
-//
-// After the final ranking the roles are put through their cases
-// (docs/design/teacher-devices.md): the phone comes back as the Remote, and a third
-// device is told both tabs are there; a tablet coming back still gets its
-// final place, and a newcomer is turned away; the Remote
-// leaves; a tab on HTTP answers "Show the quiz here" and the one that steered
-// itself becomes the Remote; ⇄ Swap three times, from either side; with the
-// class in, the class code reaches no role, the teacher code
-// still does, and so does the uploading device's secret; a Remote whose tab
-// just closed is taken at once with the teacher code; with nothing there, a
-// device takes the Projector and steers. Last, wrong teacher codes: the
-// fifth from one device locks its teacher codes, the secret still gets in;
-// from ever new addresses, the quiz's allowance runs out within ten, where
-// the site takes the address a request names (a local stack; Cloudflare
-// sets its own and refuses a request that names one, so against a deployed
-// site that sweep steps aside, saying so). The quiz is deleted.
-//
-// With OWNER_KEY set (the site's, docs/design/telemetry.md), the day's
-// telemetry is read before and after: the class, uploaded as a probe,
-// counts once, among the probes and not the classes, with its devices'
-// lines.
+// Devices drop and come back, resend, die silently and return on another
+// device; presses are resent and doubled; the teacher fixes a key, voids and
+// skips. At the end every student's score must equal what the server's
+// acknowledgements told their tablet is stored, plus the teacher's fixes:
+// nothing lost, nothing counted twice. After the final ranking the teacher's
+// roles are put through their cases. Against a deployed site the sweep of
+// wrong teacher codes from ever new addresses steps aside, saying so:
+// Cloudflare refuses a request that names its own address.
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const ALL_POLL = process.argv.includes("--all-poll");
@@ -356,9 +316,8 @@ log("uploaded", instance.slice(0, 8), "code", code);
 
 /**
  * Whether a poll's answer says a poller may rest: only with no class in the
- * quiz (docs/design/connections.md, "A poller left alone rests"). Asked as
- * a guest, whose first poll is answered at once and is no sign of any
- * device.
+ * quiz. Asked as a guest, whose first poll is answered at once and is no
+ * sign of any device.
  */
 const saysRest = async () => (await post(`/api/i/${instance}/poll`, { auth: { role: "guest" }, v: -1 })).body.rest === true;
 
@@ -396,7 +355,7 @@ async function guestTakes(name, role, mode, creds = { teacher }) {
     }
   });
   d.start();
-  // On HTTP, the guest's poll held at the time runs out first (up to 25 s);
+  // On HTTP, the guest's poll held at the time runs out first (up to POLL_HOLD_MS);
   // the page itself would have moved to its role's page at once.
   await until(() => d.view, mode === "poll" ? 30_000 : 8000, `${name} holding the ${role}`);
   return { d, offered };
@@ -544,7 +503,7 @@ function maybeAnswer(p) {
 }
 
 // A student device before the teacher lets the class in waits, and is told so
-// when it is let in (docs/design/teacher-devices.md, "The single tab: check, then join").
+// when it is let in.
 {
   const early = new Device("early", instance, { role: "guest" }, "ws");
   const choices = [];
@@ -571,7 +530,7 @@ function maybeAnswer(p) {
 for (let i = 0; i < N; i++) {
   players.push(await joinPlayer(`s${i}`, ALL_POLL || i % 5 === 4 ? "poll" : "ws"));
 }
-// One child leaves question 2 alone, so its Last call runs its fifteen seconds.
+// One child leaves question 2 alone, so its Last call runs its LAST_CALL_MS.
 players[3].leaves = 1;
 // A stray avatar (a double tab), removed by the teacher.
 const ghost = await joinPlayer("ghost", "ws");
@@ -580,8 +539,7 @@ await phone.send({ op: "remove", player: ghost.id });
 ghost.d.kill();
 log(`${N} students joined (${players.filter((p) => p.d.mode === "poll").length} over long-polling), ghost removed`);
 
-// Dressing in the lobby (docs/design/class-and-wall.md). Like
-// client/seat.ts: one `dress` in flight per device, the latest pick sent
+// Dressing in the lobby. Like client/seat.ts: one `dress` in flight per device, the latest pick sent
 // next, so a burst of taps sends the first and the last. Every student
 // picks a few looks; the server holds them and the screens hear of them once a second.
 const looks = new Map(); // player id → the look last acknowledged
@@ -638,7 +596,7 @@ for (const p of players) {
 log(`dressing: ${taps} taps by ${players.length} students in ${((Date.now() - dressStarted) / 1000).toFixed(1)} s${ALL_POLL ? `, ${dressSends} HTTP requests` : ""}`);
 
 // A device that doesn't wait for its answers (not our page): the server
-// takes MAX_LOOK_CHANGES (100) changes per student and refuses the rest.
+// takes MAX_LOOK_CHANGES changes per student and refuses the rest.
 {
   // Over a WebSocket, so the 102 arrive in order and each one is a change.
   const rogue = [...players].reverse().find((p) => p.d.mode === "ws") ?? players[players.length - 1];
@@ -736,7 +694,7 @@ const waitForAnswers = async () => {
   while (tv().run.answered < active() && Date.now() - t < 12000) await sleep(100);
   await sleep(800); // stragglers changing their mind
 };
-/** Last call runs: until it locks in, by everyone there having answered or by its fifteen seconds. */
+/** Last call runs: until it locks in, by everyone there having answered or by LAST_CALL_MS. */
 const waitForLock = async (current) => {
   const t = Date.now();
   check(!!tv().clock && tv().answering === "open", `question ${current + 1}: Last call runs (${tv().answering}, ${JSON.stringify(tv().clock)})`);
@@ -762,7 +720,7 @@ for (;;) {
     await twice({ op: "lastCall" });
     await waitForLock(current);
   } else if (current === 1) {
-    // Last call straight from the hidden answers: they show, and the fifteen seconds run.
+    // Last call straight from the hidden answers: they show, and LAST_CALL_MS runs.
     await twice({ op: "lastCall" });
     await until(() => tv().answering !== "reading", 5000, "the answers with Last call");
     await waitForLock(current);
@@ -873,7 +831,7 @@ for (;;) {
     await twice({ op: "play" });
     await until(() => tv().phase === "ranking", 5000, "ranking");
     // The phone's battery dies, silently: after about 45 s the Projector
-    // steers again by itself (docs/design/teacher-devices.md, "When a device is gone").
+    // steers again by itself.
     phone.freeze();
     const t0 = Date.now();
     log("the phone dies silently");
@@ -908,8 +866,7 @@ chaos = false;
 // The quiz is over and its questions settled: nothing can change a score
 // now. Before comparing, every device is quiet: the drops the chaos started
 // have ended and every command has its answer, so what each tablet last
-// heard of its answers is what the server stores (docs/design/question-flow.md,
-// "When a tap counts").
+// heard of its answers is what the server stores.
 await until(() => players.every((p) => p.dead || (p.d.online && p.d.pending.size === 0)), 15_000, "every device to be quiet").catch(() => {});
 await sleep(500);
 check(players.every((p) => p.dead || p.d.pending.size === 0), `every device quiet before the scores are compared (${players.filter((p) => !p.dead && p.d.pending.size > 0).map((p) => p.name)})`);
@@ -943,7 +900,7 @@ await sleep(1000);
 const withView = players.filter((p) => !p.dead && p.view && p.view.phase === "final");
 check(withView.length >= players.length - 3, `final view reached ${withView.length}/${players.length} devices`);
 
-// --- the roles' cases (docs/design/teacher-devices.md)
+// --- the roles' cases
 
 // The phone comes back (charged): it is the Remote again, and the Projector stops steering.
 const phone2 = new Device("phone-back", instance, phone.auth, "ws");
@@ -1054,7 +1011,7 @@ check(anyone.ack.ok, "with nothing there, a device takes the Projector");
 await until(() => anyone.d.view?.steer, 5000, "the new Projector to steer itself");
 log("nothing was there; a device took the Projector and steers");
 
-// Wrong teacher codes: the fifth within a minute locks this device's teacher codes for the quiz.
+// Wrong teacher codes: enough of them within a minute lock this device's teacher codes for the quiz.
 let sweptFromNew = false;
 {
   const wrongDigits = teacher === "00" ? "01" : "00";
@@ -1071,7 +1028,7 @@ let sweptFromNew = false;
   const students = await post("/api/join", { code });
   check(students.status === 200, "the class code still opens the quiz for students");
   // A sweep from ever new addresses (an IPv6 /64, a botnet): the quiz's own
-  // allowance, at most ten wrong endings and one more every six minutes,
+  // allowance (QUIZ_GUESSES, QUIZ_GUESS_EVERY_MS in instance.ts),
   // refuses it whatever the address. Only a site that takes the address a
   // request names can be swept so; Cloudflare answers such a request with a
   // 403 page. A class code (five digits) is no teacher code, so the question
@@ -1114,7 +1071,7 @@ check(joinAfter.status === 404, "after the end, the code opens nothing");
 anyone.d.kill();
 
 if (useBefore) {
-  // The class settled at its final ranking, with its summary (docs/design/telemetry.md).
+  // The class settled at its final ranking, with its summary.
   const day = await today();
   const before = useBefore.probeUse ?? { classes: 0, devices: 0, http: 0 };
   const now = day.probeUse ?? { classes: 0, devices: 0, http: 0 };

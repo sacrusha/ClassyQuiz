@@ -1,7 +1,6 @@
 // One place on the player's page: its line to the quiz, the player it is and
-// what it shows. A device has one; one the class shares has up to MAX_SEATS
-// side by side (client/play.ts, docs/design/class-and-wall.md, "Sharing a
-// device"). A teacher device's page has one that takes a role instead.
+// what it shows. A device the class shares has up to MAX_SEATS side by side;
+// a teacher device's page has one that takes a role instead.
 
 import type { Avatar, Entry, PackPic, PlayerView, ServerMessage } from "../shared/protocol.ts";
 import { TOO_MANY_CODES, WRONG_TEACHER_CODE, viewKey } from "../shared/protocol.ts";
@@ -39,7 +38,6 @@ export interface SeatContext {
   /** Another player's token at this device: a new player here joins beside them. */
   beside(): string | undefined;
   status(s: LineStatus): void;
-  /** The view or the player changed: what the page lays out around its places may follow. */
   changed(): void;
   teacherForm(note: string): void;
 }
@@ -47,7 +45,6 @@ export interface SeatContext {
 export class Seat {
   root: HTMLElement;
   view: PlayerView | null = null;
-  /** Where the place stands among the device's: a new one at the end, beside the +. */
   readonly order: number;
   private ctx: SeatContext;
   private line: Line | null = null;
@@ -60,8 +57,7 @@ export class Seat {
    * The last tap, until the server's view shows it stored (or the server
    * refused it). Until then the button shows it on its way, never as
    * accepted: what the tablet shows as accepted is the server's record, the
-   * one that scores (docs/design/question-flow.md, "When a tap counts"). It counts if it
-   * arrives while the question is still on screen.
+   * one that scores.
    */
   private waiting: { q: number; choice: number } | null = null;
   /**
@@ -82,26 +78,17 @@ export class Seat {
    * on this device, so a slow line costs no speed.
    */
   private shown: { q: number; at: number } | null = null;
-  /** Closes the buttons when Last call runs out on this device. */
   private outTimer: number | undefined;
-  /**
-   * Dressing the animal in the lobby (docs/design/class-and-wall.md):
-   * the look the child picked, shown at once, until the server's view shows
-   * it back; the latest pick wins. One `dress` is in flight at a time, so a
-   * burst of taps sends the first and then the last.
-   */
+  /** The look the child picked, shown at once, until the server's view shows it back. */
   private look: Required<Look> | null = null;
   /** The server took no more changes of look (MAX_LOOK_CHANGES): the pictures stay, without effect. */
   private dressSpent = false;
-  /** A Peers room draws its own screens (client/peers.ts); made with its first view. */
   private peers: PeersRoom | null = null;
-  /** A teacher device has acted on what the quiz said when it came in. */
   private entered = false;
   private closed = false;
-  /** A join or a pick on its way, and what a close waits on for its player (close). */
+  /** A join or a pick on its way, which a close waits on for its player. */
   private joining: Promise<Ack> | null = null;
   private welcomed: (() => void) | null = null;
-  /** A split device's place has a room of its own, which changes when a tablet turns or a place is added or closed. */
   private resizer = new ResizeObserver(() => {
     if (this.root.closest(".seats")) this.layOut();
   });
@@ -143,10 +130,9 @@ export class Seat {
   }
 
   /**
-   * The place closes (docs/design/class-and-wall.md, "Sharing a device"):
-   * its player leaves, which the server takes in the lobby only, and the
-   * device forgets them. A leave that can't get through in a few seconds is
-   * given up: the line ends anyway, and its player shows as away.
+   * Its player leaves, which the server takes in the lobby only. A leave that
+   * can't get through in a few seconds is given up: the line ends anyway, and
+   * its player shows as away.
    */
   async close(): Promise<void> {
     if (this.closed) return;
@@ -165,7 +151,6 @@ export class Seat {
     line?.forget();
   }
 
-  /** The place moves to another element (the page splits or joins again): what it shows moves with it. */
   moveTo(root: HTMLElement): void {
     if (root === this.root) return;
     const nodes = [...this.root.childNodes];
@@ -178,11 +163,6 @@ export class Seat {
     if (!root.closest(".seats")) this.layOut();
   }
 
-  /**
-   * What the place shows, laid out in the room it has: the answers'
-   * pictures by their shape; split, text answers that fit and the dressing
-   * shrunk into the place, otherwise both as the stylesheet sets them.
-   */
   private layOut(): void {
     // A place being added is drawn before it stands on the page; the observer lays it out once it does.
     if (!this.root.isConnected) return;
@@ -344,12 +324,6 @@ export class Seat {
     );
   }
 
-  /**
-   * What a teacher device does on arriving (docs/design/teacher-devices.md, "A second device: one question, only when needed"): the
-   * question when one tab shows and steers; the role whose tab is gone,
-   * without asking; or the note that both are there, which pushes nobody
-   * aside. Nothing the device senses decides it.
-   */
   private enter(c: Choice): void {
     document.title = `${c.title || "Quiz"} · ${T.showOrSteer}`;
     const entry: Entry = c.entry;
@@ -428,7 +402,6 @@ export class Seat {
     });
   }
 
-  /** Turned away by the class (MAX_PLAYERS, MAX_LATE_JOINERS): the teacher is in the room. */
   private showRefused(reason: string, final = true): void {
     // final: turned away; otherwise waiting to be let in or for room on the site, with the line's dot.
     const mark = final
@@ -455,11 +428,7 @@ export class Seat {
     });
   }
 
-  /**
-   * A pack of answer pictures arrived: the pictures on screen get their
-   * source in place (no redraw, which could swallow a tap), and the time for
-   * speed starts now if the question was waiting for them.
-   */
+  /** The pictures on screen get their source in place: a redraw could swallow a tap. */
   private packsArrived(): void {
     this.root.querySelectorAll<HTMLImageElement>("img[data-pack]").forEach((img) => {
       if (img.getAttribute("src")) return;
@@ -476,14 +445,12 @@ export class Seat {
     return p ? `<div class="row" style="justify-content:center"><div class="verdict-pic a${i}">${packImg(p)}</div></div>` : "";
   }
 
-  /** The answer the buttons show as chosen: the stored one, or the last tap on its way (sending). */
   private chosen(q: NonNullable<PlayerView["question"]>): { mine: number | null; sending: boolean } {
     const w = this.waiting;
     if (w && w.q === q.q && w.choice !== q.mine) return { mine: w.choice, sending: true };
     return { mine: q.mine, sending: false };
   }
 
-  /** The buttons' marks, in place: the stored answer, or the tap on its way. */
   private markChosen(): void {
     const q = this.view?.question;
     const box = this.root.querySelector<HTMLElement>(".buttons");
@@ -503,8 +470,7 @@ export class Seat {
     const root = this.root;
     if (v.removed) {
       // The teacher removed this avatar: the device keeps its token, so it
-      // comes back as removed rather than as a new player in the same class
-      // (docs/design/class-and-wall.md, "The door": Remove is sticky).
+      // comes back as removed rather than as a new player in the same class.
       root.innerHTML = `<div class="center"><div class="verdict void" style="width:22vmin;height:22vmin">${ICON.cross}</div></div>`;
       return;
     }
@@ -526,7 +492,6 @@ export class Seat {
     }
     clearTimeout(this.outTimer);
     if (v.phase === "question" && v.question && v.question.answering === "reading") {
-      // The class reads the question on the board; the answers come when the teacher shows them.
       root.innerHTML = `${top}<div class="center"><div class="big reading">${ICON.eye}</div></div>`;
       return;
     }
@@ -607,12 +572,11 @@ export class Seat {
     }
   }
 
-  // Dressing the animal, in the lobby: a background shape, a hat and a tool,
-  // the same menu for everyone, no words. Built once and patched in place: a
-  // view arriving (a classmate joining changes "of") must not replace a
-  // picture under a finger.
-
-  /** into: where the menu is built the first time; a Peers lobby has it beside the code and Start (client/peers.ts). */
+  /**
+   * Built once and patched in place: a view arriving (a classmate joining)
+   * must not replace a picture under a finger. into: where the menu is built
+   * the first time.
+   */
   private renderDress(stored: Avatar, into: HTMLElement = this.root): void {
     // The server's view has caught up with what the child picked.
     if (this.look && this.looks.idle() && sameLook(stored, this.look)) this.look = null;
@@ -655,10 +619,6 @@ export class Seat {
     this.looks.put(next);
   }
 
-  /**
-   * Taps go out merged (client/latest.ts): the first of a burst, then the
-   * latest. The line resends each until the server answers.
-   */
   private answers = new Latest<{ tap: { q: number; choice: number }; seq: number; v: number; ms?: number }, Ack>(
     (x) => this.line!.send({ op: "answer", q: x.tap.q, choice: x.tap.choice, seq: x.seq, v: x.v, ms: x.ms }),
     (x, a) => {
@@ -691,24 +651,18 @@ function wait(ms: number): Promise<null> {
   return new Promise((r) => setTimeout(() => r(null), ms));
 }
 
-/** The two views differ only in the stored answer of the open question (the buttons can stay). */
 function onlyMineChanged(a: PlayerView, b: PlayerView): boolean {
   if (a.phase !== "question" || b.phase !== "question" || !a.question || !b.question || a.question.q !== b.question.q) return false;
   const strip = (x: PlayerView) => viewKey({ ...x, question: { ...x.question!, mine: null } });
   return strip(a) === strip(b);
 }
 
-/** An answer picture's <img>, with its source once its pack is here. */
 function packImg(p: PackPic): string {
   const url = packPicture(p);
   return `<img data-pack="${p.p},${p.o},${p.l},${esc(p.type)}"${url ? ` src="${url}"` : ""} alt="">`;
 }
 
-/**
- * Picture answers' buttons arranged by the pictures' shape (client/answergrid.ts),
- * in the room the buttons have; the room is fixed in px so a picture
- * arriving doesn't push the buttons around.
- */
+/** The room is fixed in px so a picture arriving doesn't push the buttons around. */
 function arrangePictureButtons(box: HTMLElement, pics: (PackPic | null)[]): void {
   box.style.height = "";
   const W = box.clientWidth;
@@ -739,7 +693,6 @@ function arrangePictureButtons(box: HTMLElement, pics: (PackPic | null)[]): void
   });
 }
 
-/** Text answers as the stylesheet sets them. */
 function unfitTextButtons(box: HTMLElement): void {
   box.classList.remove("squeezed");
   box.style.gridTemplateColumns = "";
@@ -752,12 +705,10 @@ const FIT_MIN = 0.5;
 const FAMILIAR = 0.03;
 
 /**
- * Text answers in a split device's place (docs/design/class-and-wall.md,
- * "Sharing a device"): the place doesn't scroll, so the buttons share its
- * room (app.css, `.seats`) and their text and shape are set at the largest
- * share of their size (`--fit`) at which every answer fits its button
- * without breaking a word, in the stylesheet's column count or the other,
- * whichever keeps it larger.
+ * A split device's place doesn't scroll, so the buttons share its room and
+ * their text and shape are set at the largest share of their size (`--fit`)
+ * at which every answer fits its button without breaking a word, in the
+ * stylesheet's column count or the other, whichever keeps it larger.
  */
 function fitTextButtons(box: HTMLElement): void {
   unfitTextButtons(box);
@@ -806,20 +757,18 @@ const DRESS_MIN = 0.3;
 /** The share of the size that fits it may shrink further to, so that no row breaks into a full line and a stray picture. */
 const WHOLE_ROWS = 0.9;
 
-/** The dressing at the page's own size, as a device of its own has it. */
 function unfitDress(dress: HTMLElement): void {
   dress.style.flex = dress.style.width = dress.style.height = dress.style.transform = "";
 }
 
 /**
- * The dressing in a split device's place (docs/design/class-and-wall.md,
- * "Sharing a device"): laid out in a room 1/f the size of the place and
- * shrunk by f into it, at the largest f at which its parts fit that room,
- * so the pictures, the animal and the room between them shrink alike and the
- * menu breaks its rows as it does in a room that size. The menu's breaks are
- * tuned to the widths a device's own picker has (app.css, `.dress .prow`);
- * a place's picker can fall between them, so f is made a little smaller
- * where that keeps a row from a stray picture.
+ * Laid out in a room 1/f the size of the place and shrunk by f into it, at
+ * the largest f at which its parts fit that room, so the pictures, the
+ * animal and the room between them shrink alike and the menu breaks its rows
+ * as it does in a room that size. The menu's breaks are tuned to the widths
+ * a device's own picker has (app.css, `.dress .prow`); a place's picker can
+ * fall between them, so f is made a little smaller where that keeps a row
+ * from a stray picture.
  */
 function fitDress(dress: HTMLElement): void {
   unfitDress(dress);

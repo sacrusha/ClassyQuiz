@@ -1,7 +1,6 @@
-"""The notes quiz in German, French and Italian: the run's french-revolution-quiz.zip (English, 12 Nov 2026) with its
+"""The notes quiz in German, French and Italian: the run's french-revolution-quiz.zip (English) with its
 quiz.txt translated, title, questions and choices, in the words of that language's class notes
-(src/public/examples/notes-<lang>.pdf). The root page's "Notes" tab shows this run (docs/design/root-page.md, "Getting a quiz"); the
-translations are drafts for the owner's review, as the other examples' are.
+(src/public/examples/notes-<lang>.pdf).
 
     py -I docs/example/notes_zips.py      (from anywhere)
 """

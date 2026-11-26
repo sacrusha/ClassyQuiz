@@ -1,21 +1,10 @@
-// The film on the root page (public/index.html, "The film, under the first
-// screen"). Until a press the page holds its poster frame as a picture, the
-// player's bar (play, the time bar, the time, the speed, a hidden full screen
-// button) and a hidden replay, and nothing else: nothing of the film loads or
-// plays until someone asks, and the film's words (in
-// /js/film.js) stay out of the page AIs read. The bar works before the film is
-// there, as a video player's does: the speed is set here, always; ▶, the
-// picture or a move of the time bar loads /js/film.js, which takes the markup
-// over, paints the same frame over the picture, drops the picture, and plays
-// from the start or shows the moment the bar was moved to, in the page's
-// language. While it loads the bar shows the time it was moved to. If it can't
-// load, or loads but can't draw the film (it then sets data-film to "failed"),
-// the picture stays and the next press tries again.
-//
-// The film speaks the page's language, and so does its poster picture
-// (film-<lang>.webp): filmLanguage() below, from client/home.ts whenever the
-// page's language is set. A switch while the film is on goes back to the
-// poster in the new language; the next press builds the film in it.
+// The root page's film until someone asks for it: its poster picture and its
+// player's bar, which works before the film is there. Nothing of the film
+// loads before, and its words (in /js/film.js) stay out of the page AIs read.
+// ▶, the picture or a move of the time bar loads /js/film.js, which takes the
+// markup over. If it can't load, or can't draw the film (it then sets
+// data-film to "failed"), the picture stays and the next press tries again.
+// A language switch while the film is on goes back to the poster.
 
 declare global {
   interface Window {
@@ -25,8 +14,7 @@ declare global {
 }
 
 const host = document.getElementById("cqfilm");
-// The poster picture, kept here: while the film plays it is out of the document, and a switch still sets its language.
-// The static page holds it, in English, for a browser without scripts only (<noscript>); here it is made without a
+// Kept here: while the film plays it is out of the document, and a language switch still sets it. Made without a
 // source, which filmLanguage() gives it, so a visit fetches the poster of its own language and no other.
 const poster = host ? makePoster(host) : null;
 

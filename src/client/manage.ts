@@ -1,7 +1,3 @@
-// What the steering tab shows and does, shared by the Remote (teach.ts) and
-// the Projector while it steers itself (screen.ts): docs/design/teacher-devices.md,
-// docs/design/question-flow.md.
-
 import type { ImageRef, TeacherQuestion, TeacherView } from "../shared/protocol.ts";
 import { ROOM_WARN, quotaResetAt } from "../shared/limits.ts";
 import { esc, lines, sharing, siteAddress } from "./dom.ts";
@@ -11,7 +7,6 @@ import type { Line } from "./net.ts";
 import { fillPictures, picImg } from "./pictures.ts";
 import { Presses, atOf, playStep, stepState } from "./steps.ts";
 
-/** What the teacher opened or is fixing; kept across redraws. */
 export interface ManageUI {
   open: Set<number>;
   all: boolean;
@@ -22,14 +17,13 @@ export function newUI(): ManageUI {
   return { open: new Set(), all: false, fixing: null };
 }
 
-/** A number that changes while answers come in, patched in place rather than redrawn. */
 export const live = (key: string, value: string | number) => `<span data-live="${key}">${value}</span>`;
 const LIVE = /<span data-live="([^"]+)">[^<]*<\/span>/g;
 
 /**
- * Puts html into el. When only live numbers changed, they are patched and
- * nothing else is touched: answers arrive fastest just when the teacher
- * reaches for Reveal, and a button replaced under the finger loses the tap.
+ * When only live numbers changed, they are patched and nothing else is
+ * touched: answers arrive fastest just when the teacher reaches for Reveal,
+ * and a button replaced under the finger loses the tap.
  */
 export function patch(el: HTMLElement, html: string): void {
   const skeleton = html.replace(LIVE, '<span data-live="$1"></span>');
@@ -59,15 +53,12 @@ function tags(q: TeacherQuestion): string {
   ].join("");
 }
 
-/** A question's choices with the solution marked; tappable while it is being fixed. */
 export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: number[] | null = null): string {
   const fixing = ui.fixing === i;
   const rows = q.answers
     .map((a, j) => {
       const tap = fixing ? ` fixable" data-act="toggle-count" data-q="${i}" data-i="${j}` : "";
-      // A picture answer shows its picture: the text says nothing
-      // about it, so this is where the teacher checks the key. While fixing,
-      // a tap on the row toggles the answer, so the picture isn't a button then.
+      // While fixing, a tap on the row toggles the answer, so the picture isn't a button then.
       const body =
         a.image !== undefined
           ? a.image
@@ -92,16 +83,10 @@ export function answersBlock(q: TeacherQuestion, i: number, ui: ManageUI, dist: 
   return `<div class="answers">${rows}${fix}</div>`;
 }
 
-/** A picture small, tapped to see it full size on this device. */
 export function thumb(img: ImageRef, cls = "", label = ""): string {
   return `<button class="thumb${cls ? ` ${cls}` : ""}" data-act="lightbox" data-src="${esc(img.src)}" data-w="${img.w}" data-h="${img.h}" aria-label="${label || T.picture}">${picImg(img.src, img.w, img.h)}${label ? `<span>${label}</span>` : ""}</button>`;
 }
 
-/**
- * A question's picture, and its own background if it has one, outside the
- * answers' fold: the class sees them anyway, and a wrong or revealing crop
- * is what a skimming teacher has to spot.
- */
 function questionPictures(q: TeacherQuestion, quizBackground: ImageRef | null): string {
   const parts: string[] = [];
   if (q.image) parts.push(thumb(q.image, q.pictureHidden ? "hidden" : ""));
@@ -109,7 +94,6 @@ function questionPictures(q: TeacherQuestion, quizBackground: ImageRef | null): 
   return parts.length ? `<div class="qpics">${parts.join("")}</div>` : "";
 }
 
-/** The questions with their fixes; also the local check's, before the upload (client/open.ts), which has no run. */
 export type QuestionsView = Pick<TeacherView, "questions" | "background" | "warnings">;
 
 export function questionList(v: QuestionsView, ui: ManageUI): string {
@@ -156,10 +140,9 @@ export function playersRow(v: TeacherView, removable: boolean): string {
 }
 
 /**
- * The lobby's players, kept in place in its `[data-crowd]` row rather than
- * in the patched page: children dressing their animals change the row
- * often, and a page redrawn under the teacher's finger loses the tap on
- * Start. Tapping an avatar removes it, as in playersRow.
+ * Kept in place in its `[data-crowd]` row rather than in the patched page:
+ * children dressing their animals change the row often, and a page redrawn
+ * under the teacher's finger loses the tap on Start.
  */
 export function syncCrowd(root: HTMLElement, v: TeacherView): void {
   const box = root.querySelector<HTMLElement>("[data-crowd]");
@@ -172,13 +155,11 @@ export function syncCrowd(root: HTMLElement, v: TeacherView): void {
 }
 
 export class Steer {
-  /** Every press of the steering bar, its keys and clicker included, goes through here. */
   readonly presses = new Presses();
   private line: () => Line | null;
   private view: () => TeacherView | null;
   readonly ui: ManageUI;
   private redraw: () => void;
-  /** This page has given a quiz never set the browser's choice of shared devices. */
   private shareSent = false;
 
   constructor(line: () => Line | null, view: () => TeacherView | null, ui: ManageUI, redraw: () => void) {
@@ -188,11 +169,7 @@ export class Steer {
     this.redraw = redraw;
   }
 
-  /**
-   * Call on every view: the moment the step on screen changes is what a
-   * press is judged against. A quiz in its lobby that was never set takes
-   * this browser's choice of shared devices.
-   */
+  /** Call on every view: the moment the step on screen changes is what a press is judged against. */
   noteStep(v: TeacherView): void {
     this.presses.noteView(stepState(v));
     if (v.phase === "lobby" && v.share === null && !this.shareSent && sharing.get()) {
@@ -201,7 +178,6 @@ export class Steer {
     }
   }
 
-  /** The same as a click on a button with these data attributes (for the ⋯ menu and the keyboard). */
   run(act: string, data: Record<string, string> = {}): Promise<boolean> {
     const el = document.createElement("button");
     el.dataset.act = act;
@@ -209,7 +185,6 @@ export class Steer {
     return this.act(el);
   }
 
-  /** Handles a click on an element with data-act; returns false when the action isn't a steering one. */
   async act(el: HTMLElement): Promise<boolean> {
     const v = this.view();
     const line = this.line();
@@ -220,7 +195,6 @@ export class Steer {
     const at = atOf(stepState(v));
     const send = async (cmd: Parameters<Line["send"]>[0]) => {
       const r = await line.send(cmd);
-      // A long message (the site full for today) stays long enough to read.
       if (!r.ok && r.error) {
         const words = said(r.error);
         toast(words, words.length > 80 ? 12_000 : 4000);
@@ -229,7 +203,6 @@ export class Steer {
     };
     switch (a) {
       case "play": {
-        // One slice, or the second of a double press (steps.ts, Presses).
         const from = this.presses.play(stepState(v));
         if (!from) return true;
         if (from.phase === "ranking" || (from.phase === "reveal" && playStep(from)?.to.phase === "final")) this.ui.fixing = null;
@@ -242,12 +215,12 @@ export class Steer {
         await send({ op: a === "begin" ? "begin" : "lastCall", at });
         return true;
       case "exit":
-        // No question: Exit is alone in the middle of the bar, away from where Play was.
+        // No confirm: Exit is alone in the middle of the bar, away from where Play was.
         if (!this.presses.other()) return true;
         await send({ op: "endInstance" });
         return true;
       case "let-in":
-        // Refused for the day's room: the check's notice says so and stays (roomNotice), no toast.
+        // No toast: a refusal for the day's room shows as roomNotice.
         await line.send({ op: "letIn" });
         return true;
       case "speed":
@@ -299,11 +272,6 @@ export class Steer {
   }
 }
 
-/**
- * What the question list does on this device alone: unfold, show the
- * solutions, open a question's fixes, enlarge a picture. Returns false for
- * anything else (a fix itself, which the caller applies).
- */
 export function viewAct(el: HTMLElement, ui: ManageUI, redraw: () => void): boolean {
   const q = Number(el.dataset.q);
   switch (el.dataset.act) {
@@ -357,11 +325,6 @@ export function openMenu(items: MenuItem[]): void {
   document.body.appendChild(back);
 }
 
-/**
- * The steering items of the ⋯ menu for the phase; the page adds its own.
- * onWall: the menu is on the Projector, where fixing an open question shows
- * the solution to the class.
- */
 export function steerItems(v: TeacherView, steer: Steer, onWall = false): MenuItem[] {
   const open = (act: string, data: Record<string, string> = {}) => void steer.run(act, data);
   const items: MenuItem[] = [];
@@ -388,17 +351,6 @@ export function toast(msg: string, ms = 4000): void {
   toastTimer = window.setTimeout(() => (t!.hidden = true), ms);
 }
 
-/** "classyquiz.pages.dev · 63953"; on a phone-sized wall the address gives way to the code (app.css). */
-/**
- * Before the players are let in, on a day the free site is nearly or quite
- * full: what that means for this quiz, and the way to more quizzes
- * (docs/design/hosting-and-limits.md, "Running classes finish"). It stays
- * while it holds; the page opens beside the quiz. The words are
- * classesFullMessage's (shared/limits.ts), the refusal's: for the day, or
- * for now when the quizzes open now hold the room. Let in, it says the
- * same while the first join is refused: the device that asked says only
- * that the site is full (JOIN_NO_ROOM).
- */
 export function roomNotice(v: TeacherView): string {
   const room = v.room;
   if (room === null || room >= ROOM_WARN) return "";
@@ -410,27 +362,13 @@ export function addressAndCode(code: string): string {
   return `<span class="addr">${esc(siteAddress())} · </span><strong>${esc(code)}</strong>`;
 }
 
-/**
- * The lobby's switch, under Start on the join screen and in the Remote's
- * lobby: off by default, fixed once the quiz starts.
- */
 export function speedSwitch(v: TeacherView): string {
   return `<button class="speed-switch" role="switch" aria-checked="${v.speed}" data-act="speed"><span class="knob" aria-hidden="true"></span>${T.speedSwitch}</button><small class="speed-note">${T.speedNote}</small>`;
 }
 
-/**
- * A player's device as the switch makes it (client/play.ts): one animal in
- * colours of two families, as seatAvatar (server/game.ts) gives them, and
- * the + beside.
- */
+/** One animal in colours of two families, as seatAvatar (server/game.ts) gives a shared device's places. */
 const SPLIT_PICTURE = `<span class="sharepic" data-act="share" aria-hidden="true"><span class="col">${avatarSvg({ a: 2, c: 1 }, false)}</span><span class="col">${avatarSvg({ a: 2, c: 4 }, false)}</span><span class="add">${ICON.plus}${ICON.person}</span></span>`;
 
-/**
- * The switch for a split screen at the players' devices, on the check and
- * the Remote's lobby (docs/design/class-and-wall.md, "Sharing a device"):
- * what it does stays in view, since a teacher deciding whether to turn it on
- * needs that, and says it to the class.
- */
 export function shareSwitch(v: TeacherView): string {
   return `<span class="share${v.share ? " on" : ""}"><span class="share-text"><button class="speed-switch share-switch" role="switch" aria-checked="${!!v.share}" aria-describedby="share-note" data-act="share"><span class="knob" aria-hidden="true"></span>${T.shareSwitch}</button><span class="share-note" id="share-note">${T.shareNote}</span></span>${SPLIT_PICTURE}</span>`;
 }

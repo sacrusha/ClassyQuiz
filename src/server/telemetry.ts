@@ -1,7 +1,6 @@
-// Telemetry's arithmetic (docs/design/telemetry.md): a class reduced to one
+// Telemetry's arithmetic: a class reduced to one
 // summary of numbers at its settle, the summaries added into the day's
-// record, and a day folded into its month once it leaves the 31 days. Pure,
-// so it is tested under Node and carried unchanged by a converted server.
+// record, and a day folded into its month once it leaves the 31 days.
 // Nothing here holds an id, a token, a name or a time finer than the day.
 
 import type { LineCounts } from "../shared/line.ts";
@@ -74,13 +73,13 @@ export function summarize(facts: ClassFacts, lines: LineCounts[]): ClassUse {
  * The class's Durable Object requests, as the plan counts them: each HTTP
  * request and each WebSocket upgrade one, incoming WebSocket messages twenty
  * to one (Cloudflare's Durable Objects pricing). Pings are answered by the
- * runtime without an invocation (item 1's probe), so they don't count.
+ * runtime without an invocation, so they don't count.
  */
 export function objectRequests(u: ClassUse): number {
   return u.http + u.opened + Math.ceil(u.sent / 20);
 }
 
-/** Lower edges of the buckets (the first is 0); from the estimates in scaling-drawer.md. */
+/** Lower edges of the buckets (the first is 0); from the estimates in docs/design/hosting-and-limits.md, "What a class costs". */
 export const SIZE_EDGES = [0, 2, 5, 15, 30];
 export const REQUEST_EDGES = [0, 250, 1000, 3000];
 export const ROW_EDGES = [0, 150, 500, 1500];
@@ -120,7 +119,7 @@ export interface Use {
   slept: number;
 }
 
-/** Problems: kept by the day only (docs/design/telemetry.md, "How long, by kind"). */
+/** Problems: kept by the day only. */
 export interface Problems {
   failed: number;
   silent: number;
@@ -160,7 +159,6 @@ function emptyUse(): Use {
 
 const SUMMED = ["players", "late", "questions", "played", "minutes", "devices", "polled", "reconnects", "http", "sent", "pings", "pollS", "awakeS", "slept"] as const satisfies readonly (keyof Use & keyof ClassUse)[];
 
-/** The day's use with one more class added. */
 export function addClass(day: DayUse | undefined, u: ClassUse): DayUse {
   const d: DayUse = day ? structuredClone(day) : { ...emptyUse(), problems: { failed: 0, silent: 0, quota: 0, errors: 0 } };
   d.classes++;

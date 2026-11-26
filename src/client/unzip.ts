@@ -1,7 +1,3 @@
-// Reads the quiz text and its pictures out of a .zip, using the browser's own
-// decompression (DecompressionStream "deflate-raw"); no library. Entries are
-// read one at a time, when asked for (images.ts).
-
 import { parseQuiz } from "../quiz/format.ts";
 
 export interface ZipEntry {
@@ -9,10 +5,7 @@ export interface ZipEntry {
   read(): Promise<Uint8Array<ArrayBuffer>>;
 }
 
-/**
- * Why a file can't be read as a quiz's archive; the page says it in its
- * language (landing-text.ts, `zip`), the message is the English.
- */
+/** The page says the problem in its language; the message is the English. */
 export type ZipProblem = "notZip" | "damaged" | "noQuiz";
 export class ZipError extends Error {
   readonly problem: ZipProblem;

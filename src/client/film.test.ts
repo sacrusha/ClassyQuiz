@@ -1,7 +1,5 @@
-// The landing's film (public/js/film.js, built from docs/film/build/film.js) draws the site's own screens with the
-// site's own words (docs/film/README.md, Situation; docs/film/film-text.md). They are copied into its SITE when the
-// film is made, so a screen that changes its words would leave the film showing a site that isn't there any more:
-// this fails until the film's source and its build follow (docs/film/build/sitebuild.py).
+// The film (public/js/film.js, built from docs/film/build/film.js) draws the site's screens with words copied into
+// its SITE: a screen that changes its words fails this until the film's source and its build follow.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

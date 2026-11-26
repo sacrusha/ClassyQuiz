@@ -1,10 +1,7 @@
-// The page for an address that isn't one (404.html), in this device's
-// language (client/device-lang.ts); the static HTML is English.
-
 import { deviceLang, speak } from "./device-lang.ts";
 import type { Lang } from "./landing-text.ts";
 
-const N = " "; // French: a thin no-break space before a colon, as on the root page
+const N = " "; // French: a thin no-break space before a colon
 
 const WORDS: Record<Exclude<Lang, "en">, Record<string, string>> = {
   de: {

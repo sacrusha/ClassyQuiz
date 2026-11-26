@@ -15,8 +15,6 @@ The words are text.py's, space_text.py's, notes_text.py's and test_text.py's; th
 installed Edge (playwright, as docs/film/build/shoot.py does). Needs Pillow and playwright, and PyMuPDF for the PDFs' pages.
 The overviews are drawn from their .zip by the site's own src/public/preview.py, the script the guidance offers the
 AI for it; the space run's German is the AI's own (space-review-original.webp here, 1500 px wide).
-The faces are those of the machine (Segoe UI, Cambria, Consolas on Windows): the
-pictures differ a little on another one.
 """
 import html, pathlib, re, sys
 

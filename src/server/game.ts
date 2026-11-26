@@ -7,9 +7,6 @@
 // current fixes, so a key changed after the reveal moves the points with it.
 // Points for speed are the same kind of computation: each answer keeps how
 // long after the answers appeared it was tapped (shared/tempo.ts).
-//
-// When a tap counts, and when a question's answers settle: answerOutcome and
-// docs/design/question-flow.md, "When a tap counts".
 
 import type { Quiz } from "../quiz/format.ts";
 import type { LineCounts } from "../shared/line.ts";
@@ -112,11 +109,10 @@ export interface Run {
   closedView?: Record<string, number>;
   /** Points for speed, the teacher's switch on the join screen; fixed at Start. Missing: off. */
   speed?: boolean;
-  /** Devices shared, the teacher's switch on the check (docs/design/class-and-wall.md, "Sharing a device"). Missing: never set, off. */
+  /** Devices shared, the teacher's switch on the check. Missing: never set, off. */
   share?: boolean;
   /** Question index → when its answers appeared (server time): answering opened, and the time for speed runs from here. */
   shown?: Record<string, number>;
-  /** Question index → its Last call, once pressed. */
   clocks?: Record<string, Clock>;
   /** How many questions have come up so far (the door narrows from the second). */
   opened?: number;
@@ -130,9 +126,8 @@ export interface Run {
   started?: number;
   /**
    * Start was pressed: START_MS after `at` the first question comes, and
-   * until then the lobby stays, its dressing with it
-   * (docs/design/class-and-wall.md, "Dressing the avatar"). Missing before
-   * the press and once the quiz is under way.
+   * until then the lobby stays, its dressing with it. Missing before the
+   * press and once the quiz is under way.
    */
   starts?: Clock;
   /**
@@ -149,9 +144,9 @@ export interface Run {
   zoom?: string;
   /**
    * The question locked in, its spread on the wall and its key not yet shown:
-   * answering is closed, and the next step is the reveal. Only meaningful while that question is the open one; the run
-   * only moves forward, so an index left from an earlier question never
-   * matches.
+   * answering is closed, and the next step is the reveal. Only meaningful
+   * while that question is the open one; the run only moves forward, so an
+   * index left from an earlier question never matches.
    */
   votes?: number;
   /**
@@ -161,9 +156,8 @@ export interface Run {
    */
   waiting?: true;
   /**
-   * Peers (docs/design/peers.md): nobody steers, everyone plays. A
-   * question's choices show with it, it closes once everyone present has
-   * answered, and the next comes once everyone present is done with its
+   * Peers: nobody steers, everyone plays. A question's choices show with it,
+   * it closes once everyone present has answered, and the next comes once everyone present is done with its
    * solution, or when a Countdown a player started runs out. `host`: the
    * player who opened the room, who also starts it, ends it early, fixes a
    * solution and removes an avatar. `countdown`: the last one started, on
@@ -180,9 +174,9 @@ export interface Run {
   lineWrites?: { q: number; n: number };
   /**
    * Each device's own count of its line, the newest it sent: "p:<player id>",
-   * "screen", "remote" (docs/design/telemetry.md). Stored with whatever
-   * write of the run comes next, never written for its own sake; reduced to
-   * the class's summary at the settle, and deleted with the quiz.
+   * "screen", "remote". Stored with whatever write of the run comes next,
+   * never written for its own sake; reduced to the class's summary at the
+   * settle, and deleted with the quiz.
    */
   lines?: Record<string, LineCounts>;
 }
@@ -210,7 +204,7 @@ export function newGame(quiz: Quiz): Game {
  * The class, at upload. With `random`, each question's answers get a
  * fresh order, the same on every screen, unless the quiz keeps it ("Order:
  * fixed"; nothing else does: a rule the AI and the teacher can't see is one
- * they can't rely on; docs/design/quiz-format.md, "Answers are shuffled").
+ * they can't rely on).
  */
 export function startRun(g: Game, code: string, id: string, random?: () => number): void {
   g.run = { id, code, phase: "lobby", current: -1, openedAt: 0, revealed: [], players: {}, answers: {}, ended: null };
@@ -227,7 +221,6 @@ export function shownOrder(texts: string[], random: () => number): number[] {
   return order;
 }
 
-/** The order question q's answers are shown in. */
 export function orderOf(g: Game, q: number): number[] {
   const n = g.quiz.questions[q]?.answers.length ?? 0;
   const o = g.run?.order?.[q];
@@ -275,7 +268,7 @@ export { CLASS_WAITING, DOOR_OPEN_MS, MAX_ANSWER_CHANGES, MAX_LATE_JOINERS, MAX_
  * the first minutes, and a teacher who started before handing the tablets
  * out waits at the first question for the class. Once the second question
  * is up and the minutes are over, the quiz is under way and the door
- * narrows to MAX_LATE_JOINERS (docs/design/class-and-wall.md, "The door").
+ * narrows to MAX_LATE_JOINERS.
  */
 export function doorOpen(run: Run, now: number): boolean {
   if (run.phase === "lobby") return true;
@@ -284,10 +277,9 @@ export function doorOpen(run: Run, now: number): boolean {
 }
 
 /**
- * beside: a player at the device the new one shares (docs/design/class-and-wall.md,
- * "Sharing a device"), only in the lobby, while the teacher allows sharing,
- * and at most MAX_SEATS to a device; the class's caps are the same as for a
- * device of its own.
+ * beside: a player at the device the new one shares, only in the lobby,
+ * while the teacher allows sharing, and at most MAX_SEATS to a device; the
+ * class's caps are the same as for a device of its own.
  */
 export function addPlayer(g: Game, id: string, token: string, now: number, random: () => number, beside?: Player): Player {
   const run = needRun(g);
@@ -305,7 +297,6 @@ export function addPlayer(g: Game, id: string, token: string, now: number, rando
   return p;
 }
 
-/** The device a player sits at, named by its first player's id. */
 function deviceOf(p: Player): string {
   return p.device ?? p.id;
 }
@@ -358,9 +349,8 @@ export function leaveSeat(g: Game, id: string): boolean {
 }
 
 /**
- * A child dresses their animal (docs/design/class-and-wall.md, "Dressing the
- * avatar"): the background shape, the hat and the tool, set as a whole so a
- * resend changes nothing. A page from before the tools sends no tool: none.
+ * A child dresses their animal: the background shape, the hat and the tool,
+ * set as a whole so a resend changes nothing. A page from before the tools sends no tool: none.
  * Only in the lobby; the look is fixed at Start, so the wall's avatars stay
  * as the children last saw them. "same": nothing to store. "refused": not
  * now, not a look the menu has, or MAX_LOOK_CHANGES spent; the device then
@@ -393,7 +383,6 @@ export function activePlayers(run: Run): Player[] {
   return Object.values(run.players).filter((p) => !p.removed);
 }
 
-/** The answers to question q that count in the run: a removed avatar's don't. */
 export function activeAnswers(run: Run, q: number): AnswerRecord[] {
   return Object.entries(run.answers[q] ?? {})
     .filter(([pid]) => playerById(run, pid)?.removed === false)
@@ -441,13 +430,11 @@ export function startSoon(g: Game, now: number): "started" | "running" {
   return "started";
 }
 
-/** Start pressed, the lobby still up: when it began and how long it runs; null otherwise. */
 export function startClock(g: Game): Clock | null {
   const run = g.run;
   return run?.phase === "lobby" ? (run.starts ?? null) : null;
 }
 
-/** Start's time ran out (now ≥ its end): the quiz begins. True when it began. */
 export function startOut(g: Game, now: number): boolean {
   const c = startClock(g);
   if (!c || now < c.at + c.ms) return false;
@@ -455,7 +442,6 @@ export function startOut(g: Game, now: number): boolean {
   return true;
 }
 
-/** "Let the class in": students can join from now on. In the lobby only; again changes nothing. */
 export function letIn(g: Game): void {
   const run = needRun(g);
   if (run.phase !== "lobby") return;
@@ -508,7 +494,6 @@ export function lockIn(g: Game, view: number): void {
   delete run.zoom;
 }
 
-/** The open question is locked in: its spread on the wall, its key not yet. */
 export function lockedIn(g: Game): boolean {
   const run = g.run;
   return !!run && run.phase === "question" && run.votes === run.current;
@@ -525,7 +510,6 @@ export function reveal(g: Game, view: number): void {
   run.phase = "reveal";
 }
 
-/** Last call, while it runs: pressed, and answering not yet locked in. */
 export function runningClock(g: Game): Clock | null {
   const run = g.run;
   if (!run || run.phase !== "question" || lockedIn(g)) return null;
@@ -556,13 +540,11 @@ export function speedScale(g: Game): boolean {
   return !!g.run?.speed;
 }
 
-/** Whether no question comes after the current one: its reveal is followed by the final ranking. */
 export function lastQuestion(g: Game): boolean {
   const run = g.run;
   return !!run && nextShown(g, run.current) === -1;
 }
 
-/** Reveal or ranking → next question (or the final ranking after the last one). */
 export function next(g: Game, now: number): void {
   const run = needRun(g);
   if (run.phase !== "reveal" && run.phase !== "ranking") throw new GameError("Show the solution first.");
@@ -599,11 +581,7 @@ export function finish(g: Game, now: number): void {
   if (run.ended === null) run.ended = now;
 }
 
-/**
- * Records a tap. `view` is the version of the view the device showed when it
- * was tapped. Returns true when the answer was accepted (recorded, or already
- * the recorded one).
- */
+/** `view`: the version of the view the device showed when it was tapped. */
 export function answer(g: Game, playerId: string, q: number, choice: number, seq: number, view: number, now: number, deviceMs?: number): boolean {
   return answerOutcome(g, playerId, q, choice, seq, view, now, deviceMs) !== "refused";
 }
@@ -655,8 +633,7 @@ export function answerOutcome(
   const changes = prev ? (prev.changes ?? 0) + 1 : 0;
   if (changes > MAX_ANSWER_CHANGES) return "refused";
   const byPlayer = (run.answers[q] ??= {});
-  // The time is the device's, capped at the server's own count
-  // (docs/design/question-flow.md, "Whose time it is").
+  // The time is the device's, capped at the server's own count.
   const serverMs = Math.max(0, now - (run.shown?.[q] ?? run.openedAt));
   const ms = typeof deviceMs === "number" && Number.isFinite(deviceMs) ? Math.round(Math.max(0, Math.min(deviceMs, serverMs))) : serverMs;
   byPlayer[playerId] = { choice, ms, seq, ...(changes > 0 ? { changes } : {}) };
@@ -664,9 +641,9 @@ export function answerOutcome(
 }
 
 /**
- * A player's input to the stage that is open, as the server holds it
- * (docs/design/open-period-in-memory.md): the look in the lobby, the answer
- * to the question on screen, a Peers room's tap on its solution. The
+ * A player's input to the stage that is open, as the server holds it: the
+ * look in the lobby, the answer to the question on screen, a Peers room's tap
+ * on its solution. The
  * player's socket keeps a copy, so a hibernating instance rebuilds it.
  */
 export interface Held {
@@ -675,7 +652,6 @@ export interface Held {
   ready?: number;
 }
 
-/** What the server holds of this player's input to the open stage; null when there is none. */
 export function heldOf(g: Game, playerId: string): Held | null {
   const run = g.run;
   const p = run ? playerById(run, playerId) : null;
@@ -759,9 +735,8 @@ export function setHidePicture(g: Game, q: number, hide: boolean): void {
 }
 
 /**
- * The fixes made on the local check before the upload (docs/design/local-check.md,
- * "Opening a room"), applied to a new game through the same rules as a
- * teacher's fix: the browser isn't trusted. A value that doesn't fit its
+ * The fixes made on the local check before the upload, applied to a new game
+ * through the same rules as a teacher's fix: the browser isn't trusted. A value that doesn't fit its
  * question is left as the quiz has it; the rest still apply.
  */
 export function applyFixes(g: Game, fixes: unknown): void {
@@ -784,17 +759,14 @@ export function applyFixes(g: Game, fixes: unknown): void {
   });
 }
 
-// Peers (docs/design/peers.md, "Nobody steers"): the room moves on when
-// everyone present is done, or when a Countdown one of them started runs
-// out; never by a clock of its own. "Present" is the room's to say (its
+// Peers: the room moves on when everyone present is done, or when a Countdown
+// one of them started runs out; never by a clock of its own. "Present" is the room's to say (its
 // devices' lines); here it is a set of player ids.
 
-/** The room runs on its own: nobody steers. */
 export function isPeers(g: Game): boolean {
   return !!g.run?.peers;
 }
 
-/** The player who opened a Peers room. */
 export function isHost(g: Game, playerId: string): boolean {
   return !!g.run?.peers && g.run.peers.host === playerId;
 }
@@ -813,7 +785,6 @@ export function setReady(g: Game, playerId: string, q: number): "stored" | "same
   return "stored";
 }
 
-/** Peers: whether this player is done with the open question's solution. */
 export function isReady(g: Game, playerId: string): boolean {
   const run = g.run;
   return !!run?.peers && run.phase === "reveal" && run.ready?.[playerId] === run.current;
@@ -844,7 +815,6 @@ export function peersDue(g: Game, present: Set<string>): boolean {
   return anyoneDone(g) && waitingFor(g, present).length === 0;
 }
 
-/** Peers: someone has answered the open question, or is done with its solution. */
 export function anyoneDone(g: Game): boolean {
   const run = g.run;
   if (!run?.peers || (run.phase !== "question" && run.phase !== "reveal")) return false;
@@ -852,9 +822,8 @@ export function anyoneDone(g: Game): boolean {
 }
 
 /**
- * Peers: Countdown on the step the room is on, by a player done with it
- * (docs/design/peers.md, "Countdown"): LAST_CALL_MS later the room goes on
- * whoever it still waits for. Once per step. "running": one already is;
+ * Peers: Countdown on the step the room is on, by a player done with it:
+ * LAST_CALL_MS later the room goes on whoever it still waits for. Once per step. "running": one already is;
  * "refused": not now (no step, the player not done with it, a removed
  * avatar).
  */
@@ -867,14 +836,13 @@ export function startCountdown(g: Game, playerId: string, now: number): "started
   return "started";
 }
 
-/** Peers: the Countdown on the step the room is on, while it runs; null otherwise. */
 export function peersCountdown(g: Game): PeersCountdown | null {
   const run = g.run;
   const c = run?.peers?.countdown;
   return c && c.phase === run!.phase && c.q === run!.current ? c : null;
 }
 
-/** Peers: the room's Countdown ran out (now ≥ its end): the room goes on. True when it stepped. `view`: as in reveal. */
+/** `view`: as in reveal. */
 export function countdownOut(g: Game, now: number, view: number): boolean {
   const c = peersCountdown(g);
   if (!c || now < c.at + c.ms) return false;
@@ -897,20 +865,17 @@ export function goOn(g: Game, now: number, view: number): void {
   } else throw new GameError("Nothing to go on to.");
 }
 
-/** Peers: one step on if everyone present is done (peersDue). True when it stepped. */
 export function peersStep(g: Game, now: number, view: number, present: Set<string>): boolean {
   if (!peersDue(g, present)) return false;
   goOn(g, now, view);
   return true;
 }
 
-/** Whether the open question's picture fills the projector. */
 export function zoomed(g: Game): boolean {
   const run = g.run;
   return !!run && (run.phase === "question" || run.phase === "reveal") && run.zoom === `${run.phase}|${run.current}`;
 }
 
-/** The picture of the question on screen fills the projector, or goes back beside the question. */
 export function setZoom(g: Game, on: boolean): void {
   const run = needRun(g);
   if (run.phase !== "question" && run.phase !== "reveal") throw new GameError("There is no question on screen.");
@@ -1009,7 +974,6 @@ export function winners(g: Game, q: number): string[] {
     .map((p) => p.id);
 }
 
-/** How many players picked each answer of question q. */
 export function distribution(g: Game, q: number): number[] {
   const counts = new Array(g.quiz.questions[q]?.answers.length ?? 0).fill(0);
   if (g.run) for (const a of activeAnswers(g.run, q)) counts[a.choice]++;

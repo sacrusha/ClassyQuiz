@@ -1,13 +1,8 @@
-// The quiz read on the root page, passed to the local check at /open
-// (docs/design/local-check.md, "From the root page to the check"). A page
-// can't hand a file to the next one, so it goes through the browser's
-// IndexedDB for the moment of the page change: the check takes it out and
-// deletes it as it arrives. A record whose page never came (the tab closed
-// in between, the navigation lost) stays in the browser's site data until
-// the site next runs a page that sweeps: the start page, the check, or the
-// next handover, each of which deletes what is older than STALE_MS.
-// The pictures go as ArrayBuffers rather than Blobs, the plainer value to
-// store (Blobs in IndexedDB had gaps in older Safari).
+// The quiz read on the root page, passed to the local check at /open through
+// IndexedDB, since a page can't hand a file to the next one; the check
+// deletes it as it takes it. A record whose page never came stays until a
+// page that sweeps runs. The pictures go as ArrayBuffers, not Blobs: Blobs in
+// IndexedDB had gaps in older Safari.
 
 import type { QuizFiles } from "./opening.ts";
 

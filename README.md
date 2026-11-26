@@ -23,9 +23,9 @@ Give the AI you already use the site's address and say what the quiz is for. An 
 
 Or attach your material, sheets, notes or a marked test:
 
-> Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 4th grade class, about 10 questions, in English.
+> Read classyquiz.pages.dev. Can you make me a classyQuiz with exercises like no. 1, 3 and 4 from these two sheets? For my 4th grade class, about 12 questions, in English. Preferably a bit harder towards the end.
 
-The AI reads the manual on that page and hands back a `.zip`. Any AI subscription will do; otherwise, free Claude: other free options have proven less reliable in testing.
+The AI reads the manual on that page and hands back a `.zip`. Any AI subscription will do, or free Claude.
 
 Other ways to ask:
 
@@ -41,7 +41,7 @@ No quiz yet? The start page has examples to play, one for each thing an ask can 
 ## What you can count on
 
 - **Free, without accounts or sign-up.**
-- **Nothing kept.** Played on your own, a quiz never leaves your browser. Played in a room, a quiz is deleted when the room is ended, or three hours after its last use. The `.zip` is your lasting copy. No request is logged with an IP address.
+- **Nothing kept.** Played on your own, a quiz never leaves your browser. Played in a room, a quiz, with its players' answers and scores, is deleted when it ends, or three hours after its last use. The `.zip` is your lasting copy. No request is logged with an IP address.
 - **Built for bad Wi-Fi.** A device that drops comes back into the quiz, and where a network blocks live connections the quiz runs over plain HTTP.
 - **Four languages for the site's own words**: English, German, French, Italian. A quiz shows as it was written, in whatever language you asked for.
 - **Open.** The code is here, under the MIT licence.
@@ -81,8 +81,8 @@ A copy changes only when you update it: left as it is, it shows the same screens
 A school or company that would rather not use an outside service can run classyQuiz on its own server. The code as published runs on Cloudflare. It is written to be convertible, so that an AI can read it and convert it to another server, and the conversion is theirs. With an AI that runs programs, such as Claude Code: *"Convert classyQuiz from https://github.com/sacrusha/ClassyQuiz to run on our own server, following its README section 'On a school's or company's own server'."*
 
 - **What changes.** The Cloudflare-specific code is the Durable Objects in `src/server/` (`instance.ts`, `directory.ts`, `budget.ts`, `stats.ts`, exported by `worker.ts`: storage, alarms, hibernating WebSockets) and the `/api` routes in `src/functions/api/[[path]].ts`, listed at its top. The game, picture handling, the quiz format (`src/server/game.ts`, `images.ts`, `src/quiz/`, `src/shared/`) and the browser side stay as they are. The browser speaks HTTP and WebSocket to `/api`, with the messages in `src/shared/protocol.ts`.
-- **What a converted copy keeps.** A quiz is deleted when it is ended or three hours after its last use (`INSTANCE_IDLE_MS`), and no request is logged with an IP address (`docs/design/hosting-and-limits.md`, "What lives, and for how long"). The limits in `src/shared/limits.ts` are the shared site's; raise them. Serve it over HTTPS: without it, tablets can't keep the screen awake.
-- **The guidance the users' AIs read.** Before writing a quiz, a user's AI reads the start page's guidance, at the address the start page names (the Build step). It can't reach an address inside the school's or company's network, and the shared site's guidance moves on with newer versions, whose quizzes an older copy may not read. So the start page has to name an address outside that network that serves the guidance of this copy's own version.
+- **What a converted copy keeps.** A quiz is deleted when it ends or three hours after its last use (`INSTANCE_IDLE_MS`), and no request is logged with an IP address (`docs/design/hosting-and-limits.md`). The limits in `src/shared/limits.ts` are the shared site's; raise them. Serve it over HTTPS: without it, tablets can't keep the screen awake.
+- **The guidance the users' AIs read.** Before writing a quiz, a user's AI reads the guidance at the address the start page names in its example asks. It can't reach an address inside the school's or company's network, and the shared site's guidance moves on with newer versions, whose quizzes an older copy may not read. So the start page has to name an address outside that network that serves the guidance of this copy's own version.
 - **Done** when `npm test` passes in `src/` and `node scripts/simulate.mjs <your address>` passes against the converted server: a class of 25 on bad Wi-Fi, checked for answers lost or counted twice.
 - **Updates are a choice.** A copy changes only when it is updated, so converting once and leaving it is a way to run it: the same screens every time. To take an update, convert again from the newer code. The Cloudflare-specific code stays in the files above, so converting again stays the same job.
 
@@ -93,8 +93,8 @@ TypeScript throughout, run by Node as it is and bundled for the browser by esbui
 In `src/`: `npm run dev` runs the site locally, `npm test` the tests, `npm run check` the type check.
 
 - [`src/DEVELOPING.md`](src/DEVELOPING.md): where things are, running locally, deploying, and the traps.
-- [`docs/backlog.md`](docs/backlog.md): what the product is for, what is built and what is open.
-- [`docs/design/`](docs/design/): one file per part of the site, its purpose and how the site meets it.
+- [`docs/backlog.md`](docs/backlog.md): what the product is for, its constraints, and the work that is open.
+- [`docs/design/`](docs/design/): one file per part of the site.
 
 ## Licence
 

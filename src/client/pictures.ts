@@ -1,17 +1,13 @@
-// The quiz's pictures in the browser (docs/design/pictures.md, "Loading").
-// The server sends them with no-store, so a shared school laptop keeps
+// The server sends pictures with no-store, so a shared school laptop keeps
 // nothing once the page is closed; that also means an <img> that is drawn
 // again fetches again. So each picture is fetched once per page, into a blob
 // URL, and every <img data-pic="<src>"> on the page is filled from that.
-//
-// The Projector fetches every picture of the quiz ahead (in the lobby), so a
-// question never waits on one; the teacher's pages fetch what they show.
 
 const urls = new Map<string, string>();
 const loading = new Map<string, Promise<string | null>>();
 const waiting: (() => void)[] = [];
 let running = 0;
-/** At most this many fetches at once: the current question's picture shouldn't queue behind a dozen others. */
+/** The current question's picture shouldn't queue behind a dozen others. */
 const PARALLEL = 2;
 
 async function slot<T>(work: () => Promise<T>): Promise<T> {
@@ -25,7 +21,7 @@ async function slot<T>(work: () => Promise<T>): Promise<T> {
   }
 }
 
-/** The picture as a blob URL, fetched once; null when it can't be had (the <img> then asks the server itself). */
+/** null when it can't be had: the <img> then asks the server itself. */
 export function load(src: string, first = false): Promise<string | null> {
   const have = urls.get(src);
   if (have) return Promise.resolve(have);
@@ -51,19 +47,15 @@ export function load(src: string, first = false): Promise<string | null> {
 }
 
 /**
- * A picture this page already holds as a blob URL (the local check's, read
- * from the zip): used as it is. Fetching it would be refused, the
- * Content-Security-Policy letting pages fetch only from the site.
+ * A blob URL this page made itself (the local check's, read from the zip):
+ * fetching it would be refused, the Content-Security-Policy letting pages
+ * fetch only from the site.
  */
 export function own(url: string): void {
   urls.set(url, url);
 }
 
-/**
- * A picture this page already holds under another address (a Peers
- * device's, cut from a pack: client/peers.ts): drawn for `src` without
- * fetching it. One already here stays.
- */
+/** A picture this page holds under another address (cut from a pack), drawn for `src` without fetching it. */
 export function seed(src: string, url: string): void {
   if (!urls.has(src)) urls.set(src, url);
 }
@@ -72,7 +64,7 @@ export function preload(srcs: string[]): void {
   for (const s of srcs) void load(s);
 }
 
-/** An <img> for a picture; fillPictures() gives it its source. w/h hold its shape before it has loaded. */
+/** fillPictures() gives it its source. */
 export function picImg(src: string, w: number, h: number, cls = ""): string {
   return `<img data-pic="${attr(src)}" width="${w}" height="${h}" alt=""${cls ? ` class="${cls}"` : ""}>`;
 }
@@ -81,7 +73,6 @@ function attr(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
-/** Gives every <img data-pic> under root its picture, fetching what isn't here yet. */
 export function fillPictures(root: ParentNode = document): void {
   root.querySelectorAll<HTMLImageElement>("img[data-pic]").forEach((img) => {
     const src = img.dataset.pic!;

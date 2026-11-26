@@ -1,12 +1,9 @@
-// Pictures at upload (docs/design/pictures.md, "At upload"): the
-// quiz's Image: lines are matched with the files in the .zip, each picture is
-// redrawn on a canvas, and the quiz goes up with them.
-//
-// Redrawing does three things at once. It drops everything a photo carries
-// besides the picture (camera, time, GPS: "nothing identified"); it shrinks a
-// phone photo to what a projector shows (a class's devices load it over school
-// Wi-Fi); and it leaves the server only PNG and JPEG to take, so no SVG, with
-// the scripts it may hold, is ever served.
+// Pictures at upload: each picture
+// the quiz names is redrawn on a canvas. That drops everything a photo
+// carries besides the picture (camera, time, GPS); shrinks a phone photo to
+// what a projector shows, for a class's devices on school Wi-Fi; and leaves
+// the server only PNG and JPEG to take, so no SVG, with the scripts it may
+// hold, is ever served.
 
 import { imageKey, parseQuiz, pictureRefs, type PictureRef, type Problem } from "../quiz/format.ts";
 import {
@@ -34,11 +31,7 @@ export interface PreparedImage {
 
 export interface PreparedImages {
   images: PreparedImage[];
-  /**
-   * Pictures the quiz names that can't go up: not in the archive, or not
-   * readable by this browser. Each is worded for the
-   * teacher to paste to the AI; the teacher may also run without them.
-   */
+  /** Pictures the quiz names that can't go up, each worded for the AI. */
   problems: Problem[];
 }
 
@@ -62,10 +55,7 @@ function isClutter(name: string): boolean {
   return /(^|\/)(__MACOSX|\.)/.test(name) || name.endsWith("/");
 }
 
-/**
- * The pictures the quiz text names (Image: and Background:), found in the archive and redrawn. A quiz whose text has errors gets nothing here; the
- * server reports those.
- */
+/** The pictures the quiz text names, found in the archive and redrawn. A quiz whose text has errors gets nothing here; the server reports those. */
 export async function prepareImages(text: string, archive: ZipEntry[], progress?: (done: number, of: number) => void): Promise<PreparedImages> {
   const parsed = parseQuiz(text);
   // The first mention of each file names it in messages; the server matches every mention by the same key.
@@ -213,7 +203,7 @@ export async function uploadQuiz(
   images: PreparedImage[],
   leaveOut: boolean,
   fixes: Fix[],
-  /** How the room plays: "peers" runs on its own (docs/design/peers.md); absent, someone steers it. */
+  /** How the room plays: "peers" runs on its own; absent, someone steers it. */
   mode?: "peers",
 ): Promise<UploadResult & { error?: string; json?: false; quota?: boolean }> {
   if (images.length === 0) {

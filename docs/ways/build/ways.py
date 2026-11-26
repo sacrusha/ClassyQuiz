@@ -102,7 +102,7 @@ def big_screen(x, y, w, votes=None):
     """The wall on the big screen: where the question stands and who is in, the question, its picture, the four tiles;
     votes: how far each tile's split bar has filled (0 to 1), as at the split, before the solution."""
     h = w * 9 / 16
-    p = w / 100  # one hundredth of the width
+    p = w / 100
     out = f'<rect x="{f(x - 2 * p)}" y="{f(y - 2 * p)}" width="{f(w + 4 * p)}" height="{f(h + 4 * p)}" rx="{f(p)}" fill="#c7c1b6"/>'
     out += f'<rect x="{f(x)}" y="{f(y)}" width="{f(w)}" height="{f(h)}" fill="{PAPER}"/>'
     # the bar: where the question stands, the avatars of those in, the count
@@ -258,7 +258,6 @@ def quizmaster():
     o += '<rect x="-10" y="40" width="130" height="96" rx="5" fill="#c9a274"/><rect x="10" y="52" width="40" height="52" fill="#fff" transform="rotate(-3 30 78)"/><rect x="62" y="58" width="44" height="34" fill="#f6e7a6"/>'
     sx, sy, sw = 196, 26, 414
     o += big_screen(sx, sy, sw, votes=[.6, .3, .1, 0])
-    # the teacher at the left, pointing at the arrow in the picture
     # the teacher at the left, pointing at the arrow in the picture: the one a quizmaster is, so big enough to be seen
     ts, tx, ty = .76, 104, 196
     arrow = (sx + sw * (.03 + .94 * 520 / 1600), sy + sw * (.155 + .17 * .4))

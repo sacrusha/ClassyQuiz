@@ -1,6 +1,3 @@
-// Unguessable tokens and short codes, from the platform's CSPRNG.
-
-/** URL-safe token; 24 bytes is 192 bits. */
 export function randomToken(bytes = 24): string {
   const b = crypto.getRandomValues(new Uint8Array(bytes));
   let s = "";
@@ -8,7 +5,7 @@ export function randomToken(bytes = 24): string {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-/** Digits only, any of them 0: the teacher code's two after the class code (docs/design/teacher-devices.md, "One entry: the teacher code"). */
+/** Any digit may be 0: for the teacher code's two digits after the class code. */
 export function randomDigits(digits: number): string {
   const b = crypto.getRandomValues(new Uint32Array(digits));
   return Array.from(b, (x) => String(x % 10)).join("");

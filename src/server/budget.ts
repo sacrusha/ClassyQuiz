@@ -1,30 +1,29 @@
-// The site's share of the free plan (docs/design/hosting-and-limits.md, "Protecting the day's allowance"): one
-// tiny Durable Object for the whole site that books every upload against two
-// caps, the uploads' rows a day and bytes stored at once. Storage is the one limit that
-// doesn't come back at midnight: filled, every write on the account fails,
-// answers in running classes included, until quizzes expire.
+// The site's share of the free plan: one Durable Object for the whole site
+// that books every upload against two caps, the uploads' rows a day and bytes
+// stored at once. Storage is the one limit that doesn't come back at
+// midnight: filled, every write on the account fails, answers in running
+// classes included, until quizzes expire.
 //
 // Holds nothing about a quiz or who made it: an id, a size and an expiry per
 // quiz, a count per day.
 //
-// The day's ledger (docs/design/hosting-and-limits.md, "Running classes
-// finish"): rows, requests and awake seconds (server/rows.ts). A quiz books
-// its class when the class is let in, moves the booking as the class shows
-// what it needs, and settles it at the final ranking with what it spent and
-// what devices left on will. The ledger holds what is booked or spent today,
-// so a class under way never meets a spent allowance its booking didn't
+// The day's ledger: rows, requests and awake seconds (server/rows.ts). A quiz
+// books its class when the class is let in, moves the booking as the class
+// shows what it needs, and settles it at the final ranking with what it spent
+// and what devices left on will. The ledger holds what is booked or spent
+// today, so a class under way never meets a spent allowance its booking didn't
 // leave room for, as far as the estimates hold.
 //
-// Telemetry (docs/design/telemetry.md): the day's record also takes each
-// class's summary at its settle, the day's uploads and the most classes
-// booked at once, all on writes made anyway. A day leaving the 31 days is
-// folded into its month's record, kept MONTHS_KEPT months.
+// Telemetry: the day's record also takes each class's summary at its settle,
+// the day's uploads and the most classes booked at once, all on writes made
+// anyway. A day leaving the 31 days is folded into its month's record, kept
+// MONTHS_KEPT months.
 //
 // It also keeps the days (UTC, as the count) on which it refused an upload,
 // for 31 days: the landing's own-copy line says on how many of the last 30
-// the site was full. Only these refusals are known here;
-// a day the platform's request allowance ran out is not recorded, since the
-// site can't write once it is spent (docs/design/hosting-and-limits.md, "When the allowance runs out anyway").
+// the site was full. Only these refusals are known here; a day the
+// platform's request allowance ran out is not recorded, since the site can't
+// write once it is spent.
 
 import { DurableObject } from "cloudflare:workers";
 import { DAY_FOR_CLASSES, DAY_FOR_JOINS, DAY_ROWS_FOR_UPLOADS, MAX_LIVE_BYTES, NEARLY_FULL, type ClassFull, type Cost, type SiteFull } from "../shared/limits.ts";
@@ -49,7 +48,7 @@ export interface RowsDay {
   atOnce?: number;
   /** Classes turned away, as counted in this object's memory: a lower bound. */
   refused?: Refused;
-  /** The classes that settled, summed (docs/design/telemetry.md); the probes' apart. */
+  /** The classes that settled, summed; the probes' apart. */
   use?: DayUse;
   probeUse?: DayUse;
 }
@@ -66,9 +65,7 @@ interface Booking {
 /**
  * The day's ledger as a quiz hears it. stays: what of `day` stays until
  * 00:00 UTC whatever the quizzes open now give back, so a ledger that is
- * full while `stays` has room is full for now, not for the day
- * (docs/design/hosting-and-limits.md, "A refused class hears whether to
- * wait").
+ * full while `stays` has room is full for now, not for the day.
  */
 export interface Ledger {
   day: Cost;
@@ -80,11 +77,9 @@ export type Booked = Ledger & { full?: ClassFull };
 
 export class SiteBudget extends DurableObject<Env> {
   /**
-   * Every key this object stores, read once as it wakes, so that what it
-   * reads doesn't grow with its calls (docs/design/hosting-and-limits.md,
-   * "Running classes finish", Not covered). Only this object writes its
-   * storage, so the copy stays true while a value is replaced, never
-   * changed in place.
+   * Every key this object stores, read once as it wakes, so that what it reads
+   * doesn't grow with its calls. Only this object writes its storage, so the
+   * copy stays true while a value is replaced, never changed in place.
    */
   private kept = new Map<string, unknown>();
 
@@ -188,7 +183,6 @@ export class SiteBudget extends DurableObject<Env> {
     }
     const h = this.get<RowsDay>(`h:${day}`) ?? { day, classes: 0, written: 0, peak: 0 };
     const counted = b.rows !== undefined;
-    // This class and the others let in and not yet settled.
     const atOnce = 1 + [...bookings].filter(([k, o]) => k !== key && o.rows !== undefined && o.until > now).length;
     const record: RowsDay = this.withRefused({
       ...h,
@@ -232,12 +226,10 @@ export class SiteBudget extends DurableObject<Env> {
     await Promise.all(writes);
   }
 
-  /** GET /api/site, for the landing: on how many of the last 30 days the site was full. */
   async site(): Promise<{ full: number }> {
     return { full: await this.fullDays() };
   }
 
-  /** GET /api/site/use, for the owner: the days' and the months' records, newest first, with what is booked or spent now. */
   async owner(): Promise<OwnerView> {
     const records = this.list<RowsDay>("h:");
     const uploads = this.list<number>("d:");
@@ -288,7 +280,6 @@ export class SiteBudget extends DurableObject<Env> {
     await this.put(entries);
   }
 
-  /** What the classes booked or spent today, of DAY_FOR_CLASSES. */
   async ledgerToday(): Promise<Cost> {
     return asCost(this.get<Cost | number>(`r:${dayOf(Date.now())}`));
   }
@@ -353,7 +344,6 @@ function staying(ledger: Cost, bookings: Map<string, Booking>, day: string, now:
   return moved(ledger, held, NO_COST);
 }
 
-/** The day's peaks with the ledger at `after`. */
 function peaks(h: RowsDay, after: Cost): Pick<RowsDay, "peak" | "peakShare"> {
   return { peak: Math.max(h.peak, after.rows), peakShare: Math.max(h.peakShare ?? 0, fullness(after, DAY_FOR_CLASSES)) };
 }

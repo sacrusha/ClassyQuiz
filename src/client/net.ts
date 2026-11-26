@@ -1,17 +1,9 @@
-// The device's line to its quiz instance (docs/design/connections.md, "Transport: WebSocket first, long-polling when the network breaks it").
-//
-// - A socket counts as working only once a message has arrived: some school
-//   filters block the upgrade, others accept it and then drop the frames.
-//   Then long-polling over plain HTTP takes over for the rest of the page's
-//   life. Same messages, same views.
 // - Commands are kept until the server acknowledges them and are resent after
-//   a reconnect; the server ignores repeats (shared/protocol.ts).
+//   a reconnect; the server ignores repeats.
 // - A player's input as the server last took it (its look, its answer) is
 //   kept, across a reload too, and sent with every hello and poll: the
 //   server holds it in memory and rebuilds from it what an instance restart
-//   lost (docs/design/open-period-in-memory.md).
-// - The line counts itself (docs/design/telemetry.md): numbers only, kept
-//   across a reload like the input, sent with every hello, command and poll.
+//   lost.
 
 import type { AnswerAck, Auth, ClientMessage, Command, DeviceHeld, ServerMessage } from "../shared/protocol.ts";
 import { viewKey } from "../shared/protocol.ts";
@@ -27,13 +19,8 @@ export interface LineOptions {
   auth: () => Auth;
   onMessage: (m: ServerMessage) => void;
   onStatus?: (s: LineStatus) => void;
-  /** The notices' words, in the page's language: the tap that wakes a device asleep, and the day's allowance spent. */
   words: { asleep: string; quota: () => string };
-  /**
-   * Which of the page's lines this is, for what it keeps across a reload:
-   * "" for the page's one line, ".1" and ".2" for the places added at a
-   * shared device (docs/design/class-and-wall.md, "Sharing a device").
-   */
+  /** Keys what the line keeps across a reload: "" for the page's one line, ".1" and ".2" for the places added at a shared device. */
   slot?: string;
 }
 
@@ -46,24 +33,16 @@ interface Pending {
 
 const PING_EVERY = 20_000;
 const PONG_WITHIN = 8_000;
-/** The server answers a hello at once; an open socket that stays silent this long doesn't work. */
 const FIRST_MESSAGE_WITHIN = 8_000;
-/** Polls never follow each other faster than this, whatever the server answers. */
 const MIN_POLL_GAP = 300;
-/** Commands whose acknowledgement means "held", not "stored": a tick, and a player's taps. */
+/** Commands whose acknowledgement means "held" in memory, not "stored". */
 const HELD_OPS = new Set<Command["op"]>(["tick", "answer", "dress", "ready"]);
-/** Out of the daily allowance: ask again this often, not every few seconds. */
 const QUOTA_RETRY = 60_000;
 
-/** The site answered that its daily allowance is spent. */
 class QuotaError extends Error {}
 
-/**
- * The page's lines. A shared device has one per place, and they sleep and
- * wake as the page does: one notice, and its tap wakes them all.
- */
+/** A shared device has one line per place; they sleep together, and one notice's tap wakes them all. */
 const pageLines = new Set<Line>();
-/** When a view of the page's last changed, or someone touched the page. */
 let lastChange = Date.now();
 
 export class Line {
@@ -84,25 +63,18 @@ export class Line {
   private asleep = false;
   private forgotten = false;
   private lastKey = "";
-  /** Out of the allowance: "http" when the site turned requests away, "write" when the quiz couldn't store. */
+  /** "http" when the site turned requests away, "write" when the quiz couldn't store. */
   private quota: "http" | "write" | null = null;
-  /** The poll being held, to let go of when the tab's identity changes. */
   private pollAbort: AbortController | null = null;
-  /** The player's input as the server last took it, for the player whose token it names. */
   private held: DeviceHeld | null = null;
-  /** The line's own count of itself; pollS is kept as pollMs and pollSince while the page lives. */
+  /** Its pollS is kept as pollMs and pollSince while the page lives. */
   private line: LineCounts;
   private pollMs = 0;
-  /** Since when the line has been holding polls: polling, and neither asleep nor at rest. */
+  /** Set while polling, and neither asleep nor at rest. */
   private pollSince: number | null = null;
   /** The server's word with a poll's answer: no class is in this quiz, so a poller left alone may rest. */
   private mayRest = false;
-  /**
-   * At rest (docs/design/connections.md, "A poller left alone rests"): no
-   * poll is held and the line asks every REST_EVERY_MS. To the others a
-   * player's device then counts as away; a teacher's tab stays there. A
-   * step in the quiz, a touch or a command ends it.
-   */
+  /** No poll is held and the line asks every REST_EVERY_MS; to the others a player's device then counts as away. */
   private resting = false;
   /** Ends a rest's wait before its time. */
   private stir: (() => void) | null = null;
@@ -129,7 +101,6 @@ export class Line {
     const kick = () => {
       if (this.stopped) return;
       if (document.visibilityState !== "visible") return;
-      // A tablet switched back on: the student is back.
       if (this.asleep) this.wake();
       else this.reconnectNow();
     };
@@ -149,7 +120,7 @@ export class Line {
     }, 60_000);
   }
 
-  /** Closes the line until a tap; the page underneath stays as it was. A tablet left on after the lesson doesn't keep its line, or its polling, all day. */
+  /** A tablet left on after the lesson doesn't keep its line, or its polling, all day. */
   private sleep(): void {
     this.asleep = true;
     this.line.slept++;
@@ -198,10 +169,9 @@ export class Line {
   }
 
   /**
-   * The tab is someone else now (a guest became a player): a poll held under
-   * the old identity is let go, and the next one asks as the new one. Over
-   * HTTP the guest's poll would otherwise be held until the guest's choice
-   * changed, and the tablet's own view with it. Nothing to do on a socket.
+   * The tab is someone else now (a guest became a player): over HTTP the
+   * guest's held poll would otherwise be held until the guest's choice
+   * changed, and the tablet's own view with it.
    */
   repoll(): void {
     this.pollAbort?.abort();
@@ -219,10 +189,6 @@ export class Line {
     this.stir?.();
   }
 
-  /**
-   * Stops for good, and what it kept for a reload goes with it: a place
-   * closed at a shared device, whose slot a new player may take next.
-   */
   forget(): void {
     this.stop();
     this.forgotten = true;
@@ -234,7 +200,7 @@ export class Line {
   }
 
 
-  /** own: the page asking by itself (its timer's tick, a refused join asked again), which doesn't wake the line or end its rest; anything else is someone at the device. */
+  /** own: the page asking by itself (its timer's tick, a refused join asked again), which neither wakes the line nor ends its rest. */
   send(cmd: Command, own = cmd.op === "tick"): Promise<Extract<ServerMessage, { t: "ack" }>> {
     if (own && (this.asleep || this.resting)) return Promise.resolve({ t: "ack", id: "", ok: false, error: "asleep" });
     if (this.asleep) this.wake();
@@ -383,7 +349,6 @@ export class Line {
     this.line.pings++;
     clearTimeout(this.pongTimer);
     this.pongTimer = window.setTimeout(() => {
-      // No answer: the line is dead even though the socket thinks it's open.
       if (this.ws === ws) {
         this.ws = null;
         this.clearPing();
@@ -415,10 +380,9 @@ export class Line {
   }
 
   /**
-   * The line's count as sent: a teacher's tab's or a player's, not a guest's,
-   * which the server keeps nowhere. Stored for a reload on the way.
-   * ahead: what the message carrying it adds once it is sent (itself, its
-   * socket), counted in what is sent and not in what is stored.
+   * Not a guest's, which the server keeps nowhere. Stored for a reload on
+   * the way. ahead: what the message carrying it adds once it is sent
+   * (itself, its socket), counted in what is sent and not in what is stored.
    */
   private lineNow(ahead: { opened?: number; sent?: number } = {}): { line?: LineCounts } {
     if (this.opts.auth().role === "guest") return {};
@@ -433,8 +397,7 @@ export class Line {
       if (i >= 0) {
         const [p] = this.pending.splice(i, 1);
         // Something was stored again: the allowance is back. A player's tap
-        // is held in memory, not stored, so its acknowledgement doesn't say
-        // (docs/design/open-period-in-memory.md).
+        // is held in memory, not stored, so its acknowledgement doesn't say.
         if (m.ok && !HELD_OPS.has(p.cmd.op) && this.quota === "write") this.setQuota(null);
         if (m.ok) this.took(p.cmd, m.result);
         p.resolve(m);
@@ -493,7 +456,6 @@ export class Line {
     return h.look || h.answer || h.ready !== undefined ? h : null;
   }
 
-  /** An acknowledged command: a look taken, the answer tap the acknowledgement names as the record, a Peers room's tap on. */
   private took(cmd: Command, result: unknown): void {
     const auth = this.opts.auth();
     if (auth.role !== "player") return;
@@ -553,7 +515,7 @@ export class Line {
     this.flushing = false;
   }
 
-  /** Goes to rest, or ends it. Seconds at rest aren't seconds polling (`pollS`): no poll is held. */
+  /** Seconds at rest aren't seconds polling (`pollS`): no poll is held. */
   private rest(on: boolean): void {
     if (on === this.resting) return;
     this.resting = on;
@@ -612,7 +574,6 @@ export class Line {
         }
         if (gone) break;
         if (resting) {
-          // The rest goes on unless the answer brought a step, or someone touched the page meanwhile.
           if (this.mayRest && lastChange < t0) await this.restWait();
           continue;
         }
@@ -662,13 +623,11 @@ export async function api<T>(path: string, body: unknown): Promise<{ status: num
 }
 
 /**
- * An API answer's body. One that isn't JSON isn't the site's (a school
- * filter's page, say) and comes back as `json: false`, its status saying
- * nothing about a quiz, so callers go by the site's `error`; or as `quota`
- * when it reads as the daily allowance spent: our functions' `{error:
- * "quota"}`, or what Cloudflare answers in the Function's place past the
- * day's requests (docs/design/hosting-and-limits.md, "When the allowance
- * runs out anyway").
+ * A body that isn't JSON isn't the site's (a school filter's page, say) and
+ * comes back as `json: false`, its status saying nothing about a quiz; or as
+ * `quota` when it reads as the daily allowance spent: our functions'
+ * `{error: "quota"}`, or what Cloudflare answers in the Function's place
+ * past the day's requests.
  */
 export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
   const text = await res.text().catch(() => "");
@@ -684,7 +643,7 @@ export async function readApi<T>(res: Response): Promise<ApiBody<T>> {
   return parsed ?? ({ json: false } as ApiBody<T>);
 }
 
-/** The tab's held input survives a reload (an iPad reloads a tab it put away); not another tab, nor the browser closed. */
+/** Survives a reload: an iPad reloads a tab it put away. */
 function readHeld(key: string): DeviceHeld | null {
   try {
     const v = JSON.parse(sessionStorage.getItem(`cq.held.${key}`) ?? "null");
@@ -702,7 +661,6 @@ function writeHeld(key: string, h: DeviceHeld): void {
   }
 }
 
-/** The line's count survives a reload as the input does; numbers only (shared/line.ts). */
 function readCounts(key: string): LineCounts | null {
   try {
     return readLine(JSON.parse(sessionStorage.getItem(`cq.line.${key}`) ?? "null"));

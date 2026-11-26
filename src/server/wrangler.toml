@@ -1,4 +1,3 @@
-# The state Worker: hosts the Durable Objects the site's functions bind to.
 name = "classyquiz-state"
 main = "worker.ts"
 compatibility_date = "2026-10-01"
@@ -34,11 +33,10 @@ new_sqlite_classes = ["UploadStats"]
 tag = "v3"
 deleted_classes = ["Pairing"]
 
-# The site's share of the free plan: uploads a day, bytes stored (docs/design/hosting-and-limits.md, "Protecting the day's allowance").
 [[migrations]]
 tag = "v4"
 new_sqlite_classes = ["SiteBudget"]
 
-# No request logs: they would hold IP addresses (docs/design/hosting-and-limits.md, "What lives, and for how long").
+# No request logs: they would hold IP addresses.
 [observability]
 enabled = false

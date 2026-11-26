@@ -1,15 +1,8 @@
-// The header the root page and /example share: the code box and the language
-// switch. One choice of language per device (LANG_KEY), so a teacher who picks
-// one on either page finds it on the other.
-
 import { JOIN_CODE, TEACHER_CODE } from "../shared/protocol.ts";
 import { $, esc, store } from "./dom.ts";
 import { LANG_KEY, LANGS, type Lang } from "./landing-text.ts";
 
-/** The code box: the students' class code, and the teacher code, the class
- *  code and two digits (docs/design/teacher-devices.md, "One entry: the teacher
- *  code"). It routes by length and never submits by itself, so typing seven
- *  isn't cut off at five. */
+/** Never submits by itself, so typing a seven-digit teacher code isn't cut off at five. */
 export function codeBox(): void {
   const join = $("#join") as HTMLFormElement;
   const codeInput = $("#code") as HTMLInputElement;
@@ -28,11 +21,9 @@ export function codeBox(): void {
   });
 }
 
-/** The language switch, top right (docs/design/root-page.md, "Languages"): "EN ▾"
- *  over a native select, which lists the four by their own names. Made here,
- *  not in the HTML, so an AI's fetcher doesn't read four language names.
- *  A pick is stored and handed to `onPick`; the returned function shows `l`,
- *  with `label` as the switch's name in that language. */
+/** Made here, not in the HTML, so an AI's fetcher doesn't read four language
+ *  names. The returned function shows `l`, with `label` as the switch's name
+ *  in that language. */
 export function langSwitch(onPick: (l: Lang) => void): (l: Lang, label: string) => void {
   const box = document.createElement("label");
   box.className = "lang";

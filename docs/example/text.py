@@ -1,13 +1,7 @@
-"""The words of the sheets run's conversation, per language, for review side by side.
-
-The run is the owner's (19 Nov 2026, German, Claude Sonnet 5.5; its screenshot is sheets-conversation-original.webp
-here, dark): the two photographed sheets and two asks, each answered with a .zip and an overview of its questions. One
-entry per piece of the chat, in the order the chat shows them; under each the four languages. de is the AI's words as
-it wrote them, less its remark that the overview showed the picture answers only small (the run's preview.py put them
-four to a row; the overview shown is the current one's), and the app's own as that app showed them, in English; the
-asks are the owner's, the second tidied. en,
-fr and it are drafts for the owner's review, with the app's words as that language's app
-would show them. Where the German rests on the German situation (the quiz "in Schweizer
+"""The words of the sheets run's conversation, per language: the two photographed sheets and two asks, each answered
+with a .zip and an overview of its questions. One entry per piece of the chat, in the order the chat shows them; under
+each the four languages. de is the AI's words as it wrote them, less its remark that the overview showed the picture
+answers only small (the run's preview.py put them four to a row; the overview shown is the current one's). Where the German rests on the German situation (the quiz "in Schweizer
 Schreibweise"), the translation has the situation of a teacher asking in that language about the same German sheets.
 The quiz's title and questions are the translated quizzes' (quiz_zips.py).
 

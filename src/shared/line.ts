@@ -1,8 +1,7 @@
 // A device's own count of its line to the quiz it is in, since its page
-// opened (docs/design/telemetry.md, "What is counted, and by whom"). The
-// device sends its current counts, not events, so the newest replaces the
-// one before and nothing is counted twice. Numbers and one word from a
-// closed list, nothing else: no message, no name, no time.
+// opened. The device sends its current counts, not events, so the newest
+// replaces the one before and nothing is counted twice. Numbers and one word
+// from a closed list, nothing else: no message, no name, no time.
 
 export const LINE_MODES = ["ws", "poll"] as const;
 export type LineMode = (typeof LINE_MODES)[number];
@@ -39,7 +38,6 @@ export function emptyLine(): LineCounts {
   return { mode: "ws", opened: 0, failed: 0, silent: 0, http: 0, sent: 0, pings: 0, pollS: 0, quota: 0, slept: 0, errors: 0 };
 }
 
-/** What a device sent as its line, as the server keeps it: the word from the list, each number a bounded integer; null when it isn't a line at all. */
 export function readLine(v: unknown): LineCounts | null {
   if (!v || typeof v !== "object") return null;
   const o = v as Record<string, unknown>;

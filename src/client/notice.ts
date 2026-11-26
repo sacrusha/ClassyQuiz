@@ -1,8 +1,4 @@
-// Full-screen notices over any page that holds a line to its quiz
-// (docs/design/connections.md, "Devices left on", "The allowance spent"): asleep after a long while without a
-// change, a tap wakes it; and the site's daily allowance spent, said as such
-// rather than as a lost connection. Styled inline: they sit over whatever the
-// page draws, whichever stylesheet it has.
+// Styled inline: the notices sit over whatever the page draws, whichever stylesheet it has.
 
 export type NoticeKind = "sleep" | "quota";
 
@@ -13,9 +9,9 @@ const layer =
   "padding:24px;box-sizing:border-box;text-align:center;font:inherit;";
 
 /**
- * Shows a notice. `onWake` (sleep only): called once by the first tap or key,
- * which the page underneath doesn't get, so waking never also presses a
- * button or advances the quiz.
+ * `onWake` (sleep only): called by the first tap or key, which the page
+ * underneath doesn't get, so waking never also presses a button or advances
+ * the quiz.
  */
 export function showNotice(kind: NoticeKind, text: string, onWake?: () => void): void {
   if (document.getElementById(ids[kind])) {

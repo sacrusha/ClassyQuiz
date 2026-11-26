@@ -1,22 +1,17 @@
 """Builds the classyQuiz film animatic as one standalone HTML page.
 Run: py -I build.py [out_file]   (default: .tmp/film/index.html at the repo root, which git ignores;
-the page is generated, ~230 KB, and not kept in the tree. shoot.py and sitebuild.py read it from there.)
+shoot.py and sitebuild.py read it from there.)
 
-The page carries: film.css, the assets (the site's Rubik, the two sheets, the Quizmaster's picture, the
-brand marks) as data: URIs in one JS object, the avatar drawings taken from
-the repo's client/look.ts, the root page's words the film shows (the example
-ask, the words of the page's first screen, the chapters' and the player's names) taken from
-client/landing-text.ts, and film.js. On the site
-the same film.js reads the assets from the site's own files instead (see the
-header of film.js). The page opens in English; page.html?lang=de (en, fr, it)
+The page carries film.css, the assets as data: URIs, the avatar drawings from client/look.ts, the
+root page's words the film shows from client/landing-text.ts, and film.js. ?lang=de (en, fr, it)
 plays the film in that language.
 """
 import base64, json, re, sys, pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
-ROOT = HERE.parents[2]          # the repo root
-REPO = ROOT / 'src'             # the site
-PUB = REPO / 'public'
+ROOT = HERE.parents[2]
+SRC = ROOT / 'src'
+PUB = SRC / 'public'
 PAGE = ROOT / '.tmp' / 'film' / 'index.html'   # default output, git-ignored
 
 
@@ -42,7 +37,7 @@ def data_uri(path, mime):
 
 def look_js():
     """The avatars from client/look.ts, types stripped, as plain JS."""
-    src = (REPO / 'client/look.ts').read_text(encoding='utf-8')
+    src = (SRC / 'client/look.ts').read_text(encoding='utf-8')
     start = src.index('const AVATAR_COLOURS')
     end = src.index('/** A background shape alone')
     s = src[start:end]
@@ -80,17 +75,15 @@ def file_size(lang, n):
 
 def idea_file():
     """The first tab's file per language as the page names it: its name and size, from client/example-files.ts."""
-    src = (REPO / 'client/example-files.ts').read_text(encoding='utf-8')
+    src = (SRC / 'client/example-files.ts').read_text(encoding='utf-8')
     data = json.loads(src[src.index('= {') + 2:src.rindex('} as const') + 1])
     return {lang: (f['zip'], file_size(lang, f['bytes'])) for lang, f in data['idea'].items()}
 
 
 def landing_text():
     """The root page's own words the film shows, per language, from client/landing-text.ts: the example ask
-    (its parts as { s, l }: l 0 is the site's address, other l a labelled part) and the words of the page's first screen,
-    so the film types the very sentence the page prints and its phone and laptop show the root page as a visitor sees it; and the
-    chapters' names and the player's, which the film shows on the page's time bar."""
-    src = (REPO / 'client/landing-text.ts').read_text(encoding='utf-8')
+    (its parts as { s, l }: l 0 is the site's address, other l a labelled part) and LANDING_KEYS."""
+    src = (SRC / 'client/landing-text.ts').read_text(encoding='utf-8')
     out = {}
     for lang in ('de', 'en', 'fr', 'it'):
         m = re.search(r'\nconst %s: Text = \{\n(.*?)\n\};\n' % lang, src, re.S)
