@@ -156,6 +156,9 @@ turns whatever the material asks into choices of text and pictures.
   shows the owner's photographs of the printed sheet.
 - **"This file is not a readable .zip archive."** lacks a next step for the
   visitor, where the other errors under the box have one.
+- **Found when searched in German, French or Italian** — only the English
+  page reaches an index (`design/root-page.md`, Search and shared links),
+  while the example class searches in German.
 
 ## The guidance to the AI
 
@@ -302,6 +305,14 @@ The quiz is already made; it can be more than one activity.
 - `README.md` says "Nothing kept" while the site keeps daily counts that
   name no person, device or quiz (`design/telemetry.md`): whether and how
   the README says so.
+- A searched name reaching this site: ClassQuiz (classquiz.de), an
+  open-source, privacy-minded Kahoot alternative from Germany, is one
+  letter and almost no sound away; on 2026-11-26 a web search for
+  `classyquiz.pages.dev` found nothing of the site and ClassQuiz first.
+- Whether search engines have the site, and what finds it: it is
+  registered with none. Google Search Console and Bing Webmaster Tools
+  each take a `pages.dev` address verified by a file or tag the site
+  serves; Bing's index feeds several AIs' searches.
 - Two cuts he has not seen: the sentence that introduced the manual is gone
   from the root page, and "The .zip is your lasting copy." ends the note
   under Peers and Quizmaster on the check.

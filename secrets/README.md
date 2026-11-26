@@ -33,3 +33,6 @@ build as environment variables.
 - `SITE_ADDRESS` (optional, not secret): the site's address when it isn't
   `<name>.pages.dev` with the name in `src/wrangler.toml`; the build writes
   it into the start page.
+- `GOOGLE_SITE_VERIFICATION` (optional, not secret): the name of the file
+  Google Search Console hands out to verify the address, `google….html`;
+  the build serves it.

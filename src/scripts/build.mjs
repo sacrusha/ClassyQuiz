@@ -113,15 +113,42 @@ for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html"))) {
 
 // The source names the demo's address; a copy deployed under another name
 // (wrangler.toml's `name`, or SITE_ADDRESS) names its own, for readers that
-// don't run the pages' scripts: AIs reading the guidance, a saved /check.
+// don't run the pages' scripts: AIs reading the guidance, a saved /check,
+// search engines, link previews. Other pages' text may mean the shared site
+// itself (own-copy.html), so they change only in their <head>.
 const DEMO = "classyquiz.pages.dev";
 const project = (await readFile(join(root, "wrangler.toml"), "utf8")).match(/^name\s*=\s*"([^"]+)"/m)?.[1];
 const address = (process.env.SITE_ADDRESS || (project ? `${project}.pages.dev` : DEMO)).replace(/^https?:\/\//, "").replace(/\/+$/, "");
 if (address !== DEMO) {
-  for (const name of ["index.html", "check.html"]) {
-    const page = join(dist, name);
-    await writeFile(page, (await readFile(page, "utf8")).replaceAll(DEMO, address));
+  for (const name of await readdir(dist)) {
+    const file = join(dist, name);
+    if (["index.html", "check.html", "robots.txt"].includes(name)) {
+      await writeFile(file, (await readFile(file, "utf8")).replaceAll(DEMO, address));
+    } else if (name.endsWith(".html")) {
+      const html = await readFile(file, "utf8");
+      const end = html.indexOf("</head>");
+      if (end < 0) throw new Error(`${name}: no </head>`);
+      await writeFile(file, html.slice(0, end).replaceAll(DEMO, address) + html.slice(end));
+    }
   }
+}
+
+// /sitemap.xml: the pages without noindex.
+{
+  const urls = [];
+  for (const name of (await readdir(dist)).filter((n) => n.endsWith(".html")).sort()) {
+    if ((await readFile(join(dist, name), "utf8")).includes('<meta name="robots" content="noindex">')) continue;
+    urls.push(`https://${address}/${name === "index.html" ? "" : name.slice(0, -".html".length)}`);
+  }
+  await writeFile(join(dist, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `<url><loc>${u}</loc></url>`).join("\n")}\n</urlset>\n`);
+}
+
+// Google Search Console's proof that this deployment's owner holds its
+// address; set beside SITE_ADDRESS, so a copy doesn't serve the shared site's.
+if (process.env.GOOGLE_SITE_VERIFICATION) {
+  const file = process.env.GOOGLE_SITE_VERIFICATION.replace(/\.html$/, "");
+  if (!/^google[0-9a-f]+$/.test(file)) throw new Error("GOOGLE_SITE_VERIFICATION: the verification file's name, google….html");
+  await writeFile(join(dist, `${file}.html`), `google-site-verification: ${file}.html`);
 }
 
 // /manual.txt: the guidance as plain text, for an AI whose fetch tool would

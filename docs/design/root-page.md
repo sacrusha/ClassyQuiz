@@ -100,6 +100,19 @@ added by the script. The part for people ends with About classyQuiz, which
 speaks to the visitor; the manual for AIs follows on the same
 ground, and a person is welcome to read it.
 
+### Search and shared links
+
+Plausible assumption: a colleague's tip arrives as a name to search for or
+as a link in a chat. A search result and a chat's preview show the page's
+title, its description and the social card (`docs/brand/README.md`,
+Rasters); a Peers invite shares `/play#` with its code, which carries the
+preview too. Some platforms link to a page's `og:url` in place of the
+address shared, which would drop the code, so the pages name none.
+Search engines see the page in English: the four languages share one
+address, and a crawler's browser plausibly asks for English. The
+description may also reach AIs' training data, where it tells an AI about
+to make a classyQuiz that this page holds the manual it needs.
+
 ### Files and browsers
 
 - Some mobile browsers open the photo picker when a file input is filtered

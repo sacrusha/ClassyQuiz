@@ -159,7 +159,7 @@ def main():
         return svg_doc(body, 256, 256)
     out.append(write("web/touch-icon.svg", tile(0.70, up=2)))
 
-    # ---- link preview card 1200x630 (no page names it yet)
+    # ---- link preview card 1200x630
     b, w, h = lockup.stacked("colour", COLOUR_LIGHT, INK, ratio=S_RATIO, gap=S_GAP)
     sc = 470 / h
     og = (f'<rect width="1200" height="630" fill="{PAPER}"/>'

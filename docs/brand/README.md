@@ -20,13 +20,16 @@ a mark. Which file the site uses where: `docs/design/identity.md`.
 - The orange `#E26B22` is a shade deeper than the avatar's `#E8742A` so the
   head's edge reaches 3:1 against the light page.
 
-## Browser icons
+## Rasters
 
-`web/` holds the sources; the build renders no rasters, so these are
-rendered by hand with any SVG renderer that keeps the geometry:
+The build renders none, so the site's rasters are rendered by hand with any
+SVG renderer that keeps the geometry:
 
 - `favicon.ico`: `svg/classyquiz-symbol-16.svg` at 16,
   `svg/classyquiz-symbol-32.svg` at 32 and `web/favicon-48.svg` at 48.
 - `apple-touch-icon.png`: `web/touch-icon.svg` at 180.
+- `social-card.png`: `svg/classyquiz-social-card.svg` at 1200 × 630, the
+  link preview the pages name in `og:image`, where chat apps take no SVG.
 
-`web/favicon.svg` is served as it is.
+`web/` holds the browser icons' sources; `web/favicon.svg` is served as it
+is.

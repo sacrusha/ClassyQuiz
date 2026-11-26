@@ -3,3 +3,5 @@
 # robots parser gets the start page's HTML in its place.
 User-agent: *
 Allow: /
+
+Sitemap: https://classyquiz.pages.dev/sitemap.xml
