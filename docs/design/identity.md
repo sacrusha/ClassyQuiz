@@ -40,6 +40,13 @@ graculus.ch for someone who comes from that material, as from a Graculus
 video to classyQuiz to graculus.ch. The root page's About names the maker,
 linked to graculus.ch (`root-page.md`).
 
+Teacher portals and a school's IT judge a tool by who stands behind it and
+what it keeps. `/privacy` holds the imprint and the privacy statement for
+classyquiz.pages.dev, in the shape of graculus.ch's, linked from the pages
+people read. Its sentences describe what the code and the browser keep
+(`telemetry.md`, `hosting-and-limits.md`), so they go stale when that
+changes.
+
 ## Not known
 
 - Whether teachers read the answer marks as Kahoot's, and whether that helps

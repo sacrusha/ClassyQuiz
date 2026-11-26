@@ -5,6 +5,7 @@ import { $, esc } from "./dom.ts";
 import { ICON } from "./look.ts";
 import { CHECK_TEXT } from "./check-text.ts";
 import { deviceLang, speak } from "./device-lang.ts";
+import { SITE_WORDS } from "./site-text.ts";
 
 const lang = deviceLang();
 const t = CHECK_TEXT[lang];
@@ -88,7 +89,7 @@ async function main(): Promise<void> {
 }
 
 document.documentElement.lang = lang;
-speak(t as unknown as Record<string, unknown>);
+speak({ ...t, privacy: SITE_WORDS[lang].privacy } as unknown as Record<string, unknown>);
 $("#forit").textContent = t.forIt(location.host, "");
 
 $("#again").addEventListener("click", () => void main());

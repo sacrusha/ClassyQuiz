@@ -55,7 +55,7 @@ function apply(l: Lang): void {
   $("#join button").setAttribute("aria-label", head.join);
   document.title = t.title;
   document.documentElement.lang = l;
-  for (const el of document.querySelectorAll<HTMLElement>("[data-t]")) el.textContent = t[el.dataset.t as Word];
+  for (const el of document.querySelectorAll<HTMLElement>("[data-t]")) el.textContent = el.dataset.t === "privacy" ? head.privacy : t[el.dataset.t as Word];
   for (const el of document.querySelectorAll<HTMLImageElement>("img[data-t-alt]")) el.alt = t[el.dataset.tAlt as Word];
   const zip = $("#zip") as HTMLAnchorElement;
   zip.href = `/examples/${exampleZip(ex, l)}`;

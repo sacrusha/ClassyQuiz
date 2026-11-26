@@ -1,5 +1,6 @@
-// The root page's messages that the pages a quiz plays on say too, apart so
-// that those pages leave the rest of the root page's words out of their scripts.
+// Words several pages share: the root page's messages that the pages a quiz
+// plays on say too, apart so that those pages leave the rest of the root page's
+// words out of their scripts; and the link to /privacy.
 
 import type { Lang } from "./landing-text.ts";
 import type { SiteFull } from "../shared/limits.ts";
@@ -12,6 +13,7 @@ export interface SiteWords {
   quota: (at: string | null) => string;
   ownCopyLink: string;
   whatToTellIt: string;
+  privacy: string;
 }
 
 const en: SiteWords = {
@@ -23,6 +25,7 @@ const en: SiteWords = {
   quota: (at) => `The free site has used up today's allowance. It works again at ${at ? `${at} Swiss time` : "00:00 UTC"}.`,
   ownCopyLink: "More quizzes: a site of your own, your school's or your company's ›",
   whatToTellIt: "What to tell IT ›",
+  privacy: "Imprint and privacy",
 };
 
 const de: SiteWords = {
@@ -34,6 +37,7 @@ const de: SiteWords = {
   quota: (at) => `Die Gratis-Seite hat ihr Tageskontingent aufgebraucht. Ab ${at ? `${at} Uhr Schweizer Zeit` : "00:00 UTC"} funktioniert sie wieder.`,
   ownCopyLink: "Mehr Quiz: eine eigene Website für dich, deine Schule oder deine Firma ›",
   whatToTellIt: "Was du der IT sagen kannst ›",
+  privacy: "Impressum und Datenschutz",
 };
 
 const fr: SiteWords = {
@@ -45,6 +49,7 @@ const fr: SiteWords = {
   quota: (at) => `Le site gratuit a épuisé son quota du jour. Il sera de nouveau disponible à partir de ${at ? `${at}, heure suisse` : "00:00 UTC"}.`,
   ownCopyLink: "Davantage de quiz : un site à vous, à votre école ou à votre entreprise ›",
   whatToTellIt: "Que dire au service informatique ›",
+  privacy: "Mentions légales et confidentialité",
 };
 
 const it: SiteWords = {
@@ -56,6 +61,7 @@ const it: SiteWords = {
   quota: (at) => `Il sito gratuito ha esaurito la quota giornaliera. Torna a funzionare dalle ${at ? `${at}, ora svizzera` : "00:00 UTC"}.`,
   ownCopyLink: "Più quiz: un sito tuo, della tua scuola o della tua azienda ›",
   whatToTellIt: "Cosa dire al servizio informatico ›",
+  privacy: "Note legali e privacy",
 };
 
 export const SITE_WORDS: Record<Lang, SiteWords> = { de, en, fr, it };

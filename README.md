@@ -41,7 +41,7 @@ No quiz yet? The start page has examples to play, one for each thing an ask can 
 ## What you can count on
 
 - **Free, without accounts or sign-up.**
-- **Nothing kept.** Played on your own, a quiz never leaves your browser. Played in a room, a quiz, with its players' answers and scores, is deleted when it ends, or three hours after its last use. The `.zip` is your lasting copy. No request is logged with an IP address.
+- **Privacy.** Played on your own, a quiz never leaves your browser. Played in a room, a quiz, with its players' answers and scores, is deleted when it ends, at the latest three hours after its last use; the `.zip` is your lasting copy. No request is logged with an IP address. What the site keeps of its use are counts by the day, which name no person, device or quiz. In full: [imprint and privacy](https://classyquiz.pages.dev/privacy).
 - **Built for bad Wi-Fi.** A device that drops comes back into the quiz, and where a network blocks live connections the quiz runs over plain HTTP.
 - **Four languages for the site's own words**: English, German, French, Italian. A quiz shows as it was written, in whatever language you asked for.
 - **Open.** The code is here, under the MIT licence.
@@ -73,6 +73,8 @@ By hand:
 To try it on your own computer first: `npm run dev` in `src/`, then open http://127.0.0.1:8788.
 
 The shared site's limits for a few users (players per room, the rows a day its uploads may write, storage, what its rooms may book of the day's rows, requests and duration) are constants in `src/shared/limits.ts`; raise them for your own copy. Countdown's length and the points for speed are in `src/shared/tempo.ts`.
+
+The copy serves the shared site's imprint and privacy page, `/privacy`, which names its maker and says copies are run by whoever set them up. For your own, edit `src/public/privacy.html` and its translations in `src/client/privacy.ts`.
 
 A copy changes only when you update it: left as it is, it shows the same screens every time. To update, ask your AI to update it from GitHub, the way it was set up, or `git pull` and `npm run deploy`.
 

@@ -14,7 +14,7 @@ import { ASKS, LANGS, TEXT } from "../client/landing-text.ts";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 const watch = process.argv.includes("--watch");
-const pages = ["home", "example", "open", "teach", "screen", "play", "check", "owner", "own-copy", "notfound"];
+const pages = ["home", "example", "open", "teach", "screen", "play", "check", "owner", "own-copy", "notfound", "privacy"];
 
 // Scripts are revalidated so a deploy shows up on the next load; a font's
 // file name carries its version, so it can be kept a year.

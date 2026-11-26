@@ -292,16 +292,14 @@ The quiz is already made; it can be more than one activity.
 - The read of the German, French and Italian words: the root page's, the
   screens' (`client/room-text.ts`, `check-text.ts`, `own-copy.ts`,
   `notfound.ts`), `/example`'s conversations and quizzes, the film's chat and
-  quiz, and About's. Italian has no native reader on the project.
+  quiz, About's, and `/privacy`'s (`client/privacy.ts`). Italian has no
+  native reader on the project.
 - The space run's photographs (the Idea tab): whether the site may hand them
   on in the four `.zip`s (`design/example-page.md`, Not known).
 - The runs' models and plans that `example/README.md` lacks.
 - The "Not sure?" tab's answer is a mock until his run replaces it. Whether
   it is on the public site is not known: the repository doesn't record
   which commit is live.
-- `README.md` says "Nothing kept" while the site keeps daily counts that
-  name no person, device or quiz (`design/telemetry.md`): whether and how
-  the README says so.
 - A searched name reaching this site: ClassQuiz (classquiz.de), an
   open-source, privacy-minded Kahoot alternative from Germany, is one
   letter and almost no sound away; on 2026-11-26 a web search for

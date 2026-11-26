@@ -27,8 +27,9 @@ and the local check (`client/open.ts`, `client/opening.ts`) and Solo
 
 The pages' words, in the root page's four languages: `client/landing-text.ts`
 (the root page), `client/room-text.ts` (the pages a quiz plays on),
-`client/site-text.ts` (both), `client/check-text.ts`, and the tables in
-`client/own-copy.ts` and `client/notfound.ts`. The server speaks English; the
+`client/site-text.ts` (both, and the link to `/privacy`),
+`client/check-text.ts`, and the tables in `client/own-copy.ts`,
+`client/notfound.ts` and `client/privacy.ts`. The server speaks English; the
 pages show its messages through `said()` (`client/room-text.ts`), keyed by
 their English words, so a new or reworded message shows in English until
 translated (`client/room-text.test.ts` lists the missing ones).

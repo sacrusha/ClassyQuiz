@@ -1,5 +1,6 @@
 import { deviceLang, speak } from "./device-lang.ts";
 import type { Lang } from "./landing-text.ts";
+import { SITE_WORDS } from "./site-text.ts";
 
 const N = " "; // French: a thin no-break space before ? : ; !
 
@@ -72,5 +73,5 @@ const WORDS: Record<Exclude<Lang, "en">, Record<string, string>> = {
 const lang = deviceLang();
 if (lang !== "en") {
   document.documentElement.lang = lang;
-  speak(WORDS[lang]);
+  speak({ ...WORDS[lang], privacy: SITE_WORDS[lang].privacy });
 }
