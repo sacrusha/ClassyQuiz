@@ -273,8 +273,10 @@ The quiz is already made; it can be more than one activity.
   clashes, or CSS Modules screen by screen.
 - **Code paths marked "from before …"** keep data or pages older than a
   change readable (`budget.ts`, `rows.ts`, `instance.ts`, `game.ts`,
-  `entry-peers.ts`, `stats.ts`). A quiz lives three hours and the ledger is
-  kept by the day, so some of them may no longer run.
+  `entry-peers.ts`, `stats.ts`, `env.ts`). A quiz lives three hours and the
+  ledger is kept by the day, so some of them may no longer run;
+  `emptyOutsideEu` has done its work once both site-wide objects in the EU
+  have started, which they did after the deploy of 2026-11-26.
 - **`votes: boolean`** in `shared/protocol.ts` and `client/steps.ts` means
   "locked in"; in `ScreenView` `votes` is the counts. `game.ts` calls the
   state `lockedIn`.
@@ -304,10 +306,16 @@ The quiz is already made; it can be more than one activity.
   open-source, privacy-minded Kahoot alternative from Germany, is one
   letter and almost no sound away; on 2026-11-26 a web search for
   `classyquiz.pages.dev` found nothing of the site and ClassQuiz first.
-- Whether search engines have the site, and what finds it: it is
-  registered with none. Google Search Console and Bing Webmaster Tools
-  each take a `pages.dev` address verified by a file or tag the site
-  serves; Bing's index feeds several AIs' searches.
+- Whether search engines take the site, `/de/`, `/fr/` and `/it/` included,
+  and what searches find it: Google Search Console and Bing Webmaster Tools
+  have it since 2026-11-26 and show both. Bing's index feeds several AIs'
+  searches.
+- Listings where people look for such a site: the awesome-cloudflare pull
+  request from 2026-12-10, its 30 days after the repository was made;
+  the lesson idea on ZUM-Unterrichten, which needs an account; educa's
+  Navigator once Swiss schools use the site and confirm it, six months after
+  it went public at the earliest; OpenAlternative from 50 stars on GitHub.
+  Drafts and what each list asks for: `.tmp/listings/`.
 - Two cuts he has not seen: the sentence that introduced the manual is gone
   from the root page, and "The .zip is your lasting copy." ends the note
   under Peers and Quizmaster on the check.

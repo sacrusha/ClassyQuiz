@@ -18,8 +18,9 @@ run in `src/` unless said otherwise.
 - `public/`: pages and stylesheets; `scripts/`: build, dev, deploy,
   simulate.
 
-Cloudflare-specific code is only in the Durable Object classes and the `/api`
-router; the logic they call (`server/game.ts`, `server/images.ts`, `quiz/`,
+Cloudflare-specific code is only in the Durable Object classes, `server/env.ts`
+(the EU jurisdiction, which local `workerd` lacks: locally the objects aren't
+in it) and the `/api` router; the logic they call (`server/game.ts`, `server/images.ts`, `quiz/`,
 `shared/`) is platform-free. A school converts the server to its own with an
 AI, again for each update (README, "On a school's or company's own server"),
 and the local check (`client/open.ts`, `client/opening.ts`) and Solo

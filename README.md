@@ -41,7 +41,7 @@ No quiz yet? The start page has examples to play, one for each thing an ask can 
 ## What you can count on
 
 - **Free, without accounts or sign-up.**
-- **Privacy.** Played on your own, a quiz never leaves your browser. Played in a room, a quiz, with its players' answers and scores, is deleted when it ends, at the latest three hours after its last use; the `.zip` is your lasting copy. No request is logged with an IP address. What the site keeps of its use are counts by the day, which name no person, device or quiz. In full: [imprint and privacy](https://classyquiz.pages.dev/privacy).
+- **Privacy.** Played on your own, a quiz never leaves your browser. Played in a room, a quiz, with its players' answers and scores, is kept in the EU and deleted when it ends, at the latest three hours after its last use; the `.zip` is your lasting copy. No request is logged with an IP address. What the site keeps of its use are counts by the day, which name no person, device or quiz. In full: [imprint and privacy](https://classyquiz.pages.dev/privacy).
 - **Built for bad Wi-Fi.** A device that drops comes back into the quiz, and where a network blocks live connections the quiz runs over plain HTTP.
 - **Four languages for the site's own words**: English, German, French, Italian. A quiz shows as it was written, in whatever language you asked for.
 - **Open.** The code is here, under the MIT licence.
